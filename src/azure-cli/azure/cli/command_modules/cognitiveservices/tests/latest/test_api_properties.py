@@ -15,11 +15,11 @@ class CognitiveServicesApiPropertiesTests(ScenarioTest):
 
         self.kwargs.update({
             'sname': sname,
-            'kind': 'QnAMaker',
+            'kind': 'QnAMaker.v2',
             'sku': 'S0',
-            'location': 'westus',
-            'apiProperties': 'qnaRuntimeEndpoint=https://cs-cli-test-qnamaker.azurewebsites.net',
-            'apiPropertiesJson': '{\\\"qnaRuntimeEndpoint\\\":\\\"https://cs-cli-test-qnamaker.azurewebsites.net\\\"}',
+            'location': 'SOUTHCENTRALUS',
+            'apiProperties': 'qnaAzureSearchEndpointId=https://cs-cli-test-qnamaker.azurewebsites.net',
+            'apiPropertiesJson': '{\\\"qnaAzureSearchEndpointId\\\":\\\"https://cs-cli-test-qnamaker.azurewebsites.net\\\"}',
         })
 
         # test to create cognitive services account

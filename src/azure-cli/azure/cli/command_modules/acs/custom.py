@@ -4,20 +4,16 @@
 # --------------------------------------------------------------------------------------------
 
 import base64
-import binascii
-import datetime
 import errno
 import io
 import json
 import os
 import os.path
 import platform
-import random
 import re
 import shutil
 import ssl
 import stat
-import string
 import subprocess
 import sys
 import tempfile
@@ -31,17 +27,10 @@ from urllib.error import URLError
 from urllib.request import urlopen
 
 import colorama
-import dateutil.parser
 import requests
 import yaml
-from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._client_factory import (
     cf_agent_pools,
-    get_container_registry_client,
-    cf_container_services,
-    get_auth_management_client,
-    get_graph_rbac_management_client,
-    get_resource_by_name,
 )
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
@@ -71,7 +60,6 @@ from azure.cli.command_modules.acs._consts import (
     DecoratorEarlyExitException,
 )
 from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id
-from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.addonconfiguration import (
@@ -82,7 +70,6 @@ from azure.cli.command_modules.acs.addonconfiguration import (
     ensure_default_log_analytics_workspace_for_monitoring,
 )
 from azure.cli.core._profile import Profile
-from azure.cli.core.api import get_config_dir
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
     AzureInternalError,
@@ -93,15 +80,12 @@ from azure.cli.core.azclierror import (
     ValidationError,
 )
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
-from azure.cli.core.keys import is_valid_ssh_rsa_public_key
+from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import in_cloud_console, sdk_no_wait
-from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt_y_n
 from knack.util import CLIError
-from msrestazure.azure_exceptions import CloudError
 
 logger = get_logger(__name__)
 
@@ -116,1096 +100,6 @@ def get_cmd_test_hook_data(filename):
         with open(test_hook_file_path, "r") as f:
             hook_data = json.load(f)
     return hook_data
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs browse / acs kubernetes browse / acs dcos browse / acs kubernetes get-credentials
-def _get_acs_info(cli_ctx, name, resource_group_name):
-    """
-    Gets the ContainerService object from Azure REST API.
-
-    :param name: ACS resource name
-    :type name: String
-    :param resource_group_name: Resource group name
-    :type resource_group_name: String
-    """
-    container_services = cf_container_services(cli_ctx, None)
-    return container_services.get(resource_group_name, name)
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs browse
-def acs_browse(cmd, client, resource_group_name, name, disable_browser=False, ssh_key_file=None):
-    """
-    Opens a browser to the web interface for the cluster orchestrator
-
-    :param name: Name of the target Azure container service instance.
-    :type name: String
-    :param resource_group_name:  Name of Azure container service's resource group.
-    :type resource_group_name: String
-    :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
-    :type disable_browser: bool
-    :param ssh_key_file: If set a path to an SSH key to use, only applies to DCOS
-    :type ssh_key_file: string
-    """
-    acs_info = _get_acs_info(cmd.cli_ctx, name, resource_group_name)
-    _acs_browse_internal(
-        cmd, client, acs_info, resource_group_name, name, disable_browser, ssh_key_file)
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs browse
-def _acs_browse_internal(cmd, client, acs_info, resource_group_name, name, disable_browser, ssh_key_file):
-    from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
-
-    orchestrator_type = acs_info.orchestrator_profile.orchestrator_type  # pylint: disable=no-member
-
-    if str(orchestrator_type).lower() == 'kubernetes' or \
-       orchestrator_type == ContainerServiceOrchestratorTypes.kubernetes or \
-       (acs_info.custom_profile and acs_info.custom_profile.orchestrator == 'kubernetes'):  # pylint: disable=no-member
-        return k8s_browse(cmd, client, name, resource_group_name, disable_browser, ssh_key_file=ssh_key_file)
-    if str(orchestrator_type).lower() == 'dcos' or orchestrator_type == ContainerServiceOrchestratorTypes.dcos:
-        return _dcos_browse_internal(acs_info, disable_browser, ssh_key_file)
-    raise CLIError(
-        'Unsupported orchestrator type {} for browse'.format(orchestrator_type))
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs kubernetes browse
-def k8s_browse(cmd, client, name, resource_group_name, disable_browser=False, ssh_key_file=None):
-    """
-    Launch a proxy and browse the Kubernetes web UI.
-    :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
-    :type disable_browser: bool
-    """
-    acs_info = _get_acs_info(cmd.cli_ctx, name, resource_group_name)
-    _k8s_browse_internal(name, acs_info, disable_browser, ssh_key_file)
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs kubernetes browse
-def _k8s_browse_internal(name, acs_info, disable_browser, ssh_key_file):
-    if not which('kubectl'):
-        raise CLIError('Can not find kubectl executable in PATH')
-    browse_path = os.path.join(get_config_dir(), 'acsBrowseConfig.yaml')
-    if os.path.exists(browse_path):
-        os.remove(browse_path)
-
-    _k8s_get_credentials_internal(
-        name, acs_info, browse_path, ssh_key_file, False)
-
-    logger.warning('Proxy running on 127.0.0.1:8001/ui')
-    logger.warning('Press CTRL+C to close the tunnel...')
-    if not disable_browser:
-        wait_then_open_async('http://127.0.0.1:8001/ui')
-    subprocess.call(["kubectl", "--kubeconfig", browse_path, "proxy"])
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs dcos browse
-def dcos_browse(cmd, client, name, resource_group_name, disable_browser=False, ssh_key_file=None):
-    """
-    Creates an SSH tunnel to the Azure container service, and opens the Mesosphere DC/OS dashboard in the browser.
-
-    :param name: name: Name of the target Azure container service instance.
-    :type name: String
-    :param resource_group_name:  Name of Azure container service's resource group.
-    :type resource_group_name: String
-    :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
-    :type disable_browser: bool
-    :param ssh_key_file: Path to the SSH key to use
-    :type ssh_key_file: string
-    """
-    acs_info = _get_acs_info(cmd.cli_ctx, name, resource_group_name)
-    _dcos_browse_internal(acs_info, disable_browser, ssh_key_file)
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs dcos browse
-def _dcos_browse_internal(acs_info, disable_browser, ssh_key_file):
-    if not os.path.isfile(ssh_key_file):
-        raise CLIError(
-            'Private key file {} does not exist'.format(ssh_key_file))
-
-    acs = acs_client.ACSClient()
-    if not acs.connect(_get_host_name(acs_info), _get_username(acs_info),
-                       key_filename=ssh_key_file):
-        raise CLIError('Error connecting to ACS: {}'.format(
-            _get_host_name(acs_info)))
-
-    octarine_bin = '/opt/mesosphere/bin/octarine'
-    if not acs.file_exists(octarine_bin):
-        raise CLIError(
-            'Proxy server ({}) does not exist on the cluster.'.format(octarine_bin))
-
-    proxy_id = _rand_str(16)
-    proxy_cmd = '{} {}'.format(octarine_bin, proxy_id)
-    acs.run(proxy_cmd, background=True)
-
-    # Parse the output to get the remote PORT
-    proxy_client_cmd = '{} --client --port {}'.format(octarine_bin, proxy_id)
-    stdout, _ = acs.run(proxy_client_cmd)
-    remote_port = int(stdout.read().decode().strip())
-    local_port = acs.get_available_local_port()
-
-    # Set the proxy
-    proxy.set_http_proxy('127.0.0.1', local_port)
-    logger.warning('Proxy running on 127.0.0.1:%s', local_port)
-    logger.warning('Press CTRL+C to close the tunnel...')
-    if not disable_browser:
-        wait_then_open_async('http://127.0.0.1')
-    try:
-        acs.create_tunnel(
-            remote_host='127.0.0.1',
-            remote_port=remote_port,
-            local_port=local_port)
-    finally:
-        proxy.disable_http_proxy()
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs dcos browse
-def _rand_str(n):
-    """
-    Gets a random string
-    """
-    choices = string.ascii_lowercase + string.digits
-    return ''.join(random.SystemRandom().choice(choices) for _ in range(n))
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs dcos browse
-def _get_host_name(acs_info):
-    """
-    Gets the FQDN from the acs_info object.
-
-    :param acs_info: ContainerService object from Azure REST API
-    :type acs_info: ContainerService
-    """
-    if acs_info is None:
-        raise CLIError('Missing acs_info')
-    if acs_info.master_profile is None:
-        raise CLIError('Missing master_profile')
-    if acs_info.master_profile.fqdn is None:
-        raise CLIError('Missing fqdn')
-    return acs_info.master_profile.fqdn
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs dcos browse
-def _get_username(acs_info):
-    """
-    Gets the admin user name from the Linux profile of the ContainerService object.
-
-    :param acs_info: ContainerService object from Azure REST API
-    :type acs_info: ContainerService
-    """
-    if acs_info.linux_profile is not None:
-        return acs_info.linux_profile.admin_username
-    return None
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs dcos install-cli
-def dcos_install_cli(cmd, install_location=None, client_version='1.8'):
-    """
-    Downloads the dcos command line from Mesosphere
-    """
-    system = platform.system()
-
-    if not install_location:
-        raise CLIError(
-            "No install location specified and it could not be determined from the current platform '{}'".format(
-                system))
-    base_url = 'https://downloads.dcos.io/binaries/cli/{}/x86-64/dcos-{}/{}'
-    if system == 'Windows':
-        file_url = base_url.format('windows', client_version, 'dcos.exe')
-    elif system == 'Linux':
-        # TODO Support ARM CPU here
-        file_url = base_url.format('linux', client_version, 'dcos')
-    elif system == 'Darwin':
-        file_url = base_url.format('darwin', client_version, 'dcos')
-    else:
-        raise CLIError(
-            'Proxy server ({}) does not exist on the cluster.'.format(system))
-
-    logger.warning('Downloading client to %s', install_location)
-    try:
-        _urlretrieve(file_url, install_location)
-        os.chmod(install_location,
-                 os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-    except IOError as err:
-        raise CLIError(
-            'Connection error while attempting to download client ({})'.format(err))
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def _get_default_dns_prefix(name, resource_group_name, subscription_id):
-    # Use subscription id to provide uniqueness and prevent DNS name clashes
-    name_part = re.sub('[^A-Za-z0-9-]', '', name)[0:10]
-    if not name_part[0].isalpha():
-        name_part = (str('a') + name_part)[0:10]
-    resource_group_part = re.sub(
-        '[^A-Za-z0-9-]', '', resource_group_name)[0:16]
-    return '{}-{}-{}'.format(name_part, resource_group_part, subscription_id[0:6])
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def _generate_windows_profile(windows, admin_username, admin_password):
-    if windows:
-        if not admin_password:
-            raise CLIError('--admin-password is required.')
-        if len(admin_password) < 6:
-            raise CLIError('--admin-password must be at least 6 characters')
-        windows_profile = {
-            "adminUsername": admin_username,
-            "adminPassword": admin_password,
-        }
-        return windows_profile
-    return None
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def _generate_master_pool_profile(api_version, master_profile, master_count, dns_name_prefix,
-                                  master_vm_size, master_osdisk_size, master_vnet_subnet_id,
-                                  master_first_consecutive_static_ip, master_storage_profile):
-    master_pool_profile = {}
-    default_master_pool_profile = {
-        "count": int(master_count),
-        "dnsPrefix": dns_name_prefix + 'mgmt',
-    }
-    if api_version == "2017-07-01":
-        default_master_pool_profile = _update_dict(default_master_pool_profile, {
-            "count": int(master_count),
-            "dnsPrefix": dns_name_prefix + 'mgmt',
-            "vmSize": master_vm_size,
-            "osDiskSizeGB": int(master_osdisk_size),
-            "vnetSubnetID": master_vnet_subnet_id,
-            "firstConsecutiveStaticIP": master_first_consecutive_static_ip,
-            "storageProfile": master_storage_profile,
-        })
-    if not master_profile:
-        master_pool_profile = default_master_pool_profile
-    else:
-        master_pool_profile = _update_dict(
-            default_master_pool_profile, master_profile)
-    return master_pool_profile
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def _generate_agent_pool_profiles(api_version, agent_profiles, agent_count, dns_name_prefix,
-                                  agent_vm_size, os_type, agent_osdisk_size, agent_vnet_subnet_id,
-                                  agent_ports, agent_storage_profile):
-    agent_pool_profiles = []
-    default_agent_pool_profile = {
-        "count": int(agent_count),
-        "vmSize": agent_vm_size,
-        "osType": os_type,
-        "dnsPrefix": dns_name_prefix + 'agent',
-    }
-    if api_version == "2017-07-01":
-        default_agent_pool_profile = _update_dict(default_agent_pool_profile, {
-            "count": int(agent_count),
-            "vmSize": agent_vm_size,
-            "osDiskSizeGB": int(agent_osdisk_size),
-            "osType": os_type,
-            "dnsPrefix": dns_name_prefix + 'agent',
-            "vnetSubnetID": agent_vnet_subnet_id,
-            "ports": agent_ports,
-            "storageProfile": agent_storage_profile,
-        })
-    if agent_profiles is None:
-        agent_pool_profiles.append(_update_dict(
-            default_agent_pool_profile, {"name": "agentpool0"}))
-    else:
-        # override agentPoolProfiles by using the passed in agent_profiles
-        for idx, ap in enumerate(agent_profiles):
-            # if the user specified dnsPrefix, we honor that
-            # otherwise, we use the idx to avoid duplicate dns name
-            a = _update_dict(
-                {"dnsPrefix": dns_name_prefix + 'agent' + str(idx)}, ap)
-            agent_pool_profiles.append(
-                _update_dict(default_agent_pool_profile, a))
-    return agent_pool_profiles
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def _update_dict(dict1, dict2):
-    cp = dict1.copy()
-    cp.update(dict2)
-    return cp
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def _generate_outputs(name, orchestrator_type, admin_username):
-    # define outputs
-    outputs = {
-        "masterFQDN": {
-            "type": "string",
-            "value": "[reference(concat('Microsoft.ContainerService/containerServices/', '{}')).masterProfile.fqdn]".format(name)  # pylint: disable=line-too-long
-        },
-        "sshMaster0": {
-            "type": "string",
-            "value": "[concat('ssh ', '{0}', '@', reference(concat('Microsoft.ContainerService/containerServices/', '{1}')).masterProfile.fqdn, ' -A -p 22')]".format(admin_username, name)  # pylint: disable=line-too-long
-        },
-    }
-    if orchestrator_type.lower() != "kubernetes":
-        outputs["agentFQDN"] = {
-            "type": "string",
-            "value": "[reference(concat('Microsoft.ContainerService/containerServices/', '{}')).agentPoolProfiles[0].fqdn]".format(name)  # pylint: disable=line-too-long
-        }
-        # override sshMaster0 for non-kubernetes scenarios
-        outputs["sshMaster0"] = {
-            "type": "string",
-            "value": "[concat('ssh ', '{0}', '@', reference(concat('Microsoft.ContainerService/containerServices/', '{1}')).masterProfile.fqdn, ' -A -p 2200')]".format(admin_username, name)  # pylint: disable=line-too-long
-        }
-    return outputs
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def _generate_properties(api_version, orchestrator_type, orchestrator_version, master_pool_profile,
-                         agent_pool_profiles, ssh_key_value, admin_username, windows_profile):
-    properties = {
-        "orchestratorProfile": {
-            "orchestratorType": orchestrator_type,
-        },
-        "masterProfile": master_pool_profile,
-        "agentPoolProfiles": agent_pool_profiles,
-        "linuxProfile": {
-            "ssh": {
-                "publicKeys": [
-                    {
-                        "keyData": ssh_key_value
-                    }
-                ]
-            },
-            "adminUsername": admin_username
-        },
-    }
-    if api_version == "2017-07-01":
-        properties["orchestratorProfile"]["orchestratorVersion"] = orchestrator_version
-
-    if windows_profile is not None:
-        properties["windowsProfile"] = windows_profile
-    return properties
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-# pylint: disable=too-many-locals
-def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,
-               location=None, admin_username="azureuser", api_version=None, master_profile=None,
-               master_vm_size="Standard_D2_v2", master_osdisk_size=0, master_count=1, master_vnet_subnet_id="",
-               master_first_consecutive_static_ip="10.240.255.5", master_storage_profile="",
-               agent_profiles=None, agent_vm_size="Standard_D2_v2", agent_osdisk_size=0,
-               agent_count=3, agent_vnet_subnet_id="", agent_ports=None, agent_storage_profile="",
-               orchestrator_type="DCOS", orchestrator_version="", service_principal=None, client_secret=None, tags=None,
-               windows=False, admin_password="", generate_ssh_keys=False,  # pylint: disable=unused-argument
-               validate=False, no_wait=False):
-    """Create a new Acs.
-    :param resource_group_name: The name of the resource group. The name
-     is case insensitive.
-    :type resource_group_name: str
-    :param deployment_name: The name of the deployment.
-    :type deployment_name: str
-    :param dns_name_prefix: Sets the Domain name prefix for the cluster.
-     The concatenation of the domain name and the regionalized DNS zone
-     make up the fully qualified domain name associated with the public
-     IP address.
-    :type dns_name_prefix: str
-    :param name: Resource name for the container service.
-    :type name: str
-    :param ssh_key_value: Configure all linux machines with the SSH RSA
-     public key string.  Your key should include three parts, for example
-    'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm
-    :type ssh_key_value: str
-    :param content_version: If included it must match the ContentVersion
-     in the template.
-    :type content_version: str
-    :param admin_username: User name for the Linux Virtual Machines.
-    :type admin_username: str
-    :param api_version: ACS API version to use
-    :type api_version: str
-    :param master_profile: MasterProfile used to describe master pool
-    :type master_profile: dict
-    :param master_vm_size: The size of master pool Virtual Machine
-    :type master_vm_size: str
-    :param master_osdisk_size: The osDisk size in GB of master pool Virtual Machine
-    :type master_osdisk_size: int
-    :param master_count: The number of masters for the cluster.
-    :type master_count: int
-    :param master_vnet_subnet_id: The vnet subnet id for master pool
-    :type master_vnet_subnet_id: str
-    :param master_storage_profile: The storage profile used for master pool.
-     Possible value could be StorageAccount, ManagedDisk.
-    :type master_storage_profile: str
-    :param agent_profiles: AgentPoolProfiles used to describe agent pools
-    :type agent_profiles: dict
-    :param agent_vm_size: The size of the Virtual Machine.
-    :type agent_vm_size: str
-    :param agent_osdisk_size: The osDisk size in GB of agent pool Virtual Machine
-    :type agent_osdisk_size: int
-    :param agent_vnet_subnet_id: The vnet subnet id for master pool
-    :type agent_vnet_subnet_id: str
-    :param agent_ports: the ports exposed on the agent pool
-    :type agent_ports: list
-    :param agent_storage_profile: The storage profile used for agent pool.
-     Possible value could be StorageAccount, ManagedDisk.
-    :type agent_storage_profile: str
-    :param location: Location for VM resources.
-    :type location: str
-    :param orchestrator_type: The type of orchestrator used to manage the
-     applications on the cluster.
-    :type orchestrator_type: str or :class:`orchestratorType
-     <Default.models.orchestratorType>`
-    :param tags: Tags object.
-    :type tags: object
-    :param windows: If true, the cluster will be built for running Windows container.
-    :type windows: bool
-    :param admin_password: The adminstration password for Windows nodes. Only available if --windows=true
-    :type admin_password: str
-    :param bool raw: returns the direct response alongside the
-     deserialized response
-    :rtype:
-    :class:`AzureOperationPoller<msrestazure.azure_operation.AzureOperationPoller>`
-     instance that returns :class:`DeploymentExtended
-     <Default.models.DeploymentExtended>`
-    :rtype: :class:`ClientRawResponse<msrest.pipeline.ClientRawResponse>`
-     if raw=true
-    :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
-    """
-    if ssh_key_value is not None and not is_valid_ssh_rsa_public_key(ssh_key_value):
-        raise CLIError(
-            'Provided ssh key ({}) is invalid or non-existent'.format(ssh_key_value))
-
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    if not dns_name_prefix:
-        dns_name_prefix = _get_default_dns_prefix(
-            name, resource_group_name, subscription_id)
-
-    rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
-    if location is None:
-        location = rg_location
-
-    # if api-version is not specified, or specified in a version not supported
-    # override based on location
-    if api_version is None or api_version not in ["2017-01-31", "2017-07-01"]:
-        if location in regions_in_preview:
-            api_version = "2017-07-01"  # 2017-07-01 supported in the preview locations
-        else:
-            api_version = "2017-01-31"  # 2017-01-31 applied to other locations
-
-    if orchestrator_type.lower() == 'kubernetes':
-        principal_obj = _ensure_service_principal(cmd.cli_ctx, service_principal, client_secret, subscription_id,
-                                                  dns_name_prefix, location, name)
-        client_secret = principal_obj.get("client_secret")
-        service_principal = principal_obj.get("service_principal")
-
-    elif windows:
-        raise CLIError('--windows is only supported for Kubernetes clusters')
-
-    # set location if void
-    if not location:
-        location = '[resourceGroup().location]'
-
-    # set os_type
-    os_type = 'Linux'
-    if windows:
-        os_type = 'Windows'
-
-    # set agent_ports if void
-    if not agent_ports:
-        agent_ports = []
-
-    # get windows_profile
-    windows_profile = _generate_windows_profile(
-        windows, admin_username, admin_password)
-
-    # The resources.properties fields should match with ContainerServices' api model
-    master_pool_profile = _generate_master_pool_profile(api_version, master_profile, master_count, dns_name_prefix,
-                                                        master_vm_size, master_osdisk_size, master_vnet_subnet_id,
-                                                        master_first_consecutive_static_ip, master_storage_profile)
-
-    agent_pool_profiles = _generate_agent_pool_profiles(api_version, agent_profiles, agent_count, dns_name_prefix,
-                                                        agent_vm_size, os_type, agent_osdisk_size, agent_vnet_subnet_id,
-                                                        agent_ports, agent_storage_profile)
-
-    outputs = _generate_outputs(name, orchestrator_type, admin_username)
-
-    properties = _generate_properties(api_version, orchestrator_type, orchestrator_version, master_pool_profile,
-                                      agent_pool_profiles, ssh_key_value, admin_username, windows_profile)
-
-    resource = {
-        "apiVersion": api_version,
-        "location": location,
-        "type": "Microsoft.ContainerService/containerServices",
-        "name": name,
-        "tags": tags,
-        "properties": properties,
-    }
-    template = {
-        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-        "contentVersion": "1.0.0.0",
-        "resources": [
-            resource,
-        ],
-        "outputs": outputs,
-    }
-    params = {}
-    if service_principal is not None and client_secret is not None:
-        properties["servicePrincipalProfile"] = {
-            "clientId": service_principal,
-            "secret": "[parameters('clientSecret')]",
-        }
-        template["parameters"] = {
-            "clientSecret": {
-                "type": "secureString",
-                "metadata": {
-                    "description": "The client secret for the service principal"
-                }
-            }
-        }
-        params = {
-            "clientSecret": {
-                "value": client_secret
-            }
-        }
-
-    # Due to SPN replication latency, we do a few retries here
-    max_retry = 30
-    retry_exception = Exception(None)
-    for _ in range(0, max_retry):
-        try:
-            return _invoke_deployment(cmd, resource_group_name, deployment_name,
-                                      template, params, validate, no_wait)
-        except CloudError as ex:
-            retry_exception = ex
-            if 'is not valid according to the validation procedure' in ex.message or \
-               'The credentials in ServicePrincipalProfile were invalid' in ex.message or \
-               'not found in Active Directory tenant' in ex.message:
-                time.sleep(3)
-            else:
-                raise ex
-    raise retry_exception
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def _invoke_deployment(cmd, resource_group_name, deployment_name, template, parameters, validate, no_wait,
-                       subscription_id=None):
-    DeploymentProperties = cmd.get_models(
-        'DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    properties = DeploymentProperties(
-        template=template, parameters=parameters, mode='incremental')
-    smc = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                  subscription_id=subscription_id).deployments
-
-    Deployment = cmd.get_models(
-        'Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    deployment = Deployment(properties=properties)
-
-    if validate:
-        logger.info('==== BEGIN TEMPLATE ====')
-        logger.info(json.dumps(template, indent=2))
-        logger.info('==== END TEMPLATE ====')
-        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-            validation_poller = smc.begin_validate(
-                resource_group_name, deployment_name, deployment)
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-
-        return smc.validate(resource_group_name, deployment_name, deployment)
-
-    return sdk_no_wait(no_wait, smc.begin_create_or_update, resource_group_name, deployment_name, deployment)
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def _ensure_service_principal(cli_ctx,
-                              service_principal=None,
-                              client_secret=None,
-                              subscription_id=None,
-                              dns_name_prefix=None,
-                              location=None,
-                              name=None):
-    # TODO: This really needs to be unit tested.
-    rbac_client = get_graph_rbac_management_client(cli_ctx)
-    if not service_principal:
-        # --service-principal not specified, make one.
-        if not client_secret:
-            client_secret = _create_client_secret()
-        salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-        url = 'https://{}.{}.{}.cloudapp.azure.com'.format(
-            salt, dns_name_prefix, location)
-
-        service_principal, _aad_session_key = _build_service_principal(
-            rbac_client, cli_ctx, name, url, client_secret)
-        if not service_principal:
-            raise CLIError('Could not create a service principal with the right permissions. '
-                           'Are you an Owner on this project?')
-        logger.info('Created a service principal: %s', service_principal)
-        # add role first before save it
-        if not _add_role_assignment(cli_ctx, 'Contributor', service_principal):
-            logger.warning('Could not create a service principal with the right permissions. '
-                           'Are you an Owner on this project?')
-    else:
-        # --service-principal specfied, validate --client-secret was too
-        if not client_secret:
-            raise CLIError(
-                '--client-secret is required if --service-principal is specified')
-
-    return {
-        'client_secret': client_secret,
-        'service_principal': service_principal,
-    }
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create / osa command
-def _create_client_secret():
-    # Add a special character to satisfy AAD SP secret requirements
-    special_char = '$'
-    client_secret = binascii.b2a_hex(
-        os.urandom(10)).decode('utf-8') + special_char
-    return client_secret
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
-    # use get_progress_controller
-    hook = cli_ctx.get_progress_controller(True)
-    hook.add(messsage='Creating service principal', value=0, total_val=1.0)
-    logger.info('Creating service principal')
-    # always create application with 5 years expiration
-    start_date = datetime.datetime.utcnow()
-    end_date = start_date + relativedelta(years=5)
-    result, aad_session_key = create_application(rbac_client.applications, name, url, [url], password=client_secret,
-                                                 start_date=start_date, end_date=end_date)
-    service_principal = result.app_id  # pylint: disable=no-member
-    for x in range(0, 10):
-        hook.add(message='Creating service principal',
-                 value=0.1 * x, total_val=1.0)
-        try:
-            create_service_principal(
-                cli_ctx, service_principal, rbac_client=rbac_client)
-            break
-        # TODO figure out what exception AAD throws here sometimes.
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.info(ex)
-            time.sleep(2 + 2 * x)
-    else:
-        return False, aad_session_key
-    hook.add(message='Finished service principal creation',
-             value=1.0, total_val=1.0)
-    logger.info('Finished service principal creation')
-    return service_principal, aad_session_key
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def create_application(client, display_name, homepage, identifier_uris,
-                       available_to_other_tenants=False, password=None, reply_urls=None,
-                       key_value=None, key_type=None, key_usage=None, start_date=None,
-                       end_date=None, required_resource_accesses=None):
-    from azure.graphrbac.models import ApplicationCreateParameters, GraphErrorException
-    password_creds, key_creds = _build_application_creds(password, key_value, key_type,
-                                                         key_usage, start_date, end_date)
-
-    app_create_param = ApplicationCreateParameters(available_to_other_tenants=available_to_other_tenants,
-                                                   display_name=display_name,
-                                                   identifier_uris=identifier_uris,
-                                                   homepage=homepage,
-                                                   reply_urls=reply_urls,
-                                                   key_credentials=key_creds,
-                                                   password_credentials=password_creds,
-                                                   required_resource_access=required_resource_accesses)
-    try:
-        result = client.create(app_create_param, raw=True)
-        return result.output, result.response.headers["ocp-aad-session-key"]
-    except GraphErrorException as ex:
-        if 'insufficient privileges' in str(ex).lower():
-            link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
-            raise CLIError("Directory permission is needed for the current user to register the application. "
-                           "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
-        raise
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def _build_application_creds(password=None, key_value=None, key_type=None,
-                             key_usage=None, start_date=None, end_date=None):
-    from azure.graphrbac.models import KeyCredential, PasswordCredential
-    if password and key_value:
-        raise CLIError(
-            'specify either --password or --key-value, but not both.')
-
-    if not start_date:
-        start_date = datetime.datetime.utcnow()
-    elif isinstance(start_date, str):
-        start_date = dateutil.parser.parse(start_date)
-
-    if not end_date:
-        end_date = start_date + relativedelta(years=1)
-    elif isinstance(end_date, str):
-        end_date = dateutil.parser.parse(end_date)
-
-    key_type = key_type or 'AsymmetricX509Cert'
-    key_usage = key_usage or 'Verify'
-
-    password_creds = None
-    key_creds = None
-    if password:
-        password_creds = [PasswordCredential(start_date=start_date, end_date=end_date,
-                                             key_id=str(uuid.uuid4()), value=password)]
-    elif key_value:
-        key_creds = [KeyCredential(start_date=start_date, end_date=end_date, value=key_value,
-                                   key_id=str(uuid.uuid4()), usage=key_usage, type=key_type)]
-
-    return (password_creds, key_creds)
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def create_service_principal(cli_ctx, identifier, resolve_app=True, rbac_client=None):
-    from azure.graphrbac.models import ServicePrincipalCreateParameters
-    if rbac_client is None:
-        rbac_client = get_graph_rbac_management_client(cli_ctx)
-
-    if resolve_app:
-        try:
-            uuid.UUID(identifier)
-            result = list(rbac_client.applications.list(
-                filter="appId eq '{}'".format(identifier)))
-        except ValueError:
-            result = list(rbac_client.applications.list(
-                filter="identifierUris/any(s:s eq '{}')".format(identifier)))
-
-        if not result:  # assume we get an object id
-            result = [rbac_client.applications.get(identifier)]
-        app_id = result[0].app_id
-    else:
-        app_id = identifier
-
-    return rbac_client.service_principals.create(ServicePrincipalCreateParameters(app_id=app_id, account_enabled=True))
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def _add_role_assignment(cmd, role, service_principal_msi_id, is_service_principal=True, delay=2, scope=None):
-    # AAD can have delays in propagating data, so sleep and retry
-    hook = cmd.cli_ctx.get_progress_controller(True)
-    hook.add(message='Waiting for AAD role to propagate',
-             value=0, total_val=1.0)
-    logger.info('Waiting for AAD role to propagate')
-    for x in range(0, 10):
-        hook.add(message='Waiting for AAD role to propagate',
-                 value=0.1 * x, total_val=1.0)
-        try:
-            # TODO: break this out into a shared utility library
-            create_role_assignment(
-                cmd, role, service_principal_msi_id, is_service_principal, scope=scope)
-            break
-        except CloudError as ex:
-            if ex.message == 'The role assignment already exists.':
-                break
-            logger.info(ex.message)
-        except CLIError as ex:
-            logger.warning(str(ex))
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.error(str(ex))
-        time.sleep(delay + delay * x)
-    else:
-        return False
-    hook.add(message='AAD role propagation done', value=1.0, total_val=1.0)
-    logger.info('AAD role propagation done')
-    return True
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def create_role_assignment(cmd, role, assignee, is_service_principal, resource_group_name=None, scope=None):
-    return _create_role_assignment(cmd,
-                                   role, assignee, resource_group_name,
-                                   scope, resolve_assignee=is_service_principal)
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def _create_role_assignment(cmd, role, assignee,
-                            resource_group_name=None, scope=None, resolve_assignee=True):
-    from azure.cli.core.profiles import get_sdk
-    factory = get_auth_management_client(cmd.cli_ctx, scope)
-    assignments_client = factory.role_assignments
-    definitions_client = factory.role_definitions
-
-    scope = _build_role_scope(
-        resource_group_name, scope, assignments_client.config.subscription_id)
-
-    role_id = _resolve_role_id(role, scope, definitions_client)
-
-    # If the cluster has service principal resolve the service principal client id to get the object id,
-    # if not use MSI object id.
-    object_id = assignee
-    if resolve_assignee:
-        from azure.graphrbac.models import GraphErrorException
-        error_msg = "Failed to resolve service principal object ID: "
-        try:
-            object_id = _resolve_object_id(cmd.cli_ctx, assignee)
-        except GraphErrorException as ex:
-            if ex.response is not None:
-                error_code = getattr(ex.response, "status_code", None)
-                error_reason = getattr(ex.response, "reason", None)
-                internal_error = ""
-                if error_code:
-                    internal_error += str(error_code)
-                if error_reason:
-                    if internal_error:
-                        internal_error += " - "
-                    internal_error += str(error_reason)
-                if internal_error:
-                    error_msg += "({}) ".format(internal_error)
-            error_msg += ex.message
-            # this should be UserFault or ServiceError, but it is meaningless to distinguish them here
-            raise CLIError(error_msg)
-        except Exception as ex:  # pylint: disable=bare-except
-            raise CLIError(error_msg + str(ex))
-
-    assignment_name = uuid.uuid4()
-    custom_headers = None
-
-    RoleAssignmentCreateParameters = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                             'RoleAssignmentCreateParameters', mod='models',
-                                             operation_group='role_assignments')
-    if cmd.supported_api_version(min_api='2018-01-01-preview', resource_type=ResourceType.MGMT_AUTHORIZATION):
-        parameters = RoleAssignmentCreateParameters(
-            role_definition_id=role_id, principal_id=object_id)
-        return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers)
-
-    RoleAssignmentProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                       'RoleAssignmentProperties', mod='models',
-                                       operation_group='role_assignments')
-    properties = RoleAssignmentProperties(role_definition_id=role_id, principal_id=object_id)
-    return assignments_client.create(scope, assignment_name, properties, custom_headers=custom_headers)
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def _build_role_scope(resource_group_name, scope, subscription_id):
-    subscription_scope = '/subscriptions/' + subscription_id
-    if scope:
-        if resource_group_name:
-            err = 'Resource group "{}" is redundant because scope is supplied'
-            raise CLIError(err.format(resource_group_name))
-    elif resource_group_name:
-        scope = subscription_scope + '/resourceGroups/' + resource_group_name
-    else:
-        scope = subscription_scope
-    return scope
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def _resolve_role_id(role, scope, definitions_client):
-    role_id = None
-    try:
-        uuid.UUID(role)
-        role_id = role
-    except ValueError:
-        pass
-    if not role_id:  # retrieve role id
-        role_defs = list(definitions_client.list(
-            scope, "roleName eq '{}'".format(role)))
-        if not role_defs:
-            raise CLIError("Role '{}' doesn't exist.".format(role))
-        if len(role_defs) > 1:
-            ids = [r.id for r in role_defs]
-            err = "More than one role matches the given name '{}'. Please pick a value from '{}'"
-            raise CLIError(err.format(role, ids))
-        role_id = role_defs[0].id
-    return role_id
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def _resolve_object_id(cli_ctx, assignee):
-    client = get_graph_rbac_management_client(cli_ctx)
-    result = None
-    if assignee.find('@') >= 0:  # looks like a user principal name
-        result = list(client.users.list(
-            filter="userPrincipalName eq '{}'".format(assignee)))
-    if not result:
-        result = list(client.service_principals.list(
-            filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
-    if not result:  # assume an object id, let us verify it
-        result = _get_object_stubs(client, [assignee])
-
-    # 2+ matches should never happen, so we only check 'no match' here
-    if not result:
-        raise CLIError(
-            "No matches in graph database for '{}'".format(assignee))
-
-    return result[0].object_id
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs create
-def _get_object_stubs(graph_client, assignees):
-    from azure.graphrbac.models import GetObjectsParameters
-    params = GetObjectsParameters(include_directory_object_references=True,
-                                  object_ids=assignees)
-    return list(graph_client.objects.get_objects_by_object_ids(params))
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs kubernetes get-credentials
-def k8s_get_credentials(cmd, client, name, resource_group_name,
-                        path=os.path.join(os.path.expanduser(
-                            '~'), '.kube', 'config'),
-                        ssh_key_file=None,
-                        overwrite_existing=False):
-    """Download and install kubectl credentials from the cluster master
-    :param name: The name of the cluster.
-    :type name: str
-    :param resource_group_name: The name of the resource group.
-    :type resource_group_name: str
-    :param path: Where to install the kubectl config file
-    :type path: str
-    :param ssh_key_file: Path to an SSH key file to use
-    :type ssh_key_file: str
-    """
-    acs_info = _get_acs_info(cmd.cli_ctx, name, resource_group_name)
-    _k8s_get_credentials_internal(
-        name, acs_info, path, ssh_key_file, overwrite_existing)
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs kubernetes browse/get-credentials
-def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file, overwrite_existing):
-    if ssh_key_file is not None and not os.path.isfile(ssh_key_file):
-        raise CLIError(
-            'Private key file {} does not exist'.format(ssh_key_file))
-
-    dns_prefix = acs_info.master_profile.dns_prefix  # pylint: disable=no-member
-    location = acs_info.location  # pylint: disable=no-member
-    user = acs_info.linux_profile.admin_username  # pylint: disable=no-member
-    _mkdir_p(os.path.dirname(path))
-
-    path_candidate = path
-    ix = 0
-    while os.path.exists(path_candidate):
-        ix += 1
-        path_candidate = '{}-{}-{}'.format(path, name, ix)
-
-    # TODO: this only works for public cloud, need other casing for national clouds
-
-    acs_client.secure_copy(user, '{}.{}.cloudapp.azure.com'.format(dns_prefix, location),
-                           '.kube/config', path_candidate, key_filename=ssh_key_file)
-
-    # merge things
-    if path_candidate != path:
-        try:
-            merge_kubernetes_configurations(
-                path, path_candidate, overwrite_existing)
-        except yaml.YAMLError as exc:
-            logger.warning(
-                'Failed to merge credentials to kube config file: %s', exc)
-            logger.warning(
-                'The credentials have been saved to %s', path_candidate)
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs kubernetes browse/get-credentials
-def _mkdir_p(path):
-    # http://stackoverflow.com/a/600612
-    try:
-        os.makedirs(path)
-    except OSError as exc:  # Python >2.5
-        if exc.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else:
-            raise
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs list
-def list_container_services(cmd, client, resource_group_name=None):
-    ''' List Container Services. '''
-    svc_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
-        if resource_group_name else client.list()
-    return list(svc_list)
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs list-locations
-def list_acs_locations(cmd, client):
-    return {
-        "productionRegions": regions_in_prod,
-        "previewRegions": regions_in_preview
-    }
-
-
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-# legacy: acs scale
-def update_acs(cmd, client, resource_group_name, container_service_name, new_agent_count):
-    from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
-
-    instance = client.get(resource_group_name, container_service_name)
-    instance.agent_pool_profiles[0].count = new_agent_count  # pylint: disable=no-member
-
-    # null out the service principal because otherwise validation complains
-    if instance.orchestrator_profile.orchestrator_type == ContainerServiceOrchestratorTypes.kubernetes:
-        instance.service_principal_profile = None
-
-    # null out the windows profile so that validation doesn't complain about not having the admin password
-    instance.windows_profile = None
-
-    return client.begin_create_or_update(resource_group_name, container_service_name, instance)
 
 
 def aks_browse(
@@ -1230,7 +124,7 @@ def aks_browse(
     )
 
 
-# pylint: disable=too-many-statements,too-many-branches
+# pylint: disable=too-many-statements,too-many-branches,too-many-locals
 def _aks_browse(
     cmd,
     client,
@@ -1521,6 +415,7 @@ def aks_create(
     aad_server_app_id=None,
     aad_server_app_secret=None,
     aad_tenant_id=None,
+    enable_oidc_issuer=False,
     windows_admin_username=None,
     windows_admin_password=None,
     enable_ahub=False,
@@ -1534,6 +429,7 @@ def aks_create(
     defender_config=None,
     disable_disk_driver=False,
     disable_file_driver=False,
+    enable_blob_driver=None,
     disable_snapshot_controller=False,
     enable_azure_keyvault_kms=False,
     azure_keyvault_kms_key_id=None,
@@ -1636,6 +532,7 @@ def aks_update(
     disable_azure_rbac=False,
     aad_tenant_id=None,
     aad_admin_group_object_ids=None,
+    enable_oidc_issuer=False,
     windows_admin_password=None,
     enable_ahub=False,
     disable_ahub=False,
@@ -1651,6 +548,8 @@ def aks_update(
     disable_disk_driver=False,
     enable_file_driver=False,
     disable_file_driver=False,
+    enable_blob_driver=None,
+    disable_blob_driver=None,
     enable_snapshot_controller=False,
     disable_snapshot_controller=False,
     enable_azure_keyvault_kms=False,
@@ -2510,6 +1409,22 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None, base_sr
                           kubelogin_install_location, kubelogin_base_src_url)
 
 
+# determine architecture for kubectl based on platform.processor()
+# the results returned here may be inaccurate if the installed python is translated (e.g. by Rosetta)
+def get_arch_for_cli_binary():
+    arch = platform.processor().lower()
+    formatted_arch = "amd64"
+    if "arm" in arch:
+        formatted_arch = "arm64"
+    logger.warning(
+        "The detected arch is %s, would be treated as %s, which may not match the actual situation due to translation "
+        "and other reasons. If there is any problem, please download the appropriate binary by yourself.",
+        arch,
+        formatted_arch,
+    )
+    return formatted_arch
+
+
 # install kubectl
 def k8s_install_kubectl(cmd, client_version='latest', install_location=None, source_url=None):
     """
@@ -2531,7 +1446,8 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
 
     file_url = ''
     system = platform.system()
-    base_url = source_url + '/{}/bin/{}/amd64/{}'
+    arch = get_arch_for_cli_binary()
+    base_url = source_url + f"/{{}}/bin/{{}}/{arch}/{{}}"
 
     # ensure installation directory exists
     install_dir, cli = os.path.dirname(
@@ -2542,7 +1458,6 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
     if system == 'Windows':
         file_url = base_url.format(client_version, 'windows', 'kubectl.exe')
     elif system == 'Linux':
-        # TODO: Support ARM CPU here
         file_url = base_url.format(client_version, 'linux', 'kubectl')
     elif system == 'Darwin':
         file_url = base_url.format(client_version, 'darwin', 'kubectl')
@@ -2610,16 +1525,13 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
         os.makedirs(install_dir)
 
     system = platform.system()
+    arch = get_arch_for_cli_binary()
     if system == 'Windows':
         sub_dir, binary_name = 'windows_amd64', 'kubelogin.exe'
     elif system == 'Linux':
-        # TODO: Support ARM CPU here
-        sub_dir, binary_name = 'linux_amd64', 'kubelogin'
+        sub_dir, binary_name = f'linux_{arch}', 'kubelogin'
     elif system == 'Darwin':
-        if platform.machine() == 'arm64':
-            sub_dir, binary_name = 'darwin_arm64', 'kubelogin'
-        else:
-            sub_dir, binary_name = 'darwin_amd64', 'kubelogin'
+        sub_dir, binary_name = f'darwin_{arch}', 'kubelogin'
     else:
         raise CLIError(
             'Proxy server ({}) does not exist on the cluster.'.format(system))
@@ -3315,258 +2227,5 @@ def aks_nodepool_snapshot_list(cmd, client, resource_group_name=None):  # pylint
     return client.list_by_resource_group(resource_group_name)
 
 
-# TODO: remove in cli June release
-def delete_role_assignments(cli_ctx, ids=None, assignee=None, role=None, resource_group_name=None,
-                            scope=None, include_inherited=False, yes=None, is_service_principal=True):
-    factory = get_auth_management_client(cli_ctx, scope)
-    assignments_client = factory.role_assignments
-    definitions_client = factory.role_definitions
-    ids = ids or []
-    if ids:
-        if assignee or role or resource_group_name or scope or include_inherited:
-            raise CLIError(
-                'When assignment ids are used, other parameter values are not required')
-        for i in ids:
-            assignments_client.delete_by_id(i)
-        return
-    if not any([ids, assignee, role, resource_group_name, scope, assignee, yes]):
-        msg = 'This will delete all role assignments under the subscription. Are you sure?'
-        if not prompt_y_n(msg, default="n"):
-            return
-
-    scope = _build_role_scope(resource_group_name, scope,
-                              assignments_client.config.subscription_id)
-    assignments = _search_role_assignments(cli_ctx, assignments_client, definitions_client,
-                                           scope, assignee, role, include_inherited,
-                                           include_groups=False, is_service_principal=is_service_principal)
-
-    if assignments:
-        for a in assignments:
-            assignments_client.delete_by_id(a.id)
-
-
-# TODO: remove in cli June release
-def _delete_role_assignments(cli_ctx, role, service_principal, delay=2, scope=None, is_service_principal=True):
-    # AAD can have delays in propagating data, so sleep and retry
-    hook = cli_ctx.get_progress_controller(True)
-    hook.add(message='Waiting for AAD role to delete', value=0, total_val=1.0)
-    logger.info('Waiting for AAD role to delete')
-    for x in range(0, 10):
-        hook.add(message='Waiting for AAD role to delete',
-                 value=0.1 * x, total_val=1.0)
-        try:
-            delete_role_assignments(cli_ctx,
-                                    role=role,
-                                    assignee=service_principal,
-                                    scope=scope,
-                                    is_service_principal=is_service_principal)
-            break
-        except CLIError as ex:
-            raise ex
-        except CloudError as ex:
-            logger.info(ex)
-        time.sleep(delay + delay * x)
-    else:
-        return False
-    hook.add(message='AAD role deletion done', value=1.0, total_val=1.0)
-    logger.info('AAD role deletion done')
-    return True
-
-
-# TODO: remove in cli June release
-def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
-                             scope, assignee, role, include_inherited, include_groups,
-                             is_service_principal=True):
-    assignee_object_id = None
-    if assignee:
-        if is_service_principal:
-            assignee_object_id = _resolve_object_id(cli_ctx, assignee)
-        else:
-            assignee_object_id = assignee
-
-    # always use "scope" if provided, so we can get assignments beyond subscription e.g. management groups
-    if scope:
-        assignments = list(assignments_client.list_for_scope(
-            scope=scope, filter='atScope()'))
-    elif assignee_object_id:
-        if include_groups:
-            f = "assignedTo('{}')".format(assignee_object_id)
-        else:
-            f = "principalId eq '{}'".format(assignee_object_id)
-        assignments = list(assignments_client.list(filter=f))
-    else:
-        assignments = list(assignments_client.list())
-
-    if assignments:
-        assignments = [a for a in assignments if (
-            not scope or
-            include_inherited and re.match(_get_role_property(a, 'scope'), scope, re.I) or
-            _get_role_property(a, 'scope').lower() == scope.lower()
-        )]
-
-        if role:
-            role_id = _resolve_role_id(role, scope, definitions_client)
-            assignments = [i for i in assignments if _get_role_property(
-                i, 'role_definition_id') == role_id]
-
-        if assignee_object_id:
-            assignments = [i for i in assignments if _get_role_property(
-                i, 'principal_id') == assignee_object_id]
-
-    return assignments
-
-
-# TODO: remove in cli June release
-def _get_role_property(obj, property_name):
-    if isinstance(obj, dict):
-        return obj[property_name]
-    return getattr(obj, property_name)
-
-
-# TODO: remove in cli June release
-def _ensure_aks_acr_role_assignment(cmd,
-                                    assignee,
-                                    registry_id,
-                                    detach=False,
-                                    is_service_principal=True):
-    if detach:
-        if not _delete_role_assignments(cmd.cli_ctx,
-                                        'acrpull',
-                                        assignee,
-                                        scope=registry_id,
-                                        is_service_principal=is_service_principal):
-            raise CLIError('Could not delete role assignments for ACR. '
-                           'Are you an Owner on this subscription?')
-        return
-
-    if not _add_role_assignment(cmd,
-                                'acrpull',
-                                assignee,
-                                scope=registry_id,
-                                is_service_principal=is_service_principal):
-        raise CLIError('Could not create a role assignment for ACR. '
-                       'Are you an Owner on this subscription?')
-    return
-
-
-# TODO: remove in cli June release
-def _ensure_aks_acr(cmd,
-                    assignee,
-                    acr_name_or_id,
-                    subscription_id,
-                    detach=False,
-                    is_service_principal=True):
-    from msrestazure.tools import is_valid_resource_id, parse_resource_id
-    # Check if the ACR exists by resource ID.
-    if is_valid_resource_id(acr_name_or_id):
-        try:
-            parsed_registry = parse_resource_id(acr_name_or_id)
-            acr_client = get_container_registry_client(
-                cmd.cli_ctx, subscription_id=parsed_registry['subscription'])
-            registry = acr_client.registries.get(
-                parsed_registry['resource_group'], parsed_registry['name'])
-        except CloudError as ex:
-            raise CLIError(ex.message)
-        _ensure_aks_acr_role_assignment(
-            cmd, assignee, registry.id, detach, is_service_principal)
-        return
-
-    # Check if the ACR exists by name accross all resource groups.
-    registry_name = acr_name_or_id
-    registry_resource = 'Microsoft.ContainerRegistry/registries'
-    try:
-        registry = get_resource_by_name(
-            cmd.cli_ctx, registry_name, registry_resource)
-    except CloudError as ex:
-        if 'was not found' in ex.message:
-            raise CLIError(
-                "ACR {} not found. Have you provided the right ACR name?".format(registry_name))
-        raise CLIError(ex.message)
-    _ensure_aks_acr_role_assignment(cmd, assignee, registry.id, detach, is_service_principal)
-    return
-
-
-# TODO: remove in cli June release
-# deprecated, see postprocessing_after_mc_created in managed_cluster_decorator.py
-def _put_managed_cluster_ensuring_permission(
-        cmd,     # pylint: disable=too-many-locals,too-many-statements,too-many-branches
-        client,
-        subscription_id,
-        resource_group_name,
-        name,
-        managed_cluster,
-        monitoring_addon_enabled,
-        ingress_appgw_addon_enabled,
-        virtual_node_addon_enabled,
-        need_grant_vnet_permission_to_cluster_identity,
-        vnet_subnet_id,
-        enable_managed_identity,
-        attach_acr,
-        headers,
-        no_wait
-):
-    # some addons require post cluster creation role assigment
-    need_post_creation_role_assignment = (monitoring_addon_enabled or
-                                          ingress_appgw_addon_enabled or
-                                          (enable_managed_identity and attach_acr) or
-                                          virtual_node_addon_enabled or
-                                          need_grant_vnet_permission_to_cluster_identity)
-    if need_post_creation_role_assignment:
-        poller = client.begin_create_or_update(
-            resource_group_name=resource_group_name,
-            resource_name=name,
-            parameters=managed_cluster,
-            headers=headers)
-        # Grant vnet permission to system assigned identity RIGHT AFTER
-        # the cluster is put, this operation can reduce latency for the
-        # role assignment take effect
-        if need_grant_vnet_permission_to_cluster_identity:
-            instant_cluster = client.get(resource_group_name, name)
-            if not _add_role_assignment(cmd, 'Network Contributor',
-                                        instant_cluster.identity.principal_id, scope=vnet_subnet_id,
-                                        is_service_principal=False):
-                logger.warning('Could not create a role assignment for subnet. '
-                               'Are you an Owner on this subscription?')
-
-        # adding a wait here since we rely on the result for role assignment
-        cluster = LongRunningOperation(cmd.cli_ctx)(poller)
-        cloud_name = cmd.cli_ctx.cloud.name
-        # add cluster spn/msi Monitoring Metrics Publisher role assignment to publish metrics to MDM
-        # mdm metrics is supported only in azure public cloud, so add the role assignment only in this cloud
-        if monitoring_addon_enabled and cloud_name.lower() == 'azurecloud':
-            from msrestazure.tools import resource_id
-            cluster_resource_id = resource_id(
-                subscription=subscription_id,
-                resource_group=resource_group_name,
-                namespace='Microsoft.ContainerService', type='managedClusters',
-                name=name
-            )
-            add_monitoring_role_assignment(cluster, cluster_resource_id, cmd)
-        if ingress_appgw_addon_enabled:
-            add_ingress_appgw_addon_role_assignment(cluster, cmd)
-        if virtual_node_addon_enabled:
-            add_virtual_node_role_assignment(cmd, cluster, vnet_subnet_id)
-
-        if enable_managed_identity and attach_acr:
-            # Attach ACR to cluster enabled managed identity
-            if cluster.identity_profile is None or \
-               cluster.identity_profile["kubeletidentity"] is None:
-                logger.warning('Your cluster is successfully created, but we failed to attach '
-                               'acr to it, you can manually grant permission to the identity '
-                               'named <ClUSTER_NAME>-agentpool in MC_ resource group to give '
-                               'it permission to pull from ACR.')
-            else:
-                kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
-                _ensure_aks_acr(cmd,
-                                assignee=kubelet_identity_object_id,
-                                acr_name_or_id=attach_acr,
-                                subscription_id=subscription_id,
-                                is_service_principal=False)
-    else:
-        cluster = sdk_no_wait(no_wait, client.begin_create_or_update,
-                              resource_group_name=resource_group_name,
-                              resource_name=name,
-                              parameters=managed_cluster,
-                              headers=headers)
-
-    return cluster
+def aks_rotate_service_account_signing_keys(cmd, client, resource_group_name, name, no_wait=True):
+    return sdk_no_wait(no_wait, client.begin_rotate_service_account_signing_keys, resource_group_name, name)

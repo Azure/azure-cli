@@ -77,6 +77,8 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_DATABOXEDGE = ('azure.mgmt.databoxedge', 'DataBoxEdgeManagementClient')
     MGMT_CUSTOMLOCATION = ('azure.mgmt.extendedlocation', 'CustomLocations')
     MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', 'ContainerServiceClient')
+    MGMT_APPCONFIGURATION = ('azure.mgmt.appconfiguration', 'AppConfigurationManagementClient')
+
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
     # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
     # when related commands start to support Multi-API
@@ -105,7 +107,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RDBMS = ('azure.mgmt.rdbms', None)
     MGMT_REDIS = ('azure.mgmt.redis', None)
     MGMT_RELAY = ('azure.mgmt.relay', None)
-    MGMT_RESERVATIONS = ('azure.mgmt.reservations', None)
     MGMT_SEARCH = ('azure.mgmt.search', None)
     MGMT_SERVICEFABRIC = ('azure.mgmt.servicefabric', None)
     MGMT_SIGNALR = ('azure.mgmt.signalr', None)
@@ -153,19 +154,19 @@ AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2022-05-01',
         ResourceType.MGMT_NETWORK: '2022-01-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2022-03-01', {
+        ResourceType.MGMT_COMPUTE: SDKProfile('2022-08-01', {
             'resource_skus': '2019-04-01',
             'disks': '2022-03-02',
             'disk_encryption_sets': '2022-03-02',
             'disk_accesses': '2020-05-01',
-            'snapshots': '2021-12-01',
+            'snapshots': '2022-03-02',
             'galleries': '2021-10-01',
             'gallery_images': '2021-10-01',
-            'gallery_image_versions': '2021-10-01',
+            'gallery_image_versions': '2022-03-03',
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2022-01-03',
             'shared_galleries': '2022-01-03',
-            'virtual_machine_scale_sets': '2022-03-01',
+            'virtual_machine_scale_sets': '2022-08-01',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
@@ -213,10 +214,10 @@ AZURE_API_PROFILES = {
             'activity_logs': '2015-04-01',
             'alert_rule_incidents': '2016-03-01',
             'alert_rules': '2016-03-01',
-            'autoscale_settings': '2015-04-01',
+            'autoscale_settings': '2022-10-01',
             'baseline': '2018-09-01',
             'baselines': '2019-03-01',
-            'diagnostic_settings': '2017-05-01-preview',
+            'diagnostic_settings': '2021-05-01-preview',
             'diagnostic_settings_category': '2017-05-01-preview',
             'event_categories': '2015-04-01',
             'guest_diagnostics_settings': '2018-06-01-preview',
@@ -248,10 +249,13 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2022-04-01',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-06-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-09-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
-        })
+        }),
+        ResourceType.MGMT_APPCONFIGURATION: SDKProfile('2022-05-01', {
+            'replicas': '2022-03-01-preview'
+        }),
     },
     '2020-09-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2019-06-01',
@@ -408,11 +412,20 @@ AZURE_API_PROFILES = {
 # use the version in a profile as much as possible.
 AD_HOC_API_VERSIONS = {
     ResourceType.MGMT_NETWORK: {
-        'vm_default_target_network': '2018-01-01',
-        'nw_connection_monitor': '2019-06-01',
-        'container_network': '2018-08-01',
         'appservice_network': '2020-04-01',
         'appservice_ensure_subnet': '2019-02-01'
+    },
+    ResourceType.MGMT_CONTAINERREGISTRY: {
+        # src/azure-cli/azure/cli/command_modules/acr/_client_factory.py:8
+        'VERSION_2019_05_01_PREVIEW': "2019-05-01-preview",
+        'VERSION_2019_06_01_PREVIEW': "2019-06-01-preview",
+        'VERSION_2020_11_01_PREVIEW': "2020-11-01-preview",
+        'VERSION_2021_08_01_PREVIEW': "2021-08-01-preview",
+        'VERSION_2022_02_01_PREVIEW': "2022-02-01-preview",
+    },
+    ResourceType.MGMT_CONTAINERSERVICE: {
+        # src/azure-cli/azure/cli/command_modules/acs/tests/latest/test_custom.py:50
+        'ManagedClusterAddonProfile': '2020-03-01',
     }
 }
 

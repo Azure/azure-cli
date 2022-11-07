@@ -24,7 +24,7 @@ from azure.mgmt.rdbms import mysql_flexibleservers
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._servers_operations import ServersOperations as MySqlServersOperations
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._azure_ad_administrators_operations import AzureADAdministratorsOperations as MySqlAzureADAdministratorsOperations
 from ._client_factory import cf_mysql_flexible_replica, cf_mysql_flexible_servers, cf_postgres_flexible_servers, \
-    cf_mysql_flexible_adadmin
+    cf_mysql_flexible_adadmin, cf_mysql_flexible_config
 from ._flexible_server_util import run_subprocess, run_subprocess_get_output, fill_action_template, get_git_root_dir, \
     resolve_poller, GITHUB_ACTION_PATH
 from .validators import validate_public_access_server
@@ -39,8 +39,9 @@ def flexible_server_update_get(client, resource_group_name, server_name):
 
 
 def flexible_server_stop(client, resource_group_name=None, server_name=None):
-    logger.warning("Server will be automatically started after 7 days "
-                   "if you do not perform a manual start operation")
+    days = 30 if isinstance(client, MySqlServersOperations) else 7
+    logger.warning("Server will be automatically started after %d days "
+                   "if you do not perform a manual start operation", days)
     return client.begin_stop(resource_group_name, server_name)
 
 
@@ -54,7 +55,7 @@ def server_list_custom_func(client, resource_group_name=None):
     return client.list()
 
 
-def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_name=None):
+def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_mode="offline", migration_name=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     properties_filepath = os.path.join(os.path.abspath(os.getcwd()), properties)
@@ -63,7 +64,8 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
     with open(properties_filepath, "r") as f:
         try:
             request_payload = json.load(f)
-            request_payload.get("properties")['TriggerCutover'] = 'true'
+            if migration_mode == "online":
+                request_payload.get("properties")['MigrationMode'] = "Online"
             json_data = json.dumps(request_payload)
         except ValueError as err:
             logger.error(err)
@@ -71,16 +73,16 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
     if migration_name is None:
         # Convert a UUID to a string of hex digits in standard form
         migration_name = str(uuid.uuid4())
-    r = send_raw_request(cmd.cli_ctx, "put", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, json_data)
+    r = send_raw_request(cmd.cli_ctx, "put", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2022-05-01-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, json_data)
 
     return r.json()
 
 
-def migration_show_func(cmd, client, resource_group_name, server_name, migration_name, level="Default"):
+def migration_show_func(cmd, client, resource_group_name, server_name, migration_name):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?level={}&api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name, level))
+    r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2022-05-01-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name))
 
     return r.json()
 
@@ -89,12 +91,12 @@ def migration_list_func(cmd, client, resource_group_name, server_name, migration
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations?migrationListFilter={}&api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_filter))
+    r = send_raw_request(cmd.cli_ctx, "get", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations?migrationListFilter={}&api-version=2022-05-01-privatepreview".format(subscription_id, resource_group_name, server_name, migration_filter))
 
     return r.json()
 
 
-def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, db_names=None, overwrite_dbs=None, start_data_migration=None):
+def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, db_names=None, overwrite_dbs=None, cutover=None, cancel=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -118,31 +120,25 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
         operationSpecified = True
         properties = "{\"properties\": {\"overwriteDBsInTarget\": \"true\"} }"
 
-    if start_data_migration is True:
+    if cutover is not None:
         if operationSpecified is True:
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
         operationSpecified = True
-        properties = "{\"properties\": {\"startDataMigration\": \"true\"} }"
+        r = migration_show_func(cmd, client, resource_group_name, server_name, migration_name, "Default")
+        if r.get("properties").get("migrationMode") == "Offline":
+            raise BadRequestError("Cutover is not possible for migration {} if the migration_mode set to offline. The migration will cutover automatically".format(migration_name))
+        properties = json.dumps({"properties": {"triggerCutover": "true", "DBsToTriggerCutoverMigrationOn": cutover}})
+
+    if cancel is not None:
+        if operationSpecified is True:
+            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
+        operationSpecified = True
+        properties = json.dumps({"properties": {"Cancel": "true", "DBsToCancelMigrationOn": cancel}})
 
     if operationSpecified is False:
-        raise RequiredArgumentMissingError("Incorrect Usage: Atleast one update operation needs to be specified.")
+        raise RequiredArgumentMissingError("Incorrect Usage: At least one update operation needs to be specified.")
 
-    r = send_raw_request(cmd.cli_ctx, "patch", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, properties)
-
-    return r.json()
-
-
-def migration_delete_func(cmd, client, resource_group_name, server_name, migration_name, yes=None):
-
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-
-    if not yes:
-        user_confirmation(
-            "Are you sure you want to delete the migration '{0}' on target server '{1}', resource group '{2}'".format(
-                migration_name, server_name, resource_group_name))
-
-    r = send_raw_request(cmd.cli_ctx, "delete", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name))
-
+    r = send_raw_request(cmd.cli_ctx, "patch", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2022-05-01-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, properties)
     return r.json()
 
 
@@ -150,7 +146,7 @@ def migration_check_name_availability(cmd, client, resource_group_name, server_n
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     properties = json.dumps({"name": "%s" % migration_name, "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"})
-    r = send_raw_request(cmd.cli_ctx, "post", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/checkMigrationNameAvailability?api-version=2020-02-14-privatepreview".format(subscription_id, resource_group_name, server_name), None, None, properties)
+    r = send_raw_request(cmd.cli_ctx, "post", "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/checkMigrationNameAvailability?api-version=2022-05-01-privatepreview".format(subscription_id, resource_group_name, server_name), None, None, properties)
     return r.json()
 
 
@@ -481,10 +477,16 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
     for identity in identities:
         identities_map[identity] = None
 
-    parameters = {
-        'identity': mysql_flexibleservers.models.Identity(
-            user_assigned_identities=identities_map,
-            type="UserAssigned")}
+    if not (instance.identity and instance.identity.user_assigned_identities) or \
+       all(key.lower() in [identity.lower() for identity in identities] for key in instance.identity.user_assigned_identities.keys()):
+        parameters = {
+            'identity': mysql_flexibleservers.models.Identity(
+                type="None")}
+    else:
+        parameters = {
+            'identity': mysql_flexibleservers.models.Identity(
+                user_assigned_identities=identities_map,
+                type="UserAssigned")}
 
     if isinstance(client, MySqlServersOperations):
         replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
@@ -510,12 +512,12 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
         cmd.cli_ctx, 'Removing identities from server {}'.format(server_name)
     )
 
-    return result.identity
+    return result.identity or mysql_flexibleservers.models.Identity()
 
 
 def flexible_server_identity_list(client, resource_group_name, server_name):
     server = client.get(resource_group_name, server_name)
-    return server.identity
+    return server.identity or mysql_flexibleservers.models.Identity()
 
 
 def flexible_server_identity_show(client, resource_group_name, server_name, identity):
@@ -549,7 +551,8 @@ def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, 
 
     replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
     for replica in replicas:
-        if identity.lower() not in [key.lower() for key in replica.identity.user_assigned_identities.keys()]:
+        if not (replica.identity and replica.identity.user_assigned_identities and
+           identity.lower() in [key.lower() for key in replica.identity.user_assigned_identities.keys()]):
             resolve_poller(
                 server_operations_client.begin_update(
                     resource_group_name=resource_group_name,
@@ -558,7 +561,8 @@ def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, 
                 cmd.cli_ctx, 'Adding identity {} to replica {}'.format(identity, replica.name)
             )
 
-    if identity.lower() not in [key.lower() for key in instance.identity.user_assigned_identities.keys()]:
+    if not (instance.identity and instance.identity.user_assigned_identities and
+       identity.lower() in [key.lower() for key in instance.identity.user_assigned_identities.keys()]):
         resolve_poller(
             server_operations_client.begin_update(
                 resource_group_name=resource_group_name,
@@ -592,10 +596,38 @@ def flexible_server_ad_admin_delete(cmd, client, resource_group_name, server_nam
     if instance.replication_role == 'Replica':
         raise CLIError("Cannot delete an AD admin on a server with replication role. Use the primary server instead.")
 
-    return client.begin_delete(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        administrator_name='ActiveDirectory')
+    if isinstance(client, MySqlAzureADAdministratorsOperations):
+        replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
+        config_operations_client = cf_mysql_flexible_config(cmd.cli_ctx, '_')
+    else:
+        # pending postgres
+        pass
+
+    resolve_poller(
+        client.begin_delete(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            administrator_name='ActiveDirectory'),
+        cmd.cli_ctx, 'Dropping AD admin in server {}'.format(server_name))
+
+    configuration_name = 'aad_auth_only'
+    parameters = mysql_flexibleservers.models.Configuration(
+        name=configuration_name,
+        value='OFF',
+        source='user-override'
+    )
+
+    replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
+    for replica in replicas:
+        if config_operations_client.get(resource_group_name, replica.name, configuration_name).value == "ON":
+            resolve_poller(
+                config_operations_client.begin_update(resource_group_name, replica.name, configuration_name, parameters),
+                cmd.cli_ctx, 'Disabling aad_auth_only in replica {}'.format(replica.name))
+
+    if config_operations_client.get(resource_group_name, server_name, configuration_name).value == "ON":
+        resolve_poller(
+            config_operations_client.begin_update(resource_group_name, server_name, configuration_name, parameters),
+            cmd.cli_ctx, 'Disabling aad_auth_only in server {}'.format(server_name))
 
 
 def flexible_server_ad_admin_list(client, resource_group_name, server_name):

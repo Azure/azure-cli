@@ -34,9 +34,9 @@ def show_policy(client, resource_group_name, vault_name, name):
 
 
 def list_policies(client, resource_group_name, vault_name, workload_type=None, backup_management_type=None,
-                  policy_sub_type=None):
+                  policy_sub_type=None, move_to_archive_tier='All'):
     return common.list_policies(client, resource_group_name, vault_name, workload_type, backup_management_type,
-                                policy_sub_type)
+                                policy_sub_type, move_to_archive_tier)
 
 
 def create_policy(client, resource_group_name, vault_name, name, policy, backup_management_type, workload_type=None):

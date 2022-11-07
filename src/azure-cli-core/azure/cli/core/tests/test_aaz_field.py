@@ -162,6 +162,138 @@ class TestAAZField(unittest.TestCase):
         for key, value in v.tags.items():
             assert False
 
+    def test_aaz_free_form_dict_type(self):
+        from azure.cli.core.aaz._field_type import AAZObjectType, AAZFreeFormDictType, AAZDictType, AAZListType
+        from azure.cli.core.aaz._field_value import AAZObject, AAZBaseValue, AAZUndefined, AAZValuePatch
+        from azure.cli.core.aaz.exceptions import AAZInvalidValueError
+
+        model_schema = AAZObjectType()
+        model_schema.additional = AAZFreeFormDictType()
+        model_schema.configs = AAZListType()
+        model_schema.configs.Element = AAZFreeFormDictType()
+        model_schema.nullable_additional = AAZFreeFormDictType(nullable=True)
+
+        v = AAZObject(schema=model_schema, data={})
+
+        assert 'A' not in v.additional
+        with self.assertRaises(KeyError):
+            v.additional['A']
+
+        v.additional['number'] = 1
+        self.assertEqual(v.additional['number'], 1)
+
+        for key in v.additional:
+            self.assertEqual(key, 'number')
+
+        for key in v.additional.keys():
+            self.assertEqual(key, "number")
+
+        for key, value in v.additional.items():
+            self.assertEqual(key, 'number')
+            self.assertEqual(value, 1)
+            self.assertTrue(isinstance(value, int))
+
+        v.additional.clear()
+        self.assertEqual(len(v.additional), 0)
+
+        for key in v.additional:
+            self.assertTrue(False)
+
+        for key in v.additional.keys():
+            self.assertTrue(False)
+
+        for key, value in v.additional.items():
+            self.assertTrue(False)
+
+        v.additional['str'] = 'str'
+        self.assertEqual(v.additional['str'], 'str')
+
+        del v.additional
+
+        for key in v.additional:
+            self.assertTrue(False)
+
+        for key in v.additional.keys():
+            self.assertTrue(False)
+
+        for key, value in v.additional.items():
+            self.assertTrue(False)
+
+        v.additional['bool'] = True
+        self.assertEqual(v.additional['bool'], True)
+
+        del v.additional['bool']
+        with self.assertRaises(KeyError):
+            v.additional['bool']
+
+        v.additional['none'] = None
+        self.assertEqual(v.additional['none'], None)
+
+        v.additional['obj'] = {"a": 1, "b": "str", "c": True, "d": None}
+        self.assertEqual(v.additional['obj'], {"a": 1, "b": "str", "c": True, "d": None})
+
+        v.additional['list'] = ['a', 1, True, None, ["s", "v"], {"a": 1, "b": 2}]
+        self.assertEqual(v.additional['list'], ['a', 1, True, None, ["s", "v"], {"a": 1, "b": 2}])
+
+        self.assertTrue(v.additional._is_patch)
+
+        self.assertEqual(v.to_serialized_data(), {
+            "additional": {
+                'none': None,
+                'obj': {'a': 1, 'b': 'str', 'c': True, 'd': None},
+                'list': ['a', 1, True, None, ['s', 'v'], {'a': 1, 'b': 2}]
+            }
+        })
+
+        v.configs[0] = {'a': 1, 'b': 'str', 'c': True, 'd': None}
+        self.assertEqual(v.configs[0], {'a': 1, 'b': 'str', 'c': True, 'd': None})
+        self.assertEqual(v.configs[0]._data, {'a': 1, 'b': 'str', 'c': True, 'd': None})
+
+        v.configs[1] = {"obj": {"a": 1, "c": 2}}
+        del v.configs[1]['obj']['a']
+        self.assertEqual(v.configs[1], {"obj": {"c": 2}})
+
+        v.configs[0] = None
+        self.assertEqual(v.configs.to_serialized_data(), [{"obj": {"c": 2}}])
+
+        with self.assertRaises(AAZInvalidValueError):
+            v.nullable_additional['a'] = AAZValuePatch(AAZUndefined)
+
+        self.assertTrue(v.additional._is_patch)
+        with self.assertRaises(AAZInvalidValueError):
+            v.nullable_additional['p'] = v.additional
+
+        self.assertTrue(v.configs[1]._is_patch is False)
+
+        v.nullable_additional['z'] = v.configs[1]
+
+        v.configs[1]['more'] = True
+        self.assertEqual(v.nullable_additional.to_serialized_data(), {
+            "z": {"obj": {"c": 2}},
+        })
+
+        self.assertEqual(v.to_serialized_data(), {
+            "additional": {
+                'none': None,
+                'obj': {'a': 1, 'b': 'str', 'c': True, 'd': None},
+                'list': ['a', 1, True, None, ['s', 'v'], {'a': 1, 'b': 2}]
+            },
+            "configs": [{"obj": {"c": 2}, "more": True}],
+            "nullable_additional": {"z": {"obj": {"c": 2}}}
+        })
+
+        v.nullable_additional = None
+        self.assertEqual(v.to_serialized_data(), {
+            "additional": {
+                'none': None,
+                'obj': {'a': 1, 'b': 'str', 'c': True, 'd': None},
+                'list': ['a', 1, True, None, ['s', 'v'], {'a': 1, 'b': 2}]
+            },
+            "configs": [{"obj": {"c": 2}, "more": True}],
+            "nullable_additional": None
+        })
+
+
     def test_aaz_list_type(self):
         from azure.cli.core.aaz._field_type import AAZObjectType, AAZListType, AAZStrType
         from azure.cli.core.aaz._field_value import AAZObject
@@ -690,3 +822,85 @@ class TestAAZField(unittest.TestCase):
 
         self.assertTrue(v_copy.subnets[0]._is_patch and not v_copy.subnets[0].score._is_patch and not v_copy.subnets[0].count._is_patch)
         self.assertTrue(v_copy.subnets[1]._is_patch and v_copy.subnets[1].score._is_patch and v_copy.subnets[1].count._is_patch)
+
+    def test_aaz_equal_comparison(self):
+        from azure.cli.core.aaz._field_type import AAZObjectType, AAZListType, AAZFreeFormDictType, AAZDictType, AAZIntType, AAZStrType, AAZBoolType, AAZFloatType
+        from azure.cli.core.aaz._field_value import AAZObject
+        model_schema = AAZObjectType()
+
+        model_schema.name = AAZStrType()
+
+        model_schema.list = AAZListType()
+        element = model_schema.list.Element = AAZObjectType()
+        element.name = AAZStrType()
+
+        model_schema.e_list = AAZListType()
+        element = model_schema.e_list.Element = AAZStrType()
+
+        model_schema.props = AAZObjectType()
+        model_schema.props.name = AAZStrType()
+
+        model_schema.e_props = AAZObjectType()
+        model_schema.e_props.name = AAZStrType()
+
+        model_schema.dict = AAZDictType()
+        element = model_schema.dict.Element = AAZObjectType()
+        element.name = AAZStrType()
+
+        model_schema.e_dict = AAZDictType()
+        element = model_schema.e_dict.Element = AAZStrType()
+
+        model_schema.ff_dict = AAZFreeFormDictType()
+        model_schema.e_ff_dict = AAZFreeFormDictType()
+
+        data = {
+            "name": "name",
+            "list": [
+                {
+                    "name": "a"
+                },
+                {
+                    "name": "b"
+                }
+            ],
+            "props": {
+                "name": "props"
+            },
+            "dict": {
+                "key1": {
+                    "name": "key1"
+                },
+                "key2": {
+                    "name": "key2"
+                }
+            },
+            "ff_dict": {
+                "key1": {
+                    "name": "key1"
+                },
+                "key2": {
+                    "name": "key2"
+                }
+            },
+        }
+        v1 = AAZObject(model_schema, data=model_schema.process_data(data))
+        v2 = AAZObject(model_schema, data=model_schema.process_data(data))
+        self.assertEqual(v1, v2)
+        self.assertEqual(v1, data)
+
+        self.assertEqual(v1.name, v2.name)
+        self.assertEqual(v1.list, v2.list)
+        self.assertEqual(v1.props, v2.props)
+        self.assertEqual(v1.dict, v2.dict)
+        self.assertTrue(v1.ff_dict, v2.ff_dict)
+        self.assertEqual(v1.ff_dict, v1.dict)
+
+        self.assertEqual(v1.e_list, v2.e_list)
+        self.assertEqual(v1.e_props, v2.e_props)
+        self.assertEqual(v1.e_dict, v2.e_dict)
+        self.assertEqual(v1.e_ff_dict, v2.e_ff_dict)
+        self.assertEqual(v1.e_ff_dict, v1.e_dict)
+
+        # not exist compare
+        self.assertEqual(v1.list[10], v2.list[10])
+        self.assertEqual(v1.dict["NotExist"], v2.dict["NotExist"])

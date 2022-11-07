@@ -146,7 +146,7 @@ def _search_role_definitions(cli_ctx, definitions_client, name, scopes, custom_r
 
 def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, resource_group_name=None,
                            scope=None, assignee_principal_type=None, description=None,
-                           condition=None, condition_version=None):
+                           condition=None, condition_version=None, assignment_name=None):
     """Check parameters are provided correctly, then call _create_role_assignment."""
     if bool(assignee) == bool(assignee_object_id):
         raise CLIError('usage error: --assignee STRING | --assignee-object-id GUID')
@@ -178,7 +178,8 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
     try:
         return _create_role_assignment(cmd.cli_ctx, role, object_id, resource_group_name, scope, resolve_assignee=False,
                                        assignee_principal_type=principal_type, description=description,
-                                       condition=condition, condition_version=condition_version)
+                                       condition=condition, condition_version=condition_version,
+                                       assignment_name=assignment_name)
     except Exception as ex:  # pylint: disable=broad-except
         if _error_caused_by_role_assignment_exists(ex):  # for idempotent
             return list_role_assignments(cmd, assignee, role, resource_group_name, scope)[0]
@@ -187,8 +188,9 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
 
 def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None,
                             resolve_assignee=True, assignee_principal_type=None, description=None,
-                            condition=None, condition_version=None):
+                            condition=None, condition_version=None, assignment_name=None):
     """Prepare scope, role ID and resolve object ID from Graph API."""
+    assignment_name = assignment_name or _gen_guid()
     factory = _auth_client_factory(cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -198,7 +200,7 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
     role_id = _resolve_role_id(role, scope, definitions_client)
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
     worker = MultiAPIAdaptor(cli_ctx)
-    return worker.create_role_assignment(assignments_client, _gen_guid(), role_id, object_id, scope,
+    return worker.create_role_assignment(assignments_client, assignment_name, role_id, object_id, scope,
                                          assignee_principal_type, description=description,
                                          condition=condition, condition_version=condition_version)
 
@@ -495,8 +497,24 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_gr
     definitions_client = factory.role_definitions
     ids = ids or []
     if ids:
-        if assignee or role or resource_group_name or scope or include_inherited:
-            raise CLIError('When assignment ids are used, other parameter values are not required')
+        # Warn that other arguments are overriden.
+        # We can't reuse the logic of `azure.cli.core.commands.arm.register_ids_argument`, because in that function,
+        # `ids_metadata` is built by checking `id_part` of each argument.
+        # Commands like `az vm delete` require a resource ID with fixed parts, such as
+        # /subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachines/{}
+        # But for `az role assignment delete`, `--id` can have variable parts:
+        # - subscription level:   /subscriptions/{}
+        # - resource group level: /subscriptions/{}/resourceGroups/{}
+        # - resource level:       /subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachines/{}
+        # so it can't be parsed into pre-defined parts and is passed to SDK as is.
+        ids_override_args = ['assignee', 'role', 'resource_group_name', 'scope', 'include_inherited']
+        for arg in ids_override_args:
+            if locals()[arg]:
+                # This is different with `register_ids_argument`'s `--ids` handling.
+                # `register_ids_argument` doesn't show warning if `is_default` of an argument value is true,
+                # but we do here. I feel being explicit is better than being implicit.
+                logger.warning("option '%s' will be ignored due to use of '--ids'.",
+                               cmd.arguments[arg].type.settings['options_list'][0])
         for i in ids:
             assignments_client.delete_by_id(i)
         return
