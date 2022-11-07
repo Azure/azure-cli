@@ -272,9 +272,9 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        from azure.cli.core.aaz import AAZDictArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.custom_error_pages = AAZListArg(
+        args_schema.custom_error_pages = AAZDictArg(
             options=["--custom-error-pages"],
             help="Space-separated list of custom error pages in `STATUS_CODE=URL` format.",
             nullable=True,
@@ -294,16 +294,11 @@ class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
         args = self.ctx.args
         if has_value(args.custom_error_pages):
             configurations = []
-            for item in args.custom_error_pages:
-                try:
-                    code, url = item.split("=")
-                    configurations.append({
-                        "statusCode": code,
-                        "customErrorPageUrl": url
-                    })
-                except (ValueError, TypeError):
-                    err_msg = "--custom-error-pages should be like STATUS_CODE=URL [STATUS_CODE=URL ...]"
-                    raise ArgumentUsageError(err_msg)
+            for code, url in args.custom_error_pages.items():
+                configurations.append({
+                    "status_code": code,
+                    "custom_error_page_url": url,
+                })
             args.custom_error_configurations = configurations
 
         if has_value(args.sku):
