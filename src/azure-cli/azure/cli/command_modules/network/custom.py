@@ -23,6 +23,8 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
+from .aaz.latest.network.application_gateway._update import Update as _ApplicationGatewayUpdate
+
 import threading
 import time
 import platform
@@ -269,29 +271,41 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
-def update_application_gateway(cmd, instance, sku=None, capacity=None, tags=None, enable_http2=None, min_capacity=None,
-                               custom_error_pages=None, max_capacity=None):
-    if sku is not None:
-        instance.sku.tier = sku.split('_', 1)[0] if not _is_v2_sku(sku) else sku
+class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZDictArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.custom_error_pages = AAZDictArg(
+            options=["--custom-error-pages"],
+            help="Space-separated list of custom error pages in `STATUS_CODE=URL` format.",
+            nullable=True,
+        )
+        args_schema.custom_error_pages.Element = AAZStrArg(
+            nullable=True,
+        )
+        return args_schema
 
-    try:
-        if min_capacity is not None:
-            instance.autoscale_configuration.min_capacity = min_capacity
-        if max_capacity is not None:
-            instance.autoscale_configuration.max_capacity = max_capacity
-    except AttributeError:
-        instance.autoscale_configuration = {
-            'min_capacity': min_capacity,
-            'max_capacity': max_capacity
-        }
+    def _cli_arguments_loader(self):
+        args = super()._cli_arguments_loader()
+        args = [(name, arg) for (name, arg) in args if name != "custom_error_configurations"]
+        return args
 
-    with cmd.update_context(instance) as c:
-        c.set_param('sku.name', sku)
-        c.set_param('sku.capacity', capacity)
-        c.set_param('tags', tags)
-        c.set_param('enable_http2', enable_http2)
-        c.set_param('custom_error_configurations', custom_error_pages)
-    return instance
+    def pre_operations(self):
+        from azure.cli.core.aaz import has_value
+        args = self.ctx.args
+        if has_value(args.custom_error_pages):
+            configurations = []
+            for code, url in args.custom_error_pages.items():
+                configurations.append({
+                    "status_code": code,
+                    "custom_error_page_url": url,
+                })
+            args.custom_error_configurations = configurations
+
+        if has_value(args.sku):
+            sku = str(args.sku)
+            args.sku.tier = sku.split("_", 1)[0] if not _is_v2_sku(sku) else sku
 
 
 def create_ag_authentication_certificate(cmd, resource_group_name, application_gateway_name, item_name,
@@ -760,57 +774,39 @@ def show_trusted_client_certificate(cmd, resource_group_name, application_gatewa
     return instance
 
 
-def show_ag_backend_health(cmd, client, resource_group_name, application_gateway_name, expand=None,
+def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, expand=None,
                            protocol=None, host=None, path=None, timeout=None, host_name_from_http_settings=None,
                            match_body=None, match_status_codes=None, address_pool=None, http_settings=None):
     from azure.cli.core.commands import LongRunningOperation
     on_demand_arguments = {protocol, host, path, timeout, host_name_from_http_settings, match_body, match_status_codes,
                            address_pool, http_settings}
-    if on_demand_arguments.difference({None}) and cmd.supported_api_version(min_api='2019-04-01'):
-        SubResource, ApplicationGatewayOnDemandProbe, ApplicationGatewayProbeHealthResponseMatch = cmd.get_models(
-            "SubResource", "ApplicationGatewayOnDemandProbe", "ApplicationGatewayProbeHealthResponseMatch")
-        probe_request = ApplicationGatewayOnDemandProbe(
-            protocol=protocol,
-            host=host,
-            path=path,
-            timeout=timeout,
-            pick_host_name_from_backend_http_settings=host_name_from_http_settings
+    if on_demand_arguments.difference({None}):
+        from .aaz.latest.network.application_gateway._health_on_demand import HealthOnDemand
+        return LongRunningOperation(cmd.cli_ctx)(
+            HealthOnDemand(cli_ctx=cmd.cli_ctx)(command_args={
+                "name": application_gateway_name,
+                "resource_group": resource_group_name,
+                "expand": expand,
+                "protocol": protocol,
+                "host": host,
+                "path": path,
+                "timeout": timeout,
+                "host_name_from_http_settings": host_name_from_http_settings,
+                "match_body": match_body,
+                "match_status_codes": match_status_codes,
+                "address_pool": address_pool,
+                "http_settings": http_settings,
+            })
         )
-        if match_body is not None or match_status_codes is not None:
-            probe_request.match = ApplicationGatewayProbeHealthResponseMatch(
-                body=match_body,
-                status_codes=match_status_codes,
-            )
-        if address_pool is not None:
-            if not is_valid_resource_id(address_pool):
-                address_pool = resource_id(
-                    subscription=get_subscription_id(cmd.cli_ctx),
-                    resource_group=resource_group_name,
-                    namespace='Microsoft.Network',
-                    type='applicationGateways',
-                    name=application_gateway_name,
-                    child_type_1='backendAddressPools',
-                    child_name_1=address_pool
-                )
-            probe_request.backend_address_pool = SubResource(id=address_pool)
-        if http_settings is not None:
-            if not is_valid_resource_id(http_settings):
-                http_settings = resource_id(
-                    subscription=get_subscription_id(cmd.cli_ctx),
-                    resource_group=resource_group_name,
-                    namespace='Microsoft.Network',
-                    type='applicationGateways',
-                    name=application_gateway_name,
-                    child_type_1='backendHttpSettingsCollection',
-                    child_name_1=http_settings
-                )
-            probe_request.backend_http_settings = SubResource(id=http_settings)
-        return LongRunningOperation(cmd.cli_ctx)(client.begin_backend_health_on_demand(
-            resource_group_name, application_gateway_name, probe_request, expand))
 
-    return LongRunningOperation(cmd.cli_ctx)(client.begin_backend_health(
-        resource_group_name, application_gateway_name, expand))
-
+    from .aaz.latest.network.application_gateway._health import Health
+    return LongRunningOperation(cmd.cli_ctx)(
+        Health(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": application_gateway_name,
+            "resource_group": resource_group_name,
+            "expand": expand,
+        })
+    )
 # endregion
 
 

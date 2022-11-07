@@ -313,21 +313,17 @@ def load_command_table(self, _):
     # endregion
 
     # region ApplicationGateways
-    with self.command_group('network application-gateway', network_ag_sdk) as g:
+    with self.command_group('network application-gateway') as g:
         g.custom_command('create', 'create_application_gateway',
                          transform=DeploymentOutputLongRunningOperation(self.cli_ctx),
                          supports_no_wait=True,
                          table_transformer=deployment_validate_table_format,
                          validator=process_ag_create_namespace,
                          exception_handler=handle_template_based_exception)
-        g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_application_gateways')
-        g.command('start', 'begin_start')
-        g.command('stop', 'begin_stop')
-        g.custom_command('show-backend-health', 'show_ag_backend_health', min_api='2016-09-01', client_factory=cf_application_gateways)
-        g.generic_update_command('update', supports_no_wait=True, setter_name='begin_create_or_update', custom_func_name='update_application_gateway')
-        g.wait_command('wait')
+        g.custom_command('show-backend-health', 'show_ag_backend_health')
+
+        from .custom import ApplicationGatewayUpdate
+        self.command_table["network application-gateway update"] = ApplicationGatewayUpdate(loader=self)
 
     subresource_properties = [
         {'prop': 'authentication_certificates', 'name': 'auth-cert'},

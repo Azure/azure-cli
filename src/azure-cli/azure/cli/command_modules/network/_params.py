@@ -508,7 +508,7 @@ def load_arguments(self, _):
         c.argument('protocol', http_protocol_type, help='The HTTP settings protocol.')
         c.argument('host', help='The name of the host to send the probe.')
         c.argument('path', help='The relative path of the probe. Valid paths start from "/"')
-        c.argument('timeout', help='The probe timeout in seconds.')
+        c.argument('timeout', type=int, help='The probe timeout in seconds.')
         c.argument('host_name_from_http_settings', help='Use host header from HTTP settings.',
                    arg_type=get_three_state_flag())
         c.argument('match_body', help='Body that must be contained in the health response.')
