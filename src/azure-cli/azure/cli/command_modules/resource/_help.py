@@ -69,16 +69,16 @@ short-summary: Create a new management group.
 examples:
   - name: Create a new management group.
     text: >
-        az account management-group create --name GroupName
+        az account management-group create --name MyGroupName
   - name: Create a new management group with a specific display name.
     text: >
-        az account management-group create --name GroupName --display-name DisplayName
+        az account management-group create --name MyGroupName --display-name MyDisplayName
   - name: Create a new management group with a specific parent.
     text: >
-        az account management-group create --name GroupName --parent ParentId/ParentName
+        az account management-group create --name MyGroupName --parent ParentId/ParentName
   - name: Create a new management group with a specific display name and parent.
     text: >
-        az account management-group create --name GroupName --display-name DisplayName --parent ParentId/ParentName
+        az account management-group create --name MyGroupName --display-name MyDisplayName --parent ParentId/ParentName
 """
 
 helps['account management-group delete'] = """
@@ -87,7 +87,7 @@ short-summary: Delete an existing management group.
 examples:
   - name: Delete an existing management group
     text: >
-        az account management-group delete --name GroupName
+        az account management-group delete --name MyGroupName
 """
 
 helps['account management-group list'] = """
@@ -105,13 +105,13 @@ short-summary: Get the details of a specific management group.
 examples:
   - name: Get a management group.
     text: >
-        az account management-group show --name GroupName
+        az account management-group show --name MyGroupName
   - name: Get a management group with children in the first level of hierarchy.
     text: >
-        az account management-group show --name GroupName --expand
+        az account management-group show --name MyGroupName --expand
   - name: Get a management group with children in all levels of hierarchy.
     text: >
-        az account management-group show --name GroupName --expand --recurse
+        az account management-group show --name MyGroupName --expand --recurse
 """
 
 helps['account management-group subscription'] = """
@@ -125,7 +125,7 @@ short-summary: Add a subscription to a management group.
 examples:
   - name: Add a subscription to a management group.
     text: >
-        az account management-group subscription add --name GroupName --subscription Subscription
+        az account management-group subscription add --name MyGroupName --subscription Subscription
 """
 
 helps['account management-group subscription remove'] = """
@@ -134,7 +134,7 @@ short-summary: Remove an existing subscription from a management group.
 examples:
   - name: Remove an existing subscription from a management group.
     text: >
-        az account management-group subscription remove --name GroupName --subscription Subscription
+        az account management-group subscription remove --name MyGroupName --subscription Subscription
 """
 
 helps['account management-group update'] = """
@@ -143,13 +143,13 @@ short-summary: Update an existing management group.
 examples:
   - name: Update an existing management group with a specific display name.
     text: >
-        az account management-group update --name GroupName --display-name DisplayName
+        az account management-group update --name MyGroupName --display-name MyDisplayName
   - name: Update an existing management group with a specific parent.
     text: >
-        az account management-group update --name GroupName --parent ParentId/ParentName
+        az account management-group update --name MyGroupName --parent ParentId/ParentName
   - name: Update an existing management group with a specific display name and parent.
     text: >
-        az account management-group update --name GroupName --display-name DisplayName --parent ParentId/ParentName
+        az account management-group update --name MyGroupName --display-name MyDisplayName --parent ParentId/ParentName
 """
 
 helps['deployment'] = """
@@ -170,7 +170,7 @@ type: command
 short-summary: Show a deployment at subscription scope.
 examples:
   - name: Show a deployment at subscription scope.
-    text: az deployment show --name deployment01
+    text: az deployment show --name MyDeploymentName
 """
 
 helps['deployment delete'] = """
@@ -178,7 +178,7 @@ type: command
 short-summary: Delete a deployment at subscription scope.
 examples:
   - name: Delete a deployment at subscription scope.
-    text: az deployment delete --name deployment01
+    text: az deployment delete --name MyDeploymentName
 """
 
 helps['deployment cancel'] = """
@@ -186,12 +186,14 @@ type: command
 short-summary: Cancel a deployment at subscription scope.
 examples:
   - name: Cancel a deployment at subscription scope.
-    text: az deployment cancel --name deployment01
+    text: az deployment cancel --name MyDeploymentName
 """
 
 helps['deployment validate'] = """
 type: command
 short-summary: Validate whether a template is valid at subscription scope.
+long-summary: Specify only one of the following: `--template-file MyFileName`, `--template-uri` such as "https://mystorageaccount.blob.core.windows.net/AzureTemplates/newStorageAccount.json", \
+    or `--template-spec` to input the ARM template.
 examples:
   - name: Validate whether a template is valid at subscription scope.
     text: |
@@ -201,6 +203,8 @@ examples:
 helps['deployment create'] = """
 type: command
 short-summary: Start a deployment at subscription scope.
+long-summary: Specify only one of the following: `--template-file MyFileName`, `--template-uri` such as "https://mystorageaccount.blob.core.windows.net/AzureTemplates/newStorageAccount.json", \
+    or `--template-spec` to input the ARM template.
 examples:
   - name: Create a deployment at subscription scope from a remote template file, using parameters from a local JSON file.
     text: >
@@ -274,7 +278,7 @@ type: command
 short-summary: Show a deployment at subscription scope.
 examples:
   - name: Show a deployment at subscription scope.
-    text: az deployment sub show --name deployment01
+    text: az deployment sub show --name MyDeploymentName
 """
 
 helps['deployment sub delete'] = """
@@ -282,7 +286,7 @@ type: command
 short-summary: Delete a deployment at subscription scope.
 examples:
   - name: Delete a deployment at subscription scope.
-    text: az deployment sub delete --name deployment01
+    text: az deployment sub delete --name MyDeploymentName
 """
 
 helps['deployment sub cancel'] = """
@@ -290,7 +294,7 @@ type: command
 short-summary: Cancel a deployment at subscription scope.
 examples:
   - name: Cancel a deployment at subscription scope.
-    text: az deployment sub cancel --name deployment01
+    text: az deployment sub cancel --name MyDeploymentName
 """
 
 helps['deployment sub validate'] = """
@@ -392,7 +396,7 @@ type: command
 short-summary: Show a deployment at resource group.
 examples:
   - name: Show a deployment at resource group.
-    text: az deployment group show --resource-group MyResourceGroup --name deployment01
+    text: az deployment group show --resource-group MyResourceGroup --name MyDeploymentName
 """
 
 helps['deployment group delete'] = """
@@ -400,7 +404,7 @@ type: command
 short-summary: Delete a deployment at resource group.
 examples:
   - name: Delete a deployment at resource group.
-    text: az deployment group delete --resource-group MyResourceGroup --name deployment01
+    text: az deployment group delete --resource-group MyResourceGroup --name MyDeploymentName
 """
 
 helps['deployment group cancel'] = """
@@ -408,7 +412,7 @@ type: command
 short-summary: Cancel a deployment at resource group.
 examples:
   - name: Cancel a deployment at resource group.
-    text: az deployment group cancel --resource-group MyResourceGroup --name deployment01
+    text: az deployment group cancel --resource-group MyResourceGroup --name MyDeploymentName
 """
 
 helps['deployment group validate'] = """
@@ -425,7 +429,7 @@ examples:
 
 helps['deployment group create'] = """
 type: command
-short-summary: Start a deployment at resource group.
+short-summary: Create a deployment group.
 examples:
   - name: Create a deployment at resource group from a remote template file, using parameters from a local JSON file.
     text: >
@@ -484,7 +488,7 @@ examples:
 
 helps['deployment operation group'] = """
 type: group
-short-summary: Manage deployment operations at resource group.
+short-summary: Manage deployment operations of a resource group.
 """
 
 helps['deployment operation group list'] = """
@@ -499,53 +503,53 @@ examples:
 
 helps['deployment operation group show'] = """
 type: command
-short-summary: Show a deployment operation at resource group.
+short-summary: Show a deployment operation of a resource group.
 """
 
 helps['deployment mg'] = """
 type: group
-short-summary: Manage Azure Resource Manager template deployment at management group.
+short-summary: Manage Azure Resource Manager template deployment of a management group.
 """
 
 helps['deployment mg list'] = """
 type: command
-short-summary: List deployments at management group.
+short-summary: List deployments of a management group.
 examples:
-  - name: List deployments at management group.
+  - name: List deployments of a management group.
     text: az deployment mg list --management-group-id MyGroupId
 """
 
 helps['deployment mg show'] = """
 type: command
-short-summary: Show a deployment at management group.
+short-summary: Show the deployment of a management group.
 examples:
-  - name: Show a deployment at management group.
-    text: az deployment mg show --management-group-id MyGroupId --name deployment01
+  - name: Show the deployment of a management group.
+    text: az deployment mg show --management-group-id MyGroupId --name MyDeploymentName
 """
 
 helps['deployment mg delete'] = """
 type: command
-short-summary: Delete a deployment at management group.
+short-summary: Delete the deployment of a management group.
 examples:
-  - name: Delete a deployment at management group.
-    text: az deployment mg delete --management-group-id MyManagementGroup --name deployment01
+  - name: Delete the deployment of a management group.
+    text: az deployment mg delete --management-group-id MyManagementGroup --name MyDeploymentName
 """
 
 helps['deployment mg cancel'] = """
 type: command
-short-summary: Cancel a deployment at management group.
+short-summary: Cancel a deployment of a management group.
 examples:
-  - name: Cancel a deployment at management group.
-    text: az deployment mg cancel --management-group-id MyManagementGroup --name deployment01
+  - name: Cancel the deployment of a management group.
+    text: az deployment mg cancel --management-group-id MyManagementGroup --name MyDeploymentName
 """
 
 helps['deployment mg validate'] = """
 type: command
-short-summary: Validate whether a template is valid at management group.
+short-summary: Validate whether a template is valid of a management group.
 examples:
-  - name: Validate whether a template is valid at management group.
+  - name: Validate whether a template is valid of a management group.
     text: az deployment mg validate --management-group-id MyManagementGroup --location WestUS --template-file {template-file}
-  - name: Validate whether a template is valid at management group.
+  - name: Validate whether a template is valid of a management group.
     text: |
         az deployment mg validate --location WestUS --management-group-id MyManagementGroup --name MyDeployment --parameters @myparameters.json --template-file azuredeploy.json
 
@@ -553,33 +557,33 @@ examples:
 
 helps['deployment mg what-if'] = """
 type: command
-short-summary: Execute a deployment What-If operation at management group scope.
+short-summary: Execute a deployment What-If operation of a management group scope.
 examples:
-  - name: Execute a deployment What-If operation at a management group.
+  - name: Execute a deployment What-If operation of a management group.
     text: >
         az deployment mg what-if --management-group-id MyManagementGroup --location westus --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
-  - name: Execute a deployment What-If operation at a management group with ResourceIdOnly format.
+  - name: Execute a deployment What-If operation of a management group with ResourceIdOnly format.
     text: >
         az deployment mg what-if --management-group-id MyManagementGroup --location westus --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --result-format ResourceIdOnly
-  - name: Execute a deployment What-If operation at a management group without pretty-printing the result.
+  - name: Execute a deployment What-If operation of a management group without pretty-printing the result.
     text: >
         az deployment mg what-if --management-group-id MyManagementGroup --location westus --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --no-pretty-print
 """
 
 helps['deployment mg create'] = """
 type: command
-short-summary: Start a deployment at management group.
+short-summary: Start a deployment of a management group.
 examples:
-  - name: Create a deployment at management group from a remote template file, using parameters from a local JSON file.
+  - name: Create a deployment of a management group from a remote template file, using parameters from a local JSON file.
     text: >
         az deployment mg create --management-group-id MyResourceGroup --name rollout01 --location WestUS \\
             --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
-  - name: Create a deployment at management group from a local template file, using parameters from a JSON string.
+  - name: Create a deployment of a management group from a local template file, using parameters from a JSON string.
     text: |
         az deployment mg create --management-group-id MyManagementGroup --name rollout01 --location WestUS \\
             --template-file azuredeploy.json \\
             --parameters '{ \\"policyName\\": { \\"value\\": \\"policy2\\" } }'
-  - name: Create a deployment at management group from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
+  - name: Create a deployment of a management group from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: >
         az deployment mg create --management-group-id MyManagementGroup --name rollout01 --location WestUS \\
             --template-file azuredeploy.json --parameters @params.json \\
@@ -590,7 +594,7 @@ helps['deployment mg export'] = """
 type: command
 short-summary: Export the template used for a deployment.
 examples:
-  - name: Export the template used for a deployment at management group.
+  - name: Export the template used for a deployment of a management group.
     text: az deployment mg export --management-group-id MyManagementGroup --name MyDeployment
 """
 
@@ -601,17 +605,17 @@ short-summary: Place the CLI in a waiting state until a deployment condition is 
 
 helps['deployment operation mg'] = """
 type: group
-short-summary: Manage deployment operations at management group.
+short-summary: Manage deployment operations of a management group.
 """
 
 helps['deployment operation mg list'] = """
 type: command
-short-summary: List deployment operations at management group.
+short-summary: List deployment operations of a management group.
 """
 
 helps['deployment operation mg show'] = """
 type: command
-short-summary: Show a deployment operation at management group.
+short-summary: Show a deployment operation of a management group.
 """
 
 helps['deployment tenant'] = """
@@ -632,7 +636,7 @@ type: command
 short-summary: Show a deployment at tenant scope.
 examples:
   - name: Show a deployment at tenant scope.
-    text: az deployment tenant show --name deployment01
+    text: az deployment tenant show --name MyDeploymentName
 """
 
 helps['deployment tenant delete'] = """
@@ -640,7 +644,7 @@ type: command
 short-summary: Delete a deployment at tenant scope.
 examples:
   - name: Delete a deployment at tenant scope.
-    text: az deployment tenant delete --name deployment01
+    text: az deployment tenant delete --name MyDeploymentName
 """
 
 helps['deployment tenant cancel'] = """
@@ -648,7 +652,7 @@ type: command
 short-summary: Cancel a deployment at tenant scope.
 examples:
   - name: Cancel a deployment at tenant scope.
-    text: az deployment tenant cancel --name deployment01
+    text: az deployment tenant cancel --name MyDeploymentName
 """
 
 helps['deployment tenant validate'] = """
@@ -871,6 +875,9 @@ examples:
   - name: Delete a resource group.
     text: >
         az group delete --name MyResourceGroup
+  - name: Force delete all the Virtual Machines in a resource group.
+    text: >
+        az group delete -n MyResourceGroup --force-deletion-types Microsoft.Compute/virtualMachines
    - name: >
       Delete a resource group but only if it exists.  Bypass the confirmation prompt.  Do not wait for the operation to finish.
     text: >
@@ -1061,12 +1068,6 @@ examples:
   - name: Remove tags from a resource group.
     text: |
         az group update --resource-group MyResourceGroup --remove tags
-  - name: Add a property to a resource group.
-    text: |
-        az group update --resource-group MyResourceGroup --add properties.MyPropertyName=MyValue NEED WORKING EXAMPLE HERE 
-  - name: Modify an existing property of a resource group.
-    text: |
-        az group update --resource-group MyResourceGroup --set properties.MyPropertyName=MyNewValue NEED WORKING EXAMPLE HERE   
 """
 
 helps['group wait'] = """
@@ -1276,21 +1277,21 @@ examples:
            resource:          /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM
              az policy assignment create --scope \\
                 "/providers/Microsoft.Management/managementGroups/MyManagementGroup" \\
-                    --policy MyPolicyName -p "{ \\"allowedLocations\\": \\
+                    --policy MyPolicyDefinition --params "{ \\"allowedLocations\\": \\
                         { \\"value\\": [ \\"australiaeast\\", \\"eastus\\", \\"japaneast\\" ] } }"
   - name: Create a resource policy assignment and provide rule parameter values.
     text: |
-        az policy assignment create --policy MyPolicyName -p "{ \\"allowedLocations\\": \\
+        az policy assignment create --policy MyPolicyDefinition --params "{ \\"allowedLocations\\": \\
             { \\"value\\": [ \\"australiaeast\\", \\"eastus\\", \\"japaneast\\" ] } }"
   - name: Create a resource policy assignment with a system assigned identity.
     text: >
-        az policy assignment create --name myPolicy --policy MyPolicyName --assign-identity
+        az policy assignment create --name MyPolicyName --policy MyPolicyDefinition --assign-identity
   - name: Create a resource policy assignment with a system assigned identity. The identity will have 'Contributor' role access to the subscription.
     text: >
-        az policy assignment create --name myPolicy --policy MyPolicyName --assign-identity --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --role Contributor
+        az policy assignment create --name MyPolicyName --policy MyPolicyDefinition --assign-identity --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --role Contributor
   - name: Create a resource policy assignment with an enforcement mode. It indicates whether a policy effect will be enforced or not during assignment creation and update. Please visit https://aka.ms/azure-policyAssignment-enforcement-mode for more information.
     text: >
-        az policy assignment create --name myPolicy --policy MyPolicyName --enforcement-mode 'DoNotEnforce'
+        az policy assignment create --name MyPolicyName --policy MyPolicyDefinition--enforcement-mode 'DoNotEnforce'
 """
 
 helps['policy assignment update'] = """
@@ -1299,7 +1300,7 @@ short-summary: Update a resource policy assignment.
 examples:
   - name: Update a resource policy assignment's description.
     text: |
-        az policy assignment update --name myPolicy --description 'My policy description'
+        az policy assignment update --name MyPolicyName --description 'My policy description'
 """
 
 helps['policy assignment delete'] = """
@@ -1524,9 +1525,9 @@ helps['policy set-definition show'] = """
 type: command
 short-summary: Show a policy set definition.
 examples:
-  - name: Show a policy set definition.
+  - name: Show a policy set definition.  If the policy set is scoped to a management group, then you must include the `--management-group` parameter and value.
     text: |
-        az policy set-definition show --name MyPolicySetDefinition
+        az policy set-definition show --name MyPolicySetDefinition --management-group MyManagementGroup
 """
 
 helps['policy set-definition update'] = """
@@ -1696,7 +1697,7 @@ short-summary: Manage Azure resources.
 
 helps['resource create'] = """
 type: command
-short-summary: create a resource.
+short-summary: Create a resource.
 examples:
   - name: Create an API app by providing a full JSON configuration.
     text: |
@@ -1807,7 +1808,7 @@ examples:
 
 helps['resource link update'] = """
 type: command
-short-summary: Update link between resources.
+short-summary: Update a link between resources.
 examples:
   - name: Update the notes for MyLinkId notes "some notes to explain this link"
     text: >
@@ -1869,7 +1870,7 @@ examples:
 
 helps['resource lock list'] = """
 type: command
-short-summary: List lock information in the resource-level.
+short-summary: List lock information at the resource-level.
 examples:
   - name: List out all locks on a VNet
     text: >
@@ -1974,7 +1975,7 @@ examples:
 
 helps['tag'] = """
 type: group
-short-summary: Tag Management on a resource.
+short-summary: Manage the tags of a resource.
 """
 
 helps['tag add-value'] = """
@@ -2150,7 +2151,7 @@ examples:
 
 helps['bicep'] = """
 type: group
-short-summary: Bicep CLI command group.
+short-summary: Deploy Azure resources using Bicep.
 """
 
 helps['bicep install'] = """
@@ -2185,6 +2186,8 @@ examples:
     text: az bicep build --file MyFileName.bicep --outdir c:\MyOutputFolderName
   - name: Build a Bicep file and save the result to the specified file.
     text: az bicep build --file MyFileName.bicep --outfile c:\MyOutputFolderName\MyOutputFileName.json
+  - name: Build a Bicep file without restoring external modules.
+    text: az bicep build --file MyFileName.bicep --no-restore
 """
 
 helps['bicep decompile'] = """
@@ -2193,6 +2196,24 @@ short-summary: Attempt to decompile an ARM template file to a Bicep file.
 examples:
   - name: Decompile an ARM template file.
     text: az bicep decompile --file 'path/to/file.json'
+"""
+
+helps['bicep publish'] = """
+type: command
+short-summary: Publish a bicep file to a remote module registry.
+examples:
+  - name: Publish a bicep file.
+    text: az bicep publish --file MyFileName.bicep --target "br:{registry}/{module_path}:{tag}"
+"""
+
+helps['bicep restore'] = """
+type: command
+short-summary: Restore external modules for a bicep file.
+examples:
+  - name: Retore external modules.
+    text: az bicep restore --file MyFileName.bicep
+  - name: Retore external modules and overwrite cached external modules.
+    text: az bicep restore --file MyFileName.bicep --force
 """
 
 helps['bicep version'] = """
