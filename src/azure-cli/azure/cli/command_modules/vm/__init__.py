@@ -54,4 +54,46 @@ class ComputeCommandsLoader(AzCommandsLoader):
             pass
 
 
-COMMAND_LOADER_CLS = ComputeCommandsLoader
+class AzureStackComputeCommandsLoader(AzCommandsLoader):
+
+    def __init__(self, cli_ctx=None):
+        from azure.cli.core.commands import CliCommandType
+        compute_custom = CliCommandType(
+            operations_tmpl='azure.cli.command_modules.vm.azure_stack.custom#{}',
+            operation_group='virtual_machines'
+        )
+        super().__init__(cli_ctx=cli_ctx,
+                         resource_type=ResourceType.MGMT_COMPUTE,
+                         operation_group='virtual_machines',
+                         custom_command_type=compute_custom)
+
+    def load_command_table(self, args):
+        from azure.cli.command_modules.vm.azure_stack.commands import load_command_table
+        load_command_table(self, args)
+        try:
+            # When generated commands are required uncomment the following two lines.
+            from .generated.commands import load_command_table as load_command_table_generated
+            load_command_table_generated(self, args)
+            from .manual.commands import load_command_table as load_command_table_manual
+            load_command_table_manual(self, args)
+        except ImportError:
+            pass
+        return self.command_table
+
+    def load_arguments(self, command):
+        from azure.cli.command_modules.vm.azure_stack._params import load_arguments
+        load_arguments(self, command)
+        try:
+            from .generated._params import load_arguments as load_arguments_generated
+            load_arguments_generated(self, command)
+            from .manual._params import load_arguments as load_arguments_manual
+            load_arguments_manual(self, command)
+        except ImportError:
+            pass
+
+
+def get_command_loader(cli_ctx):
+    if cli_ctx.cloud.profile.lower() != "latest":
+        return AzureStackComputeCommandsLoader
+
+    return ComputeCommandsLoader

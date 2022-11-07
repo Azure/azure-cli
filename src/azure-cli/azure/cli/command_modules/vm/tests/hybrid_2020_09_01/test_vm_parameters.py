@@ -31,9 +31,8 @@ class TestVMValidators(unittest.TestCase):
 
     @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id', _mock_get_subscription_id)
     def test_vm_nics(self):
-
         from argparse import Namespace
-        from azure.cli.command_modules.vm._validators import _validate_vm_create_nics
+        from azure.cli.command_modules.vm.azure_stack._validators import _validate_vm_create_nics
 
         def _get_test_cmd():
             from azure.cli.core.mock import DummyCli

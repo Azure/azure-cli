@@ -29,7 +29,7 @@ def _get_test_cmd():
 class TestVMImage(unittest.TestCase):
 
     def test_read_images_from_alias_doc(self):
-        from azure.cli.command_modules.vm.custom import list_vm_images
+        from azure.cli.command_modules.vm.azure_stack.custom import list_vm_images
         cmd = _get_test_cmd()
 
         # action
@@ -50,7 +50,7 @@ class TestVMImage(unittest.TestCase):
 
     @mock.patch('azure.cli.core.cloud.get_active_cloud', autospec=True)
     def test_when_alias_doc_is_missing(self, mock_get_active_cloud):
-        from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
+        from azure.cli.command_modules.vm.azure_stack._actions import load_images_from_aliases_doc
         p = mock.PropertyMock(side_effect=CloudEndpointNotSetException(''))
         mock_cloud = mock.MagicMock()
         type(mock_cloud.endpoints).vm_image_alias_doc = p
