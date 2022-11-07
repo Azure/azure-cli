@@ -324,9 +324,3 @@ def is_packaged_installed(package_name):
     pkg_installed = any((package_name) in d.key.lower()
                         for d in installed_packages)
     return pkg_installed
-
-
-def install_package(package):
-    import subprocess
-    import sys
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
