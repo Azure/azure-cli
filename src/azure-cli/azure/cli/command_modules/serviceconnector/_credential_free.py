@@ -6,11 +6,11 @@
 import struct
 import sys
 from knack.log import get_logger
-from knack.util import CLIError
 from msrestazure.tools import parse_resource_id
 from azure.cli.core.azclierror import (
     AzureConnectionError,
-    ValidationError
+    ValidationError,
+    CLIInternalError
 )
 from azure.cli.core.extension.operations import _install_deps_for_psycopg2, _run_pip
 from azure.cli.core.profiles import ResourceType
@@ -216,7 +216,7 @@ class MysqlFlexibleHandler(TargetHandler):
             import pymysql
             from pymysql.constants import CLIENT
         except ModuleNotFoundError:
-            raise CLIError("Dependency pymysql can't be installed, please install it manually with `" + sys.executable + " -m pip install pymysql`.")
+            raise CLIInternalError("Dependency pymysql can't be installed, please install it manually with `" + sys.executable + " -m pip install pymysql`.")
 
         connection_kwargs['client_flag'] = CLIENT.MULTI_STATEMENTS
         try:
@@ -235,7 +235,7 @@ class MysqlFlexibleHandler(TargetHandler):
             try:
                 cursor.close()
             except Exception as e:  # pylint: disable=broad-except
-                raise CLIError(str(e))
+                raise CLIInternalError(str(e))
 
     def get_connection_string(self):
         password = run_cli_cmd(
@@ -344,11 +344,11 @@ class SqlHandler(TargetHandler):
         try:
             import pyodbc
         except ModuleNotFoundError:
-            raise CLIError(
+            raise CLIInternalError(
                 "Dependency pyodbc can't be installed, please install it manually with `" + sys.executable + " -m pip install pyodbc`.")
         drivers = [x for x in pyodbc.drivers() if x == 'ODBC Driver 18 for SQL Server']
         if not drivers:
-            raise CLIError(
+            raise CLIInternalError(
                 "Please manually install odbc 18 for SQL server, reference: https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16")
         try:
             with pyodbc.connect(connection_args.get("connection_string"), attrs_before=connection_args.get("attrs_before")) as conn:
@@ -542,7 +542,7 @@ class PostgresFlexHandler(TargetHandler):
         try:
             import psycopg2
         except ModuleNotFoundError:
-            raise CLIError(
+            raise CLIInternalError(
                 "Dependency psycopg2 can't be installed, please install it manually with `" + sys.executable + " -m pip install psycopg2-binary`.")
 
         # pylint: disable=protected-access
@@ -724,7 +724,7 @@ class SpringHandler(SourceHandler):
                 self.source_type, rg, spring, app, sub), 15, 5, output_is_none)
 
         if identity is None:
-            raise CLIError(
+            raise CLIInternalError(
                 "Unable to get system identity of Spring. Please try it later.")
         return identity.get('principalId')
 
@@ -744,7 +744,7 @@ class WebappHandler(SourceHandler):
                 'az webapp identity show --ids {}'.format(self.source_id), 15, 5, output_is_none)
 
         if identity is None:
-            raise CLIError(
+            raise CLIInternalError(
                 "Unable to get system identity of Web App. Please try it later.")
         return identity.get('principalId')
 
@@ -763,6 +763,6 @@ class ContainerappHandler(SourceHandler):
                 'az containerapp identity show --ids {}'.format(self.source_id), 15, 5, output_is_none)
 
         if identity is None:
-            raise CLIError(
+            raise CLIInternalError(
                 "Unable to get system identity of Container App. Please try it later.")
         return identity.get('principalId')
