@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network application-gateway start",
-    confirmation="",
 )
 class Start(AAZCommand):
     """Start an application gateway.

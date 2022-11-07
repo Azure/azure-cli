@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network application-gateway stop",
-    confirmation="",
 )
 class Stop(AAZCommand):
     """Stop an application gateway.

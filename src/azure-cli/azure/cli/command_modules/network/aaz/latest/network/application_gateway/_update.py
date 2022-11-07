@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network application-gateway update",
-    confirmation="",
 )
 class Update(AAZCommand):
     """Update an application gateway.
