@@ -271,7 +271,8 @@ def validate_key_type(ns):
 
 def _fetch_default_cvm_policy():
     try:
-        import requests, json
+        import requests
+        import json
         policy = requests.get(default_cvm_policy_url)
         return json.loads(policy.content)
     except Exception:  # pylint: disable=broad-except
