@@ -278,6 +278,10 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
         c.argument('resource_group_name', resource_group_name_type, options_list=['--name', '-n', '--resource-group', '-g'])
 
+    with self.argument_context('group update') as c:
+        c.argument('properties_to_add', deprecate_info=c.deprecate(hide=True))
+        c.argument('properties_to_remove', deprecate_info=c.deprecate(hide=True))
+
     with self.argument_context('group deployment') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
         c.argument('deployment_name', arg_type=deployment_name_type)
