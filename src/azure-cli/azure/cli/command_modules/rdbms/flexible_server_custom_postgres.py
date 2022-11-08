@@ -45,7 +45,8 @@ def flexible_server_create(cmd, client,
                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
-                           geo_redundant_backup=None, byok_identity=None, byok_key=None, yes=False):
+                           geo_redundant_backup=None, byok_identity=None, byok_key=None,
+                           active_directory_auth=None, password_auth=None, yes=False):
 
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
@@ -107,6 +108,9 @@ def flexible_server_create(cmd, client,
                                                                    byok_identity=byok_identity,
                                                                    byok_key=byok_key)
 
+    auth_config = postgresql_flexibleservers.models.AuthConfig(active_directory_auth_enabled=(active_directory_auth == 'Enabled'),
+                                                               password_auth_enabled=(password_auth == 'Enabled'))
+
     # Create postgresql
     # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
     server_result = _create_server(db_context, cmd, resource_group_name, server_name,
@@ -122,7 +126,8 @@ def flexible_server_create(cmd, client,
                                    high_availability=high_availability,
                                    availability_zone=zone,
                                    identity=identity,
-                                   data_encryption=data_encryption)
+                                   data_encryption=data_encryption,
+                                   auth_config=auth_config)
 
     # Adding firewall rule
     if start_ip != -1 and end_ip != -1:
@@ -240,6 +245,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        standby_availability_zone=None,
                                        maintenance_window=None,
                                        byok_identity=None, byok_key=None,
+                                       active_directory_auth=None, password_auth=None,
                                        tags=None):
 
     # validator
@@ -297,6 +303,12 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                                                    byok_identity=byok_identity,
                                                                    byok_key=byok_key)
 
+    auth_config = instance.auth_config
+    if active_directory_auth:
+        auth_config.active_directory_auth_enabled = active_directory_auth == 'Enabled'
+    if password_auth:
+        auth_config.password_auth_enabled = password_auth == 'Enabled'
+
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
                              backup=instance.backup,
@@ -304,6 +316,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                              maintenance_window=instance.maintenance_window,
                              identity=identity,
                              data_encryption=data_encryption,
+                             auth_config=auth_config,
                              tags=tags)
 
     # High availability can't be updated with existing properties
@@ -544,7 +557,7 @@ def flexible_replica_stop(client, resource_group_name, server_name):
 
 
 def _create_server(db_context, cmd, resource_group_name, server_name, tags, location, sku, administrator_login, administrator_login_password,
-                   storage, backup, network, version, high_availability, availability_zone, identity, data_encryption):
+                   storage, backup, network, version, high_availability, availability_zone, identity, data_encryption, auth_config):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
@@ -567,6 +580,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
         availability_zone=availability_zone,
         identity=identity,
         data_encryption=data_encryption,
+        auth_config=auth_config,
         create_mode="Create")
 
     return resolve_poller(
