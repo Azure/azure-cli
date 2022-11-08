@@ -122,7 +122,11 @@ def flexible_server_create(cmd, client,
 
     administrator_login_password = generate_password(administrator_login_password)
 
-    identity, data_encryption = build_identity_and_data_encryption(byok_identity, backup_byok_identity, byok_key, backup_byok_key)
+    identity, data_encryption = build_identity_and_data_encryption(db_engine='mysql',
+                                                                   byok_identity=byok_identity,
+                                                                   backup_byok_identity=backup_byok_identity,
+                                                                   byok_key=byok_key,
+                                                                   backup_byok_key=backup_byok_key)
 
     # Create mysql server
     # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
@@ -412,7 +416,11 @@ def flexible_server_update_custom_func(cmd, client, instance,
         else:
             instance.high_availability = mysql_flexibleservers.models.HighAvailability(mode=high_availability)
 
-    identity, data_encryption = build_identity_and_data_encryption(byok_identity, backup_byok_identity, byok_key, backup_byok_key)
+    identity, data_encryption = build_identity_and_data_encryption(db_engine='mysql',
+                                                                   byok_identity=byok_identity,
+                                                                   backup_byok_identity=backup_byok_identity,
+                                                                   byok_key=byok_key,
+                                                                   backup_byok_key=backup_byok_key)
     if disable_data_encryption:
         data_encryption = mysql_flexibleservers.models.DataEncryption(type="SystemManaged")
 
