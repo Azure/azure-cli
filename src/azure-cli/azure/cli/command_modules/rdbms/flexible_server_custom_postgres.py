@@ -149,7 +149,7 @@ def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
                             source_server, restore_point_in_time=None, zone=None, no_wait=False,
                             subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
-                            private_dns_zone_arguments=None, yes=False):
+                            private_dns_zone_arguments=None, geo_redundant_backup=None, yes=False):
 
     server_name = server_name.lower()
 
@@ -205,6 +205,8 @@ def flexible_server_restore(cmd, client,
                                                                                   yes=yes)
         else:
             parameters.network = source_server_object.network
+
+        parameters.backup = postgresql_flexibleservers.models.Backup(geo_redundant_backup=geo_redundant_backup)
 
     except Exception as e:
         raise ResourceNotFoundError(e)
@@ -436,7 +438,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
 
 def flexible_server_georestore(cmd, client, resource_group_name, server_name, source_server, location, zone=None,
                                vnet=None, vnet_address_prefix=None, subnet=None, subnet_address_prefix=None,
-                               private_dns_zone_arguments=None, no_wait=False, yes=False):
+                               private_dns_zone_arguments=None, geo_redundant_backup=None, no_wait=False, yes=False):
     server_name = server_name.lower()
 
     if not is_valid_resource_id(source_server):
@@ -488,6 +490,8 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
                                                                               vnet_address_prefix=vnet_address_prefix,
                                                                               subnet_address_prefix=subnet_address_prefix,
                                                                               yes=yes)
+
+    parameters.backup = postgresql_flexibleservers.models.Backup(geo_redundant_backup=geo_redundant_backup)
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 

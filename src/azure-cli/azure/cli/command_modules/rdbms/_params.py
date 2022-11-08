@@ -496,6 +496,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('subnet', arg_type=subnet_arg_type)
             c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
+            c.argument('geo_redundant_backup', default='Disabled', arg_type=geo_redundant_backup_arg_type)
             c.argument('zone', arg_type=zone_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
             if command_group == 'mysql':
@@ -511,6 +512,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('subnet', arg_type=subnet_arg_type)
             c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
+            c.argument('geo_redundant_backup', default='Disabled', arg_type=geo_redundant_backup_arg_type)
             c.argument('zone', arg_type=zone_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
             if command_group == 'mysql':
