@@ -699,28 +699,30 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
 
         # identity
-        if command_group == 'mysql':
-            with self.argument_context('{} flexible-server identity'.format(command_group)) as c:
-                c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+        with self.argument_context('{} flexible-server identity'.format(command_group)) as c:
+            c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
 
-            with self.argument_context('{} flexible-server identity assign'.format(command_group)) as c:
-                c.argument('identities', arg_type=identities_arg_type)
+        with self.argument_context('{} flexible-server identity assign'.format(command_group)) as c:
+            c.argument('identities', arg_type=identities_arg_type)
 
-            with self.argument_context('{} flexible-server identity remove'.format(command_group)) as c:
-                c.argument('identities', arg_type=identities_arg_type)
+        with self.argument_context('{} flexible-server identity remove'.format(command_group)) as c:
+            c.argument('identities', arg_type=identities_arg_type)
 
-            with self.argument_context('{} flexible-server identity show'.format(command_group)) as c:
-                c.argument('identity', options_list=['--identity', '-n'], help='Name or ID of identity to show.', validator=validate_identity)
+        with self.argument_context('{} flexible-server identity show'.format(command_group)) as c:
+            c.argument('identity', options_list=['--identity', '-n'], help='Name or ID of identity to show.', validator=validate_identity)
 
         # ad-admin
-        if command_group == 'mysql':
-            with self.argument_context('{} flexible-server ad-admin'.format(command_group)) as c:
-                c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+        with self.argument_context('{} flexible-server ad-admin'.format(command_group)) as c:
+            c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
 
-            with self.argument_context('{} flexible-server ad-admin create'.format(command_group)) as c:
-                c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Azure AD administrator user or group.')
+        for scope in ['create', 'show', 'delete', 'wait']:
+            with self.argument_context('{} flexible-server ad-admin {}'.format(command_group, scope)) as c:
                 c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Azure AD administrator.')
-                c.argument('identity', help='Name or ID of identity used for AAD Authentication.', validator=validate_identity)
+
+        with self.argument_context('{} flexible-server ad-admin create'.format(command_group)) as c:
+            c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Azure AD administrator user or group.')
+            c.argument('principal_type', options_list=['--type', '-t'], arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Azure AD administrator.')
+            c.argument('identity', help='Name or ID of identity used for AAD Authentication.', validator=validate_identity)
 
         handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)
 

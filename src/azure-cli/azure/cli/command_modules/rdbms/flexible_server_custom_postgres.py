@@ -15,11 +15,11 @@ from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError
 from azure.mgmt.rdbms import postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, \
-    cf_postgres_flexible_db, cf_postgres_check_resource_availability, \
+    cf_postgres_flexible_db, cf_postgres_check_resource_availability, cf_postgres_flexible_servers, \
     cf_postgres_check_resource_availability_with_location, cf_postgres_flexible_private_dns_zone_suffix_operations
 from ._flexible_server_util import generate_missing_parameters, resolve_poller,\
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
-    _is_resource_name
+    _is_resource_name, get_tenant_id
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
@@ -620,6 +620,120 @@ def flexible_server_connection_string(
         'connectionStrings': _create_postgresql_connection_strings(host, administrator_login,
                                                                    administrator_login_password, database_name)
     }
+
+
+# Custom functions for identity
+def flexible_server_identity_assign(cmd, client, resource_group_name, server_name, identities):
+    identities_map = {}
+    for identity in identities:
+        identities_map[identity] = {}
+
+    parameters = {
+        'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
+            user_assigned_identities=identities_map,
+            type="UserAssigned")}
+
+    result = resolve_poller(
+        client.begin_update(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            parameters=parameters),
+        cmd.cli_ctx, 'Adding identities to server {}'.format(server_name)
+    )
+
+    return result.identity
+
+
+def flexible_server_identity_remove(cmd, client, resource_group_name, server_name, identities):
+    instance = client.get(resource_group_name, server_name)
+
+    if instance.data_encryption:
+        primary_id = instance.data_encryption.primary_user_assigned_identity_id
+
+        if primary_id and primary_id.lower() in [identity.lower() for identity in identities]:
+            raise CLIError("Cannot remove identity {} because it's used for data encryption.".format(primary_id))
+
+    identities_map = {}
+    for identity in identities:
+        identities_map[identity] = None
+
+    if not (instance.identity and instance.identity.user_assigned_identities) or \
+       all(key.lower() in [identity.lower() for identity in identities] for key in instance.identity.user_assigned_identities.keys()):
+        parameters = {
+            'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
+                type="None")}
+    else:
+        parameters = {
+            'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
+                user_assigned_identities=identities_map,
+                type="UserAssigned")}
+
+    result = resolve_poller(
+        client.begin_update(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            parameters=parameters),
+        cmd.cli_ctx, 'Removing identities from server {}'.format(server_name)
+    )
+
+    return result.identity or postgresql_flexibleservers.models.UserAssignedIdentity(type="SystemAssigned")
+
+
+def flexible_server_identity_list(client, resource_group_name, server_name):
+    server = client.get(resource_group_name, server_name)
+    return server.identity or postgresql_flexibleservers.models.UserAssignedIdentity(type="SystemAssigned")
+
+
+def flexible_server_identity_show(client, resource_group_name, server_name, identity):
+    server = client.get(resource_group_name, server_name)
+
+    for key, value in server.identity.user_assigned_identities.items():
+        if key.lower() == identity.lower():
+            return value
+
+    raise CLIError("Identity '{}' does not exist in server {}.".format(identity, server_name))
+
+
+# Custom functions for ad-admin
+def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, login, principal_type, sid, no_wait=False):
+    server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+
+    instance = server_operations_client.get(resource_group_name, server_name)
+
+    if instance.replication_role == 'Replica':
+        raise CLIError("Cannot create an AD admin on a server with replication role. Use the primary server instead.")
+
+    parameters = {
+        'principal_name': login,
+        'tenant_id': get_tenant_id(),
+        'principal_type': principal_type
+    }
+
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, sid, parameters)
+
+
+def flexible_server_ad_admin_delete(cmd, client, resource_group_name, server_name, sid, no_wait=False):
+    server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+
+    instance = server_operations_client.get(resource_group_name, server_name)
+
+    if 'replica' in instance.replication_role.lower():
+        raise CLIError("Cannot delete an AD admin on a server with replication role. Use the primary server instead.")
+
+    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, server_name, sid)
+
+
+def flexible_server_ad_admin_list(client, resource_group_name, server_name):
+    return client.list_by_server(
+        resource_group_name=resource_group_name,
+        server_name=server_name)
+
+
+def flexible_server_ad_admin_show(client, resource_group_name, server_name, sid):
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        object_id=sid)
 
 
 def flexible_server_provision_network_resource(cmd, resource_group_name, server_name,

@@ -850,10 +850,9 @@ def flexible_server_identity_assign(cmd, client, resource_group_name, server_nam
 
 def flexible_server_identity_remove(cmd, client, resource_group_name, server_name, identities):
     instance = client.get(resource_group_name, server_name)
+
     if instance.replication_role == 'Replica':
         raise CLIError("Cannot remove identities from a server with replication role. Use the primary server instead.")
-
-    instance = client.get(resource_group_name, server_name)
 
     if instance.data_encryption:
         primary_id = instance.data_encryption.primary_user_assigned_identity_id
