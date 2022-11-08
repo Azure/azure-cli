@@ -216,6 +216,10 @@ def load_arguments(self, _):
                    help='SQL Server management type. Updates from LightWeight to Full.',
                    options_list=['--sql-mgmt-type'],
                    arg_type=get_enum_type(['Full']))
+        c.argument('prompt',
+                   options_list=['--yes', '-y'],
+                   help="Do not prompt for confirmation. Requires --sql-mgmt-type.",
+                   deprecate_info=c.deprecate())
 
     with self.argument_context('sql vm add-to-group', arg_group='WSFC Domain Credentials') as c:
         c.argument('cluster_bootstrap_account_password',

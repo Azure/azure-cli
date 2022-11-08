@@ -290,7 +290,7 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
 def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, sql_server_license_type=None,
                  sql_image_sku=None, least_privilege_mode=None, enable_auto_patching=None,
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
-                 enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None,
+                 enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None, prompt=True,
                  storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None, sql_management_mode=None,
                  full_backup_frequency=None, full_backup_start_time=None, full_backup_window_hours=None, log_backup_frequency=None,
                  enable_key_vault_credential=None, credential_name=None, azure_key_vault_url=None, service_principal_name=None,
