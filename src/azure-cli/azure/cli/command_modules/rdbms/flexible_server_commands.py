@@ -298,7 +298,7 @@ def load_flexibleserver_command_table(self, _):
         g.show_command('show', 'get', transform=transform_backup)
 
     with self.command_group('mysql flexible-server identity', mysql_flexible_servers_sdk,
-                            custom_command_type=flexible_server_custom_common,
+                            custom_command_type=flexible_servers_custom_mysql,
                             client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('assign', 'flexible_server_identity_assign', supports_no_wait=True)
         g.custom_command('remove', 'flexible_server_identity_remove', supports_no_wait=True, confirmation=True)
@@ -306,7 +306,7 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('list', 'flexible_server_identity_list')
 
     with self.command_group('mysql flexible-server ad-admin', mysql_flexible_adadmin_sdk,
-                            custom_command_type=flexible_server_custom_common,
+                            custom_command_type=flexible_servers_custom_mysql,
                             client_factory=cf_mysql_flexible_adadmin) as g:
         g.custom_command('create', 'flexible_server_ad_admin_set', supports_no_wait=True)
         g.custom_command('delete', 'flexible_server_ad_admin_delete', supports_no_wait=True, confirmation=True)
