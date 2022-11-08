@@ -390,7 +390,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             image_reference['lun'] = image_reference_lun
 
     if gallery_image_reference is not None:
-        from azure.cli.command_modules.vm.azure_stack._vm_utils import is_shared_gallery_image_id, is_community_gallery_image_id
+        from azure.cli.command_modules.vm.azure_stack._vm_utils import is_shared_gallery_image_id, \
+            is_community_gallery_image_id
         if is_shared_gallery_image_id(gallery_image_reference):
             # the gallery image reference is shared gallery image id
             from azure.cli.command_modules.vm.azure_stack._vm_utils import parse_shared_gallery_image_id
@@ -917,13 +918,14 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
-    from azure.cli.command_modules.vm.azure_stack._template_builder import (build_vm_resource,
-                                                                build_storage_account_resource, build_nic_resource,
-                                                                build_vnet_resource, build_nsg_resource,
-                                                                build_public_ip_resource, StorageProfile,
-                                                                build_msi_role_assignment,
-                                                                build_vm_linux_log_analytics_workspace_agent,
-                                                                build_vm_windows_log_analytics_workspace_agent)
+    from azure.cli.command_modules.vm.azure_stack._template_builder \
+        import (build_vm_resource,
+                build_storage_account_resource, build_nic_resource,
+                build_vnet_resource, build_nsg_resource,
+                build_public_ip_resource, StorageProfile,
+                build_msi_role_assignment,
+                build_vm_linux_log_analytics_workspace_agent,
+                build_vm_windows_log_analytics_workspace_agent)
     from azure.cli.command_modules.vm.azure_stack._vm_utils import ArmTemplateBuilder20190401
     from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
 
@@ -3090,12 +3092,14 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.vm.azure_stack._template_builder import (StorageProfile, build_vmss_resource,
-                                                                build_vnet_resource, build_public_ip_resource,
-                                                                build_load_balancer_resource,
-                                                                build_vmss_storage_account_pool_resource,
-                                                                build_application_gateway_resource,
-                                                                build_msi_role_assignment, build_nsg_resource,
-                                                                build_nat_rule_v2)
+                                                                            build_vnet_resource,
+                                                                            build_public_ip_resource,
+                                                                            build_load_balancer_resource,
+                                                                            build_vmss_storage_account_pool_resource,
+                                                                            build_application_gateway_resource,
+                                                                            build_msi_role_assignment,
+                                                                            build_nsg_resource,
+                                                                            build_nat_rule_v2)
 
     # The default load balancer will be expected to be changed from Basic to Standard.
     # In order to avoid breaking change which has a big impact to users,
