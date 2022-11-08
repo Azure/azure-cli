@@ -90,8 +90,9 @@ def run_cli_cmd(cmd, retry=0, interval=0, should_retry_func=None):
         raise CLIInternalError('Command execution failed, command is: '
                                '{}, error message is: {}'.format(cmd, output.stderr))
     try:
-        return json.loads(output.stdout) if output.stdout else None
-    except ValueError:
+        return json.loads(output.stdout.decode(encoding='UTF-8', errors='ignore')) if output.stdout else None
+    except ValueError as e:
+        logger.debug(e)
         return output.stdout or None
 
 
