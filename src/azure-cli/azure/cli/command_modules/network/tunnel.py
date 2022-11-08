@@ -49,7 +49,6 @@ class TunnelServer:
         self.client = None
         self.ws = None
         self.last_token = None
-        self.ws_token = None
         self.node_id = None
         self.cli_ctx = cli_ctx
         logger.info('Creating a socket on port: %s', self.local_port)
@@ -104,10 +103,9 @@ class TunnelServer:
                 exp = CloudError(response)
             raise exp
 
-        self.ws_token = response_json["websocketToken"]
         self.last_token = response_json["authToken"]
         self.node_id = response_json["nodeId"]
-        return self.ws_token
+        return response_json["websocketToken"]
 
     def _listen(self):
         self.sock.setblocking(True)
