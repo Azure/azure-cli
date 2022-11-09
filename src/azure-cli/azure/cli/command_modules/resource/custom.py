@@ -3673,6 +3673,21 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
     if stdout:
         print(output)
 
+def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_restore=None):
+    args = ["format", file]
+    if outdir:
+        args += ["--outdir", outdir]
+    if outfile:
+        args += ["--outfile", outfile]
+    if no_restore:
+        args += ["--no-restore"]
+    if stdout:
+        args += ["--stdout"]
+
+    output = run_bicep_command(args)
+
+    if stdout:
+        print(output)
 
 def publish_bicep_file(cmd, file, target):
     ensure_bicep_installation()
