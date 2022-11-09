@@ -424,7 +424,6 @@ examples:
   - name: Validate whether a template is valid at resource group.
     text: |
         az deployment group validate --parameters MyValue=This MyArray=@array.json --resource-group MyResourceGroup --template-file azuredeploy.json
-
 """
 
 helps['deployment group create'] = """
@@ -483,7 +482,6 @@ examples:
   - name: Place the CLI in a waiting state until a deployment condition is met.
     text: |
         az deployment group wait --created --name MyDeployment --resource-group MyResourceGroup
-
 """
 
 helps['deployment operation group'] = """
@@ -498,7 +496,6 @@ examples:
   - name: List deployment operations at resource group
     text: |
         az deployment operation group list --name MyDeployment --resource-group MyResourceGroup
-
 """
 
 helps['deployment operation group show'] = """
