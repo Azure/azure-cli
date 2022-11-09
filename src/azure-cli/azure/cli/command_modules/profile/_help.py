@@ -20,19 +20,19 @@ examples:
 - name: Log in with a service principal using a client secret.
   text: az login --service-principal --user http://azure-cli-2016-08-05-14-31-15 --password VerySecret --tenant contoso.onmicrosoft.com
 - name: Log in with a service principal using a client certificate.
-  text: aaz login --service-principal --user http://azure-cli-2016-08-05-14-31-15 --password ~/mycertfile.pem --tenant contoso.onmicrosoft.com
+  text: aaz login --service-principal --user http://azure-cli-2016-08-05-14-31-15 --password ~/MyCertfile.pem --tenant contoso.onmicrosoft.com
 - name: Log in using a VM's system assigned identity.
   text: az login --identity
 - name: Log in using a VM's user assigned identity. Client or object ids of the service identity also work.
-  text: az login --identity --user /subscriptions/<subscriptionId>/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+  text: az login --identity --user /subscriptions/MySubscriptionID/resourcegroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
 """
 
 helps['account'] = """
 type: group
-short-summary: Manage Azure subscription information.
+short-summary: Manage Azure subscription information. Use `az login` to log into Azure before managing subscriptions.
 long-summary: >
     For an in-depth overview of working with subscriptions using the Azure CLI, see
-    [How to manage Azure subscriptions with the Azure CLI](https://learn.microsoft.com/en-us/cli/azure/manage-azure-subscriptions-azure-cli).
+    [How to manage Azure subscriptions with the Azure CLI](https://learn.microsoft.com/cli/azure/manage-azure-subscriptions-azure-cli).   
 """
 
 helps['account clear'] = """
@@ -49,7 +49,7 @@ examples:
   text: az account list --all
 - name: List all enabled subscriptions.
   text: az account list
-- name: Using Bash, get the current default subscription.
+- name: Get the current default subscription.
   text: az account list --query "[?isDefault]"
 - name: Refresh the list of subscriptions. 
   text: az account list --refresh
@@ -72,9 +72,9 @@ examples:
 - name: Get information about a subscription using the subscription ID.
   text: az account show --name MySubscriptionID
 - name: >
-    Get information about a subscription using `--query`.
+    Get specific information about a subscription using `--query`.
     To see available query options, first run `az account show --output json`.
-    For in-depth `--query` examples see [How to query Azure CLI command output using a JMESPath query](https://learn.microsoft.com/en-us/cli/azure/query-azure-cli).
+    For in-depth `--query` examples see [How to query Azure CLI command output using a JMESPath query](https://learn.microsoft.com/cli/azure/query-azure-cli).
   text: >
     az account show --query name
     az account show --query user.name
@@ -120,7 +120,7 @@ examples:
   text: >
     az account get-access-token --resource MyResourceID
     az account get-access-token --resource https://database.windows.net
-- name: Get only the access token for a particular resource returning results in plain text.
+- name: Get only the access token for a particular resource returning results in plain text. This script is useful when you want to store the token in a variable.
   text: az account get-access-token --resource https://management.core.windows.net/ --query accessToken --output tsv
 - name: Get an access token for a particular scope
   text: az account get-access-token --scope https://management.azure.com//.default
