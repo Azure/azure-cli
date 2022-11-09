@@ -3682,13 +3682,13 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
     if stdout:
         args += ["--stdout"]
     if newline:
-        args += ["--newline"]
+        args += ["--newline", newline]
     if indentKind:
-        args += ["--indentKind"]
+        args += ["--indentKind", indentKind]
     if indentSize:
-        args += ["--indentSize"]        
+        args += ["--indentSize", indentSize]        
     if insertFinalNewline:
-        args += ["--insertFinalNewline"]           
+        args += ["--insertFinalNewline", insertFinalNewline]           
         
     output = run_bicep_command(args)
 
