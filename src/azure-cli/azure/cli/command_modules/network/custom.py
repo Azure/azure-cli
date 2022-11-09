@@ -8310,7 +8310,7 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
         tunnel_server.cleanup()
 
 
-def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, disable_gateway=False, configure=False):
+def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, disable_gateway=False, configure=False, enable_mfa=False):
     from azure.cli.core._profile import Profile
     import os
     from ._process_helper import launch_and_wait
@@ -8334,7 +8334,7 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
             logger.debug("Response %s", access_token)
             client = network_client_factory(cmd.cli_ctx).bastion_hosts
             bastion = client.get(resource_group_name, bastion_host_name)
-            web_address = 'https://{}/api/rdpfile?resourceId={}&format=rdp'.format(bastion.dns_name, target_resource_id)
+            web_address = 'https://{}/api/rdpfile?resourceId={}&format=rdp&rdpport={}&enablerdsaad={}'.format(bastion.dns_name, target_resource_id, resource_port, enable_mfa)
             headers = {}
             headers['Authorization'] = 'Bearer {}'.format(access_token)
             headers['Accept'] = '*/*'

@@ -105,7 +105,7 @@ class TunnelServer:
 
         self.last_token = response_json["authToken"]
         self.node_id = response_json["nodeId"]
-        return self.last_token
+        return response_json["websocketToken"]
 
     def _listen(self):
         self.sock.setblocking(True)
@@ -115,7 +115,7 @@ class TunnelServer:
             self.client, _address = self.sock.accept()
 
             auth_token = self._get_auth_token()
-            host = 'wss://{}/webtunnel/{}?X-Node-Id={}'.format(self.bastion.dns_name, auth_token, self.node_id)
+            host = 'wss://{}/webtunnelv2/{}?X-Node-Id={}'.format(self.bastion.dns_name, auth_token, self.node_id)
             verify_mode = ssl.CERT_NONE if should_disable_connection_verify() else ssl.CERT_REQUIRED
             self.ws = create_connection(host,
                                         sockopt=((socket.IPPROTO_TCP, socket.TCP_NODELAY, 1),),
