@@ -3673,17 +3673,23 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
     if stdout:
         print(output)
 
-def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_restore=None):
+def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, indentKind=None, indentSize=None, insertFinalNewline=None):
     args = ["format", file]
     if outdir:
         args += ["--outdir", outdir]
     if outfile:
         args += ["--outfile", outfile]
-    if no_restore:
-        args += ["--no-restore"]
     if stdout:
         args += ["--stdout"]
-
+    if newline:
+        args += ["--newline"]
+    if indentKind:
+        args += ["--indentKind"]
+    if indentSize:
+        args += ["--indentSize"]        
+    if insertFinalNewline:
+        args += ["--insertFinalNewline"]           
+        
     output = run_bicep_command(args)
 
     if stdout:
