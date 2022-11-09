@@ -79,7 +79,7 @@ examples:
     az account show --query name
     az account show --query user.name
 - name: Return results in plain text.
-  text: az account show --query tenantId --output tsv
+  text: az account show --query MyTenantID --output tsv
 - name: Using Bash, store the default subscription ID in a variable
   text: >
     subscriptionId="$(az account show --query id --output tsv)"
