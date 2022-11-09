@@ -1327,7 +1327,7 @@ def update_resource_group(instance, tags=None):
 
 def export_group_as_template(
         cmd, resource_group_name, include_comments=False, include_parameter_default_value=False, resource_ids=None, skip_resource_name_params=False, skip_all_params=False):
-    """Captures a resource group as a template.
+    """Capture a resource group as a template.
     :param str resource_group_name: the name of the resource group.
     :param resource_ids: space-separated resource ids to filter the export by. To export all resources, do not specify this argument or supply "*".
     :param bool include_comments: export template with comments.
@@ -1438,7 +1438,7 @@ def create_application(cmd, resource_group_name,
 
 
 def show_application(cmd, resource_group_name=None, application_name=None):
-    """ Gets a managed application.
+    """ Get a managed application.
     :param str resource_group_name:the resource group name
     :param str application_name:the managed application name
     """
@@ -1447,7 +1447,7 @@ def show_application(cmd, resource_group_name=None, application_name=None):
 
 
 def show_applicationdefinition(cmd, resource_group_name=None, application_definition_name=None):
-    """ Gets a managed application definition.
+    """ Get a managed application definition.
     :param str resource_group_name:the resource group name
     :param str application_definition_name:the managed application definition name
     """
@@ -1837,7 +1837,7 @@ def invoke_resource_action(cmd, action, request_body=None, resource_ids=None,
 
 
 def get_deployment_operations(client, resource_group_name, deployment_name, operation_ids):
-    """get a deployment's operation."""
+    """Get a deployment's operation."""
     result = []
     for op_id in operation_ids:
         dep = client.get(resource_group_name, deployment_name, op_id)
@@ -2169,7 +2169,7 @@ def show_provider_operations(cmd, resource_provider_namespace):
 
 
 def move_resource(cmd, ids, destination_group, destination_subscription_id=None):
-    """Moves resources from one resource group to another(can be under different subscription)
+    """Move resources from one resource group to another in the same or a different subscription.
 
     :param ids: the space-separated resource ids to be moved
     :param destination_group: the destination resource group name
@@ -2237,7 +2237,7 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
                              not_scopes=None, location=None, assign_identity=None,
                              identity_scope=None, identity_role='Contributor', enforcement_mode='Default',
                              description=None):
-    """Creates a policy assignment
+    """Create a policy assignment
     :param not_scopes: Space-separated scopes where the policy assignment does not apply.
     """
     if bool(policy) == bool(policy_set_definition):
@@ -2298,7 +2298,7 @@ def _build_identities_info(cmd, identities):
 def update_policy_assignment(cmd, name=None, display_name=None, params=None,
                              resource_group_name=None, scope=None, sku=None,
                              not_scopes=None, enforcement_mode=None, description=None):
-    """Updates a policy assignment
+    """Update a policy assignment
     :param not_scopes: Space-separated scopes where the policy assignment does not apply.
     """
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
@@ -2889,8 +2889,8 @@ def _validate_lock_params_match_lock(
     This can lead to a confusing user experience where the user specifies a lock
     name and assumes that it will work, even if they haven't given the right
     scope. This function attempts to validate the parameters and help the
-    user find the right scope, by first finding the lock, and then infering
-    what it's parameters should be.
+    user find the right scope, by first finding the lock, and then inferring
+    what the parameters should be.
     """
     locks = lock_client.management_locks.list_at_subscription_level()
     found_count = 0  # locks at different levels can have the same name
