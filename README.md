@@ -161,7 +161,9 @@ You can download the latest builds by following the links below:
 You can easily install the latest Homebrew edge build with the following command:
 
 ```bash
-brew install $(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/InstallAzureCliHomebrewEdge)
+# You need to uninstall the stable version with `brew uninstall azure-cli` first
+curl -Ls -o azure-cli.rb https://aka.ms/InstallAzureCliHomebrewEdge
+brew install --build-from-source azure-cli.rb
 ```
 
 You can install the edge build on Ubuntu Xenial with the following command:
