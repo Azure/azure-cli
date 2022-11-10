@@ -131,8 +131,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage account', storage_account_sdk_keys, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:
-        from ._validators import validate_key_name
-        g.custom_command('keys renew', 'regenerate_key', validator=validate_key_name,
+        g.custom_command('keys renew', 'regenerate_key',
                          transform=lambda x: getattr(x, 'keys', x))
         g.command('keys list', 'list_keys',
                   transform=lambda x: getattr(x, 'keys', x))

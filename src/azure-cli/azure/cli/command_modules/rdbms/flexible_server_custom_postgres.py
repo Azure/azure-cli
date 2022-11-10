@@ -15,7 +15,8 @@ from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError
 from azure.mgmt.rdbms import postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, \
-    cf_postgres_flexible_db, cf_postgres_check_resource_availability, cf_postgres_flexible_private_dns_zone_suffix_operations
+    cf_postgres_flexible_db, cf_postgres_check_resource_availability, \
+    cf_postgres_check_resource_availability_with_location, cf_postgres_flexible_private_dns_zone_suffix_operations
 from ._flexible_server_util import generate_missing_parameters, resolve_poller,\
     generate_password, parse_maintenance_window
 from .flexible_server_custom_common import create_firewall_rule
@@ -43,18 +44,18 @@ def flexible_server_create(cmd, client,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None, yes=False):
 
-    db_context = DbContext(
-        cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, cf_db=cf_postgres_flexible_db,
-        cf_availability=cf_postgres_check_resource_availability, cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations, logging_name='PostgreSQL', command_group='postgres', server_client=client)
-
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                              server_name, 'postgres')
 
+    db_context = DbContext(
+        cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
+        cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability_with_location,
+        cf_availability_without_location=cf_postgres_check_resource_availability,
+        cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations,
+        logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
+
     server_name = server_name.lower()
-    if high_availability and high_availability.lower() == 'enabled':
-        logger.warning('\'Enabled\' value for high availability parameter will be deprecated. Please use \'ZoneRedundant\' or \'SameZone\' instead.')
-        high_availability = 'ZoneRedundant'
 
     pg_arguments_validator(db_context,
                            server_name=server_name,
@@ -161,10 +162,6 @@ def flexible_server_restore(cmd, client,
                             private_dns_zone_arguments=None, yes=False):
 
     server_name = server_name.lower()
-    db_context = DbContext(
-        cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, cf_db=cf_postgres_flexible_db,
-        cf_availability=cf_postgres_check_resource_availability, cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations, logging_name='PostgreSQL', command_group='postgres', server_client=client)
-    validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
@@ -186,6 +183,15 @@ def flexible_server_restore(cmd, client,
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
 
         location = ''.join(source_server_object.location.lower().split())
+
+        db_context = DbContext(
+            cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
+            cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability_with_location,
+            cf_availability_without_location=cf_postgres_check_resource_availability,
+            cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations,
+            logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
+        validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
+
         parameters = postgresql_flexibleservers.models.Server(
             location=location,
             point_in_time_utc=restore_point_in_time,
@@ -246,12 +252,10 @@ def flexible_server_update_custom_func(cmd, client, instance,
     # validator
     location = ''.join(instance.location.lower().split())
     db_context = DbContext(
-        cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, cf_db=cf_postgres_flexible_db,
-        cf_availability=cf_postgres_check_resource_availability, logging_name='PostgreSQL', command_group='postgres', server_client=client)
-
-    if high_availability and high_availability.lower() == 'enabled':
-        logger.warning('\'Enabled\' value for high availability parameter will be deprecated. Please use \'ZoneRedundant\' or \'SameZone\' instead.')
-        high_availability = 'ZoneRedundant'
+        cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
+        cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability_with_location,
+        cf_availability_without_location=cf_postgres_check_resource_availability,
+        logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
 
     pg_arguments_validator(db_context,
                            location=location,
@@ -542,13 +546,16 @@ def _update_local_contexts(cmd, server_name, resource_group_name, database_name,
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
 class DbContext(object):
     def __init__(self, cmd=None, azure_sdk=None, logging_name=None, cf_firewall=None, cf_db=None,
-                 cf_availability=None, cf_private_dns_zone_suffix=None, command_group=None, server_client=None):
+                 cf_availability=None, cf_availability_without_location=None, cf_private_dns_zone_suffix=None,
+                 command_group=None, server_client=None, location=None):
         self.cmd = cmd
         self.azure_sdk = azure_sdk
         self.cf_firewall = cf_firewall
         self.cf_availability = cf_availability
+        self.cf_availability_without_location = cf_availability_without_location
         self.cf_private_dns_zone_suffix = cf_private_dns_zone_suffix
         self.logging_name = logging_name
         self.cf_db = cf_db
         self.command_group = command_group
         self.server_client = server_client
+        self.location = location

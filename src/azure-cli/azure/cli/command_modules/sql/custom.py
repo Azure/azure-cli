@@ -1440,6 +1440,7 @@ def db_export(
         resource_group_name,
         storage_key_type,
         storage_key,
+        no_wait=False,
         **kwargs):
     '''
     Exports a database to a bacpac file.
@@ -1450,7 +1451,9 @@ def db_export(
     kwargs['storage_key_type'] = storage_key_type
     kwargs['storage_key'] = storage_key
 
-    return client.begin_export(
+    return sdk_no_wait(
+        no_wait,
+        client.begin_export,
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -1464,6 +1467,7 @@ def db_import(
         resource_group_name,
         storage_key_type,
         storage_key,
+        no_wait=False,
         **kwargs):
     '''
     Imports a bacpac file into an existing database.
@@ -1474,7 +1478,9 @@ def db_import(
     kwargs['storage_key_type'] = storage_key_type
     kwargs['storage_key'] = storage_key
 
-    return client.begin_import_method(
+    return sdk_no_wait(
+        no_wait,
+        client.begin_import_method,
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -1824,7 +1830,7 @@ def _get_diagnostic_settings(
         server_name=server_name, database_name=database_name)
     azure_monitor_client = cf_monitor(cmd.cli_ctx)
 
-    return azure_monitor_client.diagnostic_settings.list(diagnostic_settings_url)
+    return list(azure_monitor_client.diagnostic_settings.list(diagnostic_settings_url))
 
 
 def _fetch_first_audit_diagnostic_setting(diagnostic_settings, category_name):
@@ -1920,8 +1926,8 @@ def _audit_policy_show(
         server_name=server_name, database_name=database_name)
 
     # Sort received diagnostic settings by name and get first element to ensure consistency between command executions
-    diagnostic_settings.value.sort(key=lambda d: d.name)
-    audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings.value, category_name)
+    diagnostic_settings.sort(key=lambda d: d.name)
+    audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings, category_name)
 
     # Initialize azure monitor properties
     if audit_diagnostic_setting is not None:
@@ -2150,7 +2156,7 @@ def _audit_policy_update_diagnostic_settings(
     '''
 
     # Fetch all audit diagnostic settings
-    audit_diagnostic_settings = _fetch_all_audit_diagnostic_settings(diagnostic_settings.value, category_name)
+    audit_diagnostic_settings = _fetch_all_audit_diagnostic_settings(diagnostic_settings, category_name)
     num_of_audit_diagnostic_settings = len(audit_diagnostic_settings)
 
     # If more than 1 audit diagnostic settings found then throw error
@@ -2378,8 +2384,8 @@ def _audit_policy_update_apply_azure_monitor_target_enabled(
     else:
         # Sort received diagnostic settings by name and get first element to ensure consistency
         # between command executions
-        diagnostic_settings.value.sort(key=lambda d: d.name)
-        audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings.value, category_name)
+        diagnostic_settings.sort(key=lambda d: d.name)
+        audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings, category_name)
 
         # Determine value of is_azure_monitor_target_enabled
         if audit_diagnostic_setting is None:
@@ -5159,6 +5165,7 @@ def managed_db_log_replay_start(
         last_backup_name,
         storage_container_uri,
         storage_container_sas_token,
+        storage_container_identity,
         **kwargs):
     '''
     Start a log replay restore.
@@ -5180,6 +5187,7 @@ def managed_db_log_replay_start(
 
     kwargs['storageContainerUri'] = storage_container_uri
     kwargs['storageContainerSasToken'] = storage_container_sas_token
+    kwargs['storage_container_identity'] = storage_container_identity
 
     # Create
     return client.begin_create_or_update(
@@ -5200,24 +5208,32 @@ def managed_db_log_replay_stop(
     '''
 
     restore_details_client = get_sql_managed_database_restore_details_operations(cmd.cli_ctx, None)
+    try:
+        # Determine if managed DB was created using log replay service
+        # Raises RestoreDetailsNotAvailableOrExpired exception if there are no restore details
+        restore_details = restore_details_client.get(
+            database_name=database_name,
+            managed_instance_name=managed_instance_name,
+            resource_group_name=resource_group_name,
+            restore_details_name=RestoreDetailsName.DEFAULT)
 
-    # Determine if managed DB was created using log replay service, raise exception if not
-    restore_details = restore_details_client.get(
-        database_name=database_name,
-        managed_instance_name=managed_instance_name,
-        resource_group_name=resource_group_name,
-        restore_details_name=RestoreDetailsName.DEFAULT)
+        # Type must be LRSRestore in order to proceed with stop-log-replay, else raise exception
+        if restore_details.type_properties_type.lower() == 'lrsrestore':
+            return client.begin_delete(
+                database_name=database_name,
+                managed_instance_name=managed_instance_name,
+                resource_group_name=resource_group_name)
 
-    # If type is present, it must be lrsrestore in order to proceed with stop-log-replay
-    if (hasattr(restore_details, 'type_properties_type') and restore_details.type_properties_type.lower() != 'lrsrestore'):
         raise CLIError(
             f'Cannot stop the log replay as database {database_name} on the instance {managed_instance_name} '
             f'in the resource group {resource_group_name} was not created with log replay service.')
-
-    return client.begin_delete(
-        database_name=database_name,
-        managed_instance_name=managed_instance_name,
-        resource_group_name=resource_group_name)
+    except Exception as ex:
+        # Map RestoreDetailsNotAvailableOrExpired to a more descriptive error
+        if (ex and 'RestoreDetailsNotAvailableOrExpired' in str(ex)):
+            raise CLIError(
+                f'Cannot stop the log replay as database {database_name} on the instance {managed_instance_name} '
+                f'in the resource group {resource_group_name} was not created with log replay service.')
+        raise ex
 
 
 def managed_db_log_replay_complete_restore(

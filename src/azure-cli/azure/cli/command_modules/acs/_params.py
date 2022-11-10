@@ -11,23 +11,25 @@ from azure.cli.command_modules.acs._completers import (
     get_k8s_upgrades_completion_list, get_k8s_versions_completion_list,
     get_vm_size_completion_list)
 from azure.cli.command_modules.acs._consts import (
-    CONST_LOAD_BALANCER_SKU_BASIC, CONST_LOAD_BALANCER_SKU_STANDARD,
-    CONST_NETWORK_PLUGIN_AZURE, CONST_NETWORK_PLUGIN_KUBENET, CONST_NETWORK_PLUGIN_NONE,
+    CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE,
+    CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC,
+    CONST_GPU_INSTANCE_PROFILE_MIG1_G, CONST_GPU_INSTANCE_PROFILE_MIG2_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG3_G, CONST_GPU_INSTANCE_PROFILE_MIG4_G,
+    CONST_GPU_INSTANCE_PROFILE_MIG7_G, CONST_LOAD_BALANCER_SKU_BASIC,
+    CONST_LOAD_BALANCER_SKU_STANDARD, CONST_NETWORK_PLUGIN_AZURE,
+    CONST_NETWORK_PLUGIN_KUBENET, CONST_NETWORK_PLUGIN_NONE,
     CONST_NODE_IMAGE_UPGRADE_CHANNEL, CONST_NODEPOOL_MODE_SYSTEM,
     CONST_NODEPOOL_MODE_USER, CONST_NONE_UPGRADE_CHANNEL,
     CONST_OS_DISK_TYPE_EPHEMERAL, CONST_OS_DISK_TYPE_MANAGED,
-    CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022,
-    CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
+    CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_WINDOWS2019,
+    CONST_OS_SKU_WINDOWS2022, CONST_OUTBOUND_TYPE_LOAD_BALANCER,
+    CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, CONST_PATCH_UPGRADE_CHANNEL,
     CONST_RAPID_UPGRADE_CHANNEL, CONST_SCALE_DOWN_MODE_DEALLOCATE,
     CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_SET_PRIORITY_REGULAR,
     CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
-    CONST_SPOT_EVICTION_POLICY_DELETE, CONST_STABLE_UPGRADE_CHANNEL,
-    CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC, CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE,
-    CONST_GPU_INSTANCE_PROFILE_MIG1_G, CONST_GPU_INSTANCE_PROFILE_MIG2_G,
-    CONST_GPU_INSTANCE_PROFILE_MIG3_G, CONST_GPU_INSTANCE_PROFILE_MIG4_G,
-    CONST_GPU_INSTANCE_PROFILE_MIG7_G)
+    CONST_SPOT_EVICTION_POLICY_DELETE, CONST_STABLE_UPGRADE_CHANNEL)
 from azure.cli.command_modules.acs._validators import (
     validate_acr, validate_agent_pool_name, validate_assign_identity,
     validate_assign_kubelet_identity, validate_azure_keyvault_kms_key_id,
@@ -38,23 +40,22 @@ from azure.cli.command_modules.acs._validators import (
     validate_host_group_id, validate_ip_ranges, validate_k8s_version,
     validate_keyvault_secrets_provider_disable_and_enable_parameters,
     validate_kubectl_version, validate_kubelogin_version,
-    validate_linux_host_name, validate_list_of_integers,
-    validate_load_balancer_idle_timeout, validate_network_policy,
+    validate_linux_host_name, validate_load_balancer_idle_timeout,
     validate_load_balancer_outbound_ip_prefixes,
     validate_load_balancer_outbound_ips, validate_load_balancer_outbound_ports,
     validate_load_balancer_sku, validate_max_surge,
     validate_nat_gateway_idle_timeout,
-    validate_nat_gateway_managed_outbound_ip_count, validate_nodepool_id,
-    validate_nodepool_labels, validate_nodepool_name, validate_nodepool_tags,
-    validate_nodes_count, validate_pod_subnet_id, validate_ppg,
-    validate_priority, validate_snapshot_id, validate_snapshot_name,
-    validate_spot_max_price, validate_ssh_key, validate_taints,
-    validate_vm_set_type, validate_vnet_subnet_id, validate_registry_name)
+    validate_nat_gateway_managed_outbound_ip_count, validate_network_policy,
+    validate_nodepool_id, validate_nodepool_labels, validate_nodepool_name,
+    validate_nodepool_tags, validate_nodes_count, validate_pod_subnet_id,
+    validate_ppg, validate_priority, validate_registry_name,
+    validate_snapshot_id, validate_snapshot_name, validate_spot_max_price,
+    validate_ssh_key, validate_taints, validate_vm_set_type,
+    validate_vnet_subnet_id)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
     tags_type, zones_type)
-from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.cli.core.profiles import ResourceType
 from knack.arguments import CLIArgumentType
 
@@ -132,91 +133,6 @@ def load_arguments(self, _):
 
     acr_arg_type = CLIArgumentType(metavar='ACR_NAME_OR_RESOURCE_ID')
 
-    # ACS command argument configuration
-    with self.argument_context('acs') as c:
-        c.argument('resource_name', name_type,
-                   completer=get_resource_name_completion_list(
-                       'Microsoft.ContainerService/ContainerServices'),
-                   help='Name of the container service. You can configure the default using `az configure --defaults acs=<name>`')
-        c.argument('name', name_type,
-                   completer=get_resource_name_completion_list(
-                       'Microsoft.ContainerService/ContainerServices'),
-                   help='Name of the container service. You can configure the default using `az configure --defaults acs=<name>`')
-        c.argument('container_service_name', name_type, help='Name of the container service. You can configure the default using `az configure --defaults acs=<name>`',
-                   completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
-        c.argument('admin_username', options_list=[
-                   '--admin-username', '-u'], default='azureuser')
-        c.argument('api_version',
-                   help=_get_feature_in_preview_message() + 'Use API version of ACS to perform az acs operations. Available options: 2017-01-31, 2017-07-01. Default: the latest version for the location')
-        c.argument('dns_name_prefix', options_list=['--dns-prefix', '-d'])
-        c.argument('orchestrator_type', get_enum_type(
-            orchestrator_types), options_list=['--orchestrator-type', '-t'])
-        c.argument('ssh_key_value', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'),
-                   completer=FilesCompleter(), validator=validate_ssh_key)
-        c.argument('tags', tags_type)
-        c.argument('disable_browser',
-                   help='Do not open browser after opening a proxy to the cluster web user interface')
-
-    with self.argument_context('acs create') as c:
-        c.argument('ssh_key_value', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'),
-                   completer=FilesCompleter(), validator=validate_ssh_key)
-        c.argument('master_profile', options_list=['--master-profile', '-m'], type=validate_file_or_dict,
-                   help=_get_feature_in_preview_message() + 'The file or dictionary representation of the master profile. Note it will override any master settings once set')
-        c.argument('master_vm_size', completer=get_vm_size_completion_list,
-                   help=_get_feature_in_preview_message())
-        c.argument('agent_count', type=int)
-        c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters,
-                   help='Generate SSH public and private key files if missing')
-        c.argument('master_osdisk_size', type=int,
-                   help=_get_feature_in_preview_message() + 'The disk size for master pool vms. Unit in GB. Default: corresponding vmsize disk size')
-        c.argument('master_vnet_subnet_id', type=str,
-                   help=_get_feature_in_preview_message() + 'The custom vnet subnet id. Note agent need to used the same vnet if master set. Default: ""')
-        c.argument('master_first_consecutive_static_ip', type=str,
-                   help=_get_feature_in_preview_message() + 'The first consecutive ip used to specify static ip block.')
-        c.argument('master_storage_profile', get_enum_type(storage_profile_types),
-                   help=_get_feature_in_preview_message() + 'Default: varies based on Orchestrator')
-        c.argument('agent_profiles', options_list=['--agent-profiles', '-a'], type=validate_file_or_dict,
-                   help=_get_feature_in_preview_message() + 'The file or dictionary representation of the agent profiles. Note it will override any agent settings once set')
-        c.argument('agent_vm_size', completer=get_vm_size_completion_list,
-                   help='Set the default size for agent pools vms.')
-        c.argument('agent_osdisk_size', type=int,
-                   help=_get_feature_in_preview_message() + 'Set the default disk size for agent pools vms. Unit in GB. Default: corresponding vmsize disk size')
-        c.argument('agent_vnet_subnet_id', type=str,
-                   help=_get_feature_in_preview_message() + 'Set the default custom vnet subnet id for agent pools. Note agent need to used the same vnet if master set. Default: ""')
-        c.argument('agent_ports', type=validate_list_of_integers,
-                   help=_get_feature_in_preview_message() + 'Set the default ports exposed on the agent pools. Only usable for non-Kubernetes. Default: 8080,4000,80')
-        c.argument('agent_storage_profile', get_enum_type(storage_profile_types),
-                   help=_get_feature_in_preview_message() + 'Set default storage profile for agent pools. Default: varies based on Orchestrator')
-        c.argument('windows', action='store_true',
-                   help='If true, set the default osType of agent pools to be Windows.')
-        c.argument('validate', action='store_true',
-                   help='Generate and validate the ARM template without creating any resources')
-        c.argument('orchestrator_version', help=_get_feature_in_preview_message(
-        ) + 'Use Orchestrator Version to specify the semantic version for your choice of orchestrator.')
-
-    with self.argument_context('acs scale') as c:
-        c.argument('new_agent_count', type=int)
-
-    for scope in ['dcos', 'kubernetes']:
-        with self.argument_context('acs {} browse'.format(scope)) as c:
-            c.argument('ssh_key_file', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa'),
-                       completer=FilesCompleter(), help='Path to an SSH key file to use.')
-
-    with self.argument_context('acs dcos install-cli') as c:
-        c.argument('install_location',
-                   default=_get_default_install_location('dcos'))
-
-    with self.argument_context('acs kubernetes get-credentials') as c:
-        c.argument('path', options_list=['--file', '-f'])
-        c.argument('overwrite_existing', action='store_true',
-                   help='If specified, overwrite any existing credentials.')
-
-    with self.argument_context('acs kubernetes install-cli') as c:
-        c.argument('install_location', type=file_type, completer=FilesCompleter(),
-                   default=_get_default_install_location('kubectl'))
-        c.argument('ssh_key_file', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa'),
-                   completer=FilesCompleter(), help='Path to an SSH key file to use.')
-
     # AKS command argument configuration
     with self.argument_context('aks', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('resource_name', name_type, help='Name of the managed cluster.',
@@ -279,6 +195,7 @@ def load_arguments(self, _):
         c.argument('aad_server_app_secret')
         c.argument('aad_tenant_id')
         c.argument('aad_admin_group_object_ids')
+        c.argument('enable_oidc_issuer', action='store_true')
         c.argument('windows_admin_username')
         c.argument('windows_admin_password')
         c.argument('enable_ahub', action='store_true')
@@ -292,6 +209,7 @@ def load_arguments(self, _):
         c.argument('defender_config', validator=validate_defender_config_parameter)
         c.argument('disable_disk_driver', action='store_true')
         c.argument('disable_file_driver', action='store_true')
+        c.argument('enable_blob_driver', action='store_true')
         c.argument('disable_snapshot_controller', action='store_true')
         c.argument('enable_azure_keyvault_kms', action='store_true')
         c.argument('azure_keyvault_kms_key_id', validator=validate_azure_keyvault_kms_key_id)
@@ -371,6 +289,7 @@ def load_arguments(self, _):
         c.argument('aad_tenant_id')
         c.argument('aad_admin_group_object_ids')
         c.argument('windows_admin_password')
+        c.argument('enable_oidc_issuer', action='store_true')
         c.argument('enable_ahub', action='store_true')
         c.argument('disable_ahub', action='store_true')
         c.argument('enable_windows_gmsa', action='store_true')
@@ -382,6 +301,8 @@ def load_arguments(self, _):
         c.argument('disable_disk_driver', action='store_true')
         c.argument('enable_file_driver', action='store_true')
         c.argument('disable_file_driver', action='store_true')
+        c.argument('enable_blob_driver', action='store_true')
+        c.argument('disable_blob_driver', action='store_true')
         c.argument('enable_snapshot_controller', action='store_true')
         c.argument('disable_snapshot_controller', action='store_true')
         c.argument('disable_defender', action='store_true', validator=validate_defender_disable_and_enable_parameters)
@@ -435,20 +356,13 @@ def load_arguments(self, _):
         c.argument('public_fqdn', default=False, action='store_true')
         c.argument('credential_format', options_list=['--format'], validator=validate_credential_format)
 
-    for scope in ['aks', 'acs kubernetes', 'acs dcos']:
-        with self.argument_context('{} install-cli'.format(scope)) as c:
-            c.argument('client_version', validator=validate_kubectl_version,
-                       help='Version of kubectl to install.')
-            c.argument('install_location', default=_get_default_install_location(
-                'kubectl'), help='Path at which to install kubectl.')
-            c.argument('base_src_url',
-                       help='Base download source URL for kubectl releases.')
-            c.argument('kubelogin_version', validator=validate_kubelogin_version,
-                       help='Version of kubelogin to install.')
-            c.argument('kubelogin_install_location', default=_get_default_install_location(
-                'kubelogin'), help='Path at which to install kubelogin.')
-            c.argument('kubelogin_base_src_url', options_list=[
-                       '--kubelogin-base-src-url', '-l'], help='Base download source URL for kubelogin releases.')
+    with self.argument_context('aks install-cli') as c:
+        c.argument('client_version', validator=validate_kubectl_version, help='Version of kubectl to install.')
+        c.argument('install_location', default=_get_default_install_location('kubectl'), help='Path at which to install kubectl.')
+        c.argument('base_src_url', help='Base download source URL for kubectl releases.')
+        c.argument('kubelogin_version', validator=validate_kubelogin_version, help='Version of kubelogin to install.')
+        c.argument('kubelogin_install_location', default=_get_default_install_location('kubelogin'), help='Path at which to install kubelogin.')
+        c.argument('kubelogin_base_src_url', options_list=['--kubelogin-base-src-url', '-l'], help='Base download source URL for kubelogin releases.')
 
     with self.argument_context('aks update-credentials', arg_group='Service Principal') as c:
         c.argument('reset_service_principal', action='store_true')
@@ -582,7 +496,3 @@ def _get_default_install_location(exe_name):
     else:
         install_location = None
     return install_location
-
-
-def _get_feature_in_preview_message():
-    return "Feature in preview, only in " + ", ".join(regions_in_preview) + ". "

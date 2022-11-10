@@ -3,6 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import unittest
+from knack.util import CLIError
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 LOCATION = "southcentralusstage"
 ADLOCATION = "northeurope"
@@ -130,7 +133,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
                 self.check('activeDirectories[0].adName', '{ad_name}'),
                 self.check('activeDirectories[0].aesEncryption', False),
                 self.check('activeDirectories[0].ldapSigning', '{ldap}'),
-                self.check('activeDirectories[0].allowLocalNFSUsersWithLdap', '{ldap_users}')
+                self.check('activeDirectories[0].allowLocalNfsUsersWithLdap', '{ldap_users}')
             ])
 
         # list active directory
@@ -176,7 +179,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
             'encryption': "Microsoft.NetApp"
         })
         # create account with encryption value
-        self.cmd("az netappfiles account create -g {rg} -a {acc_name} -l {loc} --encryption {encryption}", checks=[
+        self.cmd("az netappfiles account create -g {rg} -a {acc_name} -l {loc} --key-source {encryption}", checks=[
             self.check('name', '{acc_name}'),
             self.check('encryption.keySource', '{encryption}')
         ])
@@ -191,6 +194,77 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
             self.check('name', '{acc2_name}'),
             self.check('encryption.keySource', '{encryption}')
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
+    def test_account_cmk_encryption(self):
+        self.kwargs.update({
+            'loc': LOCATION,
+            'acc_name': self.create_random_name(prefix='cli-acc-', length=24),
+            'acc2_name': self.create_random_name(prefix='cli-acc-', length=24),
+            'keySource': "Microsoft.KeyVault",
+            'keyVaultUri': "myUri",
+            'keyName': "myKeyName",
+            'keyVaultResourceId': "myKeyVaultResourceId",
+            'userAssignedIdentity': "myIdentity"
+        })
+        
+        with self.assertRaises(CLIError):
+            # create account with encryption value
+            self.cmd("az netappfiles account create -g {rg} -a {acc_name} -l {loc} --key-source {keySource} --key-vault-uri {keyVaultUri} --key-name {keyName} --keyvault-resource-id {keyVaultResourceId} --user-assigned-identity {userAssignedIdentity}", checks=[
+                self.check('name', '{acc_name}'),
+                self.check('encryption.keySource', '{keySource}')
+            ])
+
+        # create account without encryption value
+        self.cmd("az netappfiles account create -g {rg} -a {acc2_name} -l {loc}", checks=[
+            self.check('name', '{acc2_name}')
+        ])
+
+        # update account with encryption value
+        with self.assertRaises(CLIError):
+            self.cmd("az netappfiles account update -g {rg} -a {acc2_name} --key-source {keySource}", checks=[
+                self.check('name', '{acc2_name}'),
+                self.check('encryption.keySource', '{keySource}')
+            ])
+
+    #@unittest.skip('(servicedeployment) api has not been deployed cannot test until finalized')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
+    def test_account_renew_credentials_fails(self):
+        self.kwargs.update({
+            'loc': LOCATION,
+            'acc_name': self.create_random_name(prefix='cli-acc-', length=24),
+            'acc2_name': self.create_random_name(prefix='cli-acc-', length=24),
+            'keySource': "Microsoft.KeyVault",
+            'keyVaultUri': "myUri",
+            'keyName': "myKeyName",
+            'keyVaultResourceId': "myKeyVaultResourceId",
+            'userAssignedIdentity': "myIdentity"
+        })
+        
+        with self.assertRaises(CLIError):
+            # create account with encryption value
+            self.cmd("az netappfiles account create -g {rg} -a {acc_name} -l {loc} --key-source {keySource} --key-vault-uri {keyVaultUri} --key-name {keyName} --keyvault-resource-id {keyVaultResourceId} --user-assigned-identity {userAssignedIdentity}", checks=[
+                self.check('name', '{acc_name}'),
+                self.check('encryption.keySource', '{keySource}')
+            ])
+
+        # create account without encryption value
+        self.cmd("az netappfiles account create -g {rg} -a {acc2_name} -l {loc}", checks=[
+            self.check('name', '{acc2_name}')
+        ])
+
+        with self.assertRaises(CLIError) as cm:
+            # create account with encryption value
+            self.cmd("az netappfiles account renew-credentials -g {rg} -a {acc2_name} ", checks=[
+                self.check('name', '{acc2_name}'),                
+            ])
+        self.assertIn('MsiInvalidForRenewal', str(
+            cm.exception))                            
+        # with self.assertRaises(CLIError):
+        #     # create account with encryption value
+        #     self.cmd("az rest --method POST --uri /subscriptions/69a75bda-882e-44d5-8431-63421204132a/resourcegroups/{rg}/providers/Microsoft.NetApp/netappAccounts/{acc_name}/renewCredentials?api-version=2022-05-01  ", checks=[
+        #         self.check('name', '{acc_name}'),                
+        #     ])        
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'}, location='eastus')
     def test_create_account_with_no_location(self):

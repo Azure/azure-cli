@@ -6,6 +6,7 @@
 # pylint: disable=too-few-public-methods, too-many-instance-attributes, protected-access, not-callable
 import importlib
 import os
+import copy
 from functools import partial
 
 from knack.commands import CLICommand, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
@@ -87,11 +88,21 @@ class AAZCommand(CLICommand):
             schema.generic_update_force_string = AAZGenericUpdateForceStringArg()
         return schema
 
-    def __init__(self, loader=None, cli_ctx=None, **kwargs):
+    def __init__(self, loader=None, cli_ctx=None, callbacks=None, **kwargs):
         """
 
         :param loader: it is required for command registered in the command table
         :param cli_ctx: if a command instance is not registered in the command table, only cli_ctx is required.
+        :param callbacks: a dict of customized callback functions registered by @register_callback.
+            common used callbacks:
+                'pre_operations': This callback runs before all the operations
+                    pre_operations(ctx) -> void
+                'post_operations': This callback runs after all the operations
+                    post_operations(ctx) -> void
+                'pre_instance_update': This callback runs before all the instance update operations
+                    pre_instance_update(instance, ctx) -> void
+                'post_instance_update': This callback runs after all the instance update operations and before PUT
+                    post_instance_update(instance, ctx) -> void
         """
         assert loader or cli_ctx, "loader or cli_ctx is required"
         self.loader = loader
@@ -118,6 +129,7 @@ class AAZCommand(CLICommand):
         self.help = self.AZ_HELP
 
         self.ctx = None
+        self.callbacks = callbacks or {}
 
         # help property will be assigned as help_file for command parser:
         # https://github.com/Azure/azure-cli/blob/d69eedd89bd097306b8579476ef8026b9f2ad63d/src/azure-cli-core/azure/cli/core/parser.py#L104
@@ -155,9 +167,10 @@ class AAZCommand(CLICommand):
         """ This function is called by core to add global arguments
         """
         schema = self.get_arguments_schema()
-        # not support to overwrite arguments defined in schema
-        if not hasattr(schema, param_name):
-            super().update_argument(param_name, argtype)
+        if hasattr(schema, param_name):
+            # not support to overwrite arguments defined in schema, use arg.type as overrides
+            argtype = copy.deepcopy(self.arguments[param_name].type)
+        super().update_argument(param_name, argtype)
 
     @staticmethod
     def deserialize_output(value, client_flatten=True):
@@ -240,6 +253,17 @@ class AAZWaitCommand(AAZCommand):
             cli_ctx=self.cli_ctx,
             getter=lambda **command_args: self._handler(command_args)
         )
+
+
+def register_callback(func):
+    def wrapper(self, *args, **kwargs):
+        callback = self.callbacks.get(func.__name__, None)
+        if callback is None:
+            return func(self, *args, **kwargs)
+
+        kwargs.setdefault("ctx", self.ctx)
+        return callback(*args, **kwargs)
+    return wrapper
 
 
 def register_command_group(

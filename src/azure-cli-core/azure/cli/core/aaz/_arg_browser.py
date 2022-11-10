@@ -62,6 +62,24 @@ class AAZArgBrowser:
         else:
             raise NotImplementedError()
 
+    def get_anytype_elements(self):
+        """Iter over sub elements of list or dict."""
+        if self._arg_data is None:
+            # stop iteration
+            return
+
+        if isinstance(self._arg_data, dict):
+            for k, d in self._arg_data.items():
+                v = self._arg_value[k]
+                if isinstance(v, AAZBaseValue):
+                    # ignore fixed type element
+                    continue
+                # build AAZBaseValue from data without schema
+                v = AAZBaseValue(None, d)
+                yield k, AAZArgBrowser(v, d, parent=None)
+        else:
+            raise NotImplementedError()
+
     @property
     def data(self):
         return self._arg_data

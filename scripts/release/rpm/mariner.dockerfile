@@ -1,7 +1,6 @@
-ARG tag=2.0
-ARG image=mcr.microsoft.com/cbl-mariner/base/core
+ARG image=mcr.microsoft.com/cbl-mariner/base/core:2.0
 
-FROM ${image}:${tag} AS build-env
+FROM ${image} AS build-env
 ARG cli_version=dev
 
 RUN tdnf update -y
@@ -19,7 +18,7 @@ RUN dos2unix ./scripts/release/rpm/azure-cli.spec && \
     rpmbuild -v -bb --clean scripts/release/rpm/azure-cli.spec && \
     cp /usr/src/mariner/RPMS/x86_64/azure-cli-${cli_version}-1.x86_64.rpm /azure-cli-dev.rpm
 
-FROM ${image}:${tag} AS execution-env
+FROM ${image} AS execution-env
 
 RUN tdnf update -y
 RUN tdnf install -y python3 rpm

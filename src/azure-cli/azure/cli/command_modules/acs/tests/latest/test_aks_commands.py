@@ -22,6 +22,7 @@ from azure.cli.testsdk import ScenarioTest, live_only
 from azure.cli.testsdk.checkers import StringCheck, StringContainCheck, StringContainCheckIgnoreCase
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
+from azure.cli.command_modules.acs.addonconfiguration import sanitize_dcr_name
 from knack.util import CLIError
 # flake8: noqa
 
@@ -4233,6 +4234,63 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap')
+    def test_aks_create_with_oidc_issuer_enabled(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--enable-managed-identity ' \
+                     '--enable-oidc-issuer ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/EnableOIDCIssuerPreview ' \
+                     '--ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('oidcIssuerProfile.enabled', True),
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap')
+    def test_aks_update_with_oidc_issuer_enabled(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--enable-managed-identity ' \
+                     '--ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/EnableOIDCIssuerPreview ' \
+                     '--enable-oidc-issuer'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('oidcIssuerProfile.enabled', True),
+        ])
+
+    @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_nodepool_scale_down_mode(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
@@ -5342,7 +5400,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
-    
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus')
     def test_aks_nodepool_stop_and_start(self, resource_group, resource_group_location):
@@ -5365,7 +5423,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
         # stop nodepool
-        self.cmd('aks nodepool stop --resource-group={resource_group} --cluster-name={name} --nodepool-name={nodepool_name}', checks=[ 
+        self.cmd('aks nodepool stop --resource-group={resource_group} --cluster-name={name} --nodepool-name={nodepool_name}', checks=[
             self.check('powerState.code', 'Stopped')
         ])
         #start nodepool
@@ -5773,7 +5831,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         })
 
         # create key vault
-        create_kv_cmd = 'keyvault create -n {kv_name} -g {resource_group} --enable-purge-protection true --enable-soft-delete true'
+        create_kv_cmd = 'keyvault create -n {kv_name} -g {resource_group} --enable-purge-protection true'
         self.cmd(create_kv_cmd, checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('name', kv_name)
@@ -6423,6 +6481,97 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap', preserve_default_location=True)
+    def test_aks_create_with_standard_blob_csi_driver(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # check standard creation scenario
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --ssh-key-value={ssh_key_value} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.blobCsiDriver.enabled', None),
+        ])
+
+        # check standard reconcile scenario
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} -y -o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.blobCsiDriver.enabled', None),
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap', preserve_default_location=True)
+    def test_aks_create_and_update_with_blob_csi_driver(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create aks with blob driver
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --ssh-key-value={ssh_key_value} -o json \
+                        --enable-blob-driver'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.blobCsiDriver.enabled', True),
+        ])
+
+        # check standard reconcile scenario
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} -y -o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.blobCsiDriver.enabled', True),
+        ])
+
+        # disable blob driver
+        disable_cmd = 'aks update --resource-group={resource_group} --name={name} -o json \
+                        --disable-blob-driver -y'
+        self.cmd(disable_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.blobCsiDriver.enabled', False),
+        ])
+
+        # check standard reconcile scenario
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} -y -o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.blobCsiDriver.enabled', False),
+        ])
+
+        # enable blob driver
+        enable_cmd = 'aks update --resource-group={resource_group} --name={name} -o json \
+                        --enable-blob-driver -y'
+        self.cmd(enable_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.blobCsiDriver.enabled', True),
+        ])
+
+        # check standard reconcile scenario
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} -y -o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.blobCsiDriver.enabled', True),
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2')
     @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_update_labels(self, resource_group, resource_group_location, sp_name, sp_password):
@@ -6808,11 +6957,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         cluster_resource_id = response["id"]
         subscription = cluster_resource_id.split("/")[2]
         workspace_resource_id = response["addonProfiles"]["omsagent"]["config"]["logAnalyticsWorkspaceResourceID"]
-        workspace_name = workspace_resource_id.split("/")[-1]
-        workspace_resource_group = workspace_resource_id.split("/")[4]
 
         # check that the DCR was created
-        dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
+        dataCollectionRuleName = sanitize_dcr_name(f"MSCI-{resource_group_location}-{aks_name}")
         dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
         get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
         self.cmd(get_cmd, checks=[
@@ -6885,7 +7032,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         workspace_resource_group = workspace_resource_id.split("/")[4]
 
         # check that the DCR was created
-        dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
+        dataCollectionRuleName = sanitize_dcr_name(f"MSCI-{resource_group_location}-{aks_name}")
         dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
         get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
         self.cmd(get_cmd, checks=[
@@ -6939,7 +7086,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         try:
             # check that the DCR was created
-            dataCollectionRuleName = f"MSCI-{aks_name}-{resource_group_location}"
+            dataCollectionRuleName = sanitize_dcr_name(f"MSCI-{resource_group_location}-{aks_name}")
             dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
             get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
             self.cmd(get_cmd, checks=[

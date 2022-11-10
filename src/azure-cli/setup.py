@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.40.0"
+VERSION = "2.42.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -72,13 +72,13 @@ DEPENDENCIES = [
     'azure-mgmt-billing==6.0.0',
     'azure-mgmt-botservice~=2.0.0b3',
     'azure-mgmt-cdn==12.0.0',
-    'azure-mgmt-cognitiveservices~=13.2.0',
-    'azure-mgmt-compute~=27.1.0',
+    'azure-mgmt-cognitiveservices~=13.3.0',
+    'azure-mgmt-compute~=29.0.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=9.1.0',
     'azure-mgmt-containerregistry==10.0.0',
-    'azure-mgmt-containerservice~=20.3.0',
-    'azure-mgmt-cosmosdb==7.0.0',
+    'azure-mgmt-containerservice~=20.6.0',
+    'azure-mgmt-cosmosdb==8.0.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
@@ -102,19 +102,18 @@ DEPENDENCIES = [
     'azure-mgmt-maps~=2.0.0',
     'azure-mgmt-marketplaceordering==1.1.0',
     'azure-mgmt-media~=9.0',
-    'azure-mgmt-monitor~=4.0.1',
+    'azure-mgmt-monitor~=5.0.0',
     'azure-mgmt-msi~=6.1.0',
-    'azure-mgmt-netapp~=8.1.0',
+    'azure-mgmt-netapp~=9.0.1',
     'azure-mgmt-network~=21.0.1',
     'azure-mgmt-policyinsights~=1.1.0b2',
     'azure-mgmt-privatedns~=1.0.0',
-    'azure-mgmt-rdbms~=10.2.0b3',
+    'azure-mgmt-rdbms~=10.2.0b4',
     'azure-mgmt-recoveryservicesbackup~=5.1.0b1',
     'azure-mgmt-recoveryservices~=2.1.0',
     'azure-mgmt-redhatopenshift==1.1.0',
     'azure-mgmt-redis~=13.1.0',
     'azure-mgmt-relay~=0.1.0',
-    'azure-mgmt-reservations==2.0.0',  # TODO: Use requirements.txt instead of '==' #9781
     'azure-mgmt-resource==21.1.0b1',
     'azure-mgmt-search~=8.0',
     'azure-mgmt-security==2.0.0b1',
@@ -124,15 +123,15 @@ DEPENDENCIES = [
     'azure-mgmt-servicefabric~=1.0.0',
     'azure-mgmt-signalr==1.1.0',
     'azure-mgmt-sqlvirtualmachine==1.0.0b3',
-    'azure-mgmt-sql==4.0.0b2',
+    'azure-mgmt-sql==4.0.0b4',
     'azure-mgmt-storage~=20.1.0',
-    'azure-mgmt-synapse==2.1.0b2',
+    'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web==7.0.0',
     'azure-multiapi-storage~=0.10.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
-    'azure-synapse-artifacts~=0.13.0',
+    'azure-synapse-artifacts~=0.14.0',
     'azure-synapse-managedprivateendpoints~=0.3.0',
     'azure-synapse-spark~=0.2.0',
     'chardet~=3.0.4',
@@ -144,6 +143,7 @@ DEPENDENCIES = [
     'jsondiff~=2.0.0',
     'packaging>=20.9,<22.0',
     'PyGithub~=1.38',
+    'PyMySQL~=1.0.2',
     'PyNaCl~=1.5.0',
     'scp~=0.13.2',
     'semver==2.13.0',
@@ -172,7 +172,7 @@ setup(
         'az',
         'az.completion.sh',
         'az.bat',
-        'az.ps1'
+        'azps.ps1'
     ],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
