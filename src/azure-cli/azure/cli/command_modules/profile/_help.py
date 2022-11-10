@@ -96,7 +96,7 @@ examples:
   text: az account set --subscription MySubscriptionID
 - name: Using Bash, change the active subscription using a variable
   text: >
-    subscriptionId="$(az account list --query "[?name=='OneOfMySubscriptionNames'].id" --output tsv)"
+    subscriptionId="$(az account list --query "[?contains(name, 'OneOfMySubscriptionNames')].id" --output tsv)"
     az account set --subscription $subscriptionId
     echo "The current subscription has been set to $subscriptionId"
 """
