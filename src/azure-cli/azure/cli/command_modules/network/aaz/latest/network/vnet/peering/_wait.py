@@ -62,11 +62,11 @@ class Wait(AAZWaitCommand):
         self.VirtualNetworkPeeringsGet(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -208,7 +208,6 @@ class Wait(AAZWaitCommand):
             _build_schema_address_space_read(properties.remote_virtual_network_address_space)
             properties.remote_virtual_network_encryption = AAZObjectType(
                 serialized_name="remoteVirtualNetworkEncryption",
-                flags={"read_only": True},
             )
             properties.resource_guid = AAZStrType(
                 serialized_name="resourceGuid",
@@ -233,11 +232,9 @@ class Wait(AAZWaitCommand):
 
             remote_virtual_network_encryption = cls._schema_on_200.properties.remote_virtual_network_encryption
             remote_virtual_network_encryption.enabled = AAZBoolType(
-                flags={"required": True, "read_only": True},
+                flags={"required": True},
             )
-            remote_virtual_network_encryption.enforcement = AAZStrType(
-                flags={"read_only": True},
-            )
+            remote_virtual_network_encryption.enforcement = AAZStrType()
 
             return cls._schema_on_200
 

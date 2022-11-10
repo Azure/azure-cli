@@ -66,11 +66,11 @@ class ListAvailableDelegations(AAZCommand):
             self.AvailableDelegationsList(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
