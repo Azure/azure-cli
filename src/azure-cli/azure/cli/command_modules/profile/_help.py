@@ -29,8 +29,9 @@ examples:
 
 helps['account'] = """
 type: group
-short-summary: Manage Azure subscription information. Use `az login` to log into Azure before managing subscriptions.
+short-summary: Manage Azure subscription information. 
 long-summary: >
+    Use `az login` to log into Azure before managing subscriptions.
     For an in-depth overview of working with subscriptions using the Azure CLI, see
     [How to manage Azure subscriptions with the Azure CLI](https://learn.microsoft.com/cli/azure/manage-azure-subscriptions-azure-cli).   
 """
@@ -80,8 +81,9 @@ examples:
     az account show --query user.name
 - name: Return results in plain text.
   text: az account show --query MyTenantID --output tsv
-- name: Using Bash, store the default subscription ID in a variable
+- name: Store the default subscription ID in a variable.
   text: >
+    # Bash script
     subscriptionId="$(az account show --query id --output tsv)"
     echo "The current subscription ID is $subscriptionId"
 """
@@ -94,8 +96,9 @@ examples:
   text: az account set --subscription "My subscription name"
 - name: Change the active subscription using a subscription ID
   text: az account set --subscription MySubscriptionID
-- name: Using Bash, change the active subscription using a variable
+- name: Change the active subscription using a variable.
   text: >
+    # Bash script
     subscriptionId="$(az account list --query "[?contains(name, 'OneOfMySubscriptionNames')].id" --output tsv)"
     az account set --subscription $subscriptionId
     echo "The current subscription has been set to $subscriptionId"
