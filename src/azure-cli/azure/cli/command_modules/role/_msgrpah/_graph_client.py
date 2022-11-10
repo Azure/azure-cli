@@ -28,6 +28,10 @@ class GraphClient:
 
     def __init__(self, cli_ctx):
         self._cli_ctx = cli_ctx
+
+        # EXPERIMENTAL: Use config option graph.api_version to override default API version
+        self._api_version = cli_ctx.config.get('graph', 'api_version', fallback=GraphClient.V1_0)
+
         self._scopes = resource_to_scopes(cli_ctx.cloud.endpoints.microsoft_graph_resource_id)
 
         # https://graph.microsoft.com/ (AzureCloud)
@@ -38,7 +42,9 @@ class GraphClient:
         # https://microsoftgraph.chinacloudapi.cn
         self._endpoint = cli_ctx.cloud.endpoints.microsoft_graph_resource_id.rstrip('/')
 
-    def _send(self, method, url, param=None, body=None, api_version=V1_0):
+    def _send(self, method, url, param=None, body=None, api_version=None):
+        # Specify api_version to override the client's default
+        api_version = api_version or self._api_version
         url = f'{self._endpoint}/{api_version}{url}'
 
         if body:
