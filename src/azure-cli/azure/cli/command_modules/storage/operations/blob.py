@@ -5,7 +5,7 @@
 
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import sdk_no_wait
@@ -993,20 +993,45 @@ def query_blob(client, query_expression, input_config=None, output_config=None, 
     return reader.readall().decode("utf-8")
 
 
-def copy_blob(client, source_url, metadata=None, **kwargs):
+def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
     if not kwargs['requires_sync']:
         kwargs.pop('requires_sync')
     blob_type = kwargs.pop('destination_blob_type', None)
-    if blob_type is not None:
+    if blob_type is not None and blob_type != 'Detect':
+        dst_client = client.from_blob_url(source_url)
+        if dst_client.account_name == client.account_name:
+            dst_client = client.from_blob_url(source_url, credential=client.credential)
+        blob_service_client = dst_client._get_container_client()._get_blob_service_client()
+        if blob_service_client.credential is not None:
+            source_url = generate_sas_blob_uri(cmd, blob_service_client, full_uri=True, blob_url=source_url,
+                                               blob_name=None, container_name=None,
+                                               expiry=datetime.utcnow() + timedelta(hours=1), permission='r')
+
+        params = {"source_if_modified_since": kwargs.get("source_if_modified_since"),
+                  "source_if_unmodified_since": kwargs.get("source_if_unmodified_since"),
+                  "if_modified_since": kwargs.get("if_modified_since"),
+                  "if_unmodified_since": kwargs.get("if_unmodified_since"),
+                  "timeout": kwargs.get("timeout")}
+
         if blob_type == 'AppendBlob':
-            return client.append_block_from_url(copy_source_url=source_url, **kwargs)
+            params.update({"lease": kwargs.get("destination_lease")})
+            client.create_append_blob()
+            res = client.append_block_from_url(copy_source_url=source_url, **params)
+            return transform_response_with_bytearray(res)
         elif blob_type == 'BlockBlob':
-            kwargs.pop('source_lease')
-            kwargs.pop('rehydrate_priority')
-            return client.upload_blob_from_url(source_url=source_url, **kwargs)
+            params.update({"overwrite": True, "tags": kwargs.get("tags"),
+                           "destination_lease": kwargs.get("destination_lease")})
+            return client.upload_blob_from_url(source_url=source_url, **params)
         elif blob_type == 'PageBlob':
-            return client.upload_pages_from_url(source_url=source_url, offset=0, length=None, source_offset=0,
-                                            **kwargs)
+            params.update({"lease": kwargs.get("destination_lease")})
+            source_blob_client = client.from_blob_url(source_url)
+            blob_length = source_blob_client.get_blob_properties().size
+            if blob_length % 512 != 0:
+                raise ValueError("Source blob size must be an integer that aligns with 512 page size")
+            client.create_page_blob(size=blob_length)
+            res = client.upload_pages_from_url(source_url=source_url, offset=0, length=blob_length,
+                                                source_offset=0, **params)
+            return transform_response_with_bytearray(res)
     return client.start_copy_from_url(source_url=source_url, metadata=metadata, incremental_copy=False, **kwargs)
 
 
