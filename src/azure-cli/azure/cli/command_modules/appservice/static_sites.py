@@ -567,7 +567,7 @@ def link_user_function(
     name,
     resource_group_name,
     function_resource_id,
-    environment_name: str = "default",
+    environment_name: str,
     force=False,
 ):
     from azure.mgmt.web.models import StaticSiteUserProvidedFunctionAppARMResource
@@ -583,6 +583,15 @@ def link_user_function(
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     function = StaticSiteUserProvidedFunctionAppARMResource(function_app_resource_id=function_resource_id,
                                                             function_app_region=function_location)
+
+    if environment_name is None:
+        # Special casing since the type of the created resource differ
+        return client.begin_register_user_provided_function_app_with_static_site(
+            name=name,
+            resource_group_name=resource_group_name,
+            function_app_name=function_name,
+            static_site_user_provided_function_envelope=function,
+            is_forced=force)
 
     return client.begin_register_user_provided_function_app_with_static_site_build(
         name=name,
