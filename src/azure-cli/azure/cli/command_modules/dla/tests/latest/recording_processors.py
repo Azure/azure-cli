@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure_devtools.scenario_tests import RecordingProcessor, mock_in_unit_test
+from azure.cli.testsdk.scenario_tests import RecordingProcessor, mock_in_unit_test
 
 
 MOCK_JOB_ID = '00000000-0000-0000-0000-000000000000'

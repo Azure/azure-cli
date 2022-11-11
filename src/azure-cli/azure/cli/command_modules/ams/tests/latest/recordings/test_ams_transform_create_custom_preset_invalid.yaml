@@ -1,8 +1,9 @@
 interactions:
 - request:
-    body: '{"location": "centralindia", "identity": {"type": "None"}, "properties":
+    body: '{"location": "centralindia", "identity": {"type": "SystemAssigned"}, "properties":
       {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
-      "type": "Primary"}]}}'
+      "type": "Primary"}], "keyDelivery": {"accessControl": {"defaultAction": "Allow",
+      "ipAllowList": []}}, "publicNetworkAccess": "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -13,34 +14,36 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '337'
+      - '392'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -n -g --storage-account -l
+      - -n -g --storage-account -l --mi-system-assigned --default-action
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Central
-        India\",\"properties\":{\r\n    \"mediaServiceId\":\"8e644535-2c72-439e-af3b-484d0578da60\",\"storageAccounts\":[\r\n
+        India\",\"properties\":{\r\n    \"mediaServiceId\":\"539f5bf7-8c13-4075-9760-7d7850cf1c48\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
         \     \"type\":\"SystemKey\"\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n
         \       \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n          \r\n        ]\r\n
-        \     }\r\n    }\r\n  },\"systemData\":{\r\n    \"createdBy\":\"phcooper@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-07-30T19:11:34.3093987Z\",\"lastModifiedBy\":\"phcooper@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-07-30T19:11:34.3093987Z\"\r\n
-        \ },\"identity\":{\r\n    \"type\":\"None\"\r\n  }\r\n}"
+        \     }\r\n    },\"publicNetworkAccess\":\"Enabled\"\r\n  },\"systemData\":{\r\n
+        \   \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T18:02:33.8083417Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T18:02:33.8083417Z\"\r\n
+        \ },\"identity\":{\r\n    \"type\":\"SystemAssigned\",\"principalId\":\"92f37371-e202-4cc2-9dcc-751bb1047729\",\"tenantId\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1162'
+      - '1168'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 19:11:38 GMT
+      - Thu, 14 Apr 2022 18:02:40 GMT
       expires:
       - '-1'
       odata-version:
@@ -54,7 +57,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1197'
     status:
       code: 201
       message: Created

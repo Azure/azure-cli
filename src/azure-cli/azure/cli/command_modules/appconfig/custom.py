@@ -4,10 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-
-from knack.util import CLIError
 from knack.log import get_logger
-from azure.cli.core.util import user_confirmation
+from azure.core.exceptions import ResourceNotFoundError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParameters,
                                                 ConfigurationStore,
                                                 Sku,
@@ -15,10 +14,10 @@ from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParamete
                                                 UserIdentity,
                                                 EncryptionProperties,
                                                 KeyVaultProperties,
-                                                RegenerateKeyParameters)
-
-from ._utils import resolve_store_metadata
-
+                                                RegenerateKeyParameters,
+                                                CreateMode,
+                                                Replica)
+from ._utils import resolve_store_metadata, resolve_deleted_store_metadata
 
 logger = get_logger(__name__)
 
@@ -36,7 +35,9 @@ def create_configstore(client,
                        tags=None,
                        assign_identity=None,
                        enable_public_network=None,
-                       disable_local_auth=None):
+                       disable_local_auth=None,
+                       retention_days=None,
+                       enable_purge_protection=None):
     if assign_identity is not None and not assign_identity:
         assign_identity = [SYSTEM_ASSIGNED_IDENTITY]
 
@@ -44,22 +45,52 @@ def create_configstore(client,
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
 
+    if sku.lower() == 'free' and (enable_purge_protection or retention_days):
+        logger.warning("Options '--enable-purge-protection' and '--retention-days' will be ignored when creating a free store.")
+        retention_days = None
+        enable_purge_protection = None
+
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=__get_resource_identity(assign_identity) if assign_identity else None,
                                             sku=Sku(name=sku),
                                             tags=tags,
                                             public_network_access=public_network_access,
-                                            disable_local_auth=disable_local_auth)
+                                            disable_local_auth=disable_local_auth,
+                                            soft_delete_retention_in_days=retention_days,
+                                            enable_purge_protection=enable_purge_protection,
+                                            create_mode=CreateMode.DEFAULT)
 
     return client.begin_create(resource_group_name, name, configstore_params)
 
 
-def delete_configstore(cmd, client, name, resource_group_name=None, yes=False):
+def recover_deleted_configstore(cmd, client, name, resource_group_name=None, location=None):
+    if resource_group_name is None or location is None:
+        metadata_resource_group, metadata_location = resolve_deleted_store_metadata(cmd, name, resource_group_name, location)
+
+        if resource_group_name is None:
+            resource_group_name = metadata_resource_group
+        if location is None:
+            location = metadata_location
+
+    configstore_params = ConfigurationStore(location=location.lower(),
+                                            sku=Sku(name="Standard"),  # Only Standard SKU stores can be recovered!
+                                            create_mode=CreateMode.RECOVER)
+
+    return client.begin_create(resource_group_name, name, configstore_params)
+
+
+def delete_configstore(cmd, client, name, resource_group_name=None):
     if resource_group_name is None:
         resource_group_name, _ = resolve_store_metadata(cmd, name)
-    confirmation_message = "Are you sure you want to delete the App Configuration: {}".format(name)
-    user_confirmation(confirmation_message, yes)
+
     return client.begin_delete(resource_group_name, name)
+
+
+def purge_deleted_configstore(cmd, client, name, location=None):
+    if location is None:
+        _, location = resolve_deleted_store_metadata(cmd, name)
+
+    return client.begin_purge_deleted(config_store_name=name, location=location)
 
 
 def list_configstore(client, resource_group_name=None):
@@ -67,10 +98,21 @@ def list_configstore(client, resource_group_name=None):
     return response
 
 
+def list_deleted_configstore(client):
+    response = client.list_deleted()
+    return response
+
+
 def show_configstore(cmd, client, name, resource_group_name=None):
     if resource_group_name is None:
         resource_group_name, _ = resolve_store_metadata(cmd, name)
     return client.get(resource_group_name, name)
+
+
+def show_deleted_configstore(cmd, client, name, location=None):
+    if location is None:
+        _, location = resolve_deleted_store_metadata(cmd, name)
+    return client.get_deleted(config_store_name=name, location=location)
 
 
 def update_configstore(cmd,
@@ -84,7 +126,8 @@ def update_configstore(cmd,
                        encryption_key_version=None,
                        identity_client_id=None,
                        enable_public_network=None,
-                       disable_local_auth=None):
+                       disable_local_auth=None,
+                       enable_purge_protection=None):
     __validate_cmk(encryption_key_name, encryption_key_vault, encryption_key_version, identity_client_id)
     if resource_group_name is None:
         resource_group_name, _ = resolve_store_metadata(cmd, name)
@@ -95,7 +138,8 @@ def update_configstore(cmd,
     update_params = ConfigurationStoreUpdateParameters(tags=tags,
                                                        sku=Sku(name=sku) if sku else None,
                                                        public_network_access=public_network_access,
-                                                       disable_local_auth=disable_local_auth)
+                                                       disable_local_auth=disable_local_auth,
+                                                       enable_purge_protection=enable_purge_protection)
 
     if encryption_key_name is not None:
         key_vault_properties = KeyVaultProperties()
@@ -198,6 +242,42 @@ def regenerate_credential(cmd, client, name, id_, resource_group_name=None):
     return client.regenerate_key(resource_group_name, name, RegenerateKeyParameters(id=id_))
 
 
+def list_replica(cmd, client, store_name, resource_group_name=None):
+    if resource_group_name is None:
+        resource_group_name, _ = resolve_store_metadata(cmd, store_name)
+
+    return client.list_by_configuration_store(resource_group_name=resource_group_name, config_store_name=store_name)
+
+
+def show_replica(cmd, client, store_name, name, resource_group_name=None):
+    if resource_group_name is None:
+        resource_group_name, _ = resolve_store_metadata(cmd, store_name)
+    try:
+        return client.get(resource_group_name=resource_group_name, config_store_name=store_name, replica_name=name)
+    except ResourceNotFoundError:
+        raise ResourceNotFoundError("The replica '{}' for App Configuration '{}' not found.".format(name, store_name))
+
+
+def create_replica(cmd, client, store_name, name, location, resource_group_name=None):
+    if resource_group_name is None:
+        resource_group_name, _ = resolve_store_metadata(cmd, store_name)
+
+    replica_creation_params = Replica(location=location)
+    return client.begin_create(resource_group_name=resource_group_name,
+                               config_store_name=store_name,
+                               replica_name=name,
+                               replica_creation_parameters=replica_creation_params)
+
+
+def delete_replica(cmd, client, store_name, name, resource_group_name=None):
+    if resource_group_name is None:
+        resource_group_name, _ = resolve_store_metadata(cmd, store_name)
+
+    return client.begin_delete(resource_group_name=resource_group_name,
+                               config_store_name=store_name,
+                               replica_name=name)
+
+
 def __get_resource_identity(assign_identity):
     system_assigned = False
     user_assigned = {}
@@ -226,11 +306,11 @@ def __validate_cmk(encryption_key_name=None,
                    identity_client_id=None):
     if encryption_key_name is None:
         if any(arg is not None for arg in [encryption_key_vault, encryption_key_version, identity_client_id]):
-            raise CLIError("To modify customer encryption key --encryption-key-name is required")
+            raise RequiredArgumentMissingError("To modify customer encryption key --encryption-key-name is required")
     else:
         if encryption_key_name:
             if encryption_key_vault is None:
-                raise CLIError("To modify customer encryption key --encryption-key-vault is required")
+                raise RequiredArgumentMissingError("To modify customer encryption key --encryption-key-vault is required")
         else:
             if any(arg is not None for arg in [encryption_key_vault, encryption_key_version, identity_client_id]):
                 logger.warning("Removing the customer encryption key. Key vault related arguments are ignored.")

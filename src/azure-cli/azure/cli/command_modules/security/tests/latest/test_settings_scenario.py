@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 class SecurityCenterSettingsTests(ScenarioTest):
@@ -23,4 +23,3 @@ class SecurityCenterSettingsTests(ScenarioTest):
 
         setting = self.cmd('az security setting update -n Sentinel --enabled false' ).get_output_in_json()
         assert setting['enabled'] == False
-        

@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"kind": "FormRecognizer", "sku": {"name": "S0"}, "identity": {"type":
-      "SystemAssigned"}, "location": "centraluseuap", "properties": {"encryption":
+      "SystemAssigned"}, "location": "SOUTHCENTRALUS", "properties": {"encryption":
       {"keySource": "Microsoft.CognitiveServices"}}}'
     headers:
       Accept:
@@ -13,31 +13,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '194'
+      - '195'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --kind --sku -l --assign-identity --encryption --yes
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-cognitiveservices/12.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2021-04-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"01001db2-0000-3300-0000-60caef190000\"","systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2021-06-17T06:43:32.827682Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-06-17T06:43:32.827682Z"},"location":"centraluseuap","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://centraluseuap.api.cognitive.microsoft.com/","dateCreated":"2021-06-17T06:43:37.0041892Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"encryption":{"keySource":"Microsoft.CognitiveServices"},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedStorage"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"formRecognizer":"https://centraluseuap.api.cognitive.microsoft.com/"},"provisioningState":"Creating"},"identity":{"principalId":"0e0bad66-ee4b-4719-af4f-23ff84660ee4","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned","userAssignedIdentities":{}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"1700116c-0000-0500-0000-6358a5fb0000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","internalId":"4688a4b1dac44c35991e64b1f0962c21","dateCreated":"2022-10-26T03:14:03.4753603Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"encryption":{"keySource":"Microsoft.CognitiveServices"},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/"},"provisioningState":"Creating"},"identity":{"principalId":"a861946d-872b-41a9-84e8-cd090bcc03a2","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:14:02.6223935Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:14:02.6223935Z"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/centraluseuap/operationResults/27d22178-9998-4000-90c9-f99053a67bbb?api-version=2017-04-18
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/be11970d-5f39-4d21-891f-e04b3140631d?api-version=2017-04-18
       cache-control:
       - no-cache
       content-length:
-      - '2569'
+      - '2550'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Jun 2021 06:43:37 GMT
+      - Wed, 26 Oct 2022 03:14:03 GMT
       etag:
-      - '"01001db2-0000-3300-0000-60caef190000"'
+      - '"1700116c-0000-0500-0000-6358a5fb0000"'
       expires:
       - '-1'
       pragma:
@@ -49,7 +49,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '431'
+      - '231'
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -69,21 +69,21 @@ interactions:
       ParameterSetName:
       - -n -g --kind --sku -l --assign-identity --encryption --yes
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-cognitiveservices/12.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/centraluseuap/operationResults/27d22178-9998-4000-90c9-f99053a67bbb?api-version=2017-04-18
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/be11970d-5f39-4d21-891f-e04b3140631d?api-version=2017-04-18
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/centraluseuap/operationResults/27d22178-9998-4000-90c9-f99053a67bbb","name":"27d22178-9998-4000-90c9-f99053a67bbb","status":"Succeeded","startTime":"2021-06-17T06:43:37Z","endTime":"2021-06-17T06:43:37Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/be11970d-5f39-4d21-891f-e04b3140631d","name":"be11970d-5f39-4d21-891f-e04b3140631d","status":"Succeeded","startTime":"2022-10-26T03:14:03Z","endTime":"2022-10-26T03:14:04Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '311'
+      - '312'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Jun 2021 06:44:07 GMT
+      - Wed, 26 Oct 2022 03:14:33 GMT
       expires:
       - '-1'
       pragma:
@@ -99,7 +99,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '11'
+      - '7'
     status:
       code: 200
       message: OK
@@ -117,23 +117,23 @@ interactions:
       ParameterSetName:
       - -n -g --kind --sku -l --assign-identity --encryption --yes
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-cognitiveservices/12.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2021-04-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"01001eb2-0000-3300-0000-60caef190000\"","systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2021-06-17T06:43:32.827682Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-06-17T06:43:32.827682Z"},"location":"centraluseuap","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://centraluseuap.api.cognitive.microsoft.com/","dateCreated":"2021-06-17T06:43:37.0041892Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"encryption":{"keySource":"Microsoft.CognitiveServices"},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedStorage"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"formRecognizer":"https://centraluseuap.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"identity":{"principalId":"0e0bad66-ee4b-4719-af4f-23ff84660ee4","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned","userAssignedIdentities":{}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"1700136c-0000-0500-0000-6358a5fc0000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","internalId":"4688a4b1dac44c35991e64b1f0962c21","dateCreated":"2022-10-26T03:14:03.4753603Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"encryption":{"keySource":"Microsoft.CognitiveServices"},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"identity":{"principalId":"a861946d-872b-41a9-84e8-cd090bcc03a2","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:14:02.6223935Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:14:02.6223935Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2570'
+      - '2551'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Jun 2021 06:44:07 GMT
+      - Wed, 26 Oct 2022 03:14:33 GMT
       etag:
-      - '"01001eb2-0000-3300-0000-60caef190000"'
+      - '"1700136c-0000-0500-0000-6358a5fc0000"'
       expires:
       - '-1'
       pragma:
@@ -149,7 +149,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '17'
+      - '8'
     status:
       code: 200
       message: OK
@@ -167,23 +167,23 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-cognitiveservices/12.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2021-04-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"01001eb2-0000-3300-0000-60caef190000\"","systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2021-06-17T06:43:32.827682Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-06-17T06:43:32.827682Z"},"location":"centraluseuap","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://centraluseuap.api.cognitive.microsoft.com/","dateCreated":"2021-06-17T06:43:37.0041892Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"encryption":{"keySource":"Microsoft.CognitiveServices"},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedStorage"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"formRecognizer":"https://centraluseuap.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"identity":{"principalId":"0e0bad66-ee4b-4719-af4f-23ff84660ee4","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned","userAssignedIdentities":{}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"1700136c-0000-0500-0000-6358a5fc0000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","internalId":"4688a4b1dac44c35991e64b1f0962c21","dateCreated":"2022-10-26T03:14:03.4753603Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"encryption":{"keySource":"Microsoft.CognitiveServices"},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"identity":{"principalId":"a861946d-872b-41a9-84e8-cd090bcc03a2","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:14:02.6223935Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:14:02.6223935Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2570'
+      - '2551'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Jun 2021 06:44:08 GMT
+      - Wed, 26 Oct 2022 03:14:34 GMT
       etag:
-      - '"01001eb2-0000-3300-0000-60caef190000"'
+      - '"1700136c-0000-0500-0000-6358a5fc0000"'
       expires:
       - '-1'
       pragma:
@@ -199,7 +199,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '14'
+      - '12'
     status:
       code: 200
       message: OK
@@ -219,9 +219,9 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-cognitiveservices/12.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2021-04-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
   response:
     body:
       string: ''
@@ -231,7 +231,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 17 Jun 2021 06:44:10 GMT
+      - Wed, 26 Oct 2022 03:14:37 GMT
       expires:
       - '-1'
       pragma:
@@ -243,7 +243,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '86'
+      - '97'
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
     status:
@@ -251,7 +251,7 @@ interactions:
       message: OK
 - request:
     body: '{"kind": "FormRecognizer", "sku": {"name": "S0"}, "identity": {"type":
-      "SystemAssigned"}, "location": "centraluseuap", "properties": {}}'
+      "SystemAssigned"}, "location": "SOUTHCENTRALUS", "properties": {}}'
     headers:
       Accept:
       - application/json
@@ -262,31 +262,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '136'
+      - '137'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --kind --sku -l --assign-identity --yes
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-cognitiveservices/12.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003?api-version=2021-04-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003","name":"cs_cli_test_000003","type":"Microsoft.CognitiveServices/accounts","etag":"\"010026b2-0000-3300-0000-60caef410000\"","systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2021-06-17T06:44:12.4765509Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-06-17T06:44:12.4765509Z"},"location":"centraluseuap","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://centraluseuap.api.cognitive.microsoft.com/","dateCreated":"2021-06-17T06:44:16.9975105Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedStorage"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"formRecognizer":"https://centraluseuap.api.cognitive.microsoft.com/"},"provisioningState":"Creating"},"identity":{"principalId":"555407aa-001b-4571-9e88-8380987dc41c","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned","userAssignedIdentities":{}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003","name":"cs_cli_test_000003","type":"Microsoft.CognitiveServices/accounts","etag":"\"17002e6c-0000-0500-0000-6358a6200000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","internalId":"6af2a711f31943a98b470e651551c76c","dateCreated":"2022-10-26T03:14:40.4199908Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/"},"provisioningState":"Creating"},"identity":{"principalId":"8c4452f1-542a-4749-9688-4a7e5dd642c7","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:14:39.6013174Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:14:39.6013174Z"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/centraluseuap/operationResults/28c1b8b6-8282-4a02-a1f4-9d86f5af6f31?api-version=2017-04-18
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/72cfa59b-d3fa-48bb-b6fe-ab74074ec20a?api-version=2017-04-18
       cache-control:
       - no-cache
       content-length:
-      - '2514'
+      - '2493'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Jun 2021 06:44:17 GMT
+      - Wed, 26 Oct 2022 03:14:40 GMT
       etag:
-      - '"010026b2-0000-3300-0000-60caef410000"'
+      - '"17002e6c-0000-0500-0000-6358a6200000"'
       expires:
       - '-1'
       pragma:
@@ -298,7 +298,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '304'
+      - '280'
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -318,21 +318,21 @@ interactions:
       ParameterSetName:
       - -n -g --kind --sku -l --assign-identity --yes
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-cognitiveservices/12.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/centraluseuap/operationResults/28c1b8b6-8282-4a02-a1f4-9d86f5af6f31?api-version=2017-04-18
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/72cfa59b-d3fa-48bb-b6fe-ab74074ec20a?api-version=2017-04-18
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/centraluseuap/operationResults/28c1b8b6-8282-4a02-a1f4-9d86f5af6f31","name":"28c1b8b6-8282-4a02-a1f4-9d86f5af6f31","status":"Succeeded","startTime":"2021-06-17T06:44:17Z","endTime":"2021-06-17T06:44:18Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/72cfa59b-d3fa-48bb-b6fe-ab74074ec20a","name":"72cfa59b-d3fa-48bb-b6fe-ab74074ec20a","status":"Succeeded","startTime":"2022-10-26T03:14:40Z","endTime":"2022-10-26T03:14:41Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '311'
+      - '312'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Jun 2021 06:44:48 GMT
+      - Wed, 26 Oct 2022 03:15:11 GMT
       expires:
       - '-1'
       pragma:
@@ -348,7 +348,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '20'
+      - '5'
     status:
       code: 200
       message: OK
@@ -366,23 +366,23 @@ interactions:
       ParameterSetName:
       - -n -g --kind --sku -l --assign-identity --yes
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-cognitiveservices/12.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003?api-version=2021-04-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003","name":"cs_cli_test_000003","type":"Microsoft.CognitiveServices/accounts","etag":"\"010029b2-0000-3300-0000-60caef420000\"","systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2021-06-17T06:44:12.4765509Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-06-17T06:44:12.4765509Z"},"location":"centraluseuap","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://centraluseuap.api.cognitive.microsoft.com/","dateCreated":"2021-06-17T06:44:16.9975105Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedStorage"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"formRecognizer":"https://centraluseuap.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"identity":{"principalId":"555407aa-001b-4571-9e88-8380987dc41c","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned","userAssignedIdentities":{}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003","name":"cs_cli_test_000003","type":"Microsoft.CognitiveServices/accounts","etag":"\"1700306c-0000-0500-0000-6358a6210000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","internalId":"6af2a711f31943a98b470e651551c76c","dateCreated":"2022-10-26T03:14:40.4199908Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"identity":{"principalId":"8c4452f1-542a-4749-9688-4a7e5dd642c7","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:14:39.6013174Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:14:39.6013174Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2515'
+      - '2494'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Jun 2021 06:44:48 GMT
+      - Wed, 26 Oct 2022 03:15:11 GMT
       etag:
-      - '"010029b2-0000-3300-0000-60caef420000"'
+      - '"1700306c-0000-0500-0000-6358a6210000"'
       expires:
       - '-1'
       pragma:
@@ -398,7 +398,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '13'
+      - '9'
     status:
       code: 200
       message: OK
@@ -416,23 +416,23 @@ interactions:
       ParameterSetName:
       - -n -g --encryption
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-cognitiveservices/12.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003?api-version=2021-04-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003","name":"cs_cli_test_000003","type":"Microsoft.CognitiveServices/accounts","etag":"\"010029b2-0000-3300-0000-60caef420000\"","systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2021-06-17T06:44:12.4765509Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-06-17T06:44:12.4765509Z"},"location":"centraluseuap","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://centraluseuap.api.cognitive.microsoft.com/","dateCreated":"2021-06-17T06:44:16.9975105Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedStorage"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"formRecognizer":"https://centraluseuap.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"identity":{"principalId":"555407aa-001b-4571-9e88-8380987dc41c","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned","userAssignedIdentities":{}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003","name":"cs_cli_test_000003","type":"Microsoft.CognitiveServices/accounts","etag":"\"1700306c-0000-0500-0000-6358a6210000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","internalId":"6af2a711f31943a98b470e651551c76c","dateCreated":"2022-10-26T03:14:40.4199908Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"identity":{"principalId":"8c4452f1-542a-4749-9688-4a7e5dd642c7","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:14:39.6013174Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:14:39.6013174Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2515'
+      - '2494'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Jun 2021 06:44:48 GMT
+      - Wed, 26 Oct 2022 03:15:11 GMT
       etag:
-      - '"010029b2-0000-3300-0000-60caef420000"'
+      - '"1700306c-0000-0500-0000-6358a6210000"'
       expires:
       - '-1'
       pragma:
@@ -470,29 +470,29 @@ interactions:
       ParameterSetName:
       - -n -g --encryption
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-cognitiveservices/12.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003?api-version=2021-04-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003","name":"cs_cli_test_000003","type":"Microsoft.CognitiveServices/accounts","etag":"\"01003bb2-0000-3300-0000-60caef610000\"","systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2021-06-17T06:44:12.4765509Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-06-17T06:44:49.279948Z"},"location":"centraluseuap","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://centraluseuap.api.cognitive.microsoft.com/","provisioningState":"Accepted","dateCreated":"2021-06-17T06:44:16.9975105Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"encryption":{"keySource":"Microsoft.CognitiveServices"},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedStorage"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"formRecognizer":"https://centraluseuap.api.cognitive.microsoft.com/"}},"identity":{"principalId":"555407aa-001b-4571-9e88-8380987dc41c","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned","userAssignedIdentities":{}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003","name":"cs_cli_test_000003","type":"Microsoft.CognitiveServices/accounts","etag":"\"17008b6c-0000-0500-0000-6358a6400000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","provisioningState":"Accepted","internalId":"6af2a711f31943a98b470e651551c76c","dateCreated":"2022-10-26T03:14:40.4199908Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"encryption":{"keySource":"Microsoft.CognitiveServices"},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/"}},"identity":{"principalId":"8c4452f1-542a-4749-9688-4a7e5dd642c7","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:14:39.6013174Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:15:12.5846271Z"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/centraluseuap/operationResults/513ea0ee-af02-45a1-87bf-4b75ebb358d0?api-version=2017-04-18
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/1283bbcb-8d4f-48b1-a46e-b7229b5d4973?api-version=2017-04-18
       cache-control:
       - no-cache
       content-length:
-      - '2570'
+      - '2550'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Jun 2021 06:44:49 GMT
+      - Wed, 26 Oct 2022 03:15:12 GMT
       etag:
-      - '"01003bb2-0000-3300-0000-60caef610000"'
+      - '"17008b6c-0000-0500-0000-6358a6400000"'
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/centraluseuap/operationResults/513ea0ee-af02-45a1-87bf-4b75ebb358d0?api-version=2017-04-18&operationResultResponseType=Location
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/1283bbcb-8d4f-48b1-a46e-b7229b5d4973?api-version=2017-04-18&operationResultResponseType=Location
       pragma:
       - no-cache
       server:
@@ -502,7 +502,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '462'
+      - '323'
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -522,21 +522,21 @@ interactions:
       ParameterSetName:
       - -n -g --encryption
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-cognitiveservices/12.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/centraluseuap/operationResults/513ea0ee-af02-45a1-87bf-4b75ebb358d0?api-version=2017-04-18
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/1283bbcb-8d4f-48b1-a46e-b7229b5d4973?api-version=2017-04-18
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/centraluseuap/operationResults/513ea0ee-af02-45a1-87bf-4b75ebb358d0","name":"513ea0ee-af02-45a1-87bf-4b75ebb358d0","status":"Succeeded","startTime":"2021-06-17T06:44:49Z","endTime":"2021-06-17T06:44:50Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/1283bbcb-8d4f-48b1-a46e-b7229b5d4973","name":"1283bbcb-8d4f-48b1-a46e-b7229b5d4973","status":"Succeeded","startTime":"2022-10-26T03:15:12Z","endTime":"2022-10-26T03:15:13Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '311'
+      - '312'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Jun 2021 06:45:19 GMT
+      - Wed, 26 Oct 2022 03:15:42 GMT
       expires:
       - '-1'
       pragma:
@@ -570,73 +570,23 @@ interactions:
       ParameterSetName:
       - -n -g --encryption
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-cognitiveservices/12.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003?api-version=2021-04-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003","name":"cs_cli_test_000003","type":"Microsoft.CognitiveServices/accounts","etag":"\"01003cb2-0000-3300-0000-60caef620000\"","systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2021-06-17T06:44:12.4765509Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-06-17T06:44:49.279948Z"},"location":"centraluseuap","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://centraluseuap.api.cognitive.microsoft.com/","provisioningState":"Succeeded","dateCreated":"2021-06-17T06:44:16.9975105Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"encryption":{"keySource":"Microsoft.CognitiveServices"},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedStorage"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"formRecognizer":"https://centraluseuap.api.cognitive.microsoft.com/"}},"identity":{"principalId":"555407aa-001b-4571-9e88-8380987dc41c","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned","userAssignedIdentities":{}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003","name":"cs_cli_test_000003","type":"Microsoft.CognitiveServices/accounts","etag":"\"1700916c-0000-0500-0000-6358a6410000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","provisioningState":"Succeeded","internalId":"6af2a711f31943a98b470e651551c76c","dateCreated":"2022-10-26T03:14:40.4199908Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"encryption":{"keySource":"Microsoft.CognitiveServices"},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/"}},"identity":{"principalId":"8c4452f1-542a-4749-9688-4a7e5dd642c7","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:14:39.6013174Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:15:12.5846271Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2571'
+      - '2551'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Jun 2021 06:45:19 GMT
+      - Wed, 26 Oct 2022 03:15:43 GMT
       etag:
-      - '"01003cb2-0000-3300-0000-60caef620000"'
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - istio-envoy
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-envoy-upstream-service-time:
-      - '11'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - cognitiveservices account show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-cognitiveservices/12.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003?api-version=2021-04-30
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003","name":"cs_cli_test_000003","type":"Microsoft.CognitiveServices/accounts","etag":"\"01003cb2-0000-3300-0000-60caef620000\"","systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2021-06-17T06:44:12.4765509Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-06-17T06:44:49.279948Z"},"location":"centraluseuap","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://centraluseuap.api.cognitive.microsoft.com/","provisioningState":"Succeeded","dateCreated":"2021-06-17T06:44:16.9975105Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"encryption":{"keySource":"Microsoft.CognitiveServices"},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedStorage"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"formRecognizer":"https://centraluseuap.api.cognitive.microsoft.com/"}},"identity":{"principalId":"555407aa-001b-4571-9e88-8380987dc41c","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned","userAssignedIdentities":{}}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '2571'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 17 Jun 2021 06:45:20 GMT
-      etag:
-      - '"01003cb2-0000-3300-0000-60caef620000"'
+      - '"1700916c-0000-0500-0000-6358a6410000"'
       expires:
       - '-1'
       pragma:
@@ -664,6 +614,56 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
+      - cognitiveservices account show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003?api-version=2022-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003","name":"cs_cli_test_000003","type":"Microsoft.CognitiveServices/accounts","etag":"\"1700916c-0000-0500-0000-6358a6410000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","provisioningState":"Succeeded","internalId":"6af2a711f31943a98b470e651551c76c","dateCreated":"2022-10-26T03:14:40.4199908Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"encryption":{"keySource":"Microsoft.CognitiveServices"},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://southcentralus.api.cognitive.microsoft.com/"}},"identity":{"principalId":"8c4452f1-542a-4749-9688-4a7e5dd642c7","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:14:39.6013174Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:15:12.5846271Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2551'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 26 Oct 2022 03:15:43 GMT
+      etag:
+      - '"1700916c-0000-0500-0000-6358a6410000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '8'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
       - cognitiveservices account delete
       Connection:
       - keep-alive
@@ -672,9 +672,9 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-mgmt-cognitiveservices/12.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003?api-version=2021-04-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000003?api-version=2022-10-01
   response:
     body:
       string: ''
@@ -684,7 +684,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 17 Jun 2021 06:45:22 GMT
+      - Wed, 26 Oct 2022 03:15:46 GMT
       expires:
       - '-1'
       pragma:
@@ -696,9 +696,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '85'
+      - '89'
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
     status:
       code: 200
       message: OK

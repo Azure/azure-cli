@@ -13,7 +13,7 @@ from knack.log import get_logger
 from datetime import datetime
 from time import sleep
 from dateutil.tz import tzutc  # pylint: disable=import-error
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError
 from azure.cli.core.util import parse_proxy_resource_id
@@ -46,22 +46,22 @@ class MigrationScenarioTest(ScenarioTest):
 
         if livemode:
             # Live mode values
-            target_subscription_id = "6a37df99-a9de-48c4-91e5-7e6ab00b2362"
+            target_subscription_id = "bb5358e5-fa78-4717-87e1-e57f1b4da5d1"
             migration_name = str(uuid.uuid4())
         else:
             # Mock test mode values
             target_subscription_id = "00000000-0000-0000-0000-000000000000"
             migration_name = "00000000-0000-0000-0000-000000000000"
 
-        target_resource_group_name = "raganesa-t-m-pg-1"
-        target_server_name = "raganesa-t-m-pg-1-vnet"
+        target_resource_group_name = "Sterling2MeruRG"
+        target_server_name = "target-server-longhaul"
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        properties_filepath = os.path.join(curr_dir, 'migrationVNet.json').replace('\\', '\\\\')
-         
+        properties_filepath = os.path.join(curr_dir, 'migrationPublic.json').replace('\\', '\\\\')
+
         # test check migration name availability -success
         result = self.cmd('{} flexible-server migration check-name-availability --subscription {} --resource-group {} --name {} --migration-name {} '
                           .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name)).get_output_in_json()
-        
+
         # test create migration - success
         result = self.cmd('{} flexible-server migration create --subscription {} --resource-group {} --name {} --migration-name {} --properties {} '
                           .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name, properties_filepath)).get_output_in_json()
@@ -82,7 +82,3 @@ class MigrationScenarioTest(ScenarioTest):
         # test update migration - error - no param
         result = self.cmd('{} flexible-server migration update --subscription {} --resource-group {} --name {} --migration-name {}'
                           .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name), expect_failure=True)
-
-        # test delete migration - success
-        result = self.cmd('{} flexible-server migration delete --subscription {} --resource-group {} --name {} --migration-name {} --yes'
-                          .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name)).get_output_in_json()

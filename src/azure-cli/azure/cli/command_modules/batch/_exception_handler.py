@@ -16,7 +16,7 @@ def batch_exception_handler(ex):
             message = ex.error.message.value
             if ex.error.values:
                 for detail in ex.error.values:
-                    message += "\n{}: {}".format(detail.key, detail.value)
+                    message += f"\n{detail.key}: {detail.value}"
             raise CLIError(message)
         except AttributeError:
             raise CLIError(ex)
@@ -25,6 +25,4 @@ def batch_exception_handler(ex):
     elif isinstance(ex, CloudError):
         raise CLIError(ex)
     else:
-        import sys
-        from six import reraise
-        reraise(*sys.exc_info())
+        raise ex

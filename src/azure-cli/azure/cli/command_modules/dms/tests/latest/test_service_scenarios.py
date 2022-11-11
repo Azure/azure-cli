@@ -81,13 +81,14 @@ class DmsServiceTests(ScenarioTest):
 
         self.cmd('az dms check-name -l {lname} -n {sname}', checks=self.name_available_checks)
 
-    @ResourceGroupPreparer(name_prefix='dms_cli_test_', location=location_name)
+    @ResourceGroupPreparer(name_prefix='dms_cli_test', location=location_name)
     @VirtualNetworkPreparer(name_prefix='dms.clitest.vn')
     def test_project_commands(self, resource_group):
         service_name = self.create_random_name(self.service_random_name_prefix, 15)
         project_name1 = self.create_random_name('project1', 15)
         project_name2 = self.create_random_name('project2', 15)
         project_name_pg = self.create_random_name('projectpg', 20)
+        project_name_mysql = self.create_random_name('projectmysql', 20)
 
         self.kwargs.update({
             'vsubnet_rg': self.vsubnet_rg,
@@ -103,7 +104,8 @@ class DmsServiceTests(ScenarioTest):
             'sname': service_name,
             'pname1': project_name1,
             'pname2': project_name2,
-            'pnamepg': project_name_pg
+            'pnamepg': project_name_pg,
+            'pnamemysql': project_name_mysql
         })
 
         # Set up container service
@@ -137,10 +139,25 @@ class DmsServiceTests(ScenarioTest):
         self.cmd('az dms project create -g {rg} --service-name {sname} -l {lname} -n {pnamepg} --source-platform PostgreSQL --target-platform AzureDbForPostgreSQL --tags Type=test Cli', checks=create_checks_pg)
         self.cmd('az dms project show -g {rg} --service-name {sname} -n {pnamepg}', create_checks_pg)
 
+        # Test MySQL project creation and deletion
+        create_checks_mysql = [JMESPathCheck('location', self.location_name),
+                               JMESPathCheck('resourceGroup', resource_group),
+                               JMESPathCheck('name', project_name_mysql),
+                               JMESPathCheck('sourcePlatform', 'MySQL'),
+                               JMESPathCheck('targetPlatform', 'AzureDbForMySQL'),
+                               JMESPathCheck('provisioningState', 'Succeeded'),
+                               JMESPathCheck('tags.Cli', ''),
+                               JMESPathCheck('tags.Type', 'test'),
+                               JMESPathCheck('type', 'Microsoft.DataMigration/services/projects')]
+        self.cmd(
+            'az dms project create -g {rg} --service-name {sname} -l {lname} -n {pnamemysql} --source-platform MySQL --target-platform AzureDbForMySQL --tags Type=test Cli',
+            checks=create_checks_mysql)
+        self.cmd('az dms project show -g {rg} --service-name {sname} -n {pnamemysql}', create_checks_mysql)
+
         create_checks_notags = [JMESPathCheck('tags', None)]
         self.cmd('az dms project create -g {rg} --service-name {sname} -l {lname} -n {pname2} --source-platform SQL --target-platform SQLDB', checks=create_checks_notags)
 
-        list_checks = [JMESPathCheck('length(@)', 3),
+        list_checks = [JMESPathCheck('length(@)', 4),
                        JMESPathCheck("length([?name == '{}'])".format(project_name1), 1)]
         self.cmd('az dms project list -g {rg} --service-name {sname}', list_checks)
 
@@ -153,7 +170,7 @@ class DmsServiceTests(ScenarioTest):
         # Clean up service for live runs
         self.cmd('az dms delete -g {rg} -n {sname} --delete-running-tasks true -y')
 
-    @ResourceGroupPreparer(name_prefix='dms_cli_test_', location=location_name)
+    @ResourceGroupPreparer(name_prefix='dms_cli_test', location=location_name)
     @VirtualNetworkPreparer(name_prefix='dms.clitest.vn')
     def test_task_commands(self, resource_group):
         from azure.cli.testsdk.checkers import JMESPathPatternCheck
@@ -181,6 +198,12 @@ class DmsServiceTests(ScenarioTest):
         target_connection_info_pg = "{ 'userName': 'testuser', 'password': 'testpassword', 'serverName': 'notarealtargetserver', 'databaseName': 'notarealdatabasename'}"
         database_options_pg = "[ { 'name': 'SourceDatabase1', 'target_database_name': 'TargetDatabase1', 'selectedTables': [ 'public.TestTableSource1', 'public.TestTableSource2'] } ]"
 
+        project_name_mysql = self.create_random_name('projectmysql', 20)
+        task_name_mysql = self.create_random_name('taskmysql', 20)
+        source_connection_info_mysql = "{ 'userName': 'testuser', 'password': 'testpassword', 'serverName': 'notarealsourceserver', 'databaseName': 'notarealdatabasename', 'encryptConnection': False }"
+        target_connection_info_mysql = "{ 'userName': 'testuser', 'password': 'testpassword', 'serverName': 'notarealtargetserver', 'databaseName': 'notarealdatabasename'}"
+        database_options_mysql = "{'make_source_server_read_only': 'true', 'selected_databases':[ { 'name': 'SourceDatabase1', 'target_database_name': 'TargetDatabase1', 'table_map': { 'sourceSchema.tableName': 'targetSchema.tableName'} } ], 'migration_level_settings': { 'DesiredRangesCount': '4', 'QueryTableDataRangeTaskCount':'8'}}"
+
         self.kwargs.update({
             'lname': self.location_name,
             'skuname': self.sku_name,
@@ -200,13 +223,35 @@ class DmsServiceTests(ScenarioTest):
             'tconnpg': target_connection_info_pg
         })
 
+        self.kwargs.update({
+            'lname': self.location_name,
+            'skuname': self.sku_name,
+            'vnetid': subnet['id'],
+            'sname': service_name,
+            'pname': project_name,
+            'pnamemysql': project_name_mysql,
+            'tname1': task_name1,
+            'tname2': task_name2,
+            'tnamemysql': task_name_mysql,
+            'dboptions1': database_options1,
+            'dboptions2': database_options2,
+            'dboptionsmysql': database_options_mysql,
+            'sconn': source_connection_info,
+            'sconnmysql': source_connection_info_mysql,
+            'tconn': target_connection_info,
+            'tconnmysql': target_connection_info_mysql
+        })
+
         # Set up container service and project
         self.cmd('az dms create -l {lname} -n {sname} -g {rg} --sku-name {skuname} --subnet {vnetid} --tags area=cli env=test')
         self.cmd('az dms project create -g {rg} --service-name {sname} -l {lname} -n {pname} --source-platform SQL --target-platform SQLDB')
         self.cmd('az dms project create -g {rg} --service-name {sname} -l {lname} -n {pnamepg} --source-platform PostgreSQL --target-platform AzureDbForPostgreSQL')
+        self.cmd('az dms project create -g {rg} --service-name {sname} -l {lname} -n {pnamemysql} --source-platform MySql --target-platform AzureDbForMySQL')
+
 
         self.cmd('az dms project task show -g {rg} --service-name {sname} --project-name {pname} -n {tname1}', expect_failure=True)
         self.cmd('az dms project task show -g {rg} --service-name {sname} --project-name {pnamepg} -n {tnamepg}', expect_failure=True)
+        self.cmd('az dms project task show -g {rg} --service-name {sname} --project-name {pnamemysql} -n {tnamemysql}', expect_failure=True)
 
         create_checks = [JMESPathCheck('name', task_name1),
                          JMESPathCheck('resourceGroup', resource_group),
@@ -233,6 +278,23 @@ class DmsServiceTests(ScenarioTest):
                             JMESPathCheck('properties.taskType', 'Migrate.PostgreSql.AzureDbForPostgreSql.SyncV2')]
         cancel_checks_pg = [JMESPathCheck('name', task_name_pg),
                             JMESPathPatternCheck('properties.state', 'Cancel(?:ed|ing)')]
+        create_checks_mysql = [JMESPathCheck('name', task_name_mysql),
+                               JMESPathCheck('resourceGroup', resource_group),
+                               JMESPathCheck('type', 'Microsoft.DataMigration/services/projects/tasks'),
+                               JMESPathCheck('length(properties.input.selectedDatabases)', 1),
+                               JMESPathCheck('length(properties.input.selectedDatabases[0])', 3),
+                               JMESPathCheck('length(properties.input.selectedDatabases[0].tableMap)', 1),
+                               JMESPathCheck('length(properties.input.optionalAgentSettings)', 2),
+                               JMESPathCheck('properties.input.makeSourceServerReadOnly', True),
+                               JMESPathCheck('properties.input.sourceConnectionInfo.serverName',
+                                             'notarealsourceserver'),
+                               JMESPathCheck('properties.input.sourceConnectionInfo.encryptConnection', False),
+                               JMESPathCheck('properties.input.targetConnectionInfo.serverName',
+                                             'notarealtargetserver'),
+                               JMESPathCheck('properties.input.targetConnectionInfo.encryptConnection', True),
+                               JMESPathCheck('properties.taskType', 'Migrate.MySql.AzureDbForMySql')]
+        cancel_checks_mysql = [JMESPathCheck('name', task_name_mysql),
+                               JMESPathPatternCheck('properties.state', 'Cancel(?:ed|ing)')]
 
         # SQL Tests
         self.cmd('az dms project task create --task-type OfflineMigration --database-options-json "{dboptions1}" -n {tname1} --project-name {pname} -g {rg} --service-name {sname} --source-connection-json "{sconn}" --target-connection-json "{tconn}"', checks=create_checks)
@@ -243,6 +305,11 @@ class DmsServiceTests(ScenarioTest):
         self.cmd('az dms project task create --task-type OnlineMigration --database-options-json "{dboptionspg}" -n {tnamepg} --project-name {pnamepg} -g {rg} --service-name {sname} --source-connection-json "{sconnpg}" --target-connection-json "{tconnpg}"', checks=create_checks_pg)
         self.cmd('az dms project task show -g {rg} --service-name {sname} --project-name {pnamepg} -n {tnamepg}', checks=create_checks_pg)
         self.cmd('az dms project task cancel -g {rg} --service-name {sname} --project-name {pnamepg} -n {tnamepg}', checks=cancel_checks_pg)
+
+        # MySQL Tests
+        self.cmd('az dms project task create --task-type OfflineMigration --database-options-json "{dboptionsmysql}" -n {tnamemysql} --project-name {pnamemysql} -g {rg} --service-name {sname} --source-connection-json "{sconnmysql}" --target-connection-json "{tconnmysql}"', checks=create_checks_mysql)
+        self.cmd('az dms project task show -g {rg} --service-name {sname} --project-name {pnamemysql} -n {tnamemysql}', checks=create_checks_mysql)
+        self.cmd('az dms project task cancel -g {rg} --service-name {sname} --project-name {pnamemysql} -n {tnamemysql}', checks=cancel_checks_mysql)
 
         self.cmd('az dms project task create --task-type OfflineMigration --database-options-json "{dboptions2}" -n {tname2} --project-name {pname} -g {rg} --service-name {sname} --source-connection-json "{sconn}" --target-connection-json "{tconn}"')
 

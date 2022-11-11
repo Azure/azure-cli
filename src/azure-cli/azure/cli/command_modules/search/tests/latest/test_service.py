@@ -39,6 +39,23 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('replicaCount', '{replica_count}'),
                     self.check('partitionCount', '{partition_count}')])
 
+        self.kwargs.update({
+            'sku_name': 'standard3',
+            'name': self.create_random_name(prefix='test', length=24),
+            'replica_count': 1,
+            'partition_count': 1,
+            'hosting_mode': 'highDensity'
+        })
+
+        self.cmd(
+            'az search service create -n {name} -g {rg} --sku {sku_name}'
+            ' --replica-count {replica_count} --partition-count {partition_count} --hosting-mode {hosting_mode}',
+            checks=[self.check('name', '{name}'),
+                    self.check('sku.name', '{sku_name}'),
+                    self.check('replicaCount', '{replica_count}'),
+                    self.check('partitionCount', '{partition_count}'),
+                    self.check('hostingMode', '{hosting_mode}')])
+
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
     def test_service_create_multi_partition(self, resource_group):
         self.kwargs.update({

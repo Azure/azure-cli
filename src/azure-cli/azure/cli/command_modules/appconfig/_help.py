@@ -26,6 +26,38 @@ examples:
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --enable-public-network --disable-local-auth
 """
 
+helps['appconfig list-deleted'] = """
+type: command
+short-summary: List all deleted, but not yet purged App Configurations.
+examples:
+  - name: List all deleted, but not yet purged App Configurations.
+    text: az appconfig list-deleted
+"""
+
+helps['appconfig show-deleted'] = """
+type: command
+short-summary: Show properties of a deleted, but not yet purged App Configuration.
+examples:
+  - name: Show properties of a deleted App Configuration named 'sample-app-configuration'.
+    text: az appconfig show-deleted --name sample-app-configuration
+"""
+
+helps['appconfig purge'] = """
+type: command
+short-summary: Permanently delete an App Configuration. Aka 'purge' the deleted App Configuration.
+examples:
+  - name: Purge a deleted App Configuration named 'sample-app-configuration'.
+    text: az appconfig purge --name sample-app-configuration
+"""
+
+helps['appconfig recover'] = """
+type: command
+short-summary: Recover a previously deleted, but not yet purged App Configuration.
+examples:
+  - name: Recover a deleted App Configuration named 'sample-app-configuration'.
+    text: az appconfig recover --name sample-app-configuration
+"""
+
 helps['appconfig identity'] = """
 type: group
 short-summary: Managed identities for App Configurations.
@@ -125,6 +157,8 @@ examples:
     text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration --key * --label * --dest-label ExportedKeys
   - name: Export all keys to another App Configuration using your 'az login' credentials.
     text: az appconfig kv export -d appconfig --endpoint https://myappconfiguration.azconfig.io --auth-mode login --dest-endpoint https://anotherappconfiguration.azconfig.io --dest-auth-mode login --key * --label * --preserve-labels
+  - name: Export all keys and feature flags with label test using appconfig/kvset profile.
+    text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json --profile appconfig/kvset
 """
 
 helps['appconfig kv import'] = """
@@ -145,7 +179,8 @@ examples:
     text: az appconfig kv import -n MyAppConfiguration -s file --path D:/abc.json --format json --separator . --content-type application/json
   - name: Import all keys to another App Configuration using your 'az login' credentials.
     text: az appconfig kv import -s appconfig --endpoint https://myappconfiguration.azconfig.io --auth-mode login --src-endpoint https://anotherappconfiguration.azconfig.io --src-auth-mode login --src-key * --src-label * --preserve-labels
-
+  - name: Import all keys and feature flags from a file using the appconfig/kvset format.
+    text: az appconfig kv import -n MyAppConfiguration -s file --path D:/abc.json --format json --profile appconfig/kvset
 """
 
 helps['appconfig kv list'] = """
@@ -261,6 +296,43 @@ examples:
     text: az appconfig revision list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --datetime "2019-05-01T11:24:12Z"
   - name: List revision history for all items and query only key, value and last_modified.
     text: az appconfig revision list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --fields key value last_modified
+"""
+
+helps['appconfig replica'] = """
+type: group
+short-summary: Manage replicas of an App Configuration.
+"""
+
+helps['appconfig replica list'] = """
+type: command
+short-summary: List replicas of an App Configuration.
+examples:
+  - name: List replicas of an App Configuration.
+    text: az appconfig replica list --store-name MyAppConfiguration
+"""
+
+helps['appconfig replica show'] = """
+type: command
+short-summary: Show details of a replica of an App Configuration.
+examples:
+  - name: Show details of a replica of an App Configuration.
+    text: az appconfig replica show --store-name MyAppConfiguration --name MyReplicaName
+"""
+
+helps['appconfig replica create'] = """
+type: command
+short-summary: Create a new replica of an App Configuration.
+examples:
+  - name: Create a new replica of an App Configuration at a location.
+    text: az appconfig replica create --store-name MyAppConfiguration --name MyReplicaName --location westus
+"""
+
+helps['appconfig replica delete'] = """
+type: command
+short-summary: Delete a replica of an App Configuration.
+examples:
+  - name: Delete a replica of an App Configuration.
+    text: az appconfig replica delete --store-name MyAppConfiguration --name MyReplicaName
 """
 
 helps['appconfig show'] = """
@@ -458,6 +530,24 @@ helps['appconfig feature filter add'] = """
           text:
             az appconfig feature filter add -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters ArrayParam=[1,2,3]
     """
+
+helps['appconfig feature filter update'] = """
+  type: command
+  short-summary: Update a filter in a feature flag.
+  examples:
+      - name: Update the filter for feature 'color' with label MyLabel with name 'MyFilter' and 2 parameters.
+        text:
+          az appconfig feature filter update -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters Name=\\"Value\\" Name2=\\"Value2\\"
+      - name: Update the filter at index 2 (zero-based index) for feature 'color' with label MyLabel with name 'MyFilter' and 2 parameters.
+        text:
+          az appconfig feature filter update -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters Name=\\"Value\\" Name2=\\"Value2\\" --index 2
+      - name: Update a filter for feature 'color' with label MyLabel and filter name 'MyFilter' with no parameters
+        text:
+          az appconfig feature filter update -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter
+      - name: Update the filter for feature 'color' with label MyLabel with name 'MyFilter' and array parameters.
+        text:
+          az appconfig feature filter update -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters ArrayParam=[1,2,3]
+  """
 
 helps['appconfig feature filter delete'] = """
     type: command

@@ -10,6 +10,11 @@ from knack.help_files import helps  # pylint: disable=unused-import
 helps['login'] = """
 type: command
 short-summary: Log in to Azure.
+long-summary: >-
+    By default, this command logs in with a user account. CLI will try to launch a web browser to log in interactively.
+    If a web browser is not available, CLI will fall back to device code login.
+
+    To login with a service principal, specify --service-principal.
 examples:
 - name: Log in interactively.
   text: az login

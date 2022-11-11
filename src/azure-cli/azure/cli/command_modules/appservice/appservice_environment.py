@@ -19,7 +19,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import (get_mgmt_service_client, get_subscription_id)
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 from azure.cli.core.util import (sdk_no_wait, random_string)
-from azure.cli.core.azclierror import (ResourceNotFoundError, ValidationError, CommandNotFoundError,
+from azure.cli.core.azclierror import (ResourceNotFoundError, ValidationError,
                                        MutuallyExclusiveArgumentError)
 from knack.log import get_logger
 from msrestazure.tools import (parse_resource_id, is_valid_resource_id, resource_id)
@@ -97,24 +97,32 @@ def delete_appserviceenvironment(cmd, name, resource_group_name=None, no_wait=Fa
 
 
 def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_scale_factor=None,
-                                 front_end_sku=None, no_wait=False):
+                                 front_end_sku=None, allow_new_private_endpoint_connections=None, no_wait=False):
     ase_client = _get_ase_client_factory(cmd.cli_ctx)
     if resource_group_name is None:
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
     ase_def = ase_client.get(resource_group_name, name)
-    if ase_def.kind.lower() != 'asev2':
-        raise CommandNotFoundError('Only ASEv2 currently supports update')
+    if ase_def.kind.lower() == 'asev3':
+        if allow_new_private_endpoint_connections is not None:
+            ase_networking_conf = ase_client.get_ase_v3_networking_configuration(resource_group_name, name)
+            if ase_networking_conf.allow_new_private_endpoint_connections != allow_new_private_endpoint_connections:
+                ase_networking_conf.allow_new_private_endpoint_connections = allow_new_private_endpoint_connections
+                return ase_client.update_ase_networking_configuration(resource_group_name=resource_group_name,
+                                                                      name=name,
+                                                                      ase_networking_configuration=ase_networking_conf)
+            return ase_networking_conf
+    elif ase_def.kind.lower() == 'asev2':
+        if front_end_scale_factor is not None or front_end_sku is not None:
+            worker_sku = _map_worker_sku(front_end_sku)
+            ase_def.internal_load_balancing_mode = None  # Workaround issue with flag enums in Swagger
+            if worker_sku:
+                ase_def.multi_size = worker_sku
+            if front_end_scale_factor:
+                ase_def.front_end_scale_factor = front_end_scale_factor
 
-    worker_sku = _map_worker_sku(front_end_sku)
-    ase_def.worker_pools = ase_def.worker_pools or []  # v1 feature, but cannot be null
-    ase_def.internal_load_balancing_mode = None  # Workaround issue with flag enums in Swagger
-    if worker_sku:
-        ase_def.multi_size = worker_sku
-    if front_end_scale_factor:
-        ase_def.front_end_scale_factor = front_end_scale_factor
-
-    return sdk_no_wait(no_wait, ase_client.begin_create_or_update, resource_group_name=resource_group_name,
-                       name=name, hosting_environment_envelope=ase_def)
+            return sdk_no_wait(no_wait, ase_client.begin_create_or_update, resource_group_name=resource_group_name,
+                               name=name, hosting_environment_envelope=ase_def)
+    logger.warning('No updates were applied. The version of ASE may not be applicable to this update.')
 
 
 def list_appserviceenvironment_addresses(cmd, name, resource_group_name=None):
@@ -123,8 +131,7 @@ def list_appserviceenvironment_addresses(cmd, name, resource_group_name=None):
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
     ase = ase_client.get(resource_group_name, name)
     if ase.kind.lower() == 'asev3':
-        # return ase_client.get_ase_v3_networking_configuration(resource_group_name, name) # pending SDK update
-        raise CommandNotFoundError('list-addresses is currently not supported for ASEv3.')
+        return ase_client.get_ase_v3_networking_configuration(resource_group_name, name)
     return ase_client.get_vip_info(resource_group_name, name)
 
 
@@ -145,11 +152,12 @@ def create_ase_inbound_services(cmd, resource_group_name, name, subnet, vnet_nam
         raise ValidationError('Private DNS Zone is not relevant for External ASE.')
 
     if ase.kind.lower() == 'asev3':
-        # pending SDK update (ase_client.get_ase_v3_networking_configuration(resource_group_name, name))
-        raise CommandNotFoundError('create-inbound-services is currently not supported for ASEv3.')
+        ase_network_conf = ase_client.get_ase_v3_networking_configuration(resource_group_name, name)
+        inbound_ip_address = ase_network_conf.internal_inbound_ip_addresses[0]
+    else:
+        ase_vip_info = ase_client.get_vip_info(resource_group_name, name)
+        inbound_ip_address = ase_vip_info.internal_ip_address
 
-    ase_vip_info = ase_client.get_vip_info(resource_group_name, name)
-    inbound_ip_address = ase_vip_info.internal_ip_address
     inbound_subnet_id = _validate_subnet_id(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
     inbound_vnet_id = _get_vnet_id_from_subnet(cmd.cli_ctx, inbound_subnet_id)
 
@@ -205,7 +213,8 @@ def _get_resource_group_name_from_ase(ase_client, ase_name):
     ase_found = False
     for ase in ase_list:
         if ase.name.lower() == ase_name.lower():
-            resource_group = ase.resource_group
+            ase_id_parts = parse_resource_id(ase.id)
+            resource_group = ase_id_parts['resource_group']
             ase_found = True
             break
     if not ase_found:

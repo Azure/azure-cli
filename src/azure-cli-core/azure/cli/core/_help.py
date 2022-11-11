@@ -62,7 +62,7 @@ class CLIPrintMixin(CLIHelp):
     def _print_detailed_help(self, cli_name, help_file):
         CLIPrintMixin._print_extensions_msg(help_file)
         super(CLIPrintMixin, self)._print_detailed_help(cli_name, help_file)
-        self._print_az_find_message(help_file.command, self.cli_ctx.enable_color)
+        self._print_az_find_message(help_file.command)
 
     @staticmethod
     def _get_choices_defaults_sources_str(p):
@@ -88,12 +88,9 @@ class CLIPrintMixin(CLIHelp):
             print('')
 
     @staticmethod
-    def _print_az_find_message(command, enable_color):
-        from colorama import Style
+    def _print_az_find_message(command):
         indent = 0
-        message = 'For more specific examples, use: az find "az {}"'.format(command)
-        if enable_color:
-            message = Style.BRIGHT + message + Style.RESET_ALL
+        message = 'To search AI knowledge base for examples, use: az find "az {}"'.format(command)
         _print_indent(message + '\n', indent)
 
     @staticmethod
@@ -174,13 +171,6 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         self._print_detailed_help(cli_name, help_file)
         from azure.cli.core.util import show_updates_available
         show_updates_available(new_line_after=True)
-        show_link = self.cli_ctx.config.getboolean('output', 'show_survey_link', True)
-        from azure.cli.core.commands.constants import (SURVEY_PROMPT_STYLED, UX_SURVEY_PROMPT_STYLED)
-        from azure.cli.core.style import print_styled_text
-        if show_link:
-            print_styled_text(SURVEY_PROMPT_STYLED)
-            if not nouns:
-                print_styled_text(UX_SURVEY_PROMPT_STYLED)
 
     def get_examples(self, command, parser, is_group):
         """Get examples of a certain command from the help file.

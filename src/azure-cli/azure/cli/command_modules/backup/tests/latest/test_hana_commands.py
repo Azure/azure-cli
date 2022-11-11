@@ -11,23 +11,23 @@ import json
 import os
 
 
-id_hana = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/SAPHANA-CLITEST-RG/providers/Microsoft.Compute/virtualMachines/saphana-clitest-vm'
-item_id_hana = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;saphana-clitest-rg;saphana-clitest-vm/protectedItems/SAPHanaDatabase;hdb;hdb'
+id_hana = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/saphana-clitest-rg/providers/Microsoft.Compute/virtualMachines/saphana-clitestvm-donotuse2'
+item_id_hana = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourcegroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;saphana-clitest-rg;saphana-clitestvm-donotuse2/protectedItems/SAPHanaDatabase;hxe;hxe'
 sub_hana = '38304e13-357e-405e-9e9a-220351dcce8c'
 rg_hana = 'saphana-clitest-rg'
-vault_hana = 'saphana-clitest-vault'
-container_hana = 'VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm'
-container_friendly_hana = 'saphana-clitest-vm'
-item1_hana = 'SAPHanaDatabase;hdb;hdb'
-item2_hana = 'SYSTEMDB'
-
+vault_hana = 'saphana-clitestvault-donotuse'
+container_hana = 'VMAppContainer;Compute;saphana-clitest-rg;saphana-clitestvm-donotuse2'
+container_friendly_hana = 'saphana-clitestvm-donotuse2'
+server_friendly_name = 'saphana-clitestvm-donotuse2'
+item_name = 'saphanadatabase;hxe;systemdb'
+item_friendly_name = 'systemdb'
 
 class BackupTests(ScenarioTest, unittest.TestCase):
 
     # SAP HANA workload tests start here
     # Please make sure you have the following setup in place before running the tests -
 
-    # For the tests using akneema-hana-ccy and akneema-vault-ccy -
+    # For the tests using saphana-clitestvm-donotuse2 and saphana-clitestvault-donotuse -
     # Each test will register the container at the start and unregister at the end of the test
     # Make sure that the container is not already registered since the start of the test
 
@@ -88,11 +88,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         if is_restorable:
             # # Integrated Restore
             self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode OriginalWorkloadRestore --item-name {item} --container-name {container} --rp-name {rp_restore}').get_output_in_json(), separators=(',', ':'))
-            with open("recoveryconfig.json", "w") as f:
+            with open("recoveryconfig_hana_archive.json", "w") as f:
                 f.write(self.kwargs['rc'])
 
             # # Trigger Restore
-            self.cmd('backup restore restore-azurewl -g {rg} -v {vault} --recovery-config recoveryconfig.json --rehydration-priority High', checks=[
+            self.cmd('backup restore restore-azurewl -g {rg} -v {vault} --recovery-config recoveryconfig_hana_archive.json --rehydration-priority High', checks=[
                 self.check("properties.operation", "RestoreWithRehydrate"),
                 self.check("properties.status", "InProgress"),
                 self.check("resourceGroup", '{rg}')
@@ -153,10 +153,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.kwargs.update({
             'vault': vault_hana,
-            'policy': 'saphana-clitest-policy',
+            'policy': 'saphana-clitestpolicy-donotuse',
             'wt': 'SAPHANA',
             'sub': sub_hana,
-            'default': 'saphana-clitest-policy',
+            'default': 'saphana-clitestpolicy-donotuse',
             'rg': rg_hana,
             'pit': 'HANADataBase',
             'policy_new': self.create_random_name('clitest-policy', 24)
@@ -199,16 +199,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs.update({
             'vault': vault_hana,
             'name': container_hana,
-            'fname': 'saphana-clitest-vm',
-            'policy': 'saphana-clitest-policy',
+            'fname': server_friendly_name,
+            'policy': 'saphana-clitestpolicy-donotuse',
             'wt': 'SAPHANA',
             'sub': sub_hana,
-            'default': 'saphana-clitest-policy',
+            'default': 'saphana-clitestpolicy-donotuse',
             'rg': rg_hana,
-            'item': "saphanadatabase;hdb;systemdb",
-            'fitem': "systemdb",
+            'item': item_name,
+            'fitem': item_friendly_name,
             'id': id_hana,
-            'item_id': item_id_hana,
             'pit': 'SAPHanaDatabase'
         })
         self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
@@ -276,7 +275,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         item1_json = self.cmd('backup item show -g {rg} -v {vault} -c {container1} -n {item} --backup-management-type AzureWorkload --workload-type SAPHanaDatabase').get_output_in_json()
-        self.assertIn("saphana-clitest-policy".lower(), item1_json['properties']['policyId'].lower())
+        self.assertIn("saphana-clitestpolicy-donotuse".lower(), item1_json['properties']['policyId'].lower())
 
         self.cmd('backup protection disable -v {vault} -g {rg} -c {container1} --backup-management-type AzureWorkload --workload-type {wt} -i {item} -y --delete-backup-data true')
 
@@ -291,15 +290,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs.update({
             'vault': vault_hana,
             'name': container_hana,
-            'fname': 'saphana-clitest-vm',
-            'policy': 'saphana-clitest-policy',
+            'fname': server_friendly_name,
+            'policy': 'saphana-clitestpolicy-donotuse',
             'wt': 'SAPHANA',
             'sub': sub_hana,
-            'default': 'saphana-clitest-policy',
+            'default': 'saphana-clitestpolicy-donotuse',
             'rg': rg_hana,
-            'item': item1_hana,
             'id': id_hana,
-            'item_id': item_id_hana,
             'pit': 'SAPHanaDatabase',
             'protectable_item_name': 'SYSTEMDB',
             'pit_hana': 'SAPHanaDatabase'
@@ -336,15 +333,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vault': vault_hana,
             'name': container_hana,
             'rg': resource_group,
-            'fname': 'saphana-clitest-vm',
-            'policy': 'saphana-clitest-policy',
+            'fname': server_friendly_name,
+            'policy': 'saphana-clitestpolicy-donotuse',
             'wt': 'SAPHANA',
             'sub': sub_hana,
-            'item': 'saphanadatabase;hdb;systemdb',
+            'item': item_name,
             'pit': "SAPHanaDatabase",
-            'item_id': item_id_hana,
             'id': id_hana,
-            'fitem': "systemdb",
+            'fitem': item_friendly_name,
         })
         self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
 
@@ -385,18 +381,17 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs.update({
             'vault': vault_hana,
             'name': container_hana,
-            'fname': 'saphana-clitest-vm',
-            'policy': 'saphana-clitest-policy',
+            'fname': server_friendly_name,
+            'policy': 'saphana-clitestpolicy-donotuse',
             'wt': 'SAPHANA',
             'sub': sub_hana,
-            'default': 'saphana-clitest-policy',
+            'default': 'saphana-clitestpolicy-donotuse',
             'rg': rg_hana,
-            'item': "saphanadatabase;hdb;systemdb",
-            'fitem': "systemdb",
+            'item': item_name,
+            'fitem': item_friendly_name,
             'id': id_hana,
-            'item_id': item_id_hana,
             'pit': "SAPHanaDatabase",
-            'entityFriendlyName': 'SYSTEMDB [saphana-clitest-vm]'
+            'entityFriendlyName': 'SYSTEMDB [saphana-clitestvm-donotuse2]'
         })
         self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
 
@@ -413,11 +408,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
         self.kwargs['backup_job'] = self.cmd('backup protection backup-now -v {vault} -g {rg} -i {item} -c {name} --backup-type Full --enable-compression false', checks=[
-            self.check("properties.entityFriendlyName", '{entityFriendlyName}'),
-            self.check("properties.operation", "Backup (Full)"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
         ]).get_output_in_json()
+
+        self.assertIn(self.kwargs['fitem'], self.kwargs['backup_job']['properties']['entityFriendlyName'].lower())
+        self.assertIn("Backup", self.kwargs['backup_job']['properties']['operation'])
 
         self.kwargs['job'] = self.kwargs['backup_job']['name']
 
@@ -458,18 +454,16 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs.update({
             'vault': vault_hana,
             'name': container_hana,
-            'fname': 'saphana-clitest-vm',
-            'policy': 'saphana-clitest-policy',
+            'fname': server_friendly_name,
+            'policy': 'saphana-clitestpolicy-donotuse',
             'wt': 'SAPHANA',
             'sub': sub_hana,
-            'default': 'saphana-clitest-policy',
+            'default': 'saphana-clitestpolicy-donotuse',
             'rg': resource_group,
-            'item': "saphanadatabase;hdb;systemdb",
-            'fitem': "systemdb",
+            'item': item_name,
+            'fitem': item_friendly_name,
             'id': id_hana,
-            'item_id': item_id_hana,
             'pit': 'SAPHanaDatabase',
-            'entityFriendlyName': 'SYSTEMDB [saphana-clitest-vm]',
             'tpit': 'HANAInstance',
             'titem': 'HDB'
         })
@@ -488,10 +482,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
         self.kwargs['backup_job'] = self.cmd('backup protection backup-now -v {vault} -g {rg} -c {name} -i {item} --backup-type Full --enable-compression false', checks=[
-            self.check("properties.operation", "Backup (Full)"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
         ]).get_output_in_json()
+
+        self.assertIn("Backup", self.kwargs['backup_job']['properties']['operation'])
 
         self.kwargs['job'] = self.kwargs['backup_job']['name']
 
@@ -510,10 +505,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['rp'] = self.kwargs['rp']['name']
 
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode AlternateWorkloadRestore --rp-name {rp} --item-name {item} --container-name {container1} --target-item-name {titem} --target-server-type {tpit} --target-server-name {fname} --workload-type {wt}').get_output_in_json(), separators=(',', ':'))
-        with open("recoveryconfig.json", "w") as f:
+        with open("recoveryconfig_hana_restore.json", "w") as f:
             f.write(self.kwargs['rc'])
 
-        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json', checks=[
+        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig_hana_restore.json', checks=[
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
@@ -524,10 +519,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup job wait -v {vault} -g {rg} -n {job}')
 
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode OriginalWorkloadRestore --item-name {item} --container-name {container1} --rp-name {rp}').get_output_in_json(), separators=(',', ':'))
-        with open("recoveryconfig.json", "w") as f:
+        with open("recoveryconfig_hana_restore.json", "w") as f:
             f.write(self.kwargs['rc'])
 
-        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json', checks=[
+        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig_hana_restore.json', checks=[
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')

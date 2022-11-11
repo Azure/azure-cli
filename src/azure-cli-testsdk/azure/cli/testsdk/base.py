@@ -11,18 +11,20 @@ import inspect
 import unittest
 import tempfile
 
-from azure_devtools.scenario_tests import (IntegrationTestBase, ReplayableTest, SubscriptionRecordingProcessor,
-                                           OAuthRequestResponsesFilter, LargeRequestBodyProcessor,
-                                           LargeResponseBodyProcessor, LargeResponseBodyReplacer, RequestUrlNormalizer,
-                                           live_only, DeploymentNameReplacer, patch_time_sleep_api, create_random_name)
+from .scenario_tests import (IntegrationTestBase, ReplayableTest, SubscriptionRecordingProcessor,
+                             LargeRequestBodyProcessor,
+                             LargeResponseBodyProcessor, LargeResponseBodyReplacer, RequestUrlNormalizer,
+                             GeneralNameReplacer,
+                             live_only, DeploymentNameReplacer, patch_time_sleep_api, create_random_name)
 
-from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, ENV_SKIP_ASSERT
+from .scenario_tests.const import MOCKED_SUBSCRIPTION_ID, ENV_SKIP_ASSERT
 
 from .patches import (patch_load_cached_subscriptions, patch_main_exception_handler,
                       patch_retrieve_token_for_user, patch_long_run_operation_delay,
                       patch_progress_controller, patch_get_current_system_username)
 from .exceptions import CliExecutionError
-from .utilities import find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer, GeneralNameReplacer
+from .utilities import (find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer,
+                        MSGraphClientPasswordReplacer, AADAuthRequestFilter)
 from .reverse_dependency import get_dummy_cli
 
 logger = logging.getLogger('azure.cli.testsdk')
@@ -84,10 +86,11 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         self.name_replacer = GeneralNameReplacer()
         self.kwargs = {}
         self.test_guid_count = 0
-        self._processors_to_reset = [StorageAccountKeyReplacer(), GraphClientPasswordReplacer()]
+        self._processors_to_reset = [StorageAccountKeyReplacer(), GraphClientPasswordReplacer(),
+                                     MSGraphClientPasswordReplacer()]
         default_recording_processors = [
             SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
-            OAuthRequestResponsesFilter(),
+            AADAuthRequestFilter(),
             LargeRequestBodyProcessor(),
             LargeResponseBodyProcessor(),
             DeploymentNameReplacer(),
@@ -193,12 +196,12 @@ class LocalContextScenarioTest(ScenarioTest):
         super(LocalContextScenarioTest, self).setUp()
         self.cli_ctx.local_context.initialize()
         os.chdir(self.working_dir)
-        self.cmd('local-context on')
+        self.cmd('config param-persist on')
 
     def tearDown(self):
         super(LocalContextScenarioTest, self).tearDown()
-        self.cmd('local-context off')
-        self.cmd('local-context delete --all --purge -y')
+        self.cmd('config param-persist off')
+        self.cmd('config param-persist delete --all --purge -y')
         os.chdir(self.original_working_dir)
         if os.path.exists(self.working_dir):
             import shutil
@@ -278,7 +281,7 @@ class ExecutionResult(object):
         return self.json_value
 
     def _in_process_execute(self, cli_ctx, command, expect_failure=False):
-        from six import StringIO
+        from io import StringIO
         from vcr.errors import CannotOverwriteExistingCassetteException
 
         if command.startswith('az '):

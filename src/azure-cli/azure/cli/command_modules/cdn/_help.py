@@ -710,6 +710,10 @@ examples:
 helps['cdn waf'] = """
 type: group
 short-summary: Manage CDN WAF.
+long-summary: >
+    WAF on Azure CDN from Microsoft is currently in public preview and is provided with a preview service level agreement.
+    Certain features may not be supported or may have constrained capabilities.
+    See the Supplemental Terms of Use for Microsoft Azure Previews (https://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms/) for details.
 """
 
 helps['cdn waf policy'] = """
@@ -1050,7 +1054,7 @@ examples:
 
 helps['afd'] = """
 type: group
-short-summary: Manage Azure Front Door.
+short-summary: Manage Azure Front Door Standard/Premium. For classical Azure Front Door, please refer https://docs.microsoft.com/en-us/cli/azure/network/front-door?view=azure-cli-latest
 """
 
 helps['afd profile'] = """
@@ -1132,7 +1136,7 @@ examples:
 
 helps['afd origin-group update'] = """
 type: command
-short-summary: Creates a new origin group within the specified profile.
+short-summary: Updates an existing origin group within the specified profile.
 examples:
   - name: Update the probe setting of the specified origin group.
     text: >
@@ -1198,9 +1202,11 @@ helps['afd custom-domain create'] = """
 type: command
 short-summary: Create a custom domain within the specified profile.
 long-summary: >
-    Your need to create a DNS TXT record to prove the custom domain's ownership to make the operation successful.
-    Suggest to use "--no-wait" if the DNS update take a lot of time. Use "az afd custom-domain show" to obtain the validation token and
-    create a DNS TXT record for record "_dnsauth.{your custom domain}" with the validation token as its value.
+    The operation will complete with a created custom domain with its validation state set to 'Pending.
+    You have to create a DNS TXT record "_dnsauth.<your_custom_domain>" with the validation token as its value to make the domain's validation state become 'Approved' to server traffic.
+    Use "az afd custom-domain show" to obtain the validation token.
+    The validation token will expire after 7 days and your domain's validation state will become "Timeout" if no correct TXT record detected in that period.
+    You could use 'az afd custom-domain regenerate-validation-token' to regenerate the validation token to restart the validation process.
 examples:
   - name: Create a custom domain that uses AFD managed cerficate for SSL/TLS encryption.
     text: >
@@ -1259,6 +1265,14 @@ examples:
     text: az afd custom-domain wait -g MyResourceGroup --profile-name MyProfle --custom-domain-name MyCustomDomain --created
 """
 
+helps['afd custom-domain regenerate-validation-token'] = """
+type: command
+short-summary: Regenerate the domain validation token to restart the validation process.
+examples:
+  - name: Regenerate the domain validation token.
+    text: az afd custom-domain regenerate-validation-token -g MyResourceGroup --profile-name MyProfle --custom-domain-name MyCustomDomain
+"""
+
 helps['afd endpoint'] = """
 type: group
 short-summary: Manage AFD endpoints within the specified profile.
@@ -1269,19 +1283,23 @@ long-summary: >
 helps['afd endpoint create'] = """
 type: command
 short-summary: Creates an endpoint within the specified profile.
+long-summary: >
+    Azure Front Door will generate a deterministic DNS domain based on the customer input endpoint name in the form of <endpoint name>-<hash>.z01.azurefd.net,
+    the deterministic DNS domain could be reused within the tenant, subscription, or resource group depends on the --name-reuse-scope option.
+    Customer will get the same DNS domain in the reuse scope if the endpoint get deleted and recreated.
 examples:
-  - name: Creates an enabled endpoint with origin response timeout set to 60 seconds.
+  - name: Creates an enabled endpoint
     text: >
-        az afd endpoint create -g group --endpoint-name endpoint1 --profile-name profile --origin-response-timeout-seconds 60 --enabled-state Enabled
+        az afd endpoint create -g group --endpoint-name endpoint1 --profile-name profile --enabled-state Enabled
 """
 
 helps['afd endpoint update'] = """
 type: command
 short-summary: Update an endpoint within the specified profile.
 examples:
-  - name: Update an endpoint's origin response timeout to 30 seconds.
+  - name: Update an endpoint's state to disabled.
     text: >
-        az afd endpoint update -g group --endpoint-name endpoint1 --profile-name profile --origin-response-timeout-seconds 30
+        az afd endpoint update -g group --endpoint-name endpoint1 --profile-name profile --enabled-state Disabled
 """
 
 helps['afd endpoint delete'] = """
@@ -1333,16 +1351,16 @@ short-summary: Creates a new route within the specified endpoint.
 examples:
   - name: Creates a route to assoicate the endpoint's default domain with an origin group for all HTTPS requests.
     text: >
-        az afd route create -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --https-redirect False
+        az afd route create -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --https-redirect Disabled
         --origin-group og001 --supported-protocols Https --link-to-default-domain Enabled --forwarding-protocol MatchRequest
   - name: Creates a route to assoicate the endpoint's default domain with an origin group for all requests and use the specified rule sets to customize the route behavior.
     text: >
         az afd route create -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --rule-sets ruleset1 rulseset2
-        --origin-group og001 --supported-protocols Http Https --link-to-default-domain Enabled --forwarding-protocol MatchRequest --https-redirect False
+        --origin-group og001 --supported-protocols Http Https --link-to-default-domain Enabled --forwarding-protocol MatchRequest --https-redirect Disabled
   - name: Creates a route to assoicate the endpoint's default domain and a custom domain with an origin group for all requests with the specified path patterns and redirect all trafic to use Https.
     text: >
         az afd route create -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --patterns-to-match /test1/* /tes2/*
-        --origin-group og001 --supported-protocols Http Https --custom-domains cd001 --forwarding-protocol MatchRequest --https-redirect True --link-to-default-domain Enabled
+        --origin-group og001 --supported-protocols Http Https --custom-domains cd001 --forwarding-protocol MatchRequest --https-redirect Enabled --link-to-default-domain Enabled
 """
 
 helps['afd route update'] = """
@@ -1352,7 +1370,7 @@ examples:
   - name: Update a route to accept both Http and Https requests and redirect all trafic to use Https.
     text: >
         az afd route update -g group --endpoint-name endpoint1 --profile-name profile --route-name route1
-        --supported-protocols Http Https --https-redirect True
+        --supported-protocols Http Https --https-redirect Enabled
   - name: Update a route's rule sets settings to customize the route behavior.
     text: >
         az afd route update -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --rule-sets ruleset1 rulseset2
@@ -1417,7 +1435,7 @@ examples:
   - name: Creates a secret using the specified certificate version.
     text: >
         az afd secret create -g group --profile-name profile --secret-name secret1 --secret-version version1
-        --secret-source /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/certificates/cert1
+        --secret-source /subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/vault1/secrets/cert1
 """
 
 helps['afd secret update'] = """

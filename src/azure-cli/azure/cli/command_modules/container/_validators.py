@@ -78,7 +78,7 @@ def validate_subnet(ns):
     if not is_valid_resource_id(ns.subnet) and ((ns.vnet and not ns.subnet) or (ns.subnet and not ns.vnet)):
         raise CLIError('usage error: --vnet NAME --subnet NAME | --vnet ID --subnet NAME | --subnet ID')
 
-    if (ns.subnet or ns.vnet) and ns.ip_address:
+    if (ns.subnet or ns.vnet) and ns.ip_address == "Public":
         raise MutuallyExclusiveArgumentError('Can not use "--subnet" or "--vnet" with IP address type "Public".')
     if (ns.subnet or ns.vnet) and ns.dns_name_label:
         raise MutuallyExclusiveArgumentError('Can not use "--subnet" or "--vnet" with "--dns-name-label".')

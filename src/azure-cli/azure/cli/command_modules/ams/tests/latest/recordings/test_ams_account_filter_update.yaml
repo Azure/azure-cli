@@ -1,8 +1,8 @@
 interactions:
 - request:
-    body: '{"location": "northeurope", "identity": {"type": "None"}, "properties":
-      {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
-      "type": "Primary"}]}}'
+    body: '{"location": "northeurope", "properties": {"storageAccounts": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
+      "type": "Primary"}], "keyDelivery": {"accessControl": {"defaultAction": "Allow",
+      "ipAllowList": []}}, "publicNetworkAccess": "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -13,34 +13,35 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '336'
+      - '351'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --storage-account -l
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"North
-        Europe\",\"properties\":{\r\n    \"mediaServiceId\":\"57fc019c-8100-440a-b05f-c0d25adac25b\",\"storageAccounts\":[\r\n
+        Europe\",\"properties\":{\r\n    \"mediaServiceId\":\"c9902c58-4ce3-4fec-abfb-e439df5f10ef\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
         \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
         \     \"type\":\"SystemKey\"\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n
         \       \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n          \r\n        ]\r\n
-        \     }\r\n    }\r\n  },\"systemData\":{\r\n    \"createdBy\":\"phcooper@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-07-30T18:56:45.9111231Z\",\"lastModifiedBy\":\"phcooper@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-07-30T18:56:45.9111231Z\"\r\n
-        \ },\"identity\":{\r\n    \"type\":\"None\"\r\n  }\r\n}"
+        \     }\r\n    },\"publicNetworkAccess\":\"Enabled\"\r\n  },\"systemData\":{\r\n
+        \   \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T17:52:17.3199631Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T17:52:17.3199631Z\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1161'
+      - '1017'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 18:56:48 GMT
+      - Thu, 14 Apr 2022 17:52:18 GMT
       expires:
       - '-1'
       odata-version:
@@ -83,9 +84,9 @@ interactions:
       - -a -g -n --first-quality --end-timestamp --live-backoff-duration --presentation-window-duration
         --start-timestamp --timescale --tracks
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/accountFilters/filter000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/accountFilters/filter000004?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\":\"filter000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/accountFilters/filter000004\",\"type\":\"Microsoft.Media/mediaservices/accountFilters\",\"properties\":{\r\n
@@ -95,16 +96,17 @@ interactions:
         \         }\r\n        ]\r\n      },{\r\n        \"trackSelections\":[\r\n
         \         {\r\n            \"property\":\"Unknown\",\"value\":\"EC-3\",\"operation\":\"NotEqual\"\r\n
         \         },{\r\n            \"property\":\"FourCC\",\"value\":\"MP4A\",\"operation\":\"Equal\"\r\n
-        \         }\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}"
+        \         }\r\n        ]\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T17:52:20.0649153Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T17:52:20.0649153Z\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '989'
+      - '1169'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 18:56:49 GMT
+      - Thu, 14 Apr 2022 17:52:20 GMT
       expires:
       - '-1'
       odata-version:
@@ -136,9 +138,9 @@ interactions:
       ParameterSetName:
       - -a -g -n --bitrate --start-timestamp --end-timestamp --set
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/accountFilters/filter000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/accountFilters/filter000004?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\":\"filter000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/accountFilters/filter000004\",\"type\":\"Microsoft.Media/mediaservices/accountFilters\",\"properties\":{\r\n
@@ -148,16 +150,17 @@ interactions:
         \         }\r\n        ]\r\n      },{\r\n        \"trackSelections\":[\r\n
         \         {\r\n            \"property\":\"Unknown\",\"value\":\"EC-3\",\"operation\":\"NotEqual\"\r\n
         \         },{\r\n            \"property\":\"FourCC\",\"value\":\"MP4A\",\"operation\":\"Equal\"\r\n
-        \         }\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}"
+        \         }\r\n        ]\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T17:52:20.0649153Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T17:52:20.0649153Z\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '989'
+      - '1169'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 18:56:50 GMT
+      - Thu, 14 Apr 2022 17:52:21 GMT
       expires:
       - '-1'
       odata-version:
@@ -201,9 +204,9 @@ interactions:
       ParameterSetName:
       - -a -g -n --bitrate --start-timestamp --end-timestamp --set
       User-Agent:
-      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.35.0 azsdk-python-mgmt-media/9.0.0 Python/3.9.5 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/accountFilters/filter000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/accountFilters/filter000004?api-version=2021-11-01
   response:
     body:
       string: "{\r\n  \"name\":\"filter000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/accountFilters/filter000004\",\"type\":\"Microsoft.Media/mediaservices/accountFilters\",\"properties\":{\r\n
@@ -213,16 +216,17 @@ interactions:
         \         }\r\n        ]\r\n      },{\r\n        \"trackSelections\":[\r\n
         \         {\r\n            \"property\":\"FourCC\",\"value\":\"EC-3\",\"operation\":\"Equal\"\r\n
         \         },{\r\n            \"property\":\"FourCC\",\"value\":\"MP4A\",\"operation\":\"Equal\"\r\n
-        \         }\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}"
+        \         }\r\n        ]\r\n      }\r\n    ]\r\n  },\"systemData\":{\r\n    \"createdBy\":\"hivyas@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2022-04-14T17:52:20.0649153Z\",\"lastModifiedBy\":\"hivyas@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2022-04-14T17:52:23.1219281Z\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '986'
+      - '1166'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 30 Jul 2021 18:56:52 GMT
+      - Thu, 14 Apr 2022 17:52:23 GMT
       expires:
       - '-1'
       odata-version:

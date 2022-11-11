@@ -21,12 +21,14 @@ except ImportError:
 from knack.util import CLIError
 from knack.log import get_logger
 
-from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
+
+from azure.core.exceptions import HttpResponseError
 
 from azure.cli.core.commands import cached_get, cached_put
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands.validators import get_default_location_from_resource_group, validate_tags
+from azure.cli.core.azclierror import RequiredArgumentMissingError, ResourceNotFoundError
 
 from azure.cli.command_modules.vm._client_factory import _compute_client_factory
 from azure.cli.command_modules.vm._validators import _get_resource_id
@@ -52,6 +54,16 @@ class ScriptType(Enum):
     WINDOWS_RESTART = "windows-restart"
     WINDOWS_UPDATE = "windows-update"
     FILE = "file"
+
+
+class GalleryImageReferenceType(Enum):
+    COMPUTE = (0, 'id')
+    COMMUNITY = (1, 'communityGalleryImageId')
+    SHARED = (2, 'sharedGalleryImageId')
+
+    def __init__(self, index, backend_key):
+        self.index = index
+        self.backend_key = backend_key
 
 
 # region Client Factories
@@ -280,7 +292,7 @@ def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=
             }
 
             logger.info("%s, looks like a managed image name. Using resource ID: %s", image_name, namespace.source)  # pylint: disable=line-too-long
-        except CloudError:
+        except HttpResponseError:
             pass
 
     if not source:
@@ -382,13 +394,14 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
         source_dict=None, scripts_list=None, destinations_lists=None, build_timeout=None, tags=None,
         source=None, scripts=None, checksum=None, managed_image_destinations=None,
         shared_image_destinations=None, no_wait=False, image_template=None, identity=None,
-        vm_size=None, os_disk_size=None, vnet=None, subnet=None):
+        vm_size=None, os_disk_size=None, vnet=None, subnet=None, proxy_vm_size=None, build_vm_identities=None,
+        staging_resource_group=None):
     from azure.mgmt.imagebuilder.models import (ImageTemplate, ImageTemplateSharedImageVersionSource,
                                                 ImageTemplatePlatformImageSource, ImageTemplateManagedImageSource,
                                                 ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
                                                 ImageTemplateManagedImageDistributor,
                                                 ImageTemplateSharedImageDistributor, ImageTemplateIdentity,
-                                                ImageTemplateIdentityUserAssignedIdentitiesValue,
+                                                ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties,  # pylint: disable=line-too-long
                                                 ImageTemplateVmProfile, VirtualNetworkConfig)
 
     if image_template is not None:
@@ -422,7 +435,9 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
             content['tags'] = obj['tags']
         if 'identity' in obj:
             content['identity'] = obj['identity']
-        return client.virtual_machine_image_templates.create_or_update(
+        if 'staging_resource_group' in obj:
+            content['staging_resource_group'] = obj['staging_resource_group']
+        return client.virtual_machine_image_templates.begin_create_or_update(
             parameters=content, resource_group_name=resource_group_name, image_template_name=image_template_name)
 
     template_source, template_scripts, template_destinations = None, [], []
@@ -473,24 +488,34 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
             if not is_valid_resource_id(ide):
                 ide = resource_id(subscription=subscription_id, resource_group=resource_group_name,
                                   namespace='Microsoft.ManagedIdentity', type='userAssignedIdentities', name=ide)
-            user_assigned_identities[ide] = ImageTemplateIdentityUserAssignedIdentitiesValue()
+            user_assigned_identities[ide] = ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties()  # pylint: disable=line-too-long
         identity_body = ImageTemplateIdentity(type='UserAssigned', user_assigned_identities=user_assigned_identities)
 
     # VM profile
     vnet_config = None
     if vnet or subnet:
         if not is_valid_resource_id(subnet):
-            subnet = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
+            subscription_id = get_subscription_id(cmd.cli_ctx)
+            subnet = resource_id(subscription=subscription_id, resource_group=resource_group_name,
                                  namespace='Microsoft.Network', type='virtualNetworks', name=vnet,
                                  child_type_1='subnets', child_name_1=subnet)
         vnet_config = VirtualNetworkConfig(subnet_id=subnet)
-    vm_profile = ImageTemplateVmProfile(vm_size=vm_size, os_disk_size_gb=os_disk_size, vnet_config=vnet_config)
+    if proxy_vm_size is not None:
+        if subnet is not None:
+            vnet_config = VirtualNetworkConfig(subnet_id=subnet, proxy_vm_size=proxy_vm_size)
+        else:
+            raise RequiredArgumentMissingError('Usage error: --proxy-vm-size is only configurable when --subnet is specified.')
+    vm_profile = ImageTemplateVmProfile(vm_size=vm_size, os_disk_size_gb=os_disk_size, user_assigned_identities=build_vm_identities, vnet_config=vnet_config)  # pylint: disable=line-too-long
 
-    image_template = ImageTemplate(source=template_source, customize=template_scripts, distribute=template_destinations,
+    image_template = ImageTemplate(source=template_source, distribute=template_destinations,
                                    location=location, build_timeout_in_minutes=build_timeout, tags=(tags or {}),
-                                   identity=identity_body, vm_profile=vm_profile)
+                                   identity=identity_body, vm_profile=vm_profile,
+                                   staging_resource_group=staging_resource_group)
 
-    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=image_template,
+    if len(template_scripts) > 0:
+        image_template.customize = template_scripts
+
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=image_template,
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -547,7 +572,7 @@ def add_template_output(cmd, client, resource_group_name, image_template_name, g
 
     existing_image_template.distribute.append(distributor)
 
-    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=existing_image_template,
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -571,7 +596,7 @@ def remove_template_output(cmd, client, resource_group_name, image_template_name
 
     existing_image_template.distribute = new_distribute
 
-    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=existing_image_template,
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -586,7 +611,7 @@ def clear_template_output(cmd, client, resource_group_name, image_template_name)
 
     existing_image_template.distribute = []
 
-    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=existing_image_template,
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -635,7 +660,7 @@ def add_template_customizer(cmd, client, resource_group_name, image_template_nam
 
     existing_image_template.customize.append(new_customizer)
 
-    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=existing_image_template,
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -659,7 +684,7 @@ def remove_template_customizer(cmd, client, resource_group_name, image_template_
 
     existing_image_template.customize = new_customize
 
-    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=existing_image_template,
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -675,7 +700,48 @@ def clear_template_customizer(cmd, client, resource_group_name, image_template_n
 
     existing_image_template.customize = []
 
-    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=existing_image_template,
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
+
+
+def add_template_validator(cmd, client, resource_group_name, image_template_name,
+                           dis_on_failure=False, source_validation_only=False):
+    _require_defer(cmd)
+    from azure.mgmt.imagebuilder.models import ImageTemplatePropertiesValidate
+
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+    image_template_properties_validate = ImageTemplatePropertiesValidate(
+        continue_distribute_on_failure=dis_on_failure, source_validation_only=source_validation_only)
+    existing_image_template.validate = image_template_properties_validate
+
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
+                      parameters=existing_image_template, resource_group_name=resource_group_name,
+                      image_template_name=image_template_name)
+
+
+def remove_template_validator(cmd, client, resource_group_name, image_template_name):
+    _require_defer(cmd)
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+
+    if not existing_image_template.validate:
+        raise ResourceNotFoundError("No validate existing in this image template, no need to remove.")
+
+    existing_image_template.validate = None
+
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
+                      resource_group_name=resource_group_name, image_template_name=image_template_name)
+
+
+def show_template_validator(cmd, client, resource_group_name, image_template_name):
+    _require_defer(cmd)
+
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+    return existing_image_template.validate
 
 # endregion

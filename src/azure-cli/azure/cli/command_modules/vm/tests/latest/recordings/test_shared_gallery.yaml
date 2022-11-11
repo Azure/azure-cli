@@ -13,37 +13,35 @@ interactions:
       ParameterSetName:
       - -g --gallery-name --permissions
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-09-24T02:56:23Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-10-26T06:40:35Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '310'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:56:25 GMT
+      - Wed, 26 Oct 2022 06:40:38 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus", "tags": {}, "properties": {"sharingProfile": {"permissions":
-      "Private"}}}'
+    body: '{"location": "westus", "tags": {}, "properties": {"sharingProfile": {"permissions":
+      "Groups"}}}'
     headers:
       Accept:
       - application/json
@@ -54,35 +52,34 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '96'
+      - '95'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g --gallery-name --permissions
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002?api-version=2021-10-01
   response:
     body:
       string: "{\r\n  \"name\": \"gellery000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n      \"uniqueName\":
-        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN\"\r\n    },\r\n    \"sharingProfile\":
-        {\r\n      \"permissions\": \"Private\"\r\n    },\r\n    \"provisioningState\":
-        \"Creating\",\r\n    \"softDeletePolicy\": {\r\n      \"isSoftDeleteEnabled\":
-        false\r\n    }\r\n  }\r\n}"
+        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE\"\r\n    },\r\n    \"sharingProfile\":
+        {\r\n      \"permissions\": \"Groups\"\r\n    },\r\n    \"provisioningState\":
+        \"Creating\"\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/4a22322b-205d-487f-9021-036c30c040a4?api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/fcf339a1-0c3c-405e-bfc3-4d36d56fd1c8?api-version=2021-10-01
       cache-control:
       - no-cache
       content-length:
-      - '630'
+      - '493'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:56:32 GMT
+      - Wed, 26 Oct 2022 06:40:44 GMT
       expires:
       - '-1'
       pragma:
@@ -97,7 +94,7 @@ interactions:
       x-ms-ratelimit-remaining-resource:
       - Microsoft.Compute/CreateUpdateGallery3Min;49,Microsoft.Compute/CreateUpdateGallery30Min;299
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -115,14 +112,14 @@ interactions:
       ParameterSetName:
       - -g --gallery-name --permissions
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/4a22322b-205d-487f-9021-036c30c040a4?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/fcf339a1-0c3c-405e-bfc3-4d36d56fd1c8?api-version=2021-10-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T02:56:30.9174824+00:00\",\r\n  \"endTime\":
-        \"2021-09-24T02:56:31.1674616+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"4a22322b-205d-487f-9021-036c30c040a4\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-10-26T06:40:43.0091302+00:00\",\r\n  \"endTime\":
+        \"2022-10-26T06:40:43.2747648+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"fcf339a1-0c3c-405e-bfc3-4d36d56fd1c8\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -131,7 +128,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:57:02 GMT
+      - Wed, 26 Oct 2022 06:41:13 GMT
       expires:
       - '-1'
       pragma:
@@ -148,7 +145,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1198,Microsoft.Compute/GetOperationStatus30Min;4198
+      - Microsoft.Compute/GetOperationStatus3Min;1198,Microsoft.Compute/GetOperationStatus30Min;4161
     status:
       code: 200
       message: OK
@@ -166,27 +163,26 @@ interactions:
       ParameterSetName:
       - -g --gallery-name --permissions
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002?api-version=2021-10-01
   response:
     body:
       string: "{\r\n  \"name\": \"gellery000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n      \"uniqueName\":
-        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN\"\r\n    },\r\n    \"sharingProfile\":
-        {\r\n      \"permissions\": \"Private\"\r\n    },\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"softDeletePolicy\": {\r\n      \"isSoftDeleteEnabled\":
-        false\r\n    }\r\n  }\r\n}"
+        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE\"\r\n    },\r\n    \"sharingProfile\":
+        {\r\n      \"permissions\": \"Groups\"\r\n    },\r\n    \"provisioningState\":
+        \"Succeeded\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '631'
+      - '494'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:57:02 GMT
+      - Wed, 26 Oct 2022 06:41:14 GMT
       expires:
       - '-1'
       pragma:
@@ -203,7 +199,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGallery3Min;346,Microsoft.Compute/GetGallery30Min;2496
+      - Microsoft.Compute/GetGallery3Min;343,Microsoft.Compute/GetGallery30Min;2450
     status:
       code: 200
       message: OK
@@ -221,21 +217,21 @@ interactions:
       ParameterSetName:
       - -g --gallery-name --gallery-image-definition --os-type -p -f -s
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-09-24T02:56:23Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-10-26T06:40:35Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '310'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:57:02 GMT
+      - Wed, 26 Oct 2022 06:41:15 GMT
       expires:
       - '-1'
       pragma:
@@ -250,7 +246,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus", "tags": {}, "properties": {"osType": "Linux", "osState":
+    body: '{"location": "westus", "tags": {}, "properties": {"osType": "Linux", "osState":
       "Generalized", "hyperVGeneration": "V1", "identifier": {"publisher": "publisher1",
       "offer": "offer1", "sku": "sku1"}, "disallowed": {}}}'
     headers:
@@ -269,13 +265,13 @@ interactions:
       ParameterSetName:
       - -g --gallery-name --gallery-image-definition --os-type -p -f -s
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/images/image1?api-version=2020-09-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/images/image1?api-version=2021-10-01
   response:
     body:
       string: "{\r\n  \"name\": \"image1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/images/image1\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries/images\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"type\": \"Microsoft.Compute/galleries/images\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
         \   \"architecture\": \"x64\",\r\n    \"osType\": \"Linux\",\r\n    \"osState\":
         \"Generalized\",\r\n    \"identifier\": {\r\n      \"publisher\": \"publisher1\",\r\n
@@ -283,15 +279,15 @@ interactions:
         \"Creating\"\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/28314495-e81b-4cd5-9aba-a9b992b98a40?api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/c111af11-40cb-4278-b9d1-cb329a13ab48?api-version=2021-10-01
       cache-control:
       - no-cache
       content-length:
-      - '623'
+      - '561'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:57:08 GMT
+      - Wed, 26 Oct 2022 06:41:20 GMT
       expires:
       - '-1'
       pragma:
@@ -304,9 +300,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/CreateUpdateGalleryImage3Min;149,Microsoft.Compute/CreateUpdateGalleryImage30Min;749
+      - Microsoft.Compute/CreateUpdateGalleryImage3Min;149,Microsoft.Compute/CreateUpdateGalleryImage30Min;748
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -324,14 +320,14 @@ interactions:
       ParameterSetName:
       - -g --gallery-name --gallery-image-definition --os-type -p -f -s
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/28314495-e81b-4cd5-9aba-a9b992b98a40?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/c111af11-40cb-4278-b9d1-cb329a13ab48?api-version=2021-10-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T02:57:08.5113799+00:00\",\r\n  \"endTime\":
-        \"2021-09-24T02:57:08.6363746+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"28314495-e81b-4cd5-9aba-a9b992b98a40\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-10-26T06:41:19.5876556+00:00\",\r\n  \"endTime\":
+        \"2022-10-26T06:41:19.7126591+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"c111af11-40cb-4278-b9d1-cb329a13ab48\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -340,7 +336,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:57:40 GMT
+      - Wed, 26 Oct 2022 06:41:51 GMT
       expires:
       - '-1'
       pragma:
@@ -357,7 +353,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1196,Microsoft.Compute/GetOperationStatus30Min;4196
+      - Microsoft.Compute/GetOperationStatus3Min;1196,Microsoft.Compute/GetOperationStatus30Min;4159
     status:
       code: 200
       message: OK
@@ -375,13 +371,13 @@ interactions:
       ParameterSetName:
       - -g --gallery-name --gallery-image-definition --os-type -p -f -s
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/images/image1?api-version=2020-09-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/images/image1?api-version=2021-10-01
   response:
     body:
       string: "{\r\n  \"name\": \"image1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/images/image1\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries/images\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"type\": \"Microsoft.Compute/galleries/images\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
         \   \"architecture\": \"x64\",\r\n    \"osType\": \"Linux\",\r\n    \"osState\":
         \"Generalized\",\r\n    \"identifier\": {\r\n      \"publisher\": \"publisher1\",\r\n
@@ -391,11 +387,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '624'
+      - '562'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:57:40 GMT
+      - Wed, 26 Oct 2022 06:41:51 GMT
       expires:
       - '-1'
       pragma:
@@ -412,7 +408,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGalleryImage3Min;596,Microsoft.Compute/GetGalleryImage30Min;2996
+      - Microsoft.Compute/GetGalleryImage3Min;596,Microsoft.Compute/GetGalleryImage30Min;2975
     status:
       code: 200
       message: OK
@@ -430,13 +426,13 @@ interactions:
       ParameterSetName:
       - -g --gallery-name --gallery-image-definition
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/images/image1?api-version=2020-09-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/images/image1?api-version=2021-10-01
   response:
     body:
       string: "{\r\n  \"name\": \"image1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/images/image1\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries/images\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"type\": \"Microsoft.Compute/galleries/images\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
         \   \"architecture\": \"x64\",\r\n    \"osType\": \"Linux\",\r\n    \"osState\":
         \"Generalized\",\r\n    \"identifier\": {\r\n      \"publisher\": \"publisher1\",\r\n
@@ -446,11 +442,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '624'
+      - '562'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:57:41 GMT
+      - Wed, 26 Oct 2022 06:41:53 GMT
       expires:
       - '-1'
       pragma:
@@ -467,7 +463,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGalleryImage3Min;595,Microsoft.Compute/GetGalleryImage30Min;2995
+      - Microsoft.Compute/GetGalleryImage3Min;595,Microsoft.Compute/GetGalleryImage30Min;2974
     status:
       code: 200
       message: OK
@@ -485,29 +481,27 @@ interactions:
       ParameterSetName:
       - -g -n --image --data-disk-sizes-gb --admin-username --generate-ssh-key --nsg-rule
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-09-24T02:56:23Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-10-26T06:40:35Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '310'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:57:41 GMT
+      - Wed, 26 Oct 2022 06:41:54 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -523,9 +517,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.25.1
+      - python-requests/2.26.0
     method: GET
-    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json
+    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json
   response:
     body:
       string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\",\n
@@ -533,36 +527,47 @@ interactions:
         {},\n  \"resources\": [],\n  \"outputs\": {\n    \"aliases\": {\n      \"type\":
         \"object\",\n      \"value\": {\n        \"Linux\": {\n          \"CentOS\":
         {\n            \"publisher\": \"OpenLogic\",\n            \"offer\": \"CentOS\",\n
-        \           \"sku\": \"7.5\",\n            \"version\": \"latest\"\n          },\n
-        \         \"Debian\": {\n            \"publisher\": \"Debian\",\n            \"offer\":
-        \"debian-10\",\n            \"sku\": \"10\",\n            \"version\": \"latest\"\n
+        \           \"sku\": \"7.5\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Debian\": {\n            \"publisher\":
+        \"Debian\",\n            \"offer\": \"debian-10\",\n            \"sku\": \"10\",\n
+        \           \"version\": \"latest\",\n            \"architecture\": \"x64\"\n
         \         },\n          \"Flatcar\": {\n            \"publisher\": \"kinvolk\",\n
         \           \"offer\": \"flatcar-container-linux-free\",\n            \"sku\":
-        \"stable\",\n            \"version\": \"latest\"\n          },\n          \"openSUSE-Leap\":
-        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"openSUSE-Leap\",\n
-        \           \"sku\": \"42.3\",\n            \"version\": \"latest\"\n          },\n
-        \         \"RHEL\": {\n            \"publisher\": \"RedHat\",\n            \"offer\":
-        \"RHEL\",\n            \"sku\": \"7-LVM\",\n            \"version\": \"latest\"\n
-        \         },\n          \"SLES\": {\n            \"publisher\": \"SUSE\",\n
-        \           \"offer\": \"SLES\",\n            \"sku\": \"15\",\n            \"version\":
-        \"latest\"\n          },\n          \"UbuntuLTS\": {\n            \"publisher\":
+        \"stable\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"openSUSE-Leap\": {\n            \"publisher\":
+        \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n            \"sku\":
+        \"gen2\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"RHEL\": {\n            \"publisher\": \"RedHat\",\n
+        \           \"offer\": \"RHEL\",\n            \"sku\": \"7-LVM\",\n            \"version\":
+        \"latest\",\n            \"architecture\": \"x64\"\n          },\n          \"SLES\":
+        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"sles-15-sp3\",\n
+        \           \"sku\": \"gen2\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"UbuntuLTS\": {\n            \"publisher\":
         \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n            \"sku\":
-        \"18.04-LTS\",\n            \"version\": \"latest\"\n          }\n        },\n
-        \       \"Windows\": {\n          \"Win2019Datacenter\": {\n            \"publisher\":
-        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
-        \"2019-Datacenter\",\n            \"version\": \"latest\"\n          },\n
-        \         \"Win2016Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
-        \           \"offer\": \"WindowsServer\",\n            \"sku\": \"2016-Datacenter\",\n
-        \           \"version\": \"latest\"\n          },\n          \"Win2012R2Datacenter\":
+        \"18.04-LTS\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          }\n        },\n        \"Windows\": {\n          \"Win2022Datacenter\":
         {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
-        \"WindowsServer\",\n            \"sku\": \"2012-R2-Datacenter\",\n            \"version\":
-        \"latest\"\n          },\n          \"Win2012Datacenter\": {\n            \"publisher\":
+        \"WindowsServer\",\n            \"sku\": \"2022-Datacenter\",\n            \"version\":
+        \"latest\",\n            \"architecture\": \"x64\"\n          },\n          \"Win2022AzureEditionCore\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2022-datacenter-azure-edition-core\",\n
+        \           \"version\": \"latest\",\n            \"architecture\": \"x64\"\n
+        \         },\n          \"Win2019Datacenter\": {\n            \"publisher\":
         \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
-        \"2012-Datacenter\",\n            \"version\": \"latest\"\n          },\n
-        \         \"Win2008R2SP1\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
-        \           \"offer\": \"WindowsServer\",\n            \"sku\": \"2008-R2-SP1\",\n
-        \           \"version\": \"latest\"\n          }\n        }\n      }\n    }\n
-        \ }\n}\n"
+        \"2019-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Win2016Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2016-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Win2012R2Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2012-R2-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Win2012Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2012-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          },\n          \"Win2008R2SP1\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2008-R2-SP1\",\n            \"version\": \"latest\",\n            \"architecture\":
+        \"x64\"\n          }\n        }\n      }\n    }\n  }\n}"
     headers:
       accept-ranges:
       - bytes
@@ -573,19 +578,19 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '2525'
+      - '3463'
       content-security-policy:
       - default-src 'none'; style-src 'unsafe-inline'; sandbox
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:57:42 GMT
+      - Wed, 26 Oct 2022 06:41:54 GMT
       etag:
-      - W/"54bceef15b892f2aa7f4c2145a49f1b5e33608722acdbb47933d7b6cbebbd7f4"
+      - W/"41b202f4dc5098d126019dc00721a4c5e30df0c5196794514fadc3710ee2a5cb"
       expires:
-      - Fri, 24 Sep 2021 03:02:42 GMT
+      - Wed, 26 Oct 2022 06:46:54 GMT
       source-age:
-      - '133'
+      - '59'
       strict-transport-security:
       - max-age=31536000
       vary:
@@ -599,15 +604,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - 38c237e399bc739d37edc540651b3e4697f1cb60
+      - ca9b81f84ee482974b6ac6cc89589187d1a01f8c
       x-frame-options:
       - deny
       x-github-request-id:
-      - C08C:069F:632D2E:791C38:614C6871
+      - 0F84:048E:906FB:FAF71:63588998
       x-served-by:
-      - cache-qpg1222-QPG
+      - cache-qpg1266-QPG
       x-timer:
-      - S1632452263.900601,VS0,VE0
+      - S1666766515.959670,VS0,VE1
       x-xss-protection:
       - 1; mode=block
     status:
@@ -617,7 +622,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -627,9 +632,121 @@ interactions:
       ParameterSetName:
       - -g -n --image --data-disk-sizes-gb --admin-username --generate-ssh-key --nsg-rule
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks?api-version=2018-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18.04-LTS/versions?$top=1&$orderby=name%20desc&api-version=2022-08-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"18.04.202210180\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202210180\"\r\n
+        \ }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '286'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 26 Oct 2022 06:41:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15999,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43997
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --data-disk-sizes-gb --admin-username --generate-ssh-key --nsg-rule
+      User-Agent:
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18.04-LTS/versions/18.04.202210180?api-version=2022-08-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
+        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"features\": [\r\n
+        \     {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n        \"value\":
+        \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n
+        \       \"value\": \"SCSI, NVMe\"\r\n      },\r\n      {\r\n        \"name\":
+        \"IsHibernateSupported\",\r\n        \"value\": \"True\"\r\n      }\r\n    ],\r\n
+        \   \"osDiskImage\": {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInGb\":
+        31,\r\n      \"sizeInBytes\": 32213303808\r\n    },\r\n    \"dataDiskImages\":
+        []\r\n  },\r\n  \"location\": \"westus\",\r\n  \"name\": \"18.04.202210180\",\r\n
+        \ \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202210180\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1048'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 26 Oct 2022 06:41:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12999,Microsoft.Compute/GetVMImageFromLocation30Min;73997
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --data-disk-sizes-gb --admin-username --generate-ssh-key --nsg-rule
+      User-Agent:
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks?api-version=2022-01-01
   response:
     body:
       string: '{"value":[]}'
@@ -641,7 +758,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:57:42 GMT
+      - Wed, 26 Oct 2022 06:41:57 GMT
       expires:
       - '-1'
       pragma:
@@ -659,33 +776,33 @@ interactions:
     body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
       [{"name": "vm1VNET", "type": "Microsoft.Network/virtualNetworks", "location":
-      "eastus", "apiVersion": "2015-06-15", "dependsOn": [], "tags": {}, "properties":
+      "westus", "apiVersion": "2015-06-15", "dependsOn": [], "tags": {}, "properties":
       {"addressSpace": {"addressPrefixes": ["10.0.0.0/16"]}, "subnets": [{"name":
       "vm1Subnet", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}, {"type": "Microsoft.Network/networkSecurityGroups",
-      "name": "vm1NSG", "apiVersion": "2015-06-15", "location": "eastus", "tags":
-      {}, "dependsOn": []}, {"apiVersion": "2018-01-01", "type": "Microsoft.Network/publicIPAddresses",
-      "name": "vm1PublicIP", "location": "eastus", "tags": {}, "dependsOn": [], "properties":
+      "name": "vm1NSG", "apiVersion": "2015-06-15", "location": "westus", "tags":
+      {}, "dependsOn": []}, {"apiVersion": "2022-01-01", "type": "Microsoft.Network/publicIPAddresses",
+      "name": "vm1PublicIP", "location": "westus", "tags": {}, "dependsOn": [], "properties":
       {"publicIPAllocationMethod": null}}, {"apiVersion": "2015-06-15", "type": "Microsoft.Network/networkInterfaces",
-      "name": "vm1VMNic", "location": "eastus", "tags": {}, "dependsOn": ["Microsoft.Network/virtualNetworks/vm1VNET",
+      "name": "vm1VMNic", "location": "westus", "tags": {}, "dependsOn": ["Microsoft.Network/virtualNetworks/vm1VNET",
       "Microsoft.Network/networkSecurityGroups/vm1NSG", "Microsoft.Network/publicIpAddresses/vm1PublicIP"],
       "properties": {"ipConfigurations": [{"name": "ipconfigvm1", "properties": {"privateIPAllocationMethod":
       "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vm1VNET/subnets/vm1Subnet"},
       "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP"}}}],
       "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG"}}},
-      {"apiVersion": "2021-07-01", "type": "Microsoft.Compute/virtualMachines", "name":
-      "vm1", "location": "eastus", "tags": {}, "dependsOn": ["Microsoft.Network/networkInterfaces/vm1VMNic"],
+      {"apiVersion": "2022-08-01", "type": "Microsoft.Compute/virtualMachines", "name":
+      "vm1", "location": "westus", "tags": {}, "dependsOn": ["Microsoft.Network/networkInterfaces/vm1VMNic"],
       "properties": {"hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "networkProfile":
       {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic",
       "properties": {"deleteOption": null}}]}, "storageProfile": {"osDisk": {"createOption":
       "fromImage", "name": null, "caching": "ReadWrite", "managedDisk": {"storageAccountType":
       null}}, "imageReference": {"publisher": "Canonical", "offer": "UbuntuServer",
       "sku": "18.04-LTS", "version": "latest"}, "dataDisks": [{"lun": 0, "managedDisk":
-      {"storageAccountType": null}, "createOption": "empty", "diskSizeGB": 10, "deleteOption":
-      null}]}, "osProfile": {"computerName": "vm1", "adminUsername": "clitest1", "linuxConfiguration":
+      {"storageAccountType": null}, "createOption": "empty", "diskSizeGB": 10}]},
+      "osProfile": {"computerName": "vm1", "adminUsername": "clitest1", "linuxConfiguration":
       {"disablePasswordAuthentication": true, "ssh": {"publicKeys": [{"keyData": "ssh-rsa
-      AAAAB3NzaC1yc2EAAAADAQABAAABAQDL2PtV5sp++a43U/dRJ2Fyjso9qDFNbWEnbYk7mA4CfXy0gvxm65oYVd90JysNmGBF/89hIvCTN3ul4aEIuPkzywozRbdyWiJngSd/7OrNBJzpQQSjsGXwoVNDRAJSzlvuQVUR2vwBHeN2xMIvufSvzO3LGI3xcSIWIYlSvU9urnV+Pefd4T6x/OXgTpE02AgMWOspdZTzg0ZKsSU3sG5nYSNoq+8qrHQSXLbLLdWzz5lYKe8p64fQC/xhXrNa3/Nw5vy8YGsyqGueM/Rj6gCI+ivgBlQg908Aa50yQLvwsMLIKxhgPlj73Am8zm27PS3DKVjkr0nTjbEp/3FzZnyB",
-      "path": "/home/clitest1/.ssh/authorized_keys"}]}}}}}], "outputs": {}}, "parameters":
-      {}, "mode": "incremental"}}'
+      AAAAB3NzaC1yc2EAAAADAQABAAABgQDLq1sEri2RcnDg8tjo775iZUd5HVjAdQjSgky6ciJgrvPNUxZv9D65dL9GLllmDhq4Xv6SxbppUJhG0vl/VgaRRPyWRrHXgZRBl0c+H0A2X0Y7L/9sir1ezs2xv89+T03Y+KQYGyZa4xuxwlfdsl6YHjHGW97ONxyDfQesFkSdwyRI0RsnV0/GB8mRF32tgSwxqT8cpXjzjz7w4usgT52knfpyslFfZGRfTjamae/sZeezBTSfsvgryEMxxxXBvXC8/iiTxRG9cQxURK6t1VCeT6F7OmJhY2G+sPCXbkEyOjkfT18y/iUSyPEPVkoaO8Ab9eNPIUFBhRPapQlZ5YsQcIBrDmBb013lRdH82K6Q7Avp3x5liFwjQT96p5CIikl6MlJScZ6SK1dnqAEEPuBvz7vCKSsVaIxTeZhnpiX44cp87VGOR1Sqlus3s3C4NbRKU/a3023vmMV6t/F9SY94sFlWPs2q6ihRTmqV5oYZScJlGgp9voQ/9XStN+4pfAE=
+      zhuyan@microsoft.com\n", "path": "/home/clitest1/.ssh/authorized_keys"}]}}}}}],
+      "outputs": {}}, "parameters": {}, "mode": "incremental"}}'
     headers:
       Accept:
       - application/json
@@ -696,29 +813,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '3555'
+      - '3492'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --image --data-disk-sizes-gb --admin-username --generate-ssh-key --nsg-rule
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vm_deploy_xxsptmsWAu80O52vCENOmWxlmLpx873q","name":"vm_deploy_xxsptmsWAu80O52vCENOmWxlmLpx873q","type":"Microsoft.Resources/deployments","properties":{"templateHash":"13440380811599830213","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-09-24T02:57:48.7575868Z","duration":"PT2.8127635S","correlationId":"37e5340b-dd77-47a5-85dc-0774cd80d7d9","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm1"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vm_deploy_D5v54KGEWvHMpVi9Xq7OvukPj7d994MV","name":"vm_deploy_D5v54KGEWvHMpVi9Xq7OvukPj7d994MV","type":"Microsoft.Resources/deployments","properties":{"templateHash":"11984111965100682686","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-10-26T06:42:03.9995172Z","duration":"PT0.0006834S","correlationId":"d28c290e-61e4-4db2-ab6e-b743316bb00f","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm1"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vm_deploy_xxsptmsWAu80O52vCENOmWxlmLpx873q/operationStatuses/08585691546195328215?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vm_deploy_D5v54KGEWvHMpVi9Xq7OvukPj7d994MV/operationStatuses/08585348403637198180?api-version=2021-04-01
       cache-control:
       - no-cache
       content-length:
-      - '2743'
+      - '2330'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:57:49 GMT
+      - Wed, 26 Oct 2022 06:42:05 GMT
       expires:
       - '-1'
       pragma:
@@ -728,7 +845,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -746,9 +863,9 @@ interactions:
       ParameterSetName:
       - -g -n --image --data-disk-sizes-gb --admin-username --generate-ssh-key --nsg-rule
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585691546195328215?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585348403637198180?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -760,7 +877,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:58:20 GMT
+      - Wed, 26 Oct 2022 06:42:35 GMT
       expires:
       - '-1'
       pragma:
@@ -788,9 +905,51 @@ interactions:
       ParameterSetName:
       - -g -n --image --data-disk-sizes-gb --admin-username --generate-ssh-key --nsg-rule
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585691546195328215?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585348403637198180?api-version=2021-04-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 26 Oct 2022 06:43:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --data-disk-sizes-gb --admin-username --generate-ssh-key --nsg-rule
+      User-Agent:
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585348403637198180?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -802,7 +961,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:58:50 GMT
+      - Wed, 26 Oct 2022 06:43:36 GMT
       expires:
       - '-1'
       pragma:
@@ -830,21 +989,21 @@ interactions:
       ParameterSetName:
       - -g -n --image --data-disk-sizes-gb --admin-username --generate-ssh-key --nsg-rule
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vm_deploy_xxsptmsWAu80O52vCENOmWxlmLpx873q","name":"vm_deploy_xxsptmsWAu80O52vCENOmWxlmLpx873q","type":"Microsoft.Resources/deployments","properties":{"templateHash":"13440380811599830213","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-09-24T02:58:32.6102973Z","duration":"PT46.665474S","correlationId":"37e5340b-dd77-47a5-85dc-0774cd80d7d9","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm1"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vm1VNET"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vm_deploy_D5v54KGEWvHMpVi9Xq7OvukPj7d994MV","name":"vm_deploy_D5v54KGEWvHMpVi9Xq7OvukPj7d994MV","type":"Microsoft.Resources/deployments","properties":{"templateHash":"11984111965100682686","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-10-26T06:43:11.7642877Z","duration":"PT1M7.7654539S","correlationId":"d28c290e-61e4-4db2-ab6e-b743316bb00f","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm1"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vm1VNET"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3807'
+      - '3101'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:58:51 GMT
+      - Wed, 26 Oct 2022 06:43:36 GMT
       expires:
       - '-1'
       pragma:
@@ -872,73 +1031,75 @@ interactions:
       ParameterSetName:
       - -g -n --image --data-disk-sizes-gb --admin-username --generate-ssh-key --nsg-rule
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1?$expand=instanceView&api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1?$expand=instanceView&api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1\",\r\n
-        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"cdcf607a-51cb-4e40-b5fe-f75d3904135c\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"e77fbc10-1419-40f8-b44d-a5b76efc72c3\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202109180\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"vm1_disk1_d684fa5643924a4fb944627347c26b35\",\r\n
+        \"18.04.202210180\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"vm1_disk1_a59f688dd9be4bd6b96dab6728114dce\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk1_d684fa5643924a4fb944627347c26b35\"\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk1_a59f688dd9be4bd6b96dab6728114dce\"\r\n
         \       },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": [\r\n        {\r\n          \"lun\":
-        0,\r\n          \"name\": \"vm1_disk2_26d9dc065fa646e38830814a167a56d6\",\r\n
+        0,\r\n          \"name\": \"vm1_disk2_b42c47c9b92543a3999b6d4916f8d793\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"Premium_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_26d9dc065fa646e38830814a167a56d6\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_b42c47c9b92543a3999b6d4916f8d793\"\r\n
         \         },\r\n          \"deleteOption\": \"Detach\",\r\n          \"diskSizeGB\":
         10,\r\n          \"toBeDetached\": false\r\n        }\r\n      ]\r\n    },\r\n
         \   \"osProfile\": {\r\n      \"computerName\": \"vm1\",\r\n      \"adminUsername\":
         \"clitest1\",\r\n      \"linuxConfiguration\": {\r\n        \"disablePasswordAuthentication\":
         true,\r\n        \"ssh\": {\r\n          \"publicKeys\": [\r\n            {\r\n
         \             \"path\": \"/home/clitest1/.ssh/authorized_keys\",\r\n              \"keyData\":
-        \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDL2PtV5sp++a43U/dRJ2Fyjso9qDFNbWEnbYk7mA4CfXy0gvxm65oYVd90JysNmGBF/89hIvCTN3ul4aEIuPkzywozRbdyWiJngSd/7OrNBJzpQQSjsGXwoVNDRAJSzlvuQVUR2vwBHeN2xMIvufSvzO3LGI3xcSIWIYlSvU9urnV+Pefd4T6x/OXgTpE02AgMWOspdZTzg0ZKsSU3sG5nYSNoq+8qrHQSXLbLLdWzz5lYKe8p64fQC/xhXrNa3/Nw5vy8YGsyqGueM/Rj6gCI+ivgBlQg908Aa50yQLvwsMLIKxhgPlj73Am8zm27PS3DKVjkr0nTjbEp/3FzZnyB\"\r\n
-        \           }\r\n          ]\r\n        },\r\n        \"provisionVMAgent\":
-        true,\r\n        \"patchSettings\": {\r\n          \"patchMode\": \"ImageDefault\",\r\n
-        \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
-        \     \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
+        \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDLq1sEri2RcnDg8tjo775iZUd5HVjAdQjSgky6ciJgrvPNUxZv9D65dL9GLllmDhq4Xv6SxbppUJhG0vl/VgaRRPyWRrHXgZRBl0c+H0A2X0Y7L/9sir1ezs2xv89+T03Y+KQYGyZa4xuxwlfdsl6YHjHGW97ONxyDfQesFkSdwyRI0RsnV0/GB8mRF32tgSwxqT8cpXjzjz7w4usgT52knfpyslFfZGRfTjamae/sZeezBTSfsvgryEMxxxXBvXC8/iiTxRG9cQxURK6t1VCeT6F7OmJhY2G+sPCXbkEyOjkfT18y/iUSyPEPVkoaO8Ab9eNPIUFBhRPapQlZ5YsQcIBrDmBb013lRdH82K6Q7Avp3x5liFwjQT96p5CIikl6MlJScZ6SK1dnqAEEPuBvz7vCKSsVaIxTeZhnpiX44cp87VGOR1Sqlus3s3C4NbRKU/a3023vmMV6t/F9SY94sFlWPs2q6ihRTmqV5oYZScJlGgp9voQ/9XStN+4pfAE=
+        zhuyan@microsoft.com\\n\"\r\n            }\r\n          ]\r\n        },\r\n
+        \       \"provisionVMAgent\": true,\r\n        \"patchSettings\": {\r\n          \"patchMode\":
+        \"ImageDefault\",\r\n          \"assessmentMode\": \"ImageDefault\"\r\n        },\r\n
+        \       \"enableVMAgentPlatformUpdates\": false\r\n      },\r\n      \"secrets\":
+        [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
         true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic\"}]},\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"computerName\":
         \"vm1\",\r\n      \"osName\": \"ubuntu\",\r\n      \"osVersion\": \"18.04\",\r\n
-        \     \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.4.0.2\",\r\n        \"statuses\":
+        \     \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.8.0.11\",\r\n        \"statuses\":
         [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
         \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
         \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
-        \"2021-09-24T02:58:42+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
-        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm1_disk1_d684fa5643924a4fb944627347c26b35\",\r\n
+        \"2022-10-26T06:43:16+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm1_disk1_a59f688dd9be4bd6b96dab6728114dce\",\r\n
         \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2021-09-24T02:58:17.7131592+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2022-10-26T06:42:28.803505+00:00\"\r\n
         \           }\r\n          ]\r\n        },\r\n        {\r\n          \"name\":
-        \"vm1_disk2_26d9dc065fa646e38830814a167a56d6\",\r\n          \"statuses\":
+        \"vm1_disk2_b42c47c9b92543a3999b6d4916f8d793\",\r\n          \"statuses\":
         [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2021-09-24T02:58:17.7287818+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2022-10-26T06:42:28.803505+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
         \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2021-09-24T02:58:31.2600447+00:00\"\r\n
+        succeeded\",\r\n          \"time\": \"2022-10-26T06:43:06.9914219+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
-        \       }\r\n      ]\r\n    }\r\n  }\r\n}"
+        \       }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2022-10-26T06:42:26.9128608+00:00\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '4874'
+      - '4937'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:58:52 GMT
+      - Wed, 26 Oct 2022 06:43:37 GMT
       expires:
       - '-1'
       pragma:
@@ -955,7 +1116,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3997,Microsoft.Compute/LowCostGet30Min;31997
+      - Microsoft.Compute/LowCostGet3Min;3997,Microsoft.Compute/LowCostGet30Min;31987
     status:
       code: 200
       message: OK
@@ -963,7 +1124,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -973,18 +1134,17 @@ interactions:
       ParameterSetName:
       - -g -n --image --data-disk-sizes-gb --admin-username --generate-ssh-key --nsg-rule
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic?api-version=2018-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm1VMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic\",\r\n
-        \ \"etag\": \"W/\\\"a728315f-ccbc-4064-9d30-4f7b0f4058b6\\\"\",\r\n  \"location\":
-        \"eastus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"1321d317-4eaa-4f51-ac70-232b2f17bf0e\",\r\n
-        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigvm1\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic/ipConfigurations/ipconfigvm1\",\r\n
-        \       \"etag\": \"W/\\\"a728315f-ccbc-4064-9d30-4f7b0f4058b6\\\"\",\r\n
+        \ \"etag\": \"W/\\\"3bdcaa2f-ce42-4a88-bc85-f825173472c1\\\"\",\r\n  \"tags\":
+        {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"0237a72c-4b1b-42f8-bda7-872550475d06\",\r\n    \"ipConfigurations\":
+        [\r\n      {\r\n        \"name\": \"ipconfigvm1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic/ipConfigurations/ipconfigvm1\",\r\n
+        \       \"etag\": \"W/\\\"3bdcaa2f-ce42-4a88-bc85-f825173472c1\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
@@ -993,24 +1153,26 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"nm0zoxm3elvu5mluwsq05uytug.bx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-0D-3A-14-3A-EB\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
-        \   \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\": {\r\n
-        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG\"\r\n
+        \"ul0nrditn0mennwpw1iqwyh2qe.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-22-48-03-F1-29\",\r\n    \"vnetEncryptionSupported\": false,\r\n    \"enableIPForwarding\":
+        false,\r\n    \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/vm1NSG\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1\"\r\n
-        \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
+        \   },\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\n
+        \   \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\": \"westus\",\r\n
+        \ \"kind\": \"Regular\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2568'
+      - '2347'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:58:53 GMT
+      - Wed, 26 Oct 2022 06:43:38 GMT
       etag:
-      - W/"a728315f-ccbc-4064-9d30-4f7b0f4058b6"
+      - W/"3bdcaa2f-ce42-4a88-bc85-f825173472c1"
       expires:
       - '-1'
       pragma:
@@ -1027,15 +1189,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 41c29381-efc3-4347-8f80-559ecfcddf56
+      - b65fe384-6991-495c-92f3-74eb9cdda935
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1045,31 +1207,32 @@ interactions:
       ParameterSetName:
       - -g -n --image --data-disk-sizes-gb --admin-username --generate-ssh-key --nsg-rule
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP?api-version=2018-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm1PublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vm1PublicIP\",\r\n
-        \ \"etag\": \"W/\\\"ac4ee34f-0537-4a8d-8fa8-7aa7587fe7b0\\\"\",\r\n  \"location\":
-        \"eastus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"8af4c65e-c88d-404d-a662-59140f28714f\",\r\n
-        \   \"ipAddress\": \"13.92.100.233\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
+        \ \"etag\": \"W/\\\"c698c747-770e-43a9-a9cf-dfe6bcbad6fa\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"16d435d6-8af2-4d15-bcbe-26a12a0b8c57\",\r\n
+        \   \"ipAddress\": \"20.245.138.70\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
         \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic/ipConfigurations/ipconfigvm1\"\r\n
         \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\"\r\n  }\r\n}"
+        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '997'
+      - '904'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:58:53 GMT
+      - Wed, 26 Oct 2022 06:43:38 GMT
       etag:
-      - W/"ac4ee34f-0537-4a8d-8fa8-7aa7587fe7b0"
+      - W/"c698c747-770e-43a9-a9cf-dfe6bcbad6fa"
       expires:
       - '-1'
       pragma:
@@ -1086,10 +1249,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c4e7217e-d573-47ad-b6dd-e4f8b7aabc48
+      - c549dc44-a310-452c-b5b1-019a096ef247
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: '{"commandId": "RunShellScript", "script": ["echo ''sudo waagent -deprovision+user
       --force'' | at -M now + 1 minutes"], "parameters": []}'
@@ -1109,25 +1272,27 @@ interactions:
       ParameterSetName:
       - -g -n --command-id --scripts
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1/runCommand?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1/runCommand?api-version=2022-08-01
   response:
     body:
       string: ''
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/67fffdfd-c2c1-46a2-aad0-958769e39872?p=54253b73-cb53-496f-ab42-5e5ee19426f8&api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/a5cb6624-db06-4588-9986-d02aeb8ce488?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Fri, 24 Sep 2021 02:58:54 GMT
+      - Wed, 26 Oct 2022 06:43:40 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/67fffdfd-c2c1-46a2-aad0-958769e39872?p=54253b73-cb53-496f-ab42-5e5ee19426f8&monitor=true&api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/a5cb6624-db06-4588-9986-d02aeb8ce488?p=571046f6-b640-41c1-86f7-f9f044b5adf9&monitor=true&api-version=2022-08-01
       pragma:
       - no-cache
       server:
@@ -1138,9 +1303,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/UpdateVM3Min;239,Microsoft.Compute/UpdateVM30Min;1199
+      - Microsoft.Compute/UpdateVM3Min;239,Microsoft.Compute/UpdateVM30Min;1197
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 202
       message: Accepted
@@ -1158,27 +1323,26 @@ interactions:
       ParameterSetName:
       - -g -n --command-id --scripts
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/67fffdfd-c2c1-46a2-aad0-958769e39872?p=54253b73-cb53-496f-ab42-5e5ee19426f8&api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/a5cb6624-db06-4588-9986-d02aeb8ce488?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T02:58:55.0100734+00:00\",\r\n  \"endTime\":
-        \"2021-09-24T02:59:14.3538665+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"properties\": {\r\n    \"output\": {\r\n  \"value\": [\r\n    {\r\n      \"code\":
-        \"ProvisioningState/succeeded\",\r\n      \"level\": \"Info\",\r\n      \"displayStatus\":
-        \"Provisioning succeeded\",\r\n      \"message\": \"Enable succeeded: \\n[stdout]\\n\\n[stderr]\\nwarning:
-        commands will be executed using /bin/sh\\njob 1 at Fri Sep 24 03:00:00 2021\\n\"\r\n
-        \   }\r\n  ]\r\n}\r\n  },\r\n  \"name\": \"67fffdfd-c2c1-46a2-aad0-958769e39872\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-10-26T06:43:40.63241+00:00\",\r\n  \"endTime\":
+        \"2022-10-26T06:43:58.6325953+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"properties\": {\r\n    \"output\": {\"value\":[{\"code\":\"ProvisioningState/succeeded\",\"level\":\"Info\",\"displayStatus\":\"Provisioning
+        succeeded\",\"message\":\"Enable succeeded: \\n[stdout]\\n\\n[stderr]\\nwarning:
+        commands will be executed using /bin/sh\\njob 1 at Wed Oct 26 06:44:00 2022\\n\"}]}\r\n
+        \ },\r\n  \"name\": \"a5cb6624-db06-4588-9986-d02aeb8ce488\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '530'
+      - '469'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:59:24 GMT
+      - Wed, 26 Oct 2022 06:44:10 GMT
       expires:
       - '-1'
       pragma:
@@ -1195,7 +1359,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14996,Microsoft.Compute/GetOperation30Min;29996
+      - Microsoft.Compute/GetOperation3Min;14996,Microsoft.Compute/GetOperation30Min;29971
     status:
       code: 200
       message: OK
@@ -1213,14 +1377,14 @@ interactions:
       ParameterSetName:
       - -g -n --command-id --scripts
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/67fffdfd-c2c1-46a2-aad0-958769e39872?p=54253b73-cb53-496f-ab42-5e5ee19426f8&monitor=true&api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/a5cb6624-db06-4588-9986-d02aeb8ce488?p=571046f6-b640-41c1-86f7-f9f044b5adf9&monitor=true&api-version=2022-08-01
   response:
     body:
       string: '{"value":[{"code":"ProvisioningState/succeeded","level":"Info","displayStatus":"Provisioning
         succeeded","message":"Enable succeeded: \n[stdout]\n\n[stderr]\nwarning: commands
-        will be executed using /bin/sh\njob 1 at Fri Sep 24 03:00:00 2021\n"}]}'
+        will be executed using /bin/sh\njob 1 at Wed Oct 26 06:44:00 2022\n"}]}'
     headers:
       cache-control:
       - no-cache
@@ -1229,7 +1393,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 02:59:25 GMT
+      - Wed, 26 Oct 2022 06:44:10 GMT
       expires:
       - '-1'
       pragma:
@@ -1246,7 +1410,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14995,Microsoft.Compute/GetOperation30Min;29995
+      - Microsoft.Compute/GetOperation3Min;14995,Microsoft.Compute/GetOperation30Min;29970
     status:
       code: 200
       message: OK
@@ -1254,7 +1418,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1266,25 +1430,27 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1/deallocate?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1/deallocate?api-version=2022-08-01
   response:
     body:
       string: ''
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/cba2c260-e5e8-4f7b-bbb3-34ba157ec00e?p=54253b73-cb53-496f-ab42-5e5ee19426f8&api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/da7a543a-03fa-49a3-974d-f58091b2508b?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Fri, 24 Sep 2021 03:00:36 GMT
+      - Wed, 26 Oct 2022 06:45:23 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/cba2c260-e5e8-4f7b-bbb3-34ba157ec00e?p=54253b73-cb53-496f-ab42-5e5ee19426f8&monitor=true&api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/da7a543a-03fa-49a3-974d-f58091b2508b?p=571046f6-b640-41c1-86f7-f9f044b5adf9&monitor=true&api-version=2022-08-01
       pragma:
       - no-cache
       server:
@@ -1295,7 +1461,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/DeleteVM3Min;239,Microsoft.Compute/DeleteVM30Min;1199
+      - Microsoft.Compute/DeleteVM3Min;239,Microsoft.Compute/DeleteVM30Min;1198
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -1315,13 +1481,13 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/cba2c260-e5e8-4f7b-bbb3-34ba157ec00e?p=54253b73-cb53-496f-ab42-5e5ee19426f8&api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/da7a543a-03fa-49a3-974d-f58091b2508b?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:00:37.3383826+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"cba2c260-e5e8-4f7b-bbb3-34ba157ec00e\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-10-26T06:45:23.7584967+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"da7a543a-03fa-49a3-974d-f58091b2508b\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1330,7 +1496,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:00:46 GMT
+      - Wed, 26 Oct 2022 06:45:33 GMT
       expires:
       - '-1'
       pragma:
@@ -1347,7 +1513,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14993,Microsoft.Compute/GetOperation30Min;29993
+      - Microsoft.Compute/GetOperation3Min;14993,Microsoft.Compute/GetOperation30Min;29980
     status:
       code: 200
       message: OK
@@ -1365,114 +1531,14 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/cba2c260-e5e8-4f7b-bbb3-34ba157ec00e?p=54253b73-cb53-496f-ab42-5e5ee19426f8&api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/da7a543a-03fa-49a3-974d-f58091b2508b?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:00:37.3383826+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"cba2c260-e5e8-4f7b-bbb3-34ba157ec00e\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '134'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Sep 2021 03:01:24 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14989,Microsoft.Compute/GetOperation30Min;29989
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm deallocate
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/cba2c260-e5e8-4f7b-bbb3-34ba157ec00e?p=54253b73-cb53-496f-ab42-5e5ee19426f8&api-version=2021-07-01
-  response:
-    body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:00:37.3383826+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"cba2c260-e5e8-4f7b-bbb3-34ba157ec00e\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '134'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Sep 2021 03:01:54 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14988,Microsoft.Compute/GetOperation30Min;29986
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm deallocate
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/cba2c260-e5e8-4f7b-bbb3-34ba157ec00e?p=54253b73-cb53-496f-ab42-5e5ee19426f8&api-version=2021-07-01
-  response:
-    body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:00:37.3383826+00:00\",\r\n  \"endTime\":
-        \"2021-09-24T03:02:16.5104778+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"cba2c260-e5e8-4f7b-bbb3-34ba157ec00e\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-10-26T06:45:23.7584967+00:00\",\r\n  \"endTime\":
+        \"2022-10-26T06:45:51.4931604+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"da7a543a-03fa-49a3-974d-f58091b2508b\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1481,7 +1547,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:02:24 GMT
+      - Wed, 26 Oct 2022 06:46:10 GMT
       expires:
       - '-1'
       pragma:
@@ -1498,7 +1564,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14990,Microsoft.Compute/GetOperation30Min;29984
+      - Microsoft.Compute/GetOperation3Min;14991,Microsoft.Compute/GetOperation30Min;29977
     status:
       code: 200
       message: OK
@@ -1516,9 +1582,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/cba2c260-e5e8-4f7b-bbb3-34ba157ec00e?p=54253b73-cb53-496f-ab42-5e5ee19426f8&monitor=true&api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/da7a543a-03fa-49a3-974d-f58091b2508b?p=571046f6-b640-41c1-86f7-f9f044b5adf9&monitor=true&api-version=2022-08-01
   response:
     body:
       string: ''
@@ -1528,7 +1594,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 24 Sep 2021 03:02:24 GMT
+      - Wed, 26 Oct 2022 06:46:10 GMT
       expires:
       - '-1'
       pragma:
@@ -1541,7 +1607,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14989,Microsoft.Compute/GetOperation30Min;29983
+      - Microsoft.Compute/GetOperation3Min;14990,Microsoft.Compute/GetOperation30Min;29976
     status:
       code: 200
       message: OK
@@ -1549,7 +1615,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1561,9 +1627,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1/generalize?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1/generalize?api-version=2022-08-01
   response:
     body:
       string: ''
@@ -1573,7 +1639,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 24 Sep 2021 03:02:25 GMT
+      - Wed, 26 Oct 2022 06:46:13 GMT
       expires:
       - '-1'
       pragma:
@@ -1586,9 +1652,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/UpdateVM3Min;239,Microsoft.Compute/UpdateVM30Min;1198
+      - Microsoft.Compute/UpdateVM3Min;238,Microsoft.Compute/UpdateVM30Min;1198
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -1606,48 +1672,50 @@ interactions:
       ParameterSetName:
       - -g -n --source
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1?api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1\",\r\n
-        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"cdcf607a-51cb-4e40-b5fe-f75d3904135c\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"e77fbc10-1419-40f8-b44d-a5b76efc72c3\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202109180\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"vm1_disk1_d684fa5643924a4fb944627347c26b35\",\r\n
+        \"18.04.202210180\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"vm1_disk1_a59f688dd9be4bd6b96dab6728114dce\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
-        \       \"managedDisk\": {\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk1_d684fa5643924a4fb944627347c26b35\"\r\n
+        \       \"managedDisk\": {\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk1_a59f688dd9be4bd6b96dab6728114dce\"\r\n
         \       },\r\n        \"deleteOption\": \"Detach\"\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm1_disk2_26d9dc065fa646e38830814a167a56d6\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm1_disk2_b42c47c9b92543a3999b6d4916f8d793\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
-        \         \"managedDisk\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_26d9dc065fa646e38830814a167a56d6\"\r\n
+        \         \"managedDisk\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_b42c47c9b92543a3999b6d4916f8d793\"\r\n
         \         },\r\n          \"deleteOption\": \"Detach\",\r\n          \"toBeDetached\":
         false\r\n        }\r\n      ]\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\":
         \"vm1\",\r\n      \"adminUsername\": \"clitest1\",\r\n      \"linuxConfiguration\":
         {\r\n        \"disablePasswordAuthentication\": true,\r\n        \"ssh\":
         {\r\n          \"publicKeys\": [\r\n            {\r\n              \"path\":
         \"/home/clitest1/.ssh/authorized_keys\",\r\n              \"keyData\": \"ssh-rsa
-        AAAAB3NzaC1yc2EAAAADAQABAAABAQDL2PtV5sp++a43U/dRJ2Fyjso9qDFNbWEnbYk7mA4CfXy0gvxm65oYVd90JysNmGBF/89hIvCTN3ul4aEIuPkzywozRbdyWiJngSd/7OrNBJzpQQSjsGXwoVNDRAJSzlvuQVUR2vwBHeN2xMIvufSvzO3LGI3xcSIWIYlSvU9urnV+Pefd4T6x/OXgTpE02AgMWOspdZTzg0ZKsSU3sG5nYSNoq+8qrHQSXLbLLdWzz5lYKe8p64fQC/xhXrNa3/Nw5vy8YGsyqGueM/Rj6gCI+ivgBlQg908Aa50yQLvwsMLIKxhgPlj73Am8zm27PS3DKVjkr0nTjbEp/3FzZnyB\"\r\n
-        \           }\r\n          ]\r\n        },\r\n        \"provisionVMAgent\":
-        true,\r\n        \"patchSettings\": {\r\n          \"patchMode\": \"ImageDefault\",\r\n
-        \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
-        \     \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
+        AAAAB3NzaC1yc2EAAAADAQABAAABgQDLq1sEri2RcnDg8tjo775iZUd5HVjAdQjSgky6ciJgrvPNUxZv9D65dL9GLllmDhq4Xv6SxbppUJhG0vl/VgaRRPyWRrHXgZRBl0c+H0A2X0Y7L/9sir1ezs2xv89+T03Y+KQYGyZa4xuxwlfdsl6YHjHGW97ONxyDfQesFkSdwyRI0RsnV0/GB8mRF32tgSwxqT8cpXjzjz7w4usgT52knfpyslFfZGRfTjamae/sZeezBTSfsvgryEMxxxXBvXC8/iiTxRG9cQxURK6t1VCeT6F7OmJhY2G+sPCXbkEyOjkfT18y/iUSyPEPVkoaO8Ab9eNPIUFBhRPapQlZ5YsQcIBrDmBb013lRdH82K6Q7Avp3x5liFwjQT96p5CIikl6MlJScZ6SK1dnqAEEPuBvz7vCKSsVaIxTeZhnpiX44cp87VGOR1Sqlus3s3C4NbRKU/a3023vmMV6t/F9SY94sFlWPs2q6ihRTmqV5oYZScJlGgp9voQ/9XStN+4pfAE=
+        zhuyan@microsoft.com\\n\"\r\n            }\r\n          ]\r\n        },\r\n
+        \       \"provisionVMAgent\": true,\r\n        \"patchSettings\": {\r\n          \"patchMode\":
+        \"ImageDefault\",\r\n          \"assessmentMode\": \"ImageDefault\"\r\n        },\r\n
+        \       \"enableVMAgentPlatformUpdates\": false\r\n      },\r\n      \"secrets\":
+        [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
         true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"timeCreated\": \"2022-10-26T06:42:26.9128608+00:00\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3071'
+      - '3135'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:02:26 GMT
+      - Wed, 26 Oct 2022 06:46:15 GMT
       expires:
       - '-1'
       pragma:
@@ -1664,7 +1732,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3998,Microsoft.Compute/LowCostGet30Min;31996
+      - Microsoft.Compute/LowCostGet3Min;3997,Microsoft.Compute/LowCostGet30Min;31992
     status:
       code: 200
       message: OK
@@ -1682,21 +1750,21 @@ interactions:
       ParameterSetName:
       - -g -n --source
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-09-24T02:56:23Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-10-26T06:40:35Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '310'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:02:26 GMT
+      - Wed, 26 Oct 2022 06:46:15 GMT
       expires:
       - '-1'
       pragma:
@@ -1711,7 +1779,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus", "tags": {}, "properties": {"sourceVirtualMachine":
+    body: '{"location": "westus", "tags": {}, "properties": {"sourceVirtualMachine":
       {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1"},
       "hyperVGeneration": "V1"}}'
     headers:
@@ -1724,27 +1792,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '302'
+      - '243'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --source
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/images/managedImage1?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/images/managedImage1?api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"managedImage1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/images/managedImage1\",\r\n
-        \ \"type\": \"Microsoft.Compute/images\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"type\": \"Microsoft.Compute/images\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"sourceVirtualMachine\": {\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1\"\r\n
         \   },\r\n    \"storageProfile\": {\r\n      \"osDisk\": {\r\n        \"osType\":
         \"Linux\",\r\n        \"osState\": \"Generalized\",\r\n        \"managedDisk\":
-        {\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk1_d684fa5643924a4fb944627347c26b35\"\r\n
+        {\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk1_a59f688dd9be4bd6b96dab6728114dce\"\r\n
         \       },\r\n        \"caching\": \"ReadWrite\",\r\n        \"storageAccountType\":
         \"Premium_LRS\"\r\n      },\r\n      \"dataDisks\": [\r\n        {\r\n          \"lun\":
-        0,\r\n          \"managedDisk\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_26d9dc065fa646e38830814a167a56d6\"\r\n
+        0,\r\n          \"managedDisk\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_b42c47c9b92543a3999b6d4916f8d793\"\r\n
         \         },\r\n          \"caching\": \"None\",\r\n          \"storageAccountType\":
         \"Premium_LRS\"\r\n        }\r\n      ]\r\n    },\r\n    \"provisioningState\":
         \"Creating\",\r\n    \"hyperVGeneration\": \"V1\"\r\n  }\r\n}"
@@ -1752,15 +1820,15 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/7eb88489-449f-4450-9687-b0caf81b4af0?p=54253b73-cb53-496f-ab42-5e5ee19426f8&api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/d6071bbe-9351-464d-a680-ad736ccac4dc?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
       cache-control:
       - no-cache
       content-length:
-      - '1566'
+      - '1330'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:02:34 GMT
+      - Wed, 26 Oct 2022 06:46:21 GMT
       expires:
       - '-1'
       pragma:
@@ -1773,9 +1841,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/CreateImages3Min;39,Microsoft.Compute/CreateImages30Min;199
+      - Microsoft.Compute/CreateImages3Min;39,Microsoft.Compute/CreateImages30Min;198
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -1793,14 +1861,14 @@ interactions:
       ParameterSetName:
       - -g -n --source
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/7eb88489-449f-4450-9687-b0caf81b4af0?p=54253b73-cb53-496f-ab42-5e5ee19426f8&api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/d6071bbe-9351-464d-a680-ad736ccac4dc?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2022-08-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:02:33.4791809+00:00\",\r\n  \"endTime\":
-        \"2021-09-24T03:02:38.5885571+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"7eb88489-449f-4450-9687-b0caf81b4af0\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-10-26T06:46:20.0247204+00:00\",\r\n  \"endTime\":
+        \"2022-10-26T06:46:25.1497746+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"d6071bbe-9351-464d-a680-ad736ccac4dc\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1809,7 +1877,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:03:04 GMT
+      - Wed, 26 Oct 2022 06:46:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1826,7 +1894,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14986,Microsoft.Compute/GetOperation30Min;29980
+      - Microsoft.Compute/GetOperation3Min;14990,Microsoft.Compute/GetOperation30Min;29975
     status:
       code: 200
       message: OK
@@ -1844,22 +1912,22 @@ interactions:
       ParameterSetName:
       - -g -n --source
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/images/managedImage1?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/images/managedImage1?api-version=2022-08-01
   response:
     body:
       string: "{\r\n  \"name\": \"managedImage1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/images/managedImage1\",\r\n
-        \ \"type\": \"Microsoft.Compute/images\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"type\": \"Microsoft.Compute/images\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"sourceVirtualMachine\": {\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/vm1\"\r\n
         \   },\r\n    \"storageProfile\": {\r\n      \"osDisk\": {\r\n        \"osType\":
         \"Linux\",\r\n        \"osState\": \"Generalized\",\r\n        \"diskSizeGB\":
-        30,\r\n        \"managedDisk\": {\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk1_d684fa5643924a4fb944627347c26b35\"\r\n
+        30,\r\n        \"managedDisk\": {\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk1_a59f688dd9be4bd6b96dab6728114dce\"\r\n
         \       },\r\n        \"caching\": \"ReadWrite\",\r\n        \"storageAccountType\":
         \"Premium_LRS\"\r\n      },\r\n      \"dataDisks\": [\r\n        {\r\n          \"lun\":
         0,\r\n          \"diskSizeGB\": 10,\r\n          \"managedDisk\": {\r\n            \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_26d9dc065fa646e38830814a167a56d6\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/disks/vm1_disk2_b42c47c9b92543a3999b6d4916f8d793\"\r\n
         \         },\r\n          \"caching\": \"None\",\r\n          \"storageAccountType\":
         \"Premium_LRS\"\r\n        }\r\n      ]\r\n    },\r\n    \"provisioningState\":
         \"Succeeded\",\r\n    \"hyperVGeneration\": \"V1\"\r\n  }\r\n}"
@@ -1867,11 +1935,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1623'
+      - '1387'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:03:04 GMT
+      - Wed, 26 Oct 2022 06:46:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1888,7 +1956,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetImages3Min;358,Microsoft.Compute/GetImages30Min;1798
+      - Microsoft.Compute/GetImages3Min;358,Microsoft.Compute/GetImages30Min;1792
     status:
       code: 200
       message: OK
@@ -1907,21 +1975,21 @@ interactions:
       - -g --gallery-name --gallery-image-definition --gallery-image-version --managed-image
         --replica-count
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-09-24T02:56:23Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-10-26T06:40:35Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '310'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:03:05 GMT
+      - Wed, 26 Oct 2022 06:46:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1936,8 +2004,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus", "tags": {}, "properties": {"publishingProfile":
-      {"targetRegions": [{"name": "eastus"}], "replicaCount": 1}, "storageProfile":
+    body: '{"location": "westus", "tags": {}, "properties": {"publishingProfile":
+      {"targetRegions": [{"name": "westus"}], "replicaCount": 1}, "storageProfile":
       {"source": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/images/managedImage1"}}}}'
     headers:
       Accept:
@@ -1949,39 +2017,41 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '364'
+      - '305'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g --gallery-name --gallery-image-definition --gallery-image-version --managed-image
         --replica-count
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/images/image1/versions/1.1.2?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/images/image1/versions/1.1.2?api-version=2022-03-03
   response:
     body:
       string: "{\r\n  \"name\": \"1.1.2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/images/image1/versions/1.1.2\",\r\n
         \ \"type\": \"Microsoft.Compute/galleries/images/versions\",\r\n  \"location\":
-        \"eastus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"publishingProfile\":
-        {\r\n      \"targetRegions\": [\r\n        {\r\n          \"name\": \"East
+        \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"publishingProfile\":
+        {\r\n      \"targetRegions\": [\r\n        {\r\n          \"name\": \"West
         US\",\r\n          \"regionalReplicaCount\": 1,\r\n          \"storageAccountType\":
         \"Standard_LRS\"\r\n        }\r\n      ],\r\n      \"replicaCount\": 1,\r\n
-        \     \"excludeFromLatest\": false,\r\n      \"publishedDate\": \"2021-09-24T03:03:13.1833522+00:00\",\r\n
+        \     \"excludeFromLatest\": false,\r\n      \"publishedDate\": \"2022-10-26T06:46:57.0129388+00:00\",\r\n
         \     \"storageAccountType\": \"Standard_LRS\"\r\n    },\r\n    \"storageProfile\":
         {\r\n      \"source\": {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/images/managedImage1\"\r\n
-        \     }\r\n    },\r\n    \"provisioningState\": \"Creating\"\r\n  }\r\n}"
+        \     }\r\n    },\r\n    \"safetyProfile\": {\r\n      \"reportedForPolicyViolation\":
+        false,\r\n      \"allowDeletionOfReplicatedLocations\": false\r\n    },\r\n
+        \   \"provisioningState\": \"Creating\"\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e?api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/d4282308-f7c6-4413-8915-dcfcf3c52247?api-version=2022-03-03
       cache-control:
       - no-cache
       content-length:
-      - '1068'
+      - '1074'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:03:13 GMT
+      - Wed, 26 Oct 2022 06:46:57 GMT
       expires:
       - '-1'
       pragma:
@@ -1994,7 +2064,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/CreateUpdateGalleryImageVersion3Min;374,Microsoft.Compute/CreateUpdateGalleryImageVersion30Min;1199
+      - Microsoft.Compute/CreateUpdateGalleryImageVersion3Min;374,Microsoft.Compute/CreateUpdateGalleryImageVersion30Min;1198
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -2015,13 +2085,13 @@ interactions:
       - -g --gallery-name --gallery-image-definition --gallery-image-version --managed-image
         --replica-count
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/d4282308-f7c6-4413-8915-dcfcf3c52247?api-version=2022-03-03
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:03:13.1677444+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-10-26T06:46:57.0129388+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"d4282308-f7c6-4413-8915-dcfcf3c52247\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -2030,7 +2100,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:04:15 GMT
+      - Wed, 26 Oct 2022 06:47:58 GMT
       expires:
       - '-1'
       pragma:
@@ -2047,7 +2117,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1198,Microsoft.Compute/GetOperationStatus30Min;4194
+      - Microsoft.Compute/GetOperationStatus3Min;1198,Microsoft.Compute/GetOperationStatus30Min;4167
     status:
       code: 200
       message: OK
@@ -2066,13 +2136,13 @@ interactions:
       - -g --gallery-name --gallery-image-definition --gallery-image-version --managed-image
         --replica-count
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/d4282308-f7c6-4413-8915-dcfcf3c52247?api-version=2022-03-03
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:03:13.1677444+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-10-26T06:46:57.0129388+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"d4282308-f7c6-4413-8915-dcfcf3c52247\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -2081,7 +2151,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:05:16 GMT
+      - Wed, 26 Oct 2022 06:48:59 GMT
       expires:
       - '-1'
       pragma:
@@ -2098,7 +2168,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1197,Microsoft.Compute/GetOperationStatus30Min;4193
+      - Microsoft.Compute/GetOperationStatus3Min;1196,Microsoft.Compute/GetOperationStatus30Min;4165
     status:
       code: 200
       message: OK
@@ -2117,13 +2187,13 @@ interactions:
       - -g --gallery-name --gallery-image-definition --gallery-image-version --managed-image
         --replica-count
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/d4282308-f7c6-4413-8915-dcfcf3c52247?api-version=2022-03-03
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:03:13.1677444+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-10-26T06:46:57.0129388+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"d4282308-f7c6-4413-8915-dcfcf3c52247\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -2132,7 +2202,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:06:16 GMT
+      - Wed, 26 Oct 2022 06:49:59 GMT
       expires:
       - '-1'
       pragma:
@@ -2149,7 +2219,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1195,Microsoft.Compute/GetOperationStatus30Min;4191
+      - Microsoft.Compute/GetOperationStatus3Min;1194,Microsoft.Compute/GetOperationStatus30Min;4171
     status:
       code: 200
       message: OK
@@ -2168,13 +2238,13 @@ interactions:
       - -g --gallery-name --gallery-image-definition --gallery-image-version --managed-image
         --replica-count
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/d4282308-f7c6-4413-8915-dcfcf3c52247?api-version=2022-03-03
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:03:13.1677444+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-10-26T06:46:57.0129388+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"d4282308-f7c6-4413-8915-dcfcf3c52247\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -2183,7 +2253,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:07:18 GMT
+      - Wed, 26 Oct 2022 06:51:01 GMT
       expires:
       - '-1'
       pragma:
@@ -2200,7 +2270,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1195,Microsoft.Compute/GetOperationStatus30Min;4189
+      - Microsoft.Compute/GetOperationStatus3Min;1195,Microsoft.Compute/GetOperationStatus30Min;4170
     status:
       code: 200
       message: OK
@@ -2219,13 +2289,13 @@ interactions:
       - -g --gallery-name --gallery-image-definition --gallery-image-version --managed-image
         --replica-count
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/d4282308-f7c6-4413-8915-dcfcf3c52247?api-version=2022-03-03
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:03:13.1677444+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-10-26T06:46:57.0129388+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"d4282308-f7c6-4413-8915-dcfcf3c52247\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -2234,7 +2304,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:08:19 GMT
+      - Wed, 26 Oct 2022 06:52:01 GMT
       expires:
       - '-1'
       pragma:
@@ -2251,7 +2321,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1195,Microsoft.Compute/GetOperationStatus30Min;4187
+      - Microsoft.Compute/GetOperationStatus3Min;1195,Microsoft.Compute/GetOperationStatus30Min;4168
     status:
       code: 200
       message: OK
@@ -2270,13 +2340,13 @@ interactions:
       - -g --gallery-name --gallery-image-definition --gallery-image-version --managed-image
         --replica-count
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/d4282308-f7c6-4413-8915-dcfcf3c52247?api-version=2022-03-03
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:03:13.1677444+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-10-26T06:46:57.0129388+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"d4282308-f7c6-4413-8915-dcfcf3c52247\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -2285,7 +2355,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:09:20 GMT
+      - Wed, 26 Oct 2022 06:53:03 GMT
       expires:
       - '-1'
       pragma:
@@ -2302,7 +2372,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1195,Microsoft.Compute/GetOperationStatus30Min;4185
+      - Microsoft.Compute/GetOperationStatus3Min;1195,Microsoft.Compute/GetOperationStatus30Min;4166
     status:
       code: 200
       message: OK
@@ -2321,116 +2391,14 @@ interactions:
       - -g --gallery-name --gallery-image-definition --gallery-image-version --managed-image
         --replica-count
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/d4282308-f7c6-4413-8915-dcfcf3c52247?api-version=2022-03-03
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:03:13.1677444+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '134'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Sep 2021 03:10:21 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1195,Microsoft.Compute/GetOperationStatus30Min;4183
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sig image-version create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --gallery-name --gallery-image-definition --gallery-image-version --managed-image
-        --replica-count
-      User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e?api-version=2021-07-01
-  response:
-    body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:03:13.1677444+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '134'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Sep 2021 03:11:22 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1195,Microsoft.Compute/GetOperationStatus30Min;4181
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sig image-version create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --gallery-name --gallery-image-definition --gallery-image-version --managed-image
-        --replica-count
-      User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e?api-version=2021-07-01
-  response:
-    body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:03:13.1677444+00:00\",\r\n  \"endTime\":
-        \"2021-09-24T03:12:14.2328256+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"ab9c4faf-56b7-4e9b-9c97-a7b9e6d6081e\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-10-26T06:46:57.0129388+00:00\",\r\n  \"endTime\":
+        \"2022-10-26T06:53:43.1890006+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"d4282308-f7c6-4413-8915-dcfcf3c52247\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -2439,7 +2407,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:12:23 GMT
+      - Wed, 26 Oct 2022 06:54:03 GMT
       expires:
       - '-1'
       pragma:
@@ -2456,7 +2424,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1195,Microsoft.Compute/GetOperationStatus30Min;4179
+      - Microsoft.Compute/GetOperationStatus3Min;1195,Microsoft.Compute/GetOperationStatus30Min;4164
     status:
       code: 200
       message: OK
@@ -2475,34 +2443,36 @@ interactions:
       - -g --gallery-name --gallery-image-definition --gallery-image-version --managed-image
         --replica-count
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/images/image1/versions/1.1.2?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/images/image1/versions/1.1.2?api-version=2022-03-03
   response:
     body:
       string: "{\r\n  \"name\": \"1.1.2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/images/image1/versions/1.1.2\",\r\n
         \ \"type\": \"Microsoft.Compute/galleries/images/versions\",\r\n  \"location\":
-        \"eastus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"publishingProfile\":
-        {\r\n      \"targetRegions\": [\r\n        {\r\n          \"name\": \"East
+        \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"publishingProfile\":
+        {\r\n      \"targetRegions\": [\r\n        {\r\n          \"name\": \"West
         US\",\r\n          \"regionalReplicaCount\": 1,\r\n          \"storageAccountType\":
         \"Standard_LRS\"\r\n        }\r\n      ],\r\n      \"replicaCount\": 1,\r\n
-        \     \"excludeFromLatest\": false,\r\n      \"publishedDate\": \"2021-09-24T03:03:13.1833522+00:00\",\r\n
+        \     \"excludeFromLatest\": false,\r\n      \"publishedDate\": \"2022-10-26T06:46:57.0129388+00:00\",\r\n
         \     \"storageAccountType\": \"Standard_LRS\"\r\n    },\r\n    \"storageProfile\":
         {\r\n      \"source\": {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/images/managedImage1\"\r\n
         \     },\r\n      \"osDiskImage\": {\r\n        \"sizeInGB\": 30,\r\n        \"hostCaching\":
         \"ReadWrite\",\r\n        \"source\": {}\r\n      },\r\n      \"dataDiskImages\":
         [\r\n        {\r\n          \"lun\": 0,\r\n          \"sizeInGB\": 10,\r\n
         \         \"hostCaching\": \"None\"\r\n        }\r\n      ]\r\n    },\r\n
-        \   \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
+        \   \"safetyProfile\": {\r\n      \"reportedForPolicyViolation\": false,\r\n
+        \     \"allowDeletionOfReplicatedLocations\": false\r\n    },\r\n    \"provisioningState\":
+        \"Succeeded\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1327'
+      - '1333'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:12:24 GMT
+      - Wed, 26 Oct 2022 06:54:03 GMT
       expires:
       - '-1'
       pragma:
@@ -2519,232 +2489,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGalleryImageVersion3Min;1999,Microsoft.Compute/GetGalleryImageVersion30Min;9996
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sig update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --gallery-name --resource-group --permissions
-      User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002?api-version=2021-07-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"gellery000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n      \"uniqueName\":
-        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN\"\r\n    },\r\n    \"sharingProfile\":
-        {\r\n      \"permissions\": \"Private\"\r\n    },\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"softDeletePolicy\": {\r\n      \"isSoftDeleteEnabled\":
-        false\r\n    }\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '631'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Sep 2021 03:12:25 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGallery3Min;349,Microsoft.Compute/GetGallery30Min;2489
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "eastus", "tags": {}, "properties": {"identifier": {}, "sharingProfile":
-      {"permissions": "Groups"}, "softDeletePolicy": {"isSoftDeleteEnabled": false}}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sig update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '165'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --gallery-name --resource-group --permissions
-      User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002?api-version=2021-07-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"gellery000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n      \"uniqueName\":
-        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN\"\r\n    },\r\n    \"sharingProfile\":
-        {\r\n      \"permissions\": \"Groups\"\r\n    },\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"softDeletePolicy\": {\r\n      \"isSoftDeleteEnabled\":
-        false\r\n    }\r\n  }\r\n}"
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/dbe40946-ad8c-4192-afd0-46d345eba0ff?api-version=2021-07-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '630'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Sep 2021 03:12:26 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/CreateUpdateGallery3Min;49,Microsoft.Compute/CreateUpdateGallery30Min;298
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sig update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --gallery-name --resource-group --permissions
-      User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/dbe40946-ad8c-4192-afd0-46d345eba0ff?api-version=2021-07-01
-  response:
-    body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:12:26.7797449+00:00\",\r\n  \"endTime\":
-        \"2021-09-24T03:12:26.8110028+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"dbe40946-ad8c-4192-afd0-46d345eba0ff\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '184'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Sep 2021 03:12:56 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1193,Microsoft.Compute/GetOperationStatus30Min;4177
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sig update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --gallery-name --resource-group --permissions
-      User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002?api-version=2021-07-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"gellery000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n      \"uniqueName\":
-        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN\"\r\n    },\r\n    \"sharingProfile\":
-        {\r\n      \"permissions\": \"Groups\"\r\n    },\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"softDeletePolicy\": {\r\n      \"isSoftDeleteEnabled\":
-        false\r\n    }\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '630'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Sep 2021 03:12:57 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGallery3Min;347,Microsoft.Compute/GetGallery30Min;2487
+      - Microsoft.Compute/GetGalleryImageVersion3Min;1998,Microsoft.Compute/GetGalleryImageVersion30Min;9986
     status:
       code: 200
       message: OK
@@ -2762,27 +2507,26 @@ interactions:
       ParameterSetName:
       - --gallery-name --resource-group --select
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002?api-version=2021-07-01&$select=Permissions
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002?api-version=2021-10-01&$select=Permissions
   response:
     body:
       string: "{\r\n  \"name\": \"gellery000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n      \"uniqueName\":
-        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN\"\r\n    },\r\n    \"sharingProfile\":
+        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE\"\r\n    },\r\n    \"sharingProfile\":
         {\r\n      \"permissions\": \"Groups\"\r\n    },\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"softDeletePolicy\": {\r\n      \"isSoftDeleteEnabled\":
-        false\r\n    }\r\n  }\r\n}"
+        \"Succeeded\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '630'
+      - '494'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:12:58 GMT
+      - Wed, 26 Oct 2022 06:54:06 GMT
       expires:
       - '-1'
       pragma:
@@ -2799,232 +2543,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGallery3Min;346,Microsoft.Compute/GetGallery30Min;2486
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sig update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --gallery-name --resource-group --permissions --permissions
-      User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002?api-version=2021-07-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"gellery000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n      \"uniqueName\":
-        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN\"\r\n    },\r\n    \"sharingProfile\":
-        {\r\n      \"permissions\": \"Groups\"\r\n    },\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"softDeletePolicy\": {\r\n      \"isSoftDeleteEnabled\":
-        false\r\n    }\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '630'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Sep 2021 03:12:59 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGallery3Min;345,Microsoft.Compute/GetGallery30Min;2485
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "eastus", "tags": {}, "properties": {"identifier": {}, "sharingProfile":
-      {"permissions": "Groups"}, "softDeletePolicy": {"isSoftDeleteEnabled": false}}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sig update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '165'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --gallery-name --resource-group --permissions --permissions
-      User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002?api-version=2021-07-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"gellery000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n      \"uniqueName\":
-        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN\"\r\n    },\r\n    \"sharingProfile\":
-        {\r\n      \"permissions\": \"Groups\"\r\n    },\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"softDeletePolicy\": {\r\n      \"isSoftDeleteEnabled\":
-        false\r\n    }\r\n  }\r\n}"
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/99620af0-aaec-4bf5-ad27-68becb4109a6?api-version=2021-07-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '630'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Sep 2021 03:13:01 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/CreateUpdateGallery3Min;48,Microsoft.Compute/CreateUpdateGallery30Min;297
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sig update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --gallery-name --resource-group --permissions --permissions
-      User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/99620af0-aaec-4bf5-ad27-68becb4109a6?api-version=2021-07-01
-  response:
-    body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:13:01.8580286+00:00\",\r\n  \"endTime\":
-        \"2021-09-24T03:13:01.8893072+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"99620af0-aaec-4bf5-ad27-68becb4109a6\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '184'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Sep 2021 03:13:31 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1194,Microsoft.Compute/GetOperationStatus30Min;4176
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sig update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --gallery-name --resource-group --permissions --permissions
-      User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002?api-version=2021-07-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"gellery000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n      \"uniqueName\":
-        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN\"\r\n    },\r\n    \"sharingProfile\":
-        {\r\n      \"permissions\": \"Groups\"\r\n    },\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"softDeletePolicy\": {\r\n      \"isSoftDeleteEnabled\":
-        false\r\n    }\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '630'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Sep 2021 03:13:31 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGallery3Min;343,Microsoft.Compute/GetGallery30Min;2483
+      - Microsoft.Compute/GetGallery3Min;346,Microsoft.Compute/GetGallery30Min;2454
     status:
       code: 200
       message: OK
@@ -3047,25 +2566,25 @@ interactions:
       ParameterSetName:
       - --gallery-name -g --subscription-ids --tenant-ids
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/share?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/share?api-version=2022-03-03
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/9206ccfa-04b5-47e5-ae07-899ba4abd6a2?api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/6a76af51-5480-4601-b756-fa547bff2a95?api-version=2022-03-03
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Fri, 24 Sep 2021 03:13:33 GMT
+      - Wed, 26 Oct 2022 06:54:07 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/9206ccfa-04b5-47e5-ae07-899ba4abd6a2?monitor=true&api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/6a76af51-5480-4601-b756-fa547bff2a95?monitor=true&api-version=2022-03-03
       pragma:
       - no-cache
       server:
@@ -3076,9 +2595,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/PostShareGallery3Min;9,Microsoft.Compute/PostShareGallery30Min;59
+      - Microsoft.Compute/PostShareGallery3Min;9,Microsoft.Compute/PostShareGallery30Min;56
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 202
       message: Accepted
@@ -3096,14 +2615,14 @@ interactions:
       ParameterSetName:
       - --gallery-name -g --subscription-ids --tenant-ids
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/9206ccfa-04b5-47e5-ae07-899ba4abd6a2?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/6a76af51-5480-4601-b756-fa547bff2a95?api-version=2022-03-03
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:13:33.2488134+00:00\",\r\n  \"endTime\":
-        \"2021-09-24T03:13:34.6394161+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"9206ccfa-04b5-47e5-ae07-899ba4abd6a2\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-10-26T06:54:07.5799144+00:00\",\r\n  \"endTime\":
+        \"2022-10-26T06:54:09.1424156+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"6a76af51-5480-4601-b756-fa547bff2a95\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -3112,7 +2631,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:14:03 GMT
+      - Wed, 26 Oct 2022 06:54:37 GMT
       expires:
       - '-1'
       pragma:
@@ -3129,7 +2648,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1194,Microsoft.Compute/GetOperationStatus30Min;4174
+      - Microsoft.Compute/GetOperationStatus3Min;1192,Microsoft.Compute/GetOperationStatus30Min;4161
     status:
       code: 200
       message: OK
@@ -3147,9 +2666,9 @@ interactions:
       ParameterSetName:
       - --gallery-name -g --subscription-ids --tenant-ids
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/9206ccfa-04b5-47e5-ae07-899ba4abd6a2?monitor=true&api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/6a76af51-5480-4601-b756-fa547bff2a95?monitor=true&api-version=2022-03-03
   response:
     body:
       string: ''
@@ -3159,7 +2678,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 24 Sep 2021 03:14:03 GMT
+      - Wed, 26 Oct 2022 06:54:38 GMT
       expires:
       - '-1'
       pragma:
@@ -3172,7 +2691,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1193,Microsoft.Compute/GetOperationStatus30Min;4173
+      - Microsoft.Compute/GetOperationStatus3Min;1191,Microsoft.Compute/GetOperationStatus30Min;4160
     status:
       code: 200
       message: OK
@@ -3190,31 +2709,30 @@ interactions:
       ParameterSetName:
       - --gallery-name --resource-group --select
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002?api-version=2021-07-01&$select=Permissions
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002?api-version=2021-10-01&$select=Permissions
   response:
     body:
       string: "{\r\n  \"name\": \"gellery000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n      \"uniqueName\":
-        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN\"\r\n    },\r\n    \"sharingProfile\":
+        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE\"\r\n    },\r\n    \"sharingProfile\":
         {\r\n      \"permissions\": \"Groups\",\r\n      \"groups\": [\r\n        {\r\n
         \         \"type\": \"Subscriptions\",\r\n          \"ids\": [\r\n            \"0b1f6471-1bf0-4dda-aec3-cb9272f09590\",\r\n
         \           \"34a4ab42-0d72-47d9-bd1a-aed207386dac\"\r\n          ]\r\n        },\r\n
         \       {\r\n          \"type\": \"AADTenants\",\r\n          \"ids\": [\r\n
         \           \"2f4a9838-26b7-47ee-be60-ccc1fdec5953\"\r\n          ]\r\n        }\r\n
-        \     ]\r\n    },\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"softDeletePolicy\":
-        {\r\n      \"isSoftDeleteEnabled\": false\r\n    }\r\n  }\r\n}"
+        \     ]\r\n    },\r\n    \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '996'
+      - '860'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:14:05 GMT
+      - Wed, 26 Oct 2022 06:54:38 GMT
       expires:
       - '-1'
       pragma:
@@ -3231,7 +2749,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGallery3Min;342,Microsoft.Compute/GetGallery30Min;2482
+      - Microsoft.Compute/GetGallery3Min;346,Microsoft.Compute/GetGallery30Min;2453
     status:
       code: 200
       message: OK
@@ -3254,25 +2772,25 @@ interactions:
       ParameterSetName:
       - --gallery-name -g --subscription-ids --tenant-ids
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/share?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/share?api-version=2022-03-03
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/2686cae9-c90c-48ee-bb14-8f6547c9dca0?api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/abb09092-1f0e-4460-a836-31ec946c1445?api-version=2022-03-03
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Fri, 24 Sep 2021 03:14:06 GMT
+      - Wed, 26 Oct 2022 06:54:40 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/2686cae9-c90c-48ee-bb14-8f6547c9dca0?monitor=true&api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/abb09092-1f0e-4460-a836-31ec946c1445?monitor=true&api-version=2022-03-03
       pragma:
       - no-cache
       server:
@@ -3283,7 +2801,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/PostShareGallery3Min;8,Microsoft.Compute/PostShareGallery30Min;58
+      - Microsoft.Compute/PostShareGallery3Min;8,Microsoft.Compute/PostShareGallery30Min;55
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -3303,14 +2821,14 @@ interactions:
       ParameterSetName:
       - --gallery-name -g --subscription-ids --tenant-ids
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/2686cae9-c90c-48ee-bb14-8f6547c9dca0?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/abb09092-1f0e-4460-a836-31ec946c1445?api-version=2022-03-03
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:14:05.8426995+00:00\",\r\n  \"endTime\":
-        \"2021-09-24T03:14:06.2021361+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"2686cae9-c90c-48ee-bb14-8f6547c9dca0\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-10-26T06:54:40.7676387+00:00\",\r\n  \"endTime\":
+        \"2022-10-26T06:54:41.2051341+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"abb09092-1f0e-4460-a836-31ec946c1445\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -3319,7 +2837,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:14:36 GMT
+      - Wed, 26 Oct 2022 06:55:10 GMT
       expires:
       - '-1'
       pragma:
@@ -3336,7 +2854,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1191,Microsoft.Compute/GetOperationStatus30Min;4171
+      - Microsoft.Compute/GetOperationStatus3Min;1191,Microsoft.Compute/GetOperationStatus30Min;4173
     status:
       code: 200
       message: OK
@@ -3354,9 +2872,9 @@ interactions:
       ParameterSetName:
       - --gallery-name -g --subscription-ids --tenant-ids
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/2686cae9-c90c-48ee-bb14-8f6547c9dca0?monitor=true&api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/abb09092-1f0e-4460-a836-31ec946c1445?monitor=true&api-version=2022-03-03
   response:
     body:
       string: ''
@@ -3366,7 +2884,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 24 Sep 2021 03:14:36 GMT
+      - Wed, 26 Oct 2022 06:55:10 GMT
       expires:
       - '-1'
       pragma:
@@ -3379,7 +2897,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1190,Microsoft.Compute/GetOperationStatus30Min;4170
+      - Microsoft.Compute/GetOperationStatus3Min;1190,Microsoft.Compute/GetOperationStatus30Min;4172
     status:
       code: 200
       message: OK
@@ -3397,29 +2915,28 @@ interactions:
       ParameterSetName:
       - --gallery-name --resource-group --select
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002?api-version=2021-07-01&$select=Permissions
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002?api-version=2021-10-01&$select=Permissions
   response:
     body:
       string: "{\r\n  \"name\": \"gellery000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n      \"uniqueName\":
-        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN\"\r\n    },\r\n    \"sharingProfile\":
+        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE\"\r\n    },\r\n    \"sharingProfile\":
         {\r\n      \"permissions\": \"Groups\",\r\n      \"groups\": [\r\n        {\r\n
         \         \"type\": \"Subscriptions\",\r\n          \"ids\": [\r\n            \"0b1f6471-1bf0-4dda-aec3-cb9272f09590\"\r\n
         \         ]\r\n        }\r\n      ]\r\n    },\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"softDeletePolicy\": {\r\n      \"isSoftDeleteEnabled\":
-        false\r\n    }\r\n  }\r\n}"
+        \"Succeeded\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '802'
+      - '666'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:14:37 GMT
+      - Wed, 26 Oct 2022 06:55:12 GMT
       expires:
       - '-1'
       pragma:
@@ -3429,14 +2946,10 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGallery3Min;341,Microsoft.Compute/GetGallery30Min;2481
+      - Microsoft.Compute/GetGallery3Min;344,Microsoft.Compute/GetGallery30Min;2460
     status:
       code: 200
       message: OK
@@ -3454,14 +2967,14 @@ interactions:
       ParameterSetName:
       - --location
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/sharedGalleries?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/sharedGalleries?api-version=2022-03-03
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"identifier\": {\r\n        \"uniqueId\":
-        \"/SharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN\"\r\n
-        \     },\r\n      \"location\": \"eastus\",\r\n      \"name\": \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN\"\r\n
+        \"/SharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE\"\r\n
+        \     },\r\n      \"location\": \"westus\",\r\n      \"name\": \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE\"\r\n
         \   }\r\n  ]\r\n}"
     headers:
       cache-control:
@@ -3471,7 +2984,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:14:39 GMT
+      - Wed, 26 Oct 2022 06:55:13 GMT
       expires:
       - '-1'
       pragma:
@@ -3504,13 +3017,13 @@ interactions:
       ParameterSetName:
       - --location --gallery-unique-name
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/sharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN?api-version=2020-09-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/sharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE?api-version=2022-01-03
   response:
     body:
-      string: "{\r\n  \"identifier\": {\r\n    \"uniqueId\": \"/SharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN\"\r\n
-        \ },\r\n  \"location\": \"eastus\",\r\n  \"name\": \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN\"\r\n}"
+      string: "{\r\n  \"identifier\": {\r\n    \"uniqueId\": \"/SharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE\"\r\n
+        \ },\r\n  \"location\": \"westus\",\r\n  \"name\": \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -3519,7 +3032,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:14:41 GMT
+      - Wed, 26 Oct 2022 06:55:14 GMT
       expires:
       - '-1'
       pragma:
@@ -3552,19 +3065,19 @@ interactions:
       ParameterSetName:
       - --gallery-unique-name --location
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/sharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN/images?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/sharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE/images?api-version=2022-03-03
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"identifier\": {\r\n        \"uniqueId\":
-        \"/SharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN/Images/image1\"\r\n
+        \"/SharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE/Images/image1\"\r\n
         \     },\r\n      \"properties\": {\r\n        \"osType\": \"Linux\",\r\n
         \       \"osState\": \"Generalized\",\r\n        \"identifier\": {\r\n          \"publisher\":
         \"publisher1\",\r\n          \"offer\": \"offer1\",\r\n          \"sku\":
         \"sku1\"\r\n        },\r\n        \"recommended\": {},\r\n        \"hyperVGeneration\":
         \"V1\",\r\n        \"architecture\": \"x64\"\r\n      },\r\n      \"location\":
-        \"eastus\",\r\n      \"name\": \"image1\"\r\n    }\r\n  ]\r\n}"
+        \"westus\",\r\n      \"name\": \"image1\"\r\n    }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -3573,7 +3086,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:14:43 GMT
+      - Wed, 26 Oct 2022 06:55:15 GMT
       expires:
       - '-1'
       pragma:
@@ -3606,17 +3119,17 @@ interactions:
       ParameterSetName:
       - --gallery-image-definition --gallery-unique-name --location
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/sharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN/images/image1?api-version=2020-09-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/sharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE/images/image1?api-version=2022-01-03
   response:
     body:
-      string: "{\r\n  \"identifier\": {\r\n    \"uniqueId\": \"/SharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN/Images/image1\"\r\n
+      string: "{\r\n  \"identifier\": {\r\n    \"uniqueId\": \"/SharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE/Images/image1\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"osType\": \"Linux\",\r\n    \"osState\":
         \"Generalized\",\r\n    \"identifier\": {\r\n      \"publisher\": \"publisher1\",\r\n
         \     \"offer\": \"offer1\",\r\n      \"sku\": \"sku1\"\r\n    },\r\n    \"recommended\":
         {},\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\": \"x64\"\r\n
-        \ },\r\n  \"location\": \"eastus\",\r\n  \"name\": \"image1\"\r\n}"
+        \ },\r\n  \"location\": \"westus\",\r\n  \"name\": \"image1\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -3625,7 +3138,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:14:44 GMT
+      - Wed, 26 Oct 2022 06:55:16 GMT
       expires:
       - '-1'
       pragma:
@@ -3658,25 +3171,29 @@ interactions:
       ParameterSetName:
       - --gallery-image-definition --gallery-unique-name --location
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/sharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN/images/image1/versions?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/sharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE/images/image1/versions?api-version=2022-03-03
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"identifier\": {\r\n        \"uniqueId\":
-        \"/SharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN/Images/image1/Versions/1.1.2\"\r\n
-        \     },\r\n      \"properties\": {\r\n        \"publishedDate\": \"2021-09-24T03:03:13.1833522+00:00\"\r\n
-        \     },\r\n      \"location\": \"eastus\",\r\n      \"name\": \"1.1.2\"\r\n
-        \   }\r\n  ]\r\n}"
+        \"/SharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE/Images/image1/Versions/1.1.2\"\r\n
+        \     },\r\n      \"properties\": {\r\n        \"publishedDate\": \"2022-10-26T06:46:57.0129388+00:00\",\r\n
+        \       \"excludeFromLatest\": false,\r\n        \"storageProfile\": {\r\n
+        \         \"osDiskImage\": {\r\n            \"diskSizeGB\": 30,\r\n            \"hostCaching\":
+        \"ReadWrite\"\r\n          },\r\n          \"dataDiskImages\": [\r\n            {\r\n
+        \             \"lun\": 0,\r\n              \"diskSizeGB\": 10,\r\n              \"hostCaching\":
+        \"None\"\r\n            }\r\n          ]\r\n        }\r\n      },\r\n      \"location\":
+        \"westus\",\r\n      \"name\": \"1.1.2\"\r\n    }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '340'
+      - '700'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:14:46 GMT
+      - Wed, 26 Oct 2022 06:55:17 GMT
       expires:
       - '-1'
       pragma:
@@ -3709,23 +3226,28 @@ interactions:
       ParameterSetName:
       - --gallery-image-definition --gallery-unique-name --location --gallery-image-version
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/sharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN/images/image1/versions/1.1.2?api-version=2020-09-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/sharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE/images/image1/versions/1.1.2?api-version=2022-01-03
   response:
     body:
-      string: "{\r\n  \"identifier\": {\r\n    \"uniqueId\": \"/SharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN/Images/image1/Versions/1.1.2\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"publishedDate\": \"2021-09-24T03:03:13.1833522+00:00\"\r\n
-        \ },\r\n  \"location\": \"eastus\",\r\n  \"name\": \"1.1.2\"\r\n}"
+      string: "{\r\n  \"identifier\": {\r\n    \"uniqueId\": \"/SharedGalleries/0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE/Images/image1/Versions/1.1.2\"\r\n
+        \ },\r\n  \"properties\": {\r\n    \"publishedDate\": \"2022-10-26T06:46:57.0129388+00:00\",\r\n
+        \   \"excludeFromLatest\": false,\r\n    \"storageProfile\": {\r\n      \"osDiskImage\":
+        {\r\n        \"diskSizeGB\": 30,\r\n        \"hostCaching\": \"ReadWrite\"\r\n
+        \     },\r\n      \"dataDiskImages\": [\r\n        {\r\n          \"lun\":
+        0,\r\n          \"diskSizeGB\": 10,\r\n          \"hostCaching\": \"None\"\r\n
+        \       }\r\n      ]\r\n    }\r\n  },\r\n  \"location\": \"westus\",\r\n  \"name\":
+        \"1.1.2\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '275'
+      - '579'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:14:47 GMT
+      - Wed, 26 Oct 2022 06:55:18 GMT
       expires:
       - '-1'
       pragma:
@@ -3762,25 +3284,25 @@ interactions:
       ParameterSetName:
       - --gallery-name -g
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/share?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002/share?api-version=2022-03-03
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/11d05032-416b-4d34-9229-7c3b73a1b5d5?api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/8e5e2c7b-6383-4879-9a03-696da97a7420?api-version=2022-03-03
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Fri, 24 Sep 2021 03:14:48 GMT
+      - Wed, 26 Oct 2022 06:55:20 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/11d05032-416b-4d34-9229-7c3b73a1b5d5?monitor=true&api-version=2021-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/8e5e2c7b-6383-4879-9a03-696da97a7420?monitor=true&api-version=2022-03-03
       pragma:
       - no-cache
       server:
@@ -3793,7 +3315,7 @@ interactions:
       x-ms-ratelimit-remaining-resource:
       - Microsoft.Compute/PostShareGallery3Min;7,Microsoft.Compute/PostShareGallery30Min;57
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 202
       message: Accepted
@@ -3811,14 +3333,14 @@ interactions:
       ParameterSetName:
       - --gallery-name -g
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/11d05032-416b-4d34-9229-7c3b73a1b5d5?api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/8e5e2c7b-6383-4879-9a03-696da97a7420?api-version=2022-03-03
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-09-24T03:14:49.1084758+00:00\",\r\n  \"endTime\":
-        \"2021-09-24T03:14:49.4678159+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"11d05032-416b-4d34-9229-7c3b73a1b5d5\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2022-10-26T06:55:20.3774206+00:00\",\r\n  \"endTime\":
+        \"2022-10-26T06:55:20.8149775+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"8e5e2c7b-6383-4879-9a03-696da97a7420\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -3827,7 +3349,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:15:19 GMT
+      - Wed, 26 Oct 2022 06:55:50 GMT
       expires:
       - '-1'
       pragma:
@@ -3844,7 +3366,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1189,Microsoft.Compute/GetOperationStatus30Min;4168
+      - Microsoft.Compute/GetOperationStatus3Min;1188,Microsoft.Compute/GetOperationStatus30Min;4170
     status:
       code: 200
       message: OK
@@ -3862,9 +3384,9 @@ interactions:
       ParameterSetName:
       - --gallery-name -g
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/11d05032-416b-4d34-9229-7c3b73a1b5d5?monitor=true&api-version=2021-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/capsOperations/8e5e2c7b-6383-4879-9a03-696da97a7420?monitor=true&api-version=2022-03-03
   response:
     body:
       string: ''
@@ -3874,7 +3396,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 24 Sep 2021 03:15:19 GMT
+      - Wed, 26 Oct 2022 06:55:51 GMT
       expires:
       - '-1'
       pragma:
@@ -3887,7 +3409,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationStatus3Min;1188,Microsoft.Compute/GetOperationStatus30Min;4167
+      - Microsoft.Compute/GetOperationStatus3Min;1187,Microsoft.Compute/GetOperationStatus30Min;4169
     status:
       code: 200
       message: OK
@@ -3905,27 +3427,26 @@ interactions:
       ParameterSetName:
       - --gallery-name --resource-group --select
       User-Agent:
-      - AZURECLI/2.28.1 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002?api-version=2021-07-01&$select=Permissions
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002?api-version=2021-10-01&$select=Permissions
   response:
     body:
       string: "{\r\n  \"name\": \"gellery000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n      \"uniqueName\":
-        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYH2ZU2S2LN\"\r\n    },\r\n    \"sharingProfile\":
+        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYASQUC4DAE\"\r\n    },\r\n    \"sharingProfile\":
         {\r\n      \"permissions\": \"Private\"\r\n    },\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"softDeletePolicy\": {\r\n      \"isSoftDeleteEnabled\":
-        false\r\n    }\r\n  }\r\n}"
+        \"Succeeded\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '631'
+      - '495'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Sep 2021 03:15:20 GMT
+      - Wed, 26 Oct 2022 06:55:53 GMT
       expires:
       - '-1'
       pragma:
@@ -3942,7 +3463,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetGallery3Min;342,Microsoft.Compute/GetGallery30Min;2480
+      - Microsoft.Compute/GetGallery3Min;343,Microsoft.Compute/GetGallery30Min;2458
     status:
       code: 200
       message: OK

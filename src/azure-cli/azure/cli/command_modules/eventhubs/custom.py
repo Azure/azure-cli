@@ -6,19 +6,22 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 # pylint: disable=inconsistent-return-statements
+# pylint: disable=too-many-locals
+
 from azure.cli.core.profiles import ResourceType
 
 
 # , resource_type = ResourceType.MGMT_EVENTHUB
 # Namespace Region
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None,
-                         is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None,
-                         default_action=None, identity=None, zone_redundant=None, cluster_arm_id=None, trusted_service_access_enabled=None,
-                         disable_local_auth=None):
+                         is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None, zone_redundant=None, cluster_arm_id=None,
+                         disable_local_auth=None, mi_system_assigned=None, mi_user_assigned=None, encryption_config=None, minimum_tls_version=None, require_infrastructure_encryption=None):
     EHNamespace = cmd.get_models('EHNamespace', resource_type=ResourceType.MGMT_EVENTHUB)
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_EVENTHUB)
     Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
     IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
+    UserAssignedIdentity = cmd.get_models('UserAssignedIdentity', resource_type=ResourceType.MGMT_EVENTHUB)
+    Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_EVENTHUB)
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2018-01-01-preview'):
         ehparam = EHNamespace()
@@ -31,31 +34,44 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
         ehparam.zone_redundant = zone_redundant
         ehparam.disable_local_auth = disable_local_auth
         ehparam.cluster_arm_id = cluster_arm_id
-        if identity:
+        ehparam.minimum_tls_version = minimum_tls_version
+
+        if mi_system_assigned:
             ehparam.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED)
+
+        if mi_user_assigned:
+            if ehparam.identity:
+                if ehparam.identity.type == IdentityType.SYSTEM_ASSIGNED:
+                    ehparam.identity.type = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
+                else:
+                    ehparam.identity.type = IdentityType.USER_ASSIGNED
+            else:
+                ehparam.identity = Identity(type=IdentityType.USER_ASSIGNED)
+
+            default_user_identity = UserAssignedIdentity()
+            ehparam.identity.user_assigned_identities = dict.fromkeys(mi_user_assigned, default_user_identity)
+
+        if encryption_config:
+            ehparam.encryption = Encryption()
+            ehparam.encryption.key_vault_properties = encryption_config
+
+        if require_infrastructure_encryption is not None:
+            if ehparam.encryption is None:
+                ehparam.encryption = Encryption()
+            ehparam.encryption.require_infrastructure_encryption = require_infrastructure_encryption
 
         client.begin_create_or_update(
             resource_group_name=resource_group_name,
             namespace_name=namespace_name,
             parameters=ehparam).result()
 
-    if default_action or trusted_service_access_enabled:
-        netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
-        netwrokruleset.default_action = default_action
-        netwrokruleset.trusted_service_access_enabled = trusted_service_access_enabled
-        client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
-
     return client.get(resource_group_name, namespace_name)
 
 
-def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=None, is_auto_inflate_enabled=None,
-                         maximum_throughput_units=None, is_kafka_enabled=None, default_action=None,
-                         identity=None, key_source=None, key_name=None, key_vault_uri=None, key_version=None, trusted_service_access_enabled=None,
-                         disable_local_auth=None, require_infrastructure_encryption=None):
+def cli_namespace_update(cmd, instance, tags=None, sku=None, capacity=None, is_auto_inflate_enabled=None,
+                         maximum_throughput_units=None, is_kafka_enabled=None,
+                         disable_local_auth=None, require_infrastructure_encryption=None, minimum_tls_version=None):
     Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_EVENTHUB)
-    KeyVaultProperties = cmd.get_models('KeyVaultProperties', resource_type=ResourceType.MGMT_EVENTHUB)
-    Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
-    IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2021-06-01-preview'):
         if tags:
@@ -68,36 +84,24 @@ def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=No
         if capacity:
             instance.sku.capacity = capacity
 
-        if is_auto_inflate_enabled:
+        if is_auto_inflate_enabled is not None:
             instance.is_auto_inflate_enabled = is_auto_inflate_enabled
 
-        if maximum_throughput_units:
+        if maximum_throughput_units is not None:
             instance.maximum_throughput_units = maximum_throughput_units
 
-        if is_kafka_enabled:
+        if is_kafka_enabled is not None:
             instance.kafka_enabled = is_kafka_enabled
 
-        if identity is True and instance.identity is None:
-            instance.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED)
-        elif instance.identity and instance.encryption is None:
-            instance.encryption = Encryption()
-            if key_source:
-                instance.encryption.key_source = key_source
-            if key_name and key_vault_uri:
-                keyprop = []
-                keyprop.append(KeyVaultProperties(key_name=key_name, key_vault_uri=key_vault_uri, key_version=key_version))
-                instance.encryption.key_vault_properties = keyprop
-            if require_infrastructure_encryption:
-                instance.encryption.require_infrastructure_encryption = require_infrastructure_encryption
+        if minimum_tls_version:
+            instance.minimum_tls_version = minimum_tls_version
 
-        if default_action:
-            resourcegroup = instance.id.split('/')[4]
-            netwrokruleset = client.get_network_rule_set(resourcegroup, instance.name)
-            netwrokruleset.default_action = default_action
-            netwrokruleset.trusted_service_access_enabled = trusted_service_access_enabled
-            client.create_or_update_network_rule_set(resourcegroup, instance.name, netwrokruleset)
+        if require_infrastructure_encryption is not None:
+            if instance.encryption is None:
+                instance.encryption = Encryption()
+            instance.encryption.require_infrastructure_encryption = require_infrastructure_encryption
 
-        if disable_local_auth:
+        if disable_local_auth is not None:
             instance.disable_local_auth = disable_local_auth
 
     return instance
@@ -117,7 +121,7 @@ def cli_namespace_exists(client, name):
 
 
 # Cluster region
-def cli_cluster_create(cmd, client, resource_group_name, cluster_name, location=None, tags=None, capacity=None):
+def cli_cluster_create(cmd, client, resource_group_name, cluster_name, location=None, tags=None, capacity=None, supports_scaling=None):
     Cluster = cmd.get_models('Cluster', resource_type=ResourceType.MGMT_EVENTHUB)
     ClusterSku = cmd.get_models('ClusterSku', resource_type=ResourceType.MGMT_EVENTHUB)
 
@@ -125,9 +129,17 @@ def cli_cluster_create(cmd, client, resource_group_name, cluster_name, location=
         ehparam = Cluster()
         ehparam.sku = ClusterSku(name='Dedicated')
         ehparam.location = location
-        if not capacity:
+
+        if capacity:
+            ehparam.sku.capacity = capacity
+        else:
             ehparam.sku.capacity = 1
+
+        if supports_scaling is not None:
+            ehparam.supports_scaling = supports_scaling
+
         ehparam.tags = tags
+
         cluster_result = client.begin_create_or_update(
             resource_group_name=resource_group_name,
             cluster_name=cluster_name,
@@ -136,10 +148,15 @@ def cli_cluster_create(cmd, client, resource_group_name, cluster_name, location=
     return cluster_result
 
 
-def cli_cluster_update(cmd, instance, tags=None):
+def cli_cluster_update(cmd, instance, tags=None, capacity=None):
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2016-06-01-preview'):
+
         if tags:
             instance.tags = tags
+
+        if capacity:
+            instance.sku.capacity = capacity
+
     return instance
 
 
@@ -191,7 +208,7 @@ def cli_eheventhub_create(cmd, client, resource_group_name, namespace_name, even
         if status:
             eventhubparameter1.status = status
 
-        if enabled and enabled is True:
+        if enabled is not None and enabled is True:
             eventhubparameter1.capture_description = CaptureDescription(
                 enabled=enabled,
                 skip_empty_archives=skip_empty_archives,
@@ -227,13 +244,15 @@ def cli_eheventhub_update(cmd, instance, message_retention_in_days=None, partiti
         if status:
             instance.status = status
 
-        if enabled and not instance.capture_description:
+        if enabled is not None and not instance.capture_description:
             instance.capture_description = capturedescription()
             instance.capture_description.destination = destination()
             instance.capture_description.encoding = encodingcapturedescription.avro
             instance.capture_description.enabled = enabled
 
         if instance.capture_description:
+            if enabled is not None:
+                instance.capture_description.enabled = enabled
             if capture_interval_seconds:
                 instance.capture_description.interval_in_seconds = capture_interval_seconds
             if capture_size_limit_bytes:
@@ -316,6 +335,22 @@ def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_nam
             netwrokruleset.ip_rules.append(NWRuleSetIpRules(ip_mask=ip_mask, action=action))
 
     return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
+
+
+def cli_networkrule_update(client, resource_group_name, namespace_name, public_network_access=None, trusted_service_access_enabled=None,
+                           default_action=None):
+    networkruleset = client.get_network_rule_set(resource_group_name, namespace_name)
+
+    if trusted_service_access_enabled is not None:
+        networkruleset.trusted_service_access_enabled = trusted_service_access_enabled
+
+    if public_network_access:
+        networkruleset.public_network_access = public_network_access
+
+    if default_action:
+        networkruleset.default_action = default_action
+
+    return client.create_or_update_network_rule_set(resource_group_name, namespace_name, networkruleset)
 
 
 def cli_networkrule_delete(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None):
@@ -403,3 +438,190 @@ def reject_private_endpoint_connection(cmd, client, resource_group_name, namespa
         cmd, client, resource_group_name=resource_group_name, namespace_name=namespace_name, is_approved=False,
         private_endpoint_connection_name=private_endpoint_connection_name, description=description
     )
+
+
+def cli_add_identity(cmd, client, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
+    namespace = client.get(resource_group_name, namespace_name)
+    IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
+    Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
+    UserAssignedIdentity = cmd.get_models('UserAssignedIdentity', resource_type=ResourceType.MGMT_EVENTHUB)
+
+    identity_id = {}
+
+    if namespace.identity is None:
+        namespace.identity = Identity()
+
+    if system_assigned:
+        if namespace.identity.type == IdentityType.USER_ASSIGNED:
+            namespace.identity.type = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
+
+        elif namespace.identity.type == IdentityType.NONE or namespace.identity.type is None:
+            namespace.identity.type = IdentityType.SYSTEM_ASSIGNED
+
+    if user_assigned:
+        default_user_identity = UserAssignedIdentity()
+        identity_id.update(dict.fromkeys(user_assigned, default_user_identity))
+
+        if namespace.identity.user_assigned_identities is None:
+            namespace.identity.user_assigned_identities = identity_id
+        else:
+            namespace.identity.user_assigned_identities.update(identity_id)
+
+        if namespace.identity.type == IdentityType.SYSTEM_ASSIGNED:
+            namespace.identity.type = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
+
+        elif namespace.identity.type == IdentityType.NONE or namespace.identity.type is None:
+            namespace.identity.type = IdentityType.USER_ASSIGNED
+
+    client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        namespace_name=namespace_name,
+        parameters=namespace).result()
+
+    get_namespace = client.get(resource_group_name, namespace_name)
+
+    return get_namespace
+
+
+def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
+    namespace = client.get(resource_group_name, namespace_name)
+    IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
+
+    from azure.cli.core import CLIError
+
+    if namespace.identity is None:
+        raise CLIError('The namespace does not have identity enabled')
+
+    if system_assigned:
+        if namespace.identity.type == IdentityType.SYSTEM_ASSIGNED:
+            namespace.identity.type = IdentityType.NONE
+
+        if namespace.identity.type == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED:
+            namespace.identity.type = IdentityType.USER_ASSIGNED
+
+    if user_assigned:
+        if namespace.identity.type == IdentityType.USER_ASSIGNED:
+            if namespace.identity.user_assigned_identities:
+                for x in user_assigned:
+                    namespace.identity.user_assigned_identities.pop(x)
+                # if all identities are popped off of the dictionary, we disable user assigned identity
+                if len(namespace.identity.user_assigned_identities) == 0:
+                    namespace.identity.type = IdentityType.NONE
+                    namespace.identity.user_assigned_identities = None
+
+        if namespace.identity.type == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED:
+            if namespace.identity.user_assigned_identities:
+                for x in user_assigned:
+                    namespace.identity.user_assigned_identities.pop(x)
+                # if all identities are popped off of the dictionary, we disable user assigned identity
+                if len(namespace.identity.user_assigned_identities) == 0:
+                    namespace.identity.type = IdentityType.SYSTEM_ASSIGNED
+                    namespace.identity.user_assigned_identities = None
+
+    client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        namespace_name=namespace_name,
+        parameters=namespace).result()
+
+    get_namespace = client.get(resource_group_name, namespace_name)
+
+    return get_namespace
+
+
+def cli_add_encryption(cmd, client, resource_group_name, namespace_name, encryption_config, require_infrastructure_encryption=None):
+    namespace = client.get(resource_group_name, namespace_name)
+    Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_EVENTHUB)
+
+    if namespace.encryption:
+        if namespace.encryption.key_vault_properties:
+            namespace.encryption.key_vault_properties.extend(encryption_config)
+        else:
+            namespace.encryption.key_vault_properties = encryption_config
+
+    else:
+        namespace.encryption = Encryption()
+        namespace.encryption.key_vault_properties = encryption_config
+
+    if require_infrastructure_encryption is not None:
+        namespace.encryption.require_infrastructure_encryption = require_infrastructure_encryption
+
+    client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        namespace_name=namespace_name,
+        parameters=namespace).result()
+
+    get_namespace = client.get(resource_group_name, namespace_name)
+
+    return get_namespace
+
+
+def cli_remove_encryption(client, resource_group_name, namespace_name, encryption_config):
+    namespace = client.get(resource_group_name, namespace_name)
+
+    from azure.cli.core import CLIError
+
+    if namespace.encryption is None:
+        raise CLIError('The namespace does not have encryption enabled')
+
+    if namespace.encryption.key_vault_properties:
+        for encryption_property in encryption_config:
+            if encryption_property in namespace.encryption.key_vault_properties:
+                namespace.encryption.key_vault_properties.remove(encryption_property)
+
+    client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        namespace_name=namespace_name,
+        parameters=namespace).result()
+
+    get_namespace = client.get(resource_group_name, namespace_name)
+
+    return get_namespace
+
+
+def cli_schemaregistry_createupdate(cmd, client, resource_group_name, namespace_name, schema_group_name,
+                                    schema_compatibility, schema_type, tags=None):
+    SchemaGroup = cmd.get_models('SchemaGroup', resource_type=ResourceType.MGMT_EVENTHUB)
+    ehSchemaGroup = SchemaGroup(schema_compatibility=schema_compatibility, schema_type=schema_type, group_properties=tags)
+
+    return client.create_or_update(resource_group_name, namespace_name, schema_group_name, ehSchemaGroup)
+
+
+def cli_appgroup_create(cmd, client, resource_group_name, namespace_name, application_group_name, client_app_group_identifier,
+                        throttling_policy_config, is_enabled=None):
+    ApplicationGroup = cmd.get_models('ApplicationGroup', resource_type=ResourceType.MGMT_EVENTHUB)
+    appGroup = ApplicationGroup(policies=throttling_policy_config, client_app_group_identifier=client_app_group_identifier)
+
+    if is_enabled is not None:
+        ApplicationGroup.is_enabled = is_enabled
+
+    return client.create_or_update_application_group(resource_group_name, namespace_name, application_group_name, appGroup)
+
+
+def cli_appgroup_update(client, resource_group_name, namespace_name, application_group_name, is_enabled=None):
+    appGroup = client.get(resource_group_name, namespace_name, application_group_name)
+
+    if is_enabled is not None:
+        appGroup.is_enabled = is_enabled
+
+    return client.create_or_update_application_group(resource_group_name, namespace_name, application_group_name, appGroup)
+
+
+def cli_add_appgroup_policy(client, resource_group_name, namespace_name, application_group_name, throttling_policy_config):
+    appGroup = client.get(resource_group_name, namespace_name, application_group_name)
+    appGroup.policies.extend(throttling_policy_config)
+    return client.create_or_update_application_group(resource_group_name, namespace_name, application_group_name, appGroup)
+
+
+def cli_remove_appgroup_policy(client, resource_group_name, namespace_name, application_group_name, throttling_policy_config):
+    from azure.cli.core import CLIError
+
+    appGroup = client.get(resource_group_name, namespace_name, application_group_name)
+
+    if appGroup.policies:
+        for policy_object in throttling_policy_config:
+            if policy_object in appGroup.policies:
+                appGroup.policies.remove(policy_object)
+            else:
+                raise CLIError('The following policy was not found: Name: ' + policy_object.name + ', RateLimitThreshold: ' + str(policy_object.rate_limit_threshold) + ', MetricId: ' + policy_object.metric_id)
+
+    return client.create_or_update_application_group(resource_group_name, namespace_name, application_group_name, appGroup)

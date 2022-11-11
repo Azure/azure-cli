@@ -8,6 +8,11 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.appconfiguration import AzureAppConfigurationClient
 from azure.core.exceptions import HttpResponseError
+from azure.cli.core.azclierror import (ValidationError,
+                                       AzureResponseError,
+                                       ResourceNotFoundError,
+                                       RequiredArgumentMissingError,
+                                       MutuallyExclusiveArgumentError)
 
 from ._client_factory import cf_configstore
 from ._constants import HttpHeaders
@@ -34,17 +39,52 @@ def construct_connection_string(cmd, config_store_name):
 
 
 def resolve_store_metadata(cmd, config_store_name):
+    resource_group = None
+    endpoint = None
     try:
         config_store_client = cf_configstore(cmd.cli_ctx)
         all_stores = config_store_client.list()
         for store in all_stores:
             if store.name.lower() == config_store_name.lower():
-                # Id has a fixed structure /subscriptions/subscriptionName/resourceGroups/groupName/providers/providerName/configurationStores/storeName"
-                return store.id.split('/')[4], store.endpoint
+                if resource_group is None:
+                    # Id has a fixed structure /subscriptions/subscriptionName/resourceGroups/groupName/providers/providerName/configurationStores/storeName"
+                    resource_group = store.id.split('/')[4]
+                    endpoint = store.endpoint
+                else:
+                    raise ValidationError('Multiple configuration stores found with name {}.'.format(config_store_name))
     except HttpResponseError as ex:
-        raise CLIError("Failed to get the list of App Configuration stores for the current user. Make sure that the account that logged in has sufficient permissions to access the App Configuration store.\n{}".format(str(ex)))
+        raise AzureResponseError("Failed to get the list of App Configuration stores for the current user. Make sure that the account that logged in has sufficient permissions to access the App Configuration store.\n{}".format(str(ex)))
 
-    raise CLIError("Failed to find the App Configuration store '{}'.".format(config_store_name))
+    if resource_group is not None and endpoint is not None:
+        return resource_group, endpoint
+
+    raise ResourceNotFoundError("Failed to find the App Configuration store '{}'.".format(config_store_name))
+
+
+def resolve_deleted_store_metadata(cmd, config_store_name, resource_group_name=None, location=None):
+    resource_group = None
+    metadata_location = None
+    try:
+        client = cf_configstore(cmd.cli_ctx)
+        deleted_stores = client.list_deleted()
+        for deleted_store in deleted_stores:
+            # configuration_store_id has a fixed structure /subscriptions/subscription_id/resourceGroups/resource_group_name/providers/Microsoft.AppConfiguration/configurationStores/configuration_store_name
+            metadata_resource_group = deleted_store.configuration_store_id.split('/')[4]
+            # match the name and additionally match resource group and location if available.
+            if deleted_store.name.lower() == config_store_name.lower() and (resource_group_name is None or resource_group_name.lower() == metadata_resource_group.lower()) and (location is None or location == deleted_store.location):
+                if metadata_location is None:
+                    resource_group = metadata_resource_group
+                    metadata_location = deleted_store.location
+                else:
+                    # It should reach here only when the user has provided only name. If they provide either location or resource group, we should be able to uniquely find the store.
+                    raise ValidationError('Multiple configuration stores found with name {}.'.format(config_store_name))
+    except HttpResponseError as ex:
+        raise AzureResponseError("Failed to get the list of deleted App Configuration stores for the current user. Make sure that the account that logged in has sufficient permissions to access the App Configuration store.\n{}".format(str(ex)))
+
+    if resource_group is not None and metadata_location is not None:
+        return resource_group, metadata_location
+
+    raise ResourceNotFoundError("Failed to find the deleted App Configuration store '{}'. If you think that the store name is correct, please validate all your input parameters again.".format(config_store_name))
 
 
 def resolve_connection_string(cmd, config_store_name=None, connection_string=None):
@@ -62,7 +102,7 @@ Please specify exactly ONE (suggest connection string) in one of the following o
 
     if connection_string:
         if string and ';'.join(sorted(connection_string.split(';'))) != string:
-            raise CLIError(error_message)
+            raise MutuallyExclusiveArgumentError(error_message)
         string = connection_string
 
     connection_string_env = cmd.cli_ctx.config.get(
@@ -70,15 +110,15 @@ Please specify exactly ONE (suggest connection string) in one of the following o
 
     if connection_string_env:
         if not is_valid_connection_string(connection_string_env):
-            raise CLIError(
+            raise ValidationError(
                 "The environment variable connection string is invalid. Correct format should be Endpoint=https://example.appconfig.io;Id=xxxxx;Secret=xxxx")
 
         if string and ';'.join(sorted(connection_string_env.split(';'))) != string:
-            raise CLIError(error_message)
+            raise MutuallyExclusiveArgumentError(error_message)
         string = connection_string_env
 
     if not string:
-        raise CLIError(
+        raise RequiredArgumentMissingError(
             'Please specify config store name or connection string(suggested).')
     return string
 
@@ -96,11 +136,16 @@ def is_valid_connection_string(connection_string):
 
 
 def get_store_name_from_connection_string(connection_string):
+    endpoint = get_store_endpoint_from_connection_string(connection_string)
+    if endpoint:
+        return endpoint.split("//")[1].split('.')[0]
+    return None
+
+
+def get_store_endpoint_from_connection_string(connection_string):
     if is_valid_connection_string(connection_string):
         segments = dict(seg.split("=", 1) for seg in connection_string.split(";"))
-        endpoint = segments.get("Endpoint")
-        if endpoint:
-            return endpoint.split("//")[1].split('.')[0]
+        return segments.get("Endpoint")
     return None
 
 
@@ -129,7 +174,7 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
                 if name:
                     _, endpoint = resolve_store_metadata(cmd, name)
                 else:
-                    raise CLIError("App Configuration endpoint or name should be provided if auth mode is 'login'.")
+                    raise RequiredArgumentMissingError("App Configuration endpoint or name should be provided if auth mode is 'login'.")
             except Exception as ex:
                 raise CLIError(str(ex) + "\nYou may be able to resolve this issue by providing App Configuration endpoint instead of name.")
 

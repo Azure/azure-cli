@@ -12,6 +12,7 @@ from knack.util import CLIError
 from azure.mgmt.datamigration.models import (DataMigrationService,
                                              NameAvailabilityRequest,
                                              MigratePostgreSqlAzureDbForPostgreSqlSyncTaskProperties,
+                                             MigrateMySqlAzureDbForMySqlOfflineTaskProperties,
                                              MigrateSqlServerSqlDbTaskProperties,
                                              MigrateSyncCompleteCommandInput,
                                              MigrateSyncCompleteCommandProperties,
@@ -21,10 +22,13 @@ from azure.mgmt.datamigration.models import (DataMigrationService,
                                              ProjectTask,
                                              ServiceSku,
                                              SqlConnectionInfo)
+
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.core.util import sdk_no_wait, get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.dms._client_factory import dms_cf_projects
 from azure.cli.command_modules.dms.scenario_inputs import (get_migrate_sql_to_sqldb_offline_input,
-                                                           get_migrate_postgresql_to_azuredbforpostgresql_sync_input)
+                                                           get_migrate_postgresql_to_azuredbforpostgresql_sync_input,
+                                                           get_migrate_mysql_to_azuredbformysql_offline_input)
 
 
 # region Service
@@ -275,7 +279,8 @@ def core_handles_scenario(
         task_type=""):
     # Add scenarios here after migrating them to the core from the extension.
     CoreScenarioTypes = [ScenarioType.sql_sqldb_offline,
-                         ScenarioType.postgres_azurepostgres_online]
+                         ScenarioType.postgres_azurepostgres_online,
+                         ScenarioType.mysql_azuremysql_offline]
     return get_scenario_type(source_platform, target_platform, task_type) in CoreScenarioTypes
 
 
@@ -318,11 +323,17 @@ def create_connection(connection_info_json, prompt_prefix, typeOfInfo):
 
     if "mysql" in typeOfInfo:
         server_name = connection_info_json.get('serverName', None)
+        if server_name is None:
+            raise RequiredArgumentMissingError('ServerName cannot be null/empty')
         port = connection_info_json.get('port', 3306)
+        encrypt_connection = connection_info_json.get('encryptConnection', True)
+        trust_server_certificate = connection_info_json.get('trustServerCertificate', True)
         return MySqlConnectionInfo(user_name=user_name,
                                    password=password,
                                    server_name=server_name,
-                                   port=port)
+                                   port=port,
+                                   encrypt_connection=encrypt_connection,
+                                   trust_server_certificate=trust_server_certificate)
 
     if "postgres" in typeOfInfo:
         server_name = connection_info_json.get('serverName', None)
@@ -370,6 +381,9 @@ def get_task_migration_properties(
     if st == ScenarioType.sql_sqldb_offline:
         TaskProperties = MigrateSqlServerSqlDbTaskProperties
         GetInput = get_migrate_sql_to_sqldb_offline_input
+    elif st == ScenarioType.mysql_azuremysql_offline:
+        TaskProperties = MigrateMySqlAzureDbForMySqlOfflineTaskProperties
+        GetInput = get_migrate_mysql_to_azuredbformysql_offline_input
     elif st == ScenarioType.postgres_azurepostgres_online:
         TaskProperties = MigratePostgreSqlAzureDbForPostgreSqlSyncTaskProperties
         GetInput = get_migrate_postgresql_to_azuredbforpostgresql_sync_input
@@ -406,6 +420,11 @@ def get_task_properties(scenario_type,
             enable_schema_validation,
             enable_data_integrity_validation,
             enable_query_analysis_validation)
+    elif scenario_type == ScenarioType.mysql_azuremysql_offline:
+        task_input = input_func(
+            options_json,
+            source_connection_info,
+            target_connection_info)
     else:
         task_input = input_func(
             options_json,
@@ -422,7 +441,7 @@ def get_scenario_type(source_platform, target_platform, task_type=""):
         scenario_type = ScenarioType.sql_sqldb_offline if not task_type or "offline" in task_type else \
             ScenarioType.unknown
     elif source_platform == "mysql" and target_platform == "azuredbformysql":
-        scenario_type = ScenarioType.mysql_azuremysql_online if not task_type or "online" in task_type else \
+        scenario_type = ScenarioType.mysql_azuremysql_offline if not task_type or "offline" in task_type else \
             ScenarioType.unknown
     elif source_platform == "postgresql" and target_platform == "azuredbforpostgresql":
         scenario_type = ScenarioType.postgres_azurepostgres_online if not task_type or "online" in task_type else \
@@ -434,7 +453,6 @@ def get_scenario_type(source_platform, target_platform, task_type=""):
 
 
 class ScenarioType(Enum):
-
     unknown = 0
     # SQL to SQLDB
     sql_sqldb_offline = 1
@@ -442,5 +460,7 @@ class ScenarioType(Enum):
     mysql_azuremysql_online = 21
     # PostgresSQL to Azure for PostgreSQL
     postgres_azurepostgres_online = 31
+    # MySQL to Azure for MySQL Offline
+    mysql_azuremysql_offline = 22
 
 # endregion

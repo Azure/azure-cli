@@ -7,9 +7,8 @@ import os
 import tempfile
 import unittest
 
-from six.moves.urllib.request import pathname2url  # pylint: disable=import-error
-from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
-from six import assertRaisesRegex
+from urllib.request import pathname2url
+from urllib.parse import urljoin
 
 from unittest import mock
 
@@ -240,7 +239,7 @@ class TestCustom(unittest.TestCase):
         def prompt_function(x):
             from knack.prompting import NoTTYException
             raise NoTTYException
-        with assertRaisesRegex(self, CLIError, "Missing input parameters: missing"):
+        with self.assertRaisesRegex(CLIError, "Missing input parameters: missing"):
             _get_missing_parameters(parameters, template, prompt_function)
 
     def test_deployment_parameters(self):

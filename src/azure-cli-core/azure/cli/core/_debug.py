@@ -45,8 +45,3 @@ def change_ssl_cert_verification_track2():
         logger.debug("Using CA bundle file at '%s'.", ca_bundle_file)
         client_kwargs['connection_verify'] = ca_bundle_file
     return client_kwargs
-
-
-def allow_debug_adal_connection():
-    if should_disable_connection_verify():
-        os.environ[ADAL_PYTHON_SSL_NO_VERIFY] = '1'

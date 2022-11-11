@@ -55,7 +55,7 @@ class ServiceFabricManagedApplicationTests(ScenarioTest):
         self.cmd('az sf managed-application-type delete -g {rg} -c {cluster_name} --application-type-name {app_type_name}')
 
         # SystemExit 3 'not found'
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az sf managed-application-type show -g {rg} -c {cluster_name} --application-type-name {app_type_name}')
 
     @ResourceGroupPreparer()
@@ -82,7 +82,7 @@ class ServiceFabricManagedApplicationTests(ScenarioTest):
         _wait_for_managed_cluster_state_ready(self, self.kwargs)
 
         # 'not found'
-        with self.assertRaisesRegexp(Exception, r'\(NotFound\).+not found.'):
+        with self.assertRaisesRegex(Exception, r'\(NotFound\).+not found.'):
             self.cmd('az sf managed-application-type version list -g {rg} -c {cluster_name} --application-type-name {app_type_name}')
         # Create
         app_type_version = self.cmd('az sf managed-application-type version create -g {rg} -c {cluster_name} '

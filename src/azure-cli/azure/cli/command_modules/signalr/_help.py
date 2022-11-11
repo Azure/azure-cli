@@ -32,6 +32,16 @@ type: group
 short-summary: Manage managed identity settings.
 """
 
+helps['signalr custom-domain'] = """
+type: group
+short-summary: Manage custom domain settings.
+"""
+
+helps['signalr custom-certificate'] = """
+type: group
+short-summary: Manage custom certificate settings.
+"""
+
 helps['signalr cors add'] = """
 type: command
 short-summary: Add allowed origins to a SignalR Service
@@ -68,9 +78,12 @@ helps['signalr create'] = """
 type: command
 short-summary: Creates a SignalR Service.
 examples:
-  - name: Create a SignalR Service with the Standard SKU and serverless mode and enable messaging logs.
+  - name: Create a SignalR Service with the Premium SKU and default mode
     text: >
-        az signalr create -n MySignalR -g MyResourceGroup --sku Standard_S1 --unit-count 1 --service-mode Serverless --enable-message-logs True
+        az signalr create -n MySignalR -g MyResourceGroup --sku Premium_P1
+  - name: Create a SignalR Service with the Premium SKU and serverless mode and enable messaging logs.
+    text: >
+        az signalr create -n MySignalR -g MyResourceGroup --sku Premium_P1 --unit-count 1 --service-mode Serverless --enable-message-logs True
 """
 
 helps['signalr delete'] = """
@@ -169,7 +182,7 @@ examples:
 
 helps['signalr upstream clear'] = """
 type: command
-short-summary: List upstream settings of an existing SignalR Service.
+short-summary: Clear upstream settings of an existing SignalR Service.
 """
 
 helps['signalr network-rule list'] = """
@@ -212,4 +225,54 @@ short-summary: Remove managed identity for SignalR Service.
 helps['signalr identity show'] = """
 type: command
 short-summary: Show managed identity for SignalR Service.
+"""
+
+helps['signalr custom-domain create'] = """
+type: command
+short-summary: Create a custom domain of SignalR Service.
+"""
+
+helps['signalr custom-domain delete'] = """
+type: command
+short-summary: Delete a custom domain of SignalR Service.
+"""
+
+helps['signalr custom-domain update'] = """
+type: command
+short-summary: Update a custom domain of SignalR Service.
+"""
+
+helps['signalr custom-domain list'] = """
+type: command
+short-summary: List custom domains of SignalR Service.
+"""
+
+helps['signalr custom-domain show'] = """
+type: command
+short-summary: Show the detail of a custom domain of SignalR Service.
+"""
+
+helps['signalr custom-certificate create'] = """
+type: command
+short-summary: Create a custom certificate of SignalR Service.
+"""
+
+helps['signalr custom-certificate delete'] = """
+type: command
+short-summary: Delete a custom certificate of SignalR Service.
+"""
+
+helps['signalr custom-certificate update'] = """
+type: command
+short-summary: Update a custom certificate of SignalR Service.
+"""
+
+helps['signalr custom-certificate list'] = """
+type: command
+short-summary: List custom certificate of SignalR Service.
+"""
+
+helps['signalr custom-certificate show'] = """
+type: command
+short-summary: Show the detail of a custom certificate of SignalR Service.
 """
