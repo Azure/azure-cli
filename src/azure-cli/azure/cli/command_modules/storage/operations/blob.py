@@ -1018,11 +1018,11 @@ def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
             client.create_append_blob()
             res = client.append_block_from_url(copy_source_url=source_url, **params)
             return transform_response_with_bytearray(res)
-        elif blob_type == 'BlockBlob':
+        if blob_type == 'BlockBlob':
             params.update({"overwrite": True, "tags": kwargs.get("tags"),
                            "destination_lease": kwargs.get("destination_lease")})
             return client.upload_blob_from_url(source_url=source_url, **params)
-        elif blob_type == 'PageBlob':
+        if blob_type == 'PageBlob':
             params.update({"lease": kwargs.get("destination_lease")})
             source_blob_client = client.from_blob_url(source_url)
             blob_length = source_blob_client.get_blob_properties().size
@@ -1030,7 +1030,7 @@ def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
                 raise ValueError("Source blob size must be an integer that aligns with 512 page size")
             client.create_page_blob(size=blob_length)
             res = client.upload_pages_from_url(source_url=source_url, offset=0, length=blob_length,
-                                                source_offset=0, **params)
+                                               source_offset=0, **params)
             return transform_response_with_bytearray(res)
     return client.start_copy_from_url(source_url=source_url, metadata=metadata, incremental_copy=False, **kwargs)
 
