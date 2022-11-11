@@ -16,11 +16,13 @@ DEFAULT_PROFILE_NAME = 'default'
 # pylint: disable=too-many-locals
 def autoscale_create(client, resource, count, autoscale_name=None, resource_group_name=None,
                      min_count=None, max_count=None, location=None, tags=None, disabled=None,
-                     actions=None, email_administrator=None, email_coadministrators=None):
+                     actions=None, email_administrator=None, email_coadministrators=None,
+                     scale_mode=None, scale_look_ahead_time=None):
 
     from azure.mgmt.monitor.models import (
         AutoscaleSettingResource, AutoscaleProfile, AutoscaleNotification, ScaleCapacity,
-        EmailNotification, WebhookNotification)
+        EmailNotification, WebhookNotification, PredictiveAutoscalePolicy)
+    from azure.cli.core.azclierror import InvalidArgumentValueError
     if not autoscale_name:
         from msrestazure.tools import parse_resource_id
         autoscale_name = parse_resource_id(resource)['name']
@@ -45,6 +47,19 @@ def autoscale_create(client, resource, count, autoscale_name=None, resource_grou
                 notification.email.custom_emails.append(email)
         elif isinstance(action, WebhookNotification):
             notification.webhooks.append(action)
+    predictive_policy = None
+    if scale_mode is not None and scale_look_ahead_time is not None:
+        predictive_policy = PredictiveAutoscalePolicy(
+            scale_mode=scale_mode,
+            scale_look_ahead_time=scale_look_ahead_time
+        )
+    elif scale_mode is not None:
+        predictive_policy = PredictiveAutoscalePolicy(
+            scale_mode=scale_mode
+        )
+    elif scale_look_ahead_time is not None:
+        raise InvalidArgumentValueError('scale-mode is required for setting predictive autoscale policy.')
+
     autoscale = AutoscaleSettingResource(
         location=location,
         profiles=[default_profile],
@@ -52,6 +67,7 @@ def autoscale_create(client, resource, count, autoscale_name=None, resource_grou
         notifications=[notification],
         enabled=not disabled,
         autoscale_setting_resource_name=autoscale_name,
+        predictive_autoscale_policy=predictive_policy,
         target_resource_uri=resource
     )
     if not (min_count == count and max_count == count):
@@ -60,12 +76,13 @@ def autoscale_create(client, resource, count, autoscale_name=None, resource_grou
 
 
 # pylint: disable=too-many-locals
-def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=None, enabled=None,
+def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=None, enabled=None,  # pylint:disable=too-many-statements,too-many-branches
                      add_actions=None, remove_actions=None, email_administrator=None,
-                     email_coadministrators=None):
+                     email_coadministrators=None, scale_mode=None, scale_look_ahead_time=None):
     import json
-    from azure.mgmt.monitor.models import EmailNotification, WebhookNotification
+    from azure.mgmt.monitor.models import EmailNotification, WebhookNotification, PredictiveAutoscalePolicy
     from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile
+    from azure.cli.core.azclierror import InvalidArgumentValueError
 
     if tags is not None:
         instance.tags = tags
@@ -130,7 +147,16 @@ def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=
         notification.email.send_to_subscription_administrator = email_administrator
     if email_coadministrators is not None:
         notification.email.send_to_subscription_co_administrators = email_coadministrators
-
+    predictive_policy = instance.predictive_autoscale_policy
+    if scale_mode is not None:
+        if predictive_policy is None:
+            predictive_policy = PredictiveAutoscalePolicy(scale_mode=scale_mode)
+        else:
+            predictive_policy.scale_mode = scale_mode
+    if scale_look_ahead_time is not None and predictive_policy is not None:
+        predictive_policy.scale_look_ahead_time = scale_look_ahead_time
+    elif scale_look_ahead_time is not None and predictive_policy is None:
+        raise InvalidArgumentValueError('scale-mode is required for setting scale-look-ahead-time.')
     return instance
 
 

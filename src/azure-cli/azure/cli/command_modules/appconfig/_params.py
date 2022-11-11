@@ -295,6 +295,13 @@ def load_arguments(self, _):
         c.argument('filter_parameters', arg_type=filter_parameters_arg_type)
         c.argument('index', type=int, help='Zero-based index in the list of filters where you want to insert the new filter. If no index is specified or index is invalid, filter will be added to the end of the list.')
 
+    with self.argument_context('appconfig feature filter update') as c:
+        c.argument('feature', help='Name of the feature whose filter you want to update. If the feature flag key is different from the default key, provide the `--key` argument instead.')
+        c.argument('label', help="If no label specified, update the feature flag with null label by default.")
+        c.argument('filter_name', help='Name of the filter to be updated.')
+        c.argument('filter_parameters', arg_type=filter_parameters_arg_type)
+        c.argument('index', type=int, help='Zero-based index of the filter to be updated in case there are multiple instances with same filter name.')
+
     with self.argument_context('appconfig feature filter delete') as c:
         c.argument('feature', help='Name of the feature from which you want to delete the filter. If the feature flag key is different from the default key, provide the `--key` argument instead.')
         c.argument('label', help="If no label specified, delete from the feature flag with null label by default.")

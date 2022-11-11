@@ -20,8 +20,7 @@ from azure.cli.core.azclierror import (ValidationError, ArgumentUsageError, Requ
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
-from azure.cli.command_modules.vm._vm_utils import (
-    check_existence, get_target_network_api, get_storage_blob_uri, list_sku_info)
+from azure.cli.command_modules.vm._vm_utils import (check_existence, get_storage_blob_uri, list_sku_info)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 from azure.cli.core import keys
 from azure.core.exceptions import ResourceNotFoundError
@@ -1515,9 +1514,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
                     if len(lb.inbound_nat_pools) > 1:
                         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' explicitly.".format(  # pylint: disable=line-too-long
                             '--nat-pool-name', ', '.join([n.name for n in lb.inbound_nat_pools])))
-                    if not lb.inbound_nat_pools:  # Associated scaleset will be missing ssh/rdp, so warn here.
-                        logger.warning("No inbound nat pool was configured on '%s'", namespace.load_balancer)
-                    else:
+                    if lb.inbound_nat_pools:
                         namespace.nat_pool_name = lb.inbound_nat_pools[0].name
                 logger.debug("using specified existing load balancer '%s'", namespace.load_balancer)
             else:
@@ -1549,7 +1546,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
 def get_network_client(cli_ctx):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK, api_version=get_target_network_api(cli_ctx))
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
 
 
 def get_network_lb(cli_ctx, resource_group_name, lb_name):
@@ -1570,6 +1567,11 @@ def process_vmss_create_namespace(cmd, namespace):
         if namespace.orchestration_mode.lower() != flexible_str.lower():
             raise InvalidArgumentValueError('usage error: --os-disk-delete-option/--data-disk-delete-option is only'
                                             ' available for VMSS with flexible orchestration mode')
+
+    if namespace.regular_priority_count is not None or namespace.regular_priority_percentage is not None:
+        if namespace.orchestration_mode.lower() != flexible_str.lower():
+            raise InvalidArgumentValueError('usage error: --regular-priority-count/--regular-priority-percentage is'
+                                            ' only available for VMSS with flexible orchestration mode')
 
     if namespace.orchestration_mode.lower() == flexible_str.lower():
 

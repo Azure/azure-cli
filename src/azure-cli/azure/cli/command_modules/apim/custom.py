@@ -72,7 +72,8 @@ def _get_subscription_key_parameter_names(subscription_key_query_param_name=None
 
 def apim_create(client, resource_group_name, name, publisher_email, sku_name=SkuType.developer.value,
                 sku_capacity=1, virtual_network_type=VirtualNetworkType.none.value, enable_managed_identity=False,
-                enable_client_certificate=None, publisher_name=None, location=None, tags=None, no_wait=False):
+                public_network_access=None, disable_gateway=None, enable_client_certificate=None,
+                publisher_name=None, location=None, tags=None, no_wait=False):
 
     parameters = ApiManagementServiceResource(
         location=location,
@@ -83,6 +84,8 @@ def apim_create(client, resource_group_name, name, publisher_email, sku_name=Sku
             name=sku_name, capacity=sku_capacity),
         enable_client_certificate=enable_client_certificate,
         virtual_network_type=VirtualNetworkType(virtual_network_type),
+        public_network_access=public_network_access,
+        disable_gateway=disable_gateway,
         tags=tags
     )
 
@@ -99,7 +102,8 @@ def apim_create(client, resource_group_name, name, publisher_email, sku_name=Sku
 
 def apim_update(instance, publisher_email=None, sku_name=None, sku_capacity=None,
                 virtual_network_type=None, publisher_name=None, enable_managed_identity=None,
-                enable_client_certificate=None, tags=None):
+                public_network_access=None, disable_gateway=None, enable_client_certificate=None,
+                tags=None):
 
     if publisher_email is not None:
         instance.publisher_email = publisher_email
@@ -131,6 +135,12 @@ def apim_update(instance, publisher_email=None, sku_name=None, sku_capacity=None
 
     if tags is not None:
         instance.tags = tags
+
+    if public_network_access is not None:
+        instance.public_network_access = public_network_access
+
+    if disable_gateway is not None:
+        instance.disable_gateway = disable_gateway
 
     return instance
 
@@ -450,6 +460,10 @@ def apim_api_import(
         ImportFormat.Wsdl.value: {
             True: ContentFormat.WSDL.value,
             False: ContentFormat.WSDL_LINK.value
+        },
+        ImportFormat.GraphQL.value: {
+            True: ContentFormat.GRAPHQL_LINK.value,
+            False: ContentFormat.GRAPHQL_LINK.value
         }
     }
 

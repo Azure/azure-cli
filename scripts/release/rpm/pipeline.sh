@@ -8,7 +8,7 @@ set -exv
 
 # DOCKERFILE should be one of 'ubi' or 'fedora'
 : "${DOCKERFILE:?DOCKERFILE environment variable not set.}"
-# IMAGE should be RHEL or Fedora image url
+# IMAGE should be RHEL or Fedora docker image url
 : "${IMAGE:?IMAGE environment variable not set.}"
 # PYTHON_PACKAGE should be python package name
 : "${PYTHON_PACKAGE:?PYTHON_PACKAGE environment variable not set.}"

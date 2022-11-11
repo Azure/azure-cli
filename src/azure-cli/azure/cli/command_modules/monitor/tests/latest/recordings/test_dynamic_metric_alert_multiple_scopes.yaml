@@ -13,12 +13,12 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001","name":"cli_test_dynamic_metric_alert_v2000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-08-05T01:45:44Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001","name":"cli_test_dynamic_metric_alert_v2000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-09-30T06:04:21Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:45:49 GMT
+      - Fri, 30 Sep 2022 06:04:25 GMT
       expires:
       - '-1'
       pragma:
@@ -56,52 +56,58 @@ interactions:
     uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json
   response:
     body:
-      string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\",\n
-        \ \"contentVersion\": \"1.0.0.0\",\n  \"parameters\": {},\n  \"variables\":
-        {},\n  \"resources\": [],\n  \"outputs\": {\n    \"aliases\": {\n      \"type\":
-        \"object\",\n      \"value\": {\n        \"Linux\": {\n          \"CentOS\":
-        {\n            \"publisher\": \"OpenLogic\",\n            \"offer\": \"CentOS\",\n
-        \           \"sku\": \"7.5\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          },\n          \"Debian\": {\n            \"publisher\":
-        \"Debian\",\n            \"offer\": \"debian-10\",\n            \"sku\": \"10\",\n
-        \           \"version\": \"latest\",\n            \"architecture\": \"x64\"\n
-        \         },\n          \"Flatcar\": {\n            \"publisher\": \"kinvolk\",\n
-        \           \"offer\": \"flatcar-container-linux-free\",\n            \"sku\":
-        \"stable\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          },\n          \"openSUSE-Leap\": {\n            \"publisher\":
-        \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n            \"sku\":
-        \"gen2\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          },\n          \"RHEL\": {\n            \"publisher\": \"RedHat\",\n
-        \           \"offer\": \"RHEL\",\n            \"sku\": \"7-LVM\",\n            \"version\":
-        \"latest\",\n            \"architecture\": \"x64\"\n          },\n          \"SLES\":
-        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"sles-15-sp3\",\n
-        \           \"sku\": \"gen2\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          },\n          \"UbuntuLTS\": {\n            \"publisher\":
-        \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n            \"sku\":
-        \"18.04-LTS\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          }\n        },\n        \"Windows\": {\n          \"Win2022Datacenter\":
-        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
-        \"WindowsServer\",\n            \"sku\": \"2022-Datacenter\",\n            \"version\":
-        \"latest\",\n            \"architecture\": \"x64\"\n          },\n          \"Win2022AzureEditionCore\":
-        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
-        \"WindowsServer\",\n            \"sku\": \"2022-datacenter-azure-edition-core\",\n
-        \           \"version\": \"latest\",\n            \"architecture\": \"x64\"\n
-        \         },\n          \"Win2019Datacenter\": {\n            \"publisher\":
-        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
-        \"2019-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          },\n          \"Win2016Datacenter\": {\n            \"publisher\":
-        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
-        \"2016-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          },\n          \"Win2012R2Datacenter\": {\n            \"publisher\":
-        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
-        \"2012-R2-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          },\n          \"Win2012Datacenter\": {\n            \"publisher\":
-        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
-        \"2012-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          },\n          \"Win2008R2SP1\": {\n            \"publisher\":
-        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
-        \"2008-R2-SP1\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          }\n        }\n      }\n    }\n  }\n}"
+      string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\"\
+        ,\n  \"contentVersion\": \"1.0.0.0\",\n  \"parameters\": {},\n  \"variables\"\
+        : {},\n  \"resources\": [],\n  \"outputs\": {\n    \"aliases\": {\n      \"\
+        type\": \"object\",\n      \"value\": {\n        \"Linux\": {\n          \"\
+        CentOS\": {\n            \"publisher\": \"OpenLogic\",\n            \"offer\"\
+        : \"CentOS\",\n            \"sku\": \"7.5\",\n            \"version\": \"\
+        latest\",\n            \"architecture\": \"x64\"\n          },\n         \
+        \ \"Debian\": {\n            \"publisher\": \"Debian\",\n            \"offer\"\
+        : \"debian-10\",\n            \"sku\": \"10\",\n            \"version\": \"\
+        latest\",\n            \"architecture\": \"x64\"\n          },\n         \
+        \ \"Flatcar\": {\n            \"publisher\": \"kinvolk\",\n            \"\
+        offer\": \"flatcar-container-linux-free\",\n            \"sku\": \"stable\"\
+        ,\n            \"version\": \"latest\",\n            \"architecture\": \"\
+        x64\"\n          },\n          \"openSUSE-Leap\": {\n            \"publisher\"\
+        : \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n            \"\
+        sku\": \"gen2\",\n            \"version\": \"latest\",\n            \"architecture\"\
+        : \"x64\"\n          },\n          \"RHEL\": {\n            \"publisher\"\
+        : \"RedHat\",\n            \"offer\": \"RHEL\",\n            \"sku\": \"7-LVM\"\
+        ,\n            \"version\": \"latest\",\n            \"architecture\": \"\
+        x64\"\n          },\n          \"SLES\": {\n            \"publisher\": \"\
+        SUSE\",\n            \"offer\": \"sles-15-sp3\",\n            \"sku\": \"\
+        gen2\",\n            \"version\": \"latest\",\n            \"architecture\"\
+        : \"x64\"\n          },\n          \"UbuntuLTS\": {\n            \"publisher\"\
+        : \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n            \"\
+        sku\": \"18.04-LTS\",\n            \"version\": \"latest\",\n            \"\
+        architecture\": \"x64\"\n          }\n        },\n        \"Windows\": {\n\
+        \          \"Win2022Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\"\
+        ,\n            \"offer\": \"WindowsServer\",\n            \"sku\": \"2022-Datacenter\"\
+        ,\n            \"version\": \"latest\",\n            \"architecture\": \"\
+        x64\"\n          },\n          \"Win2022AzureEditionCore\": {\n          \
+        \  \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\"\
+        ,\n            \"sku\": \"2022-datacenter-azure-edition-core\",\n        \
+        \    \"version\": \"latest\",\n            \"architecture\": \"x64\"\n   \
+        \       },\n          \"Win2019Datacenter\": {\n            \"publisher\"\
+        : \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n\
+        \            \"sku\": \"2019-Datacenter\",\n            \"version\": \"latest\"\
+        ,\n            \"architecture\": \"x64\"\n          },\n          \"Win2016Datacenter\"\
+        : {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"\
+        offer\": \"WindowsServer\",\n            \"sku\": \"2016-Datacenter\",\n \
+        \           \"version\": \"latest\",\n            \"architecture\": \"x64\"\
+        \n          },\n          \"Win2012R2Datacenter\": {\n            \"publisher\"\
+        : \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n\
+        \            \"sku\": \"2012-R2-Datacenter\",\n            \"version\": \"\
+        latest\",\n            \"architecture\": \"x64\"\n          },\n         \
+        \ \"Win2012Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\"\
+        ,\n            \"offer\": \"WindowsServer\",\n            \"sku\": \"2012-Datacenter\"\
+        ,\n            \"version\": \"latest\",\n            \"architecture\": \"\
+        x64\"\n          },\n          \"Win2008R2SP1\": {\n            \"publisher\"\
+        : \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n\
+        \            \"sku\": \"2008-R2-SP1\",\n            \"version\": \"latest\"\
+        ,\n            \"architecture\": \"x64\"\n          }\n        }\n      }\n\
+        \    }\n  }\n}"
     headers:
       accept-ranges:
       - bytes
@@ -118,11 +124,11 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:45:51 GMT
+      - Fri, 30 Sep 2022 06:04:26 GMT
       etag:
       - W/"41b202f4dc5098d126019dc00721a4c5e30df0c5196794514fadc3710ee2a5cb"
       expires:
-      - Fri, 05 Aug 2022 01:50:51 GMT
+      - Fri, 30 Sep 2022 06:09:26 GMT
       source-age:
       - '0'
       strict-transport-security:
@@ -132,21 +138,21 @@ interactions:
       via:
       - 1.1 varnish
       x-cache:
-      - HIT
+      - MISS
       x-cache-hits:
-      - '1'
+      - '0'
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - 3740427085fdb3104ee7f393cc66adcdbffccec1
+      - dbc544a4d0d1b6e9e9be18651f7b42e59e1a3052
       x-frame-options:
       - deny
       x-github-request-id:
-      - 1E4E:4FEC:123DD0:1D028B:62EC7031
+      - 965C:23A9:CF488:1409BE:633686E9
       x-served-by:
-      - cache-tyo11958-TYO
+      - cache-hkg17931-HKG
       x-timer:
-      - S1659663951.930217,VS0,VE238
+      - S1664517866.987129,VS0,VE322
       x-xss-protection:
       - 1; mode=block
     status:
@@ -166,14 +172,14 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-compute/28.0.0 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2012-R2-Datacenter/versions?$top=1&$orderby=name%20desc&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2012-R2-Datacenter/versions?$top=1&$orderby=name%20desc&api-version=2022-08-01
   response:
     body:
-      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"9600.20478.220708\",\r\n
-        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2012-R2-Datacenter/Versions/9600.20478.220708\"\r\n
-        \ }\r\n]"
+      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"9600.20571.220908\"\
+        ,\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2012-R2-Datacenter/Versions/9600.20571.220908\"\
+        \r\n  }\r\n]"
     headers:
       cache-control:
       - no-cache
@@ -182,7 +188,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:45:52 GMT
+      - Fri, 30 Sep 2022 06:04:27 GMT
       expires:
       - '-1'
       pragma:
@@ -199,7 +205,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15999,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43998
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15999,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43999
     status:
       code: 200
       message: OK
@@ -217,24 +223,26 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-compute/28.0.0 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2012-R2-Datacenter/versions/9600.20478.220708?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2012-R2-Datacenter/versions/9600.20571.220908?api-version=2022-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
-        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
-        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
-        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
-        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"features\": [\r\n
-        \     {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n        \"value\":
-        \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n
-        \       \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\",\r\n
-        \       \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\":
-        {\r\n      \"operatingSystem\": \"Windows\",\r\n      \"sizeInGb\": 128,\r\n
-        \     \"sizeInBytes\": 136367309312\r\n    },\r\n    \"dataDiskImages\": []\r\n
-        \ },\r\n  \"location\": \"westus\",\r\n  \"name\": \"9600.20478.220708\",\r\n
-        \ \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2012-R2-Datacenter/Versions/9600.20478.220708\"\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n \
+        \   \"architecture\": \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n\
+        \    \"disallowed\": {\r\n      \"vmDiskType\": \"None\"\r\n    },\r\n   \
+        \ \"automaticOSUpgradeProperties\": {\r\n      \"automaticOSUpgradeSupported\"\
+        : true\r\n    },\r\n    \"imageDeprecationStatus\": {\r\n      \"imageState\"\
+        : \"Active\"\r\n    },\r\n    \"features\": [\r\n      {\r\n        \"name\"\
+        : \"IsAcceleratedNetworkSupported\",\r\n        \"value\": \"True\"\r\n  \
+        \    },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n     \
+        \   \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\"\
+        ,\r\n        \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\"\
+        : {\r\n      \"operatingSystem\": \"Windows\",\r\n      \"sizeInGb\": 128,\r\
+        \n      \"sizeInBytes\": 136367309312\r\n    },\r\n    \"dataDiskImages\"\
+        : []\r\n  },\r\n  \"location\": \"westus\",\r\n  \"name\": \"9600.20571.220908\"\
+        ,\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2012-R2-Datacenter/Versions/9600.20571.220908\"\
+        \r\n}"
     headers:
       cache-control:
       - no-cache
@@ -243,7 +251,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:45:53 GMT
+      - Fri, 30 Sep 2022 06:04:28 GMT
       expires:
       - '-1'
       pragma:
@@ -268,7 +276,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -278,9 +286,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks?api-version=2018-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks?api-version=2022-01-01
   response:
     body:
       string: '{"value":[]}'
@@ -292,7 +300,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:45:54 GMT
+      - Fri, 30 Sep 2022 06:04:28 GMT
       expires:
       - '-1'
       pragma:
@@ -318,7 +326,7 @@ interactions:
       "10.0.0.0/24"}}]}}, {"type": "Microsoft.Network/networkSecurityGroups", "name":
       "clitest-vm000002NSG", "apiVersion": "2015-06-15", "location": "westus", "tags":
       {"MabUsed": "Yes", "Owner": "sisi", "Purpose": "CLITest", "DeleteBy": "12-2099",
-      "AutoShutdown": "No"}, "dependsOn": []}, {"apiVersion": "2018-01-01", "type":
+      "AutoShutdown": "No"}, "dependsOn": []}, {"apiVersion": "2022-01-01", "type":
       "Microsoft.Network/publicIPAddresses", "name": "clitest-vm000002PublicIP", "location":
       "westus", "tags": {"MabUsed": "Yes", "Owner": "sisi", "Purpose": "CLITest",
       "DeleteBy": "12-2099", "AutoShutdown": "No"}, "dependsOn": [], "properties":
@@ -331,7 +339,7 @@ interactions:
       {"privateIPAllocationMethod": "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks/clitest-vm000002VNET/subnets/clitest-vm000002Subnet"},
       "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000002PublicIP"}}}],
       "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000002NSG"}}},
-      {"apiVersion": "2022-03-01", "type": "Microsoft.Compute/virtualMachines", "name":
+      {"apiVersion": "2022-08-01", "type": "Microsoft.Compute/virtualMachines", "name":
       "clitest-vm000002", "location": "westus", "tags": {"MabUsed": "Yes", "Owner":
       "sisi", "Purpose": "CLITest", "DeleteBy": "12-2099", "AutoShutdown": "No"},
       "dependsOn": ["Microsoft.Network/networkInterfaces/clitest-vm000002VMNic"],
@@ -360,15 +368,15 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/vm_deploy_FGKb5jfN0eESZfyT8CKCeTyHvVHKpr2w","name":"vm_deploy_FGKb5jfN0eESZfyT8CKCeTyHvVHKpr2w","type":"Microsoft.Resources/deployments","properties":{"templateHash":"13753970827142498615","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-08-05T01:46:03.5028884Z","duration":"PT0.0008597S","correlationId":"242d9e14-081c-49c6-b9ca-072e11fe897b","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks/clitest-vm000002VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"clitest-vm000002VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000002NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"clitest-vm000002NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000002PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"clitest-vm000002PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000002VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000002VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"clitest-vm000002"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/vm_deploy_yJvb6xpTna5Cv6x3GbZF2S5a9tGwN0Nv","name":"vm_deploy_yJvb6xpTna5Cv6x3GbZF2S5a9tGwN0Nv","type":"Microsoft.Resources/deployments","properties":{"templateHash":"17484830308316765749","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-09-30T06:04:35.9740033Z","duration":"PT0.0008563S","correlationId":"88bacd81-d500-4f95-a083-ac116db89b3d","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks/clitest-vm000002VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"clitest-vm000002VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000002NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"clitest-vm000002NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000002PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"clitest-vm000002PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000002VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000002VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"clitest-vm000002"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/vm_deploy_FGKb5jfN0eESZfyT8CKCeTyHvVHKpr2w/operationStatuses/08585419429242631732?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/vm_deploy_yJvb6xpTna5Cv6x3GbZF2S5a9tGwN0Nv/operationStatuses/08585370890124198000?api-version=2021-04-01
       cache-control:
       - no-cache
       content-length:
@@ -376,7 +384,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:46:04 GMT
+      - Fri, 30 Sep 2022 06:04:36 GMT
       expires:
       - '-1'
       pragma:
@@ -404,9 +412,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585419429242631732?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585370890124198000?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -418,7 +426,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:46:35 GMT
+      - Fri, 30 Sep 2022 06:05:08 GMT
       expires:
       - '-1'
       pragma:
@@ -446,9 +454,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585419429242631732?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585370890124198000?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -460,7 +468,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:47:05 GMT
+      - Fri, 30 Sep 2022 06:05:38 GMT
       expires:
       - '-1'
       pragma:
@@ -488,12 +496,12 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/vm_deploy_FGKb5jfN0eESZfyT8CKCeTyHvVHKpr2w","name":"vm_deploy_FGKb5jfN0eESZfyT8CKCeTyHvVHKpr2w","type":"Microsoft.Resources/deployments","properties":{"templateHash":"13753970827142498615","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-08-05T01:46:46.4976858Z","duration":"PT42.9956571S","correlationId":"242d9e14-081c-49c6-b9ca-072e11fe897b","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks/clitest-vm000002VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"clitest-vm000002VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000002NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"clitest-vm000002NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000002PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"clitest-vm000002PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000002VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000002VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"clitest-vm000002"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000002NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000002PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks/clitest-vm000002VNET"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/vm_deploy_yJvb6xpTna5Cv6x3GbZF2S5a9tGwN0Nv","name":"vm_deploy_yJvb6xpTna5Cv6x3GbZF2S5a9tGwN0Nv","type":"Microsoft.Resources/deployments","properties":{"templateHash":"17484830308316765749","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-09-30T06:05:30.3610057Z","duration":"PT54.3878587S","correlationId":"88bacd81-d500-4f95-a083-ac116db89b3d","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks/clitest-vm000002VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"clitest-vm000002VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000002NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"clitest-vm000002NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000002PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"clitest-vm000002PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000002VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000002VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"clitest-vm000002"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000002NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000002PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks/clitest-vm000002VNET"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -502,7 +510,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:47:06 GMT
+      - Fri, 30 Sep 2022 06:05:39 GMT
       expires:
       - '-1'
       pragma:
@@ -530,63 +538,66 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-compute/28.0.0 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002?$expand=instanceView&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002?$expand=instanceView&api-version=2022-08-01
   response:
     body:
-      string: "{\r\n  \"name\": \"clitest-vm000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002\",\r\n
-        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {\r\n    \"MabUsed\": \"Yes\",\r\n    \"Owner\": \"sisi\",\r\n
-        \   \"Purpose\": \"CLITest\",\r\n    \"DeleteBy\": \"12-2099\",\r\n    \"AutoShutdown\":
-        \"No\"\r\n  },\r\n  \"properties\": {\r\n    \"vmId\": \"4983b581-bc11-4b0c-be94-b6982881a01c\",\r\n
-        \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
-        \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
-        \"MicrosoftWindowsServer\",\r\n        \"offer\": \"WindowsServer\",\r\n        \"sku\":
-        \"2012-R2-Datacenter\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"9600.20478.220708\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Windows\",\r\n        \"name\": \"clitest-vm000002_disk1_1d3fb1931ffc4b79ba598519465dd29f\",\r\n
-        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
-        \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/disks/clitest-vm000002_disk1_1d3fb1931ffc4b79ba598519465dd29f\"\r\n
-        \       },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\":
-        127\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
-        {\r\n      \"computerName\": \"clitest-vm000002\",\r\n      \"adminUsername\":
-        \"clitest-vm000002\",\r\n      \"windowsConfiguration\": {\r\n        \"provisionVMAgent\":
-        true,\r\n        \"enableAutomaticUpdates\": true,\r\n        \"patchSettings\":
-        {\r\n          \"patchMode\": \"AutomaticByOS\",\r\n          \"assessmentMode\":
-        \"ImageDefault\"\r\n        },\r\n        \"enableVMAgentPlatformUpdates\":
-        false\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\":
-        true,\r\n      \"requireGuestProvisionSignal\": true\r\n    },\r\n    \"networkProfile\":
-        {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"vmAgent\":
-        {\r\n        \"vmAgentVersion\": \"Unknown\",\r\n        \"statuses\": [\r\n
-        \         {\r\n            \"code\": \"ProvisioningState/Unavailable\",\r\n
-        \           \"level\": \"Warning\",\r\n            \"displayStatus\": \"Not
-        Ready\",\r\n            \"message\": \"VM status blob is found but not yet
-        populated.\",\r\n            \"time\": \"2022-08-05T01:47:08+00:00\"\r\n          }\r\n
-        \       ]\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\":
-        \"clitest-vm000002_disk1_1d3fb1931ffc4b79ba598519465dd29f\",\r\n          \"statuses\":
-        [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
-        \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2022-08-05T01:46:25.5277406+00:00\"\r\n
-        \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
-        \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
-        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2022-08-05T01:46:42.6063942+00:00\"\r\n
-        \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
-        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
-        \       }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2022-08-05T01:46:24.1214914+00:00\"\r\n
-        \ }\r\n}"
+      string: "{\r\n  \"name\": \"clitest-vm000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\"\
+        : \"westus\",\r\n  \"tags\": {\r\n    \"MabUsed\": \"Yes\",\r\n    \"Owner\"\
+        : \"sisi\",\r\n    \"Purpose\": \"CLITest\",\r\n    \"DeleteBy\": \"12-2099\"\
+        ,\r\n    \"AutoShutdown\": \"No\"\r\n  },\r\n  \"properties\": {\r\n    \"\
+        vmId\": \"87dead5f-1824-409f-a591-73d838886a35\",\r\n    \"hardwareProfile\"\
+        : {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"MicrosoftWindowsServer\"\
+        ,\r\n        \"offer\": \"WindowsServer\",\r\n        \"sku\": \"2012-R2-Datacenter\"\
+        ,\r\n        \"version\": \"latest\",\r\n        \"exactVersion\": \"9600.20571.220908\"\
+        \r\n      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Windows\",\r\n\
+        \        \"name\": \"clitest-vm000002_disk1_4afe432d34a746598dd3d97375bdae7d\"\
+        ,\r\n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/disks/clitest-vm000002_disk1_4afe432d34a746598dd3d97375bdae7d\"\
+        \r\n        },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\"\
+        : 127\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\"\
+        : {\r\n      \"computerName\": \"clitest-vm000002\",\r\n      \"adminUsername\"\
+        : \"clitest-vm000002\",\r\n      \"windowsConfiguration\": {\r\n        \"\
+        provisionVMAgent\": true,\r\n        \"enableAutomaticUpdates\": true,\r\n\
+        \        \"patchSettings\": {\r\n          \"patchMode\": \"AutomaticByOS\"\
+        ,\r\n          \"assessmentMode\": \"ImageDefault\"\r\n        },\r\n    \
+        \    \"enableVMAgentPlatformUpdates\": false\r\n      },\r\n      \"secrets\"\
+        : [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\"\
+        : true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\"\
+        :\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic\"\
+        }]},\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\"\
+        : {\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"Unknown\",\r\n\
+        \        \"statuses\": [\r\n          {\r\n            \"code\": \"ProvisioningState/Unavailable\"\
+        ,\r\n            \"level\": \"Warning\",\r\n            \"displayStatus\"\
+        : \"Not Ready\",\r\n            \"message\": \"VM status blob is found but\
+        \ not yet populated.\",\r\n            \"time\": \"2022-09-30T06:05:40+00:00\"\
+        \r\n          }\r\n        ]\r\n      },\r\n      \"disks\": [\r\n       \
+        \ {\r\n          \"name\": \"clitest-vm000002_disk1_4afe432d34a746598dd3d97375bdae7d\"\
+        ,\r\n          \"statuses\": [\r\n            {\r\n              \"code\"\
+        : \"ProvisioningState/succeeded\",\r\n              \"level\": \"Info\",\r\
+        \n              \"displayStatus\": \"Provisioning succeeded\",\r\n       \
+        \       \"time\": \"2022-09-30T06:05:03.918559+00:00\"\r\n            }\r\n\
+        \          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\": \"V1\"\
+        ,\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\"\
+        ,\r\n          \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning\
+        \ succeeded\",\r\n          \"time\": \"2022-09-30T06:05:27.6842807+00:00\"\
+        \r\n        },\r\n        {\r\n          \"code\": \"PowerState/running\"\
+        ,\r\n          \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\
+        \r\n        }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2022-09-30T06:05:02.2466279+00:00\"\
+        \r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3490'
+      - '3489'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:47:07 GMT
+      - Fri, 30 Sep 2022 06:05:40 GMT
       expires:
       - '-1'
       pragma:
@@ -603,142 +614,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3989,Microsoft.Compute/LowCostGet30Min;31879
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json, text/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --image --admin-username --admin-password --tags --nsg-rule
-      User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic?api-version=2018-01-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"clitest-vm000002VMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic\",\r\n
-        \ \"etag\": \"W/\\\"c01f502a-832d-48ad-a8b3-c2a43709d723\\\"\",\r\n  \"tags\":
-        {\r\n    \"MabUsed\": \"Yes\",\r\n    \"Owner\": \"sisi\",\r\n    \"Purpose\":
-        \"CLITest\",\r\n    \"DeleteBy\": \"12-2099\",\r\n    \"AutoShutdown\": \"No\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"a6e815f9-7dd6-406f-baf9-3d76dc250c2e\",\r\n    \"ipConfigurations\":
-        [\r\n      {\r\n        \"name\": \"ipconfigclitest-vm000002\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic/ipConfigurations/ipconfigclitest-vm000002\",\r\n
-        \       \"etag\": \"W/\\\"c01f502a-832d-48ad-a8b3-c2a43709d723\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
-        \"Dynamic\",\r\n          \"publicIPAddress\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000002PublicIP\"\r\n
-        \         },\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks/clitest-vm000002VNET/subnets/clitest-vm000002Subnet\"\r\n
-        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
-        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
-        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"4jddy422fgretojeoe0zr5up1d.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-0D-3A-37-57-B7\",\r\n    \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\":
-        {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000002NSG\"\r\n
-        \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002\"\r\n
-        \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n
-        \ \"location\": \"westus\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '2563'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 05 Aug 2022 01:47:09 GMT
-      etag:
-      - W/"c01f502a-832d-48ad-a8b3-c2a43709d723"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 5812c0e7-32fc-4b76-b013-394f7385098b
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json, text/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --image --admin-username --admin-password --tags --nsg-rule
-      User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000002PublicIP?api-version=2018-01-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"clitest-vm000002PublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000002PublicIP\",\r\n
-        \ \"etag\": \"W/\\\"b33b3f3e-91e5-47cb-b8b6-48bd8447e43d\\\"\",\r\n  \"location\":
-        \"westus\",\r\n  \"tags\": {\r\n    \"MabUsed\": \"Yes\",\r\n    \"Owner\":
-        \"sisi\",\r\n    \"Purpose\": \"CLITest\",\r\n    \"DeleteBy\": \"12-2099\",\r\n
-        \   \"AutoShutdown\": \"No\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"92ac9435-795f-4068-a2e1-64c1a2b416df\",\r\n
-        \   \"ipAddress\": \"20.245.49.97\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
-        \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
-        4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic/ipConfigurations/ipconfigclitest-vm000002\"\r\n
-        \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\"\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1104'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 05 Aug 2022 01:47:10 GMT
-      etag:
-      - W/"b33b3f3e-91e5-47cb-b8b6-48bd8447e43d"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - aecd671a-c8f4-4bdd-b9ff-654ef9e7d3e9
+      - Microsoft.Compute/LowCostGet3Min;3997,Microsoft.Compute/LowCostGet30Min;31992
     status:
       code: 200
       message: OK
@@ -756,12 +632,153 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"clitest-vm000002VMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic\"\
+        ,\r\n  \"etag\": \"W/\\\"3d313c38-1009-4bd9-83de-ca6f13959fde\\\"\",\r\n \
+        \ \"tags\": {\r\n    \"MabUsed\": \"Yes\",\r\n    \"Owner\": \"sisi\",\r\n\
+        \    \"Purpose\": \"CLITest\",\r\n    \"DeleteBy\": \"12-2099\",\r\n    \"\
+        AutoShutdown\": \"No\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Succeeded\",\r\n    \"resourceGuid\": \"34a4cd5d-d4e2-45fc-8fd4-8c5d25d9c1f3\"\
+        ,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigclitest-vm000002\"\
+        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic/ipConfigurations/ipconfigclitest-vm000002\"\
+        ,\r\n        \"etag\": \"W/\\\"3d313c38-1009-4bd9-83de-ca6f13959fde\\\"\"\
+        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
+        : \"Dynamic\",\r\n          \"publicIPAddress\": {\r\n            \"id\":\
+        \ \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000002PublicIP\"\
+        \r\n          },\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks/clitest-vm000002VNET/subnets/clitest-vm000002Subnet\"\
+        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
+        : \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n\
+        \      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"\
+        internalDomainNameSuffix\": \"2cs0vsh3cpoe1hnwg0s5zxmabf.dx.internal.cloudapp.net\"\
+        \r\n    },\r\n    \"macAddress\": \"00-0D-3A-37-8B-7F\",\r\n    \"vnetEncryptionSupported\"\
+        : false,\r\n    \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\"\
+        : {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000002NSG\"\
+        \r\n    },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n    \
+        \  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002\"\
+        \r\n    },\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\
+        \n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\
+        \n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":\
+        \ \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2739'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 30 Sep 2022 06:05:41 GMT
+      etag:
+      - W/"3d313c38-1009-4bd9-83de-ca6f13959fde"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c8f3ffd8-65bc-4b85-b847-3be89598ccdf
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --admin-username --admin-password --tags --nsg-rule
+      User-Agent:
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000002PublicIP?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"clitest-vm000002PublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000002PublicIP\"\
+        ,\r\n  \"etag\": \"W/\\\"f6300ce9-d143-47b6-b1bb-fc75414d931b\\\"\",\r\n \
+        \ \"location\": \"westus\",\r\n  \"tags\": {\r\n    \"MabUsed\": \"Yes\",\r\
+        \n    \"Owner\": \"sisi\",\r\n    \"Purpose\": \"CLITest\",\r\n    \"DeleteBy\"\
+        : \"12-2099\",\r\n    \"AutoShutdown\": \"No\"\r\n  },\r\n  \"properties\"\
+        : {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":\
+        \ \"ed5cc1f9-b433-44c0-a915-2c14e850be7c\",\r\n    \"ipAddress\": \"20.66.120.100\"\
+        ,\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\"\
+        : \"Dynamic\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": [],\r\
+        \n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic/ipConfigurations/ipconfigclitest-vm000002\"\
+        \r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\
+        \n  \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\
+        \n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1130'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 30 Sep 2022 06:05:41 GMT
+      etag:
+      - W/"f6300ce9-d143-47b6-b1bb-fc75414d931b"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - cd7ed46e-daec-4948-a49f-401bf05a79c2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --admin-username --admin-password --tags --nsg-rule
+      User-Agent:
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001","name":"cli_test_dynamic_metric_alert_v2000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-08-05T01:45:44Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001","name":"cli_test_dynamic_metric_alert_v2000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-09-30T06:04:21Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -770,7 +787,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:47:10 GMT
+      - Fri, 30 Sep 2022 06:05:41 GMT
       expires:
       - '-1'
       pragma:
@@ -799,52 +816,58 @@ interactions:
     uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json
   response:
     body:
-      string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\",\n
-        \ \"contentVersion\": \"1.0.0.0\",\n  \"parameters\": {},\n  \"variables\":
-        {},\n  \"resources\": [],\n  \"outputs\": {\n    \"aliases\": {\n      \"type\":
-        \"object\",\n      \"value\": {\n        \"Linux\": {\n          \"CentOS\":
-        {\n            \"publisher\": \"OpenLogic\",\n            \"offer\": \"CentOS\",\n
-        \           \"sku\": \"7.5\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          },\n          \"Debian\": {\n            \"publisher\":
-        \"Debian\",\n            \"offer\": \"debian-10\",\n            \"sku\": \"10\",\n
-        \           \"version\": \"latest\",\n            \"architecture\": \"x64\"\n
-        \         },\n          \"Flatcar\": {\n            \"publisher\": \"kinvolk\",\n
-        \           \"offer\": \"flatcar-container-linux-free\",\n            \"sku\":
-        \"stable\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          },\n          \"openSUSE-Leap\": {\n            \"publisher\":
-        \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n            \"sku\":
-        \"gen2\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          },\n          \"RHEL\": {\n            \"publisher\": \"RedHat\",\n
-        \           \"offer\": \"RHEL\",\n            \"sku\": \"7-LVM\",\n            \"version\":
-        \"latest\",\n            \"architecture\": \"x64\"\n          },\n          \"SLES\":
-        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"sles-15-sp3\",\n
-        \           \"sku\": \"gen2\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          },\n          \"UbuntuLTS\": {\n            \"publisher\":
-        \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n            \"sku\":
-        \"18.04-LTS\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          }\n        },\n        \"Windows\": {\n          \"Win2022Datacenter\":
-        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
-        \"WindowsServer\",\n            \"sku\": \"2022-Datacenter\",\n            \"version\":
-        \"latest\",\n            \"architecture\": \"x64\"\n          },\n          \"Win2022AzureEditionCore\":
-        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
-        \"WindowsServer\",\n            \"sku\": \"2022-datacenter-azure-edition-core\",\n
-        \           \"version\": \"latest\",\n            \"architecture\": \"x64\"\n
-        \         },\n          \"Win2019Datacenter\": {\n            \"publisher\":
-        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
-        \"2019-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          },\n          \"Win2016Datacenter\": {\n            \"publisher\":
-        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
-        \"2016-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          },\n          \"Win2012R2Datacenter\": {\n            \"publisher\":
-        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
-        \"2012-R2-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          },\n          \"Win2012Datacenter\": {\n            \"publisher\":
-        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
-        \"2012-Datacenter\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          },\n          \"Win2008R2SP1\": {\n            \"publisher\":
-        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
-        \"2008-R2-SP1\",\n            \"version\": \"latest\",\n            \"architecture\":
-        \"x64\"\n          }\n        }\n      }\n    }\n  }\n}"
+      string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\"\
+        ,\n  \"contentVersion\": \"1.0.0.0\",\n  \"parameters\": {},\n  \"variables\"\
+        : {},\n  \"resources\": [],\n  \"outputs\": {\n    \"aliases\": {\n      \"\
+        type\": \"object\",\n      \"value\": {\n        \"Linux\": {\n          \"\
+        CentOS\": {\n            \"publisher\": \"OpenLogic\",\n            \"offer\"\
+        : \"CentOS\",\n            \"sku\": \"7.5\",\n            \"version\": \"\
+        latest\",\n            \"architecture\": \"x64\"\n          },\n         \
+        \ \"Debian\": {\n            \"publisher\": \"Debian\",\n            \"offer\"\
+        : \"debian-10\",\n            \"sku\": \"10\",\n            \"version\": \"\
+        latest\",\n            \"architecture\": \"x64\"\n          },\n         \
+        \ \"Flatcar\": {\n            \"publisher\": \"kinvolk\",\n            \"\
+        offer\": \"flatcar-container-linux-free\",\n            \"sku\": \"stable\"\
+        ,\n            \"version\": \"latest\",\n            \"architecture\": \"\
+        x64\"\n          },\n          \"openSUSE-Leap\": {\n            \"publisher\"\
+        : \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n            \"\
+        sku\": \"gen2\",\n            \"version\": \"latest\",\n            \"architecture\"\
+        : \"x64\"\n          },\n          \"RHEL\": {\n            \"publisher\"\
+        : \"RedHat\",\n            \"offer\": \"RHEL\",\n            \"sku\": \"7-LVM\"\
+        ,\n            \"version\": \"latest\",\n            \"architecture\": \"\
+        x64\"\n          },\n          \"SLES\": {\n            \"publisher\": \"\
+        SUSE\",\n            \"offer\": \"sles-15-sp3\",\n            \"sku\": \"\
+        gen2\",\n            \"version\": \"latest\",\n            \"architecture\"\
+        : \"x64\"\n          },\n          \"UbuntuLTS\": {\n            \"publisher\"\
+        : \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n            \"\
+        sku\": \"18.04-LTS\",\n            \"version\": \"latest\",\n            \"\
+        architecture\": \"x64\"\n          }\n        },\n        \"Windows\": {\n\
+        \          \"Win2022Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\"\
+        ,\n            \"offer\": \"WindowsServer\",\n            \"sku\": \"2022-Datacenter\"\
+        ,\n            \"version\": \"latest\",\n            \"architecture\": \"\
+        x64\"\n          },\n          \"Win2022AzureEditionCore\": {\n          \
+        \  \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\"\
+        ,\n            \"sku\": \"2022-datacenter-azure-edition-core\",\n        \
+        \    \"version\": \"latest\",\n            \"architecture\": \"x64\"\n   \
+        \       },\n          \"Win2019Datacenter\": {\n            \"publisher\"\
+        : \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n\
+        \            \"sku\": \"2019-Datacenter\",\n            \"version\": \"latest\"\
+        ,\n            \"architecture\": \"x64\"\n          },\n          \"Win2016Datacenter\"\
+        : {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"\
+        offer\": \"WindowsServer\",\n            \"sku\": \"2016-Datacenter\",\n \
+        \           \"version\": \"latest\",\n            \"architecture\": \"x64\"\
+        \n          },\n          \"Win2012R2Datacenter\": {\n            \"publisher\"\
+        : \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n\
+        \            \"sku\": \"2012-R2-Datacenter\",\n            \"version\": \"\
+        latest\",\n            \"architecture\": \"x64\"\n          },\n         \
+        \ \"Win2012Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\"\
+        ,\n            \"offer\": \"WindowsServer\",\n            \"sku\": \"2012-Datacenter\"\
+        ,\n            \"version\": \"latest\",\n            \"architecture\": \"\
+        x64\"\n          },\n          \"Win2008R2SP1\": {\n            \"publisher\"\
+        : \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n\
+        \            \"sku\": \"2008-R2-SP1\",\n            \"version\": \"latest\"\
+        ,\n            \"architecture\": \"x64\"\n          }\n        }\n      }\n\
+        \    }\n  }\n}"
     headers:
       accept-ranges:
       - bytes
@@ -861,13 +884,13 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:47:11 GMT
+      - Fri, 30 Sep 2022 06:05:43 GMT
       etag:
       - W/"41b202f4dc5098d126019dc00721a4c5e30df0c5196794514fadc3710ee2a5cb"
       expires:
-      - Fri, 05 Aug 2022 01:52:11 GMT
+      - Fri, 30 Sep 2022 06:10:43 GMT
       source-age:
-      - '80'
+      - '77'
       strict-transport-security:
       - max-age=31536000
       vary:
@@ -881,15 +904,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - cbfa3cca0085fa1270d3e5f52d5edf29cfb41449
+      - 1cc1a5346c084ba40c59bbf5f052d2e3ed95170b
       x-frame-options:
       - deny
       x-github-request-id:
-      - 1E4E:4FEC:123DD0:1D028B:62EC7031
+      - 965C:23A9:CF488:1409BE:633686E9
       x-served-by:
-      - cache-tyo11972-TYO
+      - cache-hkg17920-HKG
       x-timer:
-      - S1659664032.639107,VS0,VE0
+      - S1664517943.302811,VS0,VE1
       x-xss-protection:
       - 1; mode=block
     status:
@@ -909,14 +932,14 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-compute/28.0.0 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2012-R2-Datacenter/versions?$top=1&$orderby=name%20desc&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2012-R2-Datacenter/versions?$top=1&$orderby=name%20desc&api-version=2022-08-01
   response:
     body:
-      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"9600.20478.220708\",\r\n
-        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2012-R2-Datacenter/Versions/9600.20478.220708\"\r\n
-        \ }\r\n]"
+      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"9600.20571.220908\"\
+        ,\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2012-R2-Datacenter/Versions/9600.20571.220908\"\
+        \r\n  }\r\n]"
     headers:
       cache-control:
       - no-cache
@@ -925,7 +948,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:47:13 GMT
+      - Fri, 30 Sep 2022 06:05:43 GMT
       expires:
       - '-1'
       pragma:
@@ -942,7 +965,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15990,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43989
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15996,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43996
     status:
       code: 200
       message: OK
@@ -960,24 +983,26 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-compute/28.0.0 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2012-R2-Datacenter/versions/9600.20478.220708?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2012-R2-Datacenter/versions/9600.20571.220908?api-version=2022-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
-        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
-        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
-        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
-        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"features\": [\r\n
-        \     {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n        \"value\":
-        \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n
-        \       \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\",\r\n
-        \       \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\":
-        {\r\n      \"operatingSystem\": \"Windows\",\r\n      \"sizeInGb\": 128,\r\n
-        \     \"sizeInBytes\": 136367309312\r\n    },\r\n    \"dataDiskImages\": []\r\n
-        \ },\r\n  \"location\": \"westus\",\r\n  \"name\": \"9600.20478.220708\",\r\n
-        \ \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2012-R2-Datacenter/Versions/9600.20478.220708\"\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n \
+        \   \"architecture\": \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n\
+        \    \"disallowed\": {\r\n      \"vmDiskType\": \"None\"\r\n    },\r\n   \
+        \ \"automaticOSUpgradeProperties\": {\r\n      \"automaticOSUpgradeSupported\"\
+        : true\r\n    },\r\n    \"imageDeprecationStatus\": {\r\n      \"imageState\"\
+        : \"Active\"\r\n    },\r\n    \"features\": [\r\n      {\r\n        \"name\"\
+        : \"IsAcceleratedNetworkSupported\",\r\n        \"value\": \"True\"\r\n  \
+        \    },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n     \
+        \   \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\"\
+        ,\r\n        \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\"\
+        : {\r\n      \"operatingSystem\": \"Windows\",\r\n      \"sizeInGb\": 128,\r\
+        \n      \"sizeInBytes\": 136367309312\r\n    },\r\n    \"dataDiskImages\"\
+        : []\r\n  },\r\n  \"location\": \"westus\",\r\n  \"name\": \"9600.20571.220908\"\
+        ,\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2012-R2-Datacenter/Versions/9600.20571.220908\"\
+        \r\n}"
     headers:
       cache-control:
       - no-cache
@@ -986,7 +1011,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:47:14 GMT
+      - Fri, 30 Sep 2022 06:05:44 GMT
       expires:
       - '-1'
       pragma:
@@ -1003,7 +1028,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetVMImageFromLocation3Min;12993,Microsoft.Compute/GetVMImageFromLocation30Min;73993
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12997,Microsoft.Compute/GetVMImageFromLocation30Min;73997
     status:
       code: 200
       message: OK
@@ -1011,7 +1036,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1021,40 +1046,44 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks?api-version=2018-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"clitest-vm000002VNET\",\r\n
-        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks/clitest-vm000002VNET\",\r\n
-        \     \"etag\": \"W/\\\"6e21a45f-f990-4ec6-ba70-d5f2f02bc054\\\"\",\r\n      \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n      \"location\": \"westus\",\r\n
-        \     \"tags\": {\r\n        \"MabUsed\": \"Yes\",\r\n        \"Owner\": \"sisi\",\r\n
-        \       \"Purpose\": \"CLITest\",\r\n        \"DeleteBy\": \"12-2099\",\r\n
-        \       \"AutoShutdown\": \"No\"\r\n      },\r\n      \"properties\": {\r\n
-        \       \"provisioningState\": \"Succeeded\",\r\n        \"resourceGuid\":
-        \"7b3c46f2-299c-49a2-b924-713598fe8fdb\",\r\n        \"addressSpace\": {\r\n
-        \         \"addressPrefixes\": [\r\n            \"10.0.0.0/16\"\r\n          ]\r\n
-        \       },\r\n        \"subnets\": [\r\n          {\r\n            \"name\":
-        \"clitest-vm000002Subnet\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks/clitest-vm000002VNET/subnets/clitest-vm000002Subnet\",\r\n
-        \           \"etag\": \"W/\\\"6e21a45f-f990-4ec6-ba70-d5f2f02bc054\\\"\",\r\n
-        \           \"properties\": {\r\n              \"provisioningState\": \"Succeeded\",\r\n
-        \             \"addressPrefix\": \"10.0.0.0/24\",\r\n              \"ipConfigurations\":
-        [\r\n                {\r\n                  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic/ipConfigurations/ipconfigclitest-vm000002\"\r\n
-        \               }\r\n              ]\r\n            },\r\n            \"type\":
-        \"Microsoft.Network/virtualNetworks/subnets\"\r\n          }\r\n        ],\r\n
-        \       \"virtualNetworkPeerings\": [],\r\n        \"enableDdosProtection\":
-        false\r\n      }\r\n    }\r\n  ]\r\n}"
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"clitest-vm000002VNET\"\
+        ,\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks/clitest-vm000002VNET\"\
+        ,\r\n      \"etag\": \"W/\\\"179f04ce-c341-4992-a7c7-87cf5629837c\\\"\",\r\
+        \n      \"type\": \"Microsoft.Network/virtualNetworks\",\r\n      \"location\"\
+        : \"westus\",\r\n      \"tags\": {\r\n        \"MabUsed\": \"Yes\",\r\n  \
+        \      \"Owner\": \"sisi\",\r\n        \"Purpose\": \"CLITest\",\r\n     \
+        \   \"DeleteBy\": \"12-2099\",\r\n        \"AutoShutdown\": \"No\"\r\n   \
+        \   },\r\n      \"properties\": {\r\n        \"provisioningState\": \"Succeeded\"\
+        ,\r\n        \"resourceGuid\": \"c8aaa5e0-13fd-4ddc-9db6-36a5fcdd800d\",\r\
+        \n        \"addressSpace\": {\r\n          \"addressPrefixes\": [\r\n    \
+        \        \"10.0.0.0/16\"\r\n          ]\r\n        },\r\n        \"subnets\"\
+        : [\r\n          {\r\n            \"name\": \"clitest-vm000002Subnet\",\r\n\
+        \            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks/clitest-vm000002VNET/subnets/clitest-vm000002Subnet\"\
+        ,\r\n            \"etag\": \"W/\\\"179f04ce-c341-4992-a7c7-87cf5629837c\\\"\
+        \",\r\n            \"properties\": {\r\n              \"provisioningState\"\
+        : \"Succeeded\",\r\n              \"addressPrefix\": \"10.0.0.0/24\",\r\n\
+        \              \"ipConfigurations\": [\r\n                {\r\n          \
+        \        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic/ipConfigurations/ipconfigclitest-vm000002\"\
+        \r\n                }\r\n              ],\r\n              \"delegations\"\
+        : [],\r\n              \"privateEndpointNetworkPolicies\": \"Disabled\",\r\
+        \n              \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n   \
+        \         },\r\n            \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\
+        \r\n          }\r\n        ],\r\n        \"virtualNetworkPeerings\": [],\r\
+        \n        \"enableDdosProtection\": false\r\n      }\r\n    }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1846'
+      - '2004'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:47:15 GMT
+      - Fri, 30 Sep 2022 06:05:45 GMT
       expires:
       - '-1'
       pragma:
@@ -1071,7 +1100,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2a16e40b-8da4-4bb7-a144-0e3b3a5ed431
+      - e608a5fd-1354-4209-a5ac-9db727e31baa
     status:
       code: 200
       message: OK
@@ -1082,7 +1111,7 @@ interactions:
       [{"type": "Microsoft.Network/networkSecurityGroups", "name": "clitest-vm000003NSG",
       "apiVersion": "2015-06-15", "location": "westus", "tags": {"MabUsed": "Yes",
       "Owner": "sisi", "Purpose": "CLITest", "DeleteBy": "12-2099", "AutoShutdown":
-      "No"}, "dependsOn": []}, {"apiVersion": "2018-01-01", "type": "Microsoft.Network/publicIPAddresses",
+      "No"}, "dependsOn": []}, {"apiVersion": "2022-01-01", "type": "Microsoft.Network/publicIPAddresses",
       "name": "clitest-vm000003PublicIP", "location": "westus", "tags": {"MabUsed":
       "Yes", "Owner": "sisi", "Purpose": "CLITest", "DeleteBy": "12-2099", "AutoShutdown":
       "No"}, "dependsOn": [], "properties": {"publicIPAllocationMethod": null}}, {"apiVersion":
@@ -1094,7 +1123,7 @@ interactions:
       "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks/clitest-vm000002VNET/subnets/clitest-vm000002Subnet"},
       "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000003PublicIP"}}}],
       "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000003NSG"}}},
-      {"apiVersion": "2022-03-01", "type": "Microsoft.Compute/virtualMachines", "name":
+      {"apiVersion": "2022-08-01", "type": "Microsoft.Compute/virtualMachines", "name":
       "clitest-vm000003", "location": "westus", "tags": {"MabUsed": "Yes", "Owner":
       "sisi", "Purpose": "CLITest", "DeleteBy": "12-2099", "AutoShutdown": "No"},
       "dependsOn": ["Microsoft.Network/networkInterfaces/clitest-vm000003VMNic"],
@@ -1123,15 +1152,15 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/vm_deploy_J0ZdYWKePwAQ4R1zljIdWcTVNTHi6qA5","name":"vm_deploy_J0ZdYWKePwAQ4R1zljIdWcTVNTHi6qA5","type":"Microsoft.Resources/deployments","properties":{"templateHash":"5210684898848461140","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-08-05T01:47:21.8495388Z","duration":"PT0.0005173S","correlationId":"59c9ed19-68d2-4f12-a102-b02c4b0e586d","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000003NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"clitest-vm000003NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000003PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"clitest-vm000003PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000003VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000003VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"clitest-vm000003"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/vm_deploy_xaAveEsey6CxQ1I11r9dsnCEYEA3hHbk","name":"vm_deploy_xaAveEsey6CxQ1I11r9dsnCEYEA3hHbk","type":"Microsoft.Resources/deployments","properties":{"templateHash":"2545616193817049787","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-09-30T06:05:50.2394972Z","duration":"PT0.0001341S","correlationId":"ddfffa1a-12d0-4165-800b-70e6ad7e3030","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000003NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"clitest-vm000003NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000003PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"clitest-vm000003PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000003VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000003VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"clitest-vm000003"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/vm_deploy_J0ZdYWKePwAQ4R1zljIdWcTVNTHi6qA5/operationStatuses/08585419428448370968?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/vm_deploy_xaAveEsey6CxQ1I11r9dsnCEYEA3hHbk/operationStatuses/08585370889370812031?api-version=2021-04-01
       cache-control:
       - no-cache
       content-length:
@@ -1139,7 +1168,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:47:22 GMT
+      - Fri, 30 Sep 2022 06:05:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1149,7 +1178,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -1167,9 +1196,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585419428448370968?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585370889370812031?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1181,7 +1210,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:47:53 GMT
+      - Fri, 30 Sep 2022 06:06:21 GMT
       expires:
       - '-1'
       pragma:
@@ -1209,9 +1238,51 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585419428448370968?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585370889370812031?api-version=2021-04-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 30 Sep 2022 06:06:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --admin-username --admin-password --tags --nsg-rule
+      User-Agent:
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585370889370812031?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -1223,7 +1294,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:48:23 GMT
+      - Fri, 30 Sep 2022 06:07:23 GMT
       expires:
       - '-1'
       pragma:
@@ -1251,21 +1322,21 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/vm_deploy_J0ZdYWKePwAQ4R1zljIdWcTVNTHi6qA5","name":"vm_deploy_J0ZdYWKePwAQ4R1zljIdWcTVNTHi6qA5","type":"Microsoft.Resources/deployments","properties":{"templateHash":"5210684898848461140","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-08-05T01:48:02.9602014Z","duration":"PT41.1111799S","correlationId":"59c9ed19-68d2-4f12-a102-b02c4b0e586d","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000003NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"clitest-vm000003NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000003PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"clitest-vm000003PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000003VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000003VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"clitest-vm000003"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000003NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000003PublicIP"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Resources/deployments/vm_deploy_xaAveEsey6CxQ1I11r9dsnCEYEA3hHbk","name":"vm_deploy_xaAveEsey6CxQ1I11r9dsnCEYEA3hHbk","type":"Microsoft.Resources/deployments","properties":{"templateHash":"2545616193817049787","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-09-30T06:06:53.7212236Z","duration":"PT1M3.4818605S","correlationId":"ddfffa1a-12d0-4165-800b-70e6ad7e3030","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000003NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"clitest-vm000003NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000003PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"clitest-vm000003PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000003VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000003VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"clitest-vm000003"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000003NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000003PublicIP"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3116'
+      - '3117'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:48:24 GMT
+      - Fri, 30 Sep 2022 06:07:23 GMT
       expires:
       - '-1'
       pragma:
@@ -1293,63 +1364,66 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-compute/27.1.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-compute/28.0.0 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003?$expand=instanceView&api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003?$expand=instanceView&api-version=2022-08-01
   response:
     body:
-      string: "{\r\n  \"name\": \"clitest-vm000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003\",\r\n
-        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {\r\n    \"MabUsed\": \"Yes\",\r\n    \"Owner\": \"sisi\",\r\n
-        \   \"Purpose\": \"CLITest\",\r\n    \"DeleteBy\": \"12-2099\",\r\n    \"AutoShutdown\":
-        \"No\"\r\n  },\r\n  \"properties\": {\r\n    \"vmId\": \"4ac8453f-a631-4825-9304-206be1b5d08e\",\r\n
-        \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
-        \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
-        \"MicrosoftWindowsServer\",\r\n        \"offer\": \"WindowsServer\",\r\n        \"sku\":
-        \"2012-R2-Datacenter\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"9600.20478.220708\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Windows\",\r\n        \"name\": \"clitest-vm000003_disk1_e5773bc9c212468d8c3c6c289c8be6d5\",\r\n
-        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
-        \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/disks/clitest-vm000003_disk1_e5773bc9c212468d8c3c6c289c8be6d5\"\r\n
-        \       },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\":
-        127\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
-        {\r\n      \"computerName\": \"clitest-vm000003\",\r\n      \"adminUsername\":
-        \"clitest-vm000003\",\r\n      \"windowsConfiguration\": {\r\n        \"provisionVMAgent\":
-        true,\r\n        \"enableAutomaticUpdates\": true,\r\n        \"patchSettings\":
-        {\r\n          \"patchMode\": \"AutomaticByOS\",\r\n          \"assessmentMode\":
-        \"ImageDefault\"\r\n        },\r\n        \"enableVMAgentPlatformUpdates\":
-        false\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\":
-        true,\r\n      \"requireGuestProvisionSignal\": true\r\n    },\r\n    \"networkProfile\":
-        {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"vmAgent\":
-        {\r\n        \"vmAgentVersion\": \"Unknown\",\r\n        \"statuses\": [\r\n
-        \         {\r\n            \"code\": \"ProvisioningState/Unavailable\",\r\n
-        \           \"level\": \"Warning\",\r\n            \"displayStatus\": \"Not
-        Ready\",\r\n            \"message\": \"VM status blob is found but not yet
-        populated.\",\r\n            \"time\": \"2022-08-05T01:48:26+00:00\"\r\n          }\r\n
-        \       ]\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\":
-        \"clitest-vm000003_disk1_e5773bc9c212468d8c3c6c289c8be6d5\",\r\n          \"statuses\":
-        [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
-        \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2022-08-05T01:47:46.5150391+00:00\"\r\n
-        \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
-        \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
-        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2022-08-05T01:48:00.578102+00:00\"\r\n
-        \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
-        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
-        \       }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2022-08-05T01:47:45.2650158+00:00\"\r\n
-        \ }\r\n}"
+      string: "{\r\n  \"name\": \"clitest-vm000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\"\
+        : \"westus\",\r\n  \"tags\": {\r\n    \"MabUsed\": \"Yes\",\r\n    \"Owner\"\
+        : \"sisi\",\r\n    \"Purpose\": \"CLITest\",\r\n    \"DeleteBy\": \"12-2099\"\
+        ,\r\n    \"AutoShutdown\": \"No\"\r\n  },\r\n  \"properties\": {\r\n    \"\
+        vmId\": \"9fe5e5ae-bb2f-47f9-aeac-efd2f2ff3f17\",\r\n    \"hardwareProfile\"\
+        : {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"MicrosoftWindowsServer\"\
+        ,\r\n        \"offer\": \"WindowsServer\",\r\n        \"sku\": \"2012-R2-Datacenter\"\
+        ,\r\n        \"version\": \"latest\",\r\n        \"exactVersion\": \"9600.20571.220908\"\
+        \r\n      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Windows\",\r\n\
+        \        \"name\": \"clitest-vm000003_disk1_e6cae090391d48d19f97abd3176cac82\"\
+        ,\r\n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/disks/clitest-vm000003_disk1_e6cae090391d48d19f97abd3176cac82\"\
+        \r\n        },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\"\
+        : 127\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\"\
+        : {\r\n      \"computerName\": \"clitest-vm000003\",\r\n      \"adminUsername\"\
+        : \"clitest-vm000003\",\r\n      \"windowsConfiguration\": {\r\n        \"\
+        provisionVMAgent\": true,\r\n        \"enableAutomaticUpdates\": true,\r\n\
+        \        \"patchSettings\": {\r\n          \"patchMode\": \"AutomaticByOS\"\
+        ,\r\n          \"assessmentMode\": \"ImageDefault\"\r\n        },\r\n    \
+        \    \"enableVMAgentPlatformUpdates\": false\r\n      },\r\n      \"secrets\"\
+        : [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\"\
+        : true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\"\
+        :\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic\"\
+        }]},\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\"\
+        : {\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"Unknown\",\r\n\
+        \        \"statuses\": [\r\n          {\r\n            \"code\": \"ProvisioningState/Unavailable\"\
+        ,\r\n            \"level\": \"Warning\",\r\n            \"displayStatus\"\
+        : \"Not Ready\",\r\n            \"message\": \"VM status blob is found but\
+        \ not yet populated.\",\r\n            \"time\": \"2022-09-30T06:07:25+00:00\"\
+        \r\n          }\r\n        ]\r\n      },\r\n      \"disks\": [\r\n       \
+        \ {\r\n          \"name\": \"clitest-vm000003_disk1_e6cae090391d48d19f97abd3176cac82\"\
+        ,\r\n          \"statuses\": [\r\n            {\r\n              \"code\"\
+        : \"ProvisioningState/succeeded\",\r\n              \"level\": \"Info\",\r\
+        \n              \"displayStatus\": \"Provisioning succeeded\",\r\n       \
+        \       \"time\": \"2022-09-30T06:06:12.0595529+00:00\"\r\n            }\r\
+        \n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\": \"V1\"\
+        ,\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\"\
+        ,\r\n          \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning\
+        \ succeeded\",\r\n          \"time\": \"2022-09-30T06:06:49.3878524+00:00\"\
+        \r\n        },\r\n        {\r\n          \"code\": \"PowerState/running\"\
+        ,\r\n          \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\
+        \r\n        }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2022-09-30T06:06:10.7782936+00:00\"\
+        \r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3489'
+      - '3490'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:48:25 GMT
+      - Fri, 30 Sep 2022 06:07:24 GMT
       expires:
       - '-1'
       pragma:
@@ -1366,7 +1440,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3970,Microsoft.Compute/LowCostGet30Min;31859
+      - Microsoft.Compute/LowCostGet3Min;3993,Microsoft.Compute/LowCostGet30Min;31988
     status:
       code: 200
       message: OK
@@ -1374,7 +1448,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1384,46 +1458,50 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic?api-version=2018-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"clitest-vm000003VMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic\",\r\n
-        \ \"etag\": \"W/\\\"3c97148c-39b7-4d54-ba59-70155c2c8770\\\"\",\r\n  \"tags\":
-        {\r\n    \"MabUsed\": \"Yes\",\r\n    \"Owner\": \"sisi\",\r\n    \"Purpose\":
-        \"CLITest\",\r\n    \"DeleteBy\": \"12-2099\",\r\n    \"AutoShutdown\": \"No\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"a5736095-055d-4c56-9f2c-5a8b541eb5dc\",\r\n    \"ipConfigurations\":
-        [\r\n      {\r\n        \"name\": \"ipconfigclitest-vm000003\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic/ipConfigurations/ipconfigclitest-vm000003\",\r\n
-        \       \"etag\": \"W/\\\"3c97148c-39b7-4d54-ba59-70155c2c8770\\\"\",\r\n
-        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateIPAddress\": \"10.0.0.5\",\r\n          \"privateIPAllocationMethod\":
-        \"Dynamic\",\r\n          \"publicIPAddress\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000003PublicIP\"\r\n
-        \         },\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks/clitest-vm000002VNET/subnets/clitest-vm000002Subnet\"\r\n
-        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
-        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
-        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"4jddy422fgretojeoe0zr5up1d.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-0D-3A-33-34-E3\",\r\n    \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\":
-        {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000003NSG\"\r\n
-        \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003\"\r\n
-        \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n
-        \ \"location\": \"westus\"\r\n}"
+      string: "{\r\n  \"name\": \"clitest-vm000003VMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic\"\
+        ,\r\n  \"etag\": \"W/\\\"edb865f5-64d5-4377-8381-3413c01d190f\\\"\",\r\n \
+        \ \"tags\": {\r\n    \"MabUsed\": \"Yes\",\r\n    \"Owner\": \"sisi\",\r\n\
+        \    \"Purpose\": \"CLITest\",\r\n    \"DeleteBy\": \"12-2099\",\r\n    \"\
+        AutoShutdown\": \"No\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Succeeded\",\r\n    \"resourceGuid\": \"7aa05b2b-56ae-40d6-b2b3-afced1e6c114\"\
+        ,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigclitest-vm000003\"\
+        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic/ipConfigurations/ipconfigclitest-vm000003\"\
+        ,\r\n        \"etag\": \"W/\\\"edb865f5-64d5-4377-8381-3413c01d190f\\\"\"\
+        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
+        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
+        ,\r\n          \"privateIPAddress\": \"10.0.0.5\",\r\n          \"privateIPAllocationMethod\"\
+        : \"Dynamic\",\r\n          \"publicIPAddress\": {\r\n            \"id\":\
+        \ \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000003PublicIP\"\
+        \r\n          },\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks/clitest-vm000002VNET/subnets/clitest-vm000002Subnet\"\
+        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
+        : \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n\
+        \      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"\
+        internalDomainNameSuffix\": \"2cs0vsh3cpoe1hnwg0s5zxmabf.dx.internal.cloudapp.net\"\
+        \r\n    },\r\n    \"macAddress\": \"60-45-BD-00-98-01\",\r\n    \"vnetEncryptionSupported\"\
+        : false,\r\n    \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\"\
+        : {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000003NSG\"\
+        \r\n    },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n    \
+        \  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003\"\
+        \r\n    },\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\
+        \n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\": true\r\n  },\r\
+        \n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":\
+        \ \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2563'
+      - '2739'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:48:26 GMT
+      - Fri, 30 Sep 2022 06:07:25 GMT
       etag:
-      - W/"3c97148c-39b7-4d54-ba59-70155c2c8770"
+      - W/"edb865f5-64d5-4377-8381-3413c01d190f"
       expires:
       - '-1'
       pragma:
@@ -1440,7 +1518,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4bfcd1da-e27a-4689-b5e5-33a1f35f53b9
+      - 42744cb9-0132-4628-8a72-b55b9007710a
     status:
       code: 200
       message: OK
@@ -1448,7 +1526,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1458,33 +1536,35 @@ interactions:
       ParameterSetName:
       - -n -g --image --admin-username --admin-password --tags --nsg-rule
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000003PublicIP?api-version=2018-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000003PublicIP?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"clitest-vm000003PublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000003PublicIP\",\r\n
-        \ \"etag\": \"W/\\\"22c60be8-6bdb-4bc8-b3ed-665970378f9b\\\"\",\r\n  \"location\":
-        \"westus\",\r\n  \"tags\": {\r\n    \"MabUsed\": \"Yes\",\r\n    \"Owner\":
-        \"sisi\",\r\n    \"Purpose\": \"CLITest\",\r\n    \"DeleteBy\": \"12-2099\",\r\n
-        \   \"AutoShutdown\": \"No\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"0b9b7443-35ef-4680-87ec-0e380df295a7\",\r\n
-        \   \"ipAddress\": \"20.66.80.35\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
-        \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
-        4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic/ipConfigurations/ipconfigclitest-vm000003\"\r\n
-        \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\"\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"clitest-vm000003PublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000003PublicIP\"\
+        ,\r\n  \"etag\": \"W/\\\"4aca1175-d853-4289-98ec-1bb9fac3abdc\\\"\",\r\n \
+        \ \"location\": \"westus\",\r\n  \"tags\": {\r\n    \"MabUsed\": \"Yes\",\r\
+        \n    \"Owner\": \"sisi\",\r\n    \"Purpose\": \"CLITest\",\r\n    \"DeleteBy\"\
+        : \"12-2099\",\r\n    \"AutoShutdown\": \"No\"\r\n  },\r\n  \"properties\"\
+        : {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":\
+        \ \"0f4d50ef-323e-4534-891b-f323ac1764bb\",\r\n    \"ipAddress\": \"20.245.151.174\"\
+        ,\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\"\
+        : \"Dynamic\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": [],\r\
+        \n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic/ipConfigurations/ipconfigclitest-vm000003\"\
+        \r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\
+        \n  \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\
+        \n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1103'
+      - '1131'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:48:27 GMT
+      - Fri, 30 Sep 2022 06:07:25 GMT
       etag:
-      - W/"22c60be8-6bdb-4bc8-b3ed-665970378f9b"
+      - W/"4aca1175-d853-4289-98ec-1bb9fac3abdc"
       expires:
       - '-1'
       pragma:
@@ -1501,12 +1581,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 61912715-39f7-4eed-8139-effd2359fdbb
+      - e41610bf-d59d-4ea6-8845-43a3a02fa44c
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "global", "properties": {"groupShortName": "ag1", "enabled":
+    body: '{"location": "Global", "properties": {"groupShortName": "ag1", "enabled":
       true, "emailReceivers": [], "smsReceivers": [], "webhookReceivers": [], "itsmReceivers":
       [], "azureAppPushReceivers": [], "automationRunbookReceivers": [], "voiceReceivers":
       [], "logicAppReceivers": [], "azureFunctionReceivers": [], "armRoleReceivers":
@@ -1527,7 +1607,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-monitor/4.0.1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-monitor/5.0.0 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/actionGroups/ag1?api-version=2022-06-01
   response:
@@ -1541,7 +1621,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:48:34 GMT
+      - Fri, 30 Sep 2022 06:07:30 GMT
       expires:
       - '-1'
       pragma:
@@ -1558,7 +1638,7 @@ interactions:
       code: 201
       message: Created
 - request:
-    body: '{"location": "global", "properties": {"groupShortName": "ag2", "enabled":
+    body: '{"location": "Global", "properties": {"groupShortName": "ag2", "enabled":
       true, "emailReceivers": [], "smsReceivers": [], "webhookReceivers": [], "itsmReceivers":
       [], "azureAppPushReceivers": [], "automationRunbookReceivers": [], "voiceReceivers":
       [], "logicAppReceivers": [], "azureFunctionReceivers": [], "armRoleReceivers":
@@ -1579,7 +1659,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-monitor/4.0.1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-monitor/5.0.0 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/actionGroups/ag2?api-version=2022-06-01
   response:
@@ -1593,7 +1673,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:48:41 GMT
+      - Fri, 30 Sep 2022 06:07:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1636,29 +1716,30 @@ interactions:
       ParameterSetName:
       - -g -n --scopes --action --region --condition --description
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-monitor/4.0.1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-monitor/5.0.0 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1\",\r\n
-        \ \"name\": \"alert1\",\r\n  \"type\": \"Microsoft.Insights/metricAlerts\",\r\n
-        \ \"location\": \"global\",\r\n  \"properties\": {\r\n    \"description\":
-        \"High CPU\",\r\n    \"severity\": 2,\r\n    \"enabled\": true,\r\n    \"scopes\":
-        [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002\",\r\n
-        \     \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003\"\r\n
-        \   ],\r\n    \"evaluationFrequency\": \"PT1M\",\r\n    \"windowSize\": \"PT5M\",\r\n
-        \   \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n          \"alertSensitivity\":
-        \"Low\",\r\n          \"failingPeriods\": {\r\n            \"numberOfEvaluationPeriods\":
-        4,\r\n            \"minFailingPeriodsToAlert\": 2\r\n          },\r\n          \"ignoreDataBefore\":
-        \"2020-11-01T16:00:00.000Z\",\r\n          \"name\": \"cond0\",\r\n          \"metricName\":
-        \"Percentage CPU\",\r\n          \"operator\": \"GreaterThan\",\r\n          \"timeAggregation\":
-        \"Average\",\r\n          \"criterionType\": \"DynamicThresholdCriterion\"\r\n
-        \       }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n
-        \   },\r\n    \"targetResourceType\": \"Microsoft.Compute/virtualMachines\",\r\n
-        \   \"targetResourceRegion\": \"westus\",\r\n    \"actions\": [\r\n      {\r\n
-        \       \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1\"\r\n
-        \     }\r\n    ]\r\n  }\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1\"\
+        ,\r\n  \"name\": \"alert1\",\r\n  \"type\": \"Microsoft.Insights/metricAlerts\"\
+        ,\r\n  \"location\": \"global\",\r\n  \"properties\": {\r\n    \"description\"\
+        : \"High CPU\",\r\n    \"severity\": 2,\r\n    \"enabled\": true,\r\n    \"\
+        scopes\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002\"\
+        ,\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003\"\
+        \r\n    ],\r\n    \"evaluationFrequency\": \"PT1M\",\r\n    \"windowSize\"\
+        : \"PT5M\",\r\n    \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n\
+        \          \"alertSensitivity\": \"Low\",\r\n          \"failingPeriods\"\
+        : {\r\n            \"numberOfEvaluationPeriods\": 4,\r\n            \"minFailingPeriodsToAlert\"\
+        : 2\r\n          },\r\n          \"ignoreDataBefore\": \"2020-11-01T16:00:00.000Z\"\
+        ,\r\n          \"name\": \"cond0\",\r\n          \"metricName\": \"Percentage\
+        \ CPU\",\r\n          \"operator\": \"GreaterThan\",\r\n          \"timeAggregation\"\
+        : \"Average\",\r\n          \"criterionType\": \"DynamicThresholdCriterion\"\
+        \r\n        }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\
+        \r\n    },\r\n    \"targetResourceType\": \"Microsoft.Compute/virtualMachines\"\
+        ,\r\n    \"targetResourceRegion\": \"westus\",\r\n    \"actions\": [\r\n \
+        \     {\r\n        \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1\"\
+        \r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       api-supported-versions:
       - 2017-09-01-preview, 2018-03-01
@@ -1671,7 +1752,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:48:56 GMT
+      - Fri, 30 Sep 2022 06:07:47 GMT
       expires:
       - '-1'
       pragma:
@@ -1710,29 +1791,30 @@ interactions:
       - -g -n --severity --description --add-action --remove-action --remove-conditions
         --evaluation-frequency --window-size --tags --auto-mitigate --add-condition
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-monitor/4.0.1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-monitor/5.0.0 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1\",\r\n
-        \ \"name\": \"alert1\",\r\n  \"type\": \"Microsoft.Insights/metricAlerts\",\r\n
-        \ \"location\": \"global\",\r\n  \"properties\": {\r\n    \"description\":
-        \"High CPU\",\r\n    \"severity\": 2,\r\n    \"enabled\": true,\r\n    \"scopes\":
-        [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002\",\r\n
-        \     \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003\"\r\n
-        \   ],\r\n    \"evaluationFrequency\": \"PT1M\",\r\n    \"windowSize\": \"PT5M\",\r\n
-        \   \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n          \"alertSensitivity\":
-        \"Low\",\r\n          \"failingPeriods\": {\r\n            \"numberOfEvaluationPeriods\":
-        4,\r\n            \"minFailingPeriodsToAlert\": 2\r\n          },\r\n          \"ignoreDataBefore\":
-        \"2020-11-01T16:00:00.000Z\",\r\n          \"name\": \"cond0\",\r\n          \"metricName\":
-        \"Percentage CPU\",\r\n          \"operator\": \"GreaterThan\",\r\n          \"timeAggregation\":
-        \"Average\",\r\n          \"criterionType\": \"DynamicThresholdCriterion\"\r\n
-        \       }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n
-        \   },\r\n    \"targetResourceType\": \"Microsoft.Compute/virtualMachines\",\r\n
-        \   \"targetResourceRegion\": \"westus\",\r\n    \"actions\": [\r\n      {\r\n
-        \       \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1\"\r\n
-        \     }\r\n    ]\r\n  }\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1\"\
+        ,\r\n  \"name\": \"alert1\",\r\n  \"type\": \"Microsoft.Insights/metricAlerts\"\
+        ,\r\n  \"location\": \"global\",\r\n  \"properties\": {\r\n    \"description\"\
+        : \"High CPU\",\r\n    \"severity\": 2,\r\n    \"enabled\": true,\r\n    \"\
+        scopes\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002\"\
+        ,\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003\"\
+        \r\n    ],\r\n    \"evaluationFrequency\": \"PT1M\",\r\n    \"windowSize\"\
+        : \"PT5M\",\r\n    \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n\
+        \          \"alertSensitivity\": \"Low\",\r\n          \"failingPeriods\"\
+        : {\r\n            \"numberOfEvaluationPeriods\": 4,\r\n            \"minFailingPeriodsToAlert\"\
+        : 2\r\n          },\r\n          \"ignoreDataBefore\": \"2020-11-01T16:00:00.000Z\"\
+        ,\r\n          \"name\": \"cond0\",\r\n          \"metricName\": \"Percentage\
+        \ CPU\",\r\n          \"operator\": \"GreaterThan\",\r\n          \"timeAggregation\"\
+        : \"Average\",\r\n          \"criterionType\": \"DynamicThresholdCriterion\"\
+        \r\n        }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\
+        \r\n    },\r\n    \"targetResourceType\": \"Microsoft.Compute/virtualMachines\"\
+        ,\r\n    \"targetResourceRegion\": \"westus\",\r\n    \"actions\": [\r\n \
+        \     {\r\n        \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag1\"\
+        \r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       api-supported-versions:
       - 2017-09-01-preview, 2018-03-01
@@ -1745,7 +1827,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:48:56 GMT
+      - Fri, 30 Sep 2022 06:07:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1797,31 +1879,32 @@ interactions:
       - -g -n --severity --description --add-action --remove-action --remove-conditions
         --evaluation-frequency --window-size --tags --auto-mitigate --add-condition
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-monitor/4.0.1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-monitor/5.0.0 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1\",\r\n
-        \ \"name\": \"alert1\",\r\n  \"type\": \"Microsoft.Insights/metricAlerts\",\r\n
-        \ \"location\": \"global\",\r\n  \"tags\": {\r\n    \"foo\": \"boo\"\r\n  },\r\n
-        \ \"properties\": {\r\n    \"description\": \"High Or Low CPU\",\r\n    \"severity\":
-        3,\r\n    \"enabled\": true,\r\n    \"scopes\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002\",\r\n
-        \     \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003\"\r\n
-        \   ],\r\n    \"evaluationFrequency\": \"PT5M\",\r\n    \"windowSize\": \"PT15M\",\r\n
-        \   \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n          \"alertSensitivity\":
-        \"Medium\",\r\n          \"failingPeriods\": {\r\n            \"numberOfEvaluationPeriods\":
-        6,\r\n            \"minFailingPeriodsToAlert\": 1\r\n          },\r\n          \"ignoreDataBefore\":
-        \"2020-10-01T10:23:00.000Z\",\r\n          \"name\": \"cond0\",\r\n          \"metricName\":
-        \"Percentage CPU\",\r\n          \"operator\": \"GreaterOrLessThan\",\r\n
-        \         \"timeAggregation\": \"Average\",\r\n          \"criterionType\":
-        \"DynamicThresholdCriterion\"\r\n        }\r\n      ],\r\n      \"odata.type\":
-        \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n    },\r\n
-        \   \"autoMitigate\": true,\r\n    \"targetResourceType\": \"Microsoft.Compute/virtualMachines\",\r\n
-        \   \"targetResourceRegion\": \"westus\",\r\n    \"actions\": [\r\n      {\r\n
-        \       \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2\",\r\n
-        \       \"webHookProperties\": {\r\n          \"test\": \"best\"\r\n        }\r\n
-        \     }\r\n    ]\r\n  }\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1\"\
+        ,\r\n  \"name\": \"alert1\",\r\n  \"type\": \"Microsoft.Insights/metricAlerts\"\
+        ,\r\n  \"location\": \"global\",\r\n  \"tags\": {\r\n    \"foo\": \"boo\"\r\
+        \n  },\r\n  \"properties\": {\r\n    \"description\": \"High Or Low CPU\"\
+        ,\r\n    \"severity\": 3,\r\n    \"enabled\": true,\r\n    \"scopes\": [\r\
+        \n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002\"\
+        ,\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003\"\
+        \r\n    ],\r\n    \"evaluationFrequency\": \"PT5M\",\r\n    \"windowSize\"\
+        : \"PT15M\",\r\n    \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n\
+        \          \"alertSensitivity\": \"Medium\",\r\n          \"failingPeriods\"\
+        : {\r\n            \"numberOfEvaluationPeriods\": 6,\r\n            \"minFailingPeriodsToAlert\"\
+        : 1\r\n          },\r\n          \"ignoreDataBefore\": \"2020-10-01T10:23:00.000Z\"\
+        ,\r\n          \"name\": \"cond0\",\r\n          \"metricName\": \"Percentage\
+        \ CPU\",\r\n          \"operator\": \"GreaterOrLessThan\",\r\n          \"\
+        timeAggregation\": \"Average\",\r\n          \"criterionType\": \"DynamicThresholdCriterion\"\
+        \r\n        }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\
+        \r\n    },\r\n    \"autoMitigate\": true,\r\n    \"targetResourceType\": \"\
+        Microsoft.Compute/virtualMachines\",\r\n    \"targetResourceRegion\": \"westus\"\
+        ,\r\n    \"actions\": [\r\n      {\r\n        \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2\"\
+        ,\r\n        \"webHookProperties\": {\r\n          \"test\": \"best\"\r\n\
+        \        }\r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       api-supported-versions:
       - 2017-09-01-preview, 2018-03-01
@@ -1834,7 +1917,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:49:10 GMT
+      - Fri, 30 Sep 2022 06:08:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1872,33 +1955,36 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-monitor/4.0.1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-monitor/5.0.0 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts?api-version=2018-03-01
   response:
     body:
-      string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1\",\r\n
-        \     \"name\": \"alert1\",\r\n      \"type\": \"Microsoft.Insights/metricAlerts\",\r\n
-        \     \"location\": \"global\",\r\n      \"tags\": {\r\n        \"foo\": \"boo\"\r\n
-        \     },\r\n      \"properties\": {\r\n        \"description\": \"High Or
-        Low CPU\",\r\n        \"severity\": 3,\r\n        \"enabled\": true,\r\n        \"scopes\":
-        [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002\",\r\n
-        \         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003\"\r\n
-        \       ],\r\n        \"evaluationFrequency\": \"PT5M\",\r\n        \"windowSize\":
-        \"PT15M\",\r\n        \"criteria\": {\r\n          \"allOf\": [\r\n            {\r\n
-        \             \"alertSensitivity\": \"Medium\",\r\n              \"failingPeriods\":
-        {\r\n                \"numberOfEvaluationPeriods\": 6,\r\n                \"minFailingPeriodsToAlert\":
-        1\r\n              },\r\n              \"ignoreDataBefore\": \"2020-10-01T10:23:00.000Z\",\r\n
-        \             \"name\": \"cond0\",\r\n              \"metricName\": \"Percentage
-        CPU\",\r\n              \"operator\": \"GreaterOrLessThan\",\r\n              \"timeAggregation\":
-        \"Average\",\r\n              \"criterionType\": \"DynamicThresholdCriterion\"\r\n
-        \           }\r\n          ],\r\n          \"odata.type\": \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n
-        \       },\r\n        \"autoMitigate\": true,\r\n        \"targetResourceType\":
-        \"Microsoft.Compute/virtualMachines\",\r\n        \"targetResourceRegion\":
-        \"westus\",\r\n        \"actions\": [\r\n          {\r\n            \"actionGroupId\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2\",\r\n
-        \           \"webHookProperties\": {\r\n              \"test\": \"best\"\r\n
-        \           }\r\n          }\r\n        ]\r\n      }\r\n    }\r\n  ]\r\n}"
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1\"\
+        ,\r\n      \"name\": \"alert1\",\r\n      \"type\": \"Microsoft.Insights/metricAlerts\"\
+        ,\r\n      \"location\": \"global\",\r\n      \"tags\": {\r\n        \"foo\"\
+        : \"boo\"\r\n      },\r\n      \"properties\": {\r\n        \"description\"\
+        : \"High Or Low CPU\",\r\n        \"severity\": 3,\r\n        \"enabled\"\
+        : true,\r\n        \"scopes\": [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002\"\
+        ,\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003\"\
+        \r\n        ],\r\n        \"evaluationFrequency\": \"PT5M\",\r\n        \"\
+        windowSize\": \"PT15M\",\r\n        \"criteria\": {\r\n          \"allOf\"\
+        : [\r\n            {\r\n              \"alertSensitivity\": \"Medium\",\r\n\
+        \              \"failingPeriods\": {\r\n                \"numberOfEvaluationPeriods\"\
+        : 6,\r\n                \"minFailingPeriodsToAlert\": 1\r\n              },\r\
+        \n              \"ignoreDataBefore\": \"2020-10-01T10:23:00.000Z\",\r\n  \
+        \            \"name\": \"cond0\",\r\n              \"metricName\": \"Percentage\
+        \ CPU\",\r\n              \"operator\": \"GreaterOrLessThan\",\r\n       \
+        \       \"timeAggregation\": \"Average\",\r\n              \"criterionType\"\
+        : \"DynamicThresholdCriterion\"\r\n            }\r\n          ],\r\n     \
+        \     \"odata.type\": \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\
+        \r\n        },\r\n        \"autoMitigate\": true,\r\n        \"targetResourceType\"\
+        : \"Microsoft.Compute/virtualMachines\",\r\n        \"targetResourceRegion\"\
+        : \"westus\",\r\n        \"actions\": [\r\n          {\r\n            \"actionGroupId\"\
+        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2\"\
+        ,\r\n            \"webHookProperties\": {\r\n              \"test\": \"best\"\
+        \r\n            }\r\n          }\r\n        ]\r\n      }\r\n    }\r\n  ]\r\
+        \n}"
     headers:
       api-supported-versions:
       - 2017-09-01-preview, 2018-03-01
@@ -1911,7 +1997,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:49:12 GMT
+      - Fri, 30 Sep 2022 06:08:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1947,31 +2033,32 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-monitor/4.0.1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-monitor/5.0.0 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1\",\r\n
-        \ \"name\": \"alert1\",\r\n  \"type\": \"Microsoft.Insights/metricAlerts\",\r\n
-        \ \"location\": \"global\",\r\n  \"tags\": {\r\n    \"foo\": \"boo\"\r\n  },\r\n
-        \ \"properties\": {\r\n    \"description\": \"High Or Low CPU\",\r\n    \"severity\":
-        3,\r\n    \"enabled\": true,\r\n    \"scopes\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002\",\r\n
-        \     \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003\"\r\n
-        \   ],\r\n    \"evaluationFrequency\": \"PT5M\",\r\n    \"windowSize\": \"PT15M\",\r\n
-        \   \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n          \"alertSensitivity\":
-        \"Medium\",\r\n          \"failingPeriods\": {\r\n            \"numberOfEvaluationPeriods\":
-        6,\r\n            \"minFailingPeriodsToAlert\": 1\r\n          },\r\n          \"ignoreDataBefore\":
-        \"2020-10-01T10:23:00.000Z\",\r\n          \"name\": \"cond0\",\r\n          \"metricName\":
-        \"Percentage CPU\",\r\n          \"operator\": \"GreaterOrLessThan\",\r\n
-        \         \"timeAggregation\": \"Average\",\r\n          \"criterionType\":
-        \"DynamicThresholdCriterion\"\r\n        }\r\n      ],\r\n      \"odata.type\":
-        \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n    },\r\n
-        \   \"autoMitigate\": true,\r\n    \"targetResourceType\": \"Microsoft.Compute/virtualMachines\",\r\n
-        \   \"targetResourceRegion\": \"westus\",\r\n    \"actions\": [\r\n      {\r\n
-        \       \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2\",\r\n
-        \       \"webHookProperties\": {\r\n          \"test\": \"best\"\r\n        }\r\n
-        \     }\r\n    ]\r\n  }\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1\"\
+        ,\r\n  \"name\": \"alert1\",\r\n  \"type\": \"Microsoft.Insights/metricAlerts\"\
+        ,\r\n  \"location\": \"global\",\r\n  \"tags\": {\r\n    \"foo\": \"boo\"\r\
+        \n  },\r\n  \"properties\": {\r\n    \"description\": \"High Or Low CPU\"\
+        ,\r\n    \"severity\": 3,\r\n    \"enabled\": true,\r\n    \"scopes\": [\r\
+        \n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002\"\
+        ,\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003\"\
+        \r\n    ],\r\n    \"evaluationFrequency\": \"PT5M\",\r\n    \"windowSize\"\
+        : \"PT15M\",\r\n    \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n\
+        \          \"alertSensitivity\": \"Medium\",\r\n          \"failingPeriods\"\
+        : {\r\n            \"numberOfEvaluationPeriods\": 6,\r\n            \"minFailingPeriodsToAlert\"\
+        : 1\r\n          },\r\n          \"ignoreDataBefore\": \"2020-10-01T10:23:00.000Z\"\
+        ,\r\n          \"name\": \"cond0\",\r\n          \"metricName\": \"Percentage\
+        \ CPU\",\r\n          \"operator\": \"GreaterOrLessThan\",\r\n          \"\
+        timeAggregation\": \"Average\",\r\n          \"criterionType\": \"DynamicThresholdCriterion\"\
+        \r\n        }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\
+        \r\n    },\r\n    \"autoMitigate\": true,\r\n    \"targetResourceType\": \"\
+        Microsoft.Compute/virtualMachines\",\r\n    \"targetResourceRegion\": \"westus\"\
+        ,\r\n    \"actions\": [\r\n      {\r\n        \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/microsoft.insights/actionGroups/ag2\"\
+        ,\r\n        \"webHookProperties\": {\r\n          \"test\": \"best\"\r\n\
+        \        }\r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       api-supported-versions:
       - 2017-09-01-preview, 2018-03-01
@@ -1984,7 +2071,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:49:13 GMT
+      - Fri, 30 Sep 2022 06:08:06 GMT
       expires:
       - '-1'
       pragma:
@@ -2022,7 +2109,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-monitor/4.0.1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-monitor/5.0.0 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
   response:
@@ -2038,7 +2125,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 05 Aug 2022 01:49:25 GMT
+      - Fri, 30 Sep 2022 06:08:20 GMT
       expires:
       - '-1'
       pragma:
@@ -2072,7 +2159,7 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-monitor/4.0.1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-monitor/5.0.0 Python/3.10.6 (macOS-12.6-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dynamic_metric_alert_v2000001/providers/Microsoft.Insights/metricAlerts?api-version=2018-03-01
   response:
@@ -2086,7 +2173,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 05 Aug 2022 01:49:27 GMT
+      - Fri, 30 Sep 2022 06:08:21 GMT
       expires:
       - '-1'
       pragma:

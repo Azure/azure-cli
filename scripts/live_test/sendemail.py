@@ -26,6 +26,10 @@ REQUESTED_FOR_EMAIL = sys.argv[8]
 ACCOUNT_KEY = sys.argv[9]
 COMMIT_ID = sys.argv[10]
 DB_PWD = sys.argv[11]
+DB_USER = sys.argv[12]
+DB_HOST = sys.argv[13]
+DB_PORT = sys.argv[14]
+DB_SCHEME = sys.argv[15]
 
 
 def main():
@@ -145,11 +149,11 @@ def write_db(container, testdata):
     import mysql.connector
     logger.warning('Connect DB...')
     # Connect
-    cnx = mysql.connector.connect(user='fey@clisqldbserver',
+    cnx = mysql.connector.connect(user=DB_USER,
                                   password=DB_PWD,
-                                  host='clisqldbserver.mysql.database.azure.com',
-                                  port=3306,
-                                  database='clidb',
+                                  host=DB_HOST,
+                                  port=DB_PORT,
+                                  database=DB_SCHEME,
                                   connection_timeout=30)
     logger.warning('Connect DB Success')
     cursor = cnx.cursor()

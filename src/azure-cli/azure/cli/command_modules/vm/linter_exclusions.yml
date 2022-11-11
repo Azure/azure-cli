@@ -44,6 +44,9 @@ vmss create:
         data_disk_delete_option:
             rule_exclusions:
                 - option_length_too_long
+        regular_priority_percentage:
+            rule_exclusions:
+                - option_length_too_long
 vmss update:
     parameters:
         enable_cross_zone_upgrade:
@@ -64,6 +67,9 @@ vmss update:
         prioritize_unhealthy_instances:
             rule_exclusions:
             - option_length_too_long
+        regular_priority_percentage:
+            rule_exclusions:
+                - option_length_too_long
 vmss encryption enable:
     parameters:
         key_encryption_algorithm:
@@ -98,6 +104,9 @@ vm encryption enable:
         key_encryption_algorithm:
             rule_exclusions:
             - missing_parameter_help
+vm extension list:
+    rule_exclusions:
+        - no_ids_for_list_commands
 vm install-patches:
     parameters:
         classifications_to_include_win:
@@ -133,6 +142,14 @@ snapshot update:
 sig image-version create:
     parameters:
         target_region_cvm_encryption:
+            rule_exclusions:
+            - option_length_too_long
+        allow_replicated_location_deletion:
+            rule_exclusions:
+            - option_length_too_long
+sig image-version update:
+    parameters:
+        allow_replicated_location_deletion:
             rule_exclusions:
             - option_length_too_long
 ...
