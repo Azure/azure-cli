@@ -2753,9 +2753,9 @@ examples:
   - name: Foramt a Bicep file set newline char. Valid values are ( Auto | LF | CRLF | CR ).
     text: az bicep format --file {bicep_file} --newline {newline}
   - name: Foramt a Bicep file set indentation kind. Valid values are ( Space | Tab ).
-    text: az bicep format --file {bicep_file} --indentKind {indentKind}    
+    text: az bicep format --file {bicep_file} --indentKind {indentKind}
   - name: Foramt a Bicep file set number of spaces to indent with (Only valid with --indentKind set to Space).
-    text: az bicep format --file {bicep_file} --indentSize {indentSize}  
+    text: az bicep format --file {bicep_file} --indentSize {indentSize}
   - name: Foramt a Bicep file insert a final newline.
     text: az bicep format --file {bicep_file} --insertFinalNewline
 """
