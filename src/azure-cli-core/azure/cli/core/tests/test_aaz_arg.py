@@ -1237,3 +1237,12 @@ class TestAAZArg(unittest.TestCase):
             "vnets": None,
             "pt": 12.123
         })
+
+    def test_aaz_has_value_for_buildin(self):
+        from azure.cli.core.aaz import has_value, AAZUndefined
+        self.assertTrue(has_value(0))
+        self.assertTrue(has_value(""))
+        self.assertTrue(has_value(False))
+        self.assertTrue(has_value(None))
+
+        self.assertFalse(has_value(AAZUndefined))
