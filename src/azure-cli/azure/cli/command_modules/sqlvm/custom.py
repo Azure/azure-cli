@@ -286,7 +286,7 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
     return client.get(resource_group_name, sql_virtual_machine_name)
 
 
-# pylint: disable=too-many-statements, line-too-long, too-many-boolean-expressions
+# pylint: disable=too-many-statements, line-too-long, too-many-boolean-expressions, unused-argument
 def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, sql_server_license_type=None,
                  sql_image_sku=None, least_privilege_mode=None, enable_auto_patching=None,
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
