@@ -261,7 +261,15 @@ jobs:
        $(Build.ArtifactStagingDirectory)/msi/**.wxs
        $(Build.ArtifactStagingDirectory)/msi/obj/Release/**.wixobj
        $(Build.ArtifactStagingDirectory)/msi/obj/Release/**/**.wixobj
+      AnalyzeVerbose: true
     enabled: true
+
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: binskim'
+    inputs:
+      # D:\a\_work\1\.gdn\.r\binskim\001\binskim.sarif
+      TargetPath: $(Pipeline.Workspace)\.gdn\.r\binskim\001\binskim.sarif
+      ArtifactName: binskim
 
 - job: BuildDockerImage
   displayName: Build Docker Image
