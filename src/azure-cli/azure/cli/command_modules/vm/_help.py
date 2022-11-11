@@ -787,13 +787,6 @@ examples:
         --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
         --os-type linux --os-state Specialized \\
         --features IsAcceleratedNetworkSupported=true
-  - name: Create an image definition for images that can be used to create Trusted VMs
-    text: |
-        az sig image-definition create --resource-group MyResourceGroup \\
-        --gallery-name MyGallery --gallery-image-definition MyImage \\
-        --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
-        --os-type linux --os-state Specialized \\
-        --features SecurityType=TrustedLaunchSupported
   - name: Create an image definition for images that can only be used to create Trusted VMs. Only Trusted VMs can be created from this image.
     text: |
         az sig image-definition create --resource-group MyResourceGroup \\
@@ -815,13 +808,6 @@ examples:
         --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
         --os-type linux --os-state Specialized \\
         --features SecurityType=ConfidentialVM
-  - name: Create an image definition for images that can be used to create Trusted or Confidential VMs
-    text: |
-        az sig image-definition create --resource-group MyResourceGroup \\
-        --gallery-name MyGallery --gallery-image-definition MyImage \\
-        --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
-        --os-type linux --os-state Specialized \\
-        --features SecurityType=TrustedLaunchAndConfidentialVmSupported
   - name: Create an image definition and indicate end of life date
     text: |
         az sig image-definition create --resource-group MyResourceGroup \\
@@ -1096,13 +1082,13 @@ examples:
         --gallery-image-version 1.0.0 \\
         --target-edge-zones westus=microsoftlosangeles1 eastus=microsoftlosangeles2=1 \\
         --target-edge-zone-encryption microsoftlosangeles1,WestUSDiskEncryptionSet1,0,WestUSDiskEncryptionSet2
-  - name: Replicate to an additional region. Optional, you can set the replica count for the region.
+  - name: Replicate to an additional region. Optional, you can set the replica count for the region and exclude this image when using the latest version of the image definition.
     text: |
         az sig image-version update --resource-group MyResourceGroup \\
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.0.0 \\
         --add publishingProfile.targetRegions name=westcentralus \\
-        regionalReplicaCount=3
+        regionalReplicaCount=3 excludeFromLatest=true
   - name: Change whether an image should be included in consideration for latest version in the image definition. Setting this value to true excludes the image from consideration and setting this value to false includes the image for consideration.
     text: |
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
@@ -1113,6 +1099,11 @@ examples:
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
         --gallery-image-definition MyImage --gallery-image-version 1.0.0 \\
         --set publishingProfile.endOfLifeDate=2024-08-02T00:00:00+00:00
+  - name: Allow to remove the gallery image version from replicated regions.
+    text: |
+        az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
+        --gallery-image-definition MyImage --gallery-image-version 1.0.0 \\
+        --set safetyProfile.allowDeletionOfReplicatedLocations=true
 """
 
 helps['sig image-version list-community'] = """
@@ -1189,8 +1180,7 @@ short-summary: Share gallery with subscriptions and tenants
 examples:
   - name: Share entire gallery with all members of a subscription and/or tenant.
     text: |
-        az sig share add --resource-group MyResourceGroup --gallery-name MyGallery
-        --gallery-image-definition MyImage \\
+        az sig share add --resource-group MyResourceGroup --gallery-name MyGallery \\
         --subscription-ids subId1 subId2 --tenant-ids tenantId1 tenantId2
 """
 
@@ -2645,6 +2635,8 @@ parameters:
     short-summary: "Specify the script download location."
   - name: --command-id
     short-summary: "Specify a commandId of predefined built-in script."
+  - name: --output-blob-uri
+    short-summary: "Specify the Azure storage blob (SAS URI) where script output stream will be uploaded."
   - name: --parameters
     short-summary: "The parameters used by the script."
     long-summary: |
@@ -2660,6 +2652,11 @@ examples:
 --async-execution false --parameters arg1=param1 arg2=value1 --run-as-password "<runAsPassword>" \
 --run-as-user "user1" --script "Write-Host Hello World!" --timeout-in-seconds 3600 \
 --run-command-name "myRunCommand" --vm-name "myVM"
+  - name: Create a run command with uploading script output stream to Azure storage blob (SAS URI).
+    text: |-
+           az vm run-command create --resource-group "myResourceGroup" --location "West US" \
+--script "Write-Host Hello World!" --run-command-name "myRunCommand" --vm-name "myVM" --output-blob-uri \
+"https://mystorageaccount.blob.core.windows.net/mycontainer/RuncommandOutput.txt?sp=racw&st=2022-10-17T19:02:15Z&se=2022-10-18T03:02:15Z&spr=https&sv=2021-06-08&sr=b&sig=3BxtEasfdasdfasdfdYki9yvYsqc60V0%3D"
 """
 
 helps['vm run-command update'] = """
@@ -2672,6 +2669,8 @@ parameters:
     short-summary: "Specify the script download location."
   - name: --command-id
     short-summary: "Specify a commandId of predefined built-in script."
+  - name: --output-blob-uri
+    short-summary: "Specify the Azure storage blob (SAS URI) where script output stream will be uploaded."
   - name: --parameters
     short-summary: "The parameters used by the script."
     long-summary: |
@@ -2687,6 +2686,11 @@ examples:
 --async-execution false --parameters arg1=param1 arg2=value1 --run-as-password "<runAsPassword>" \
 --run-as-user "user1" --script "Write-Host Hello World!" --timeout-in-seconds 3600 \
 --run-command-name "myRunCommand" --vm-name "myVM"
+  - name: Update a run command with uploading script output stream to Azure storage blob (SAS URI).
+    text: |-
+           az vm run-command update --resource-group "myResourceGroup" --location "West US" \
+--script "Write-Host Hello World!" --run-command-name "myRunCommand" --vm-name "myVM" --output-blob-uri \
+"https://mystorageaccount.blob.core.windows.net/mycontainer/RuncommandOutput.txt?sp=racw&st=2022-10-17T19:02:15Z&se=2022-10-18T03:02:15Z&spr=https&sv=2021-06-08&sr=b&sig=3BxtEasfdasdfasdfdYki9yvYsqc60V0%3D"
 """
 
 helps['vm run-command delete'] = """

@@ -134,7 +134,7 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
                               backup_byok_key=None, disable_data_encryption=None, instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
-    list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
+    list_skus_info = get_mysql_list_skus_info(db_context.cmd, location, server_name=instance.name if instance else None)
     sku_info = list_skus_info['sku_info']
     single_az = list_skus_info['single_az']
     geo_paired_regions = list_skus_info['geo_paired_regions']
@@ -278,7 +278,8 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
                            version=None, instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
-    list_skus_info = get_postgres_list_skus_info(db_context.cmd, location)
+    list_skus_info = get_postgres_list_skus_info(db_context.cmd, location,
+                                                 server_name=instance.name if instance else None)
     sku_info = list_skus_info['sku_info']
     single_az = list_skus_info['single_az']
     _network_arg_validator(subnet, public_access)
@@ -462,21 +463,17 @@ def validate_server_name(db_context, server_name, type_):
 
     if len(server_name) < 3 or len(server_name) > 63:
         raise ValidationError("Server name must be at least 3 characters and at most 63 characters.")
-
-    if db_context.command_group == 'mysql':
-        try:
-            result = client.execute(db_context.location,
-                                    name_availability_request={
-                                        'name': server_name,
-                                        'type': type_})
-        except HttpResponseError as e:
-            if e.status_code == 403 and e.error and e.error.code == 'AuthorizationFailed':
-                client_without_location = db_context.cf_availability_without_location(db_context.cmd.cli_ctx, '_')
-                result = client_without_location.execute(name_availability_request={'name': server_name, 'type': type_})
-            else:
-                raise e
-    else:
-        result = client.execute(name_availability_request={'name': server_name, 'type': type_})
+    try:
+        result = client.execute(db_context.location,
+                                name_availability_request={
+                                    'name': server_name,
+                                    'type': type_})
+    except HttpResponseError as e:
+        if e.status_code == 403 and e.error and e.error.code == 'AuthorizationFailed':
+            client_without_location = db_context.cf_availability_without_location(db_context.cmd.cli_ctx, '_')
+            result = client_without_location.execute(name_availability_request={'name': server_name, 'type': type_})
+        else:
+            raise e
 
     if not result.name_available:
         raise ValidationError(result.message)

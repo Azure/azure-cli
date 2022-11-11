@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.42.0
+++++++
+* `aaz`: Support `FreeFormDictType` and `FreeFormDictArg` (#24183)
+* `aaz`: Support `configured_default` property in arguments (#24411)
+
 2.41.0
 ++++++
 * Support Continuous Access Evaluation (#23635)

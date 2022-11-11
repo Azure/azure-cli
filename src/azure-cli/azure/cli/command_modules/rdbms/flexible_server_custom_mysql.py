@@ -364,7 +364,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                               backup_byok_key=backup_byok_key,
                               disable_data_encryption=disable_data_encryption)
 
-    list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
+    list_skus_info = get_mysql_list_skus_info(db_context.cmd, location, server_name=instance.name if instance else None)
     iops_info = list_skus_info['iops_info']
 
     server_module_path = instance.__module__

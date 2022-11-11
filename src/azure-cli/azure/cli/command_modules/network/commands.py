@@ -14,20 +14,19 @@ from azure.cli.core.profiles import get_api_version, ResourceType
 from azure.cli.command_modules.network._client_factory import (
     cf_application_gateways, cf_express_route_circuit_authorizations,
     cf_express_route_circuit_peerings, cf_express_route_circuits,
-    cf_express_route_service_providers, cf_load_balancers, cf_local_network_gateways,
-    cf_network_interfaces, cf_network_security_groups, cf_network_watcher, cf_packet_capture,
+    cf_express_route_service_providers, cf_load_balancers,
+    cf_network_interfaces, cf_network_watcher, cf_packet_capture,
     cf_virtual_networks, cf_virtual_network_peerings, cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_security_rules, cf_subnets, cf_usages,
+    cf_subnets,
     cf_public_ip_addresses, cf_connection_monitor,
     cf_public_ip_prefixes, cf_dns_references, cf_private_endpoints,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
     cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
     cf_virtual_router, cf_virtual_router_peering, cf_bastion_hosts, cf_flow_logs,
-    cf_private_dns_zone_groups, cf_load_balancer_backend_pools, cf_virtual_hub,
-    cf_custom_ip_prefixes)
+    cf_private_dns_zone_groups, cf_load_balancer_backend_pools)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
     delete_lb_resource_property_entry)
@@ -196,24 +195,9 @@ def load_command_table(self, _):
         min_api='2020-04-01'
     )
 
-    network_lgw_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#LocalNetworkGatewaysOperations.{}',
-        client_factory=cf_local_network_gateways
-    )
-
     network_nic_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#NetworkInterfacesOperations.{}',
         client_factory=cf_network_interfaces
-    )
-
-    network_nsg_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#NetworkSecurityGroupsOperations.{}',
-        client_factory=cf_network_security_groups
-    )
-
-    network_nsg_rule_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#SecurityRulesOperations.{}',
-        client_factory=cf_security_rules
     )
 
     network_public_ip_sdk = CliCommandType(
@@ -277,18 +261,6 @@ def load_command_table(self, _):
         client_factory=cf_packet_capture
     )
 
-    network_virtual_hub_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualHubsOperations.{}',
-        client_factory=cf_virtual_hub,
-        min_api='2020-07-01'
-    )
-
-    network_virtual_hub_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
-        client_factory=cf_virtual_hub,
-        min_api='2020-07-01'
-    )
-
     network_vrouter_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#VirtualRoutersOperations.{}',
         client_factory=cf_virtual_router,
@@ -319,12 +291,6 @@ def load_command_table(self, _):
         min_api='2019-11-01'
     )
 
-    network_custom_ip_prefix_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#CustomIPPrefixesOperations.{}',
-        client_factory=cf_custom_ip_prefixes,
-        min_api='2020-06-01'
-    )
-
     network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
 
     network_load_balancers_custom = CliCommandType(
@@ -341,27 +307,23 @@ def load_command_table(self, _):
     # endregion
 
     # region NetworkRoot
-    usage_path = 'azure.mgmt.network.operations#UsagesOperations.{}'
-    with self.command_group('network') as g:
-        g.command('list-usages', 'list', operations_tmpl=usage_path, client_factory=cf_usages, transform=transform_network_usage_list, table_transformer=transform_network_usage_table)
+    with self.command_group('network'):
+        from azure.cli.command_modules.network.aaz.latest.network import ListUsages
+        self.command_table['network list-usages'] = ListUsages(loader=self, transform=transform_network_usage_list, table_transformer=transform_network_usage_table)
     # endregion
 
     # region ApplicationGateways
-    with self.command_group('network application-gateway', network_ag_sdk) as g:
+    with self.command_group('network application-gateway') as g:
         g.custom_command('create', 'create_application_gateway',
                          transform=DeploymentOutputLongRunningOperation(self.cli_ctx),
                          supports_no_wait=True,
                          table_transformer=deployment_validate_table_format,
                          validator=process_ag_create_namespace,
                          exception_handler=handle_template_based_exception)
-        g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_application_gateways')
-        g.command('start', 'begin_start')
-        g.command('stop', 'begin_stop')
-        g.custom_command('show-backend-health', 'show_ag_backend_health', min_api='2016-09-01', client_factory=cf_application_gateways)
-        g.generic_update_command('update', supports_no_wait=True, setter_name='begin_create_or_update', custom_func_name='update_application_gateway')
-        g.wait_command('wait')
+        g.custom_command('show-backend-health', 'show_ag_backend_health')
+
+        from .custom import ApplicationGatewayUpdate
+        self.command_table["network application-gateway update"] = ApplicationGatewayUpdate(loader=self)
 
     subresource_properties = [
         {'prop': 'authentication_certificates', 'name': 'auth-cert'},
@@ -758,23 +720,20 @@ def load_command_table(self, _):
     # endregion
 
     # region LoadBalancers
-    with self.command_group('network lb', network_lb_sdk) as g:
-        g.show_command('show', 'get')
-        g.custom_command('create', 'create_load_balancer', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_lb_create_namespace, exception_handler=handle_template_based_exception)
-        g.command('delete', 'begin_delete')
-        g.custom_command('list', 'list_lbs')
-        g.wait_command('wait')
-        g.generic_update_command('update', getter_name='lb_get', getter_type=network_load_balancers_custom,
-                                 setter_name='begin_create_or_update')
-        g.custom_command('list-nic', 'list_load_balancer_nic', min_api='2017-06-01')
-        g.custom_command('list-mapping', 'list_load_balancer_mapping', min_api='2021-05-01')
+    with self.command_group('network lb') as g:
+        g.custom_command('create', 'create_load_balancer',
+                         transform=DeploymentOutputLongRunningOperation(self.cli_ctx),
+                         supports_no_wait=True,
+                         table_transformer=deployment_validate_table_format,
+                         validator=process_lb_create_namespace,
+                         exception_handler=handle_template_based_exception)
+        g.custom_command('list-mapping', 'list_load_balancer_mapping')
 
     property_map = {
         'frontend_ip_configurations': 'frontend-ip',
         'inbound_nat_rules': 'inbound-nat-rule',
         'inbound_nat_pools': 'inbound-nat-pool',
-        'load_balancing_rules': 'rule',
-        'probes': 'probe',
+        'load_balancing_rules': 'rule'
     }
     for subresource, alias in property_map.items():
         with self.command_group('network lb {}'.format(alias), network_util) as g:
@@ -843,13 +802,12 @@ def load_command_table(self, _):
                                  setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_rule')
 
-    with self.command_group('network lb probe', network_lb_sdk) as g:
+    with self.command_group('network lb probe') as g:
         g.custom_command('create', 'create_lb_probe')
-        g.generic_update_command('update', child_collection_prop_name='probes',
-                                 getter_name='lb_get',
-                                 getter_type=network_load_balancers_custom,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_lb_probe')
+        g.custom_command('update', 'set_lb_probe')
+
+    with self.command_group('network lb probe', network_util) as g:
+        g.command('delete', delete_lb_resource_property_entry('load_balancers', 'probes'))
 
     with self.command_group('network lb outbound-rule', network_lb_sdk, min_api='2018-07-01') as g:
         g.custom_command('create', 'create_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
@@ -911,15 +869,16 @@ def load_command_table(self, _):
                                  custom_func_name='set_cross_region_lb_rule')
 
     with self.command_group('network cross-region-lb probe', network_lb_sdk) as g:
-        g.custom_command('create', 'create_lb_probe')
+        g.custom_command('create', 'create_cross_lb_probe')
         g.generic_update_command('update', child_collection_prop_name='probes',
                                  setter_name='begin_create_or_update',
-                                 custom_func_name='set_lb_probe')
+                                 custom_func_name='set_cross_lb_probe')
     # endregion
 
     # region LocalGateways
-    with self.command_group('network local-gateway', network_lgw_sdk) as g:
-        g.command('list', 'list', table_transformer=transform_local_gateway_table_output)
+    with self.command_group('network local-gateway'):
+        from .aaz.latest.network.local_gateway import List
+        self.command_table['network local-gateway list'] = List(loader=self, table_transformer=transform_local_gateway_table_output)
     # endregion
 
     # region NetworkInterfaces: (NIC)
@@ -957,21 +916,16 @@ def load_command_table(self, _):
     # endregion
 
     # region NetworkSecurityGroups
-    with self.command_group('network nsg', network_nsg_sdk) as g:
+    with self.command_group('network nsg') as g:
         g.custom_command('create', 'create_nsg', transform=transform_nsg_create_output)
-        g.generic_update_command('update', setter_name='begin_create_or_update')
 
-    with self.command_group('network nsg rule', network_nsg_rule_sdk) as g:
+    with self.command_group('network nsg rule') as g:
         g.custom_command('list', 'list_nsg_rules', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
-        g.show_command('show', 'get', table_transformer=transform_nsg_rule_table_output)
-        g.custom_command('create', 'create_nsg_rule_2017_06_01', min_api='2017-06-01')
-        g.generic_update_command('update', setter_arg_name='security_rule_parameters', min_api='2017-06-01',
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='update_nsg_rule_2017_06_01', doc_string_source='SecurityRule')
-        g.custom_command('create', 'create_nsg_rule_2017_03_01', max_api='2017-03-01')
-        g.generic_update_command('update', max_api='2017-03-01', setter_arg_name='security_rule_parameters',
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='update_nsg_rule_2017_03_01', doc_string_source='SecurityRule')
+        g.custom_command('create', 'create_nsg_rule')
+        from .aaz.latest.network.nsg.rule import Show
+        self.command_table['network nsg rule show'] = Show(loader=self, table_transformer=transform_nsg_rule_table_output)
+        from azure.cli.command_modules.network.custom import NsgRuleUpdate
+        self.command_table['network nsg rule update'] = NsgRuleUpdate(loader=self)
     # endregion
 
     # region NetworkWatchers
@@ -1076,32 +1030,15 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_nw_troubleshooting_result', validator=process_nw_troubleshooting_show_namespace)
     # endregion
 
-    # region CustomIpPrefix
-    with self.command_group('network custom-ip prefix', network_custom_ip_prefix_sdk, client_factory=cf_custom_ip_prefixes, is_preview=True, min_api='2020-06-01') as g:
-        g.custom_command('create', 'create_custom_ip_prefix', supports_no_wait=True)
-        g.command('delete', 'begin_delete')
-        g.custom_command('list', 'list_custom_ip_prefixes')
-        g.show_command('show')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_custom_ip_prefix', supports_no_wait=True)
-        g.wait_command('wait')
-    # endRegion
-
     # region PublicIPAddresses
     public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Address:ipAddress, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
     public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ' if self.supported_api_version(min_api='2017-06-01') else ' ')
 
     with self.command_group('network public-ip', network_public_ip_sdk) as g:
-        if self.cli_ctx.cloud.profile == 'latest':
-            from .aaz.latest.network.public_ip import List, Show
-            self.command_table['network public-ip list'] = List(loader=self, table_transformer='[].' + public_ip_show_table_transform)
-            self.command_table['network public-ip show'] = Show(loader=self, table_transformer=public_ip_show_table_transform)
-            g.custom_command('create', 'create_public_ip_latest', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
-        else:
-            g.command('delete', 'begin_delete')
-            g.show_command('show', 'get', table_transformer=public_ip_show_table_transform)
-            g.custom_command('list', 'list_public_ips', table_transformer='[].' + public_ip_show_table_transform)
-            g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
-            g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_public_ip')
+        from .aaz.latest.network.public_ip import List, Show
+        self.command_table['network public-ip list'] = List(loader=self, table_transformer='[].' + public_ip_show_table_transform)
+        self.command_table['network public-ip show'] = Show(loader=self, table_transformer=public_ip_show_table_transform)
+        g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
 
     with self.command_group('network public-ip prefix', network_public_ip_prefix_sdk, client_factory=cf_public_ip_prefixes) as g:
         g.custom_command('create', 'create_public_ip_prefix')
@@ -1267,8 +1204,7 @@ def load_command_table(self, _):
     # endregion
 
     # region VirtualHub
-    with self.command_group('network routeserver', network_virtual_hub_sdk,
-                            custom_command_type=network_virtual_hub_update_sdk) as g:
+    with self.command_group('network routeserver') as g:
         g.custom_command('create', 'create_virtual_hub')
         g.custom_command('delete', 'delete_virtual_hub', supports_no_wait=True, confirmation=True)
     # endregion
