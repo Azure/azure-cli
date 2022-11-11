@@ -588,4 +588,4 @@ class AAZGenericUpdateRemoveArg(AAZGenericUpdateArg):
 
 
 def has_value(arg_value):
-    return arg_value != AAZUndefined
+    return arg_value.to_serialized_data() != AAZUndefined
