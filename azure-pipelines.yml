@@ -251,6 +251,25 @@ jobs:
         
         Get-Content .\install_logs.txt
 
+- job: BinSkim
+  displayName: BinSkim
+  dependsOn: TestWindowsMSI
+  condition: succeeded()
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@4
+    displayName: Run BinSkim
+    inputs:
+      TargetPattern: binskimPattern
+      AnalyzeTargetBinskim: |
+       $(Build.ArtifactStagingDirectory)/msi/**.msi
+       $(Build.ArtifactStagingDirectory)/msi/**.wixpdb
+       $(Build.ArtifactStagingDirectory)/msi/**.wxs
+       $(Build.ArtifactStagingDirectory)/msi/obj/Release/**.wixobj
+       $(Build.ArtifactStagingDirectory)/msi/obj/Release/**/**.wixobj
+    enabled: true
+
 - job: BuildDockerImage
   displayName: Build Docker Image
 
