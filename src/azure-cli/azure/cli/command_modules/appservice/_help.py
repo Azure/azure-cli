@@ -2636,6 +2636,43 @@ helps['staticwebapp functions show'] = """
       text: az staticwebapp functions show -n MyStaticAppName -g MyResourceGroup
 """
 
+helps['staticwebapp backends'] = """
+type: group
+short-summary: Link or unlink a prexisting backend with a static webapp. Also known as "Bring your own Backend."
+"""
+
+helps['staticwebapp backends validate'] = """
+    type: command
+    short-summary: Validate a backend for static webapp. Only one backend is available to a single static web app. Static webapp SKU must be "Standard". Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps.
+    examples:
+    - name: Link a backend to a static webapp
+      text: az staticwebapp backends validate -n MyStaticAppName -g MyResourceGroup --backend-resource-id "/subscriptions/<<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/sites/<backend-name>" --region "<backend-region>"
+"""
+
+helps['staticwebapp backends link'] = """
+    type: command
+    short-summary: Link an backend to a static webapp. Also known as "Bring your own Backend." Only one backend is available to a single static web app. Static webapp SKU must be "Standard". Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps.
+    examples:
+    - name: Link a backend to a static webapp
+      text: az staticwebapp backends link -n MyStaticAppName -g MyResourceGroup --backend-resource-id "/subscriptions/<<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/sites/<backend-name>" --region "<backend-region>"
+"""
+
+helps['staticwebapp backends unlink'] = """
+    type: command
+    short-summary: Unlink an backend from a static webapp
+    examples:
+    - name: Show static app backends.
+      text: az staticwebapp backends unlink -n MyStaticAppName -g MyResourceGroup
+"""
+
+helps['staticwebapp backends show'] = """
+    type: command
+    short-summary: Show details on the backend linked to a static webapp
+    examples:
+    - name: Show static webapp backends.
+      text: az staticwebapp backends show -n MyStaticAppName -g MyResourceGroup
+"""
+
 helps['staticwebapp enterprise-edge'] = """
     type: group
     short-summary: Manage the Azure Front Door CDN for static webapps. For optimal experience and availability please check our documentation https://aka.ms/swaedge
