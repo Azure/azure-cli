@@ -9022,6 +9022,49 @@ class CapacityReservationScenarioTest(ScenarioTest):
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
         self.cmd('capacity reservation group delete -n {reservation_group2} -g {rg} --yes')
 
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_delete', location='centraluseuap')
+    def test_capacity_reservation_list_delete(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'reservation_group': self.create_random_name('cli_reservation_group_', 40),
+            'reservation_name': self.create_random_name('cli_reservation_name_', 40),
+            'sku': 'Standard_DS1_v2'
+        })
+
+        self.kwargs['reservation_group_id1'] = \
+            self.cmd('capacity reservation group create -n {reservation_group} -g {rg} --tags key=val --zones 1 2',
+                     checks=[
+                         self.check('name', '{reservation_group}'),
+                         self.check('zones', ['1', '2']),
+                         self.check('tags', {'key': 'val'})
+                     ]).get_output_in_json()['id']
+
+        self.cmd('capacity reservation create -c {reservation_group} -n {reservation_name} -g {rg} '
+                 '--sku {sku} --capacity 5 --zone 1 --tags key=val',
+                 checks=[
+                     self.check('name', '{reservation_name}'),
+                     self.check('sku.name', '{sku}'),
+                     self.check('sku.capacity', 5),
+                     self.check('zones', ['1']),
+                     self.check('tags', {'key': 'val'}),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('capacity reservation list -c {reservation_group} -g {rg} --query "[?name==\'{reservation_name}\']" ',
+                 checks=[
+                     self.check('[0].name', '{reservation_name}'),
+                     self.check('[0].sku.name', '{sku}'),
+                     self.check('[0].sku.capacity', 5),
+                     self.check('[0].tags', {'key': 'val'}),
+                     self.check('[0].zones', ['1']),
+                     self.check('[0].provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('capacity reservation delete -c {reservation_group} -n {reservation_name} -g {rg} --yes')
+        self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
+
 
 class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
