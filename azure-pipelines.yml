@@ -251,13 +251,6 @@ jobs:
         
         Get-Content .\install_logs.txt
 
-- job: BinSkim
-  displayName: BinSkim
-  dependsOn: TestWindowsMSI
-  condition: succeeded()
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@4
     displayName: Run BinSkim
     inputs:
