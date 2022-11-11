@@ -949,7 +949,7 @@ class NetworkPrivateLinkAgFoodPlatformsScenarioTest(ScenarioTest):
         private_link_resources = self.cmd(
             'network private-link-resource list --id {resource_id} ').get_output_in_json()
         self.kwargs['group_id'] = private_link_resources[0]['properties']['groupId']
-        
+
 
         # Create private endpoint
         private_endpoint = self.cmd(
@@ -957,8 +957,8 @@ class NetworkPrivateLinkAgFoodPlatformsScenarioTest(ScenarioTest):
             '--private-connection-resource-id {resource_id} --connection-name {private_endpoint_connection} '
             '--group-id {group_id}').get_output_in_json()
         self.assertTrue(self.kwargs['private_endpoint'].lower() in private_endpoint['name'].lower())
-        
-        
+
+
         # Test get private endpoint connection
         private_endpoint_connections = self.cmd('network private-endpoint-connection list --id {resource_id}').get_output_in_json()
 
@@ -3474,7 +3474,7 @@ class NetworkKubernetesConfigurationPrivateLinkScopesTest(ScenarioTest):
         })
 
 
-        # Test create Private Link Scope create 
+        # Test create Private Link Scope create
         self.cmd('az rest --method "PUT" \
                         --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/Microsoft.KubernetesConfiguration/privateLinkScopes/{scopename}?api-version=2022-04-02-preview" \
                         --body "{body}"')
@@ -3621,7 +3621,7 @@ class NetworkPrivateLinkDeviceUpdateScenarioTest(ScenarioTest):
 
         # Create device update account
         deviceupdate = self.cmd(
-            'iot device-update account create --account {deviceupdate_name} --resource-group {rg}').get_output_in_json()
+            'iot du account create --account {deviceupdate_name} --resource-group {rg}').get_output_in_json()
         self.kwargs['deviceupdate_id'] = deviceupdate['id']
 
         # Create a vnet and subnet for private endpoint connection
