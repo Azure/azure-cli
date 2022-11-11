@@ -9022,7 +9022,6 @@ class CapacityReservationScenarioTest(ScenarioTest):
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
         self.cmd('capacity reservation group delete -n {reservation_group2} -g {rg} --yes')
 
-    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_delete', location='centraluseuap')
     def test_capacity_reservation_list_delete(self, resource_group):
 
