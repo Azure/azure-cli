@@ -121,7 +121,7 @@ examples:
   text: az account get-access-token --resource-type ms-graph
 - name: Get an access token information for a particular resource. If you receive a `Failed to connect to MSI...` error, your resource may not exist.
   text: >
-    az account get-access-token --resource MyResourceID
+    az account get-access-token --resource MyResourceID \
     az account get-access-token --resource https://database.windows.net/
 - name: Get only the access token for a particular resource returning results in plain text. This script is useful when you want to store the token in a variable.
   text: az account get-access-token --resource https://management.core.windows.net/ --query accessToken --output tsv
