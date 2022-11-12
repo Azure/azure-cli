@@ -1168,6 +1168,7 @@ examples:
    - name: >
       Delete a resource group but only if it exists. Bypass the confirmation prompt. Do not wait for the operation to finish.
     text: >
+        # Bash script
         resourceGroup=MyResourceGroup
         if [ $(az group exists --name $resourceGroup --output json) = true ]; then 
           az group delete --name $resourceGroup --yes --no-wait
