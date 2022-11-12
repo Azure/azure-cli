@@ -3673,6 +3673,7 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
     if stdout:
         print(output)
 
+
 def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, indentKind=None, indentSize=None, insertFinalNewline=None):
     args = ["format", file]
     if outdir:
@@ -3694,6 +3695,7 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
 
     if stdout:
         print(output)
+
 
 def publish_bicep_file(cmd, file, target):
     ensure_bicep_installation()
