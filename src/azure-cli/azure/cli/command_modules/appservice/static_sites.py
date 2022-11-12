@@ -598,56 +598,63 @@ def get_user_function(cmd, name, resource_group_name):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     return client.get_user_provided_function_apps_for_static_site(name=name, resource_group_name=resource_group_name)
 
-def validate_backend(cmd, name, resource_group_name, backend_resource_id, backend_location):
+
+def validate_backend(cmd, name, resource_group_name, backend_resource_id, backend_region=None, environment_name='default'):
     from azure.mgmt.web.models import StaticSiteLinkedBackendARMResource
 
     parsed_rid = parse_resource_id(backend_resource_id)
     backend_name = parsed_rid["name"]
 
-    client = _get_staticsites_client_factory(cmd.cli_ctx)
-    backend = StaticSiteLinkedBackendARMResource(backend_app_resource_id=backend_resource_id,
-    backend_app_region=backend_location)
+    backend = StaticSiteLinkedBackendARMResource(
+        backend_resource_id=backend_resource_id,
+        region=backend_region)
 
-    return client.begin_validate_backend_for_static_site(
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    return client.begin_validate_backend_for_build(
         name=name,
         resource_group_name=resource_group_name,
-        backend_app_name=backend_name,
-        static_site_linked_backend_envelope=backend)
+        linked_backend_name=backend_name,
+        static_site_linked_backend_envelope=backend,
+        environment_name=environment_name)
 
 
-def link_backend(cmd, name, resource_group_name, backend_resource_id, backend_location):
+def link_backend(cmd, name, resource_group_name, backend_resource_id, backend_region=None, environment_name='default'):
     from azure.mgmt.web.models import StaticSiteLinkedBackendARMResource
 
     parsed_rid = parse_resource_id(backend_resource_id)
     backend_name = parsed_rid["name"]
 
-    client = _get_staticsites_client_factory(cmd.cli_ctx)
-    backend = StaticSiteLinkedBackendARMResource(backend_app_resource_id=backend_resource_id,
-                                                 backend_app_region=backend_location)
+    backend = StaticSiteLinkedBackendARMResource(
+        backend_resource_id=backend_resource_id,
+        region=backend_region)
 
-    return client.begin_link_backend_to_static_site(
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    return client.begin_link_backend_to_build(
         name=name,
         resource_group_name=resource_group_name,
-        backend_name=backend_name,
-        static_site_linked_backend_envelope=backend)
+        linked_backend_name=backend_name,
+        static_site_linked_backend_envelope=backend,
+        environment_name=environment_name)
 
 
-def unlink_backend(cmd, name, resource_group_name, is_cleaning_auth_config=False):
+def unlink_backend(cmd, name, resource_group_name, is_cleaning_auth_config=False, environment_name='default'):
     if is_cleaning_auth_config:
-        logger.warning("--is_cleaning_auth_config: removing auth configuration from backend")
+        logger.warning("--is-cleaning-auth-config: removing auth configuration from backend")
 
-    backend_name = list(get_backend(cmd, name, resource_group_name))[0].name
+    backend_name = list(get_backend(cmd, name, resource_group_name, environment_name))[0].name
+    
     client = _get_staticsites_client_factory(cmd.cli_ctx)
-    return client.unlink_backend_from_static_site(
+    return client.unlink_backend_from_build(
         name=name,
         resource_group_name=resource_group_name,
-        backend_name=backend_name,
+        linked_backend_name=backend_name,
+        environment_name=environment_name,
         is_cleaning_auth_config=is_cleaning_auth_config)
 
 
-def get_backend(cmd, name, resource_group_name):
+def get_backend(cmd, name, resource_group_name, environment_name='default'):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
-    return client.get_linked_backends_for_static_site(name=name, resource_group_name=resource_group_name)
+    return client.get_linked_backends_for_build(name=name, resource_group_name=resource_group_name, environment_name=environment_name)
 
 def _enterprise_edge_warning():
     logger.warning("For optimal experience and availability please check our documentation https://aka.ms/swaedge")

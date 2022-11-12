@@ -2617,7 +2617,7 @@ helps['staticwebapp functions link'] = """
     short-summary: Link an Azure Function to a static webapp. Also known as "Bring your own Functions." Only one Azure Functions app is available to a single static web app. Static webapp SKU must be "Standard"
     examples:
     - name: Link a function to a static webapp
-      text: az staticwebapp functions link -n MyStaticAppName -g MyResourceGroup --function-resource-id "/subscriptions/<<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Web/sites/<function-name>"
+      text: az staticwebapp functions link -n MyStaticAppName -g MyResourceGroup --function-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Web/sites/<function-name>"
 """
 
 helps['staticwebapp functions unlink'] = """
@@ -2643,26 +2643,46 @@ short-summary: Link or unlink a prexisting backend with a static webapp. Also kn
 
 helps['staticwebapp backends validate'] = """
     type: command
-    short-summary: Validate a backend for static webapp. Only one backend is available to a single static web app. Static webapp SKU must be "Standard". Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps.
+    short-summary: Validate an backend for a static webapp. 
+    long-summary: >
+      Only one backend is available to a single static web app. 
+      If backend was previously linked to other static webapp auth configuration must be removed from backend
+      Static webapp SKU must be "Standard". 
+      Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps. 
+      Backend region must be provided for Azure Functions and Azure App Service.
+      See https://learn.microsoft.com/en-us/azure/static-web-apps/apis-overview to learn more.
     examples:
-    - name: Link a backend to a static webapp
-      text: az staticwebapp backends validate -n MyStaticAppName -g MyResourceGroup --backend-resource-id "/subscriptions/<<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/sites/<backend-name>" --region "<backend-region>"
+    - name: Validate a backend for a static webapp
+      text: az staticwebapp backends validate -n MyStaticAppName -g MyResourceGroup --backend-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/<resource-type>/<backend-name>" --backend-region MyBackendRegion
+    - name: Validate a backend for a static webapp environment
+      text: az staticwebapp backends validate -n MyStaticAppName -g MyResourceGroup --environment-name MyEnvironmentName --backend-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/<resource-type>/<backend-name>" --backend-region MyBackendRegion
 """
 
 helps['staticwebapp backends link'] = """
     type: command
-    short-summary: Link an backend to a static webapp. Also known as "Bring your own Backend." Only one backend is available to a single static web app. Static webapp SKU must be "Standard". Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps.
+    short-summary: Link an backend to a static webapp. Also known as "Bring your own Backend."
+    long-summary: >
+      Only one backend is available to a single static web app. 
+      If backend was previously linked to other static webapp auth configuration must be removed from backend
+      Static webapp SKU must be "Standard". 
+      Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps. 
+      Backend region must be provided for Azure Functions and Azure App Service.
+      See https://learn.microsoft.com/en-us/azure/static-web-apps/apis-overview to learn more.
     examples:
     - name: Link a backend to a static webapp
-      text: az staticwebapp backends link -n MyStaticAppName -g MyResourceGroup --backend-resource-id "/subscriptions/<<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/sites/<backend-name>" --region "<backend-region>"
+      text: az staticwebapp backends link -n MyStaticAppName -g MyResourceGroup --backend-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/<resource-type>/<backend-name>" --backend-region MyBackendRegion
+    - name: Link a backend to a static webapp environment
+      text: az staticwebapp backends link -n MyStaticAppName -g MyResourceGroup --environment-name MyEnvironmentName --backend-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/<resource-type>/<backend-name>" --backend-region MyBackendRegion
 """
 
 helps['staticwebapp backends unlink'] = """
     type: command
-    short-summary: Unlink an backend from a static webapp
+    short-summary: Unlink backend from a static webapp
     examples:
-    - name: Show static app backends.
+    - name: Unlink static app backends.
       text: az staticwebapp backends unlink -n MyStaticAppName -g MyResourceGroup
+    - name: Unlink backend from static webapp environment and remove auth config from backend.
+      text: az staticwebapp backends unlink -n MyStaticAppName -g MyResourceGroup --environment-name MyEnvironmentName --is-cleaning-auth-config
 """
 
 helps['staticwebapp backends show'] = """
@@ -2671,6 +2691,8 @@ helps['staticwebapp backends show'] = """
     examples:
     - name: Show static webapp backends.
       text: az staticwebapp backends show -n MyStaticAppName -g MyResourceGroup
+    - name: Show static webapp backends for environment.
+      text: az staticwebapp backends show -n MyStaticAppName -g MyResourceGroup --environment-name MyEnvironmentName
 """
 
 helps['staticwebapp enterprise-edge'] = """
