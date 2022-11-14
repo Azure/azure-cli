@@ -1246,3 +1246,40 @@ class TestAAZArg(unittest.TestCase):
         self.assertTrue(has_value(None))
 
         self.assertFalse(has_value(AAZUndefined))
+
+    def test_aaz_registered_arg(self):
+        from azure.cli.core.aaz._arg import AAZStrArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value
+        from azure.cli.core.aaz.exceptions import AAZUnregisteredArg
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.work_day = AAZStrArg(
+            options=["--work-day", "-d"],
+            enum={
+                "1": "Monday",
+                "2": "Tuesday",
+                "3": "Wednesday",
+                "4": "Thursday",
+                "5": "Friday",
+                "6": "Saturday",
+                "7": "Sunday",
+                "Mon": "Monday",
+                "Tue": "Tuesday",
+                "Wed": "Wednesday",
+                "Thu": "Thursday",
+                "Fri": "Friday",
+                "Sat": "Saturday",
+                "Sun": "Sunday",
+            },
+            nullable=True,
+            blank="Sunday"
+        )
+        self.assertTrue(schema.work_day.registered)
+
+        arg = schema.work_day.to_cmd_arg("work_day")
+
+        schema.work_day.registered = False
+        with self.assertRaises(AAZUnregisteredArg):
+            schema.work_day.to_cmd_arg("work_day")
