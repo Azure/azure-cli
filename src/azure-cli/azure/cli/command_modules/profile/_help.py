@@ -77,7 +77,6 @@ examples:
     To see available query options, first run `az account show --output json`.
     For in-depth `--query` examples see [How to query Azure CLI command output using a JMESPath query](https://learn.microsoft.com/cli/azure/query-azure-cli).
   text: >
-    az account show --query name
     az account show --query user.name
 - name: Return results in plain text.
   text: az account show --query MyTenantID --output tsv
