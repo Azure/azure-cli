@@ -24,6 +24,8 @@ from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zo
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
 from .aaz.latest.network.application_gateway._update import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.vnet._create import Create as _VNetCreate
+from .aaz.latest.network.vnet._update import Update as _VNetUpdate
 
 import threading
 import time
@@ -6862,6 +6864,72 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 
 # region VirtualNetworks
 # pylint: disable=too-many-locals
+class VNetCreate(_VNetCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.edge_zone = AAZStrArg(
+            options=["--edge-zone"],
+            help="The name of edge zone.",
+        )
+        # add subnet arguments
+        args_schema.subnet_name = AAZStrArg(
+            options=["--subnet-name"],
+            arg_group="Subnet",
+            help="Name of a new subnet to create within the VNet.",
+        )
+        args_schema.subnet_prefixes = AAZListArg(
+            options=["--subnet-prefixes"],
+            arg_group="Subnet",
+            help="Space-separated list of address prefixes in CIDR format for the new subnet. If omitted, "
+                 "automatically reserves a /24 (or as large as available) block within the VNet address space.",
+        )
+        args_schema.subnet_prefixes.Element = AAZStrArg()
+        args_schema.subnet_nsg = AAZResourceIdArg(
+            options=["--nsg", "--network-security-group"],
+            arg_group="Subnet",
+            help="Name or ID of a network security group (NSG).",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/networkSecurityGroups/{}",
+            ),
+        )
+        # set default value
+        args_schema.address_prefixes._default = ["10.0.0.0/16"]
+        return args_schema
+
+    def _cli_arguments_loader(self):
+        args = super()._cli_arguments_loader()
+        args = [(name, arg) for (name, arg) in args if name != "extended_location"]
+        return args
+
+    def pre_operations(self):
+        from azure.cli.core.aaz import has_value
+        args = self.ctx.args
+        if has_value(args.edge_zone):
+            args.extended_location.name = args.edge_zone
+            args.extended_location.type = "EdgeZone"
+        if has_value(args.subnet_name):
+            subnet = {"name": args.subnet_name}
+            if not has_value(args.subnet_prefixes):
+                # set default value
+                address, bit_mask = str(args.address_prefixes[0]).split("/")
+                subnet_mask = 24 if int(bit_mask) < 24 else bit_mask
+                subnet["address_prefix"] = f"{address}/{subnet_mask}"
+            elif len(args.subnet_prefixes) == 1:
+                subnet["address_prefix"] = args.subnet_prefixes[0]
+            else:
+                subnet["address_prefixes"] = args.subnet_prefixes
+            if has_value(args.subnet_nsg):
+                subnet["network_security_group"] = {"id": args.subnet_nsg}
+            args.subnets = [subnet]
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return {"newVNet": result}
+
+
 def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
                 location=None, tags=None, vm_protection=None, ddos_protection=None, bgp_community=None,
