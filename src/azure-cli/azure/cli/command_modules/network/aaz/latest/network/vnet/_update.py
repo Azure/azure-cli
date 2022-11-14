@@ -93,7 +93,6 @@ class Update(AAZCommand):
         _args_schema.vm_protection = AAZBoolArg(
             options=["--vm-protection"],
             help="Enable VM protection for all subnets in the VNet.",
-            is_preview=True,
             nullable=True,
         )
         _args_schema.enable_encryption = AAZBoolArg(
