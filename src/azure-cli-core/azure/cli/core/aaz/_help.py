@@ -109,7 +109,7 @@ class AAZShowHelp(BaseException):
         max_header_len = 0
 
         for prop_schema in schema._fields.values():
-            if not prop_schema.registered:
+            if not prop_schema._registered:
                 # ignore unregistered args
                 continue
 

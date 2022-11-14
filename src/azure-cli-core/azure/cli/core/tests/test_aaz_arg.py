@@ -1248,7 +1248,7 @@ class TestAAZArg(unittest.TestCase):
         self.assertFalse(has_value(AAZUndefined))
 
     def test_aaz_registered_arg(self):
-        from azure.cli.core.aaz._arg import AAZStrArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg import AAZStrArg, AAZObjectArg, AAZBoolArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
         from azure.cli.core.aaz import has_value
         from azure.cli.core.aaz.exceptions import AAZUnregisteredArg
@@ -1276,10 +1276,27 @@ class TestAAZArg(unittest.TestCase):
             nullable=True,
             blank="Sunday"
         )
-        self.assertTrue(schema.work_day.registered)
+        self.assertTrue(schema.work_day._registered)
 
         arg = schema.work_day.to_cmd_arg("work_day")
 
-        schema.work_day.registered = False
+        schema.work_day._registered = False
         with self.assertRaises(AAZUnregisteredArg):
             schema.work_day.to_cmd_arg("work_day")
+
+        schema.properties = AAZObjectArg(
+            options=["--prop", "-p"],
+            nullable=True
+        )
+
+        schema.properties.enable = AAZBoolArg(
+            options=["enable"],
+            nullable=True,
+        )
+
+        self.assertTrue(schema.properties._registered)
+        arg = schema.properties.to_cmd_arg("properties")
+
+        schema.properties._registered = False
+        with self.assertRaises(AAZUnregisteredArg):
+            schema.properties.to_cmd_arg("properties")

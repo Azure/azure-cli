@@ -111,11 +111,11 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
         self._default = default
         self._blank = blank
         self._fmt = fmt
-        self.registered = registered
+        self._registered = registered
 
     def to_cmd_arg(self, name, **kwargs):
         """ convert AAZArg to CLICommandArgument """
-        if not self.registered:
+        if not self._registered:
             # argument will not registered in command display
             raise AAZUnregisteredArg()
 
