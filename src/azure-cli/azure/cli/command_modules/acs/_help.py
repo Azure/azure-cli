@@ -273,7 +273,7 @@ parameters:
     short-summary: Enable Managed Identity Auth for Monitoring addon.
   - name: --enable-syslog
     type: bool
-    short-summary: Enable syslog data collection for AKS clusters
+    short-summary: Enable syslog data collection for Monitoring addon
   - name: --uptime-sla
     type: bool
     short-summary: Enable a paid managed cluster service with a financially backed SLA.
@@ -807,7 +807,7 @@ parameters:
     short-summary: Enable Managed Identity Auth for Monitoring addon.
   - name: --enable-syslog
     type: bool
-    short-summary: Enable syslog data collection for AKS clusters
+    short-summary: Enable syslog data collection for Monitoring addon
   - name: --appgw-name
     type: string
     short-summary: Name of the application gateway to create/use in the node resource group. Use with ingress-azure addon.
