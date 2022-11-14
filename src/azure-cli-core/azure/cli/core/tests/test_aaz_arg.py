@@ -469,6 +469,7 @@ class TestAAZArg(unittest.TestCase):
     def test_aaz_str_arg(self):
         from azure.cli.core.aaz._arg import AAZStrArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value
         schema = AAZArgumentsSchema()
         v = schema()
 
@@ -493,6 +494,8 @@ class TestAAZArg(unittest.TestCase):
             nullable=True,
             blank="Sunday"
         )
+        self.assertFalse(has_value(v.work_day))
+
         arg = schema.work_day.to_cmd_arg("work_day")
         self.assertEqual(len(arg.choices), 14)
         action = arg.type.settings["action"]
@@ -581,6 +584,7 @@ class TestAAZArg(unittest.TestCase):
     def test_aaz_int_arg(self):
         from azure.cli.core.aaz._arg import AAZIntArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value
         schema = AAZArgumentsSchema()
         v = schema()
 
@@ -595,6 +599,9 @@ class TestAAZArg(unittest.TestCase):
             nullable=True,
             blank=0
         )
+
+        self.assertFalse(has_value(v.score))
+
         arg = schema.score.to_cmd_arg("score")
         self.assertEqual(len(arg.choices), 4)
         action = arg.type.settings["action"]
@@ -670,6 +677,7 @@ class TestAAZArg(unittest.TestCase):
     def test_aaz_float_arg(self):
         from azure.cli.core.aaz._arg import AAZFloatArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value
         schema = AAZArgumentsSchema()
         v = schema()
 
@@ -684,6 +692,8 @@ class TestAAZArg(unittest.TestCase):
             nullable=True,
             blank=0.0
         )
+        self.assertFalse(has_value(v.score))
+
         arg = schema.score.to_cmd_arg("score")
         self.assertEqual(len(arg.choices), 4)
         action = arg.type.settings["action"]
@@ -756,10 +766,13 @@ class TestAAZArg(unittest.TestCase):
     def test_aaz_bool_arg(self):
         from azure.cli.core.aaz._arg import AAZBoolArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value
         schema = AAZArgumentsSchema()
         v = schema()
 
         schema.enable = AAZBoolArg(options=["--enable", "-e"])
+        self.assertFalse(has_value(v.enable))
+
         arg = schema.enable.to_cmd_arg("enable")
         self.assertEqual(len(arg.choices), 10)
         action = arg.type.settings["action"]
@@ -871,6 +884,7 @@ class TestAAZArg(unittest.TestCase):
     def test_aaz_list_arg(self):
         from azure.cli.core.aaz._arg import AAZListArg, AAZStrArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations, _ELEMENT_APPEND_KEY
+        from azure.cli.core.aaz import has_value
         schema = AAZArgumentsSchema()
         v = schema()
 
@@ -882,6 +896,8 @@ class TestAAZArg(unittest.TestCase):
             nullable=True,
             blank="a blank value"
         )
+
+        self.assertFalse(has_value(v.names))
 
         arg = schema.names.to_cmd_arg("names")
         action = arg.type.settings["action"]
@@ -965,6 +981,7 @@ class TestAAZArg(unittest.TestCase):
     def test_aaz_dict_arg(self):
         from azure.cli.core.aaz._arg import AAZDictArg, AAZStrArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value
         schema = AAZArgumentsSchema()
         v = schema()
 
@@ -975,6 +992,8 @@ class TestAAZArg(unittest.TestCase):
             nullable=True,
             blank="a blank value"
         )
+
+        self.assertFalse(has_value(v.tags))
 
         arg = schema.tags.to_cmd_arg("tags")
         action = arg.type.settings["action"]
@@ -1018,6 +1037,7 @@ class TestAAZArg(unittest.TestCase):
     def test_aaz_freeform_dict_arg(self):
         from azure.cli.core.aaz._arg import AAZFreeFormDictArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value
         schema = AAZArgumentsSchema()
         v = schema()
 
@@ -1026,6 +1046,8 @@ class TestAAZArg(unittest.TestCase):
             nullable=True,
             blank={"blank": True}
         )
+
+        self.assertFalse(has_value(v.tags))
 
         arg = schema.tags.to_cmd_arg("tags")
         action = arg.type.settings["action"]
@@ -1069,11 +1091,11 @@ class TestAAZArg(unittest.TestCase):
         with self.assertRaises(aazerror.AAZInvalidValueError):
             action.setup_operations(dest_ops, "[1, 2, 3]")
 
-
     def test_aaz_object_arg(self):
         from azure.cli.core.aaz._arg import AAZDictArg, AAZListArg, AAZObjectArg, AAZIntArg, AAZBoolArg, AAZFloatArg, \
             AAZStrArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value
         schema = AAZArgumentsSchema()
         v = schema()
 
@@ -1115,6 +1137,11 @@ class TestAAZArg(unittest.TestCase):
             nullable=True,
             blank="0.1"
         )
+
+        self.assertFalse(has_value(v.properties.identities))
+        self.assertFalse(has_value(v.properties.vnets))
+        self.assertFalse(has_value(v.properties.pt))
+        self.assertFalse(has_value(v.properties))
 
         arg = schema.properties.to_cmd_arg("properties")
         action = arg.type.settings["action"]
@@ -1210,3 +1237,12 @@ class TestAAZArg(unittest.TestCase):
             "vnets": None,
             "pt": 12.123
         })
+
+    def test_aaz_has_value_for_buildin(self):
+        from azure.cli.core.aaz import has_value, AAZUndefined
+        self.assertTrue(has_value(0))
+        self.assertTrue(has_value(""))
+        self.assertTrue(has_value(False))
+        self.assertTrue(has_value(None))
+
+        self.assertFalse(has_value(AAZUndefined))
