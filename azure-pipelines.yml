@@ -638,16 +638,19 @@ jobs:
         image: registry.access.redhat.com/ubi7/ubi:7.9
         artifact: rpm-ubi7
         python_package: rh-python38-python
+        python_cmd:  /opt/rh/rh-python38/root/usr/bin/python3.8
       Red Hat Universal Base Image 8:
         dockerfile: ubi
         image: registry.access.redhat.com/ubi8/ubi:8.4
         artifact: rpm-ubi8
         python_package: python39
+        python_cmd: python3.9
       Red Hat Universal Base Image 9:
         dockerfile: ubi
         image: registry.access.redhat.com/ubi9/ubi:9.0.0
         artifact: rpm-ubi9
         python_package: python3.9
+        python_cmd: python3.9
       Fedora35:
         dockerfile: fedora
         image: fedora:35
@@ -689,8 +692,8 @@ jobs:
         distro: el7
         image: registry.access.redhat.com/ubi7/ubi:7.9
         python_package: rh-python38-python
-        python_cmd: python3.8
-        pip_cmd: pip3.8
+        python_cmd: /opt/rh/rh-python38/root/usr/bin/python3.8
+        pip_cmd: /opt/rh/rh-python38/root/usr/bin/pip3.8
       Red Hat Universal Base Image 8:
         artifact: rpm-ubi8
         distro: el8
