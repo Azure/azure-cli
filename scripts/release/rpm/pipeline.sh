@@ -12,6 +12,8 @@ set -exv
 : "${IMAGE:?IMAGE environment variable not set.}"
 # PYTHON_PACKAGE should be python package name
 : "${PYTHON_PACKAGE:?PYTHON_PACKAGE environment variable not set.}"
+# PYTHON_CMD should be python command
+: "${PYTHON_CMD:?PYTHON_CMD environment variable not set.}"
 
 CLI_VERSION=`cat src/azure-cli/azure/cli/__main__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`
 
@@ -21,6 +23,7 @@ docker build \
     --build-arg cli_version=${CLI_VERSION} \
     --build-arg image=${IMAGE} \
     --build-arg python_package=${PYTHON_PACKAGE} \
+    --build-arg python_cmd=${PYTHON_CMD} \
     -f ./scripts/release/rpm/${DOCKERFILE}.dockerfile \
     -t azure/azure-cli:${DOCKERFILE}-builder \
     .
