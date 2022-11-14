@@ -6930,6 +6930,16 @@ class VNetCreate(_VNetCreate):
         return {"newVNet": result}
 
 
+class VNetUpdate(_VNetUpdate):
+    def pre_operations(self):
+        from azure.cli.core.aaz import has_value
+        args = self.ctx.args
+        if has_value(args.dns_servers) and args.dns_servers == [""]:
+            args.dns_servers = None
+        if has_value(args.ddos_protection_plan) and args.ddos_protection_plan == "":
+            args.ddos_protection_plan = None
+
+
 def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
                 location=None, tags=None, vm_protection=None, ddos_protection=None, bgp_community=None,

@@ -4399,7 +4399,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
         ])
 
         # test generic update
-        self.cmd('network vnet update --resource-group {rg} --name {vnet} --set addressSpace.addressPrefixes[0]="20.0.0.0/24"',
+        self.cmd('network vnet update --resource-group {rg} --name {vnet} --set properties.addressSpace.addressPrefixes[0]="20.0.0.0/24"',
                  checks=self.check('addressSpace.addressPrefixes[0]', '20.0.0.0/24'))
 
         self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix 20.0.0.0/24')
