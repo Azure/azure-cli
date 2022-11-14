@@ -2778,7 +2778,7 @@ short-summary: List out all available versions of Bicep CLI.
 
 helps['stack'] = """
 type: group
-short-summary: (Version 1.4) Manage deployment stacks at subscription or resource group scope, this version contains denysettings help edit
+short-summary: (Version 1.5) Manage deployment stacks at subscription or resource group scope, this version contains denysettings help edit & export template output table fix
 """
 
 helps['stack mg create'] = """
