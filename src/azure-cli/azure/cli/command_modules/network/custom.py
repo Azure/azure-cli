@@ -7286,7 +7286,7 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
                         address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
                         gateway_default_site=None, custom_routes=None, aad_tenant=None, aad_audience=None,
                         aad_issuer=None, root_cert_data=None, root_cert_name=None, vpn_auth_type=None, edge_zone=None,
-                        nat_rule=None):
+                        nat_rule=None,VNetExtendedLocationResourceId=None):
     (VirtualNetworkGateway, BgpSettings, SubResource, VirtualNetworkGatewayIPConfiguration, VirtualNetworkGatewaySku,
      VpnClientConfiguration, AddressSpace, VpnClientRootCertificate, VirtualNetworkGatewayNatRule,
      VpnNatRuleMapping) = cmd.get_models(
@@ -7296,18 +7296,21 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
 
     client = network_client_factory(cmd.cli_ctx).virtual_network_gateways
     subnet = virtual_network + '/subnets/GatewaySubnet'
-    active = len(public_ip_address) == 2
+    active = True
+    if gateway_type != "LocalGateway":
+        active = len(public_ip_address) != 2
     vnet_gateway = VirtualNetworkGateway(
         gateway_type=gateway_type, vpn_type=vpn_type, vpn_gateway_generation=vpn_gateway_generation, location=location,
         tags=tags, sku=VirtualNetworkGatewaySku(name=sku, tier=sku), active=active, ip_configurations=[],
         gateway_default_site=SubResource(id=gateway_default_site) if gateway_default_site else None)
-    for i, public_ip in enumerate(public_ip_address):
-        ip_configuration = VirtualNetworkGatewayIPConfiguration(
-            subnet=SubResource(id=subnet),
-            public_ip_address=SubResource(id=public_ip),
-            private_ip_allocation_method='Dynamic',
-            name='vnetGatewayConfig{}'.format(i)
-        )
+    if gateway_type != "LocalGateway":
+        for i, public_ip in enumerate(public_ip_address):
+            ip_configuration = VirtualNetworkGatewayIPConfiguration(
+                subnet=SubResource(id=subnet),
+                public_ip_address=SubResource(id=public_ip),
+                private_ip_allocation_method='Dynamic',
+                name='vnetGatewayConfig{}'.format(i)
+            )
         vnet_gateway.ip_configurations.append(ip_configuration)
     if asn or bgp_peering_address or peer_weight:
         vnet_gateway.enable_bgp = True
@@ -7339,6 +7342,8 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
 
     if edge_zone:
         vnet_gateway.extended_location = _edge_zone_model(cmd, edge_zone)
+    if gateway_type != "LocalGateway" and VNetExtendedLocationResourceId:
+        vnet_gateway.VNetExtendedLocationResourceId = VNetExtendedLocationResourceId
     if nat_rule:
         vnet_gateway.nat_rules = [
             VirtualNetworkGatewayNatRule(type_properties_type=rule.get('type'), mode=rule.get('mode'), name=rule.get('name'),
