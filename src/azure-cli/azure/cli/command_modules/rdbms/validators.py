@@ -360,7 +360,7 @@ def _pg_high_availability_validator(high_availability, standby_availability_zone
 
 
 def _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported):
-    if geo_redundant_backup and not geo_backup_supported:
+    if (geo_redundant_backup and geo_redundant_backup.lower() == 'enabled') and not geo_backup_supported:
         raise ArgumentUsageError("The region of the server does not support geo-restore feature.")
 
 
