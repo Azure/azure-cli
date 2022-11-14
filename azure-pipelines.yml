@@ -87,6 +87,12 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: metadata
 
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: result'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/version'
+      ArtifactName: binskim
+
 - job: VerifyLinuxRequirements
   displayName: 'Verify src/azure-cli/requirements.*.Linux.txt'
   condition: succeeded()
@@ -185,6 +191,12 @@ jobs:
     inputs:
       TargetPath: 'build_scripts/windows/out/'
       ArtifactName: msi
+
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: result'
+    inputs:
+      TargetPath: 'build_scripts/windows/out/azure-cli.wxs'
+      ArtifactName: binskim
 
 - job: TestWindowsMSI
   displayName: Test Windows MSI
