@@ -160,7 +160,7 @@ class AAZCommand(CLICommand):
         args = {}
         for name, field in schema._fields.items():
             # generate command arguments from argument schema.
-            args[name] = field.to_cmd_arg(name)
+            args[name] = field.to_cmd_arg(name, cli_ctx=self.cli_ctx)
         return list(args.items())
 
     def update_argument(self, param_name, argtype):
