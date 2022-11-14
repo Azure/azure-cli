@@ -10,6 +10,9 @@ ARG python_package=python39
 RUN yum update -y
 RUN yum install -y wget rpm-build gcc libffi-devel ${python_package}-devel openssl-devel make bash diffutils patch dos2unix perl
 
+# dos2unix is not avaialble in ubi7
+RUN if [ "${image}" == "registry.access.redhat.com/ubi7/ubi:7.9" ]; then wget "http://mirror.centos.org/centos/7/os/x86_64/Packages/dos2unix-6.0.3-7.el7.x86_64.rpm" && rpm -i dos2unix-6.0.3-7.el7.x86_64.rpm fi
+
 WORKDIR /azure-cli
 
 COPY . .

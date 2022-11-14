@@ -633,6 +633,11 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
+      Red Hat Universal Base Image 7:
+        dockerfile: ubi
+        image: registry.access.redhat.com/ubi7/ubi:7.9
+        artifact: rpm-ubi7
+        python_package: rh-python38-python
       Red Hat Universal Base Image 8:
         dockerfile: ubi
         image: registry.access.redhat.com/ubi8/ubi:8.4
@@ -679,6 +684,13 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
+      Red Hat Universal Base Image 7:
+        artifact: rpm-ubi7
+        distro: el7
+        image: registry.access.redhat.com/ubi7/ubi:7.9
+        python_package: rh-python38-python
+        python_cmd: python3.8
+        pip_cmd: pip3.8
       Red Hat Universal Base Image 8:
         artifact: rpm-ubi8
         distro: el8
