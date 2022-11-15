@@ -642,7 +642,7 @@ def unlink_backend(cmd, name, resource_group_name, is_cleaning_auth_config=False
         logger.warning("--is-cleaning-auth-config: removing auth configuration from backend")
 
     backend_name = list(get_backend(cmd, name, resource_group_name, environment_name))[0].name
-    
+
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     return client.unlink_backend_from_build(
         name=name,
@@ -655,6 +655,7 @@ def unlink_backend(cmd, name, resource_group_name, is_cleaning_auth_config=False
 def get_backend(cmd, name, resource_group_name, environment_name='default'):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     return client.get_linked_backends_for_build(name=name, resource_group_name=resource_group_name, environment_name=environment_name)
+
 
 def _enterprise_edge_warning():
     logger.warning("For optimal experience and availability please check our documentation https://aka.ms/swaedge")
