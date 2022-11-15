@@ -79,23 +79,12 @@ jobs:
     inputs:
       targetType: F
       result: PoliCheckResult.xml
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
-    displayName: 'Run PoliCheck'
-    inputs:
-      targetType: F
-      result: PoliCheckResult.xml
-      optionsFTPATH: tools/SecurityTools/PoliCheckFileExtensions.xml
 
-  - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-postanalysis.PostAnalysis@1
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@2
     displayName: 'Post Analysis'
     inputs:
-      AllTools: false
-      BinSkim: false
-      CredScan: false
-      PoliCheck: true
-      RoslynAnalyzers: false
-      TSLint: false
-      ToolLogsNotFoundAction: 'Standard'
+      GdnBreakAllTools: false
+      GdnBreakGdnToolPoliCheck: true
 
 - job: ExtractMetadata
   displayName: Extract Metadata
