@@ -194,8 +194,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             match = helper.resolve(runtime, is_linux)
             if not match:
                 raise ValidationError("Linux Runtime '{}' is not supported."
-                                      " Please invoke 'az webapp list-runtimes --os-type linux'
-                                       to cross check".format(runtime))
+                                " Please invoke 'az webapp list-runtimes --os-type linux' to cross check".format(runtime))
             helper.get_site_config_setter(match, linux=is_linux)(cmd=cmd, stack=match, site_config=site_config)
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
@@ -226,8 +225,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         match = helper.resolve(runtime, linux=is_linux)
         if not match:
             raise ValidationError("Windows runtime '{}' is not supported. "
-                                  "Please invoke 'az webapp list-runtimes --os-type windows'
-                                   to cross check".format(runtime))
+                            "Please invoke 'az webapp list-runtimes --os-type windows' to cross check".format(runtime))
         helper.get_site_config_setter(match, linux=is_linux)(cmd=cmd, stack=match, site_config=site_config)
 
         # TODO: Ask Calvin the purpose of this - seems like unneeded set of calls
