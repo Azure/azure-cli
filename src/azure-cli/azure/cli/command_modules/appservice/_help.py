@@ -2646,10 +2646,10 @@ helps['staticwebapp backends validate'] = """
     short-summary: Validate a backend for a static web app
     long-summary: >
       Only one backend is available to a single static web app. 
-      If a backend was previously linked to another Static Web App, the auth configuration must first be removed from the backend before linking to a different Static Web App.
+      If a backend was previously linked to another static Web App, the auth configuration must first be removed from the backend before linking to a different Static Web App.
       Static web app SKU must be "Standard". 
       Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps. 
-      Backend region must be provided for Azure Functions and Azure App Service.
+      Backend region must be provided for backends of type Azure Functions and Azure App Service.
       See https://learn.microsoft.com/azure/static-web-apps/apis-overview to learn more.
     examples:
     - name: Validate a backend for a static web app
@@ -2663,10 +2663,10 @@ helps['staticwebapp backends link'] = """
     short-summary: Link a backend to a static web app. Also known as "Bring your own API."
     long-summary: >
       Only one backend is available to a single static web app. 
-      If a backend was previously linked to other static web app auth configuration must be removed from backend
+      If a backend was previously linked to another static Web App, the auth configuration must first be removed from the backend before linking to a different Static Web App.
       Static web app SKU must be "Standard". 
       Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps. 
-      Backend region must be provided for Azure Functions and Azure App Service.
+      Backend region must be provided for backends of type Azure Functions and Azure App Service.
       See https://learn.microsoft.com/azure/static-web-apps/apis-overview to learn more.
     examples:
     - name: Link a backend to a static web app
