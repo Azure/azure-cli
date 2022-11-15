@@ -187,7 +187,7 @@ class Create(AAZCommand):
         )
         _element.disable_private_endpoint_network_policies = AAZStrArg(
             options=["disable-private-endpoint-network-policies"],
-            help="Disable private endpoint network policies on the subnet.",
+            help="Disable private endpoint network policies on the subnet, the policy is disabled by default.",
             default="Disabled",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )

@@ -4654,7 +4654,7 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
             self.check('[0].name', 'peering2'),
             self.check('length(@)', 1)
         ])
-        self.cmd('network vnet peering update -g {rg} -n peering1 --vnet-name vnet1 --set useRemoteGateways=false', checks=[
+        self.cmd('network vnet peering update -g {rg} -n peering1 --vnet-name vnet1 --set properties.useRemoteGateways=false', checks=[
             self.check('useRemoteGateways', False),
             self.check('allowForwardedTraffic', True)
         ])

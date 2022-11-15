@@ -62,6 +62,11 @@ class Create(AAZCommand):
             required=True,
             id_part="child_name_1",
         )
+        _args_schema.sync_remote = AAZStrArg(
+            options=["--sync-remote"],
+            help="Indicate the intention to sync the peering with the current address space on the remote VNet after it's updated.",
+            enum={"true": "true"},
+        )
         _args_schema.allow_forwarded_traffic = AAZBoolArg(
             options=["--allow-forwarded-traffic"],
             help="Allows forwarded traffic from the local VNet to the remote VNet.",
@@ -201,6 +206,9 @@ class Create(AAZCommand):
         @property
         def query_parameters(self):
             parameters = {
+                **self.serialize_query_param(
+                    "syncRemoteAddressSpace", self.ctx.args.sync_remote,
+                ),
                 **self.serialize_query_param(
                     "api-version", "2022-01-01",
                     required=True,
