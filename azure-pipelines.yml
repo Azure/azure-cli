@@ -46,7 +46,7 @@ jobs:
       echo "Reject pull request directly to master branch"
       exit 1
 
-- job: CredScan
+- job: Static Code Analysis
   displayName: "Credential Scan"
   pool:
     name: ${{ variables.windows_pool }}
@@ -57,12 +57,21 @@ jobs:
       toolMajorVersion: V2
       suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
       toolVersionV2: '2.1.17'
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@2
+    displayName: 'Run PoliCheck'
+    inputs:
+      targetType: F
+      targetArgument: '$(Build.SourcesDirectory)/artifacts'
+      result: '$(Build.SourcesDirectory)/artifacts/PoliCheck/PoliCheck.xml'
+
   - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-postanalysis.PostAnalysis@1
     displayName: 'Post Analysis'
     inputs:
       AllTools: false
       BinSkim: false
       CredScan: true
+      PoliCheck: true
       RoslynAnalyzers: false
       TSLint: false
       ToolLogsNotFoundAction: 'Standard'
@@ -86,12 +95,6 @@ jobs:
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: metadata
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: result'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/version'
-      ArtifactName: binskim
 
 - job: VerifyLinuxRequirements
   displayName: 'Verify src/azure-cli/requirements.*.Linux.txt'
@@ -192,12 +195,6 @@ jobs:
       TargetPath: 'build_scripts/windows/out/'
       ArtifactName: msi
 
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: result'
-    inputs:
-      TargetPath: 'build_scripts/windows/out/azure-cli.wxs'
-      ArtifactName: binskim
-
 - job: TestWindowsMSI
   displayName: Test Windows MSI
 
@@ -262,26 +259,6 @@ jobs:
         az self-test
         
         Get-Content .\install_logs.txt
-
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@4
-    displayName: Run BinSkim
-    inputs:
-      TargetPattern: binskimPattern
-      AnalyzeTargetBinskim: |
-       $(Build.ArtifactStagingDirectory)/msi/**.msi
-       $(Build.ArtifactStagingDirectory)/msi/**.wixpdb
-       $(Build.ArtifactStagingDirectory)/msi/**.wxs
-       $(Build.ArtifactStagingDirectory)/msi/obj/Release/**.wixobj
-       $(Build.ArtifactStagingDirectory)/msi/obj/Release/**/**.wixobj
-      AnalyzeVerbose: true
-    enabled: true
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: binskim'
-    inputs:
-      # D:\a\_work\1\.gdn\.r\binskim\001\binskim.sarif
-      TargetPath: $(Pipeline.Workspace)\.gdn\.r\binskim\001\binskim.sarif
-      ArtifactName: binskim
 
 - job: BuildDockerImage
   displayName: Build Docker Image
