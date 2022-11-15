@@ -521,9 +521,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             if command_group == 'mysql':
                 c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']),
                            help='Determines the public access. ')
-            elif command_group == 'postgres':
-                c.argument('byok_key', arg_type=key_arg_type)
-                c.argument('byok_identity', arg_type=identity_arg_type)
 
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
