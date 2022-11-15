@@ -160,13 +160,6 @@ class Create(AAZCommand):
         subnets.Element = AAZObjectArg()
 
         _element = cls._args_schema.subnets.Element
-        _element.id = AAZResourceIdArg(
-            options=["id"],
-            help="Resource ID.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}",
-            ),
-        )
         _element.name = AAZStrArg(
             options=["name"],
             help="The subnet name.",
@@ -194,7 +187,7 @@ class Create(AAZCommand):
         )
         _element.disable_private_endpoint_network_policies = AAZStrArg(
             options=["disable-private-endpoint-network-policies"],
-            help="Disable private endpoint network policies on the subnet, the policy is disabled by default.",
+            help="Disable private endpoint network policies on the subnet.",
             default="Disabled",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
@@ -215,10 +208,6 @@ class Create(AAZCommand):
         _element.service_endpoints = AAZListArg(
             options=["service-endpoints"],
             help="An array of service endpoints.",
-        )
-        _element.type = AAZStrArg(
-            options=["type"],
-            help="Resource type.",
         )
 
         address_prefixes = cls._args_schema.subnets.Element.address_prefixes
@@ -769,10 +758,8 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".properties.subnets[]")
             if _elements is not None:
-                _elements.set_prop("id", AAZStrType, ".id")
                 _elements.set_prop("name", AAZStrType, ".name")
                 _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-                _elements.set_prop("type", AAZStrType, ".type")
 
             properties = _builder.get(".properties.subnets[].properties")
             if properties is not None:

@@ -65,14 +65,17 @@ class Create(AAZCommand):
         _args_schema.allow_forwarded_traffic = AAZBoolArg(
             options=["--allow-forwarded-traffic"],
             help="Allows forwarded traffic from the local VNet to the remote VNet.",
+            default=False,
         )
         _args_schema.allow_gateway_transit = AAZBoolArg(
             options=["--allow-gateway-transit"],
             help="Allows gateway link to be used in the remote VNet.",
+            default=False,
         )
         _args_schema.allow_vnet_access = AAZBoolArg(
             options=["--allow-vnet-access"],
             help="Allows access from the local VNet to the remote VNet.",
+            default=False,
         )
         _args_schema.remote_vnet = AAZResourceIdArg(
             options=["--remote-vnet"],
@@ -85,6 +88,7 @@ class Create(AAZCommand):
         _args_schema.use_remote_gateways = AAZBoolArg(
             options=["--use-remote-gateways"],
             help="Allows VNet to use the remote VNet's gateway. Remote VNet gateway must have --allow-gateway-transit enabled for remote peering. Only 1 peering can have this flag enabled. Cannot be set if the VNet already has a gateway.",
+            default=False,
         )
 
         # define Arg Group "Properties"
