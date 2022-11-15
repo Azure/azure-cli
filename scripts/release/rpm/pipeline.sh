@@ -33,6 +33,7 @@ docker build \
     --build-arg cli_version=${CLI_VERSION} \
     --build-arg image=${IMAGE} \
     --build-arg python_package=${PYTHON_PACKAGE} \
+    --build-arg python_cmd=${PYTHON_CMD} \
     -f ./scripts/release/rpm/${DOCKERFILE}.dockerfile \
     -t azure/azure-cli:${DOCKERFILE} \
     .
