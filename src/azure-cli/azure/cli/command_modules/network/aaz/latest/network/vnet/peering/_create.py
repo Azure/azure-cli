@@ -74,9 +74,13 @@ class Create(AAZCommand):
             options=["--allow-vnet-access"],
             help="Allows access from the local VNet to the remote VNet.",
         )
-        _args_schema.remote_vnet = AAZStrArg(
+        _args_schema.remote_vnet = AAZResourceIdArg(
             options=["--remote-vnet"],
             help="Name or ID of the remote VNet.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/virtualNetworks/{}",
+            ),
         )
         _args_schema.use_remote_gateways = AAZBoolArg(
             options=["--use-remote-gateways"],

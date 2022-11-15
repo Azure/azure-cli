@@ -5045,8 +5045,6 @@ parameters:
     short-summary: Space-separated list of services allowed private access to this subnet.
     populator-commands:
       - az network vnet list-endpoint-services
-  - name: --nat-gateway
-    short-summary: Attach Nat Gateway to subnet
 examples:
   - name: Create new subnet attached to an NSG with a custom route table.
     text: |
