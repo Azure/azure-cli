@@ -75,10 +75,16 @@ jobs:
     name: ${{ variables.windows_pool }}
   steps:
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@2
+    displayName: 'Run Policy Check'
+    inputs:
+      targetType: F
+      result: PoliCheckResult.xml
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
     displayName: 'Run PoliCheck'
     inputs:
       targetType: F
       result: PoliCheckResult.xml
+      optionsFTPATH: tools/SecurityTools/PoliCheckFileExtensions.xml
 
   - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-postanalysis.PostAnalysis@1
     displayName: 'Post Analysis'
