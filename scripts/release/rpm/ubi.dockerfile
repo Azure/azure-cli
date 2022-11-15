@@ -27,8 +27,8 @@ RUN dos2unix ./scripts/release/rpm/azure-cli.spec && \
 FROM ${image} AS execution-env
 
 RUN yum update -y
-RUN yum install -y python39
-
+ARG image
+RUN if [ "$image" == "centos:7" ]; then yum install -y centos-release-scl ; fi
 COPY --from=build-env /azure-cli-dev.rpm ./
-RUN rpm -i ./azure-cli-dev.rpm && \
+RUN yum install -y ./azure-cli-dev.rpm && \
     az --version
