@@ -12,7 +12,7 @@ else
 fi
 
 if [ $centos7 == true ] ; then
-    rpm install -y dnf
+    yum install -y dnf
     dnf install -y centos-release-scl
 fi
 
