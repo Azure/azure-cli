@@ -46,8 +46,8 @@ jobs:
       echo "Reject pull request directly to master branch"
       exit 1
 
-- job: StaticCodeAnalysis
-  displayName: "Credential Scan"
+- job: SecurityTools
+  displayName: "Security Tools"
   pool:
     name: ${{ variables.windows_pool }}
   steps:
@@ -62,8 +62,7 @@ jobs:
     displayName: 'Run PoliCheck'
     inputs:
       targetType: F
-      targetArgument: '$(Build.SourcesDirectory)/artifacts'
-      result: '$(Build.SourcesDirectory)/artifacts/PoliCheck/PoliCheck.xml'
+      result: PoliCheckResult.xml
 
   - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-postanalysis.PostAnalysis@1
     displayName: 'Post Analysis'
