@@ -964,9 +964,9 @@ helps['functionapp deploy'] = """
     short-summary: Deploys a provided artifact to Azure functionapp.
     examples:
     - name: Deploy a war file asynchronously.
-      text: az functionapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type war --async true
+      text: az functionapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type war --async true
     - name: Deploy a static text file to wwwroot/staticfiles/test.txt
-      text: az functionapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
+      text: az functionapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
 """
 
 helps['webapp'] = """
