@@ -2645,7 +2645,7 @@ helps['staticwebapp backends validate'] = """
     type: command
     short-summary: Validate a backend for a static web app
     long-summary: >
-      Only one backend is available to a single static web app. 
+      Only one backend is available to a single static web app.
       If a backend was previously linked to another static Web App, the auth configuration must first be removed from the backend before linking to a different Static Web App.
       Static web app SKU must be "Standard".
       Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps.
