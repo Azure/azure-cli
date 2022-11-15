@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import math
 from collections import Counter, OrderedDict
 
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
@@ -31,6 +32,10 @@ import platform
 import subprocess
 import tempfile
 import requests
+
+from .aaz.latest.network.express_route import Update as _ExpressRouteUpdate
+from .aaz.latest.network.express_route.gateway.connection import Update as _ExpressRouteConnectionUpdate,\
+    Create as _ExpressRouteConnectionCreate
 
 logger = get_logger(__name__)
 
@@ -3095,31 +3100,62 @@ def lists_match(l1, l2):
 
 # region ExpressRoutes
 def create_express_route(cmd, circuit_name, resource_group_name, bandwidth_in_mbps, peering_location,
-                         service_provider_name, location=None, tags=None, no_wait=False,
+                         service_provider_name, location=None, tags=None,
                          sku_family=None, sku_tier=None, allow_global_reach=None, express_route_port=None,
                          allow_classic_operations=None):
-    ExpressRouteCircuit, ExpressRouteCircuitSku, ExpressRouteCircuitServiceProviderProperties, SubResource = \
-        cmd.get_models(
-            'ExpressRouteCircuit', 'ExpressRouteCircuitSku', 'ExpressRouteCircuitServiceProviderProperties',
-            'SubResource')
-    client = network_client_factory(cmd.cli_ctx).express_route_circuits
     sku_name = '{}_{}'.format(sku_tier, sku_family)
-    circuit = ExpressRouteCircuit(
-        location=location, tags=tags,
-        service_provider_properties=ExpressRouteCircuitServiceProviderProperties(
-            service_provider_name=service_provider_name,
-            peering_location=peering_location,
-            bandwidth_in_mbps=bandwidth_in_mbps if not express_route_port else None),
-        sku=ExpressRouteCircuitSku(name=sku_name, tier=sku_tier, family=sku_family),
-        allow_global_reach=allow_global_reach,
-        bandwidth_in_gbps=(int(bandwidth_in_mbps) / 1000) if express_route_port else None
-    )
-    if cmd.supported_api_version(min_api='2010-07-01') and allow_classic_operations is not None:
-        circuit.allow_classic_operations = allow_classic_operations
-    if cmd.supported_api_version(min_api='2018-08-01') and express_route_port:
-        circuit.express_route_port = SubResource(id=express_route_port)
-        circuit.service_provider_properties = None
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, circuit_name, circuit)
+    args = {
+        'resource_group': resource_group_name,
+        'name': circuit_name,
+        'sku_name': sku_name,
+        'sku_tier': sku_tier,
+        'sku_family': sku_family,
+        'location': location,
+        'tags': tags,
+        'bandwidth': (float(bandwidth_in_mbps) / 1000) if express_route_port else None,
+        'global_reach_enabled': allow_global_reach,
+        'service_provider_name': service_provider_name,
+        'peering_location': peering_location,
+        'bandwidth_in_mbps': (int(bandwidth_in_mbps)) if not express_route_port else None
+    }
+    if allow_classic_operations is not None:
+        args['allow_classic_operations'] = allow_classic_operations
+    if express_route_port:
+        args['express_route_port'] = express_route_port
+        args['service_provider_name'] = None
+        args['peering_location'] = None
+        args['bandwidth_in_mbps'] = None
+
+    from .aaz.latest.network.express_route import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
+
+
+from .aaz.latest.network.express_route import Create as _ExpressRouteCreate
+class ExpressRouteCreate(_ExpressRouteCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZIntArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.bandwidth = AAZIntArg(
+            options=["--bandwidth"],
+            help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps.",
+            nullable=True,
+        )
+        return args_schema
+
+    def _cli_arguments_loader(self):
+        args = super()._cli_arguments_loader()
+        args = [(name, arg) for (name, arg) in args if name not in ("bandwidth_in_mbps", "bandwidth_of_circuit")]
+        return args
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.sku_name = '{}_{}'.format(args.sku_tier, args.sku_family)
+        args.bandwidth_of_circuit = (args.bandwidth.to_serialized_data() / 1000.0) if args.express_route_port else None
+        args.bandwidth_in_mbps = (args.bandwidth) if not args.express_route_port else None
+        if args.express_route_port:
+            args.provider = None
+            args.peering_location = None
 
 
 def update_express_route(instance, cmd, bandwidth_in_mbps=None, peering_location=None,
@@ -3152,6 +3188,37 @@ def update_express_route(instance, cmd, bandwidth_in_mbps=None, peering_location
             instance.bandwidth_in_gbps = (float(bandwidth_in_mbps) / 1000)
 
     return instance
+
+
+class ExpressRouteUpdate(_ExpressRouteUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZIntArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.bandwidth = AAZIntArg(
+            options=["--bandwidth"],
+            help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps.",
+            nullable=True,
+        )
+        return args_schema
+
+    def _cli_arguments_loader(self):
+        args = super()._cli_arguments_loader()
+        args = [(name, arg) for (name, arg) in args if name not in ("bandwidth_in_mbps", "bandwidth_of_circuit")]
+        return args
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if args.bandwidth:
+            args.bandwidth_of_circuit = (args.bandwidth.to_serialized_data() / 1000.0)
+            args.bandwidth_in_mbps = args.bandwidth
+
+    def post_instance_update(self, instance):
+        if instance.properties.expressRoutePort is not None:
+            instance.properties.serviceProviderProperties = None
+        else:
+            instance.properties.bandwidthInGbps = None
 
 
 def create_express_route_peering_connection(cmd, resource_group_name, circuit_name, peering_name, connection_name,
@@ -3353,7 +3420,7 @@ def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_addr
 # region ExpressRoute Connection
 # pylint: disable=unused-argument
 def create_express_route_connection(cmd, resource_group_name, express_route_gateway_name, connection_name,
-                                    peering, circuit_name=None, authorization_key=None, routing_weight=None,
+                                    peering, authorization_key=None, routing_weight=None,
                                     enable_internet_security=None, associated_route_table=None,
                                     propagated_route_tables=None, labels=None):
     ExpressRouteConnection, SubResource, RoutingConfiguration, PropagatedRouteTable\
@@ -3381,6 +3448,39 @@ def create_express_route_connection(cmd, resource_group_name, express_route_gate
         connection.enable_internet_security = enable_internet_security
 
     return client.begin_create_or_update(resource_group_name, express_route_gateway_name, connection_name, connection)
+
+
+class ExpressRouteConnectionCreate(_ExpressRouteConnectionCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.associated_route_table = AAZStrArg(
+            options=['--associated-route-table', '--associated'],
+            arg_group="Routing Configuration",
+            help="The resource id of route table associated with this routing configuration.",
+            is_preview=True)
+        args_schema.propagated_route_tables = AAZListArg(
+            options=['--propagated-route-tables', '--propagated'],
+            arg_group="Routing Configuration",
+            help="Space-separated list of resource id of propagated route tables.",
+            is_preview=True)
+        args_schema.propagated_route_tables.Element = AAZStrArg()
+
+        return args_schema
+
+    def _cli_arguments_loader(self):
+        args = super()._cli_arguments_loader()
+        args = [(name, arg) for (name, arg) in args if name not in ("associated_id", "propagated_ids")]
+        return args
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if args.associated_route_table is not None:
+            args.associated_id = {"id": args.associated_route_table}
+        if args.propagated_route_tables is not None:
+            args.propagated_ids = [{"id": propagated_route_table} for propagated_route_table in args.propagated_route_tables]
 
 
 # pylint: disable=unused-argument
@@ -3412,6 +3512,42 @@ def update_express_route_connection(instance, cmd, circuit_name=None, peering=No
                 instance.routing_configuration.propagated_route_tables.labels = labels
 
     return instance
+
+
+class ExpressRouteConnectionUpdate(_ExpressRouteConnectionUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.associated_route_table = AAZStrArg(
+            options=['--associated-route-table', '--associated'],
+            arg_group="Routing Configuration",
+            help="The resource id of route table associated with this routing configuration.",
+            is_preview=True,
+            nullable=True)
+        args_schema.propagated_route_tables = AAZListArg(
+            options=['--propagated-route-tables', '--propagated'],
+            arg_group="Routing Configuration",
+            help="Space-separated list of resource id of propagated route tables.",
+            is_preview=True,
+            nullable=True,)
+        args_schema.propagated_route_tables.Element = AAZStrArg()
+
+        return args_schema
+
+    def _cli_arguments_loader(self):
+        args = super()._cli_arguments_loader()
+        args = [(name, arg) for (name, arg) in args if name not in ("associated_id", "propagated_ids")]
+        return args
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if args.associated_route_table is not None:
+            args.associated_id = {"id": args.associated_route_table}
+        if args.propagated_route_tables is not None:
+            args.propagated_ids = [{"id": propagated_route_table} for propagated_route_table in args.propagated_route_tables]
+    pass
 # endregion
 
 
@@ -3427,6 +3563,14 @@ def create_express_route_gateway(cmd, resource_group_name, express_route_gateway
     )
     if min or max:
         gateway.auto_scale_configuration = {'bounds': {'min': min_val, 'max': max_val}}
+    print(min)
+    # ExpressRouteGatewayPropertiesAutoScaleConfiguration, \
+    # ExpressRouteGatewayPropertiesAutoScaleConfigurationBounds = cmd.get_models(
+    #     'ExpressRouteGatewayPropertiesAutoScaleConfiguration',
+    #     'ExpressRouteGatewayPropertiesAutoScaleConfigurationBounds')
+    # ExpressRouteGatewayPropertiesAutoScaleConfiguration(
+    #     bounds=ExpressRouteGatewayPropertiesAutoScaleConfigurationBounds(min=min, max=max))
+
     return client.begin_create_or_update(resource_group_name, express_route_gateway_name, gateway)
 
 
@@ -3449,6 +3593,8 @@ def update_express_route_gateway(instance, cmd, tags=None, min_val=None, max_val
     if max is not None:
         _ensure_autoscale()
         instance.auto_scale_configuration.bounds.max = max_val
+
+    print("-------------------------------------------------------------------------------------------")
     return instance
 
 

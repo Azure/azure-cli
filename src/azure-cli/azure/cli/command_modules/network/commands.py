@@ -580,38 +580,45 @@ def load_command_table(self, _):
 
     # region ExpressRoutes
     with self.command_group('network express-route', network_er_sdk) as g:
-        g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.command('get-stats', 'get_stats')
-        g.command('list-arp-tables', 'begin_list_arp_table')
-        g.command('list-route-tables', 'begin_list_routes_table', is_preview=True)
-        g.command('list-route-tables-summary', 'begin_list_routes_table_summary', is_preview=True)
-        g.custom_command('create', 'create_express_route', supports_no_wait=True)
-        g.custom_command('list', 'list_express_route_circuits')
-        g.command('list-service-providers', 'list', command_type=network_ersp_sdk)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_express_route', supports_no_wait=True)
-        g.wait_command('wait')
+        # g.command('delete', 'begin_delete', supports_no_wait=True)
+        # g.show_command('show', 'get')
+        # g.command('get-stats', 'get_stats')
+        # g.command('list-arp-tables', 'begin_list_arp_table')
+        # g.command('list-route-tables', 'begin_list_routes_table', is_preview=True)
+        # g.command('list-route-tables-summary', 'begin_list_routes_table_summary', is_preview=True)
+        # g.custom_command('create', 'create_express_route', supports_no_wait=True)
+        # g.custom_command('list', 'list_express_route_circuits')
+        # g.command('list-service-providers', 'list', command_type=network_ersp_sdk)
+        from azure.cli.command_modules.network.custom import ExpressRouteUpdate
+        self.command_table['network express-route update'] = ExpressRouteUpdate(loader=self)
+        from azure.cli.command_modules.network.custom import ExpressRouteCreate
+        self.command_table['network express-route create'] = ExpressRouteCreate(loader=self)
+        # g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_express_route', supports_no_wait=True)
+        # g.wait_command('wait')
 
-    with self.command_group('network express-route auth', network_erca_sdk) as g:
-        g.custom_command('create', 'create_express_route_auth', min_api='2019-09-01')
-        g.command('create', 'begin_create_or_update', max_api='2019-08-01', validator=process_auth_create_namespace)
-        g.command('delete', 'begin_delete')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
+    # with self.command_group('network express-route auth', network_erca_sdk) as g:
+    #     g.custom_command('create', 'create_express_route_auth', min_api='2019-09-01')
+    #     g.command('create', 'begin_create_or_update', max_api='2019-08-01', validator=process_auth_create_namespace)
+    #     g.command('delete', 'begin_delete')
+    #     g.show_command('show', 'get')
+    #     g.command('list', 'list')
 
-    with self.command_group('network express-route gateway', network_er_gateway_sdk) as g:
-        g.custom_command('create', 'create_express_route_gateway')
-        g.command('delete', 'begin_delete')
-        g.custom_command('list', 'list_express_route_gateways')
-        g.show_command('show', 'get')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_express_route_gateway', setter_arg_name='put_express_route_gateway_parameters')
+    # with self.command_group('network express-route gateway', network_er_gateway_sdk) as g:
+    #     g.custom_command('create', 'create_express_route_gateway')
+    #     g.command('delete', 'begin_delete')
+    #     g.custom_command('list', 'list_express_route_gateways')
+    #     g.show_command('show', 'get')
+    #     g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_express_route_gateway', setter_arg_name='put_express_route_gateway_parameters')
 
     with self.command_group('network express-route gateway connection', network_er_connection_sdk) as g:
-        g.custom_command('create', 'create_express_route_connection')
-        g.command('delete', 'begin_delete')
-        g.command('list', 'list')
-        g.show_command('show', 'get')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_express_route_connection', setter_arg_name='put_express_route_connection_parameters')
+        # g.custom_command('create', 'create_express_route_connection')
+        # g.command('delete', 'begin_delete')
+        # g.command('list', 'list')
+        # g.show_command('show', 'get')
+        from azure.cli.command_modules.network.custom import ExpressRouteConnectionUpdate, ExpressRouteConnectionCreate
+        self.command_table['network express-route gateway connection update'] = ExpressRouteConnectionUpdate(loader=self)
+        self.command_table['network express-route gateway connection create'] = ExpressRouteConnectionCreate(loader=self)
+        # g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_express_route_connection', setter_arg_name='put_express_route_connection_parameters')
 
     with self.command_group('network express-route peering', network_er_peering_sdk) as g:
         g.custom_command('create', 'create_express_route_peering', client_factory=cf_express_route_circuit_peerings)
