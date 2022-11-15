@@ -5,12 +5,28 @@ set -exv
 
 export USERNAME=azureuser
 
+if [ `rpm --eval "%{dist}"` == '.el7' ] ; then
+    centos7=true
+else
+    centos7=false
+fi
+
+if [ $centos7 == true ] ; then
+    rpm install -y dnf
+    dnf install -y centos-release-scl
+fi
+
 dnf --nogpgcheck install /mnt/rpm/$RPM_NAME -y
 
 dnf install git gcc $PYTHON_PACKAGE-devel findutils -y
 
-ln -s -f /usr/bin/$PYTHON_CMD /usr/bin/python
-ln -s -f /usr/bin/$PIP_CMD /usr/bin/pip
+if [ $centos7 == true ] ; then
+    ln -s -f $PYTHON_CMD /usr/bin/python
+    ln -s -f $PIP_CMD /usr/bin/pip
+else
+    ln -s -f /usr/bin/$PYTHON_CMD /usr/bin/python
+    ln -s -f /usr/bin/$PIP_CMD /usr/bin/pip
+fi
 time az self-test
 time az --version
 
