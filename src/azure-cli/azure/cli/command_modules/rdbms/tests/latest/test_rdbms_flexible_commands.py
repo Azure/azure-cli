@@ -2015,7 +2015,14 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
+    postgres_location = 'eastus'
     mysql_location = 'northeurope'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_postgres_flexible_server_upgrade_mgmt(self, resource_group):
+        self._test_flexible_server_upgrade_mgmt('postgres', resource_group, False)
+        self._test_flexible_server_upgrade_mgmt('postgres', resource_group, True)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
@@ -2027,10 +2034,16 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         replica_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
-        current_version = '5.7'
-        new_version = '8'
+        if database_engine == 'mysql':
+            current_version = '5.7'
+            new_version = '8'
+            location = self.mysql_location
+        else:
+            current_version = '11'
+            new_version = '14'
+            location = self.postgres_location
 
-        create_command = '{} flexible-server create -g {} -n {} --tier GeneralPurpose --sku-name Standard_D2ds_v4 --location {} --version {} --yes'.format(database_engine, resource_group, server_name, self.mysql_location, current_version)
+        create_command = '{} flexible-server create -g {} -n {} --tier GeneralPurpose --sku-name Standard_D2ds_v4 --location {} --version {} --yes'.format(database_engine, resource_group, server_name, location, current_version)
         if public_access:
             create_command += ' --public-access none'
         else:
@@ -2053,19 +2066,30 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
             # remove sql_mode NO_AUTO_CREATE_USER, which is incompatible with new version 8
             for server in [replica_name, server_name]:
                 self.cmd('{} flexible-server parameter set -g {} -s {} -n {} -v {}'
-                        .format(database_engine,
-                                resource_group,
-                                server,
-                                'sql_mode',
-                                'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO'))
+                         .format(database_engine,
+                                 resource_group,
+                                 server,
+                                 'sql_mode',
+                                 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO'))
 
-        # should fail because we first need to upgrade replica
-        self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, server_name, new_version),
-                 expect_failure=True)
+            # should fail because we first need to upgrade replica
+            self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, server_name, new_version),
+                     expect_failure=True)
 
-        # upgrade replica
-        result = self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, replica_name, new_version)).get_output_in_json()
-        self.assertTrue(result['version'].startswith(new_version))
+            # upgrade replica
+            result = self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, replica_name, new_version)).get_output_in_json()
+            self.assertTrue(result['version'].startswith(new_version))
+        else:
+            # should fail because we can't upgrade replica
+            self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, replica_name, new_version),
+                     expect_failure=True)
+
+            # should fail because we can't upgrade primary server with existing replicas
+            self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, server_name, new_version),
+                     expect_failure=True)
+
+            # delete replica
+            self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, replica_name))
 
         # upgrade primary server
         result = self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, server_name, new_version)).get_output_in_json()
