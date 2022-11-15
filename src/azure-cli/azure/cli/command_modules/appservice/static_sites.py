@@ -599,7 +599,8 @@ def get_user_function(cmd, name, resource_group_name):
     return client.get_user_provided_function_apps_for_static_site(name=name, resource_group_name=resource_group_name)
 
 
-def validate_backend(cmd, name, resource_group_name, backend_resource_id, backend_region=None, environment_name='default'):
+def validate_backend(cmd, name, resource_group_name, backend_resource_id, 
+                     backend_region=None, environment_name='default'):
     from azure.mgmt.web.models import StaticSiteLinkedBackendARMResource
 
     parsed_rid = parse_resource_id(backend_resource_id)
@@ -654,7 +655,10 @@ def unlink_backend(cmd, name, resource_group_name, is_cleaning_auth_config=False
 
 def get_backend(cmd, name, resource_group_name, environment_name='default'):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
-    return client.get_linked_backends_for_build(name=name, resource_group_name=resource_group_name, environment_name=environment_name)
+    return client.get_linked_backends_for_build(
+        name=name, 
+        resource_group_name=resource_group_name, 
+        environment_name=environment_name)
 
 
 def _enterprise_edge_warning():
