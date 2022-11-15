@@ -20,6 +20,7 @@ from ._field_value import AAZObject
 from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AAZFreeFormDictArgFormat, \
     AAZSubscriptionIdArgFormat, AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat, AAZDateFormat, \
     AAZTimeFormat, AAZDateTimeFormat, AAZDurationFormat
+from .exceptions import AAZUnregisteredArg
 
 # pylint: disable=redefined-builtin, protected-access, too-few-public-methods
 
@@ -75,7 +76,7 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
     """Base argument"""
 
     def __init__(self, options=None, required=False, help=None, arg_group=None, is_preview=False, is_experimental=False,
-                 id_part=None, default=AAZUndefined, blank=AAZUndefined, nullable=False, fmt=None):
+                 id_part=None, default=AAZUndefined, blank=AAZUndefined, nullable=False, fmt=None, registered=True):
         """
 
         :param options: argument optional names.
@@ -90,6 +91,7 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
         :param blank: when the argument flag is used without value data, the blank value will be used.
         :param nullable: argument can accept `None` as value
         :param fmt: argument format
+        :param registered: control whether register argument into command display
         """
         super().__init__(options=options, nullable=nullable)
         self._help = {}  # the key in self._help can be 'name', 'short-summary', 'long-summary', 'populator-commands'
@@ -109,9 +111,14 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
         self._default = default
         self._blank = blank
         self._fmt = fmt
+        self._registered = registered
 
     def to_cmd_arg(self, name, **kwargs):
         """ convert AAZArg to CLICommandArgument """
+        if not self._registered:
+            # argument will not registered in command display
+            raise AAZUnregisteredArg()
+
         options_list = [*self._options] if self._options else None
         arg = CLICommandArgument(
             dest=name,
@@ -373,7 +380,6 @@ class AAZFreeFormDictArg(AAZBaseArg, AAZFreeFormDictType):
 
     def to_cmd_arg(self, name, **kwargs):
         arg = super().to_cmd_arg(name, **kwargs)
-
         short_summary = arg.type.settings.get('help', None) or ''
         if short_summary:
             short_summary += '  '
@@ -440,7 +446,6 @@ class AAZResourceGroupNameArg(AAZStrArg):
         from azure.cli.core.commands.parameters import get_resource_group_completion_list
         from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
         arg = super().to_cmd_arg(name, **kwargs)
-
         arg.completer = get_resource_group_completion_list
         arg.configured_default = 'group'
         arg.local_context_attribute = LocalContextAttribute(
