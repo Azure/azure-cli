@@ -2638,60 +2638,60 @@ helps['staticwebapp functions show'] = """
 
 helps['staticwebapp backends'] = """
 type: group
-short-summary: Link or unlink a prexisting backend with a static webapp. Also known as "Bring your own Backend."
+short-summary: Link or unlink a prexisting backend with a static web app. Also known as "Bring your own API."
 """
 
 helps['staticwebapp backends validate'] = """
     type: command
-    short-summary: Validate an backend for a static webapp. 
+    short-summary: Validate a backend for a static web app
     long-summary: >
       Only one backend is available to a single static web app. 
-      If backend was previously linked to other static webapp auth configuration must be removed from backend
-      Static webapp SKU must be "Standard". 
+      If a backend was previously linked to another Static Web App, the auth configuration must first be removed from the backend before linking to a different Static Web App.
+      Static web app SKU must be "Standard". 
       Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps. 
       Backend region must be provided for Azure Functions and Azure App Service.
-      See https://learn.microsoft.com/en-us/azure/static-web-apps/apis-overview to learn more.
+      See https://learn.microsoft.com/azure/static-web-apps/apis-overview to learn more.
     examples:
-    - name: Validate a backend for a static webapp
+    - name: Validate a backend for a static web app
       text: az staticwebapp backends validate -n MyStaticAppName -g MyResourceGroup --backend-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/<resource-type>/<backend-name>" --backend-region MyBackendRegion
-    - name: Validate a backend for a static webapp environment
+    - name: Validate a backend for a static web app environment
       text: az staticwebapp backends validate -n MyStaticAppName -g MyResourceGroup --environment-name MyEnvironmentName --backend-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/<resource-type>/<backend-name>" --backend-region MyBackendRegion
 """
 
 helps['staticwebapp backends link'] = """
     type: command
-    short-summary: Link an backend to a static webapp. Also known as "Bring your own Backend."
+    short-summary: Link a backend to a static web app. Also known as "Bring your own API."
     long-summary: >
       Only one backend is available to a single static web app. 
-      If backend was previously linked to other static webapp auth configuration must be removed from backend
-      Static webapp SKU must be "Standard". 
+      If a backend was previously linked to other static web app auth configuration must be removed from backend
+      Static web app SKU must be "Standard". 
       Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps. 
       Backend region must be provided for Azure Functions and Azure App Service.
-      See https://learn.microsoft.com/en-us/azure/static-web-apps/apis-overview to learn more.
+      See https://learn.microsoft.com/azure/static-web-apps/apis-overview to learn more.
     examples:
-    - name: Link a backend to a static webapp
+    - name: Link a backend to a static web app
       text: az staticwebapp backends link -n MyStaticAppName -g MyResourceGroup --backend-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/<resource-type>/<backend-name>" --backend-region MyBackendRegion
-    - name: Link a backend to a static webapp environment
+    - name: Link a backend to a static web app environment
       text: az staticwebapp backends link -n MyStaticAppName -g MyResourceGroup --environment-name MyEnvironmentName --backend-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/<resource-type>/<backend-name>" --backend-region MyBackendRegion
 """
 
 helps['staticwebapp backends unlink'] = """
     type: command
-    short-summary: Unlink backend from a static webapp
+    short-summary: Unlink backend from a static web app
     examples:
     - name: Unlink static app backends.
       text: az staticwebapp backends unlink -n MyStaticAppName -g MyResourceGroup
-    - name: Unlink backend from static webapp environment and remove auth config from backend.
+    - name: Unlink backend from static web app environment and remove auth config from backend.
       text: az staticwebapp backends unlink -n MyStaticAppName -g MyResourceGroup --environment-name MyEnvironmentName --is-cleaning-auth-config
 """
 
 helps['staticwebapp backends show'] = """
     type: command
-    short-summary: Show details on the backend linked to a static webapp
+    short-summary: Show details on the backend linked to a static web app
     examples:
-    - name: Show static webapp backends.
+    - name: Show static web app backends.
       text: az staticwebapp backends show -n MyStaticAppName -g MyResourceGroup
-    - name: Show static webapp backends for environment.
+    - name: Show static web app backends for environment.
       text: az staticwebapp backends show -n MyStaticAppName -g MyResourceGroup --environment-name MyEnvironmentName
 """
 
