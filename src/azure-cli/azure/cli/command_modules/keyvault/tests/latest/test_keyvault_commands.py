@@ -61,7 +61,7 @@ def _create_keyvault(test, kwargs, additional_args=None):
 
 def _create_hsm(test):
     # There's no generic way to get the object id of signed in user/sp, just use a fixed one
-    return test.cmd('keyvault create --hsm-name {hsm} -g {rg} -l {loc} '
+    return test.cmd('keyvault create --hsm-name {hsm} -g {rg} -l {loc} --retention-days 7 '
                     '--administrators "3707fb2f-ac10-4591-a04f-8b0d786ea37d"')
 
 
@@ -121,7 +121,7 @@ class KeyVaultMHSMPrivateLinkResourceScenarioTest(ScenarioTest):
     def test_mhsm_private_link_resource(self, resource_group):
         self.kwargs.update({
             'hsm': self.create_random_name('cli-test-hsm-plr-', 24),
-            'loc': 'centraluseuap'
+            'loc': 'eastus2euap'
         })
         _create_hsm(self)
         self.cmd('keyvault private-link-resource list --hsm-name {hsm}',
