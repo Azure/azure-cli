@@ -95,7 +95,6 @@ def retryable_method(retries=3, interval_sec=5, exception_type=Exception, condit
                 try:
                     return func(*args, **kwargs)
                 except exception_type as ex:  # pylint: disable=broad-except
-                    print(condition(ex))
                     if condition and not condition(ex):
                         raise ex
                     current_retry -= 1
