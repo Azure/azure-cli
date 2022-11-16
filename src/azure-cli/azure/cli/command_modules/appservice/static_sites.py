@@ -640,7 +640,7 @@ def link_backend(cmd, name, resource_group_name, backend_resource_id, backend_re
 
 def unlink_backend(cmd, name, resource_group_name, remove_backend_auth=False, environment_name='default'):
     if remove_backend_auth:
-        logger.warning("--remove-backend-auth: removing auth configuration from backend")
+        logger.warning("Please note that using parameter --remove-backend-auth will remove auth configuration from backend")
 
     backend_name = list(get_backend(cmd, name, resource_group_name, environment_name))[0].name
 
