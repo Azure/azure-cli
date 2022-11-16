@@ -6637,6 +6637,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             aad_route=True,
             create_dcr=False,
             create_dcra=True,
+            enable_syslog=None,
         )
 
         dec_3 = AKSManagedClusterCreateDecorator(
@@ -8842,6 +8843,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             aad_route=True,
             create_dcr=False,
             create_dcra=True,
+            enable_syslog=None,
         )
 
         dec_3 = AKSManagedClusterUpdateDecorator(
