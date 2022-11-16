@@ -33,9 +33,9 @@ import subprocess
 import tempfile
 import requests
 
-from .aaz.latest.network.express_route import Update as _ExpressRouteUpdate
-from .aaz.latest.network.express_route.gateway.connection import Update as _ExpressRouteConnectionUpdate,\
-    Create as _ExpressRouteConnectionCreate
+from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
+from .aaz.latest.network.express_route.gateway.connection import Create as _ExpressRouteConnectionCreate, \
+    Update as _ExpressRouteConnectionUpdate
 
 logger = get_logger(__name__)
 
@@ -85,16 +85,6 @@ def list_vnet(cmd, resource_group_name=None):
 
 def list_express_route_circuits(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'express_route_circuits', resource_group_name)
-
-
-def create_express_route_auth(cmd, resource_group_name, circuit_name, authorization_name):
-    ExpressRouteCircuitAuthorization = cmd.get_models('ExpressRouteCircuitAuthorization')
-
-    client = network_client_factory(cmd.cli_ctx).express_route_circuit_authorizations
-    return client.begin_create_or_update(resource_group_name,
-                                         circuit_name,
-                                         authorization_name,
-                                         ExpressRouteCircuitAuthorization())
 
 
 def list_lbs(cmd, resource_group_name=None):
@@ -3099,38 +3089,6 @@ def lists_match(l1, l2):
 
 
 # region ExpressRoutes
-def create_express_route(cmd, circuit_name, resource_group_name, bandwidth_in_mbps, peering_location,
-                         service_provider_name, location=None, tags=None,
-                         sku_family=None, sku_tier=None, allow_global_reach=None, express_route_port=None,
-                         allow_classic_operations=None):
-    sku_name = '{}_{}'.format(sku_tier, sku_family)
-    args = {
-        'resource_group': resource_group_name,
-        'name': circuit_name,
-        'sku_name': sku_name,
-        'sku_tier': sku_tier,
-        'sku_family': sku_family,
-        'location': location,
-        'tags': tags,
-        'bandwidth': (float(bandwidth_in_mbps) / 1000) if express_route_port else None,
-        'global_reach_enabled': allow_global_reach,
-        'service_provider_name': service_provider_name,
-        'peering_location': peering_location,
-        'bandwidth_in_mbps': (int(bandwidth_in_mbps)) if not express_route_port else None
-    }
-    if allow_classic_operations is not None:
-        args['allow_classic_operations'] = allow_classic_operations
-    if express_route_port:
-        args['express_route_port'] = express_route_port
-        args['service_provider_name'] = None
-        args['peering_location'] = None
-        args['bandwidth_in_mbps'] = None
-
-    from .aaz.latest.network.express_route import Create
-    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
-
-
-from .aaz.latest.network.express_route import Create as _ExpressRouteCreate
 class ExpressRouteCreate(_ExpressRouteCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -3156,38 +3114,6 @@ class ExpressRouteCreate(_ExpressRouteCreate):
         if args.express_route_port:
             args.provider = None
             args.peering_location = None
-
-
-def update_express_route(instance, cmd, bandwidth_in_mbps=None, peering_location=None,
-                         service_provider_name=None, sku_family=None, sku_tier=None, tags=None,
-                         allow_global_reach=None, express_route_port=None,
-                         allow_classic_operations=None):
-
-    with cmd.update_context(instance) as c:
-        c.set_param('allow_classic_operations', allow_classic_operations)
-        c.set_param('tags', tags)
-        c.set_param('allow_global_reach', allow_global_reach)
-
-    with cmd.update_context(instance.sku) as c:
-        c.set_param('family', sku_family)
-        c.set_param('tier', sku_tier)
-
-    with cmd.update_context(instance.service_provider_properties) as c:
-        c.set_param('peering_location', peering_location)
-        c.set_param('service_provider_name', service_provider_name)
-
-    if express_route_port is not None:
-        SubResource = cmd.get_models('SubResource')
-        instance.express_route_port = SubResource(id=express_route_port)
-        instance.service_provider_properties = None
-
-    if bandwidth_in_mbps is not None:
-        if not instance.express_route_port:
-            instance.service_provider_properties.bandwith_in_mbps = float(bandwidth_in_mbps)
-        else:
-            instance.bandwidth_in_gbps = (float(bandwidth_in_mbps) / 1000)
-
-    return instance
 
 
 class ExpressRouteUpdate(_ExpressRouteUpdate):
@@ -3419,37 +3345,6 @@ def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_addr
 
 # region ExpressRoute Connection
 # pylint: disable=unused-argument
-def create_express_route_connection(cmd, resource_group_name, express_route_gateway_name, connection_name,
-                                    peering, authorization_key=None, routing_weight=None,
-                                    enable_internet_security=None, associated_route_table=None,
-                                    propagated_route_tables=None, labels=None):
-    ExpressRouteConnection, SubResource, RoutingConfiguration, PropagatedRouteTable\
-        = cmd.get_models('ExpressRouteConnection', 'SubResource', 'RoutingConfiguration', 'PropagatedRouteTable')
-    client = network_client_factory(cmd.cli_ctx).express_route_connections
-
-    propagated_route_tables = PropagatedRouteTable(
-        labels=labels,
-        ids=[SubResource(id=propagated_route_table) for propagated_route_table in
-             propagated_route_tables] if propagated_route_tables else None
-    )
-    routing_configuration = RoutingConfiguration(
-        associated_route_table=SubResource(id=associated_route_table),
-        propagated_route_tables=propagated_route_tables
-    )
-    connection = ExpressRouteConnection(
-        name=connection_name,
-        express_route_circuit_peering=SubResource(id=peering) if peering else None,
-        authorization_key=authorization_key,
-        routing_weight=routing_weight,
-        routing_configuration=routing_configuration
-    )
-
-    if enable_internet_security and cmd.supported_api_version(min_api='2019-09-01'):
-        connection.enable_internet_security = enable_internet_security
-
-    return client.begin_create_or_update(resource_group_name, express_route_gateway_name, connection_name, connection)
-
-
 class ExpressRouteConnectionCreate(_ExpressRouteConnectionCreate):
 
     @classmethod
@@ -3484,36 +3379,6 @@ class ExpressRouteConnectionCreate(_ExpressRouteConnectionCreate):
 
 
 # pylint: disable=unused-argument
-def update_express_route_connection(instance, cmd, circuit_name=None, peering=None, authorization_key=None,
-                                    routing_weight=None, enable_internet_security=None, associated_route_table=None,
-                                    propagated_route_tables=None, labels=None):
-    SubResource = cmd.get_models('SubResource')
-    if peering is not None:
-        instance.express_route_connection_id = SubResource(id=peering)
-    if authorization_key is not None:
-        instance.authorization_key = authorization_key
-    if routing_weight is not None:
-        instance.routing_weight = routing_weight
-    if enable_internet_security is not None and cmd.supported_api_version(min_api='2019-09-01'):
-        instance.enable_internet_security = enable_internet_security
-    if associated_route_table is not None or propagated_route_tables is not None or labels is not None:
-        if instance.routing_configuration is None:
-            RoutingConfiguration = cmd.get_models('RoutingConfiguration')
-            instance.routing_configuration = RoutingConfiguration()
-        if associated_route_table is not None:
-            instance.routing_configuration.associated_route_table = SubResource(id=associated_route_table)
-        if propagated_route_tables is not None or labels is not None:
-            if instance.routing_configuration.propagated_route_tables is None:
-                PropagatedRouteTable = cmd.get_models('PropagatedRouteTable')
-                instance.routing_configuration.propagated_route_tables = PropagatedRouteTable()
-            if propagated_route_tables is not None:
-                instance.routing_configuration.propagated_route_tables.ids = [SubResource(id=propagated_route_table) for propagated_route_table in propagated_route_tables]  # pylint: disable=line-too-long
-            if labels is not None:
-                instance.routing_configuration.propagated_route_tables.labels = labels
-
-    return instance
-
-
 class ExpressRouteConnectionUpdate(_ExpressRouteConnectionUpdate):
 
     @classmethod
@@ -3548,61 +3413,6 @@ class ExpressRouteConnectionUpdate(_ExpressRouteConnectionUpdate):
         if args.propagated_route_tables is not None:
             args.propagated_ids = [{"id": propagated_route_table} for propagated_route_table in args.propagated_route_tables]
     pass
-# endregion
-
-
-# region ExpressRoute Gateways
-def create_express_route_gateway(cmd, resource_group_name, express_route_gateway_name, location=None, tags=None,
-                                 min_val=2, max_val=None, virtual_hub=None):
-    ExpressRouteGateway, SubResource = cmd.get_models('ExpressRouteGateway', 'SubResource')
-    client = network_client_factory(cmd.cli_ctx).express_route_gateways
-    gateway = ExpressRouteGateway(
-        location=location,
-        tags=tags,
-        virtual_hub=SubResource(id=virtual_hub) if virtual_hub else None
-    )
-    if min or max:
-        gateway.auto_scale_configuration = {'bounds': {'min': min_val, 'max': max_val}}
-    print(min)
-    # ExpressRouteGatewayPropertiesAutoScaleConfiguration, \
-    # ExpressRouteGatewayPropertiesAutoScaleConfigurationBounds = cmd.get_models(
-    #     'ExpressRouteGatewayPropertiesAutoScaleConfiguration',
-    #     'ExpressRouteGatewayPropertiesAutoScaleConfigurationBounds')
-    # ExpressRouteGatewayPropertiesAutoScaleConfiguration(
-    #     bounds=ExpressRouteGatewayPropertiesAutoScaleConfigurationBounds(min=min, max=max))
-
-    return client.begin_create_or_update(resource_group_name, express_route_gateway_name, gateway)
-
-
-def update_express_route_gateway(instance, cmd, tags=None, min_val=None, max_val=None):
-
-    def _ensure_autoscale():
-        if not instance.auto_scale_configuration:
-            ExpressRouteGatewayPropertiesAutoScaleConfiguration, \
-                ExpressRouteGatewayPropertiesAutoScaleConfigurationBounds = cmd.get_models(
-                    'ExpressRouteGatewayPropertiesAutoScaleConfiguration',
-                    'ExpressRouteGatewayPropertiesAutoScaleConfigurationBounds')
-            instance.auto_scale_configuration = ExpressRouteGatewayPropertiesAutoScaleConfiguration(
-                bounds=ExpressRouteGatewayPropertiesAutoScaleConfigurationBounds(min=min, max=max))
-
-    if tags is not None:
-        instance.tags = tags
-    if min is not None:
-        _ensure_autoscale()
-        instance.auto_scale_configuration.bounds.min = min_val
-    if max is not None:
-        _ensure_autoscale()
-        instance.auto_scale_configuration.bounds.max = max_val
-
-    print("-------------------------------------------------------------------------------------------")
-    return instance
-
-
-def list_express_route_gateways(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).express_route_gateways
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list_by_subscription()
 # endregion
 
 
