@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network express-route get-stats",
-    confirmation="",
 )
 class GetStats(AAZCommand):
     """Get the statistics of an ExpressRoute circuit.

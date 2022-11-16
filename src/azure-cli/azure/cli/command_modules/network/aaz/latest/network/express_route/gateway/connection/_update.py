@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network express-route gateway connection update",
-    confirmation="",
 )
 class Update(AAZCommand):
     """Update an ExpressRoute gateway connection.

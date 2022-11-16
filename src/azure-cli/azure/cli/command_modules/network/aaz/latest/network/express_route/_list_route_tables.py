@@ -14,7 +14,6 @@ from azure.cli.core.aaz import *
 @register_command(
     "network express-route list-route-tables",
     is_preview=True,
-    confirmation="",
 )
 class ListRouteTables(AAZCommand):
     """Show the current routing table of an ExpressRoute circuit peering.
@@ -26,7 +25,7 @@ class ListRouteTables(AAZCommand):
     _aaz_info = {
         "version": "2022-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutecrossconnections/{}/peerings/{}/routetables/{}", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutecircuits/{}/peerings/{}/routetables/{}", "2022-01-01"],
         ]
     }
 
@@ -53,32 +52,26 @@ class ListRouteTables(AAZCommand):
             required=True,
             id_part="name",
         )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
-            required=True,
-        )
-
-        # define Arg Group "Arguments"
-
-        _args_schema = cls._args_schema
         _args_schema.path = AAZStrArg(
             options=["--path"],
-            arg_group="Arguments",
-            help="The path of the device.",
+            help="The path of the device.  Allowed values: primary, secondary.",
             required=True,
             id_part="child_name_2",
         )
         _args_schema.peering_name = AAZStrArg(
             options=["--peering-name"],
-            arg_group="Arguments",
             help="The name of the peering.",
             required=True,
             id_part="child_name_1",
+        )
+        _args_schema.resource_group = AAZResourceGroupNameArg(
+            required=True,
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.ExpressRouteCrossConnectionsListRoutesTable(ctx=self.ctx)()
+        yield self.ExpressRouteCircuitsListRoutesTable(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -93,7 +86,7 @@ class ListRouteTables(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class ExpressRouteCrossConnectionsListRoutesTable(AAZHttpOperation):
+    class ExpressRouteCircuitsListRoutesTable(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -123,7 +116,7 @@ class ListRouteTables(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteCrossConnections/{crossConnectionName}/peerings/{peeringName}/routeTables/{devicePath}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteCircuits/{circuitName}/peerings/{peeringName}/routeTables/{devicePath}",
                 **self.url_parameters
             )
 
@@ -139,7 +132,7 @@ class ListRouteTables(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "crossConnectionName", self.ctx.args.name,
+                    "circuitName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(

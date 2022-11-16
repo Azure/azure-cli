@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network express-route auth create",
-    confirmation="",
 )
 class Create(AAZCommand):
     """Create a new link authorization for an ExpressRoute circuit.

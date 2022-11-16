@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network express-route list",
-    confirmation="",
 )
 class List(AAZCommand):
     """List all ExpressRoute circuits for the current subscription.

@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network express-route gateway delete",
-    confirmation="",
 )
 class Delete(AAZCommand):
     """Delete an ExpressRoute gateway.

@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network express-route list-arp-tables",
-    confirmation="",
 )
 class ListArpTables(AAZCommand):
     """Show the current Address Resolution Protocol (ARP) table of an ExpressRoute circuit.
@@ -25,7 +24,7 @@ class ListArpTables(AAZCommand):
     _aaz_info = {
         "version": "2022-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutecrossconnections/{}/peerings/{}/arptables/{}", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutecircuits/{}/peerings/{}/arptables/{}", "2022-01-01"],
         ]
     }
 
@@ -52,8 +51,8 @@ class ListArpTables(AAZCommand):
             required=True,
             id_part="name",
         )
-        _args_schema.device_path = AAZStrArg(
-            options=["--device-path"],
+        _args_schema.path = AAZStrArg(
+            options=["--path"],
             help="The path of the device.  Allowed values: primary, secondary.",
             required=True,
             id_part="child_name_2",
@@ -71,7 +70,7 @@ class ListArpTables(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.ExpressRouteCrossConnectionsListArpTable(ctx=self.ctx)()
+        yield self.ExpressRouteCircuitsListArpTable(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -86,7 +85,7 @@ class ListArpTables(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class ExpressRouteCrossConnectionsListArpTable(AAZHttpOperation):
+    class ExpressRouteCircuitsListArpTable(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -116,7 +115,7 @@ class ListArpTables(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteCrossConnections/{crossConnectionName}/peerings/{peeringName}/arpTables/{devicePath}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteCircuits/{circuitName}/peerings/{peeringName}/arpTables/{devicePath}",
                 **self.url_parameters
             )
 
@@ -132,11 +131,11 @@ class ListArpTables(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "crossConnectionName", self.ctx.args.name,
+                    "circuitName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "devicePath", self.ctx.args.device_path,
+                    "devicePath", self.ctx.args.path,
                     required=True,
                 ),
                 **self.serialize_url_param(

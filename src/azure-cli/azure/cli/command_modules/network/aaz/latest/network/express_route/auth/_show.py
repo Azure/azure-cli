@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network express-route auth show",
-    confirmation="",
 )
 class Show(AAZCommand):
     """Get the details of a link authorization of an ExpressRoute circuit.

@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network express-route auth delete",
-    confirmation="",
 )
 class Delete(AAZCommand):
     """Delete a link authorization of an ExpressRoute circuit.

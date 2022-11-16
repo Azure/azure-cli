@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network express-route auth list",
-    confirmation="",
 )
 class List(AAZCommand):
     """List link authorizations of an ExpressRoute circuit.

@@ -72,9 +72,9 @@ class Create(AAZCommand):
             options=["--express-route-port"],
             help="Name or ID of an ExpressRoute port.",
         )
-        _args_schema.global_reach_enabled = AAZBoolArg(
-            options=["--global-reach-enabled"],
-            help="Flag denoting global reach status.",
+        _args_schema.allow_global_reach = AAZBoolArg(
+            options=["--allow-global-reach"],
+            help="Enable global reach on the circuit.",
         )
         _args_schema.peering_location = AAZStrArg(
             options=["--peering-location"],
@@ -304,7 +304,7 @@ class Create(AAZCommand):
                 properties.set_prop("allowClassicOperations", AAZBoolType, ".allow_classic_operations")
                 properties.set_prop("bandwidthInGbps", AAZFloatType, ".bandwidth_of_circuit")
                 properties.set_prop("expressRoutePort", AAZObjectType)
-                properties.set_prop("globalReachEnabled", AAZBoolType, ".global_reach_enabled")
+                properties.set_prop("globalReachEnabled", AAZBoolType, ".allow_global_reach")
                 properties.set_prop("serviceProviderProperties", AAZObjectType)
 
             express_route_port = _builder.get(".properties.expressRoutePort")

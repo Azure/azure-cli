@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network express-route gateway connection create",
-    confirmation="",
 )
 class Create(AAZCommand):
     """Create an ExpressRoute gateway connection.

@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network express-route list-service-providers",
-    confirmation="",
 )
 class ListServiceProviders(AAZCommand):
     """List available ExpressRoute service providers.

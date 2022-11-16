@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network express-route gateway show",
-    confirmation="",
 )
 class Show(AAZCommand):
     """Get the details of an ExpressRoute gateway.

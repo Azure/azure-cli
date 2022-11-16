@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network express-route gateway list",
-    confirmation="",
 )
 class List(AAZCommand):
     """List ExpressRoute gateways.
