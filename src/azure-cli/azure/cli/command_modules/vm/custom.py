@@ -4696,8 +4696,8 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         image_version.publishing_profile.replica_count = replica_count
     if image_version.storage_profile.source is not None:
         image_version.storage_profile.os_disk_image = image_version.storage_profile.data_disk_images = None
-    if target_edge_zones:
-        image_version.publishing_profile.target_extended_locations = target_edge_zones
+    # target extended locations are not contained if the update command is called without target edge zones
+    image_version.publishing_profile.target_extended_locations = target_edge_zones
     if allow_replicated_location_deletion is not None:
         image_version.safety_profile.allow_deletion_of_replicated_locations = allow_replicated_location_deletion
 
