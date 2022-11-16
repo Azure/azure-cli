@@ -599,7 +599,7 @@ def get_user_function(cmd, name, resource_group_name):
     return client.get_user_provided_function_apps_for_static_site(name=name, resource_group_name=resource_group_name)
 
 
-def validate_backend(cmd, name, resource_group_name, backend_resource_id, 
+def validate_backend(cmd, name, resource_group_name, backend_resource_id,
                      backend_region=None, environment_name='default'):
     from azure.mgmt.web.models import StaticSiteLinkedBackendARMResource
 
@@ -638,9 +638,9 @@ def link_backend(cmd, name, resource_group_name, backend_resource_id, backend_re
         environment_name=environment_name)
 
 
-def unlink_backend(cmd, name, resource_group_name, is_cleaning_auth_config=False, environment_name='default'):
-    if is_cleaning_auth_config:
-        logger.warning("--is-cleaning-auth-config: removing auth configuration from backend")
+def unlink_backend(cmd, name, resource_group_name, remove_backend_auth=False, environment_name='default'):
+    if remove_backend_auth:
+        logger.warning("--remove-backend-auth: removing auth configuration from backend")
 
     backend_name = list(get_backend(cmd, name, resource_group_name, environment_name))[0].name
 
@@ -650,14 +650,14 @@ def unlink_backend(cmd, name, resource_group_name, is_cleaning_auth_config=False
         resource_group_name=resource_group_name,
         linked_backend_name=backend_name,
         environment_name=environment_name,
-        is_cleaning_auth_config=is_cleaning_auth_config)
+        is_cleaning_auth_config=remove_backend_auth)
 
 
 def get_backend(cmd, name, resource_group_name, environment_name='default'):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     return client.get_linked_backends_for_build(
-        name=name, 
-        resource_group_name=resource_group_name, 
+        name=name,
+        resource_group_name=resource_group_name,
         environment_name=environment_name)
 
 

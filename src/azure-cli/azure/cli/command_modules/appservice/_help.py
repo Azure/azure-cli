@@ -2682,7 +2682,7 @@ helps['staticwebapp backends unlink'] = """
     - name: Unlink static app backends.
       text: az staticwebapp backends unlink -n MyStaticAppName -g MyResourceGroup
     - name: Unlink backend from static web app environment and remove auth config from backend.
-      text: az staticwebapp backends unlink -n MyStaticAppName -g MyResourceGroup --environment-name MyEnvironmentName --is-cleaning-auth-config
+      text: az staticwebapp backends unlink -n MyStaticAppName -g MyResourceGroup --environment-name MyEnvironmentName --remove-backend-auth
 """
 
 helps['staticwebapp backends show'] = """
