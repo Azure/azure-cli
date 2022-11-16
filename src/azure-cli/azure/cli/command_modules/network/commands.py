@@ -558,13 +558,13 @@ def load_command_table(self, _):
     with self.command_group('network express-route', network_er_sdk) as g:
         g.command('list-route-tables-summary', 'begin_list_routes_table_summary', is_preview=True)
         from azure.cli.command_modules.network.custom import ExpressRouteCreate, ExpressRouteUpdate
-        self.command_table['network express-route update'] = ExpressRouteUpdate(loader=self)
         self.command_table['network express-route create'] = ExpressRouteCreate(loader=self)
+        self.command_table['network express-route update'] = ExpressRouteUpdate(loader=self)
 
     with self.command_group('network express-route gateway connection'):
         from azure.cli.command_modules.network.custom import ExpressRouteConnectionUpdate, ExpressRouteConnectionCreate
-        self.command_table['network express-route gateway connection update'] = ExpressRouteConnectionUpdate(loader=self)
         self.command_table['network express-route gateway connection create'] = ExpressRouteConnectionCreate(loader=self)
+        self.command_table['network express-route gateway connection update'] = ExpressRouteConnectionUpdate(loader=self)
 
     with self.command_group('network express-route peering', network_er_peering_sdk) as g:
         g.custom_command('create', 'create_express_route_peering', client_factory=cf_express_route_circuit_peerings)

@@ -3362,6 +3362,10 @@ class ExpressRouteConnectionCreate(_ExpressRouteConnectionCreate):
             help="Space-separated list of resource id of propagated route tables.",
             is_preview=True)
         args_schema.propagated_route_tables.Element = AAZStrArg()
+        args_schema.circuit_name = AAZStrArg(
+            options=['--circuit-name'],
+            arg_group="Peering",
+            help="ExpressRoute circuit name.")
 
         return args_schema
 
@@ -3398,6 +3402,10 @@ class ExpressRouteConnectionUpdate(_ExpressRouteConnectionUpdate):
             is_preview=True,
             nullable=True,)
         args_schema.propagated_route_tables.Element = AAZStrArg()
+        args_schema.circuit_name = AAZStrArg(
+            options=['--circuit-name'],
+            arg_group="Peering",
+            help="ExpressRoute circuit name.")
 
         return args_schema
 

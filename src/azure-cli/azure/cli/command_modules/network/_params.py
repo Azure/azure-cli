@@ -763,8 +763,6 @@ def load_arguments(self, _):
 
     # region ExpressRoutes
     device_path_values = ['primary', 'secondary']
-    er_circuit_name_type = CLIArgumentType(options_list='--circuit-name', metavar='NAME', help='ExpressRoute circuit name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'))
-    er_gateway_name_type = CLIArgumentType(options_list='--gateway-name', metavar='NAME', help='ExpressRoute gateway name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/expressRouteGateways'))
     er_port_name_type = CLIArgumentType(options_list='--port-name', metavar='NAME', help='ExpressRoute port name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/expressRoutePorts'))
     er_bandwidth_type = CLIArgumentType(options_list='--bandwidth', nargs='+')
     sku_family_type = CLIArgumentType(help='Chosen SKU family of ExpressRoute circuit.', arg_type=get_enum_type(ExpressRouteCircuitSkuFamily), default=ExpressRouteCircuitSkuFamily.metered_data.value)
@@ -783,10 +781,6 @@ def load_arguments(self, _):
         c.argument('allow_global_reach', arg_type=get_three_state_flag(), min_api='2018-07-01', help='Enable global reach on the circuit.')
         c.argument('express_route_port', help='Name or ID of an ExpressRoute port.', min_api='2018-08-01', validator=validate_express_route_port)
         c.argument('allow_classic_operations', arg_type=get_three_state_flag(), min_api='2017-10-01', help='Allow classic operations.')
-
-    with self.argument_context('network express-route update') as c:
-        c.argument('sku_family', sku_family_type, default=None)
-        c.argument('sku_tier', sku_tier_type, default=None)
 
     with self.argument_context('network express-route auth') as c:
         c.argument('circuit_name', circuit_name_type)
@@ -837,31 +831,6 @@ def load_arguments(self, _):
     # endregion
 
     # region ExpressRoute Gateways
-    with self.argument_context('network express-route gateway', min_api='2018-08-01') as c:
-        c.argument('express_route_gateway_name', er_gateway_name_type, options_list=['--name', '-n'])
-        c.argument('min_val', help='Minimum number of scale units deployed for gateway.', type=int, arg_group='Autoscale')
-        c.argument('max_val', help='Maximum number of scale units deployed for gateway.', type=int, arg_group='Autoscale')
-        c.argument('virtual_hub', help='Name or ID of the virtual hub to associate with the gateway.', validator=validate_virtual_hub)
-
-    with self.argument_context('network express-route gateway connection', min_api='2018-08-01') as c:
-        c.argument('express_route_gateway_name', er_gateway_name_type)
-        c.argument('connection_name', options_list=['--name', '-n'], help='ExpressRoute connection name.', id_part='child_name_1')
-        c.argument('routing_weight', help='Routing weight associated with the connection.', type=int)
-        c.argument('authorization_key', help='Authorization key to establish the connection.')
-        c.argument('enable_internet_security', options_list='--internet-security', arg_type=get_three_state_flag(), help='Enable internet security. A virtual hub can have the ability to propagate a learned default route to this ExpressRoute connection. This ref https://review.docs.microsoft.com/en-us/azure/virtual-wan/effective-routes-virtual-hub?branch=pr-en-us-91866#aboutdefaultroute might be helpful.', min_api='2019-09-01')
-
-    with self.argument_context('network express-route gateway connection', arg_group='Peering', min_api='2018-08-01') as c:
-        c.argument('peering', help='Name or ID of an ExpressRoute peering.', validator=validate_express_route_peering)
-        c.argument('circuit_name', er_circuit_name_type, id_part=None)
-
-    with self.argument_context('network express-route gateway connection', arg_group='Routing Configuration', min_api='2020-04-01', is_preview=True) as c:
-        c.argument('associated_route_table', options_list=['--associated', '--associated-route-table'], help='The resource id of route table associated with this routing configuration.')
-        c.argument('propagated_route_tables', options_list=['--propagated', '--propagated-route-tables'], nargs='+', help='Space-separated list of resource id of propagated route tables.')
-        c.argument('labels', nargs='+', help='Space-separated list of labels for propagated route tables.')
-
-    with self.argument_context('network express-route gateway connection list', min_api='2018-08-01') as c:
-        c.argument('express_route_gateway_name', er_gateway_name_type, id_part=None)
-
     with self.argument_context('network express-route port', min_api='2018-08-01') as c:
         c.argument('express_route_port_name', er_port_name_type, options_list=['--name', '-n'])
         c.argument('encapsulation', arg_type=get_enum_type(ExpressRoutePortsEncapsulation), help='Encapsulation method on physical ports.')

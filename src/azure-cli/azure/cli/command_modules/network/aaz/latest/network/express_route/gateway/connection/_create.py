@@ -83,6 +83,9 @@ class Create(AAZCommand):
             options=["--peering"],
             arg_group="Peering",
             help="Name or ID of an ExpressRoute peering.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{circuit_name}/peerings/{}"
+            )
         )
 
         # define Arg Group "Properties"
