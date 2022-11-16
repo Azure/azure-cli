@@ -75,9 +75,13 @@ class Create(AAZCommand):
             options=["--delegations"],
             help="Space-separated list of services to whom the subnet should be delegated, e.g., `Microsoft.Sql/servers`.",
         )
-        _args_schema.nat_gateway = AAZStrArg(
+        _args_schema.nat_gateway = AAZResourceIdArg(
             options=["--nat-gateway"],
             help="Name or ID of a NAT gateway to attach.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/natGateways/{}",
+            ),
         )
         _args_schema.network_security_group = AAZResourceIdArg(
             options=["--nsg", "--network-security-group"],
@@ -105,12 +109,12 @@ class Create(AAZCommand):
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/routeTables/{}",
             ),
         )
-        _args_schema.service_endpoint_policies = AAZListArg(
-            options=["--service-endpoint-policies"],
+        _args_schema.policies = AAZListArg(
+            options=["--policies"],
             help="An array of service endpoint policies.",
         )
-        _args_schema.service_endpoints = AAZListArg(
-            options=["--service-endpoints"],
+        _args_schema.endpoints = AAZListArg(
+            options=["--endpoints"],
             help="An array of service endpoints.",
         )
 
@@ -138,10 +142,10 @@ class Create(AAZCommand):
             help="Resource type.",
         )
 
-        service_endpoint_policies = cls._args_schema.service_endpoint_policies
-        service_endpoint_policies.Element = AAZObjectArg()
+        policies = cls._args_schema.policies
+        policies.Element = AAZObjectArg()
 
-        _element = cls._args_schema.service_endpoint_policies.Element
+        _element = cls._args_schema.policies.Element
         _element.id = AAZResourceIdArg(
             options=["id"],
             help="Resource ID.",
@@ -173,13 +177,13 @@ class Create(AAZCommand):
             help="Resource tags.",
         )
 
-        contextual_service_endpoint_policies = cls._args_schema.service_endpoint_policies.Element.contextual_service_endpoint_policies
+        contextual_service_endpoint_policies = cls._args_schema.policies.Element.contextual_service_endpoint_policies
         contextual_service_endpoint_policies.Element = AAZStrArg()
 
-        service_endpoint_policy_definitions = cls._args_schema.service_endpoint_policies.Element.service_endpoint_policy_definitions
+        service_endpoint_policy_definitions = cls._args_schema.policies.Element.service_endpoint_policy_definitions
         service_endpoint_policy_definitions.Element = AAZObjectArg()
 
-        _element = cls._args_schema.service_endpoint_policies.Element.service_endpoint_policy_definitions.Element
+        _element = cls._args_schema.policies.Element.service_endpoint_policy_definitions.Element
         _element.id = AAZResourceIdArg(
             options=["id"],
             help="Resource ID.",
@@ -208,16 +212,16 @@ class Create(AAZCommand):
             help="The type of the resource.",
         )
 
-        service_resources = cls._args_schema.service_endpoint_policies.Element.service_endpoint_policy_definitions.Element.service_resources
+        service_resources = cls._args_schema.policies.Element.service_endpoint_policy_definitions.Element.service_resources
         service_resources.Element = AAZStrArg()
 
-        tags = cls._args_schema.service_endpoint_policies.Element.tags
+        tags = cls._args_schema.policies.Element.tags
         tags.Element = AAZStrArg()
 
-        service_endpoints = cls._args_schema.service_endpoints
-        service_endpoints.Element = AAZObjectArg()
+        endpoints = cls._args_schema.endpoints
+        endpoints.Element = AAZObjectArg()
 
-        _element = cls._args_schema.service_endpoints.Element
+        _element = cls._args_schema.endpoints.Element
         _element.locations = AAZListArg(
             options=["locations"],
             help="A list of locations.",
@@ -227,7 +231,7 @@ class Create(AAZCommand):
             help="The type of the endpoint service.",
         )
 
-        locations = cls._args_schema.service_endpoints.Element.locations
+        locations = cls._args_schema.endpoints.Element.locations
         locations.Element = AAZStrArg()
 
         # define Arg Group "NetworkSecurityGroup"
@@ -410,8 +414,8 @@ class Create(AAZCommand):
                 properties.set_prop("privateEndpointNetworkPolicies", AAZStrType, ".disable_private_endpoint_network_policies")
                 properties.set_prop("privateLinkServiceNetworkPolicies", AAZStrType, ".disable_private_link_service_network_policies")
                 properties.set_prop("routeTable", AAZObjectType)
-                properties.set_prop("serviceEndpointPolicies", AAZListType, ".service_endpoint_policies")
-                properties.set_prop("serviceEndpoints", AAZListType, ".service_endpoints")
+                properties.set_prop("serviceEndpointPolicies", AAZListType, ".policies")
+                properties.set_prop("serviceEndpoints", AAZListType, ".endpoints")
 
             address_prefixes = _builder.get(".properties.addressPrefixes")
             if address_prefixes is not None:
