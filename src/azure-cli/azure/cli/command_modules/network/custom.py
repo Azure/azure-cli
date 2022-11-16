@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import math
 from collections import Counter, OrderedDict
 
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
@@ -3420,7 +3419,6 @@ class ExpressRouteConnectionUpdate(_ExpressRouteConnectionUpdate):
             args.associated_id = {"id": args.associated_route_table}
         if args.propagated_route_tables is not None:
             args.propagated_ids = [{"id": propagated_route_table} for propagated_route_table in args.propagated_route_tables]
-    pass
 # endregion
 
 

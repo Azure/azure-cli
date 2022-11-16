@@ -79,7 +79,7 @@ class Create(AAZCommand):
         # define Arg Group "Peering"
 
         _args_schema = cls._args_schema
-        _args_schema.peering = AAZStrArg(
+        _args_schema.peering = AAZResourceIdArg(
             options=["--peering"],
             arg_group="Peering",
             help="Name or ID of an ExpressRoute peering.",

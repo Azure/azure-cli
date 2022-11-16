@@ -57,9 +57,12 @@ class Create(AAZCommand):
                 resource_group_arg="resource_group",
             ),
         )
-        _args_schema.virtual_hub = AAZStrArg(
+        _args_schema.virtual_hub = AAZResourceIdArg(
             options=["--virtual-hub"],
             help="Name or ID of the virtual hub to associate with the gateway.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}"
+            )
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
