@@ -115,6 +115,16 @@ password_length = 15
 def create_vault(client, vault_name, resource_group_name, location, tags=None, classic_alerts='Enable',
                  azure_monitor_alerts_for_job_failures='Enable', public_network_access='Enable'):
     vault_sku = Sku(name=SkuName.standard)
+
+    # TODO cleanup
+    try:
+        _tmp = client.get(resource_group_name, vault_name)
+        #print(_tmp.properties.public_network_access)
+        public_network_access = _tmp.properties.public_network_access[:-1]
+    except Exception as e:
+        #print(e)
+        pass
+
     vault_properties = VaultProperties(
         monitoring_settings=MonitoringSettings(
             azure_monitor_alert_settings=AzureMonitorAlertSettings(
