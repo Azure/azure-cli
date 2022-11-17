@@ -530,74 +530,66 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault purge --hsm-name {hsm} -l {loc}')
 
 
-# class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
-#     @record_only()
-#     @AllowLargeResponse()
-#     @ResourceGroupPreparer(name_prefix='cli_test_hsm_security_domain', location='eastus2euap')
-#     def test_keyvault_hsm_security_domain(self, resource_group):
-#         sdtest_dir = tempfile.mkdtemp()
-#         self.kwargs.update({
-#             'hsm_name': self.create_random_name(prefix='clitesthsmsd', length=24),
-#             'next_hsm_name': self.create_random_name(prefix='clitesthsmsd', length=24),
-#             'loc': 'eastus2euap',
-#             'init_admin': 'a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e', #need to hard code admin oid
-#             'key_name': self.create_random_name('key', 10),
-#             'rg': resource_group,
-#             'sdtest_dir': sdtest_dir
-#         })
-#         self.kwargs.update({
-#             'sdfile': os.path.join(self.kwargs['sdtest_dir'], 'sdfile.json'),
-#             'exchange_key': os.path.join(self.kwargs['sdtest_dir'], 'sdex.pem'),
-#             'key_backup': os.path.join(self.kwargs['sdtest_dir'], 'key.bak')
-#         })
-#
-#         for i in range(1, 4):
-#             self.kwargs['cer{}_path'.format(i)] = os.path.join(CERTS_DIR, 'cert_{}.cer'.format(i-1))
-#             self.kwargs['key{}_path'.format(i)] = os.path.join(KEYS_DIR, 'sd{}.pem'.format(i))
-#
-#         self.cmd('az keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin} '
-#                  '--retention-days 7 --no-wait')
-#
-#         self.cmd('az keyvault wait-hsm --hsm-name {hsm_name} --created')
-#
-#         # download SD
-#         self.cmd('az keyvault security-domain download --hsm-name {hsm_name} --security-domain-file "{sdfile}" '
-#                  '--sd-quorum 2 --sd-wrapping-keys "{cer1_path}" "{cer2_path}" "{cer3_path}" --no-wait')
-#
-#         # create a new key and backup it
-#         self.cmd('az keyvault key create --hsm-name {hsm_name} -n {key_name}')
-#         self.cmd('az keyvault key backup --hsm-name {hsm_name} -n {key_name} -f "{key_backup}"')
-#
-#         # download SD
-#         self.cmd('az keyvault security-domain download --hsm-name {hsm_name} --security-domain-file "{sdfile}" '
-#                  '--sd-quorum 2 --sd-wrapping-keys "{cer1_path}" "{cer2_path}" "{cer3_path}" --no-wait')
-#
-#         # delete the HSM
-#         self.cmd('az keyvault delete --hsm-name {hsm_name}')
-#
-#         # create a new HSM
-#         self.cmd('az keyvault create --hsm-name {next_hsm_name} -l {loc} -g {rg} --administrators {init_admin} '
-#                  '--retention-days 7 --no-wait')
-#
-#         # wait until the HSM is ready for recovery
-#         self.cmd('az keyvault wait-hsm --hsm-name {next_hsm_name} --created')
-#
-#         # download the exchange key
-#         self.cmd('az keyvault security-domain init-recovery --hsm-name {next_hsm_name} '
-#                  '--sd-exchange-key "{exchange_key}"')
-#
-#         # upload the blob
-#         self.cmd('az keyvault security-domain upload --hsm-name {next_hsm_name} --sd-file "{sdfile}" '
-#                  '--sd-exchange-key "{exchange_key}" '
-#                  '--sd-wrapping-keys "{key1_path}" "{key2_path}"')
-#
-#         # restore the key
-#         self.cmd('az keyvault key restore --hsm-name {next_hsm_name} -f "{key_backup}"')
-#
-#         files = ['sdfile', 'exchange_key', 'key_backup']
-#         for f in files:
-#             if os.path.exists(self.kwargs[f]):
-#                 os.remove(self.kwargs[f])
+class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
+    @record_only()
+    @AllowLargeResponse()
+    def test_keyvault_hsm_security_domain(self):
+        sdtest_dir = tempfile.mkdtemp()
+        self.kwargs.update({
+            'hsm_url': SD_ACTIVE_HSM_NAME,
+            'hsm_name': SD_ACTIVE_HSM_NAME,
+            'next_hsm_url': SD_NEXT_ACTIVE_HSM_URL,
+            'next_hsm_name': SD_NEXT_ACTIVE_HSM_NAME,
+            'loc': 'eastus2',
+            'init_admin': '9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa',
+            'key_name': self.create_random_name('key', 10),
+            'rg': 'bim-rg',
+            'sdtest_dir': sdtest_dir
+        })
+        self.kwargs.update({
+            'sdfile': os.path.join(self.kwargs['sdtest_dir'], 'sdfile.json'),
+            'exchange_key': os.path.join(self.kwargs['sdtest_dir'], 'sdex.pem'),
+            'key_backup': os.path.join(self.kwargs['sdtest_dir'], 'key.bak')
+        })
+
+        for i in range(1, 4):
+            self.kwargs['cer{}_path'.format(i)] = os.path.join(KEYS_DIR, 'sd{}.cer'.format(i))
+            self.kwargs['key{}_path'.format(i)] = os.path.join(KEYS_DIR, 'sd{}.pem'.format(i))
+
+        # create a new key and backup it
+        self.cmd('az keyvault key create --hsm-name {hsm_name} -n {key_name}')
+        self.cmd('az keyvault key backup --hsm-name {hsm_name} -n {key_name} -f "{key_backup}"')
+
+        # download SD
+        self.cmd('az keyvault security-domain download --hsm-name {hsm_name} --security-domain-file "{sdfile}" '
+                 '--sd-quorum 2 --sd-wrapping-keys "{cer1_path}" "{cer2_path}" "{cer3_path}" --no-wait')
+
+        # delete the HSM
+        self.cmd('az keyvault delete --hsm-name {hsm_name}')
+
+        # create a new HSM
+        self.cmd('az keyvault create --hsm-name {next_hsm_name} -l {loc} -g {rg} --administrators {init_admin} '
+                 '--retention-days 7 --no-wait')
+
+        # wait until the HSM is ready for recovery
+        self.cmd('az keyvault wait-hsm --hsm-name {next_hsm_name} --created')
+
+        # download the exchange key
+        self.cmd('az keyvault security-domain init-recovery --hsm-name {next_hsm_name} '
+                 '--sd-exchange-key "{exchange_key}"')
+
+        # upload the blob
+        self.cmd('az keyvault security-domain upload --hsm-name {next_hsm_name} --sd-file "{sdfile}" '
+                 '--sd-exchange-key "{exchange_key}" '
+                 '--sd-wrapping-keys "{key1_path}" "{key2_path}"')
+
+        # restore the key
+        self.cmd('az keyvault key restore --hsm-name {next_hsm_name} -f "{key_backup}"')
+
+        files = ['sdfile', 'exchange_key', 'key_backup']
+        for f in files:
+            if os.path.exists(self.kwargs[f]):
+                os.remove(self.kwargs[f])
 
 
 class KeyVaultHSMSelectiveKeyRestoreScenarioTest(ScenarioTest):
