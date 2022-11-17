@@ -8,12 +8,6 @@ export USERNAME=azureuser
 apt update
 apt install -y apt-transport-https git gcc python3-dev
 
-# The distros that need libssl1.1
-case ${DISTRO} in
-    bionic|buster|focal) apt install -y libssl1.1;;
-    *)                        :;;
-esac
-
 dpkg -i /mnt/artifacts/azure-cli_$CLI_VERSION-1~${DISTRO}_all.deb
 
 time az self-test
