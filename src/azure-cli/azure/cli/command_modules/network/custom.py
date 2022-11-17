@@ -9,7 +9,7 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_
 from knack.log import get_logger
 
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
-from azure.cli.command_modules.network.aaz.latest.network.nsg.rule import Update as _NsgRuleUpdate
+from azure.cli.core.aaz import AAZResourceIdArgFormat as _EmptyResourceIdArgFormat
 from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
@@ -24,6 +24,7 @@ from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zo
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
 from .aaz.latest.network.application_gateway._update import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.nsg.rule import Update as _NSGRuleUpdate
 from .aaz.latest.network.vnet._create import Create as _VNetCreate
 from .aaz.latest.network.vnet._update import Update as _VNetUpdate
 from .aaz.latest.network.vnet.subnet._create import Create as _VNetSubnetCreate
@@ -5369,7 +5370,7 @@ def create_nsg_rule(cmd, resource_group_name, network_security_group_name, secur
     return Create(cli_ctx=cmd.cli_ctx)(command_args=kwargs)
 
 
-class NsgRuleUpdate(_NsgRuleUpdate):
+class NSGRuleUpdate(_NSGRuleUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZListArg, AAZResourceIdArgFormat, AAZResourceIdArg
@@ -6866,6 +6867,15 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 
 # region VirtualNetworks
 # pylint: disable=protected-access
+class EmptyResourceIdArgFormat(_EmptyResourceIdArgFormat):
+    def __call__(self, ctx, value):
+        if value._data == "":
+            logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+            return value
+
+        return super().__call__(ctx, value)
+
+
 class VNetCreate(_VNetCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -6931,10 +6941,19 @@ class VNetCreate(_VNetCreate):
 
 
 class VNetUpdate(_VNetUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        # handle detach logic
+        args_schema.ddos_protection_plan._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/ddosProtectionPlans/{}",
+        )
+
     def post_instance_update(self, instance):
         if instance.properties.dhcp_options.dns_servers == [""]:
             instance.properties.dhcp_options.dns_servers = None
-        if str(instance.properties.ddos_protection_plan).split("/")[-1] == "":
+        if instance.properties.ddos_protection_plan == "":
             instance.properties.ddos_protection_plan = None
 
 
@@ -7066,6 +7085,19 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         args_schema.private_endpoint_network_policies._registered = False
         args_schema.private_link_service_network_policies._registered = False
         args_schema.address_prefix._registered = False
+        # handle detach logic
+        args_schema.nat_gateway._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/natGateways/{}",
+        )
+        args_schema.network_security_group._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/networkSecurityGroups/{}",
+        )
+        args_schema.route_table._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/routeTables/{}",
+        )
         return args_schema
 
     def pre_operations(self):
@@ -7119,11 +7151,11 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
                 args.private_link_service_network_policies = "Enabled"
 
     def post_instance_update(self, instance):
-        if str(instance.properties.nat_gateway.id).split("/")[-1] == "":
+        if instance.properties.nat_gateway.id == "":
             instance.properties.nat_gateway = None
-        if str(instance.properties.network_security_group.id).split("/")[-1] == "":
+        if instance.properties.network_security_group.id == "":
             instance.properties.network_security_group = None
-        if str(instance.properties.route_table.id).split("/")[-1] == "":
+        if instance.properties.route_table.id == "":
             instance.properties.route_table = None
 
 

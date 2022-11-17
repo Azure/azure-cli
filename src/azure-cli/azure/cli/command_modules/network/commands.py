@@ -902,12 +902,12 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_nsg', transform=transform_nsg_create_output)
 
     with self.command_group('network nsg rule') as g:
-        g.custom_command('list', 'list_nsg_rules', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
-        g.custom_command('create', 'create_nsg_rule')
         from .aaz.latest.network.nsg.rule import Show
+        from .custom import NSGRuleUpdate
+        self.command_table['network nsg rule update'] = NSGRuleUpdate(loader=self)
         self.command_table['network nsg rule show'] = Show(loader=self, table_transformer=transform_nsg_rule_table_output)
-        from azure.cli.command_modules.network.custom import NsgRuleUpdate
-        self.command_table['network nsg rule update'] = NsgRuleUpdate(loader=self)
+        g.custom_command('create', 'create_nsg_rule')
+        g.custom_command('list', 'list_nsg_rules', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
     # endregion
 
     # region NetworkWatchers
