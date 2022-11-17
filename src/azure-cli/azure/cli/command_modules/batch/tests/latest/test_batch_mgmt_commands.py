@@ -149,11 +149,11 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
         self.cmd('network private-endpoint create -g {rg} -n {pename} --vnet-name {vnetname} --subnet default --private-connection-resource-id {accountId} --group-id batchAccount --connection-name {pename} -l {loc}')
        
         self.cmd('batch private-link-resource list --account-name {acc} --resource-group {rg}').assert_with_checks([
-             self.check('length(@)', 1),
-            self.check('[0].name', '{acc}')])
+             self.check('length(@)', 2),
+            self.check('[0].name', 'batchAccount')])
 
-        self.cmd('batch private-link-resource show --account-name {acc} --resource-group {rg} --name {acc}').assert_with_checks([
-             self.check('name', '{acc}')])
+        self.cmd('batch private-link-resource show --account-name {acc} --resource-group {rg} --name batchAccount').assert_with_checks([
+             self.check('name', 'batchAccount')])
 
         endpoints = self.cmd('batch private-endpoint-connection list --account-name {acc} --resource-group {rg}').get_output_in_json()
         self.kwargs['endpointId'] = endpoints[0]['name']

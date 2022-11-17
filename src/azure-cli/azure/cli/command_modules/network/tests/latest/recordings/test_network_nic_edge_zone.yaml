@@ -19,7 +19,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_nic_edge_zone000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001","name":"test_network_nic_edge_zone000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","date":"2022-11-14T03:30:17Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001","name":"test_network_nic_edge_zone000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","date":"2022-11-17T14:33:42Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -28,7 +28,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Nov 2022 03:30:25 GMT
+      - Thu, 17 Nov 2022 14:33:47 GMT
       expires:
       - '-1'
       pragma:
@@ -68,68 +68,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2022-01-01
   response:
     body:
-      string: '{"error":{"code":"SubscriptionRequestsThrottled","message":"Number
-        of requests for subscription ''0b1f6471-1bf0-4dda-aec3-cb9272f09590'' and
-        operation ''PUT/SUBSCRIPTIONS/RESOURCEGROUPS/PROVIDERS/MICROSOFT.NETWORK/VIRTUALNETWORKS/''
-        exceeded the backend storage limit. Please try again after ''6'' seconds."}}'
-    headers:
-      cache-control:
-      - no-cache
-      connection:
-      - close
-      content-length:
-      - '303'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 14 Nov 2022 03:30:37 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 429
-      message: ''
-- request:
-    body: '{"extendedLocation": {"name": "microsoftrrdclab1", "type": "EdgeZone"},
-      "location": "eastus2euap", "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "enableDdosProtection": false, "enableVmProtection": false,
-      "subnets": [{"name": "subnet1", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '310'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -g -n --subnet-name --edge-zone
-      User-Agent:
-      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2022-01-01
-  response:
-    body:
       string: "{\r\n  \"name\": \"clitestvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/virtualNetworks/clitestvnet\",\r\n
-        \ \"etag\": \"W/\\\"2902f77a-9a20-4629-b5cc-4954b501c7e9\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"06d22a84-b779-467c-92e8-9fefb777fa89\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2euap\",\r\n
         \ \"extendedLocation\": {\r\n    \"type\": \"EdgeZone\",\r\n    \"name\":
         \"microsoftrrdclab1\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Updating\",\r\n    \"resourceGuid\": \"847b2291-5a2f-4f77-9296-b5d0d2529da2\",\r\n
+        \"Updating\",\r\n    \"resourceGuid\": \"32cade50-05e4-46cc-8260-93ba493574de\",\r\n
         \   \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n
         \     ]\r\n    },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"2902f77a-9a20-4629-b5cc-4954b501c7e9\\\"\",\r\n
+        \       \"etag\": \"W/\\\"06d22a84-b779-467c-92e8-9fefb777fa89\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -141,7 +89,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/dcaf175d-98d2-4964-acd0-3f7c0731d81a?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/72d769b6-60ff-4bc8-86fd-d9f90f56b38a?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
@@ -149,7 +97,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Nov 2022 03:30:47 GMT
+      - Thu, 17 Nov 2022 14:33:53 GMT
       expires:
       - '-1'
       pragma:
@@ -162,9 +110,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c3081616-b5da-46cc-ab78-aa3a031fe43c
+      - 90b668ca-bdca-47a2-a10a-05b72223d47c
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1194'
     status:
       code: 201
       message: ''
@@ -184,7 +132,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/dcaf175d-98d2-4964-acd0-3f7c0731d81a?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/72d769b6-60ff-4bc8-86fd-d9f90f56b38a?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -196,7 +144,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Nov 2022 03:31:18 GMT
+      - Thu, 17 Nov 2022 14:33:56 GMT
       expires:
       - '-1'
       pragma:
@@ -213,7 +161,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0fef9143-ca70-4fd2-8d8d-9f53b03fc2bf
+      - ba8aaad7-6aa9-43a0-83f2-6d12825337e5
     status:
       code: 200
       message: ''
@@ -237,15 +185,15 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"clitestvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/virtualNetworks/clitestvnet\",\r\n
-        \ \"etag\": \"W/\\\"b8cb111f-d332-4584-9e18-0f57cf7d550b\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"4e21cd6a-388b-44e2-85ae-7452f1001abf\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2euap\",\r\n
         \ \"extendedLocation\": {\r\n    \"type\": \"EdgeZone\",\r\n    \"name\":
         \"microsoftrrdclab1\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"847b2291-5a2f-4f77-9296-b5d0d2529da2\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"32cade50-05e4-46cc-8260-93ba493574de\",\r\n
         \   \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n
         \     ]\r\n    },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"b8cb111f-d332-4584-9e18-0f57cf7d550b\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4e21cd6a-388b-44e2-85ae-7452f1001abf\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -261,9 +209,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Nov 2022 03:31:19 GMT
+      - Thu, 17 Nov 2022 14:33:56 GMT
       etag:
-      - W/"b8cb111f-d332-4584-9e18-0f57cf7d550b"
+      - W/"4e21cd6a-388b-44e2-85ae-7452f1001abf"
       expires:
       - '-1'
       pragma:
@@ -280,7 +228,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 074f0ee2-b7bd-4871-adc1-8ec4624e56b1
+      - 99181b56-55cd-4da6-8925-ae7f48bea92a
     status:
       code: 200
       message: ''
@@ -304,7 +252,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_nic_edge_zone000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001","name":"test_network_nic_edge_zone000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","date":"2022-11-14T03:30:17Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001","name":"test_network_nic_edge_zone000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","date":"2022-11-17T14:33:42Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -313,7 +261,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Nov 2022 03:31:19 GMT
+      - Thu, 17 Nov 2022 14:33:57 GMT
       expires:
       - '-1'
       pragma:
@@ -357,12 +305,12 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"clitestnic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/networkInterfaces/clitestnic\",\r\n
-        \ \"etag\": \"W/\\\"d04161f2-228a-405a-924b-af28cb6fc455\\\"\",\r\n  \"extendedLocation\":
+        \ \"etag\": \"W/\\\"7bbe8a97-7446-4b3d-aeb4-6ec9f96c38b8\\\"\",\r\n  \"extendedLocation\":
         {\r\n    \"type\": \"EdgeZone\",\r\n    \"name\": \"microsoftrrdclab1\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"4a02efad-aa83-4834-a8ba-5c6ab2d3630b\",\r\n    \"ipConfigurations\":
+        \   \"resourceGuid\": \"e554f22f-11c8-4842-9325-a4f19179e65b\",\r\n    \"ipConfigurations\":
         [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/networkInterfaces/clitestnic/ipConfigurations/ipconfig1\",\r\n
-        \       \"etag\": \"W/\\\"d04161f2-228a-405a-924b-af28cb6fc455\\\"\",\r\n
+        \       \"etag\": \"W/\\\"7bbe8a97-7446-4b3d-aeb4-6ec9f96c38b8\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
@@ -370,7 +318,7 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"serhxbbplj1u5euwwxineuu3uc.cbnx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        \"kdpmumxeaxgenataso3esnlu1g.cbnx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
         false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
         \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
         true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
@@ -379,7 +327,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/75e6e942-2b3d-496d-bc54-e443e31f39b1?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/71619596-b4fc-4f4c-8dfb-440daa4807f7?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
@@ -387,7 +335,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Nov 2022 03:31:25 GMT
+      - Thu, 17 Nov 2022 14:34:00 GMT
       expires:
       - '-1'
       pragma:
@@ -400,9 +348,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 996e048e-a7cc-44a1-ac21-68eea0d1ad3e
+      - b4b93556-87d6-42db-ace3-dd7a2badf37c
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1193'
     status:
       code: 201
       message: ''
@@ -423,7 +371,7 @@ interactions:
       - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
         (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/75e6e942-2b3d-496d-bc54-e443e31f39b1?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/71619596-b4fc-4f4c-8dfb-440daa4807f7?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -435,7 +383,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Nov 2022 03:31:55 GMT
+      - Thu, 17 Nov 2022 14:34:31 GMT
       expires:
       - '-1'
       pragma:
@@ -452,7 +400,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ae9c8f8c-0ac7-4b4e-8d52-2a8b6ccaceb0
+      - 6b5b1782-c7b6-423b-9ad5-8180628eb3c9
     status:
       code: 200
       message: ''
@@ -477,12 +425,12 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"clitestnic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/networkInterfaces/clitestnic\",\r\n
-        \ \"etag\": \"W/\\\"d04161f2-228a-405a-924b-af28cb6fc455\\\"\",\r\n  \"extendedLocation\":
+        \ \"etag\": \"W/\\\"7bbe8a97-7446-4b3d-aeb4-6ec9f96c38b8\\\"\",\r\n  \"extendedLocation\":
         {\r\n    \"type\": \"EdgeZone\",\r\n    \"name\": \"microsoftrrdclab1\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"4a02efad-aa83-4834-a8ba-5c6ab2d3630b\",\r\n    \"ipConfigurations\":
+        \   \"resourceGuid\": \"e554f22f-11c8-4842-9325-a4f19179e65b\",\r\n    \"ipConfigurations\":
         [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_nic_edge_zone000001/providers/Microsoft.Network/networkInterfaces/clitestnic/ipConfigurations/ipconfig1\",\r\n
-        \       \"etag\": \"W/\\\"d04161f2-228a-405a-924b-af28cb6fc455\\\"\",\r\n
+        \       \"etag\": \"W/\\\"7bbe8a97-7446-4b3d-aeb4-6ec9f96c38b8\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
@@ -490,7 +438,7 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"serhxbbplj1u5euwwxineuu3uc.cbnx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        \"kdpmumxeaxgenataso3esnlu1g.cbnx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
         false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
         \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
         true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
@@ -503,9 +451,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Nov 2022 03:31:56 GMT
+      - Thu, 17 Nov 2022 14:34:31 GMT
       etag:
-      - W/"d04161f2-228a-405a-924b-af28cb6fc455"
+      - W/"7bbe8a97-7446-4b3d-aeb4-6ec9f96c38b8"
       expires:
       - '-1'
       pragma:
@@ -522,7 +470,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1b3a0a8f-53a5-48d8-ba38-40051177bf71
+      - a3519f22-7411-4b01-8110-9cbb54b0004b
     status:
       code: 200
       message: ''
