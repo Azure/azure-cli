@@ -124,7 +124,7 @@ DEPENDENCIES = [
     'azure-mgmt-signalr==1.1.0',
     'azure-mgmt-sqlvirtualmachine==1.0.0b4',
     'azure-mgmt-sql==4.0.0b4',
-    'azure-mgmt-storage~=20.1.0',
+    'azure-mgmt-storage~=21.0.0',
     'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web==7.0.0',
