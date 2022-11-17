@@ -159,7 +159,7 @@ def load_arguments(self, _):
     with self.argument_context('keyvault check-name') as c:
         c.argument('name', options_list=['--name', '-n'],
                    help='The name of the HSM within the specified resource group')
-        c.argument('resource_type', arg_type=get_enum_type(['hsm']))
+        c.argument('resource_type', arg_type=get_enum_type(['hsm']), help='Type of resource. ')
 
     for item in ['show', 'delete', 'create']:
         with self.argument_context('keyvault {}'.format(item)) as c:
