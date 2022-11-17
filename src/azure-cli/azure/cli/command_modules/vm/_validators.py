@@ -1322,7 +1322,6 @@ def _validate_trusted_launch(namespace):
 
 
 def _validate_generation_version_and_trusted_launch(cmd, namespace):
-
     if namespace.image is not None:
         from msrestazure.tools import is_valid_resource_id, parse_resource_id
         from ._vm_utils import is_shared_gallery_image_id, is_community_gallery_image_id,\
@@ -1333,23 +1332,15 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
             gallery_image_info = cf_shared_gallery_image(cmd.cli_ctx).get(
                 location=namespace.location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
             if gallery_image_info.hyper_v_generation == 'V1':
-                logger.warning(
-                    'Please consider upgrading security for your VM resources by using Gen 2 OS image and '
-                    'Trusted Launch security type. To know more about Trusted Launch, please visit '
-                    'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+                logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS image and'
+                               ' Trusted Launch security type. To know more about Trusted Launch, please visit'
+                               ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
             if gallery_image_info.hyper_v_generation == 'V2':
-                if gallery_image_info.features is not None:
-                    if _validate_trusted_launch_supported(gallery_image_info.features):
-                        namespace.enable_secure_boot = False
-                        namespace.enable_vtpm = True
-                        namespace.security_type = 'TrustedLaunch'
-                        namespace.disable_integrity_monitoring = True
-                else:
-                    if namespace.enable_secure_boot or namespace.enable_vtpm  \
-                            or namespace.security_type.lower() == 'trustedlaunch':
-                        raise ValidationError("Since the image you are using does not support trust,"
-                                              " you cannot use these parameters: --enable-secure-boot,"
-                                              " --enable-vtpm, --security-type ")
+                if gallery_image_info.features and _validate_trusted_launch_supported(gallery_image_info.features) and\
+                        namespace.security_type is None:
+                    logger.warning('Starting xx/xx/xxxx az vm create command will deploy Trusted Launch VM by default.'
+                                   ' To know more about Trusted Launch, please visit'
+                                   ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
 
         elif is_community_gallery_image_id(namespace.image):
             from ._client_factory import cf_community_gallery_image
@@ -1357,75 +1348,42 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
             gallery_image_info = cf_community_gallery_image(cmd.cli_ctx).get(
                 location=namespace.location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
             if gallery_image_info.hyper_v_generation == 'V1':
-                logger.warning(
-                    'Please consider upgrading security for your VM resources by using Gen 2 OS image and '
-                    'Trusted Launch security type. To know more about Trusted Launch, please visit '
-                    'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+                logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS image and'
+                               ' Trusted Launch security type. To know more about Trusted Launch, please visit'
+                               ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
             if gallery_image_info.hyper_v_generation == 'V2':
-                if gallery_image_info.features is not None:
-                    if _validate_trusted_launch_supported(gallery_image_info.features):
-                        namespace.enable_secure_boot = False
-                        namespace.enable_vtpm = True
-                        namespace.security_type = 'TrustedLaunch'
-                        namespace.disable_integrity_monitoring = True
-                else:
-                    if namespace.enable_secure_boot or namespace.enable_vtpm  \
-                            or namespace.security_type.lower() == 'trustedlaunch':
-                        raise ValidationError("Since the image you are using does not support trust,"
-                                              " you cannot use these parameters: --enable-secure-boot,"
-                                              " --enable-vtpm, --security-type ")
+                if gallery_image_info.features is not None and namespace.security_type is None and\
+                        _validate_trusted_launch_supported(gallery_image_info.features):
+                    logger.warning('Starting xx/xx/xxxx az vm create command will deploy Trusted Launch VM by default.'
+                                   ' To know more about Trusted Launch, please visit'
+                                   ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
 
         elif is_valid_resource_id(namespace.image):
-            from ._client_factory import cf_images
-            image_name = parse_resource_id(namespace.image)['name']
-            image_info = cf_images.get(namespace.resource_group_name, image_name)
-            image_generation_version = image_info.hyper_v_generation
-            if image_generation_version == 'V1':
-                logger.warning('Consider upgrading security for your workloads using Azure Trusted Launch VM.'
-                               ' To know more about Trusted Launch, please visit'
-                               ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
-            if image_generation_version == 'V2':
-                if namespace.security_type is None:
-                    logger.warning(
-                        'Starting xx/xx/xxxx az vm create command will deploy Trusted Launch VM by default.'
-                        ' To know more about Trusted Launch, please visit'
-                        ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+            pass
         elif urlparse(namespace.image).scheme and "://" in namespace.image:
             pass
-
         else:
             client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
             if namespace.os_version.lower() == 'latest':
                 latest_version = _get_latest_image_version(cmd.cli_ctx, namespace.location, namespace.os_publisher,
                                                            namespace.os_offer, namespace.os_sku)
-                vm_image_info = client.get(namespace.location, namespace.os_publisher, namespace.os_offer,
-                                           namespace.os_sku, latest_version)
+                vm_image_info = client.get(namespace.location, namespace.os_publisher,
+                                                             namespace.os_offer, namespace.os_sku, latest_version)
                 vm_image_generation_version = vm_image_info.hyper_v_generation
             else:
-                vm_image_info = client.get(namespace.location, namespace.os_publisher, namespace.os_offer,
-                                           namespace.os_sku, namespace.os_version)
+                vm_image_info = client.get(namespace.location, namespace.os_publisher,
+                                                             namespace.os_offer, namespace.os_sku, namespace.os_version)
                 vm_image_generation_version = vm_image_info.hyper_v_generation
             if vm_image_generation_version == 'V1':
                 logger.warning('Consider upgrading security for your workloads using Azure Trusted Launch VMs.'
                                ' To know more about Trusted Launch, please visit'
                                ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
             if vm_image_generation_version == 'V2':
-                if vm_image_info.features is not None:
-                    if _validate_trusted_launch_supported(vm_image_info.features):
-                        if namespace.security_type is None:
-                            logger.warning(
-                                'Starting xx/xx/xxxx az vm create command will deploy Trusted Launch VM by default.'
-                                ' To know more about Trusted Launch, please visit'
-                                ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
-                        namespace.enable_secure_boot = True
-                        namespace.enable_vtpm = True
-                        namespace.security_type = 'TrustedLaunch'
-                    else:
-                        if namespace.enable_secure_boot or namespace.enable_vtpm \
-                                or namespace.security_type.lower() == 'trustedlaunch':
-                            raise ValidationError("Since the image you are using does not support trust,"
-                                                  " you cannot use these parameters: --enable-secure-boot,"
-                                                  " --enable-vtpm, --security-type ")
+                if vm_image_info.features and _validate_trusted_launch_supported(vm_image_info.features) and\
+                        namespace.security_type is None:
+                    logger.warning('Starting xx/xx/xxxx az vm create command will deploy Trusted Launch VM by default.'
+                                   ' To know more about Trusted Launch, please visit'
+                                   ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
 
     if hasattr(namespace, 'attach_os_disk') and namespace.attach_os_disk is not None:
         from msrestazure.tools import parse_resource_id
@@ -1437,23 +1395,11 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
                            ' and Trusted Launch security type. To know more about Trusted Launch, please visit'
                            ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
         if attach_os_disk_info.hyper_v_generation == 'V2':
-            if attach_os_disk_info.features is not None:
-                if _validate_trusted_launch_supported(attach_os_disk_info.features):
-                    if namespace.security_type is None:
-                        logger.warning(
-                            'Starting xx/xx/xxxx az vm create command will deploy Trusted Launch VM by default.'
-                            ' To know more about Trusted Launch, please visit'
-                            ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
-                    namespace.enable_secure_boot = False
-                    namespace.enable_vtpm = True
-                    namespace.security_type = 'TrustedLaunch'
-                    namespace.disable_integrity_monitoring = True
-                else:
-                    if namespace.enable_secure_boot or namespace.enable_vtpm  \
-                            or namespace.security_type.lower() == 'trustedlaunch':
-                        raise ValidationError("Since the image you are using does not support trust,"
-                                              " you cannot use these parameters: --enable-secure-boot,"
-                                              " --enable-vtpm, --security-type ")
+            if attach_os_disk_info.features and _validate_trusted_launch_supported(attach_os_disk_info.features) and\
+                    namespace.security_type is None:
+                logger.warning('Starting xx/xx/xxxx az vm create command will deploy Trusted Launch VM by default.'
+                               ' To know more about Trusted Launch, please visit'
+                               ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
 
 
 def _validate_trusted_launch_supported(features):
