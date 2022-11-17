@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update settings of an ExpressRoute gateway.
+
+    :example: Update an ExpressRoute gateway.
+        az network express-route gateway update --name MyExpressRouteGateway --resource-group MyResourceGroup --min-val 3
     """
 
     _aaz_info = {

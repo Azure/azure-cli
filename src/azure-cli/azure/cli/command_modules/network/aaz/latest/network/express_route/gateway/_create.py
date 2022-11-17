@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create an ExpressRoute gateway.
+
+    :example: Create an ExpressRoute gateway.
+        az network express-route gateway create --name MyExpressRouteGateway --resource-group MyResourceGroup --min-val 5
     """
 
     _aaz_info = {
