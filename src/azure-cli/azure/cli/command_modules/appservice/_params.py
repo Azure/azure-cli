@@ -154,7 +154,7 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('vnet', help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
         c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the webapp join. The --vnet is argument also needed if specifying subnet by name.")
-        c.argument('public_network_access', help="Please specify public network access", arg_type=get_enum_type(PUBLIC_NETWORK_ACCESS_MODES))
+        c.argument('public_network_access', help="Please define the --public-network-access parameter", arg_type=get_enum_type(PUBLIC_NETWORK_ACCESS_MODES))
         c.ignore('language')
         c.ignore('using_webapp_up')
 
