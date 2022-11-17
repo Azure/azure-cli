@@ -296,7 +296,7 @@ type: command
 short-summary: Create a new migration workflow for a flexible server.
 examples:
   - name: Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file.
-    text: az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --properties "migrationConfig.json"
+    text: az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name testmigration --properties "migrationConfig.json"
 """
 
 helps['postgres flexible-server migration list'] = """
@@ -314,7 +314,7 @@ type: command
 short-summary: Get the details of a specific migration.
 examples:
   - name: Get the details of a specific migration of a target flexible server.
-    text: az postgres flexible-server migration show --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    text: az postgres flexible-server migration show --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name testmigration
 """
 
 helps['postgres flexible-server migration update'] = """
@@ -322,23 +322,15 @@ type: command
 short-summary: Update a specific migration.
 examples:
   - name: Allow the migration workflow to setup logical replication on the source. Note that this command will restart the source server.
-    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --setup-replication
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name testmigration --setup-replication
   - name: Space-separated list of DBs to migrate. A minimum of 1 and a maximum of 8 DBs can be specified. You can migrate more DBs concurrently using additional migrations. Note that each additional DB affects the performance of the source server.
-    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --db-names db1 db2
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name testmigration --db-names db1 db2
   - name: Allow the migration workflow to overwrite the DB on the target.
-    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --overwrite-dbs
-  - name: Cutover the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.
-    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --cutover
-  - name: This command helps in starting the data migration immediately between the source and target. Any migration scheduled for a future date and time will be cancelled.
-    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --start-data-migration
-"""
-
-helps['postgres flexible-server migration delete'] = """
-type: command
-short-summary: Delete a specific migration.
-examples:
-  - name: Cancel/delete the migration workflow. The migration workflows can be canceled/deleted at any point.
-    text: az postgres flexible-server migration delete --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name testmigration --overwrite-dbs
+  - name: Cut-over the data migration for either all databases or few selected ones. After this is complete, subsequent updates to the selected databases will not be migrated to the target.
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name testmigration --cutover db1 db2 db3
+  - name: Cancel the data migration for either all databases or few selected ones.
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name testmigration --cutover db1 db2 db3
 """
 
 helps['postgres flexible-server migration check-name-availability'] = """
@@ -440,4 +432,57 @@ short-summary: Show the details of a specific backup for a given server.
 examples:
   - name: Show the details of backup 'testbackup' for 'testsvr'.
     text: az postgres flexible-server backup show -g testgroup -n testsvr --backup-name testbackup
+"""
+
+helps['postgres flexible-server replica'] = """
+type: group
+short-summary: Manage read replicas.
+"""
+
+helps['postgres flexible-server replica create'] = """
+type: command
+short-summary: Create a read replica for a server.
+examples:
+  - name: Create a read replica 'testReplicaServer' for 'testserver' with public or private access in the specified zone and location if available.
+    text: az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testserver --zone 3 --location testLocation
+  - name: Create a read replica 'testReplicaServer' with new subnet for 'testserver' with private access.
+    text: >
+      az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup \\
+        --source-server testserver --zone 3 --location testLocation \\
+        --vnet newVnet --subnet newSubnet \\
+        --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
+        --private-dns-zone testDNS.postgres.database.azure.com
+"""
+
+helps['postgres flexible-server replica list'] = """
+type: command
+short-summary: List all read replicas for a given server.
+examples:
+  - name: List all read replicas for master server 'testserver'.
+    text: az postgres flexible-server replica list -g testGroup -n testserver
+"""
+
+helps['postgres flexible-server replica stop-replication'] = """
+type: command
+short-summary: Stop replication to a read replica and make it a read/write server.
+examples:
+  - name: Stop replication to 'testReplicaServer' and make it a read/write server.
+    text: az postgres flexible-server replica stop-replication -g testGroup -n testReplicaServer
+"""
+
+helps['postgres flexible-server geo-restore'] = """
+type: command
+short-summary: Geo-restore a flexible server from backup.
+examples:
+  - name: >
+      Geo-restore public access server 'testserver' to a new server 'testserverNew' in location 'newLocation' with public access.
+    text: az postgres flexible-server geo-restore --resource-group testGroup --name testserverNew --source-server testserver --location newLocation
+  - name: >
+      Geo-restore private access server 'testserver' as a new server 'testserverNew' with new subnet.
+      New vnet, subnet, and private dns zone for the restored server will be provisioned. Please refer to 'flexible-server create' command for more private access scenarios.
+    text: >
+      az postgres flexible-server geo-restore --resource-group testGroup --name testserverNew \\
+        --source-server testserver --vnet newVnet --subnet newSubnet \\
+        --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
+        --private-dns-zone testDNS.postgres.database.azure.com --location newLocation
 """

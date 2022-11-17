@@ -648,8 +648,8 @@ def remove_remote_build_app_settings(cmd, resource_group_name, name, slot):
     app_settings_should_contain = {}
 
     for keyval in settings:
-        value = keyval['value'].lower()
         if keyval['name'] == 'SCM_DO_BUILD_DURING_DEPLOYMENT':
+            value = keyval['value'].lower()
             scm_do_build_during_deployment = value in ('true', '1')
 
     if scm_do_build_during_deployment is not False:
@@ -3441,7 +3441,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
-        raise MutuallyExclusiveArgumentError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
+        raise MutuallyExclusiveArgumentError("usage error: You must specify one of these parameter "
+                                             "--plan NAME_OR_ID | --consumption-plan-location LOCATION")
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)

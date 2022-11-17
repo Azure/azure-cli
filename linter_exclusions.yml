@@ -327,6 +327,9 @@ aks create:
     enable_msi_auth_for_monitoring:
       rule_exclusions:
       - option_length_too_long
+    enable_syslog:
+      rule_exclusions:
+      - option_length_too_long
     node_osdisk_diskencryptionset_id:
       rule_exclusions:
       - option_length_too_long
@@ -354,6 +357,9 @@ aks enable-addons:
       rule_exclusions:
       - option_length_too_long
     enable_msi_auth_for_monitoring:
+      rule_exclusions:
+      - option_length_too_long
+    enable_syslog:
       rule_exclusions:
       - option_length_too_long
 aks install-cli:
@@ -3018,21 +3024,6 @@ relay wcfrelay update:
     relay_type:
       rule_exclusions:
       - no_parameter_defaults_for_update_commands
-reservations catalog show:
-  parameters:
-    reserved_resource_type:
-      rule_exclusions:
-      - option_length_too_long
-reservations reservation-order calculate:
-  parameters:
-    reserved_resource_type:
-      rule_exclusions:
-      - option_length_too_long
-reservations reservation-order purchase:
-  parameters:
-    reserved_resource_type:
-      rule_exclusions:
-      - option_length_too_long
 resource move:
   parameters:
     destination_subscription_id:

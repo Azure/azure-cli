@@ -37,6 +37,9 @@ examples:
   - name: Create a SQL virtual machine with specific sku type and license type.
     text: >
         az sql vm create -n sqlvm -g myresourcegroup -l eastus --image-sku Enterprise --license-type AHUB
+  - name: Create a SQL virtual machine with least privilege mode enabled.
+    text: >
+        az sql vm create -n sqlvm -g myresourcegroup -l eastus --least-privilege-mode Enabled --sql-mgmt-type Full
   - name: Create a SQL virtual machine with NoAgent type, only valid for EOS SQL 2008 and SQL 2008 R2.
     text: >
         az sql vm create -n sqlvm -g myresourcegroup -l eastus --license-type AHUB --sql-mgmt-type NoAgent --image-sku Enterprise --image-offer SQL2008-WS2008R2
@@ -92,6 +95,9 @@ examples:
   - name: Create a SQL virtual machine group for SQL2016-WS2016 Enterprise virtual machines.
     text: >
         az sql vm group create -n sqlvmgroup -l eastus -g myresourcegroup --image-offer SQL2016-WS2016 --image-sku Enterprise --domain-fqdn Domain.com --operator-acc testop --service-acc testservice --sa-key {PublicKey} --storage-account 'https://storacc.blob.core.windows.net/'
+  - name: Create a SQL virtual machine group for SQL2019-WS2022 Enterprise virtual machines with MultiSubnet.
+    text: >
+        az sql vm group create -n sqlvmgroup -l eastus -g myresourcegroup --image-offer SQL2019-WS2022 --image-sku Enterprise --cluster-subnet-type MultiSubnet --domain-fqdn Domain.com --operator-acc testop --service-acc testservice --sa-key {PublicKey} --storage-account 'https://storacc.blob.core.windows.net/'
 """
 
 helps['sql vm group update'] = """
@@ -139,7 +145,10 @@ examples:
         az sql vm update -n sqlvm -g myresourcegroup --image-sku Enterprise
   - name: Update a SQL virtual machine manageability from LightWeight to Full.
     text: >
-        az sql vm update -n sqlvm -g myresourcegroup --sql-mgmt-type Full --yes
+        az sql vm update -n sqlvm -g myresourcegroup --sql-mgmt-type Full
+  - name: Update a SQL virtual machine to least privilege mode.
+    text: >
+        az sql vm update -n sqlvm -g myresourcegroup --least-privilege-mode Enabled --sql-mgmt-type Full
   - name: Update SQL virtual machine auto backup settings.
     text: >
         az sql vm update -n sqlvm -g myresourcegroup --backup-schedule-type manual --full-backup-frequency Weekly --full-backup-start-hour 2 --full-backup-duration 2 --sa-key {storageKey} --storage-account 'https://storageacc.blob.core.windows.net/' --retention-period 30 --log-backup-frequency 60

@@ -21,14 +21,14 @@ logger.addHandler(ch)
 
 # sys.argv is passed by
 # .azure-pipelines/templates/automation_test.yml in section `Running full test`
-# scripts/bump_version/bump_version.yml in `azdev test` step
+# scripts/regression_test/regression_test.yml in section "Rerun tests"
 instance_cnt = int(sys.argv[1])
 instance_idx = int(sys.argv[2])
 profile = sys.argv[3]
 serial_modules = sys.argv[4].split()
 fix_failure_tests = sys.argv[5].lower() == 'true' if len(sys.argv) >= 6 else False
-working_directory = "/home/vsts/work/1/s"
-azdev_test_result_dir = "/home/vsts/.azdev/env_config/home/vsts/work/1/s/env"
+working_directory = "/mnt/vss/_work/1/s"
+azdev_test_result_dir = "/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env"
 jobs = {
             'acr': 45,
             'acs': 62,
@@ -85,7 +85,6 @@ jobs = {
             'rdbms': 89,
             'redis': 31,
             'relay': 22,
-            'reservations': 20,
             'resource': 101,
             'role': 38,
             'search': 34,

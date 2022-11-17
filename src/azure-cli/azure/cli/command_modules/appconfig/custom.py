@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from knack.util import CLIError
 from knack.log import get_logger
 from azure.core.exceptions import ResourceNotFoundError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParameters,
                                                 ConfigurationStore,
                                                 Sku,
@@ -306,11 +306,11 @@ def __validate_cmk(encryption_key_name=None,
                    identity_client_id=None):
     if encryption_key_name is None:
         if any(arg is not None for arg in [encryption_key_vault, encryption_key_version, identity_client_id]):
-            raise CLIError("To modify customer encryption key --encryption-key-name is required")
+            raise RequiredArgumentMissingError("To modify customer encryption key --encryption-key-name is required")
     else:
         if encryption_key_name:
             if encryption_key_vault is None:
-                raise CLIError("To modify customer encryption key --encryption-key-vault is required")
+                raise RequiredArgumentMissingError("To modify customer encryption key --encryption-key-vault is required")
         else:
             if any(arg is not None for arg in [encryption_key_vault, encryption_key_version, identity_client_id]):
                 logger.warning("Removing the customer encryption key. Key vault related arguments are ignored.")

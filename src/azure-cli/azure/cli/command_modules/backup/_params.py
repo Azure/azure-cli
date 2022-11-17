@@ -32,7 +32,8 @@ allowed_rehyd_priority_type = ['Standard', 'High']
 
 backup_management_type_help = """Specify the backup management type. Define how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Required only if friendly name is used as Container name."""
 container_name_help = """Name of the backup container. Accepts 'Name' or 'FriendlyName' from the output of az backup container list command. If 'FriendlyName' is passed then BackupManagementType is required."""
-workload_type_help = """Specify the type of applications within the Resource which should be discovered and protected by Azure Backup. """
+workload_type_help = """Specify the type of applications within the Resource which should be discovered and protected by Azure Backup. 'MSSQL' and 'SQLDataBase' can be used interchangeably for SQL in Azure VM, as can 'SAPHANA' and 'SAPHanaDatabase' for SAP HANA in Azure VM."""
+protectable_item_type_help = """Specify the type of items within the Resource which should be discovered and protected by Azure Backup. 'HANAInstance' and 'SAPHanaSystem' can be used interchangeably."""
 restore_mode_help = """Specify the restore mode."""
 resolve_conflict_help = "Instruction if there's a conflict with the restored data."
 resource_id_help = """ID of the Azure Resource containing items to be protected by Azure Backup service. Currently, only Azure VM resource IDs are supported."""
@@ -64,7 +65,7 @@ restore_mode_workload_type = CLIArgumentType(help=restore_mode_help, arg_type=ge
 resolve_conflict_type = CLIArgumentType(help=resolve_conflict_help, arg_type=get_enum_type(['Overwrite', 'Skip']), options_list=['--resolve-conflict'])
 resource_id_type = CLIArgumentType(help=resource_id_help, options_list=['--resource-id'])
 policy_type = CLIArgumentType(help=policy_help, options_list=['--policy'], completer=FilesCompleter(), type=file_type)
-protectable_item_type = CLIArgumentType(help=workload_type_help, options_list=['--protectable-item-type'], arg_type=get_enum_type(allowed_protectable_item_type))
+protectable_item_type = CLIArgumentType(help=protectable_item_type_help, options_list=['--protectable-item-type'], arg_type=get_enum_type(allowed_protectable_item_type))
 target_server_type = CLIArgumentType(help=target_server_type_help, options_list=['--target-server-type'], arg_type=get_enum_type(allowed_protectable_item_type))
 protectable_item_name_type = CLIArgumentType(help=protectable_item_name_type_help, options_list=['--protectable-item-name'])
 diskslist_type = CLIArgumentType(nargs='+', help=diskslist_help)
@@ -348,7 +349,7 @@ def load_arguments(self, _):
         c.argument('rp_name', rp_name_type, id_part='child_name_4')
 
     with self.argument_context('backup restore restore-disks') as c:
-        c.argument('storage_account', help='Name or ID of the staging storage account. The VM configuration will be restored to this storage account. See the help for --restore-to-staging-storage-account parameter for more info.')
+        c.argument('storage_account', help='Name or ID of the staging storage account. The VM configuration will be restored to this storage account. See the help for --restore-to-staging-storage-account parameter for more info. The ID might be needed for cross-region restores where the storage account and vault are not on the same resource group. In order to get the ID, use the storage account show command as specified here (https://learn.microsoft.com/en-us/azure/storage/common/storage-account-get-info?tabs=azure-cli#get-the-resource-id-for-a-storage-account).')
         c.argument('restore_to_staging_storage_account', arg_type=get_three_state_flag(), help='Use this flag when you want disks to be restored to the staging storage account using the --storage-account parameter. When not specified, disks will be restored to their original storage accounts. Default: false.')
         c.argument('target_resource_group', options_list=['--target-resource-group', '-t'], help='Use this to specify the target resource group in which the restored disks will be saved')
         c.argument('diskslist', diskslist_type)

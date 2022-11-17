@@ -13,6 +13,7 @@ from ipaddress import ip_network
 
 from enum import Enum
 from knack.deprecation import Deprecated
+from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -21,9 +22,68 @@ from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgum
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
+logger = get_logger(__name__)
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
 secret_binary_encoding_values = ['base64', 'hex']
+default_cvm_policy_url = "https://raw.githubusercontent.com/Azure/confidential-computing-cvm/main/cvm_deployment/key/skr-policy.json"  # pylint: disable=line-too-long
+fallback_cvm_policy = {
+    'version': '1.0.0',
+    'anyOf': [
+        {
+            'authority': 'https://sharedeus.eus.attest.azure.net/',
+            'allOf': [
+                {
+                    'claim': 'x-ms-attestation-type',
+                    'equals': 'sevsnpvm'
+                },
+                {
+                    'claim': 'x-ms-compliance-status',
+                    'equals': 'azure-compliant-cvm'
+                }
+            ]
+        },
+        {
+            'authority': 'https://sharedwus.wus.attest.azure.net/',
+            'allOf': [
+                {
+                    'claim': 'x-ms-attestation-type',
+                    'equals': 'sevsnpvm'
+                },
+                {
+                    'claim': 'x-ms-compliance-status',
+                    'equals': 'azure-compliant-cvm'
+                }
+            ]
+        },
+        {
+            'authority': 'https://sharedneu.neu.attest.azure.net/',
+            'allOf': [
+                {
+                    'claim': 'x-ms-attestation-type',
+                    'equals': 'sevsnpvm'
+                },
+                {
+                    'claim': 'x-ms-compliance-status',
+                    'equals': 'azure-compliant-cvm'
+                }
+            ]
+        },
+        {
+            'authority': 'https://sharedweu.weu.attest.azure.net/',
+            'allOf': [
+                {
+                    'claim': 'x-ms-attestation-type',
+                    'equals': 'sevsnpvm'
+                },
+                {
+                    'claim': 'x-ms-compliance-status',
+                    'equals': 'azure-compliant-cvm'
+                }
+            ]
+        }
+    ]
+}
 
 
 class KeyEncryptionDataType(str, Enum):
@@ -209,6 +269,18 @@ def validate_key_type(ns):
     setattr(ns, 'kty', kty)
 
 
+def _fetch_default_cvm_policy():
+    try:
+        import requests
+        import json
+        policy = requests.get(default_cvm_policy_url)
+        return json.loads(policy.content)
+    except Exception:  # pylint: disable=broad-except
+        logger.debug("Fail to fetch default cvm policy from %s,use local cvm policy as fallback",
+                     default_cvm_policy_url)
+    return fallback_cvm_policy
+
+
 def process_key_release_policy(cmd, ns):
     default_cvm_policy = None
     if hasattr(ns, 'default_cvm_policy'):
@@ -232,63 +304,7 @@ def process_key_release_policy(cmd, ns):
     KeyReleasePolicy = cmd.loader.get_sdk('KeyReleasePolicy', mod='_models',
                                           resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     if default_cvm_policy:
-        policy = {
-            'version': '1.0.0',
-            'anyOf': [
-                {
-                    'authority': 'https://sharedeus.eus.attest.azure.net/',
-                    'allOf': [
-                        {
-                            'claim': 'x-ms-attestation-type',
-                            'equals': 'sevsnpvm'
-                        },
-                        {
-                            'claim': 'x-ms-compliance-status',
-                            'equals': 'azure-compliant-cvm'
-                        }
-                    ]
-                },
-                {
-                    'authority': 'https://sharedwus.wus.attest.azure.net/',
-                    'allOf': [
-                        {
-                            'claim': 'x-ms-attestation-type',
-                            'equals': 'sevsnpvm'
-                        },
-                        {
-                            'claim': 'x-ms-compliance-status',
-                            'equals': 'azure-compliant-cvm'
-                        }
-                    ]
-                },
-                {
-                    'authority': 'https://sharedneu.neu.attest.azure.net/',
-                    'allOf': [
-                        {
-                            'claim': 'x-ms-attestation-type',
-                            'equals': 'sevsnpvm'
-                        },
-                        {
-                            'claim': 'x-ms-compliance-status',
-                            'equals': 'azure-compliant-cvm'
-                        }
-                    ]
-                },
-                {
-                    'authority': 'https://sharedweu.weu.attest.azure.net/',
-                    'allOf': [
-                        {
-                            'claim': 'x-ms-attestation-type',
-                            'equals': 'sevsnpvm'
-                        },
-                        {
-                            'claim': 'x-ms-compliance-status',
-                            'equals': 'azure-compliant-cvm'
-                        }
-                    ]
-                }
-            ]
-        }
+        policy = _fetch_default_cvm_policy()
         ns.release_policy = KeyReleasePolicy(encoded_policy=json.dumps(policy).encode('utf-8'),
                                              immutable=immutable)
         return
