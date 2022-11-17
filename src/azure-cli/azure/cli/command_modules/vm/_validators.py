@@ -1367,12 +1367,12 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
             if namespace.os_version.lower() == 'latest':
                 latest_version = _get_latest_image_version(cmd.cli_ctx, namespace.location, namespace.os_publisher,
                                                            namespace.os_offer, namespace.os_sku)
-                vm_image_info = client.get(namespace.location, namespace.os_publisher,
-                                                             namespace.os_offer, namespace.os_sku, latest_version)
+                vm_image_info = client.get(namespace.location, namespace.os_publisher, namespace.os_offer,
+                                           namespace.os_sku, latest_version)
                 vm_image_generation_version = vm_image_info.hyper_v_generation
             else:
-                vm_image_info = client.get(namespace.location, namespace.os_publisher,
-                                                             namespace.os_offer, namespace.os_sku, namespace.os_version)
+                vm_image_info = client.get(namespace.location, namespace.os_publisher, namespace.os_offer,
+                                           namespace.os_sku, namespace.os_version)
                 vm_image_generation_version = vm_image_info.hyper_v_generation
             if vm_image_generation_version == 'V1':
                 logger.warning('Consider upgrading security for your workloads using Azure Trusted Launch VMs.'
