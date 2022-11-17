@@ -4513,8 +4513,6 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('encryption.enabled', True),
             self.check('encryption.enforcement', '{dropUnencrypted}'),
         ])
-        # only create with --encryption-enforcement-policy
-        self.cmd('network vnet create --address-prefixes 10.4.0.0/16 --name MyVnet5 --resource-group {rg} --subnet-name Mysubnet --subnet-prefixes 10.4.0.0/24 --encryption-enforcement-policy allowUnencrypted', expect_failure=True)
         # create without encryption
         self.cmd('network vnet create --address-prefixes 10.5.0.0/16 --name MyVnet6 --resource-group {rg} --subnet-name Mysubnet --subnet-prefixes 10.5.0.0/24')
         self.cmd('network vnet create --address-prefixes 10.6.0.0/16 --name MyVnet7 --resource-group {rg} --subnet-name Mysubnet --subnet-prefixes 10.6.0.0/24')
@@ -5019,7 +5017,7 @@ class NetworkVirtualHubRouter(ScenarioTest):
 
         # a cleanup program runs in short peoridically to assign subnets a NSG within that subscription
         # which will block subnet is assigned to the virtual router
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet1} --remove networkSecurityGroup')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet1} --remove properties.networkSecurityGroup')
         vnet = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()
         self.cmd('network public-ip create -g {rg} -n {vhr_ip1} --sku Standard')
 
