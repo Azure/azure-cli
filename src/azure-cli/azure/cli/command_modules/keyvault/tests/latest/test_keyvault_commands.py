@@ -281,10 +281,12 @@ class KeyVaultHSMPrivateEndpointConnectionScenarioTest(ScenarioTest):
 class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='clitest-mhsm-rg', location='uksouth')
     def test_keyvault_hsm_mgmt(self, resource_group):
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e"
         self.kwargs.update({
             'hsm_name': self.create_random_name('clitest-mhsm-', 24),
             'loc': 'uksouth',
-            'init_admin': '3707fb2f-ac10-4591-a04f-8b0d786ea37d'
+            'init_admin': logged_in_user
         })
 
         show_checks = [
@@ -295,7 +297,10 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             self.check('type', 'Microsoft.KeyVault/managedHSMs'),
             self.check('length(properties.initialAdminObjectIds)', 1),
             self.check('properties.initialAdminObjectIds[0]', '{init_admin}'),
-            self.exists('properties.hsmUri')
+            self.exists('properties.hsmUri'),
+            self.exists('properties.securityDomainProperties'),
+            self.exists('properties.securityDomainProperties.activationStatus'),
+            self.exists('properties.securityDomainProperties.activationStatusMessage'),
         ]
 
         show_deleted_checks = [
@@ -322,7 +327,16 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             self.exists('[?name==\'{hsm_name}\'&&properties.location==\'{loc}\'&&properties.deletionDate]'),
         ]
 
+        self.cmd('keyvault check-name -n {hsm_name}', checks=[
+            self.check('nameAvailable', True)
+        ])
+
         self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin} --retention-days 7')
+
+        self.cmd('keyvault check-name -n {hsm_name}', checks=[
+            self.check('nameAvailable', False),
+            self.check('reason', 'AlreadyExists')
+        ])
 
         cert_dir = os.path.join(TEST_DIR, 'certs')
         tmp_dir = self.create_temp_dir()
@@ -517,19 +531,18 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
-    @record_only()
+    # @record_only()
     @AllowLargeResponse()
-    def test_keyvault_hsm_security_domain(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_hsm_security_domain', location='eastus2euap')
+    def test_keyvault_hsm_security_domain(self, resource_group):
         sdtest_dir = tempfile.mkdtemp()
         self.kwargs.update({
-            'hsm_url': SD_ACTIVE_HSM_NAME,
-            'hsm_name': SD_ACTIVE_HSM_NAME,
-            'next_hsm_url': SD_NEXT_ACTIVE_HSM_URL,
-            'next_hsm_name': SD_NEXT_ACTIVE_HSM_NAME,
-            'loc': 'eastus2',
-            'init_admin': '9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa',
+            'hsm_name': self.create_random_name(prefix='clitesthsmsd', length=24),
+            'next_hsm_name': self.create_random_name(prefix='clitesthsmsd', length=24),
+            'loc': 'eastus2euap',
+            'init_admin': 'a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e', #need to hard code admin oid
             'key_name': self.create_random_name('key', 10),
-            'rg': 'bim-rg',
+            'rg': resource_group,
             'sdtest_dir': sdtest_dir
         })
         self.kwargs.update({
@@ -539,8 +552,17 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         })
 
         for i in range(1, 4):
-            self.kwargs['cer{}_path'.format(i)] = os.path.join(KEYS_DIR, 'sd{}.cer'.format(i))
+            self.kwargs['cer{}_path'.format(i)] = os.path.join(CERTS_DIR, 'cert_{}.cer'.format(i-1))
             self.kwargs['key{}_path'.format(i)] = os.path.join(KEYS_DIR, 'sd{}.pem'.format(i))
+
+        self.cmd('az keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin} '
+                 '--retention-days 7 --no-wait')
+
+        self.cmd('az keyvault wait-hsm --hsm-name {hsm_name} --created')
+
+        # download SD
+        self.cmd('az keyvault security-domain download --hsm-name {hsm_name} --security-domain-file "{sdfile}" '
+                 '--sd-quorum 2 --sd-wrapping-keys "{cer1_path}" "{cer2_path}" "{cer3_path}" --no-wait')
 
         # create a new key and backup it
         self.cmd('az keyvault key create --hsm-name {hsm_name} -n {key_name}')
