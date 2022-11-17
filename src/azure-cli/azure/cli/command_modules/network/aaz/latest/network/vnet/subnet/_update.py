@@ -78,36 +78,37 @@ class Update(AAZCommand):
             help="Space-separated list of address prefixes in CIDR format.",
             nullable=True,
         )
-        _args_schema.delegations = AAZListArg(
-            options=["--delegations"],
+        _args_schema.delegated_services = AAZListArg(
+            options=["--delegated-services"],
             help="Space-separated list of services to whom the subnet should be delegated, e.g., `Microsoft.Sql/servers`.",
             nullable=True,
         )
         _args_schema.nat_gateway = AAZResourceIdArg(
             options=["--nat-gateway"],
             help="Name or ID of a NAT gateway to attach.",
+            nullable=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                          "/natGateways/{}",
             ),
-            nullable=True,
         )
         _args_schema.network_security_group = AAZResourceIdArg(
             options=["--nsg", "--network-security-group"],
             help="Name or ID of a network security group (NSG). Use empty string \"\"('\"\"' in PowerShell) to detach it.",
             nullable=True,
             fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/networkSecurityGroups/{}",
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/networkSecurityGroups/{}",
             ),
         )
-        _args_schema.disable_private_endpoint_network_policies = AAZStrArg(
-            options=["--disable-private-endpoint-network-policies"],
-            help="Disable private endpoint network policies on the subnet, the policy is disabled by default.",
+        _args_schema.private_endpoint_network_policies = AAZStrArg(
+            options=["--private-endpoint-network-policies"],
+            help="Disable private endpoint network policies on the subnet.",
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
-        _args_schema.disable_private_link_service_network_policies = AAZStrArg(
-            options=["--disable-private-link-service-network-policies"],
+        _args_schema.private_link_service_network_policies = AAZStrArg(
+            options=["--private-link-service-network-policies"],
             help="Disable private link service network policies on the subnet.",
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
@@ -117,7 +118,8 @@ class Update(AAZCommand):
             help="Name or ID of a route table to associate with the subnet. Use empty string \"\"('\"\"' in PowerShell) to detach it. You can also append \"--remove routeTable\" in \"az network vnet subnet update\" to detach it.",
             nullable=True,
             fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/routeTables/{}",
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/routeTables/{}",
             ),
         )
         _args_schema.policies = AAZListArg(
@@ -136,12 +138,12 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        delegations = cls._args_schema.delegations
-        delegations.Element = AAZObjectArg(
+        delegated_services = cls._args_schema.delegated_services
+        delegated_services.Element = AAZObjectArg(
             nullable=True,
         )
 
-        _element = cls._args_schema.delegations.Element
+        _element = cls._args_schema.delegated_services.Element
         _element.id = AAZStrArg(
             options=["id"],
             help="Resource ID.",
@@ -599,11 +601,11 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
                 properties.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
-                properties.set_prop("delegations", AAZListType, ".delegations")
+                properties.set_prop("delegations", AAZListType, ".delegated_services")
                 properties.set_prop("natGateway", AAZObjectType)
                 properties.set_prop("networkSecurityGroup", AAZObjectType)
-                properties.set_prop("privateEndpointNetworkPolicies", AAZStrType, ".disable_private_endpoint_network_policies")
-                properties.set_prop("privateLinkServiceNetworkPolicies", AAZStrType, ".disable_private_link_service_network_policies")
+                properties.set_prop("privateEndpointNetworkPolicies", AAZStrType, ".private_endpoint_network_policies")
+                properties.set_prop("privateLinkServiceNetworkPolicies", AAZStrType, ".private_link_service_network_policies")
                 properties.set_prop("routeTable", AAZObjectType)
                 properties.set_prop("serviceEndpointPolicies", AAZListType, ".policies")
                 properties.set_prop("serviceEndpoints", AAZListType, ".endpoints")
