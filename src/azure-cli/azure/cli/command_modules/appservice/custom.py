@@ -176,17 +176,9 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if using_webapp_up:
         https_only = using_webapp_up
 
-    if public_network_access is not None:
-        if public_network_access == 'Enabled':
-            public_network_access = 'Enabled'
-        elif public_network_access == 'Disabled':
-            public_network_access = 'Disabled'
-        else:
-            logger.warning("--public-network-access must be Disabled, Enabled or empty string")
-
-
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
-                      https_only=https_only, virtual_network_subnet_id=subnet_resource_id, public_network_access=public_network_access)
+                      https_only=https_only, virtual_network_subnet_id=subnet_resource_id,
+                      public_network_access=public_network_access)
     if runtime:
         runtime = _StackRuntimeHelper.remove_delimiters(runtime)
 
