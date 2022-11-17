@@ -1075,28 +1075,6 @@ def _inform_coming_breaking_change_for_public_ip(namespace):
                        ' For non-zonal regions, you will get a non zone-redundant IP indicated by zones:null.')
 
 
-def process_vnet_create_namespace(cmd, namespace):
-    get_default_location_from_resource_group(cmd, namespace)
-    validate_ddos_name_or_id(cmd, namespace)
-    validate_tags(namespace)
-    get_nsg_validator()(cmd, namespace)
-
-    if namespace.subnet_prefix and not namespace.subnet_name:
-        if cmd.supported_api_version(min_api='2018-08-01'):
-            raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefixes PREFIXES]')
-        raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefix PREFIX]')
-
-    if namespace.subnet_name and not namespace.subnet_prefix:
-        if isinstance(namespace.vnet_prefixes, str):
-            namespace.vnet_prefixes = [namespace.vnet_prefixes]
-        prefix_components = namespace.vnet_prefixes[0].split('/', 1)
-        address = prefix_components[0]
-        bit_mask = int(prefix_components[1])
-        subnet_mask = 24 if bit_mask < 24 else bit_mask
-        subnet_prefix = '{}/{}'.format(address, subnet_mask)
-        namespace.subnet_prefix = [subnet_prefix] if cmd.supported_api_version(min_api='2018-08-01') else subnet_prefix
-
-
 def _validate_cert(namespace, param_name):
     attr = getattr(namespace, param_name)
     if attr and os.path.isfile(attr):

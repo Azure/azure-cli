@@ -6865,6 +6865,7 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 
 
 # region VirtualNetworks
+# pylint: disable=protected-access
 class VNetCreate(_VNetCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):

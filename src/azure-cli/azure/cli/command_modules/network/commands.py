@@ -32,7 +32,7 @@ from azure.cli.command_modules.network._util import (
 from azure.cli.command_modules.network._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
-    transform_vnet_create_output, transform_public_ip_create_output,
+    transform_public_ip_create_output,
     transform_traffic_manager_create_output, transform_nic_create_output,
     transform_nsg_create_output, transform_vnet_gateway_create_output,
     transform_vpn_connection, transform_vpn_connection_list,
@@ -53,7 +53,7 @@ from azure.cli.command_modules.network._validators import (
     process_nw_packet_capture_create_namespace, process_nw_test_connectivity_namespace, process_nw_topology_namespace,
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
     process_public_ip_create_namespace,
-    process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
+    process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
     process_vpn_connection_create_namespace,
     process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace,
     process_appgw_waf_policy_update, process_cross_region_lb_frontend_ip_namespace, process_cross_region_lb_create_namespace)
@@ -274,8 +274,6 @@ def load_command_table(self, _):
         client_factory=cf_bastion_hosts,
         min_api='2019-11-01'
     )
-
-    network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
 
     network_load_balancers_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.network.custom#{}',
