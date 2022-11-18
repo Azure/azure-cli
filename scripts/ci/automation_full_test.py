@@ -22,14 +22,15 @@ logger.addHandler(ch)
 # sys.argv is passed by
 # .azure-pipelines/templates/automation_test.yml in section `Running full test`
 # scripts/regression_test/regression_test.yml in section "Rerun tests"
-instance_cnt = int(sys.argv[1])
-instance_idx = int(sys.argv[2])
-profile = sys.argv[3]
-serial_modules = sys.argv[4].split()
+instance_cnt = int(sys.argv[1]) if len(sys.argv) >= 2 else 1
+instance_idx = int(sys.argv[2]) if len(sys.argv) >= 3 else 1
+profile = sys.argv[3] if len(sys.argv) >= 4 else 'latest'
+serial_modules = sys.argv[4].split() if len(sys.argv) >= 5 else []
 fix_failure_tests = sys.argv[5].lower() == 'true' if len(sys.argv) >= 6 else False
+target = sys.argv[6].lower() if len(sys.argv) >= 7 else 'cli'
 working_directory = "/mnt/vss/_work/1/s"
 azdev_test_result_dir = "/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env"
-jobs = {
+cli_jobs = {
             'acr': 45,
             'acs': 62,
             'advisor': 18,
@@ -104,6 +105,132 @@ jobs = {
             'azure-cli-telemetry': 18,
             'azure-cli-testsdk': 20,
         }
+
+extension_jobs = {
+    'account': 23,
+    'acrtransfer': 20,
+    'ad': 21,
+    'aem': 50,
+    'ai-examples': 30,
+    'aks-preview': 118,
+    'alertsmanagement': 20,
+    'alias': 21,
+    'amg': 26,
+    'application-insights': 30,
+    'appservice-kube': 21,
+    'attestation': 21,
+    'authV2': 24,
+    'automation': 24,
+    'azure-firewall': 121,
+    'blockchain': 20,
+    'blueprint': 21,
+    'change-analysis': 20,
+    'cli-translator': 22,
+    'cloudservice': 20,
+    'communication': 32,
+    'confidentialledger': 21,
+    'confluent': 21,
+    'connectedk8s': 24,
+    'connectedmachine': 26,
+    'connectedvmware': 26,
+    'connection-monitor-preview': 28,
+    'containerapp': 228,
+    'cosmosdb-preview': 58,
+    'costmanagement': 25,
+    'custom-providers': 27,
+    'databox': 22,
+    'databricks': 25,
+    'datadog': 22,
+    'datafactory': 27,
+    'datamigration': 25,
+    'dataprotection': 30,
+    'datashare': 23,
+    'db-up': 25,
+    'desktopvirtualization': 23,
+    'dev-spaces': 20,
+    'diskpool': 23,
+    'dms-preview': 23,
+    'dnc': 21,
+    'dns-resolver': 30,
+    'edgeorder': 24,
+    'elastic-san': 26,
+    'elastic': 24,
+    'eventgrid': 21,
+    'express-route-cross-connection': 22,
+    'fleet': 24,
+    'fluid-relay': 23,
+    'footprint': 22,
+    'front-door': 36,
+    'functionapp': 21,
+    'guestconfig': 20,
+    'hack': 28,
+    'hardware-security-modules': 30,
+    'healthbot': 23,
+    'healthcareapis': 30,
+    'hpc-cache': 24,
+    'image-copy': 21,
+    'image-gallery': 24,
+    'import-export': 22,
+    'init': 22,
+    'interactive': 23,
+    'internet-analyzer': 27,
+    'ip-group': 24,
+    'k8s-configuration': 26,
+    'k8s-extension': 22,
+    'kusto': 25,
+    'log-analytics-solution': 22,
+    'log-analytics': 23,
+    'logic': 23,
+    'logz': 23,
+    'maintenance': 23,
+    'managementpartner': 25,
+    'mesh': 31,
+    'mixed-reality': 32,
+    'monitor-control-service': 25,
+    'netappfiles-preview': 54,
+    'network-manager': 37,
+    'next': 25,
+    'nginx': 25,
+    'notification-hub': 23,
+    'offazure': 25,
+    'orbital': 26,
+    'peering': 19,
+    'portal': 21,
+    'powerbidedicated': 22,
+    'providerhub': 23,
+    'purview': 24,
+    'quantum': 38,
+    'quota': 25,
+    'rdbms-connect': 42,
+    'redisenterprise': 26,
+    'reservation': 34,
+    'resource-graph': 23,
+    'resource-mover': 28,
+    'scenario-guide': 22,
+    'scheduled-query': 24,
+    'scvmm': 27,
+    'securityinsight': 51,
+    'serial-console': 24,
+    'spring-cloud': 341,
+    'spring': 345,
+    'ssh': 24,
+    'stack-hci': 25,
+    'storage-blob-preview': 59,
+    'storage-preview': 42,
+    'storagesync': 25,
+    'stream-analytics': 49,
+    'subscription': 22,
+    'support': 41,
+    'swiftlet': 22,
+    'timeseriesinsights': 24,
+    'traffic-collector': 26,
+    'virtual-network-tap': 20,
+    'virtual-wan': 70,
+    'vm-repair': 22,
+    'vmware': 38,
+    'webapp': 22,
+    'webpubsub': 23,
+}
 
 
 def run_command(cmd, check_return_code=False):
@@ -230,7 +357,17 @@ class AutomaticScheduling(object):
         # only get modules and core, ignore extensions
         self.modules = {**result['mod'], **result['core']}
 
-    def append_new_modules(self):
+    def get_extension_modules(self):
+        out = subprocess.Popen(['azdev', 'extension', 'list', '-o', 'tsv'], stdout=subprocess.PIPE)
+        stdout = out.communicate()[0]
+        if not stdout:
+            raise RuntimeError("No extension detected")
+        extensions = stdout.decode('UTF-8').split('\n')
+        self.modules = {extension.split('\t')[1]: extension.split('\t')[2].strip('\r')
+                        for extension in extensions if len(extension.split('\t')) > 2}
+        logger.info(self.modules)
+
+    def append_new_modules(self, jobs):
         # If add a new module, use average test time
         avg_cost = int(sum(jobs.values()) / len(jobs.values()))
         for module in self.modules:
@@ -286,15 +423,32 @@ class AutomaticScheduling(object):
             parallel_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
         return serial_error_flag or parallel_error_flag
 
+    def run_extension_instance_modules(self, instance_modules):
+        command = ['azdev', 'extension', 'add'].extend(instance_modules.keys())
+        run_command(command)
+        self.run_instance_modules(instance_modules)
+
 
 def main():
     logger.info("Start automation full test ...\n")
     autoscheduling = AutomaticScheduling()
     autoscheduling.get_all_modules()
-    autoscheduling.append_new_modules()
+    autoscheduling.append_new_modules(cli_jobs)
     instance_modules = autoscheduling.get_instance_modules()
     sys.exit(1) if autoscheduling.run_instance_modules(instance_modules) else sys.exit(0)
 
 
+def extension_main():
+    logger.info("Start extension automation full test ...\n")
+    autoscheduling = AutomaticScheduling()
+    autoscheduling.get_extension_modules()
+    autoscheduling.append_new_modules(extension_jobs)
+    instance_modules = autoscheduling.get_instance_modules()
+    sys.exit(1) if autoscheduling.run_extension_instance_modules(instance_modules) else sys.exit(0)
+
+
 if __name__ == '__main__':
-    main()
+    if target == 'cli':
+        main()
+    else:
+        extension_main()

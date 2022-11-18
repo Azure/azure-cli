@@ -16,7 +16,7 @@ jobs:
   displayName: CLI Extension Regression Test
   timeoutInMinutes: 0
     strategy:
-      maxParallel: 8
+      maxParallel: 12
       matrix:
         instance1:
           Instance_idx: 1
@@ -34,6 +34,14 @@ jobs:
           Instance_idx: 7
         instance8:
           Instance_idx: 8
+        instance9:
+          Instance_idx: 9
+        instance10:
+          Instance_idx: 10
+        instance11:
+          Instance_idx: 11
+        instance12:
+          Instance_idx: 12
     pool:
       name: ${{ variables.ubuntu_pool }}
     steps:
@@ -46,4 +54,12 @@ jobs:
         CLIExtensionRepoPath: azure-cli-extensions
     - bash: |
         set -ev
+
+        source env/bin/activate
+
+        az login -u $(CLI_LIVE_TEST_ACCOUNT) -p "$(CLI_LIVE_TEST_PASSWORD)"
+        az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+
+        python scripts/ci/automation_full_test_extension.py "12" "$(Instance_idx)" "latest" "" "True" "extension"
+      displayName: "Rerun tests"
 
