@@ -488,6 +488,12 @@ def load_command_table(self, _):
         g.custom_command('unlink', 'unlink_user_function', validator=validate_staticsite_sku)
         g.custom_show_command('show', 'get_user_function', validator=validate_staticsite_sku)
 
+    with self.command_group('staticwebapp backends', custom_command_type=staticsite_sdk) as g:
+        g.custom_command('validate', 'validate_backend', validator=validate_staticsite_sku, exception_handler=ex_handler_factory())
+        g.custom_command('link', 'link_backend', validator=validate_staticsite_sku, exception_handler=ex_handler_factory())
+        g.custom_command('unlink', 'unlink_backend', validator=validate_staticsite_sku, exception_handler=ex_handler_factory())
+        g.custom_show_command('show', 'get_backend', validator=validate_staticsite_sku)
+
     with self.command_group('staticwebapp enterprise-edge', custom_command_type=staticsite_sdk) as g:
         g.custom_command('enable', 'enable_staticwebapp_enterprise_edge')
         g.custom_command('disable', 'disable_staticwebapp_enterprise_edge')
