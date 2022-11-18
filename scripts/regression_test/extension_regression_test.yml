@@ -15,51 +15,64 @@ jobs:
 - job: CLIExtensionRegressionTest
   displayName: CLI Extension Regression Test
   timeoutInMinutes: 0
-    strategy:
-      maxParallel: 12
-      matrix:
-        instance1:
-          Instance_idx: 1
-        instance2:
-          Instance_idx: 2
-        instance3:
-          Instance_idx: 3
-        instance4:
-          Instance_idx: 4
-        instance5:
-          Instance_idx: 5
-        instance6:
-          Instance_idx: 6
-        instance7:
-          Instance_idx: 7
-        instance8:
-          Instance_idx: 8
-        instance9:
-          Instance_idx: 9
-        instance10:
-          Instance_idx: 10
-        instance11:
-          Instance_idx: 11
-        instance12:
-          Instance_idx: 12
-    pool:
-      name: ${{ variables.ubuntu_pool }}
-    steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '3.10'
-        displayName: "Use Python 3.10"
-    - template: ../../.azure-pipelines/templates/azdev_setup.yml
-      parameters:
-        CLIExtensionRepoPath: azure-cli-extensions
-    - bash: |
+  strategy:
+    maxParallel: 12
+    matrix:
+      instance1:
+        Instance_idx: 1
+      instance2:
+        Instance_idx: 2
+      instance3:
+        Instance_idx: 3
+      instance4:
+        Instance_idx: 4
+      instance5:
+        Instance_idx: 5
+      instance6:
+        Instance_idx: 6
+      instance7:
+        Instance_idx: 7
+      instance8:
+        Instance_idx: 8
+      instance9:
+        Instance_idx: 9
+      instance10:
+        Instance_idx: 10
+      instance11:
+        Instance_idx: 11
+      instance12:
+        Instance_idx: 12
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.10'
+      displayName: "Use Python 3.10"
+  - task: AzureCLI@1
+    displayName: 'checkout cli and extension repo'
+    inputs:
+      azureSubscription: 'Azure CLI release'
+      scriptLocation: inlineScript
+      inlineScript: |
         set -ev
 
-        source env/bin/activate
+        # git config
+        git config --global user.email "AzPyCLI@microsoft.com"
+        git config --global user.name "Azure CLI Team"
 
-        az login -u $(CLI_LIVE_TEST_ACCOUNT) -p "$(CLI_LIVE_TEST_PASSWORD)"
-        az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+        git clone https://github.com/Azure/azure-cli-extensions.git
+  - template: ../../.azure-pipelines/templates/azdev_setup.yml
+    parameters:
+      CLIExtensionRepoPath: azure-cli-extensions
+  - bash: |
+      set -ev
 
-        python scripts/ci/automation_full_test_extension.py "12" "$(Instance_idx)" "latest" "" "True" "extension"
-      displayName: "Rerun tests"
+      source env/bin/activate
+
+      az login -u $(CLI_LIVE_TEST_ACCOUNT) -p "$(CLI_LIVE_TEST_PASSWORD)"
+      az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+
+      python scripts/ci/automation_full_test_extension.py "12" "$(Instance_idx)" "latest" "" "True" "extension"
+    displayName: "Rerun tests"
 
