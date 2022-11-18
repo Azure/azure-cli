@@ -17,7 +17,7 @@ from azure.cli.core.profiles import ResourceType
 
 from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, PatchVault, IdentityData, \
     CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity, MonitoringSettings, \
-    AzureMonitorAlertSettings, ClassicAlertSettings, PublicNetworkAccess
+    AzureMonitorAlertSettings, ClassicAlertSettings
 from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
     AzureIaaSComputeVMProtectedItem, AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, \
     BackupRequestResource, IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
@@ -30,7 +30,7 @@ from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest,
 
 import azure.cli.command_modules.backup._validators as validators
 from azure.cli.core.util import CLIError
-from azure.core.exceptions import HttpResponseError
+from azure.core.exceptions import HttpResponseError, ResourceNotFoundError as CoreResourceNotFoundError
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, \
     MutuallyExclusiveArgumentError, ArgumentUsageError, ValidationError, ResourceNotFoundError
 from azure.cli.command_modules.backup._client_factory import (
@@ -112,25 +112,26 @@ password_length = 15
 # pylint: disable=too-many-function-args
 
 
-def create_vault(client, vault_name, resource_group_name, location, tags=None, classic_alerts='Enable',
-                 azure_monitor_alerts_for_job_failures='Enable', public_network_access='Enable'):
+def create_vault(client, vault_name, resource_group_name, location, tags=None, public_network_access=None,
+                 classic_alerts='Enable', azure_monitor_alerts_for_job_failures='Enable'):
     vault_sku = Sku(name=SkuName.standard)
-
-    # TODO cleanup
-    try:
-        _tmp = client.get(resource_group_name, vault_name)
-        #print(_tmp.properties.public_network_access)
-        public_network_access = _tmp.properties.public_network_access[:-1]
-    except Exception as e:
-        #print(e)
-        pass
-
+    if public_network_access is None:
+        # get the existing value of public_network_access so the request is made correctly
+        try:
+            existing_vault_if_any = client.get(resource_group_name, vault_name)
+            existing_vault_public_network_access = existing_vault_if_any.properties.public_network_access
+            # TODO add better validation for existing_vault_public_network_access? It might be invalid.
+            #   Maybe have a list of possible values and iterate through, and if not add a warning to
+            #   contact support?
+            public_network_access = existing_vault_public_network_access[:-1]
+        except CoreResourceNotFoundError:
+            public_network_access = 'Enable'
     vault_properties = VaultProperties(
         monitoring_settings=MonitoringSettings(
             azure_monitor_alert_settings=AzureMonitorAlertSettings(
                 alerts_for_all_job_failures=azure_monitor_alerts_for_job_failures + 'd'),
             classic_alert_settings=ClassicAlertSettings(alerts_for_critical_operations=classic_alerts + 'd')),
-       public_network_access=public_network_access+'d')
+        public_network_access=public_network_access + 'd')
     vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
     return client.begin_create_or_update(resource_group_name, vault_name, vault)
 
