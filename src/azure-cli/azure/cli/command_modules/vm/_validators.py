@@ -2024,8 +2024,6 @@ def process_gallery_image_version_namespace(cmd, namespace):
         ConfidentialVMEncryptionType, GalleryTargetExtendedLocation, GalleryExtendedLocation = cmd.get_models(
             'TargetRegion', 'EncryptionImages', 'OSDiskImageEncryption', 'DataDiskImageEncryption',
             'ConfidentialVMEncryptionType', 'GalleryTargetExtendedLocation', 'GalleryExtendedLocation')
-    storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS']]
-    storage_account_types_str = ", ".join(storage_account_types_list)
 
     if namespace.target_regions:
         if hasattr(namespace, 'target_region_encryption') and namespace.target_region_encryption:
@@ -2039,6 +2037,9 @@ def process_gallery_image_version_namespace(cmd, namespace):
                 raise InvalidArgumentValueError(
                     'usage error: Length of --target_region_cvm_encryption should be as same as '
                     'length of target regions')
+
+        storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS']]
+        storage_account_types_str = ", ".join(storage_account_types_list)
 
         regions_info = []
         for i, t in enumerate(namespace.target_regions):
@@ -2144,6 +2145,10 @@ def process_gallery_image_version_namespace(cmd, namespace):
                 raise InvalidArgumentValueError(
                     'usage error: Length of --target-edge-zone-encryption '
                     'should be as same as length of --target-edge-zones')
+
+        storage_account_types_list = [item.lower() for item in
+                                            ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS', 'StandardSSD_LRS']]
+        storage_account_types_str = ", ".join(storage_account_types_list)
 
         edge_zone_info = []
         for i, t in enumerate(namespace.target_edge_zones):
