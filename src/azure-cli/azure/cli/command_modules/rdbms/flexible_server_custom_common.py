@@ -75,7 +75,7 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
         migration_name = str(uuid.uuid4())
     r = send_raw_request(cmd.cli_ctx, "put", "https://api-dogfood.resources.windows-int.net:443/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2022-05-01-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, json_data)
 
-    return r.json() 
+    return r.json()
 
 
 def migration_show_func(cmd, client, resource_group_name, server_name, migration_name):
