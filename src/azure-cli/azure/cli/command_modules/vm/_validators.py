@@ -2147,7 +2147,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     'should be as same as length of --target-edge-zones')
 
         storage_account_types_list = [item.lower() for item in
-                                            ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS', 'StandardSSD_LRS']]
+                                      ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS', 'StandardSSD_LRS']]
         storage_account_types_str = ", ".join(storage_account_types_list)
 
         edge_zone_info = []
