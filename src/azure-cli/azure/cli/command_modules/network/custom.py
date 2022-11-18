@@ -9,7 +9,7 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_
 from knack.log import get_logger
 
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
-from azure.cli.core.aaz import AAZResourceIdArgFormat as _EmptyResourceIdArgFormat
+from azure.cli.core.aaz import has_value
 from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
@@ -23,12 +23,10 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
-from .aaz.latest.network.application_gateway._update import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.application_gateway import Update as _ApplicationGatewayUpdate
 from .aaz.latest.network.nsg.rule import Update as _NSGRuleUpdate
-from .aaz.latest.network.vnet._create import Create as _VNetCreate
-from .aaz.latest.network.vnet._update import Update as _VNetUpdate
-from .aaz.latest.network.vnet.subnet._create import Create as _VNetSubnetCreate
-from .aaz.latest.network.vnet.subnet._update import Update as _VNetSubnetUpdate
+from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdate
+from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update as _VNetSubnetUpdate
 
 import threading
 import time
@@ -297,7 +295,6 @@ class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
         return args
 
     def pre_operations(self):
-        from azure.cli.core.aaz import has_value
         args = self.ctx.args
         if has_value(args.custom_error_pages):
             configurations = []
@@ -5373,7 +5370,7 @@ def create_nsg_rule(cmd, resource_group_name, network_security_group_name, secur
 class NSGRuleUpdate(_NSGRuleUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArgFormat, AAZResourceIdArg
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.destination_asgs = AAZListArg(
             options=['--destination-asgs'],
@@ -6867,15 +6864,6 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 
 # region VirtualNetworks
 # pylint: disable=protected-access
-class EmptyResourceIdArgFormat(_EmptyResourceIdArgFormat):
-    def __call__(self, ctx, value):
-        if value._data == "":
-            logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-            return value
-
-        return super().__call__(ctx, value)
-
-
 class VNetCreate(_VNetCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -6914,7 +6902,6 @@ class VNetCreate(_VNetCreate):
         return args_schema
 
     def pre_operations(self):
-        from azure.cli.core.aaz import has_value
         args = self.ctx.args
         if has_value(args.edge_zone):
             args.extended_location.name = args.edge_zone
@@ -6943,18 +6930,31 @@ class VNetCreate(_VNetCreate):
 class VNetUpdate(_VNetUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArgFormat, AAZResourceIdArgFormat
+
+        class EmptyListArgFormat(AAZListArgFormat):
+            def __call__(self, ctx, value):
+                data = value._data
+                if has_value(data) and len(data) == 1 and data[0] == "":
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
+        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
+            def __call__(self, ctx, value):
+                if value._data == "":
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         # handle detach logic
+        args_schema.dns_servers._fmt = EmptyListArgFormat()
         args_schema.ddos_protection_plan._fmt = EmptyResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/ddosProtectionPlans/{}",
         )
-
-    def post_instance_update(self, instance):
-        if instance.properties.dhcp_options.dns_servers == [""]:
-            instance.properties.dhcp_options.dns_servers = None
-        if instance.properties.ddos_protection_plan == "":
-            instance.properties.ddos_protection_plan = None
+        return args_schema
 
 
 class VNetSubnetCreate(_VNetSubnetCreate):
@@ -7003,7 +7003,6 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         return args_schema
 
     def pre_operations(self):
-        from azure.cli.core.aaz import has_value
         args = self.ctx.args
         if has_value(args.address_prefixes) and len(args.address_prefixes) == 1:
             args.address_prefix = args.address_prefixes[0]
@@ -7045,25 +7044,52 @@ class VNetSubnetCreate(_VNetSubnetCreate):
 class VNetSubnetUpdate(_VNetSubnetUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZBoolArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZBoolArg, AAZResourceIdArg, \
+                                       AAZListArgFormat, AAZResourceIdArgFormat
+
+        class EmptyListArgFormat(AAZListArgFormat):
+            def __call__(self, ctx, value):
+                data = value._data
+                if has_value(data) and len(data) == 1 and data[0] == "":
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
+        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
+            def __call__(self, ctx, value):
+                if value._data == "":
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.delegations = AAZListArg(
             options=["--delegations"],
-            help="Space-separated list of services to whom the subnet should be delegated, e.g., Microsoft.Sql/servers."
+            help="Space-separated list of services to whom the subnet should be delegated, e.g., Microsoft.Sql/servers.",
+            nullable=True,
         )
-        args_schema.delegations.Element = AAZStrArg()
+        args_schema.delegations.Element = AAZStrArg(
+            nullable=True,
+        )
         # add endpoint/policy arguments
         args_schema.service_endpoints = AAZListArg(
             options=["--service-endpoints"],
             help="Space-separated list of services allowed private access to this subnet. "
                  "Values from: az network vnet list-endpoint-services.",
+            nullable=True,
+            fmt=EmptyListArgFormat(),
         )
-        args_schema.service_endpoints.Element = AAZStrArg()
+        args_schema.service_endpoints.Element = AAZStrArg(
+            nullable=True,
+        )
         args_schema.service_endpoint_policy = AAZListArg(
             options=["--service-endpoint-policy"],
             help="Space-separated list of names or IDs of service endpoint policies to apply.",
+            nullable=True,
+            fmt=EmptyListArgFormat(),
         )
         args_schema.service_endpoint_policy.Element = AAZResourceIdArg(
+            nullable=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                          "/serviceEndpointPolicies/{}",
@@ -7073,14 +7099,16 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         args_schema.disable_private_endpoint_network_policies = AAZBoolArg(
             options=["--disable-private-endpoint-network-policies"],
             help="Disable private endpoint network policies on the subnet.",
+            nullable=True,
         )
         args_schema.disable_private_link_service_network_policies = AAZBoolArg(
             options=["--disable-private-link-service-network-policies"],
             help="Disable private link service network policies on the subnet.",
+            nullable=True,
         )
         # filter arguments
-        args_schema.policies._registered = False
         args_schema.endpoints._registered = False
+        args_schema.policies._registered = False
         args_schema.delegated_services._registered = False
         args_schema.private_endpoint_network_policies._registered = False
         args_schema.private_link_service_network_policies._registered = False
@@ -7101,7 +7129,6 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         return args_schema
 
     def pre_operations(self):
-        from azure.cli.core.aaz import has_value
         args = self.ctx.args
         if has_value(args.address_prefixes):
             prefixes = args.address_prefixes
@@ -7109,21 +7136,15 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             args.address_prefix = prefixes[0] if len(prefixes) == 1 else None
 
         if has_value(args.service_endpoints):
-            if args.service_endpoints == [""]:
-                args.endpoints = None
-            else:
-                endpoints = []
-                for service in args.service_endpoints:
-                    endpoints.append({"service": service})
-                args.endpoints = endpoints
-        if has_value(args.service_endpoint_policy) and args.args.service_endpoint_policy != [""]:
-            if args.args.service_endpoint_policy == [""]:
-                args.policies = None
-            else:
-                policies = []
-                for policy_id in args.service_endpoint_policy:
-                    policies.append({"id": policy_id})
-                args.policies = policies
+            endpoints = []
+            for service in args.service_endpoints:
+                endpoints.append({"service": service})
+            args.endpoints = endpoints or None
+        if has_value(args.service_endpoint_policy):
+            policies = []
+            for policy_id in args.service_endpoint_policy:
+                policies.append({"id": policy_id})
+            args.policies = policies or None
 
         if has_value(args.delegations):
             delegations = []
@@ -7151,11 +7172,9 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
                 args.private_link_service_network_policies = "Enabled"
 
     def post_instance_update(self, instance):
-        if instance.properties.nat_gateway.id == "":
-            instance.properties.nat_gateway = None
-        if instance.properties.network_security_group.id == "":
+        if not has_value(instance.properties.network_security_group.id):
             instance.properties.network_security_group = None
-        if instance.properties.route_table.id == "":
+        if not has_value(instance.properties.route_table.id):
             instance.properties.route_table = None
 
 

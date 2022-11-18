@@ -902,7 +902,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_nsg', transform=transform_nsg_create_output)
 
     with self.command_group('network nsg rule') as g:
-        from .aaz.latest.network.nsg.rule import Show
+        from .aaz.latest.network.nsg.rule._show import Show
         from .custom import NSGRuleUpdate
         self.command_table['network nsg rule update'] = NSGRuleUpdate(loader=self)
         self.command_table['network nsg rule show'] = Show(loader=self, table_transformer=transform_nsg_rule_table_output)
