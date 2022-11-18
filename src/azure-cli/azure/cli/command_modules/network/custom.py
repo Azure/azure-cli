@@ -26,6 +26,7 @@ from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone
 from .aaz.latest.network.application_gateway import Update as _ApplicationGatewayUpdate
 from .aaz.latest.network.nsg.rule import Update as _NSGRuleUpdate
 from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdate
+from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
 from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update as _VNetSubnetUpdate
 
 import threading
@@ -7144,30 +7145,45 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             args.address_prefixes = prefixes if len(prefixes) > 1 else None
             args.address_prefix = prefixes[0] if len(prefixes) == 1 else None
 
-        if has_value(args.delegations):
-            delegations = []
-            for idx, service_name in enumerate(args.delegations):
-                service_name = str(service_name)
-                # covert name to service name
-                if "/" not in service_name and len(service_name.split(".")) == 3:
-                    _, service, resource_type = service_name.split(".")
-                    service_name = f"Microsoft.{service}/{resource_type}"
-                delegations.append({
-                    "name": str(idx),
-                    "service_name": service_name,
-                })
-            args.delegated_services = delegations
+        def to_aaz_list_arg(source, target, transformer=None):
+            if not has_value(source):
+                return
 
-        if has_value(args.service_endpoints):
-            endpoints = []
-            for service in args.service_endpoints:
-                endpoints.append({"service": service})
-            args.endpoints = endpoints or None
-        if has_value(args.service_endpoint_policy):
-            policies = []
-            for policy_id in args.service_endpoint_policy:
-                policies.append({"id": policy_id})
-            args.policies = policies or None
+            if source == None:
+                target._data = target._schema.process_data(None)
+                return
+
+            for idx, item in enumerate(source):
+                if not has_value(item):
+                    continue
+
+                if item == None:
+                    target[idx] = None
+                elif transformer:
+                    target[idx] = transformer(item, idx)
+                else:
+                    target[idx] = item
+
+        def delegation_trans(service_name, index):
+            service_name = str(service_name)
+            # covert name to service name
+            if "/" not in service_name and len(service_name.split(".")) == 3:
+                _, service, resource_type = service_name.split(".")
+                service_name = f"Microsoft.{service}/{resource_type}"
+            return {
+                "name": str(index),
+                "service_name": service_name,
+            }
+
+        def endpoint_trans(service_name):
+            return {"service": service_name}
+
+        def policy_trans(policy_id):
+            return {"id": policy_id}
+
+        to_aaz_list_arg(args.delegations, args.delegated_services, transformer=delegation_trans)
+        to_aaz_list_arg(args.service_endpoints, args.endpoints, transformer=endpoint_trans)
+        to_aaz_list_arg(args.service_endpoint_policy, args.policies, transformer=policy_trans)
         # use string instead of bool
         args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
         args.private_link_service_network_policies = args.disable_private_link_service_network_policies
@@ -7179,34 +7195,16 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             instance.properties.route_table = None
 
 
-def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name):
-    from .aaz.latest.network.vnet.peering._show import Show
-    try:
-        peering = Show(cli_ctx=cmd.cli_ctx)(command_args={
-            "name": virtual_network_peering_name,
-            "resource_group": resource_group_name,
-            "vnet_name": virtual_network_name,
-        })
-    except ResourceNotFoundError:
-        err_msg = f"Virtual network peering {virtual_network_name} doesn't exist."
-        raise ResourceNotFoundError(err_msg)
-
-    from .aaz.latest.network.vnet.peering._create import Create
-    return Create(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": virtual_network_peering_name,
-        "resource_group": resource_group_name,
-        "vnet_name": virtual_network_name,
-        "remote_vnet": peering["remoteVirtualNetwork"].pop("id", None),
-        "allow_vnet_access": peering.pop("allowVirtualNetworkAccess", False),
-        "allow_gateway_transit": peering.pop("allowGatewayTransit", False),
-        "allow_forwarded_traffic": peering.pop("allowForwardedTraffic", False),
-        "use_remote_gateways": peering.pop("useRemoteGateways", False),
-        "sync_remote": "true",
-    })
+class VNetPeeringCreate(_VNetPeeringCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.sync_remote._registered = False
+        return args_schema
 
 
 def list_available_ips(cmd, resource_group_name, virtual_network_name):
-    from .aaz.latest.network.vnet._show import Show
+    from .aaz.latest.network.vnet import Show
     vnet = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "name": virtual_network_name,
         "resource_group": resource_group_name,
@@ -7214,7 +7212,7 @@ def list_available_ips(cmd, resource_group_name, virtual_network_name):
 
     start_ip = vnet["addressSpace"]["addressPrefixes"][0].split("/")[0]
 
-    from .aaz.latest.network.vnet._check_ip_address import CheckIpAddress
+    from .aaz.latest.network.vnet import CheckIpAddress
     return CheckIpAddress(cli_ctx=cmd.cli_ctx)(command_args={
         "name": virtual_network_name,
         "resource_group": resource_group_name,
@@ -7223,7 +7221,7 @@ def list_available_ips(cmd, resource_group_name, virtual_network_name):
 
 
 def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, subnet_name):
-    from .aaz.latest.network.vnet.subnet._show import Show
+    from .aaz.latest.network.vnet.subnet import Show
     subnet = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "name": subnet_name,
         "resource_group": resource_group_name,
@@ -7236,12 +7234,38 @@ def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, su
         address_prefix = subnet["addressPrefix"]
     start_ip = address_prefix.split("/")[0]
 
-    from .aaz.latest.network.vnet._check_ip_address import CheckIpAddress
+    from .aaz.latest.network.vnet import CheckIpAddress
     return CheckIpAddress(cli_ctx=cmd.cli_ctx)(command_args={
         "name": virtual_network_name,
         "resource_group": resource_group_name,
         "ip_address": start_ip,
     })["availableIPAddresses"]
+
+
+def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name):
+    from .aaz.latest.network.vnet.peering import Show
+    try:
+        peering = Show(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": virtual_network_peering_name,
+            "resource_group": resource_group_name,
+            "vnet_name": virtual_network_name,
+        })
+    except ResourceNotFoundError:
+        err_msg = f"Virtual network peering {virtual_network_name} doesn't exist."
+        raise ResourceNotFoundError(err_msg)
+
+    from .aaz.latest.network.vnet.peering import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": virtual_network_peering_name,
+        "resource_group": resource_group_name,
+        "vnet_name": virtual_network_name,
+        "remote_vnet": peering["remoteVirtualNetwork"].pop("id", None),
+        "allow_vnet_access": peering.pop("allowVirtualNetworkAccess", None),
+        "allow_gateway_transit": peering.pop("allowGatewayTransit", None),
+        "allow_forwarded_traffic": peering.pop("allowForwardedTraffic", None),
+        "use_remote_gateways": peering.pop("useRemoteGateways", None),
+        "sync_remote": "true",
+    })
 # endregion
 
 

@@ -1480,7 +1480,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         # time.sleep(15 * 60)
 
         # remove delegations from all vnets
-        self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group_1,
+        self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove properties.delegations'.format(resource_group_1,
                                                                                                          subnet_name,
                                                                                                          vnet_name))
         # remove all vnets
