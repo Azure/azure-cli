@@ -6863,7 +6863,7 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 
 
 # region VirtualNetworks
-# pylint: disable=protected-access
+# pylint: disable=protected-access,too-few-public-methods
 class VNetCreate(_VNetCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -7044,8 +7044,7 @@ class VNetSubnetCreate(_VNetSubnetCreate):
 class VNetSubnetUpdate(_VNetSubnetUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZBoolArg, AAZResourceIdArg, \
-                                       AAZListArgFormat, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
 
         class EmptyListArgFormat(AAZListArgFormat):
             def __call__(self, ctx, value):
@@ -7096,23 +7095,33 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             ),
         )
         # add ple/pls arguments
-        args_schema.disable_private_endpoint_network_policies = AAZBoolArg(
+        args_schema.disable_private_endpoint_network_policies = AAZStrArg(
             options=["--disable-private-endpoint-network-policies"],
             help="Disable private endpoint network policies on the subnet.",
             nullable=True,
+            enum={
+                "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
+                "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
+            },
+            blank="Disabled",
         )
-        args_schema.disable_private_link_service_network_policies = AAZBoolArg(
+        args_schema.disable_private_link_service_network_policies = AAZStrArg(
             options=["--disable-private-link-service-network-policies"],
             help="Disable private link service network policies on the subnet.",
             nullable=True,
+            enum={
+                "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
+                "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
+            },
+            blank="Enabled",
         )
         # filter arguments
+        args_schema.address_prefix._registered = False
+        args_schema.delegated_services._registered = False
         args_schema.endpoints._registered = False
         args_schema.policies._registered = False
-        args_schema.delegated_services._registered = False
         args_schema.private_endpoint_network_policies._registered = False
         args_schema.private_link_service_network_policies._registered = False
-        args_schema.address_prefix._registered = False
         # handle detach logic
         args_schema.nat_gateway._fmt = EmptyResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
@@ -7135,17 +7144,6 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             args.address_prefixes = prefixes if len(prefixes) > 1 else None
             args.address_prefix = prefixes[0] if len(prefixes) == 1 else None
 
-        if has_value(args.service_endpoints):
-            endpoints = []
-            for service in args.service_endpoints:
-                endpoints.append({"service": service})
-            args.endpoints = endpoints or None
-        if has_value(args.service_endpoint_policy):
-            policies = []
-            for policy_id in args.service_endpoint_policy:
-                policies.append({"id": policy_id})
-            args.policies = policies or None
-
         if has_value(args.delegations):
             delegations = []
             for idx, service_name in enumerate(args.delegations):
@@ -7160,16 +7158,19 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
                 })
             args.delegated_services = delegations
 
-        if has_value(args.disable_private_endpoint_network_policies):
-            if bool(args.disable_private_endpoint_network_policies) is True:
-                args.private_endpoint_network_policies = "Disabled"
-            else:
-                args.private_endpoint_network_policies = "Enabled"
-        if has_value(args.disable_private_link_service_network_policies):
-            if bool(args.disable_private_link_service_network_policies) is True:
-                args.private_link_service_network_policies = "Disabled"
-            else:
-                args.private_link_service_network_policies = "Enabled"
+        if has_value(args.service_endpoints):
+            endpoints = []
+            for service in args.service_endpoints:
+                endpoints.append({"service": service})
+            args.endpoints = endpoints or None
+        if has_value(args.service_endpoint_policy):
+            policies = []
+            for policy_id in args.service_endpoint_policy:
+                policies.append({"id": policy_id})
+            args.policies = policies or None
+        # use string instead of bool
+        args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
+        args.private_link_service_network_policies = args.disable_private_link_service_network_policies
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.network_security_group.id):
