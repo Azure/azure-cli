@@ -56,4 +56,3 @@ class MigrationScenarioTest(ScenarioTest):
         target_resource_group_name = "Sterling2MeruRG"
         target_server_name = "target-server-longhaul"
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        properties_filepath = os.path.join(curr_dir, 'migrationPublic.json').replace('\\', '\\\\')
