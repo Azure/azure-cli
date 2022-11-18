@@ -382,6 +382,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Server major version.'
         )
 
+        pg_version_upgrade_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['12', '13', '14']),
+            options_list=['--version', '-v'],
+            help='Server major version.'
+        )
+
         private_dns_zone_arguments_arg_type = CLIArgumentType(
             options_list=['--private-dns-zone'],
             help='This parameter only applies for a server with private access. '
@@ -544,10 +550,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             elif command_group == 'postgres':
                 c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
 
-        if command_group == 'mysql':
-            with self.argument_context('{} flexible-server upgrade'.format(command_group)) as c:
-                c.argument('version', arg_type=mysql_version_upgrade_arg_type)
-                c.argument('yes', arg_type=yes_arg_type)
+        with self.argument_context('{} flexible-server upgrade'.format(command_group)) as c:
+            c.argument('version', arg_type=mysql_version_upgrade_arg_type if command_group == 'mysql' else pg_version_upgrade_arg_type)
+            c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server restart'.format(command_group)) as c:
             if command_group == 'postgres':

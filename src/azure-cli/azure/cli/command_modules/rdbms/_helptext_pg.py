@@ -486,3 +486,11 @@ examples:
         --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
         --private-dns-zone testDNS.postgres.database.azure.com --location newLocation
 """
+
+helps['postgres flexible-server upgrade'] = """
+type: command
+short-summary: Upgrade the major version of a flexible server.
+examples:
+  - name: Upgrade server 'testsvr' to PostgreSQL major version 14.
+    text: az postgres flexible-server upgrade -g testgroup -n testsvr -v 14
+"""
