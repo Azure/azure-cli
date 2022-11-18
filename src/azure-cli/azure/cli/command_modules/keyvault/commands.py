@@ -97,6 +97,9 @@ def load_command_table(self, _):
                 custom_func_name='update_hsm', supports_no_wait=True,
                 doc_string_source=mgmt_hsms_entity.models_docs_tmpl.format('ManagedHsmProperties'))
             g.custom_wait_command('wait-hsm', 'wait_hsm')
+            g.custom_command('check-name', 'check_name_availability',
+                             doc_string_source=mgmt_hsms_entity.operations_docs_tmpl.
+                             format('check_mhsm_name_availability'))
 
     with self.command_group('keyvault network-rule',
                             mgmt_vaults_entity.command_type,
