@@ -663,8 +663,8 @@ def load_arguments(self, _):
         c.argument('outdir', arg_type=bicep_outdir_type)
         c.argument('outfile', arg_type=bicep_outfile_type)
         c.argument('stdout', arg_type=bicep_stdout_type)
-        c.argument('indentKind', arg_type=bicep_indentkind_type, help="Set indentation kind. Valid values are ( Space | Tab ).)
-        c.argument('indentSize', arg_type=bicep_indentsize_type, help="Number of spaces to indent with (Only valid with --indentKind set to Space).)
+        c.argument('indentKind', arg_type=bicep_indentkind_type, help="Set indentation kind. Valid values are ( Space | Tab ).")
+        c.argument('indentSize', arg_type=bicep_indentsize_type, help="Number of spaces to indent with (Only valid with --indentKind set to Space).")
         c.argument('insertFinalNewline', arg_type=bicep_insertfinalnewline_type, help="Insert a final newline.")
         c.argument('newline', arg_type=bicep_newline_type, help="Set newline char. Valid values are ( Auto | LF | CRLF | CR ).")
 
