@@ -1103,6 +1103,18 @@ def load_arguments(self, _):
     with self.argument_context('staticwebapp functions link') as c:
         c.argument('function_resource_id', help="Resource ID of the functionapp to link. Can be retrieved with 'az functionapp --query id'")
         c.argument('force', help="Force the function link even if the function is already linked to a static webapp. May be needed if the function was previously linked to a static webapp.")
-
+    with self.argument_context('staticwebapp backends link') as c:
+        c.argument('backend_resource_id', help="Resource ID of the backend to link.")
+        c.argument('backend_region', help="Region of the backend resource.")
+        c.argument('environment_name', help="Name of the environment of static site")
+    with self.argument_context('staticwebapp backends validate') as c:
+        c.argument('backend_resource_id', help="Resource ID of the backend to link.")
+        c.argument('backend_region', help="Region of the backend resource.")
+        c.argument('environment_name', help="Name of the environment of static site")
+    with self.argument_context('staticwebapp backends show') as c:
+        c.argument('environment_name', help="Name of the environment of static site")
+    with self.argument_context('staticwebapp backends unlink') as c:
+        c.argument('remove_backend_auth', help="If set to true, removes the identity provider configured on the backend during the linking process.")
+        c.argument('environment_name', help="Name of the environment of static site")
     with self.argument_context('staticwebapp enterprise-edge') as c:
         c.argument("no_register", help="Don't try to register the Microsoft.CDN provider. Registration can be done manually with: az provider register --wait --namespace Microsoft.CDN. For more details, please review the documentation available at https://go.microsoft.com/fwlink/?linkid=2184995 .", default=False)
