@@ -32,9 +32,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2018-08-01",
+        "version": "2022-04-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}/{}/{}", "2018-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}/{}/{}", "2022-04-01-preview"],
         ]
     }
 
@@ -77,6 +77,12 @@ class Update(AAZCommand):
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
+        )
+        _args_schema.always_serve = AAZStrArg(
+            options=["--always-serve"],
+            help="If Always Serve is enabled, probing for endpoint health will be disabled and endpoints will be included in the traffic routing method.",
+            nullable=True,
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
 
         # define Arg Group "Parameters"
@@ -211,10 +217,30 @@ class Update(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         self.EndpointsGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.vars.instance)
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.vars.instance)
         self.EndpointsCreateOrUpdate(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
+
+    @register_callback
+    def pre_instance_update(self, instance):
+        pass
+
+    @register_callback
+    def post_instance_update(self, instance):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -276,7 +302,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-08-01",
+                    "api-version", "2022-04-01-preview",
                     required=True,
                 ),
             }
@@ -367,7 +393,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-08-01",
+                    "api-version", "2022-04-01-preview",
                     required=True,
                 ),
             }
@@ -430,6 +456,7 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("alwaysServe", AAZStrType, ".always_serve")
                 properties.set_prop("customHeaders", AAZListType, ".custom_headers")
                 properties.set_prop("endpointLocation", AAZStrType, ".endpoint_location")
                 properties.set_prop("endpointMonitorStatus", AAZStrType, ".endpoint_monitor_status")
@@ -501,6 +528,9 @@ def _build_schema_endpoint_read(_schema):
     endpoint_read.type = AAZStrType()
 
     properties = _schema_endpoint_read.properties
+    properties.always_serve = AAZStrType(
+        serialized_name="alwaysServe",
+    )
     properties.custom_headers = AAZListType(
         serialized_name="customHeaders",
     )
