@@ -2102,25 +2102,27 @@ def create_deployment_stack_at_subscription(cmd, name, location, delete_resource
         if get_subscription_response:
             if get_subscription_response.location != location:
                 raise CLIError("Cannot change location of an already existing stack at subscription scope.")
-            from knack.prompting import prompt_y_n
-            build_confirmation_string = "The DeploymentStack {} you're trying to create already exists in the current subscription. Do you want to overwrite it with the following actions: ".format(name)
-            #first case we have only detach
-            if delete_resources_enum == detach_model and delete_resource_groups_enum == detach_model:
-                build_confirmation_string += "\nDetach: resources and resource groups"
-            #second case we only have delete
-            elif delete_resources_enum == delete_model and delete_resource_groups_enum == delete_model:
-                build_confirmation_string += "\nDelete: resources and resource groups"
-            else:
-                if delete_resources_enum == detach_model:
-                    build_confirmation_string += "\nDetach: resources"
-                    build_confirmation_string += "\nDelete: resource groups"
+            #bypass if yes flag is true
+            if not yes:
+                from knack.prompting import prompt_y_n
+                build_confirmation_string = "The DeploymentStack {} you're trying to create already exists in the current subscription. Do you want to overwrite it with the following actions: ".format(name)
+                #first case we have only detach
+                if delete_resources_enum == detach_model and delete_resource_groups_enum == detach_model:
+                    build_confirmation_string += "\nDetach: resources and resource groups"
+                #second case we only have delete
+                elif delete_resources_enum == delete_model and delete_resource_groups_enum == delete_model:
+                    build_confirmation_string += "\nDelete: resources and resource groups"
                 else:
-                    build_confirmation_string += "\nDetach: resource groups"
-                    build_confirmation_string += "\nDelete: resources"
-            confirmation = prompt_y_n(build_confirmation_string)
-            if not confirmation:
-                return None
-            pass
+                    if delete_resources_enum == detach_model:
+                        build_confirmation_string += "\nDetach: resources"
+                        build_confirmation_string += "\nDelete: resource groups"
+                    else:
+                        build_confirmation_string += "\nDetach: resource groups"
+                        build_confirmation_string += "\nDelete: resources"
+                confirmation = prompt_y_n(build_confirmation_string)
+                if not confirmation:
+                    return None
+                pass
     except:
         pass
 
@@ -2290,25 +2292,26 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, delete_
         raise InvalidArgumentValueError("Please enter only one of the following: template file, template spec, or template url")
     try:
         if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
-            from knack.prompting import prompt_y_n
-            build_confirmation_string = "The DeploymentStack {} you're trying to create already exists in the current subscription. Do you want to overwrite it with the following actions: ".format(name)
-            #first case we have only detach
-            if delete_resources_enum == detach_model and delete_resource_groups_enum == detach_model:
-                build_confirmation_string += "\nDetach: resources and resource groups"
-            #second case we only have delete
-            elif delete_resources_enum == delete_model and delete_resource_groups_enum == delete_model:
-                build_confirmation_string += "\nDelete: resources and resource groups"
-            else:
-                if delete_resources_enum == detach_model:
-                    build_confirmation_string += "\nDetach: resources"
-                    build_confirmation_string += "\nDelete: resource groups"
+            if not yes:
+                from knack.prompting import prompt_y_n
+                build_confirmation_string = "The DeploymentStack {} you're trying to create already exists in the current subscription. Do you want to overwrite it with the following actions: ".format(name)
+                #first case we have only detach
+                if delete_resources_enum == detach_model and delete_resource_groups_enum == detach_model:
+                    build_confirmation_string += "\nDetach: resources and resource groups"
+                #second case we only have delete
+                elif delete_resources_enum == delete_model and delete_resource_groups_enum == delete_model:
+                    build_confirmation_string += "\nDelete: resources and resource groups"
                 else:
-                    build_confirmation_string += "\nDetach: resource groups"
-                    build_confirmation_string += "\nDelete: resources"
-            confirmation = prompt_y_n(build_confirmation_string)
-            if not confirmation:
-                return None
-            pass
+                    if delete_resources_enum == detach_model:
+                        build_confirmation_string += "\nDetach: resources"
+                        build_confirmation_string += "\nDelete: resource groups"
+                    else:
+                        build_confirmation_string += "\nDetach: resource groups"
+                        build_confirmation_string += "\nDelete: resources"
+                confirmation = prompt_y_n(build_confirmation_string)
+                if not confirmation:
+                    return None
+                pass
     except:
         pass
     t_spec, t_uri = None, None
