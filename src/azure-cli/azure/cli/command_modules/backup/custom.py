@@ -122,7 +122,7 @@ def create_vault(client, vault_name, resource_group_name, location, tags=None, p
             existing_vault_public_network_access = existing_vault_if_any.properties.public_network_access
             # TODO add better validation for existing_vault_public_network_access? It might be invalid.
             #   Maybe have a list of possible values and iterate through, and if not add a warning to
-            #   contact support?
+            #   contact support? Such as: if public_network_access in [list], <action>, else <warn user>.
             public_network_access = existing_vault_public_network_access[:-1]
         except CoreResourceNotFoundError:
             public_network_access = 'Enable'
