@@ -18,11 +18,12 @@ from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql
     cf_postgres_flexible_db, cf_postgres_check_resource_availability, \
     cf_postgres_check_resource_availability_with_location, cf_postgres_flexible_private_dns_zone_suffix_operations
 from ._flexible_server_util import generate_missing_parameters, resolve_poller,\
-    generate_password, parse_maintenance_window, get_current_time, _is_resource_name
+    generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
+    _is_resource_name
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
-    validate_postgres_replica, validate_georestore_network
+    validate_postgres_replica, validate_georestore_network, pg_byok_validator
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -44,7 +45,7 @@ def flexible_server_create(cmd, client,
                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
-                           geo_redundant_backup=None, yes=False):
+                           geo_redundant_backup=None, byok_identity=None, byok_key=None, yes=False):
 
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
@@ -71,7 +72,9 @@ def flexible_server_create(cmd, client,
                            subnet=subnet,
                            public_access=public_access,
                            version=version,
-                           geo_redundant_backup=geo_redundant_backup)
+                           geo_redundant_backup=geo_redundant_backup,
+                           byok_identity=byok_identity,
+                           byok_key=byok_key)
 
     server_result = firewall_id = None
 
@@ -100,6 +103,10 @@ def flexible_server_create(cmd, client,
 
     administrator_login_password = generate_password(administrator_login_password)
 
+    identity, data_encryption = build_identity_and_data_encryption(db_engine='postgres',
+                                                                   byok_identity=byok_identity,
+                                                                   byok_key=byok_key)
+
     # Create postgresql
     # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
     server_result = _create_server(db_context, cmd, resource_group_name, server_name,
@@ -113,7 +120,9 @@ def flexible_server_create(cmd, client,
                                    network=network,
                                    version=version,
                                    high_availability=high_availability,
-                                   availability_zone=zone)
+                                   availability_zone=zone,
+                                   identity=identity,
+                                   data_encryption=data_encryption)
 
     # Adding firewall rule
     if start_ip != -1 and end_ip != -1:
@@ -149,7 +158,8 @@ def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
                             source_server, restore_point_in_time=None, zone=None, no_wait=False,
                             subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
-                            private_dns_zone_arguments=None, geo_redundant_backup=None, yes=False):
+                            private_dns_zone_arguments=None, geo_redundant_backup=None, byok_identity=None,
+                            byok_key=None, yes=False):
 
     server_name = server_name.lower()
 
@@ -182,6 +192,8 @@ def flexible_server_restore(cmd, client,
             logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
         validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
+        pg_byok_validator(byok_identity, byok_key)
+
         parameters = postgresql_flexibleservers.models.Server(
             location=location,
             point_in_time_utc=restore_point_in_time,
@@ -208,6 +220,10 @@ def flexible_server_restore(cmd, client,
 
         parameters.backup = postgresql_flexibleservers.models.Backup(geo_redundant_backup=geo_redundant_backup)
 
+        parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(db_engine='postgres',
+                                                                                             byok_identity=byok_identity,
+                                                                                             byok_key=byok_key)
+
     except Exception as e:
         raise ResourceNotFoundError(e)
 
@@ -223,6 +239,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        high_availability=None,
                                        standby_availability_zone=None,
                                        maintenance_window=None,
+                                       byok_identity=None, byok_key=None,
                                        tags=None):
 
     # validator
@@ -241,6 +258,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                            high_availability=high_availability,
                            zone=instance.availability_zone,
                            standby_availability_zone=standby_availability_zone,
+                           byok_identity=byok_identity,
+                           byok_key=byok_key,
                            instance=instance)
 
     server_module_path = instance.__module__
@@ -274,11 +293,17 @@ def flexible_server_update_custom_func(cmd, client, instance,
         instance.maintenance_window.start_minute = start_minute
         instance.maintenance_window.custom_window = custom_window
 
+    identity, data_encryption = build_identity_and_data_encryption(db_engine='postgres',
+                                                                   byok_identity=byok_identity,
+                                                                   byok_key=byok_key)
+
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
                              backup=instance.backup,
                              administrator_login_password=administrator_login_password,
                              maintenance_window=instance.maintenance_window,
+                             identity=identity,
+                             data_encryption=data_encryption,
                              tags=tags)
 
     # High availability can't be updated with existing properties
@@ -373,7 +398,8 @@ def flexible_list_skus(cmd, client, location):
 
 def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, zone=None,
                             location=None, vnet=None, vnet_address_prefix=None, subnet=None,
-                            subnet_address_prefix=None, private_dns_zone_arguments=None, no_wait=False, yes=False):
+                            subnet_address_prefix=None, private_dns_zone_arguments=None, no_wait=False,
+                            byok_identity=None, byok_key=None, yes=False):
     replica_name = replica_name.lower()
 
     if not is_valid_resource_id(source_server):
@@ -411,6 +437,8 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
     validate_server_name(db_context, replica_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
+    pg_byok_validator(byok_identity, byok_key)
+
     parameters = postgresql_flexibleservers.models.Server(
         source_server_resource_id=source_server_id,
         location=location,
@@ -432,6 +460,10 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
                                                                               yes=yes)
     else:
         parameters.network = source_server_object.network
+
+    parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(db_engine='postgres',
+                                                                                         byok_identity=byok_identity,
+                                                                                         byok_key=byok_key)
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, replica_name, parameters)
 
@@ -512,7 +544,7 @@ def flexible_replica_stop(client, resource_group_name, server_name):
 
 
 def _create_server(db_context, cmd, resource_group_name, server_name, tags, location, sku, administrator_login, administrator_login_password,
-                   storage, backup, network, version, high_availability, availability_zone):
+                   storage, backup, network, version, high_availability, availability_zone, identity, data_encryption):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
@@ -533,6 +565,8 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
         version=version,
         high_availability=high_availability,
         availability_zone=availability_zone,
+        identity=identity,
+        data_encryption=data_encryption,
         create_mode="Create")
 
     return resolve_poller(
