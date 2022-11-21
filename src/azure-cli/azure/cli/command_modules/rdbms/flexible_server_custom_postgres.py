@@ -709,12 +709,12 @@ def flexible_server_identity_show(client, resource_group_name, server_name, iden
 
 
 # Custom functions for ad-admin
-def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, login, principal_type, sid, no_wait=False):
+def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, login, sid, principal_type=None, no_wait=False):
     server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
 
     instance = server_operations_client.get(resource_group_name, server_name)
 
-    if instance.replication_role == 'Replica':
+    if 'replica' in instance.replication_role.lower():
         raise CLIError("Cannot create an AD admin on a server with replication role. Use the primary server instead.")
 
     parameters = {

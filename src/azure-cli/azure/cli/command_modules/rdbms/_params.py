@@ -541,9 +541,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             if command_group == 'mysql':
                 c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']),
                            help='Determines the public access. ')
-            elif command_group == 'postgres':
-                c.argument('byok_key', arg_type=key_arg_type)
-                c.argument('byok_identity', arg_type=identity_arg_type)
 
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
@@ -737,7 +734,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         with self.argument_context('{} flexible-server ad-admin create'.format(command_group)) as c:
             c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Azure AD administrator user or group.')
-            c.argument('principal_type', options_list=['--type', '-t'], arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Azure AD administrator.')
+            c.argument('principal_type', options_list=['--type', '-t'], default='User', arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Azure AD administrator.')
             c.argument('identity', help='Name or ID of identity used for AAD Authentication.', validator=validate_identity)
 
         handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)

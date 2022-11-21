@@ -20,9 +20,7 @@ from azure.cli.core.util import send_raw_request
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, FileOperationError, BadRequestError
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._servers_operations import ServersOperations as MySqlServersOperations
-from azure.mgmt.rdbms.mysql_flexibleservers.operations._azure_ad_administrators_operations import AzureADAdministratorsOperations as MySqlAzureADAdministratorsOperations
-from ._client_factory import cf_mysql_flexible_replica, cf_postgres_flexible_replica, cf_mysql_flexible_servers, \
-    cf_postgres_flexible_servers, cf_mysql_flexible_adadmin, cf_mysql_flexible_config
+from ._client_factory import cf_mysql_flexible_replica, cf_postgres_flexible_replica
 from ._flexible_server_util import run_subprocess, run_subprocess_get_output, fill_action_template, get_git_root_dir, \
     resolve_poller, GITHUB_ACTION_PATH
 from .validators import validate_public_access_server
