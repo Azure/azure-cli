@@ -636,23 +636,23 @@ class AKSManagedClusterContext(BaseAKSContext):
                 profile.enabled = False
 
         return profile
-    
+
     def get_enable_keda(self) -> bool:
         """Obtain the value of enable_keda.
-        
+
         This function will verify the parameter by default. If both enable_keda and disable_keda are specified, raise a
         MutuallyExclusiveArgumentError.
-        
+
         :return: bool
         """
         return self._get_enable_keda(enable_validation=True)
 
     def _get_enable_keda(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of enable_keda.
-        
+
         This function supports the option of enable_validation. When enabled, if both enable_keda and disable_keda are
         specified, raise a MutuallyExclusiveArgumentError.
-        
+
         :return: bool
         """
         # Read the original value passed by the command.
@@ -675,23 +675,23 @@ class AKSManagedClusterContext(BaseAKSContext):
                 )
 
         return enable_keda
-    
+
     def get_disable_keda(self) -> bool:
         """Obtain the value of disable_keda.
-        
+
         This function will verify the parameter by default. If both enable_keda and disable_keda are specified, raise a
         MutuallyExclusiveArgumentError.
-        
+
         :return: bool
         """
         return self._get_disable_keda(enable_validation=True)
-    
+
     def _get_disable_keda(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of disable_keda.
-        
+
         This function supports the option of enable_validation. When enabled, if both enable_keda and disable_keda are
         specified, raise a MutuallyExclusiveArgumentError.
-        
+
         :return: bool
         """
         # Read the original value passed by the command.
@@ -5243,12 +5243,12 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             if mc.workload_auto_scaler_profile is None:
                 mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoscalerProfile()
             mc.workload_auto_scaler_profile.keda = ManagedClusterWorkloadAutoscalerProfileKeda(enabled=True)
-        
+
         return mc
 
     def update_workload_auto_scaler_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update workload auto-scaler profile for the ManagedCluster object.
-        
+
         :return: the ManagedCluster object
         """
         self._ensure_mc(mc)
@@ -5257,12 +5257,12 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             if mc.workload_auto_scaler_profile is None:
                 mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoscalerProfile()
             mc.workload_auto_scaler_profile.keda = ManagedClusterWorkloadAutoscalerProfileKeda(enabled=True)
-        
+
         if self.context.get_disable_keda():
             if mc.workload_auto_scaler_profile is None:
                 mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoscalerProfile()
             mc.workload_auto_scaler_profile.keda = ManagedClusterWorkloadAutoscalerProfileKeda(enabled=False)
-        
+
         return mc
 
     def set_up_api_server_access_profile(self, mc: ManagedCluster) -> ManagedCluster:
