@@ -5241,7 +5241,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         if self.context.get_enable_keda():
             if mc.workload_auto_scaler_profile is None:
-                mc.workload_auto_scaler_profile = ManagedClusterWorkloadAutoscalerProfile()
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoscalerProfile()
             mc.workload_auto_scaler_profile.keda = ManagedClusterWorkloadAutoscalerProfileKeda(enabled=True)
         
         return mc
@@ -5255,12 +5255,12 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         if self.context.get_enable_keda():
             if mc.workload_auto_scaler_profile is None:
-                mc.workload_auto_scaler_profile = ManagedClusterWorkloadAutoscalerProfile()
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoscalerProfile()
             mc.workload_auto_scaler_profile.keda = ManagedClusterWorkloadAutoscalerProfileKeda(enabled=True)
         
         if self.context.get_disable_keda():
             if mc.workload_auto_scaler_profile is None:
-                mc.workload_auto_scaler_profile = ManagedClusterWorkloadAutoscalerProfile()
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoscalerProfile()
             mc.workload_auto_scaler_profile.keda = ManagedClusterWorkloadAutoscalerProfileKeda(enabled=False)
         
         return mc
@@ -6426,7 +6426,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_identity_profile(mc)
         # set up http proxy config
         mc = self.update_http_proxy_config(mc)
-        # update workload autoscaler
+        # update workload autoscaler profile
         mc = self.update_workload_auto_scaler_profile(mc)
         return mc
 
