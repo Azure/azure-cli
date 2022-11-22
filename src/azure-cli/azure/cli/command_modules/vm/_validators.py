@@ -1322,6 +1322,9 @@ def _validate_trusted_launch(namespace):
 
 
 def _validate_generation_version_and_trusted_launch(cmd, namespace):
+    from azure.cli.core.profiles import ResourceType
+    if not cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE, min_api='2022-08-01'):
+        return
     from ._vm_utils import trusted_launch_warning_log
     if namespace.image is not None:
         from msrestazure.tools import is_valid_resource_id, parse_resource_id
