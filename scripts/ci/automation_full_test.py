@@ -28,7 +28,7 @@ profile = sys.argv[3] if len(sys.argv) >= 4 else 'latest'
 serial_modules = sys.argv[4].split() if len(sys.argv) >= 5 else []
 fix_failure_tests = sys.argv[5].lower() == 'true' if len(sys.argv) >= 6 else False
 target = sys.argv[6].lower() if len(sys.argv) >= 7 else 'cli'
-working_directory = "/mnt/vss/_work/1/s"
+working_directory = "/mnt/vss/_work/1/s" if target == 'cli' else "/mnt/vss/_work/1/s/azure-cli-extensions"
 azdev_test_result_dir = "/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env"
 cli_jobs = {
             'acr': 45,
@@ -270,7 +270,7 @@ def git_push(message):
     retry = 3
     while retry >= 0:
         try:
-            run_command(["git", "fetch", "azclibot"], check_return_code=True)
+            run_command(["git", "fetch"], check_return_code=True)
             run_command(["git", "pull", "--rebase"], check_return_code=True)
             run_command(["git", "push"], check_return_code=True)
 
