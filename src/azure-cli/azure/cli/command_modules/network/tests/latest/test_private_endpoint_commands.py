@@ -3810,6 +3810,7 @@ class NetworkPrivateLinkDesktopVirtualizationScenarioTest(ScenarioTest):
         ])
 
 class NetworkPrivateLinkMLRegistryScenarioTest(ScenarioTest):
+    @live_only()
     @ResourceGroupPreparer(name_prefix='test_ml_registries_pe_', random_name_length=40, location="eastus2euap")
     def test_private_link_endpoint_ml_registry(self, resource_group):
         self.kwargs.update({
