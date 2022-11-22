@@ -3809,6 +3809,77 @@ class NetworkPrivateLinkDesktopVirtualizationScenarioTest(ScenarioTest):
             self.check('length(@)', '1'),
         ])
 
+class NetworkPrivateLinkMLRegistryScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_ml_registries_pe_', random_name_length=40, location="eastus2euap")
+    def test_private_link_endpoint_ml_registry(self, resource_group):
+        self.kwargs.update({
+            'resource_group_name': resource_group,
+            'subscription_id': self.get_subscription_id(),
+            'registry_name': self.create_random_name('registry-', 20),
+            'vnet_name': self.create_random_name('vnet-', 20),
+            'subnet_name': self.create_random_name('subnet-', 20),
+            'endpoint_name': self.create_random_name('pe-', 20),
+            'endpoint_connection_name': self.create_random_name('pec-', 20),
+            'approve_description_msg': 'Approved!',
+            'reject_description_msg': 'Rejected!',
+            'location': 'eastus2euap',
+        })
+
+        # Create registry 
+        with open('registry.yml', 'w') as the_file:
+            the_file.write(f'name: {self.kwargs["registry_name"]}\nlocation: {self.kwargs["location"]}\nreplication_locations:\n  - location: {self.kwargs["location"]}')
+
+        self.cmd('ml registry create --subscription {subscription_id} --resource-group {resource_group_name} --file registry.yml')
+        registryJson = self.cmd('ml registry show --subscription {subscription_id} --resource-group {resource_group_name} --name {registry_name}').get_output_in_json()
+        os.remove('registry.yml')
+        self.kwargs['registry_resource_id'] = registryJson['id']
+
+        # Create a vnet and subnet for private endpoint connection
+        self.cmd('network vnet create -g {resource_group_name} -n {vnet_name} --subnet-name {subnet_name} --location {location}')
+        self.cmd('network vnet subnet update -g {resource_group_name} --vnet-name {vnet_name} --name {subnet_name} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Test list private link resources
+        registry_private_link_resources = self.cmd(
+            'network private-link-resource list --id {registry_resource_id}').get_output_in_json()
+        self.kwargs['group_id'] = registry_private_link_resources[0]['properties']['groupId']
+
+        # Create private endpoint with manual request approval
+        private_endpoint = self.cmd(
+            'network private-endpoint create -g {resource_group_name} -n {endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} '
+            '--private-connection-resource-id {registry_resource_id} --connection-name {endpoint_connection_name} '
+            '--group-id {group_id} --location {location} --manual-request').get_output_in_json()
+        self.assertTrue(self.kwargs['endpoint_name'].lower() in private_endpoint['name'].lower())
+
+        # Test get private endpoint connection
+        private_endpoint_connections = self.cmd('network private-endpoint-connection list --id {registry_resource_id}',
+                                                checks=[
+                                                    self.check(
+                                                        '@[0].properties.privateLinkServiceConnectionState.status',
+                                                        'Pending'),
+                                                ]).get_output_in_json()
+
+        # Test approve private endpoint connection
+        self.kwargs['private-endpoint-connection-id'] = private_endpoint_connections[0]['id']
+        self.cmd(
+            'network private-endpoint-connection approve --id {private-endpoint-connection-id} '
+            '--description {approve_description_msg}', checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+            ])
+
+        # Test reject private endpoint connnection
+        self.cmd('network private-endpoint-connection reject --id {private-endpoint-connection-id}'
+                 ' --description {reject_description_msg}', checks=[
+                  self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+        ])
+
+        # Test delete private endpoint connection
+        self.cmd('network private-endpoint-connection delete --id {private-endpoint-connection-id} --yes')
+        import time
+        time.sleep(90)
+        self.cmd('network private-endpoint-connection show --id {private-endpoint-connection-id}',
+                 expect_failure=True)
 
 if __name__ == '__main__':
     unittest.main()
