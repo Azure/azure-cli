@@ -425,7 +425,8 @@ class AutomaticScheduling(object):
 
     def run_extension_instance_modules(self, instance_modules):
         command = ['azdev', 'extension', 'add']
-        run_command(command.extend(instance_modules.keys()))
+        command.extend(instance_modules.keys())
+        run_command(command)
         self.run_instance_modules(instance_modules)
 
 
