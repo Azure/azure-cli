@@ -4575,14 +4575,15 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         if managed_image is None and os_snapshot is None and os_vhd_uri is None:
             raise RequiredArgumentMissingError('usage error: Please provide --managed-image or --os-snapshot or --vhd')
         GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
-        GalleryArtifactVersionSource = cmd.get_models('GalleryArtifactVersionSource')
+        GalleryArtifactVersionFullSource = cmd.get_models('GalleryArtifactVersionFullSource')
+        GalleryDiskImageSource = cmd.get_models('GalleryDiskImageSource')
         GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
         GalleryDataDiskImage = cmd.get_models('GalleryDataDiskImage')
         source = os_disk_image = data_disk_images = None
         if managed_image is not None:
-            source = GalleryArtifactVersionSource(id=managed_image)
+            source = GalleryArtifactVersionFullSource(id=managed_image)
         if os_snapshot is not None:
-            os_disk_image = GalleryOSDiskImage(source=GalleryArtifactVersionSource(id=os_snapshot))
+            os_disk_image = GalleryOSDiskImage(source=GalleryDiskImageSource(id=os_snapshot))
         if data_snapshot_luns and not data_snapshots:
             raise ArgumentUsageError('usage error: --data-snapshot-luns must be used together with --data-snapshots')
         if data_snapshots:
@@ -4593,7 +4594,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                 data_snapshot_luns = list(range(len(data_snapshots)))
             data_disk_images = []
             for i, s in enumerate(data_snapshots):
-                data_disk_images.append(GalleryDataDiskImage(source=GalleryArtifactVersionSource(id=s),
+                data_disk_images.append(GalleryDataDiskImage(source=GalleryDiskImageSource(id=s),
                                                              lun=data_snapshot_luns[i]))
         # from vhd, only support os image now
         if cmd.supported_api_version(min_api='2020-09-30', operation_group='gallery_image_versions'):
@@ -4605,7 +4606,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                     os_vhd_storage_account = resource_id(
                         subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                         namespace='Microsoft.Storage', type='storageAccounts', name=os_vhd_storage_account)
-                os_disk_image = GalleryOSDiskImage(source=GalleryArtifactVersionSource(
+                os_disk_image = GalleryOSDiskImage(source=GalleryDiskImageSource(
                     id=os_vhd_storage_account, uri=os_vhd_uri))
 
             # Data disks
@@ -4636,7 +4637,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                     data_disk_images = []
                 for uri, lun, account in zip(data_vhds_uris, data_vhds_luns, data_vhds_storage_accounts):
                     data_disk_images.append(GalleryDataDiskImage(
-                        source=GalleryArtifactVersionSource(id=account, uri=uri), lun=lun))
+                        source=GalleryDiskImageSource(id=account, uri=uri), lun=lun))
 
         storage_profile = GalleryImageVersionStorageProfile(source=source, os_disk_image=os_disk_image,
                                                             data_disk_images=data_disk_images)
