@@ -2166,7 +2166,7 @@ def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_co
         request = SnapshotRestoreRequest(overwrite=False, snapshot_time=time, recovery_source=source,
                                          recover_configuration=recover_config)
         if slot:
-            return client.web_apps.begin_restore_snapshot_slot(resource_group_name, name, request, slot)
+            return client.web_apps.begin_restore_snapshot_slot(resource_group_name, name, slot, request)
         return client.web_apps.begin_restore_snapshot(resource_group_name, name, request)
     if any([source_resource_group, source_name]):
         raise ArgumentUsageError('usage error: --source-resource-group and '
@@ -2174,7 +2174,7 @@ def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_co
     # Overwrite app with its own snapshot
     request = SnapshotRestoreRequest(overwrite=True, snapshot_time=time, recover_configuration=recover_config)
     if slot:
-        return client.web_apps.begin_restore_snapshot_slot(resource_group_name, name, request, slot)
+        return client.web_apps.begin_restore_snapshot_slot(resource_group_name, name, slot, request)
     return client.web_apps.begin_restore_snapshot(resource_group_name, name, request)
 
 
