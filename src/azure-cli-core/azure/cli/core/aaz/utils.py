@@ -2,11 +2,19 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=protected-access
 
 from ._arg import AAZListArg, AAZDictArg, has_value
+from ._field_value import AAZList, AAZDict
 from ._base import AAZBaseValue
 
-def transform_aaz_list_args(target, source, element_transformer=None):
+
+def assign_aaz_list_arg(target: AAZList, source: AAZList, element_transformer=None):
+    """ an convenience function to transform from a source AAZListArg to a target AAZListArg
+    Example:
+
+    args.target = assign_aaz_list_arg(args.target, args.source, element_transformer=lambda e: {"prop": e})
+    """
     assert isinstance(target, AAZBaseValue)
     assert isinstance(source, AAZBaseValue)
 
@@ -21,23 +29,46 @@ def transform_aaz_list_args(target, source, element_transformer=None):
                                                                                "target element and source arg element"
 
     if not has_value(source):
-        return
+        return target
 
-    if source == None:
-        target._data = target_schema.process_data(None)
-        return
+    if source == None:  # noqa: E711, pylint: disable=singleton-comparison
+        return None
 
+    if not source._is_patch:
+        # return the whole array
+        data = []
+        for idx, element in enumerate(source):
+            if not has_value(element):
+                continue
+            if element == None:  # noqa: E711, pylint: disable=singleton-comparison
+                data.append(None)
+            elif element_transformer:
+                data.append(element_transformer(element))
+            else:
+                data.append(element)
+        return data
+
+    # assign by patch way
     for idx, element in enumerate(source):
         if not has_value(element):
             continue
-        if element == None:
+        if element == None:  # noqa: E711, pylint: disable=singleton-comparison
             target[idx] = None
         elif element_transformer:
             target[idx] = element_transformer(element)
         else:
             target[idx] = element
 
-def transform_aaz_dict_args(target, source, element_transformer=None):
+    return target
+
+
+def assign_aaz_dict_arg(target: AAZDict, source: AAZDict, element_transformer=None):
+    """ an convenience function to transform from a source AAZDictArg to a target AAZDictArg
+    Example:
+
+    args.target = assign_aaz_dict_arg(args.target, args.source, element_transformer=lambda e: {"prop": e})
+    """
+
     assert isinstance(target, AAZBaseValue)
     assert isinstance(source, AAZBaseValue)
 
@@ -52,18 +83,34 @@ def transform_aaz_dict_args(target, source, element_transformer=None):
                                                                                "target element and source arg element"
 
     if not has_value(source):
-        return
+        return target
 
-    if source == None:
-        target._data = target_schema.process_data(None)
-        return
+    if source == None:  # noqa: E711, pylint: disable=singleton-comparison
+        return None
 
+    if not source._is_patch:
+        # return the whole array
+        data = {}
+        for key, element in source.items():
+            if not has_value(element):
+                continue
+            if element == None:  # noqa: E711, pylint: disable=singleton-comparison
+                data[key] = None
+            elif element_transformer:
+                data[key] = element_transformer(element)
+            else:
+                data[key] = element
+        return data
+
+    # assign by patch way
     for key, element in source.items():
         if not has_value(element):
             continue
-        if element == None:
+        if element == None:  # noqa: E711, pylint: disable=singleton-comparison
             target[key] = None
         elif element_transformer:
             target[key] = element_transformer(element)
         else:
             target[key] = element
+
+    return target
