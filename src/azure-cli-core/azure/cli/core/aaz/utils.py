@@ -13,7 +13,7 @@ def assign_aaz_list_arg(target: AAZList, source: AAZList, element_transformer=No
     """ an convenience function to transform from a source AAZListArg to a target AAZListArg
     Example:
 
-    args.target = assign_aaz_list_arg(args.target, args.source, element_transformer=lambda e: {"prop": e})
+    args.target = assign_aaz_list_arg(args.target, args.source, lambda idx, e: {'idx': idx, "prop": e})
     """
     assert isinstance(target, AAZBaseValue)
     assert isinstance(source, AAZBaseValue)
@@ -43,7 +43,7 @@ def assign_aaz_list_arg(target: AAZList, source: AAZList, element_transformer=No
             if element == None:  # noqa: E711, pylint: disable=singleton-comparison
                 data.append(None)
             elif element_transformer:
-                data.append(element_transformer(element))
+                data.append(element_transformer(idx, element))
             else:
                 data.append(element)
         return data
@@ -55,7 +55,7 @@ def assign_aaz_list_arg(target: AAZList, source: AAZList, element_transformer=No
         if element == None:  # noqa: E711, pylint: disable=singleton-comparison
             target[idx] = None
         elif element_transformer:
-            target[idx] = element_transformer(element)
+            target[idx] = element_transformer(idx, element)
         else:
             target[idx] = element
 
@@ -66,7 +66,7 @@ def assign_aaz_dict_arg(target: AAZDict, source: AAZDict, element_transformer=No
     """ an convenience function to transform from a source AAZDictArg to a target AAZDictArg
     Example:
 
-    args.target = assign_aaz_dict_arg(args.target, args.source, element_transformer=lambda e: {"prop": e})
+    args.target = assign_aaz_dict_arg(args.target, args.source, lambda key, e: {'name': key, "prop": e})
     """
 
     assert isinstance(target, AAZBaseValue)
@@ -97,7 +97,7 @@ def assign_aaz_dict_arg(target: AAZDict, source: AAZDict, element_transformer=No
             if element == None:  # noqa: E711, pylint: disable=singleton-comparison
                 data[key] = None
             elif element_transformer:
-                data[key] = element_transformer(element)
+                data[key] = element_transformer(key, element)
             else:
                 data[key] = element
         return data
@@ -109,7 +109,7 @@ def assign_aaz_dict_arg(target: AAZDict, source: AAZDict, element_transformer=No
         if element == None:  # noqa: E711, pylint: disable=singleton-comparison
             target[key] = None
         elif element_transformer:
-            target[key] = element_transformer(element)
+            target[key] = element_transformer(key, element)
         else:
             target[key] = element
 
