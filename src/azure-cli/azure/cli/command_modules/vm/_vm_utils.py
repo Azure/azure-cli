@@ -519,3 +519,21 @@ def raise_unsupported_error_for_flex_vmss(vmss, error_message):
             and vmss.orchestration_mode.lower() == 'flexible':
         from azure.cli.core.azclierror import ArgumentUsageError
         raise ArgumentUsageError(error_message)
+
+
+def is_trusted_launch_supported(features):
+    trusted_launch = ['TrustedLaunchSupported', 'TrustedLaunch', 'TrustedLaunchAndConfidentialVmSupported']
+
+    return any(tl_feature in [feature.value for feature in features] for tl_feature in trusted_launch)
+
+
+def trusted_launch_warning_log(namespace, features, generation_version):
+    if generation_version == 'V1':
+        logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS/DISK image'
+                       ' and Trusted Launch security type. To know more about Trusted Launch, please visit'
+                       ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+    if generation_version == 'V2':
+        if features and is_trusted_launch_supported(features) and namespace.security_type is None:
+            logger.warning('Starting Build 2023 event az vm/vmss create command will deploy Trusted Launch VM'
+                           ' by default. To know more about Trusted Launch, please visit'
+                           ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')

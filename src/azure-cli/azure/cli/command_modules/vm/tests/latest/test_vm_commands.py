@@ -3509,6 +3509,7 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local')
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_ephemeral_os_disk_placement')
     def test_vmss_create_ephemeral_os_disk_placement(self, resource_group):
         self.kwargs.update({
@@ -5742,15 +5743,13 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('disk create -g {rg} -n d2 --size-gb 10')
         s1_id = self.cmd('snapshot create -g {rg} -n s1 --source d1').get_output_in_json()['id']
         s2_id = self.cmd('snapshot create -g {rg} -n s2 --source d2').get_output_in_json()['id']
+        # Service error: The source id: xxx must be a managed disk or snapshot. Target: galleryImageVersion.properties.storageProfile.dataDiskImages.source.id
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition image1 '
-                 '--gallery-image-version 1.0.0 --os-snapshot s1 --data-snapshot-luns 0 --data-snapshots s2 '
-                 '--data-vhds-luns 1 --data-vhds-sa {stac} --data-vhds-uris {vhd}',
+                 '--gallery-image-version 1.0.0 --os-snapshot s1 --data-snapshot-luns 0 --data-snapshots s2 ',
                  checks=[
                      self.check('storageProfile.osDiskImage.source.id', s1_id),
                      self.check('storageProfile.dataDiskImages[0].source.id', s2_id),
-                     self.check('storageProfile.dataDiskImages[0].lun', 0),
-                     self.check('storageProfile.dataDiskImages[1].source.uri', vhd_uri),
-                     self.check('storageProfile.dataDiskImages[1].lun', 1)])
+                     self.check('storageProfile.dataDiskImages[0].lun', 0)])
 
     @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
     @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='CentralUSEUAP',
