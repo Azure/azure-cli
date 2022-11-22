@@ -880,7 +880,7 @@ def load_arguments(self, _):
         c.argument('secondary_type',
                    options_list=['--secondary-type'],
                    help='Type of secondary to create.'
-                   ' Allowed values include: Geo, Named.')
+                   ' Allowed values include: Geo, Named, Standby.')
 
     with self.argument_context('sql db replica set-primary') as c:
         c.argument('database_name',
