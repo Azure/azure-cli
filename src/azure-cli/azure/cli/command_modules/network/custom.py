@@ -35,6 +35,8 @@ import requests
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
 from .aaz.latest.network.express_route.gateway.connection import Create as _ExpressRouteConnectionCreate, \
     Update as _ExpressRouteConnectionUpdate
+from .aaz.latest.network.express_route.peering import Create as _ExpressRoutePeeringCreate, \
+    Update as _ExpressRoutePeeringUpdate
 
 logger = get_logger(__name__)
 
@@ -3270,6 +3272,52 @@ def create_express_route_peering(
     return client.begin_create_or_update(resource_group_name, circuit_name, peering_type, peering)
 
 
+class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.ip_version = AAZStrArg(
+            options=['--ip-version'],
+            arg_group="Microsoft Peering",
+            help="The IP version to update Microsoft Peering settings for. Allowed values: IPv4, IPv6.  Default: IPv4.",
+            default='IPv4'
+        )
+
+        return args_schema
+
+    def _cli_arguments_loader(self):
+        args = super()._cli_arguments_loader()
+        args = [(name, arg) for (name, arg) in args if name not in ("ipv6_peering_config", "peering_name")]
+        return args
+
+    def pre_operations(self):
+        from azure.cli.core.aaz import AAZUndefined
+        args = self.ctx.args
+        args.name = args.peering_type
+        if args.ip_version.lower() == 'IPv6':
+            if args.peering_type == 'MicrosoftPeering':
+                microsoft_config = {
+                     'advertised_public_prefixes': args.advertised_public_prefixes,
+                     'customer_asn': args.customer_asn,
+                     'routing_registry_name': args.routing_registry_name
+                }
+            else:
+                microsoft_config = None
+            args.ipv6_peering_config = {
+                'primary_peer_address_prefix': args.primary_peer_address_prefix,
+                'secondary_peer_address_prefix': args.secondary_peer_address_prefix,
+                'microsoft_peering_config': microsoft_config,
+                'route_filter': args.route_filter
+            }
+            args.primary_peer_address_prefix, args.secondary_peer_address_prefix, args.route_filter, \
+            args.advertised_public_prefixes, args.customer_asn, args.args.routing_registry_name = AAZUndefined
+
+        else:
+            if args.peering_type != 'MicrosoftPeering':
+                args.advertised_public_prefixes, args.customer_asn, args.routing_registry_name = AAZUndefined
+
+
 def _create_or_update_ipv6_peering(cmd, config, primary_peer_address_prefix, secondary_peer_address_prefix,
                                    route_filter, advertised_public_prefixes, customer_asn, routing_registry_name):
     if config:
@@ -3298,6 +3346,49 @@ def _create_or_update_ipv6_peering(cmd, config, primary_peer_address_prefix, sec
                             route_filter=route_filter)
 
     return config
+
+
+class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.ip_version = AAZStrArg(
+            options=['--ip-version'],
+            arg_group="Microsoft Peering",
+            help="The IP version to update Microsoft Peering settings for. Allowed values: IPv4, IPv6.  Default: IPv4.",
+            default='IPv4'
+        )
+
+        return args_schema
+
+    def _cli_arguments_loader(self):
+        args = super()._cli_arguments_loader()
+        args = [(name, arg) for (name, arg) in args if name not in ("ipv6_peering_config", "peering_type", "connections")]
+        return args
+
+    def pre_operations(self):
+        from azure.cli.core.aaz import AAZUndefined
+        args = self.ctx.args
+        if args.ip_version == 'IPv6':
+            microsoft_config = {}
+            if args.primary_peer_address_prefix:
+                args.ipv6_peering_config['primary_peer_address_prefix'] = args.primary_peer_subnet
+            if args.secondary_peer_subnet:
+                args.ipv6_peering_config['secondary_peer_address_prefix'] = args.secondary_peer_subnet
+            if args.advertised_public_prefixes:
+                microsoft_config['advertised_public_prefixes'] = args.advertised_public_prefixes
+            if args.customer_asn:
+                microsoft_config['customer_asn'] = args.customer_asn
+            if args.routing_registry_name:
+                microsoft_config['routing_registry_name'] = args.routing_registry_name
+            if args.route_filter:
+                args.ipv6_peering_config.route_filter = args.route_filter
+            if microsoft_config is not None:
+                args.ipv6_peering_config['microsoft-peering-config'] = microsoft_config
+            args.primary_peer_address_prefix, args.secondary_peer_address_prefix, args.route_filter, \
+            args.advertised_public_prefixes, args.customer_asn, args.args.routing_registry_name = AAZUndefined
 
 
 def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_address_prefix=None,
@@ -3461,13 +3552,12 @@ def download_generated_loa_as_pdf(cmd,
         basename = basename + '.pdf'
 
     file_path = os.path.join(dirname, basename)
-    generate_express_route_ports_loa_request =\
-        cmd.get_models('GenerateExpressRoutePortsLOARequest')(customer_name=customer_name)
-    client = network_client_factory(cmd.cli_ctx).express_route_ports
-    response = client.generate_loa(resource_group_name, express_route_port_name,
-                                   generate_express_route_ports_loa_request)
+    from .aaz.latest.network.express_route.port import GenerateLoa
+    response = GenerateLoa(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name,
+                                                              'name': express_route_port_name,
+                                                              'customer_name': customer_name})
 
-    encoded_content = base64.b64decode(response.encoded_content)
+    encoded_content = base64.b64decode(response['encodedContent'])
 
     from azure.cli.core.azclierror import FileOperationError
     try:
