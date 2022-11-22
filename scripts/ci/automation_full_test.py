@@ -424,8 +424,8 @@ class AutomaticScheduling(object):
         return serial_error_flag or parallel_error_flag
 
     def run_extension_instance_modules(self, instance_modules):
-        command = ['azdev', 'extension', 'add'].extend(instance_modules.keys())
-        run_command(command)
+        command = ['azdev', 'extension', 'add']
+        run_command(command.extend(instance_modules.keys()))
         self.run_instance_modules(instance_modules)
 
 
