@@ -3825,6 +3825,8 @@ class NetworkPrivateLinkMLRegistryScenarioTest(ScenarioTest):
             'location': 'eastus2euap',
         })
 
+        self.cmd('extension add --name ml')
+
         # Create registry 
         with open('registry.yml', 'w') as the_file:
             the_file.write(f'name: {self.kwargs["registry_name"]}\nlocation: {self.kwargs["location"]}\nreplication_locations:\n  - location: {self.kwargs["location"]}')
