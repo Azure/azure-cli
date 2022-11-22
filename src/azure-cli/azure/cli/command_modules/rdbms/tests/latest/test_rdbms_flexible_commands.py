@@ -133,6 +133,12 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     def test_mysql_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name):
         self._test_flexible_server_byok_mgmt('mysql', resource_group, vault_name, backup_vault_name)
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=postgres_location, additional_params='--enable-purge-protection true --retention-days 90')
+    def test_postgres_flexible_server_byok_mgmt(self, resource_group, vault_name):
+        self._test_flexible_server_byok_mgmt('postgres', resource_group, vault_name)
+
     def _test_flexible_server_mgmt(self, database_engine, resource_group):
 
         if self.cli_ctx.local_context.is_on:
@@ -572,7 +578,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, source_server))
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, target_server))
 
-    def _test_flexible_server_byok_mgmt(self, database_engine, resource_group, vault_name, backup_vault_name):
+    def _test_flexible_server_byok_mgmt(self, database_engine, resource_group, vault_name, backup_vault_name=None):
         key_name = self.create_random_name('rdbmskey', 32)
         identity_name = self.create_random_name('identity', 32)
         backup_key_name = self.create_random_name('rdbmskey', 32)
@@ -581,27 +587,47 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         replica_1_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         replica_2_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         backup_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        key_2_name = self.create_random_name('rdbmskey', 32)
+        identity_2_name = self.create_random_name('identity', 32)
+        server_2_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         tier = 'GeneralPurpose'
-        sku_name = 'Standard_D2ds_v4'
-        location = 'northeurope'
-        backup_location = 'westeurope'
-        backup_location_full_name = 'West Europe'
+        if database_engine == 'mysql':
+            sku_name = 'Standard_D2ds_v4'
+            location = self.mysql_location
+            backup_location = 'westeurope'
+            backup_location_full_name = 'West Europe'
+            replication_role = 'Replica'
+        elif database_engine == 'postgres':
+            sku_name = 'Standard_D2s_v3'
+            location = self.postgres_location
+            backup_location = 'westus'
+            backup_location_full_name = 'West US'
+            replication_role = 'AsyncReplica'
 
         key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                        .format(key_name, vault_name)).get_output_in_json()
 
-        backup_key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
-                              .format(backup_key_name, backup_vault_name)).get_output_in_json()
-
         identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_name, location)).get_output_in_json()
-
-        backup_identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, backup_identity_name, backup_location)).get_output_in_json()
 
         self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
                  .format(resource_group, vault_name, identity['principalId']))
 
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                 .format(resource_group, backup_vault_name, backup_identity['principalId']))
+        if database_engine == 'mysql':
+            backup_key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
+                                  .format(backup_key_name, backup_vault_name)).get_output_in_json()
+
+            backup_identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, backup_identity_name, backup_location)).get_output_in_json()
+
+            self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
+                     .format(resource_group, backup_vault_name, backup_identity['principalId']))
+        elif database_engine == 'postgres':
+            key_2 = self.cmd('keyvault key create --name {} -p software --vault-name {}'
+                             .format(key_2_name, vault_name)).get_output_in_json()
+
+            identity_2 = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_2_name, location)).get_output_in_json()
+
+            self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
+                     .format(resource_group, vault_name, identity_2['principalId']))
 
         def invalid_input_tests():
             # key or identity only
@@ -623,50 +649,62 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                 identity['id'],
             ), expect_failure=True)
 
-            # backup key or backup identity only
-            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --backup-key {} --geo-redundant-backup Enabled'.format(
-                database_engine,
-                resource_group,
-                server_name,
-                tier,
-                sku_name,
-                key['key']['kid'],
-                identity['id'],
-                backup_key['key']['kid']
-            ), expect_failure=True)
+            if database_engine == 'mysql':
+                # backup key or backup identity only
+                self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --backup-key {} --geo-redundant-backup Enabled'.format(
+                    database_engine,
+                    resource_group,
+                    server_name,
+                    tier,
+                    sku_name,
+                    key['key']['kid'],
+                    identity['id'],
+                    backup_key['key']['kid']
+                ), expect_failure=True)
 
-            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --backup-identity {} --geo-redundant-backup Enabled'.format(
-                database_engine,
-                resource_group,
-                server_name,
-                tier,
-                sku_name,
-                key['key']['kid'],
-                identity['id'],
-                backup_identity['id'],
-            ), expect_failure=True)
+                self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --backup-identity {} --geo-redundant-backup Enabled'.format(
+                    database_engine,
+                    resource_group,
+                    server_name,
+                    tier,
+                    sku_name,
+                    key['key']['kid'],
+                    identity['id'],
+                    backup_identity['id'],
+                ), expect_failure=True)
 
-            # backup key without principal key
-            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --backup-key {} --backup-identity {}'.format(
-                database_engine,
-                resource_group,
-                server_name,
-                tier,
-                sku_name,
-                backup_key['key']['kid'],
-                backup_identity['id']
-            ), expect_failure=True)
+                # backup key without principal key
+                self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --backup-key {} --backup-identity {}'.format(
+                    database_engine,
+                    resource_group,
+                    server_name,
+                    tier,
+                    sku_name,
+                    backup_key['key']['kid'],
+                    backup_identity['id']
+                ), expect_failure=True)
 
-            # geo-redundant server without backup-key
-            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --geo-redundant-backup Enabled'.format(
-                database_engine,
-                resource_group,
-                server_name,
-                tier,
-                sku_name,
-                key['key']['kid'],
-                identity['id'],
-            ), expect_failure=True)
+                # geo-redundant server without backup-key
+                self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --geo-redundant-backup Enabled'.format(
+                    database_engine,
+                    resource_group,
+                    server_name,
+                    tier,
+                    sku_name,
+                    key['key']['kid'],
+                    identity['id'],
+                ), expect_failure=True)
+            elif database_engine == 'postgres':
+                # geo-redundant server with data encryption is not supported
+                self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --geo-redundant-backup Enabled'.format(
+                    database_engine,
+                    resource_group,
+                    server_name,
+                    tier,
+                    sku_name,
+                    key['key']['kid'],
+                    identity['id'],
+                ), expect_failure=True)
 
         def main_tests(geo_redundant_backup):
             geo_redundant_backup_enabled = 'Enabled' if geo_redundant_backup else 'Disabled'
@@ -687,15 +725,16 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                         geo_redundant_backup_enabled
                     ))
 
-            # should fail because we can't remove identity used for data encryption
-            self.cmd('{} flexible-server identity remove -g {} -s {} -n {} --yes'
-                     .format(database_engine, resource_group, server_name, identity['id']),
-                     expect_failure=True)
-
-            if geo_redundant_backup:
+            if database_engine == 'mysql':
+                # should fail because we can't remove identity used for data encryption
                 self.cmd('{} flexible-server identity remove -g {} -s {} -n {} --yes'
-                     .format(database_engine, resource_group, server_name, backup_identity['id']),
-                     expect_failure=True)
+                         .format(database_engine, resource_group, server_name, identity['id']),
+                         expect_failure=True)
+
+                if geo_redundant_backup:
+                    self.cmd('{} flexible-server identity remove -g {} -s {} -n {} --yes'
+                             .format(database_engine, resource_group, server_name, backup_identity['id']),
+                             expect_failure=True)
 
             main_checks = [
                 JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
@@ -713,57 +752,101 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
                     checks=main_checks).get_output_in_json()
 
-            # should fail because disable-data-encryption and key for data encryption are provided at the same time
-            self.cmd('{} flexible-server update -g {} -n {} --key {} --identity {} --disable-data-encryption'.format(
-                database_engine,
-                resource_group,
-                server_name,
-                key['key']['kid'],
-                identity['id']
-            ), expect_failure=True)
+            if database_engine == 'mysql':
+                # should fail because disable-data-encryption and key for data encryption are provided at the same time
+                self.cmd('{} flexible-server update -g {} -n {} --key {} --identity {} --disable-data-encryption'.format(
+                    database_engine,
+                    resource_group,
+                    server_name,
+                    key['key']['kid'],
+                    identity['id']
+                ), expect_failure=True)
 
-            # disable data encryption in primary server
-            self.cmd('{} flexible-server update -g {} -n {} --disable-data-encryption'.format(database_engine, resource_group, server_name),
-                    checks=[JMESPathCheck('dataEncryption', None)])
+                # disable data encryption in primary server
+                self.cmd('{} flexible-server update -g {} -n {} --disable-data-encryption'.format(database_engine, resource_group, server_name),
+                        checks=[JMESPathCheck('dataEncryption', None)])
 
-            # create replica 1, it shouldn't have data encryption
-            self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'.format(
+                # create replica 1, it shouldn't have data encryption
+                self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'.format(
+                            database_engine,
+                            resource_group,
+                            replica_1_name,
+                            server_name
+                ), checks=[
+                    JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
+                    JMESPathCheck('dataEncryption', None),
+                    JMESPathCheck('replicationRole', replication_role)
+                ] + ([JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(backup_identity['id']))] if geo_redundant_backup else []))
+
+                # enable data encryption again in primary server
+                self.cmd('{} flexible-server update -g {} -n {} --key {} --identity {} {}'.format(
+                            database_engine,
+                            resource_group,
+                            server_name,
+                            key['key']['kid'],
+                            identity['id'],
+                            backup_key_id_flags
+                ), checks=main_checks)
+
+                # replica 1 now should have data encryption as well
+                self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, replica_1_name),
+                            checks=main_checks)
+
+                # create replica 2
+                self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'.format(
+                            database_engine,
+                            resource_group,
+                            replica_2_name,
+                            server_name
+                ), checks=main_checks + [JMESPathCheck('replicationRole', replication_role)])
+
+                # should fail because modifying data encryption on replica server is not allowed
+                self.cmd('{} flexible-server update -g {} -n {} --disable-data-encryption'
+                        .format(database_engine, resource_group, replica_2_name),
+                    expect_failure=True)
+            elif database_engine == 'postgres':
+                # create replica 1 with data encryption
+                self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --key {} --identity {}'.format(
+                            database_engine,
+                            resource_group,
+                            replica_1_name,
+                            server_name,
+                            key['key']['kid'],
+                            identity['id']
+                ), checks=main_checks + [JMESPathCheck('replicationRole', replication_role)])
+
+                # update different key and identity in primary server
+                self.cmd('{} flexible-server update -g {} -n {} --key {} --identity {}'.format(
+                            database_engine,
+                            resource_group,
+                            server_name,
+                            key_2['key']['kid'],
+                            identity_2['id']
+                ), checks=[
+                    JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity_2['id'])),
+                    JMESPathCheck('dataEncryption.primaryKeyUri', key_2['key']['kid']),
+                    JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity_2['id'])
+                ])
+
+                # try to update key and identity in a server without data encryption
+                self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --location {}'.format(
                         database_engine,
                         resource_group,
-                        replica_1_name,
-                        server_name
-            ), checks=[
-                JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
-                JMESPathCheck('dataEncryption', None),
-                JMESPathCheck('replicationRole', 'Replica')
-            ] + ([JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(backup_identity['id']))] if geo_redundant_backup else []))
-
-            # enable data encryption again in primary server
-            self.cmd('{} flexible-server update -g {} -n {} --key {} --identity {} {}'.format(
-                        database_engine,
+                        server_2_name,
+                        tier,
+                        sku_name,
+                        location
+                    ))
+                
+                self.cmd('{} flexible-server update -g {} -n {} --key {} --identity {}'
+                        .format(database_engine,
                         resource_group,
-                        server_name,
+                        server_2_name,
                         key['key']['kid'],
-                        identity['id'],
-                        backup_key_id_flags
-            ), checks=main_checks)
+                        identity['id']),
+                    expect_failure=True)
 
-            # replica 1 now should have data encryption as well
-            self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, replica_1_name),
-                checks=main_checks)
-
-            # create replica 2
-            self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'.format(
-                        database_engine,
-                        resource_group,
-                        replica_2_name,
-                        server_name
-            ), checks=main_checks + [JMESPathCheck('replicationRole', 'Replica')])
-
-            # should fail because modifying data encryption on replica server is not allowed
-            self.cmd('{} flexible-server update -g {} -n {} --disable-data-encryption'
-                     .format(database_engine, resource_group, replica_2_name),
-                expect_failure=True)
+                self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_2_name))
 
             # restore backup
             current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
@@ -771,24 +854,26 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
             sleep(max(0, seconds_to_wait))
 
-            self.cmd('{} flexible-server {} -g {} --name {} --source-server {}'.format(
+            self.cmd('{} flexible-server {} -g {} --name {} --source-server {} {}'.format(
                      database_engine,
                      restore_type,
                      resource_group,
                      backup_name,
-                     server_name
+                     server_name,
+                     F"--key {key['key']['kid']} --identity {identity['id']}" if database_engine == 'postgres' else ''
             ), checks=main_checks + ([JMESPathCheck('location', backup_location_full_name)] if geo_redundant_backup else []))
 
-            # disable data encryption in primary server
-            self.cmd('{} flexible-server update -g {} -n {} --disable-data-encryption'.format(database_engine, resource_group, server_name),
+            if database_engine == 'mysql':
+                # disable data encryption in primary server
+                self.cmd('{} flexible-server update -g {} -n {} --disable-data-encryption'.format(database_engine, resource_group, server_name),
+                        checks=[JMESPathCheck('dataEncryption', None)])
+
+                # none of the replica servers should have data encryption now
+                self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, replica_1_name),
                     checks=[JMESPathCheck('dataEncryption', None)])
 
-            # none of the replica servers should have data encryption now
-            self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, replica_1_name),
-                checks=[JMESPathCheck('dataEncryption', None)])
-
-            self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, replica_2_name),
-                checks=[JMESPathCheck('dataEncryption', None)])
+                self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, replica_2_name),
+                    checks=[JMESPathCheck('dataEncryption', None)])
 
             # delete all servers
             self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, replica_1_name))
@@ -797,7 +882,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
 
         invalid_input_tests()
-        main_tests(True)
+        if database_engine == 'mysql':
+            main_tests(True)
         main_tests(False)
 
 
@@ -2015,7 +2101,14 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
+    postgres_location = 'eastus'
     mysql_location = 'northeurope'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_postgres_flexible_server_upgrade_mgmt(self, resource_group):
+        self._test_flexible_server_upgrade_mgmt('postgres', resource_group, False)
+        self._test_flexible_server_upgrade_mgmt('postgres', resource_group, True)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
@@ -2027,10 +2120,16 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         replica_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
-        current_version = '5.7'
-        new_version = '8'
+        if database_engine == 'mysql':
+            current_version = '5.7'
+            new_version = '8'
+            location = self.mysql_location
+        else:
+            current_version = '11'
+            new_version = '14'
+            location = self.postgres_location
 
-        create_command = '{} flexible-server create -g {} -n {} --tier GeneralPurpose --sku-name Standard_D2ds_v4 --location {} --version {} --yes'.format(database_engine, resource_group, server_name, self.mysql_location, current_version)
+        create_command = '{} flexible-server create -g {} -n {} --tier GeneralPurpose --sku-name Standard_D2ds_v4 --location {} --version {} --yes'.format(database_engine, resource_group, server_name, location, current_version)
         if public_access:
             create_command += ' --public-access none'
         else:
@@ -2053,19 +2152,30 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
             # remove sql_mode NO_AUTO_CREATE_USER, which is incompatible with new version 8
             for server in [replica_name, server_name]:
                 self.cmd('{} flexible-server parameter set -g {} -s {} -n {} -v {}'
-                        .format(database_engine,
-                                resource_group,
-                                server,
-                                'sql_mode',
-                                'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO'))
+                         .format(database_engine,
+                                 resource_group,
+                                 server,
+                                 'sql_mode',
+                                 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO'))
 
-        # should fail because we first need to upgrade replica
-        self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, server_name, new_version),
-                 expect_failure=True)
+            # should fail because we first need to upgrade replica
+            self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, server_name, new_version),
+                     expect_failure=True)
 
-        # upgrade replica
-        result = self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, replica_name, new_version)).get_output_in_json()
-        self.assertTrue(result['version'].startswith(new_version))
+            # upgrade replica
+            result = self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, replica_name, new_version)).get_output_in_json()
+            self.assertTrue(result['version'].startswith(new_version))
+        else:
+            # should fail because we can't upgrade replica
+            self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, replica_name, new_version),
+                     expect_failure=True)
+
+            # should fail because we can't upgrade primary server with existing replicas
+            self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, server_name, new_version),
+                     expect_failure=True)
+
+            # delete replica
+            self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, replica_name))
 
         # upgrade primary server
         result = self.cmd('{} flexible-server upgrade -g {} -n {} --version {} --yes'.format(database_engine, resource_group, server_name, new_version)).get_output_in_json()

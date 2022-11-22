@@ -24,7 +24,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 from azure.cli.command_modules.role.custom import create_service_principal_for_rbac
-from azure.mgmt.rdbms import mysql_flexibleservers
+from azure.mgmt.rdbms import mysql_flexibleservers, postgresql_flexibleservers
 from azure.mgmt.resource.resources.models import ResourceGroup
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
 
@@ -492,7 +492,8 @@ def _is_resource_name(resource):
     return False
 
 
-def build_identity_and_data_encryption(byok_identity, backup_byok_identity, byok_key, backup_byok_key):
+def build_identity_and_data_encryption(db_engine, byok_identity=None, backup_byok_identity=None,
+                                       byok_key=None, backup_byok_key=None):
     identity, data_encryption = None, None
 
     if byok_identity and byok_key:
@@ -501,15 +502,24 @@ def build_identity_and_data_encryption(byok_identity, backup_byok_identity, byok
         if backup_byok_identity:
             identities[backup_byok_identity] = {}
 
-        identity = mysql_flexibleservers.models.Identity(user_assigned_identities=identities,
-                                                         type="UserAssigned")
+        if db_engine == 'mysql':
+            identity = mysql_flexibleservers.models.Identity(user_assigned_identities=identities,
+                                                             type="UserAssigned")
 
-        data_encryption = mysql_flexibleservers.models.DataEncryption(
-            primary_user_assigned_identity_id=byok_identity,
-            primary_key_uri=byok_key,
-            geo_backup_user_assigned_identity_id=backup_byok_identity,
-            geo_backup_key_uri=backup_byok_key,
-            type="AzureKeyVault")
+            data_encryption = mysql_flexibleservers.models.DataEncryption(
+                primary_user_assigned_identity_id=byok_identity,
+                primary_key_uri=byok_key,
+                geo_backup_user_assigned_identity_id=backup_byok_identity,
+                geo_backup_key_uri=backup_byok_key,
+                type="AzureKeyVault")
+        else:
+            identity = postgresql_flexibleservers.models.UserAssignedIdentity(user_assigned_identities=identities,
+                                                                              type="UserAssigned")
+
+            data_encryption = postgresql_flexibleservers.models.DataEncryption(
+                primary_user_assigned_identity_id=byok_identity,
+                primary_key_uri=byok_key,
+                type="AzureKeyVault")
 
     return identity, data_encryption
 
