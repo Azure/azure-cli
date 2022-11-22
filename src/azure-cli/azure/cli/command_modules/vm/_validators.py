@@ -1327,13 +1327,17 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
         from msrestazure.tools import is_valid_resource_id, parse_resource_id
         from ._vm_utils import is_shared_gallery_image_id, is_community_gallery_image_id,\
             parse_shared_gallery_image_id, parse_community_gallery_image_id
+
         if is_shared_gallery_image_id(namespace.image):
             # create vm with shared gallery
             from ._client_factory import cf_shared_gallery_image
             image_info = parse_shared_gallery_image_id(namespace.image)
             gallery_image_info = cf_shared_gallery_image(cmd.cli_ctx).get(
                 location=namespace.location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
-            trusted_launch_warning_log(namespace, gallery_image_info.features, gallery_image_info.hyper_v_generation)
+            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
+                                                                                  'hyper_v_generation') else None
+            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
 
         elif is_community_gallery_image_id(namespace.image):
             # create vm with community gallery
@@ -1341,14 +1345,19 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
             image_info = parse_community_gallery_image_id(namespace.image)
             gallery_image_info = cf_community_gallery_image(cmd.cli_ctx).get(
                 location=namespace.location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
-            trusted_launch_warning_log(namespace, gallery_image_info.features, gallery_image_info.hyper_v_generation)
+            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
+                                                                                  'hyper_v_generation') else None
+            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
 
         elif is_valid_resource_id(namespace.image):
             # create vm with managed image
             return
+
         elif urlparse(namespace.image).scheme and "://" in namespace.image:
             # create vm with vhd
             return
+
         else:
             # create vm with uri or urn
             client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
@@ -1357,12 +1366,16 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
                                                            namespace.os_offer, namespace.os_sku)
                 vm_image_info = client.get(namespace.location, namespace.os_publisher, namespace.os_offer,
                                            namespace.os_sku, latest_version)
-                vm_image_generation_version = vm_image_info.hyper_v_generation
+                generation_version = vm_image_info.hyper_v_generation if hasattr(vm_image_info,
+                                                                                 'hyper_v_generation') else None
+                features = vm_image_info.features if hasattr(vm_image_info, 'features') else None
             else:
                 vm_image_info = client.get(namespace.location, namespace.os_publisher, namespace.os_offer,
                                            namespace.os_sku, namespace.os_version)
-                vm_image_generation_version = vm_image_info.hyper_v_generation
-            trusted_launch_warning_log(namespace, vm_image_info.features, vm_image_generation_version)
+                generation_version = vm_image_info.hyper_v_generation if hasattr(vm_image_info,
+                                                                                 'hyper_v_generation') else None
+                features = vm_image_info.features if hasattr(vm_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
 
     # create vm with os disk
     if hasattr(namespace, 'attach_os_disk') and namespace.attach_os_disk is not None:
@@ -1372,8 +1385,9 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
         client = _compute_client_factory(cmd.cli_ctx).disks
         attach_os_disk_name = parse_resource_id(namespace.attach_os_disk)['name']
         attach_os_disk_info = client.get(namespace.resource_group_name, attach_os_disk_name)
+        generation_version = attach_os_disk_info if hasattr(attach_os_disk_info, 'hyper_v_generation') else None
         features = attach_os_disk_info.features if hasattr(attach_os_disk_info, 'features') else None
-        trusted_launch_warning_log(namespace, features, attach_os_disk_info.hyper_v_generation)
+        trusted_launch_warning_log(namespace, generation_version, features)
 
 
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
