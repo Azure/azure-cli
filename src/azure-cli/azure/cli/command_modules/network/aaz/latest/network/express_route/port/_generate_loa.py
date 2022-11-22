@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network express-route port generate-loa",
-)
 class GenerateLoa(AAZCommand):
     """Generate and download a letter of authorization for the requested ExpressRoutePort.
 

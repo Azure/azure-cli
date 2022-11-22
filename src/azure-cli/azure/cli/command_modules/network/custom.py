@@ -3294,8 +3294,8 @@ class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
     def pre_operations(self):
         from azure.cli.core.aaz import AAZUndefined
         args = self.ctx.args
-        args.name = args.peering_type
-        if args.ip_version.lower() == 'IPv6':
+        args.peering_name = args.peering_type
+        if args.ip_version == 'IPv6':
             if args.peering_type == 'MicrosoftPeering':
                 microsoft_config = {
                      'advertised_public_prefixes': args.advertised_public_prefixes,
@@ -3310,12 +3310,18 @@ class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
                 'microsoft_peering_config': microsoft_config,
                 'route_filter': args.route_filter
             }
-            args.primary_peer_address_prefix, args.secondary_peer_address_prefix, args.route_filter, \
-            args.advertised_public_prefixes, args.customer_asn, args.args.routing_registry_name = AAZUndefined
+            args.primary_peer_address_prefix = None
+            args.secondary_peer_address_prefix = None
+            args.route_filter = None
+            args.advertised_public_prefixes = None
+            args.customer_asn = None
+            args.routing_registry_name = None
 
         else:
             if args.peering_type != 'MicrosoftPeering':
-                args.advertised_public_prefixes, args.customer_asn, args.routing_registry_name = AAZUndefined
+                args.advertised_public_prefixes = None
+                args.customer_asn = None
+                args.routing_registry_name = None
 
 
 def _create_or_update_ipv6_peering(cmd, config, primary_peer_address_prefix, secondary_peer_address_prefix,
@@ -3369,26 +3375,30 @@ class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
         return args
 
     def pre_operations(self):
-        from azure.cli.core.aaz import AAZUndefined
         args = self.ctx.args
         if args.ip_version == 'IPv6':
             microsoft_config = {}
+            args.ipv6_peering_config = {}
             if args.primary_peer_address_prefix:
                 args.ipv6_peering_config['primary_peer_address_prefix'] = args.primary_peer_subnet
+                args.primary_peer_subnet = None
             if args.secondary_peer_subnet:
                 args.ipv6_peering_config['secondary_peer_address_prefix'] = args.secondary_peer_subnet
+                args.secondary_peer_subnet = None
             if args.advertised_public_prefixes:
                 microsoft_config['advertised_public_prefixes'] = args.advertised_public_prefixes
+                args.advertised_public_prefixes = None
             if args.customer_asn:
                 microsoft_config['customer_asn'] = args.customer_asn
+                args.customer_asn = None
             if args.routing_registry_name:
                 microsoft_config['routing_registry_name'] = args.routing_registry_name
+                args.routing_registry_name = None
             if args.route_filter:
-                args.ipv6_peering_config.route_filter = args.route_filter
+                args.ipv6_peering_config['route_filter'] = args.route_filter
+                args.route_filter = None
             if microsoft_config is not None:
                 args.ipv6_peering_config['microsoft-peering-config'] = microsoft_config
-            args.primary_peer_address_prefix, args.secondary_peer_address_prefix, args.route_filter, \
-            args.advertised_public_prefixes, args.customer_asn, args.args.routing_registry_name = AAZUndefined
 
 
 def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_address_prefix=None,
@@ -3516,18 +3526,19 @@ class ExpressRouteConnectionUpdate(_ExpressRouteConnectionUpdate):
 # region ExpressRoute ports
 def create_express_route_port(cmd, resource_group_name, express_route_port_name, location=None, tags=None,
                               peering_location=None, bandwidth_in_gbps=None, encapsulation=None):
-    client = network_client_factory(cmd.cli_ctx).express_route_ports
-    ExpressRoutePort = cmd.get_models('ExpressRoutePort')
+    from .aaz.latest.network.express_route.port import Create
     if bandwidth_in_gbps is not None:
         bandwidth_in_gbps = int(bandwidth_in_gbps)
-    port = ExpressRoutePort(
-        location=location,
-        tags=tags,
-        peering_location=peering_location,
-        bandwidth_in_gbps=bandwidth_in_gbps,
-        encapsulation=encapsulation
-    )
-    return client.begin_create_or_update(resource_group_name, express_route_port_name, port)
+    port_args = {
+        'resource_group': resource_group_name,
+        'name': express_route_port_name,
+        'location': location,
+        'tags': tags,
+        'peering_location': peering_location,
+        'bandwidth_in_gbps': bandwidth_in_gbps,
+        'encapsulation': encapsulation
+    }
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=port_args)
 
 
 def update_express_route_port(cmd, instance, tags=None):

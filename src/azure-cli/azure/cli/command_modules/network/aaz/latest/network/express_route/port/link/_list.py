@@ -43,9 +43,9 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.express_route_port_name = AAZStrArg(
-            options=["--express-route-port-name"],
-            help="The name of the ExpressRoutePort resource.",
+        _args_schema.port_name = AAZStrArg(
+            options=["--port-name"],
+            help="ExpressRoute port name.",
             required=True,
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -101,7 +101,7 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "expressRoutePortName", self.ctx.args.express_route_port_name,
+                    "expressRoutePortName", self.ctx.args.port_name,
                     required=True,
                 ),
                 **self.serialize_url_param(

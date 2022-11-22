@@ -60,9 +60,8 @@ class Create(AAZCommand):
         _args_schema.peering_name = AAZStrArg(
             options=["-n", "--name", "--peering-name"],
             help="The name of the peering.",
-            required=True,
-            id_part="child_name_1",
-            default="AzurePrivatePeering",
+            # required=True,
+            id_part="child_name_1"
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,

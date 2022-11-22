@@ -44,15 +44,15 @@ class Show(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.express_route_port_name = AAZStrArg(
-            options=["--express-route-port-name"],
-            help="The name of the ExpressRoutePort resource.",
+        _args_schema.port_name = AAZStrArg(
+            options=["--port-name"],
+            help="ExpressRoute port name.",
             required=True,
             id_part="name",
         )
-        _args_schema.link_name = AAZStrArg(
-            options=["-n", "--name", "--link-name"],
-            help="The name of the ExpressRouteLink resource.",
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
+            help="The link name of the ExpressRoute Port.",
             required=True,
             id_part="child_name_1",
         )
@@ -108,11 +108,11 @@ class Show(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "expressRoutePortName", self.ctx.args.express_route_port_name,
+                    "expressRoutePortName", self.ctx.args.port_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "linkName", self.ctx.args.link_name,
+                    "linkName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(

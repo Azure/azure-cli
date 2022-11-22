@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network express-route port create",
-)
 class Create(AAZCommand):
     """Create an ExpressRoute port.
 
@@ -60,8 +57,8 @@ class Create(AAZCommand):
                 resource_group_arg="resource_group",
             ),
         )
-        _args_schema.bandwidth = AAZIntArg(
-            options=["--bandwidth"],
+        _args_schema.bandwidth_in_gbps = AAZIntArg(
+            options=["--bandwidth-in-gbps"],
             help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Gbps.",
         )
         _args_schema.encapsulation = AAZStrArg(
@@ -198,7 +195,7 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("bandwidthInGbps", AAZIntType, ".bandwidth")
+                properties.set_prop("bandwidthInGbps", AAZIntType, ".bandwidth_in_gbps")
                 properties.set_prop("encapsulation", AAZStrType, ".encapsulation")
                 properties.set_prop("peeringLocation", AAZStrType, ".peering_location")
 

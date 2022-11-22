@@ -18,8 +18,6 @@ from azure.cli.core.aaz import *
 class GetStats(AAZCommand):
     """Get all traffic stats of an ExpressRoute peering.
 
-    This command is in preview and under development. Reference and support levels: https://aka.ms/CLI_refstatus
-
     :example: Get ExpressRoute Circuit Peering Traffic Stats
         az network express-route peering get-stats --circuit-name MyCircuit --name MyPeering --resource-group MyResourceGroup
     """
@@ -52,8 +50,8 @@ class GetStats(AAZCommand):
             help="ExpressRoute circuit name.",
             required=True,
         )
-        _args_schema.peering_name = AAZStrArg(
-            options=["--peering-name"],
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
             help="The name of the peering.",
             required=True,
         )
@@ -113,7 +111,7 @@ class GetStats(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "peeringName", self.ctx.args.peering_name,
+                    "peeringName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(

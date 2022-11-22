@@ -591,13 +591,13 @@ def load_command_table(self, _):
     #     g.show_command('show', is_preview=True)
     #     g.show_command('list', 'list', is_preview=True)
 
-    # with self.command_group('network express-route port', network_er_ports_sdk) as g:
-    #     g.custom_command('create', 'create_express_route_port')
+    with self.command_group('network express-route port', network_er_ports_sdk) as g:
+        g.custom_command('create', 'create_express_route_port')
     #     g.command('delete', 'begin_delete')
     #     g.custom_command('list', 'list_express_route_ports')
     #     g.show_command('show')
     #     g.generic_update_command('update', custom_func_name='update_express_route_port')
-    #     g.custom_command('generate-loa', 'download_generated_loa_as_pdf')
+        g.custom_command('generate-loa', 'download_generated_loa_as_pdf')
     #     g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_express_route_port')
 
     with self.command_group('network express-route port identity', min_api='2019-08-01') as g:
@@ -605,9 +605,9 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_express_route_port_identity', supports_no_wait=True)
         g.custom_show_command('show', 'show_express_route_port_identity')
 
-    # with self.command_group('network express-route port link', network_er_links_sdk) as g:
-    #     g.command('list', 'list')
-    #     g.show_command('show')
+    with self.command_group('network express-route port link', network_er_links_sdk) as g:
+        g.command('list', 'list')
+        g.show_command('show')
 
     with self.command_group('network express-route port link', network_er_ports_sdk) as g:
         g.generic_update_command('update',
