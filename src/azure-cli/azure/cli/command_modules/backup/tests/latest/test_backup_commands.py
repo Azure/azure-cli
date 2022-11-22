@@ -787,6 +787,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup job stop -g {rg} -v {vault} -n {job}')
 
+    @unittest.skip('CloudInternalError: Microsoft Azure Backup encountered an internal error. Wait for a few minutes and then try the operation again. If the issue persists, please contact Microsoft support.')
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer()
@@ -1284,7 +1285,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-
+    @unittest.skip('ServiceResourceNotEmptyWithBackendMessage: Recovery Services vault cannot be deleted as there are backup items still present in soft delete state. Visit the following link for the steps to permanently delete soft deleted items: https://aka.ms/undeletesoftdeleteditems.  : clitest-vm000003. Please ensure all containers have been unregistered from the vault and all private endpoints associated with the vault have been deleted, and retry operation.')
     @ResourceGroupPreparer(location="centraluseuap")
     @VaultPreparer()
     @VMPreparer(parameter_name='vm1')

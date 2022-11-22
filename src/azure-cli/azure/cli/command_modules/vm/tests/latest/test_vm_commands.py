@@ -2980,6 +2980,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[3].managedDisk.storageAccountType', 'StandardSSD_LRS'),
         ])
 
+    @unittest.skip('BadRequest: PremiumV2_LRS disk is not supported.')
     @ResourceGroupPreparer(name_prefix='cli-test-stdssdk2', location='eastus2euap')
     @AllowLargeResponse(size_kb=99999)
     def test_vm_disk_storage_sku2(self, resource_group):
@@ -7584,6 +7585,7 @@ class DiskEncryptionSetTest(ScenarioTest):
         ])
 
 
+    @unittest.skip('The requested VM size is not available, others VM siz also not availiable :https://github.com/Azure/azure-cli/issues/22199#issue-1216780069')
     @ResourceGroupPreparer(name_prefix='cli_test_os_disk_security_encryption', location='CentralUSEUAP')
     def test_os_disk_security_encryption(self, resource_group):
         self.kwargs.update({
@@ -7617,7 +7619,7 @@ class DiskEncryptionSetTest(ScenarioTest):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role assignment create --assignee {des1_sp_id} --role Reader --scope {vault_id}')
 
-        self.cmd('vm create -n {vm1} -g {rg} --size Standard_DC2as_v5 --security-type confidentialvm --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --admin-username testuser --admin-password testPassword0 --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type diskwithvmgueststate --os-disk-secure-vm-disk-encryption-set {des1}')
+        self.cmd('vm create -n {vm1} -g {rg} --size Standard_DC2ads_v5 --security-type confidentialvm --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --admin-username testuser --admin-password testPassword0 --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type diskwithvmgueststate --os-disk-secure-vm-disk-encryption-set {des1}')
         self.cmd('vm show -n {vm1} -g {rg}', checks=[
             self.check('storageProfile.osDisk.managedDisk.securityProfile.securityEncryptionType', 'DiskWithVMGuestState'),
             self.check('storageProfile.osDisk.managedDisk.securityProfile.diskEncryptionSet.id', '{des1_id}')
