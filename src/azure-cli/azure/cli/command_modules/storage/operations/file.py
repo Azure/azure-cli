@@ -169,22 +169,24 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
     from azure.cli.command_modules.storage.util import glob_files_locally, normalize_blob_file_path
 
     source_files = list(glob_files_locally(source, pattern))
-    settings_class = cmd.get_models('_models#ContentSettings')
+    settings_class = cmd.get_models('_models#ContentSettings', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
 
     if dryrun:
         logger.info('upload files to file share')
         logger.info('    account %s', client.account_name)
         logger.info('      share %s', destination)
         logger.info('      total %d', len(source_files))
-        dst = None
-        kwargs = {
-            'dir_name': os.path.dirname(dst),
-            'file_name': os.path.basename(dst)
-        }
-
-        return [{'File': create_file_url(client, **kwargs),
-                 'Type': guess_content_type(src, content_settings, settings_class).content_type} for src, dst in
-                source_files]
+        res = []
+        for src, dst in source_files:
+            formatted_dst = normalize_blob_file_path(destination_path, dst)
+            kwargs = {
+                'directory_name': os.path.dirname(formatted_dst),
+                'file_name': os.path.basename(formatted_dst)
+            }
+            file = create_file_url(client, **kwargs)
+            guessed_type = guess_content_type(src, content_settings, settings_class).content_type
+            res.append({'File': file, 'Type': guessed_type})
+        return res
 
     # TODO: Performance improvement
     # 1. Upload files in parallel
@@ -200,7 +202,7 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
                             progress_callback, max_connections)
 
         args = {
-            'dir_name': dir_name,
+            'directory_name': dir_name,
             'file_name': file_name
         }
         return create_file_url(client, **args)

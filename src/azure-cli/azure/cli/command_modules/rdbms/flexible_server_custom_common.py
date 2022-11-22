@@ -23,8 +23,8 @@ from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissin
 from azure.mgmt.rdbms import mysql_flexibleservers
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._servers_operations import ServersOperations as MySqlServersOperations
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._azure_ad_administrators_operations import AzureADAdministratorsOperations as MySqlAzureADAdministratorsOperations
-from ._client_factory import cf_mysql_flexible_replica, cf_mysql_flexible_servers, cf_postgres_flexible_servers, \
-    cf_mysql_flexible_adadmin, cf_mysql_flexible_config
+from ._client_factory import cf_mysql_flexible_replica, cf_postgres_flexible_replica, cf_mysql_flexible_servers, \
+    cf_postgres_flexible_servers, cf_mysql_flexible_adadmin, cf_mysql_flexible_config
 from ._flexible_server_util import run_subprocess, run_subprocess_get_output, fill_action_template, get_git_root_dir, \
     resolve_poller, GITHUB_ACTION_PATH
 from .validators import validate_public_access_server
@@ -379,16 +379,21 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
         }
         version_mapped = mysql_version_map[version]
     else:
-        # pending postgres
+        replica_operations_client = cf_postgres_flexible_replica(cmd.cli_ctx, '_')
         version_mapped = version
 
     replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
-    for replica in replicas:
-        current_replica_version = int(replica.version.split('.')[0])
-        if current_replica_version < int(version):
-            raise CLIError("Primary server version must not be greater than replica server version. "
-                           "First upgrade {} server version to {} and try again."
-                           .format(replica.name, version))
+
+    if isinstance(client, MySqlServersOperations):
+        for replica in replicas:
+            current_replica_version = int(replica.version.split('.')[0])
+            if current_replica_version < int(version):
+                raise CLIError("Primary server version must not be greater than replica server version. "
+                               "First upgrade {} server version to {} and try again."
+                               .format(replica.name, version))
+    else:
+        if 'replica' in instance.replication_role.lower() or len(list(replicas)) > 0:
+            raise CLIError("Major version upgrade is not yet supported for servers in a read replica setup.")
 
     parameters = {
         'version': version_mapped

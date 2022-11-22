@@ -119,7 +119,8 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         group = self._get_resource_group(**kwargs)
 
         if not self.dev_setting_name:
-            template = 'az storage account create -n {} -g {} -l {} --sku {} --kind {} --https-only '
+            template = 'az storage account create -n {} -g {} -l {} --sku {} --kind {} ' \
+                       '--https-only --allow-blob-public-access false'
             if self.hns:
                 template += '--hns'
             self.live_only_execute(self.cli_ctx, template.format(
@@ -177,7 +178,7 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             if self.additional_params:
                 template += self.additional_params
             if '--retention-days' not in template:
-                template += '--retention-days 7'
+                template += ' --retention-days 7'
             self.live_only_execute(self.cli_ctx, template.format(name, group, self.location, self.sku))
             self.test_class_instance.kwargs[self.key] = name
             return {self.parameter_name: name}

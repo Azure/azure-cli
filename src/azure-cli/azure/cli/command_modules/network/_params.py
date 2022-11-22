@@ -508,7 +508,7 @@ def load_arguments(self, _):
         c.argument('protocol', http_protocol_type, help='The HTTP settings protocol.')
         c.argument('host', help='The name of the host to send the probe.')
         c.argument('path', help='The relative path of the probe. Valid paths start from "/"')
-        c.argument('timeout', help='The probe timeout in seconds.')
+        c.argument('timeout', type=int, help='The probe timeout in seconds.')
         c.argument('host_name_from_http_settings', help='Use host header from HTTP settings.',
                    arg_type=get_three_state_flag())
         c.argument('match_body', help='Body that must be contained in the health response.')
@@ -2149,6 +2149,7 @@ def load_arguments(self, _):
         c.argument('ssh_key', help='SSH key file location for SSH connections.', options_list=['--ssh-key'])
     with self.argument_context('network bastion rdp') as c:
         c.argument('disable_gateway', arg_type=get_three_state_flag(), help='Flag to disable access through RD gateway.')
+        c.argument('enable_mfa', help='Enable RDS auth for MFA if supported by the target machine.', arg_type=get_three_state_flag())
         c.argument('configure', help='Flag to configure RDP session.', action='store_true')
     with self.argument_context('network bastion tunnel') as c:
         c.argument('port', help='Local port to use for the tunneling.', options_list=['--port'])

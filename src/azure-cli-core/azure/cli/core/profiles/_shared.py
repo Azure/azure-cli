@@ -178,9 +178,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2021-05-01',
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
-        ResourceType.MGMT_KEYVAULT: SDKProfile('2021-04-01-preview', {
-            'vaults': '2022-07-01'
-        }),
+        ResourceType.MGMT_KEYVAULT: '2022-07-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2020-04-01-preview', {
             'classic_administrators': '2015-06-01',
             'role_definitions': '2018-01-01-preview',
@@ -243,7 +241,7 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.MGMT_MSI: '2022-01-31-preview',
         ResourceType.MGMT_APPSERVICE: '2022-03-01',
-        ResourceType.MGMT_IOTHUB: '2021-07-02',
+        ResourceType.MGMT_IOTHUB: '2022-04-30-preview',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
         ResourceType.MGMT_IOTCENTRAL: '2021-11-01-preview',
         ResourceType.MGMT_ARO: '2022-04-01',

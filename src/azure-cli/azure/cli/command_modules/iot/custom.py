@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use,no-member,line-too-long,too-few-public-methods,too-many-lines,too-many-arguments,too-many-locals
 
+import json
 import re
 from enum import Enum
 from knack.log import get_logger
@@ -278,7 +279,10 @@ def iot_dps_linked_hub_create(
                 raise InvalidArgumentValueError("Please provide a valid IoT Hub connection string.")
 
         hub_client = iot_hub_service_factory(cmd.cli_ctx)
-        location = iot_hub_get(cmd, hub_client, hub_name=hub_name, resource_group_name=hub_resource_group).location
+        try:
+            location = iot_hub_get(cmd, hub_client, hub_name=hub_name, resource_group_name=hub_resource_group).location
+        except CLIError:
+            raise RequiredArgumentMissingError("Please provide the IoT Hub location.")
 
     resource_group_name = _ensure_dps_resource_group_name(client, resource_group_name, dps_name)
 
@@ -491,7 +495,6 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                    fileupload_storage_container_name=None,
                    fileupload_sas_ttl=1,
                    fileupload_storage_authentication_type=None,
-                   fileupload_storage_container_uri=None,
                    fileupload_storage_identity=None,
                    min_tls_version=None,
                    tags=None,
@@ -546,7 +549,6 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
         connection_string=fileupload_storage_connectionstring if fileupload_storage_connectionstring else '',
         container_name=fileupload_storage_container_name if fileupload_storage_container_name else '',
         authentication_type=fileupload_storage_authentication_type if fileupload_storage_authentication_type else None,
-        container_uri=fileupload_storage_container_uri if fileupload_storage_container_uri else '',
         identity=ManagedIdentity(user_assigned_identity=fileupload_storage_identity) if fileupload_storage_identity else None)
 
     properties = IotHubProperties(event_hub_endpoints=event_hub_dic,
@@ -1129,6 +1131,10 @@ def iot_hub_route_update(cmd, client, hub_name, route_name, source_type=None, en
 
 def iot_hub_route_test(cmd, client, hub_name, route_name=None, source_type=None, body=None, app_properties=None,
                        system_properties=None, resource_group_name=None):
+    if app_properties:
+        app_properties = json.loads(app_properties)
+    if system_properties:
+        system_properties = json.loads(system_properties)
     resource_group_name = _ensure_hub_resource_group_name(client, resource_group_name, hub_name)
     route_message = RoutingMessage(
         body=body,
