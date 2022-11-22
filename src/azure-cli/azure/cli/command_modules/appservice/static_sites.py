@@ -414,7 +414,7 @@ def create_staticsites(cmd, resource_group_name, name, location="centralus",  # 
     if source and ("https://" not in source and "http://" not in source):
         source = f"https://{source}"  # urlparse doesn't split the url properly without a scheme
 
-    if source or branch or login_with_github or token:
+    if source or branch or login_with_github or login_with_ado or token:
         if not source:
             raise ValidationError("--source is required to make a static web app connected to a repo")
         if not branch:
@@ -431,7 +431,6 @@ def create_staticsites(cmd, resource_group_name, name, location="centralus",  # 
                 token = get_github_access_token(cmd, scopes)
             if login_with_ado:
                 token = _get_ado_token(cmd, source)
-                print(token)
         else:
             if login_with_github:
                 logger.warning("Both token and --login-with-github flag are provided. Will use provided token")
