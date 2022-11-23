@@ -5558,10 +5558,11 @@ class NetworkVpnClientPackageScenarioTest(ScenarioTest):
 
 class NetworkTrafficManagerScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer('cli_test_traffic_manager')
-    def test_network_traffic_manager(self, resource_group):
+    @record_only()
+    def test_network_traffic_manager(self):
 
         self.kwargs.update({
+            'rg': 'external_az_cli_testing',
             'tm': 'mytmprofile',
             'endpoint': 'myendpoint',
             'dns': 'mytrafficmanager001100a'
@@ -5577,11 +5578,13 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
         self.cmd('network traffic-manager profile list -g {rg}')
 
         # Endpoint tests
-        self.cmd('network traffic-manager endpoint create -n {endpoint} --profile-name {tm} -g {rg} --type externalEndpoints --weight 50 --target www.microsoft.com',
-                 checks=self.check('type', 'Microsoft.Network/trafficManagerProfiles/externalEndpoints'))
-        self.cmd('network traffic-manager endpoint update -n {endpoint} --profile-name {tm} -g {rg} --type externalEndpoints --weight 25 --target www.contoso.com', checks=[
+        self.cmd('network traffic-manager endpoint create -n {endpoint} --profile-name {tm} -g {rg} --type externalEndpoints --weight 50 --target www.microsoft.com --always-serve Enabled',
+                 checks=[self.check('type', 'Microsoft.Network/trafficManagerProfiles/externalEndpoints'),
+                         self.check('alwaysServe', 'Enabled')])
+        self.cmd('network traffic-manager endpoint update -n {endpoint} --profile-name {tm} -g {rg} --type externalEndpoints --weight 25 --target www.contoso.com --always-serve Disabled', checks=[
             self.check('weight', 25),
-            self.check('target', 'www.contoso.com')
+            self.check('target', 'www.contoso.com'),
+            self.check('alwaysServe', 'Disabled')
         ])
         self.cmd('network traffic-manager endpoint show -g {rg} --profile-name {tm} -t externalEndpoints -n {endpoint}')
         self.cmd('network traffic-manager endpoint list -g {rg} --profile-name {tm} -t externalEndpoints',
