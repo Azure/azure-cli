@@ -10,6 +10,7 @@
 from azure.cli.core.commands.parameters import (get_three_state_flag,
                                                 get_enum_type,
                                                 resource_group_name_type)
+#from azure.mgmt.security.models import SettingName
 from azure.mgmt.security.models._security_center_enums import Enum69
 from knack.arguments import CLIArgumentType
 from ._validators import (validate_alert_status,
@@ -23,7 +24,7 @@ home_region_arg_type = CLIArgumentType(options_list=('--home-region', '-hr'), me
 location_arg_type = CLIArgumentType(options_list=('--location', '-l'), metavar='LOCATION', help='location of the resource')
 
 # Alerts
-alert_status_arg_type = CLIArgumentType(options_list=('--status'), metavar='STATUS', help='target status of the alert. possible values are "dismiss" and "activate"')
+alert_status_arg_type = CLIArgumentType(options_list=('--status'), metavar='STATUS', help='target status of the alert. possible values are "dismiss", "activate", "resolve" and "inprogress"')
 
 
 # Alerts Suppression Rules

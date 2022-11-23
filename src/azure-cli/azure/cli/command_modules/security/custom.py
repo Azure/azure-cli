@@ -32,6 +32,7 @@ from azure.mgmt.security.models import (SecurityContact,
                                         AutomationActionEventHub,
                                         AutomationRuleSet,
                                         AutomationTriggeringRule)
+#from azure.mgmt.security.models import SettingName
 from azure.mgmt.security.models._security_center_enums import Enum69
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError)
@@ -95,7 +96,7 @@ def get_security_alert(client, location, resource_name, resource_group_name=None
     if resource_group_name:
         return client.get_resource_group_level(resource_name, resource_group_name)
 
-    return client.get_subscription_level(resource_name)
+    return client.get_subscription_level(location, resource_name)
 
 
 def update_security_alert(client, location, resource_name, status, resource_group_name=None):
@@ -104,18 +105,22 @@ def update_security_alert(client, location, resource_name, status, resource_grou
 
     if resource_group_name:
         if status == "Dismiss":
-            client.update_resource_group_level_state_to_dismiss(resource_name, resource_group_name)
+            client.update_resource_group_level_state_to_dismiss(location, resource_name, resource_group_name)
         if status == "Activate":
-            client.update_resource_group_level_state_to_activate(resource_name, resource_group_name)
+            client.update_resource_group_level_state_to_activate(location, resource_name, resource_group_name)
         if status == "Resolve":
-            client.update_resource_group_level_state_to_resolve(resource_name, resource_group_name)
+            client.update_resource_group_level_state_to_resolve(location, resource_name, resource_group_name)
+        if status == "InProgress":
+            client.update_resource_group_level_state_to_in_progress(location, resource_name, resource_group_name)
     else:
         if status == "Dismiss":
-            client.update_subscription_level_state_to_dismiss(resource_name)
+            client.update_subscription_level_state_to_dismiss(location, resource_name)
         if status == "Activate":
-            client.update_subscription_level_state_to_activate(resource_name)
+            client.update_subscription_level_state_to_activate(location, resource_name)
         if status == "Resolve":
-            client.update_subscription_level_state_to_resolve(resource_name)
+            client.update_subscription_level_state_to_resolve(location, resource_name)
+        if status == "InProgress":
+            client.update_subscription_level_state_to_in_progress(location, resource_name)
 
 # --------------------------------------------------------------------------------------------
 # Security Alerts Suppression Rule

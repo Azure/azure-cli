@@ -52,6 +52,12 @@ class SecurityCenterAlertsTests(ScenarioTest):
 
         assert alert["status"] == "Resolved"
 
+        self.cmd('az security alert update -g {} -l {} -n {} --status InProgress'.format(rg, location, alertName))
+
+        alert = self.cmd('az security alert show -g {} -l {} -n {}'.format(rg, location, alertName)).get_output_in_json()
+
+        assert alert["status"] == "InProgress"
+
         # check subscription level
 
         self.cmd('az security alert update -l {} -n {} --status Activate'.format(location, alertName))
@@ -71,6 +77,12 @@ class SecurityCenterAlertsTests(ScenarioTest):
         alert = self.cmd('az security alert show -l {} -n {}'.format(location, alertName)).get_output_in_json()
 
         assert alert["status"] == "Resolved"
+
+        self.cmd('az security alert update -l {} -n {} --status InProgress'.format(location, alertName))
+
+        alert = self.cmd('az security alert show -l {} -n {}'.format(location, alertName)).get_output_in_json()
+
+        assert alert["status"] == "InProgress"
 
         # reset alert to active
 
