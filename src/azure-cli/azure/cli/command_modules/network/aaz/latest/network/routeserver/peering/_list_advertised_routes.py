@@ -178,15 +178,12 @@ class ListAdvertisedRoutes(AAZCommand):
             cls._schema_on_200 = AAZDictType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.Element = AAZObjectType()
+            _schema_on_200.Element = AAZListType()
 
             _element = cls._schema_on_200.Element
-            _element.value = AAZListType()
+            _element.Element = AAZObjectType()
 
-            value = cls._schema_on_200.Element.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.Element.value.Element
+            _element = cls._schema_on_200.Element.Element
             _element.as_path = AAZStrType(
                 serialized_name="asPath",
                 flags={"read_only": True},
