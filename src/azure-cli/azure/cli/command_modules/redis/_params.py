@@ -46,7 +46,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('vm_size', arg_type=get_enum_type(allowed_c_family_sizes + allowed_p_family_sizes), help='Size of Redis cache to deploy. Basic and Standard Cache sizes start with C. Premium Cache sizes start with P')
         c.argument('enable_non_ssl_port', action='store_true', help='If specified, then the non-ssl redis server port (6379) will be enabled.')
         c.argument('replicas_per_master', help='The number of replicas to be created per master.')
-        c.argument('redis_version', help='Redis version. Only major version will be used in create/update request with current valid values: (4, 6)')
+        c.argument('redis_version', help='Redis version. This should be in the form \'major[.minor]\' (only \'major\' is required) or the value \'latest\' which refers to the latest stable Redis version that is available. Supported versions: 4.0, 6.0 (latest). Default value is \'latest\'.')
         c.argument('mi_system_assigned', arg_type=system_identity_type)
         c.argument('mi_user_assigned', arg_type=user_identity_type)
 
