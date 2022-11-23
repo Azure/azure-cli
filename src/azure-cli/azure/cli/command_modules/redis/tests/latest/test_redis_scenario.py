@@ -196,17 +196,20 @@ class RedisCacheTests(ScenarioTest):
             filesasURL = storage['primaryEndpoints']['blob'] + self.kwargs['containerName'] + "/"+ self.kwargs["prefix"] + "?" + containersasToken[1:-2]
             self.kwargs['containersasURL'] = containersasURL
             self.kwargs['filesasURL'] = filesasURL
+        
+        with self.assertRaises(SystemExit):
+            self.cmd('az redis export -n {name} -g {rg} --prefix {prefix} --container \'{containersasURL}\' --preferred-data-archive-auth-method badAuthMethod',expect_failure=True)
+            self.cmd('az redis import -n {name} -g {rg} --files "{filesasURL}" --preferred-data-archive-auth-method badAuthMethod')
 
         self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size}')
 
-
-        self.cmd('az redis export -n {name} -g {rg} --prefix {prefix} --container \'{containersasURL}\'')
+        self.cmd('az redis export -n {name} -g {rg} --prefix {prefix} --container \'{containersasURL}\' --preferred-data-archive-auth-method SAS')
         if self.is_live:
             time.sleep(5 * 60)
-        self.cmd('az redis import-method -n {name} -g {rg} --files "{filesasURL}"')
+        self.cmd('az redis import-method -n {name} -g {rg} --files "{filesasURL}" --preferred-data-archive-auth-method SAS')
         if self.is_live:
             time.sleep(5 * 60)
-        self.cmd('az redis import -n {name} -g {rg} --files "{filesasURL}"')
+        self.cmd('az redis import -n {name} -g {rg} --files "{filesasURL}" --preferred-data-archive-auth-method SAS')
         if self.is_live:
             time.sleep(5 * 60)
         self.cmd('az redis delete -n {name} -g {rg} -y')

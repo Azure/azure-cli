@@ -10,7 +10,7 @@ from knack.arguments import CLIArgumentType
 def load_arguments(self, _):  # pylint: disable=too-many-statements
     from azure.mgmt.redis.models import RebootType, RedisKeyType, SkuName, TlsVersion, ReplicationRole
     from azure.cli.command_modules.redis._validators import JsonString, ScheduleEntryList
-    from azure.cli.command_modules.redis.custom import allowed_c_family_sizes, allowed_p_family_sizes
+    from azure.cli.command_modules.redis.custom import allowed_c_family_sizes, allowed_p_family_sizes, allowed_auth_methods
     from azure.cli.core.commands.parameters import get_enum_type, tags_type, zones_type
     from azure.cli.core.commands.parameters import get_resource_name_completion_list
 
@@ -32,6 +32,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('file_format', arg_type=format_type)
         c.argument('container', help='SAS url for container where data needs to be exported to')
         c.argument('prefix', help='Prefix to use for exported files')
+        c.argument('preferred_data_archive_auth_method', arg_type=get_enum_type(allowed_auth_methods),help='Preferred auth method to communicate to storage account used for data archive, default value is SAS')
         c.argument('cache_name', arg_type=cache_name)
         c.argument('shard_count', type=int, help='The number of shards to be created on a Premium Cluster Cache.')
         c.argument('subnet_id', help='The full resource ID of a subnet in a virtual network to deploy the redis cache in. Example format /subscriptions/{subid}/resourceGroups/{resourceGroupName}/providers/Microsoft.{Network|ClassicNetwork}/virtualNetworks/vnet1/subnets/subnet1')

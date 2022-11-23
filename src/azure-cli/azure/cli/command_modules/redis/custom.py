@@ -14,14 +14,15 @@ allowed_p_family_sizes = ['p1', 'p2', 'p3', 'p4', 'p5']
 wrong_vmsize_error = CLIError('Invalid VM size. Example for Valid values: '
                               'For Standard Sku : (C0, C1, C2, C3, C4, C5, C6), '
                               'for Premium Sku : (P1, P2, P3, P4, P5)')
-
+allowed_auth_methods = ['SAS','ManagedIdentity']
 # region Custom Commands
 
 
 # pylint: disable=unused-argument
-def cli_redis_export(cmd, client, resource_group_name, name, prefix, container, file_format=None):
+def cli_redis_export(cmd, client, resource_group_name, name, prefix, container, preferred_data_archive_auth_method=None, file_format=None):
     from azure.mgmt.redis.models import ExportRDBParameters
-    parameters = ExportRDBParameters(prefix=prefix, container=container, format=file_format)
+    parameters = ExportRDBParameters(prefix=prefix, container=container, format=file_format,
+    preferred_data_archive_auth_method=preferred_data_archive_auth_method)
     return client.begin_export_data(resource_group_name, name, parameters)
 
 
@@ -178,9 +179,10 @@ def cli_redis_regenerate_key(client, resource_group_name, name, key_type):
     return client.regenerate_key(resource_group_name, name, RedisRegenerateKeyParameters(key_type=key_type))
 
 
-def cli_redis_import(client, resource_group_name, name, files, file_format=None):
+def cli_redis_import(client, resource_group_name, name, files, preferred_data_archive_auth_method=None,file_format=None):
     from azure.mgmt.redis.models import ImportRDBParameters
-    return client.begin_import_data(resource_group_name, name, ImportRDBParameters(files=files, format=file_format))
+    return client.begin_import_data(resource_group_name, name, ImportRDBParameters(files=files, format=file_format,
+    preferred_data_archive_auth_method=preferred_data_archive_auth_method))
 
 
 def cli_redis_force_reboot(client, resource_group_name, name, reboot_type, shard_id=None):
