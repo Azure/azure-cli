@@ -10,6 +10,7 @@ from knack.log import get_logger
 
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
 from azure.cli.core.aaz import has_value
+from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
@@ -7114,7 +7115,7 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
                 "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
                 "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
             },
-            blank="Enabled",
+            blank="Disabled",
         )
         # filter arguments
         args_schema.address_prefix._registered = False
@@ -7145,26 +7146,7 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             args.address_prefixes = prefixes if len(prefixes) > 1 else None
             args.address_prefix = prefixes[0] if len(prefixes) == 1 else None
 
-        def to_aaz_list_arg(source, target, transformer=None):
-            if not has_value(source):
-                return
-
-            if source == None:
-                target._data = target._schema.process_data(None)
-                return
-
-            for idx, item in enumerate(source):
-                if not has_value(item):
-                    continue
-
-                if item == None:
-                    target[idx] = None
-                elif transformer:
-                    target[idx] = transformer(item, idx)
-                else:
-                    target[idx] = item
-
-        def delegation_trans(service_name, index):
+        def delegation_trans(index, service_name):
             service_name = str(service_name)
             # covert name to service name
             if "/" not in service_name and len(service_name.split(".")) == 3:
@@ -7175,15 +7157,21 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
                 "service_name": service_name,
             }
 
-        def endpoint_trans(service_name):
-            return {"service": service_name}
-
-        def policy_trans(policy_id):
-            return {"id": policy_id}
-
-        to_aaz_list_arg(args.delegations, args.delegated_services, transformer=delegation_trans)
-        to_aaz_list_arg(args.service_endpoints, args.endpoints, transformer=endpoint_trans)
-        to_aaz_list_arg(args.service_endpoint_policy, args.policies, transformer=policy_trans)
+        args.delegated_services = assign_aaz_list_arg(
+            args.delegated_services,
+            args.delegations,
+            element_transformer=delegation_trans
+        )
+        args.endpoints = assign_aaz_list_arg(
+            args.endpoints,
+            args.service_endpoints,
+            element_transformer=lambda _, service_name: {"service": service_name}
+        )
+        args.policies = assign_aaz_list_arg(
+            args.policies,
+            args.service_endpoint_policy,
+            element_transformer=lambda _, policy_id: {"id": policy_id}
+        )
         # use string instead of bool
         args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
         args.private_link_service_network_policies = args.disable_private_link_service_network_policies
