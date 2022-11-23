@@ -232,9 +232,12 @@ def load_command_table(self, _):
         from .validators import validate_diagnostic_settings
         g.custom_command('create', 'create_diagnostics_settings', validator=validate_diagnostic_settings)
         g.show_command('show', 'get')
-        g.command('list', 'list')
+        # g.command('list', 'list')
         g.command('delete', 'delete')
         g.generic_update_command('update')
+
+    from .operations.diagnostics_settings import DiagnosticSettingsList
+    self.command_table['monitor diagnostic-settings list'] = DiagnosticSettingsList(loader=self)
 
     with self.command_group('monitor diagnostic-settings categories', diagnostics_categories_sdk) as g:
         g.show_command('show', 'get')

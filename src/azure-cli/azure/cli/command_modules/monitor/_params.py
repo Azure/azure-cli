@@ -278,8 +278,8 @@ def load_arguments(self, _):
     with self.argument_context('monitor diagnostic-settings show') as c:
         c.resource_parameter('resource_uri', required=True, arg_group='Target Resource')
 
-    with self.argument_context('monitor diagnostic-settings list') as c:
-        c.resource_parameter('resource_uri', required=True)
+    # with self.argument_context('monitor diagnostic-settings list') as c:
+    #     c.resource_parameter('resource_uri', required=True)
 
     with self.argument_context('monitor diagnostic-settings delete') as c:
         c.resource_parameter('resource_uri', required=True, arg_group='Target Resource')
