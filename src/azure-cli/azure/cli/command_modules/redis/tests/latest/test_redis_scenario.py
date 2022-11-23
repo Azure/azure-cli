@@ -396,7 +396,10 @@ class RedisCacheTests(ScenarioTest):
         self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size}')
         self.cmd('az redis create -n {secname} -g {rg} -l {seclocation} --sku {sku} --vm-size {size}')
 
-        self.cmd('az redis server-link create -n {name} -g {rg} --replication-role Secondary --server-to-link {secname}')
+        self.cmd('az redis server-link create -n {name} -g {rg} --replication-role Secondary --server-to-link {secname}',checks=[
+            self.exists('geoReplicatedPrimaryHostName'),
+            self.exists('primaryHostName')
+        ])
         if self.is_live:
             time.sleep(5 * 60)
         self.cmd('az redis server-link list -n {name} -g {rg}')
