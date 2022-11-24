@@ -283,7 +283,7 @@ def git_push(message):
     if "nothing to commit, working tree clean" in str(stdout):
         return
     try:
-        run_command(["git", "add", "*/command_modules/*"], check_return_code=True)
+        run_command(["git", "add", "*/src/*"], check_return_code=True)
         run_command(["git", "commit", "-m", message], check_return_code=True)
     except RuntimeError as ex:
         raise ex
@@ -325,20 +325,20 @@ def process_test(cmd, azdev_test_result_fp, live_rerun=False):
     error_flag = run_command(cmd)
     if not error_flag or not live_rerun:
         return error_flag
+    if not os.path.exists(azdev_test_result_fp):
+        logger.warning(f"{cmd} failed directly. The related module can't work!")
+        return error_flag
     # drop the original `--pytest-args` and add new arguments
     cmd = cmd[:-2] + ['--lf', '--live', '--pytest-args', '-o junit_family=xunit1']
     error_flag = run_command(cmd)
     # restore original recording yaml file for failed test in live run
     if error_flag:
-        if os.path.exists(azdev_test_result_fp):
-            failed_tests = get_failed_tests(azdev_test_result_fp)
-            for (test, file) in failed_tests.items():
-                git_restore(os.path.join(working_directory, file))
-        else:
-            logger.warning(f"{cmd} failed without {azdev_test_result_fp}")
+        failed_tests = get_failed_tests(azdev_test_result_fp)
+        for (test, file) in failed_tests.items():
+            git_restore(os.path.join(working_directory, file))
 
     # save live run recording changes to git
-    commit_message = f"Rerun tests {cmd}. See {os.path.basename(azdev_test_result_fp)} for details"
+    commit_message = f"Rerun tests from instance {instance_idx}. See {os.path.basename(azdev_test_result_fp)} for details"
     git_push(commit_message)
     return False
 
@@ -452,7 +452,7 @@ class AutomaticScheduling(object):
             error_flag = install_extension(module)
             if not error_flag:
                 azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{module}.xml")
-                cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', module,
+                cmd = ['azdev', 'test', '--discover' , '--no-exitfirst', '--verbose', module,
                        '--xml-path', azdev_test_result_fp, '--pytest-args', '"--durations=10"']
                 error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
             remove_extension(module)
