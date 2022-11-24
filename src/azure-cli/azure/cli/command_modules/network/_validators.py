@@ -482,7 +482,7 @@ def validate_ip_tags(cmd, namespace):
         ip_tags = []
         for item in namespace.ip_tags:
             tag_type, tag_value = item.split('=', 1)
-            ip_tags.append(IpTag(ip_tag_type=tag_type, tag=tag_value))
+            ip_tags.append({"ip_tag_type": tag_type, "tag": tag_value})
         namespace.ip_tags = ip_tags
 
 
