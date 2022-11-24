@@ -112,7 +112,7 @@ def load_arguments(self, _):
     )
     edge_zone = CLIArgumentType(help='The name of edge zone.', min_api='2021-02-01')
     gateway_lb = CLIArgumentType(help='The reference to gateway load balancer frontend IP. If you want to delete it, '
-                                      'input \'\"\"\'(Powershell) or \"\"(Linux)', is_preview=True, min_api='2020-08-01')
+                                      'input \'\"\"\'(Powershell) or \"\"(Linux)', min_api='2020-08-01')
 
     # region NetworkRoot
     with self.argument_context('network') as c:
