@@ -360,7 +360,12 @@ def load_command_table(self, _):
     with self.command_group('monitor diagnostic-settings subscription', subscription_dianostic_settings_sdk,
                             custom_command_type=subscription_dianostic_settings_custom) as g:
         g.custom_command('create', 'create_subscription_diagnostic_settings')
-        g.command('delete', 'delete', confirmation=True)
-        g.show_command('show', 'get')
-        g.command('list', 'list')
+        # g.command('delete', 'delete', confirmation=True)
+        # g.show_command('show', 'get')
+        # g.command('list', 'list')
         g.generic_update_command('update', custom_func_name='update_subscription_diagnostic_settings')
+    from .operations.diagnostics_settings import SubscriptionDiagnosticSettingsShow, SubscriptionDiagnosticSettingsList, SubscriptionDiagnosticSettingsDelete
+    self.command_table['monitor diagnostic-settings subscription show'] = SubscriptionDiagnosticSettingsShow(loader=self)
+    self.command_table['monitor diagnostic-settings subscription list'] = SubscriptionDiagnosticSettingsList(loader=self)
+    self.command_table['monitor diagnostic-settings subscription delete'] = SubscriptionDiagnosticSettingsDelete(loader=self)
+

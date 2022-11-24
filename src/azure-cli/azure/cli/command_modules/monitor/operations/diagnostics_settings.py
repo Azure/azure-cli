@@ -8,6 +8,9 @@ from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings im
 from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings import Delete as _DiagnosticSettingsDelete
 from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings.categories import List as _DiagnosticSettingsCategoryList
 from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings.categories import Show as _DiagnosticSettingsCategoryShow
+from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings.subscription import Delete as _SubscriptionDiagnosticSettingsDelete
+from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings.subscription import Show as _SubscriptionDiagnosticSettingsShow
+from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings.subscription import List as _SubscriptionDiagnosticSettingsList
 from knack.util import CLIError
 
 def create_resource_parameters(arg_schema, arg_group=None):
@@ -120,6 +123,16 @@ class DiagnosticSettingsCategoryShow(_DiagnosticSettingsCategoryShow):
     def pre_operations(self):
         ctx = self.ctx
         update_resource_parameters(ctx)
+
+class SubscriptionDiagnosticSettingsShow(_SubscriptionDiagnosticSettingsShow):
+    pass
+
+class SubscriptionDiagnosticSettingsDelete(_SubscriptionDiagnosticSettingsDelete):
+    pass
+
+class SubscriptionDiagnosticSettingsList(_SubscriptionDiagnosticSettingsList):
+    pass
+
 
 # pylint: disable=unused-argument, line-too-long
 def create_diagnostics_settings(client, name, resource_uri,

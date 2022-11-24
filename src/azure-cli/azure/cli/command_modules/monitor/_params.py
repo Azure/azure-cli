@@ -299,11 +299,11 @@ def load_arguments(self, _):
                         'as opposed to the default dynamic schema table called AzureDiagnostics. '
                         'This argument is effective only when the argument --workspace is also given.')
 
-    with self.argument_context('monitor diagnostic-settings categories list') as c:
-        c.resource_parameter('resource_uri', required=True)
-
-    with self.argument_context('monitor diagnostic-settings categories show') as c:
-        c.resource_parameter('resource_uri', required=True)
+    # with self.argument_context('monitor diagnostic-settings categories list') as c:
+    #     c.resource_parameter('resource_uri', required=True)
+    #
+    # with self.argument_context('monitor diagnostic-settings categories show') as c:
+    #     c.resource_parameter('resource_uri', required=True)
 
     with self.argument_context('monitor diagnostic-settings subscription') as c:
         import argparse
