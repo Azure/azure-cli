@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "monitor diagnostic-settings delete",
-    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
     """Deletes existing diagnostic settings for the specified resource.
