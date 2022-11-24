@@ -5655,6 +5655,34 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
             self.check('subnets[0].last', '11.0.0.0')
         ])
 
+    @record_only()
+    def test_network_traffi_manager_always_serve(self):
+        self.kwargs.update({
+            "rg": "external_az_cli_testing",
+            "profile": self.create_random_name("profile-", 12),
+            "endpoint": self.create_random_name("endpoint-", 16),
+            "dns": "mytrafficmanager001100a1",
+        })
+
+        self.cmd("network traffic-manager profile create -n {profile} -g {rg} --routing-method weighted --unique-dns-name {dns}")
+        self.cmd(
+            "network traffic-manager endpoint create -n {endpoint} -g {rg} --profile-name {profile} "
+            "--type externalEndpoints --weight 50 --target www.microsoft.com --always-serve Enabled",
+            checks=[
+                self.check("type", "Microsoft.Network/trafficManagerProfiles/externalEndpoints"),
+                self.check("alwaysServe", "Enabled"),
+            ]
+        )
+        self.cmd(
+            "network traffic-manager endpoint update -n {endpoint} -g {rg} --profile-name {profile} "
+            "--type externalEndpoints --weight 25 --target www.contoso.com --always-serve Disabled",
+            checks=[
+                self.check("weight", 25),
+                self.check("target", "www.contoso.com"),
+                self.check("alwaysServe", "Disabled"),
+            ]
+        )
+
 
 class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
 
