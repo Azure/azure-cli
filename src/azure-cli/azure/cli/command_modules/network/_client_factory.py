@@ -108,10 +108,6 @@ def cf_network_interfaces(cli_ctx, _):
     return network_client_factory(cli_ctx).network_interfaces
 
 
-def cf_network_security_groups(cli_ctx, _):
-    return network_client_factory(cli_ctx).network_security_groups
-
-
 def cf_network_watcher(cli_ctx, _):
     return network_client_factory(cli_ctx).network_watchers
 
@@ -132,16 +128,8 @@ def cf_public_ip_prefixes(cli_ctx, _):
     return network_client_factory(cli_ctx).public_ip_prefixes
 
 
-def cf_security_rules(cli_ctx, _):
-    return network_client_factory(cli_ctx).security_rules
-
-
 def cf_subnets(cli_ctx, _):
     return network_client_factory(cli_ctx).subnets
-
-
-def cf_usages(cli_ctx, _):
-    return network_client_factory(cli_ctx).usages
 
 
 def cf_virtual_network_gateway_connections(cli_ctx, _):

@@ -949,7 +949,7 @@ class NetworkPrivateLinkAgFoodPlatformsScenarioTest(ScenarioTest):
         private_link_resources = self.cmd(
             'network private-link-resource list --id {resource_id} ').get_output_in_json()
         self.kwargs['group_id'] = private_link_resources[0]['properties']['groupId']
-        
+
 
         # Create private endpoint
         private_endpoint = self.cmd(
@@ -957,8 +957,8 @@ class NetworkPrivateLinkAgFoodPlatformsScenarioTest(ScenarioTest):
             '--private-connection-resource-id {resource_id} --connection-name {private_endpoint_connection} '
             '--group-id {group_id}').get_output_in_json()
         self.assertTrue(self.kwargs['private_endpoint'].lower() in private_endpoint['name'].lower())
-        
-        
+
+
         # Test get private endpoint connection
         private_endpoint_connections = self.cmd('network private-endpoint-connection list --id {resource_id}').get_output_in_json()
 
@@ -1562,13 +1562,13 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
         # One default private link would be here
         self.assertEqual(len(show_appgw_data['privateLinkConfigurations']), 1)
         self.assertEqual(len(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations']), 1)
-        # The frontendIpConfigurations must be assocciated with the same ID of private link configuration ID
-        self.assertEqual(show_appgw_data['frontendIpConfigurations'][0]['privateLinkConfiguration']['id'],
+        # The frontendIpConfigurations must be associated with the same ID of private link configuration ID
+        self.assertEqual(show_appgw_data['frontendIPConfigurations'][0]['privateLinkConfiguration']['id'],
                          show_appgw_data['privateLinkConfigurations'][0]['id'])
         self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['name'], 'PrivateLinkDefaultConfiguration')
-        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['privateIpAllocationMethod'],
+        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['privateIPAllocationMethod'],
                          'Dynamic')
-        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['primary'], None)
+        self.assertNotIn("primary", show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0])
 
         appgw_vnet = self.cmd('network vnet show -g {rg} -n "{appgw}Vnet"').get_output_in_json()
         self.assertEqual(len(appgw_vnet['subnets']), 2)
@@ -1652,11 +1652,11 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
         # One default private link would be here
         self.assertEqual(len(show_appgw_data['privateLinkConfigurations']), 1)
         self.assertEqual(len(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations']), 1)
-        # The frontendIpConfigurations must be assocciated with the same ID of private link configuration ID
-        self.assertEqual(show_appgw_data['frontendIpConfigurations'][0]['privateLinkConfiguration']['id'],
+        # The frontendIpConfigurations must be associated with the same ID of private link configuration ID
+        self.assertEqual(show_appgw_data['frontendIPConfigurations'][0]['privateLinkConfiguration']['id'],
                          show_appgw_data['privateLinkConfigurations'][0]['id'])
         self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['name'], 'PrivateLinkDefaultConfiguration')
-        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['privateIpAllocationMethod'],
+        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['privateIPAllocationMethod'],
                          'Dynamic')
         self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['primary'], True)
 
@@ -3474,7 +3474,7 @@ class NetworkKubernetesConfigurationPrivateLinkScopesTest(ScenarioTest):
         })
 
 
-        # Test create Private Link Scope create 
+        # Test create Private Link Scope create
         self.cmd('az rest --method "PUT" \
                         --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/Microsoft.KubernetesConfiguration/privateLinkScopes/{scopename}?api-version=2022-04-02-preview" \
                         --body "{body}"')
@@ -3621,7 +3621,7 @@ class NetworkPrivateLinkDeviceUpdateScenarioTest(ScenarioTest):
 
         # Create device update account
         deviceupdate = self.cmd(
-            'iot device-update account create --account {deviceupdate_name} --resource-group {rg}').get_output_in_json()
+            'iot du account create --account {deviceupdate_name} --resource-group {rg}').get_output_in_json()
         self.kwargs['deviceupdate_id'] = deviceupdate['id']
 
         # Create a vnet and subnet for private endpoint connection
@@ -3670,6 +3670,144 @@ class NetworkPrivateLinkDeviceUpdateScenarioTest(ScenarioTest):
         time.sleep(90)
         self.cmd('network private-endpoint-connection show --id {private-endpoint-connection-id}',
                  expect_failure=True)
+
+class NetworkPrivateLinkDesktopVirtualizationScenarioTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_desktopvirtual_pe', random_name_length=40, location ="westus2")
+    def test_desktopvirtualization_private_endpoint(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': "westus2",
+            'vnet': self.create_random_name('cli-vnet-dv', 20),
+            'subnet': self.create_random_name('cli-subnet-dv', 20),
+            'hostpoolName': self.create_random_name('cli-test-dv-hp', 20),
+            'workspaceName': self.create_random_name('cli-test-dv-ws', 20),
+            'hostpoolType': "Pooled",
+            'loadBalancerType': "BreadthFirst",
+            'preferredAppGroupType': "Desktop",
+            'hp_pe1_name': self.create_random_name('cli-test-dv-hp-pe1', 20),
+            'hp_pec1_name': self.create_random_name('cli-test-dv-hp-pec1', 20),
+            'hp_pe2_name': self.create_random_name('cli-test-dv-hp-pe2', 20),
+            'hp_pec2_name': self.create_random_name('cli-test-dv-hp-pec2', 20),
+            'ws_pe1_name': self.create_random_name('cli-test-dv-ws-pe1', 20),
+            'ws_pec1_name': self.create_random_name('cli-test-dv-ws-pec1', 20),
+            'ws_pe2_name': self.create_random_name('cli-test-dv-ws-pe2', 20),
+            'ws_pec2_name': self.create_random_name('cli-test-dv-ws-pec2', 20),
+            'approve_description_msg': 'Approved!',
+            'reject_description_msg': 'Rejected!'
+        })
+
+        # DesktopVirtualzation is an extension
+        self.cmd('extension add --name desktopvirtualization')
+
+        #Create hostpool and workspace
+        hostpool = self.cmd('desktopvirtualization hostpool create --name {hostpoolName} --resource-group {rg} --location {location} '
+        '--host-pool-type {hostpoolType} --load-balancer-type {loadBalancerType} --preferred-app-group-type {preferredAppGroupType}').get_output_in_json()
+        self.kwargs['hostpool_id'] = hostpool['id']
+
+        workspace = self.cmd('desktopvirtualization workspace create --name {workspaceName} --resource-group {rg} --location {location}').get_output_in_json()
+        self.kwargs['workspace_id'] = workspace['id']
+
+        # Create vnet and subnet for private endpoint connection
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} --name {subnet} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # List hostpool private link resources
+        dv_hostpool_private_link_resources = self.cmd(
+            'network private-link-resource list --id {hostpool_id}').get_output_in_json()
+        self.kwargs['hp_group_id'] = dv_hostpool_private_link_resources[0]['properties']['groupId']
+
+        # List workspace private link resources
+        dv_workspace_private_link_resources = self.cmd(
+            'network private-link-resource list --id {workspace_id}').get_output_in_json()
+        self.kwargs['ws_group_id'] = dv_workspace_private_link_resources[0]['properties']['groupId']
+
+        # Create auto-approved private endpoint for hostpool
+        peHostpoolCreation = self.cmd(
+            'network private-endpoint create -g {rg} -n {hp_pe1_name} --vnet-name {vnet} --subnet {subnet} '
+            '--private-connection-resource-id {hostpool_id} --connection-name {hp_pec1_name} '
+            '--group-id {hp_group_id}').get_output_in_json()
+        self.assertTrue(self.kwargs['hp_pe1_name'].lower() in peHostpoolCreation['name'].lower())
+
+        # Create auto-approved private endpoint for workspace
+        peWorkspaceCreation = self.cmd(
+            'network private-endpoint create -g {rg} -n {ws_pe1_name} --vnet-name {vnet} --subnet {subnet} '
+            '--private-connection-resource-id {workspace_id} --connection-name {ws_pec1_name} '
+            '--group-id {ws_group_id}').get_output_in_json()
+        self.assertTrue(self.kwargs['ws_pe1_name'].lower() in peWorkspaceCreation['name'].lower())
+
+        # Get private endpoint connection for hostpool
+        pecsHostpool = self.cmd('network private-endpoint-connection list --id {hostpool_id}',
+                                                checks=[
+                                                    self.check(
+                                                        '@[0].properties.privateLinkServiceConnectionState.status',
+                                                        'Approved'),
+                                                ]).get_output_in_json()
+        self.kwargs['pecsHostpool-id'] = pecsHostpool[0]['id']
+
+        # Get private endpoint connection for workpace
+        pecsWorkspace = self.cmd('network private-endpoint-connection list --id {workspace_id}',
+                                                checks=[
+                                                    self.check(
+                                                        '@[0].properties.privateLinkServiceConnectionState.status',
+                                                        'Approved'),
+                                                ]).get_output_in_json()
+
+        self.kwargs['pecsWorkspace-id'] = pecsWorkspace[0]['id']
+
+        # Reject private endpoint connection on hostpool using resource id
+        self.cmd(
+            'network private-endpoint-connection reject --id {pecsHostpool-id}'
+            ' --description {reject_description_msg}', checks=[
+                  self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+            ])
+
+        # Reject private endpoint connection on workspace using resource id
+        self.cmd(
+            'network private-endpoint-connection reject --id {pecsWorkspace-id}'
+            ' --description {reject_description_msg}', checks=[
+                  self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+            ])
+
+        # Manually create an endpoint for hostpool and approve it using resourceGroup/name/type
+        pe2HostpoolCreation = self.cmd(
+            'network private-endpoint create -g {rg} -n {hp_pe2_name} --vnet-name {vnet} --subnet {subnet} '
+            '--private-connection-resource-id {hostpool_id} --connection-name {hp_pec2_name} '
+            '--group-id {hp_group_id}').get_output_in_json()
+        self.assertTrue(self.kwargs['hp_pe2_name'].lower() in pe2HostpoolCreation['name'].lower())
+
+        self.cmd('network private-endpoint-connection approve -g {rg} -n {hp_pec2_name} --type Microsoft.DesktopVirtualization/hostpools --description {approve_description_msg}',
+        checks=[
+            self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+            self.check('properties.privateLinkServiceConnectionState.description', '{approve_description_msg}')
+        ])
+
+        # Manually create an endpoint for workspace and approve it using resourceGroup/name/type
+        pe2WorkspaceCreation = self.cmd(
+            'network private-endpoint create -g {rg} -n {ws_pe2_name} --vnet-name {vnet} --subnet {subnet} '
+            '--private-connection-resource-id {workspace_id} --connection-name {ws_pec2_name} '
+            '--group-id {ws_group_id} --manual-request').get_output_in_json()
+        self.assertTrue(self.kwargs['ws_pe2_name'].lower() in pe2WorkspaceCreation['name'].lower())
+
+        self.cmd('network private-endpoint-connection approve -g {rg} -n {ws_pec2_name} --type Microsoft.DesktopVirtualization/workspaces --description {approve_description_msg}',
+        checks=[
+            self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+            self.check('properties.privateLinkServiceConnectionState.description', '{approve_description_msg}')
+        ])
+
+        # Delete the autoapproved private endpoint connections for hostpool and workspace using resource id
+        self.cmd('az network private-endpoint-connection delete --id {pecHostpool-id} -y')
+        self.cmd('az network private-endpoint-connection delete --id {pecsWorkspace-id} -y')
+        import time
+        time.sleep(90)
+        self.cmd('az network private-endpoint-connection list --id {pecHostpool-id}', checks=[
+            self.check('length(@)', '1'),
+        ])
+        self.cmd('az network private-endpoint-connection list --id {pecsWorkspace-id}', checks=[
+            self.check('length(@)', '1'),
+        ])
 
 
 if __name__ == '__main__':
