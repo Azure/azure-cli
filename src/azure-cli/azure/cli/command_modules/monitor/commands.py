@@ -231,10 +231,15 @@ def load_command_table(self, _):
                             custom_command_type=diagnostics_custom) as g:
         from .validators import validate_diagnostic_settings
         g.custom_command('create', 'create_diagnostics_settings', validator=validate_diagnostic_settings)
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.command('delete', 'delete')
+        # g.show_command('show', 'get')
+        # g.command('list', 'list')
+        # g.command('delete', 'delete')
         g.generic_update_command('update')
+
+    from .operations.diagnostics_settings import DiagnosticSettingsShow, DiagnosticSettingsList, DiagnosticSettingsDelete
+    self.command_table['monitor diagnostic-settings show'] = DiagnosticSettingsShow(loader=self)
+    self.command_table['monitor diagnostic-settings list'] = DiagnosticSettingsList(loader=self)
+    self.command_table['monitor diagnostic-settings delete'] = DiagnosticSettingsDelete(loader=self)
 
     with self.command_group('monitor diagnostic-settings categories', diagnostics_categories_sdk) as g:
         g.show_command('show', 'get')
