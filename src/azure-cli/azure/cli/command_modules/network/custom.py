@@ -4782,6 +4782,13 @@ def set_lb_outbound_rule(instance, cmd, parent, item_name, protocol=None, outbou
 
 def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol, port,
                     path=None, interval=None, threshold=None, probe_threshold=None):
+    if probe_threshold is not None:
+        logger.warning(
+            "Please note that the parameter --probeThreshold is currently in preview and is not recommended "
+            "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
+            "by not specifying the value of the property."
+        )
+
     from .aaz.latest.network.lb import Show
     lb = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
@@ -4836,6 +4843,11 @@ def set_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protoc
             if threshold is not None:
                 probe['number_of_probes'] = threshold
             if probe_threshold is not None:
+                logger.warning(
+                    "Please note that the parameter --probeThreshold is currently in preview and is not recommended "
+                    "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
+                    "by not specifying the value of the property."
+                )
                 probe['probe_threshold'] = probe_threshold
     lb['resource_group'] = resource_group_name
     from .aaz.latest.network.lb import Update
