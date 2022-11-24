@@ -1327,11 +1327,18 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
         return
     from ._vm_utils import trusted_launch_warning_log
     if namespace.image is not None:
-        from msrestazure.tools import is_valid_resource_id, parse_resource_id
-        from ._vm_utils import is_shared_gallery_image_id, is_community_gallery_image_id,\
-            parse_shared_gallery_image_id, parse_community_gallery_image_id
+        from ._vm_utils import parse_shared_gallery_image_id, parse_community_gallery_image_id
+        image_type = _parse_image_argument(cmd, namespace)
 
-        if is_shared_gallery_image_id(namespace.image):
+        if image_type == 'image_id':
+            # create vm with managed image
+            return
+
+        if image_type == 'uri':
+            # create vm with vhd
+            return
+
+        if image_type == 'shared_gallery_image_id':
             # create vm with shared gallery
             from ._client_factory import cf_shared_gallery_image
             image_info = parse_shared_gallery_image_id(namespace.image)
@@ -1342,7 +1349,7 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
             features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
             trusted_launch_warning_log(namespace, generation_version, features)
 
-        elif is_community_gallery_image_id(namespace.image):
+        if image_type == 'community_gallery_image_id':
             # create vm with community gallery
             from ._client_factory import cf_community_gallery_image
             image_info = parse_community_gallery_image_id(namespace.image)
@@ -1353,16 +1360,8 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
             features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
             trusted_launch_warning_log(namespace, generation_version, features)
 
-        elif is_valid_resource_id(namespace.image):
-            # create vm with managed image
-            return
-
-        elif urlparse(namespace.image).scheme and "://" in namespace.image:
-            # create vm with vhd
-            return
-
-        else:
-            # create vm with uri or urn
+        if image_type == 'urn':
+            # create vm with urn
             client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
             if namespace.os_version.lower() == 'latest':
                 latest_version = _get_latest_image_version(cmd.cli_ctx, namespace.location, namespace.os_publisher,
