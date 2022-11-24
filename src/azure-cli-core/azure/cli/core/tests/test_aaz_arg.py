@@ -1300,3 +1300,182 @@ class TestAAZArg(unittest.TestCase):
         schema.properties._registered = False
         with self.assertRaises(AAZUnregisteredArg):
             schema.properties.to_cmd_arg("properties")
+
+
+class TestAAZArgUtils(unittest.TestCase):
+
+    def test_assign_aaz_list_arg(self):
+        from azure.cli.core.aaz.utils import assign_aaz_list_arg
+        from azure.cli.core.aaz._arg import AAZListArg, AAZStrArg, AAZObjectArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value, AAZUndefined
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.names = AAZListArg(
+            options=["--names", "--ns"],
+            singular_options=["--name", "-n"],
+            nullable=True
+        )
+        schema.names.Element = AAZStrArg(
+            nullable=True,
+            blank="a blank value"
+        )
+        schema.items = AAZListArg(
+            nullable=True,
+        )
+        schema.items.Element = AAZObjectArg(
+            nullable=True,
+        )
+        schema.items.Element.name = AAZStrArg()
+
+        # AAZUndefined
+        self.assertFalse(has_value(v.names))
+        v.items = assign_aaz_list_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertFalse(has_value(v.items))
+
+        v.items = [{"name": "1"}]
+        v.items = assign_aaz_list_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertEqual(v.items, [{"name": "1"}])
+
+        arg = schema.names.to_cmd_arg("names")
+        action = arg.type.settings["action"]
+
+        # null value
+        v = schema()
+        dest_ops = AAZArgActionOperations()
+
+        action.setup_operations(dest_ops, ["null"])
+        dest_ops.apply(v, "names")
+        self.assertEqual(v.names, None)
+
+        v.items = assign_aaz_list_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertEqual(v.items, None)
+
+        # null element value
+        v = schema()
+        dest_ops = AAZArgActionOperations()
+
+        action.setup_operations(dest_ops, ["[0]=null"])
+        dest_ops.apply(v, "names")
+        self.assertEqual(v.names, [None, ])
+
+        v.items = assign_aaz_list_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertEqual(v.items, [None, ])
+
+        # element
+        v = schema()
+        dest_ops = AAZArgActionOperations()
+
+        action.setup_operations(dest_ops, ["1", "2", "3"])
+        dest_ops.apply(v, "names")
+        self.assertEqual(v.names, ['1', '2', '3'])
+        self.assertFalse(v.names._is_patch)
+
+        v.items = assign_aaz_list_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertEqual(v.items, [{"name": '1'}, {"name": '2'}, {"name": "3"}])
+        self.assertFalse(v.items._is_patch)
+
+        # patch element
+        v = schema()
+        dest_ops = AAZArgActionOperations()
+
+        action.setup_operations(dest_ops, ["[3]=n5"])
+        dest_ops.apply(v, "names")
+        self.assertTrue(v.names._is_patch)
+        self.assertEqual(len(v.names), 4)
+        self.assertFalse(has_value(v.items[0]))
+        self.assertFalse(has_value(v.items[1]))
+        self.assertFalse(has_value(v.items[2]))
+        self.assertEqual(v.names[3], 'n5')
+        v.items = assign_aaz_list_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertTrue(v.items._is_patch)
+        self.assertEqual(len(v.items), 4)
+        self.assertFalse(has_value(v.items[0]))
+        self.assertFalse(has_value(v.items[1]))
+        self.assertFalse(has_value(v.items[2]))
+        self.assertEqual(v.items[3], {"name": 'n5'})
+
+    def test_assign_aaz_dict_arg(self):
+        from azure.cli.core.aaz.utils import assign_aaz_dict_arg
+        from azure.cli.core.aaz._arg import AAZDictArg, AAZStrArg, AAZObjectArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value, AAZUndefined
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.names = AAZDictArg(
+            options=["--names", "--ns"],
+            nullable=True
+        )
+        schema.names.Element = AAZStrArg(
+            nullable=True,
+            blank="a blank value"
+        )
+        schema.items = AAZDictArg(
+            nullable=True,
+        )
+        schema.items.Element = AAZObjectArg(
+            nullable=True,
+        )
+        schema.items.Element.name = AAZStrArg()
+
+        # AAZUndefined
+        self.assertFalse(has_value(v.names))
+        v.items = assign_aaz_dict_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertFalse(has_value(v.items))
+
+        v.items = {"a": {"name": "1"}}
+        v.items = assign_aaz_dict_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertEqual(v.items, {"a": {"name": "1"}})
+
+        arg = schema.names.to_cmd_arg("names")
+        action = arg.type.settings["action"]
+
+        # null value
+        v = schema()
+        dest_ops = AAZArgActionOperations()
+
+        action.setup_operations(dest_ops, ["null"])
+        dest_ops.apply(v, "names")
+        self.assertEqual(v.names, None)
+
+        v.items = assign_aaz_dict_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertEqual(v.items, None)
+
+        # null element value
+        v = schema()
+        dest_ops = AAZArgActionOperations()
+
+        action.setup_operations(dest_ops, ["a=null"])
+        dest_ops.apply(v, "names")
+        self.assertEqual(v.names, {'a': None})
+
+        v.items = assign_aaz_dict_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertEqual(v.items, {'a': None})
+
+        # element
+        v = schema()
+        dest_ops = AAZArgActionOperations()
+
+        action.setup_operations(dest_ops, ["{a:a1,b:b2}"])
+        dest_ops.apply(v, "names")
+        self.assertEqual(v.names, {'a': 'a1', 'b': 'b2'})
+        self.assertFalse(v.names._is_patch)
+
+        v.items = assign_aaz_dict_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertFalse(v.items._is_patch)
+        self.assertEqual(v.items, {'a': {"name": 'a1'}, 'b': {"name": 'b2'}})
+
+        # element with patch
+        v = schema()
+        dest_ops = AAZArgActionOperations()
+
+        action.setup_operations(dest_ops, ["a=1", "b=2", "c=3"])
+        dest_ops.apply(v, "names")
+        self.assertEqual(v.names, {'a': '1', 'b': '2', 'c': '3'})
+        self.assertTrue(v.names._is_patch)
+
+        v.items = assign_aaz_dict_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertTrue(v.items._is_patch)
+        self.assertEqual(v.items, {'a': {"name": '1'}, 'b': {"name": '2'}, 'c': {"name": "3"}})
