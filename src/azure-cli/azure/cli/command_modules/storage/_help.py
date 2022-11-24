@@ -161,7 +161,7 @@ examples:
         az storage account encryption-scope list --account-name mystorageaccount -g MyResourceGroup
   - name: List encryption scopes starting with specific name.
     text: |
-        az storage account encryption-scope list --account-name mystorageaccount -g myresourcegroup --filter startswith(name, value)
+        az storage account encryption-scope list --account-name mystorageaccount -g myresourcegroup --filter 'startswith(name, value)'
 """
 
 helps['storage account encryption-scope show'] = """
