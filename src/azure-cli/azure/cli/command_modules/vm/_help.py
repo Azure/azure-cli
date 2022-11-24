@@ -3730,14 +3730,6 @@ examples:
     text: az capacity reservation group update -n ReservationGroupName -g MyResourceGroup --tags key=val
 """
 
-helps['capacity reservation group delete'] = """
-type: command
-short-summary: Delete capacity reservation group.
-examples:
-  - name: Delete a capacity reservation group.
-    text: az capacity reservation group delete -n ReservationGroupName -g MyResourceGroup --yes
-"""
-
 helps['capacity reservation group show'] = """
 type: command
 short-summary: Show capacity reservation group.
@@ -3793,16 +3785,6 @@ examples:
             -g MyResourceGroup --capacity 5 --tags key=val
 """
 
-helps['capacity reservation delete'] = """
-type: command
-short-summary: Delete capacity reservation.
-examples:
-  - name: Delete a capacity reservation.
-    text: |
-        az capacity reservation delete -c ReservationGroupName -n ReservationName \\
-            -g MyResourceGroup --yes
-"""
-
 helps['capacity reservation show'] = """
 type: command
 short-summary: Show capacity reservation.
@@ -3825,14 +3807,6 @@ examples:
     text: |
         az capacity reservation show -c ReservationGroupName -n ReservationName \\
             -g MyResourceGroup --instance-view
-"""
-
-helps['capacity reservation list'] = """
-type: command
-short-summary: List capacity reservation.
-examples:
-  - name: List the capacity reservations.
-    text: az capacity reservation list -c ReservationGroupName -g MyResourceGroup
 """
 
 helps['vmss list-instances'] = """

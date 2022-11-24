@@ -9,6 +9,7 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_
 from knack.log import get_logger
 
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
+from azure.cli.command_modules.network.aaz.latest.network.nsg.rule import Update as _NsgRuleUpdate
 from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
@@ -21,6 +22,8 @@ from azure.cli.core.profiles import ResourceType, supported_api_version
 from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
+
+from .aaz.latest.network.application_gateway._update import Update as _ApplicationGatewayUpdate
 
 import threading
 import time
@@ -98,11 +101,12 @@ def list_nics(cmd, resource_group_name=None):
 
 
 def list_nsg_rules(cmd, resource_group_name, network_security_group_name, include_default=False):
-    client = network_client_factory(cmd.cli_ctx).network_security_groups
-    nsg = client.get(resource_group_name, network_security_group_name)
-    rules = nsg.security_rules
+    from azure.cli.command_modules.network.aaz.latest.network.nsg import Show
+    nsg = Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name,
+                                                  'name': network_security_group_name})
+    rules = nsg['securityRules']
     if include_default:
-        rules = rules + nsg.default_security_rules
+        rules = rules + nsg['defaultSecurityRules']
     return rules
 
 
@@ -267,29 +271,41 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
-def update_application_gateway(cmd, instance, sku=None, capacity=None, tags=None, enable_http2=None, min_capacity=None,
-                               custom_error_pages=None, max_capacity=None):
-    if sku is not None:
-        instance.sku.tier = sku.split('_', 1)[0] if not _is_v2_sku(sku) else sku
+class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZDictArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.custom_error_pages = AAZDictArg(
+            options=["--custom-error-pages"],
+            help="Space-separated list of custom error pages in `STATUS_CODE=URL` format.",
+            nullable=True,
+        )
+        args_schema.custom_error_pages.Element = AAZStrArg(
+            nullable=True,
+        )
+        return args_schema
 
-    try:
-        if min_capacity is not None:
-            instance.autoscale_configuration.min_capacity = min_capacity
-        if max_capacity is not None:
-            instance.autoscale_configuration.max_capacity = max_capacity
-    except AttributeError:
-        instance.autoscale_configuration = {
-            'min_capacity': min_capacity,
-            'max_capacity': max_capacity
-        }
+    def _cli_arguments_loader(self):
+        args = super()._cli_arguments_loader()
+        args = [(name, arg) for (name, arg) in args if name != "custom_error_configurations"]
+        return args
 
-    with cmd.update_context(instance) as c:
-        c.set_param('sku.name', sku)
-        c.set_param('sku.capacity', capacity)
-        c.set_param('tags', tags)
-        c.set_param('enable_http2', enable_http2)
-        c.set_param('custom_error_configurations', custom_error_pages)
-    return instance
+    def pre_operations(self):
+        from azure.cli.core.aaz import has_value
+        args = self.ctx.args
+        if has_value(args.custom_error_pages):
+            configurations = []
+            for code, url in args.custom_error_pages.items():
+                configurations.append({
+                    "status_code": code,
+                    "custom_error_page_url": url,
+                })
+            args.custom_error_configurations = configurations
+
+        if has_value(args.sku):
+            sku = str(args.sku)
+            args.sku.tier = sku.split("_", 1)[0] if not _is_v2_sku(sku) else sku
 
 
 def create_ag_authentication_certificate(cmd, resource_group_name, application_gateway_name, item_name,
@@ -758,57 +774,39 @@ def show_trusted_client_certificate(cmd, resource_group_name, application_gatewa
     return instance
 
 
-def show_ag_backend_health(cmd, client, resource_group_name, application_gateway_name, expand=None,
+def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, expand=None,
                            protocol=None, host=None, path=None, timeout=None, host_name_from_http_settings=None,
                            match_body=None, match_status_codes=None, address_pool=None, http_settings=None):
     from azure.cli.core.commands import LongRunningOperation
     on_demand_arguments = {protocol, host, path, timeout, host_name_from_http_settings, match_body, match_status_codes,
                            address_pool, http_settings}
-    if on_demand_arguments.difference({None}) and cmd.supported_api_version(min_api='2019-04-01'):
-        SubResource, ApplicationGatewayOnDemandProbe, ApplicationGatewayProbeHealthResponseMatch = cmd.get_models(
-            "SubResource", "ApplicationGatewayOnDemandProbe", "ApplicationGatewayProbeHealthResponseMatch")
-        probe_request = ApplicationGatewayOnDemandProbe(
-            protocol=protocol,
-            host=host,
-            path=path,
-            timeout=timeout,
-            pick_host_name_from_backend_http_settings=host_name_from_http_settings
+    if on_demand_arguments.difference({None}):
+        from .aaz.latest.network.application_gateway._health_on_demand import HealthOnDemand
+        return LongRunningOperation(cmd.cli_ctx)(
+            HealthOnDemand(cli_ctx=cmd.cli_ctx)(command_args={
+                "name": application_gateway_name,
+                "resource_group": resource_group_name,
+                "expand": expand,
+                "protocol": protocol,
+                "host": host,
+                "path": path,
+                "timeout": timeout,
+                "host_name_from_http_settings": host_name_from_http_settings,
+                "match_body": match_body,
+                "match_status_codes": match_status_codes,
+                "address_pool": address_pool,
+                "http_settings": http_settings,
+            })
         )
-        if match_body is not None or match_status_codes is not None:
-            probe_request.match = ApplicationGatewayProbeHealthResponseMatch(
-                body=match_body,
-                status_codes=match_status_codes,
-            )
-        if address_pool is not None:
-            if not is_valid_resource_id(address_pool):
-                address_pool = resource_id(
-                    subscription=get_subscription_id(cmd.cli_ctx),
-                    resource_group=resource_group_name,
-                    namespace='Microsoft.Network',
-                    type='applicationGateways',
-                    name=application_gateway_name,
-                    child_type_1='backendAddressPools',
-                    child_name_1=address_pool
-                )
-            probe_request.backend_address_pool = SubResource(id=address_pool)
-        if http_settings is not None:
-            if not is_valid_resource_id(http_settings):
-                http_settings = resource_id(
-                    subscription=get_subscription_id(cmd.cli_ctx),
-                    resource_group=resource_group_name,
-                    namespace='Microsoft.Network',
-                    type='applicationGateways',
-                    name=application_gateway_name,
-                    child_type_1='backendHttpSettingsCollection',
-                    child_name_1=http_settings
-                )
-            probe_request.backend_http_settings = SubResource(id=http_settings)
-        return LongRunningOperation(cmd.cli_ctx)(client.begin_backend_health_on_demand(
-            resource_group_name, application_gateway_name, probe_request, expand))
 
-    return LongRunningOperation(cmd.cli_ctx)(client.begin_backend_health(
-        resource_group_name, application_gateway_name, expand))
-
+    from .aaz.latest.network.application_gateway._health import Health
+    return LongRunningOperation(cmd.cli_ctx)(
+        Health(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": application_gateway_name,
+            "resource_group": resource_group_name,
+            "expand": expand,
+        })
+    )
 # endregion
 
 
@@ -5301,10 +5299,13 @@ def remove_nic_ip_config_inbound_nat_rule(
 
 # region NetworkSecurityGroups
 def create_nsg(cmd, resource_group_name, network_security_group_name, location=None, tags=None):
-    client = network_client_factory(cmd.cli_ctx).network_security_groups
-    NetworkSecurityGroup = cmd.get_models('NetworkSecurityGroup')
-    nsg = NetworkSecurityGroup(location=location, tags=tags)
-    return client.begin_create_or_update(resource_group_name, network_security_group_name, nsg)
+    from azure.cli.command_modules.network.aaz.latest.network.nsg import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "name": network_security_group_name,
+        "location": location,
+        "tags": tags
+    })
 
 
 def _create_singular_or_plural_property(kwargs, val, singular_name, plural_name):
@@ -5324,23 +5325,25 @@ def _create_singular_or_plural_property(kwargs, val, singular_name, plural_name)
 def _handle_asg_property(kwargs, key, asgs):
     prefix = key.split('_', 1)[0] + '_'
     if asgs:
-        kwargs[key] = asgs
+        kwargs[key] = [{"id": asg} for asg in asgs]
         if kwargs[prefix + 'address_prefix']:
             kwargs[prefix + 'address_prefix'] = ''
 
 
-def create_nsg_rule_2017_06_01(cmd, resource_group_name, network_security_group_name, security_rule_name,
-                               priority, description=None, protocol=None, access=None, direction=None,
-                               source_port_ranges='*', source_address_prefixes='*',
-                               destination_port_ranges=80, destination_address_prefixes='*',
-                               source_asgs=None, destination_asgs=None):
+def create_nsg_rule(cmd, resource_group_name, network_security_group_name, security_rule_name,
+                    priority, description=None, protocol=None, access=None, direction=None,
+                    source_port_ranges='*', source_address_prefixes='*',
+                    destination_port_ranges=80, destination_address_prefixes='*',
+                    source_asgs=None, destination_asgs=None):
     kwargs = {
         'protocol': protocol,
         'direction': direction,
         'description': description,
         'priority': priority,
         'access': access,
-        'name': security_rule_name
+        'name': security_rule_name,
+        'resource_group': resource_group_name,
+        'nsg_name': network_security_group_name,
     }
     _create_singular_or_plural_property(kwargs, source_address_prefixes,
                                         'source_address_prefix', 'source_address_prefixes')
@@ -5355,103 +5358,89 @@ def create_nsg_rule_2017_06_01(cmd, resource_group_name, network_security_group_
     kwargs['source_address_prefix'] = kwargs['source_address_prefix'] or ''
     kwargs['destination_address_prefix'] = kwargs['destination_address_prefix'] or ''
 
-    if cmd.supported_api_version(min_api='2017-09-01'):
-        _handle_asg_property(kwargs, 'source_application_security_groups', source_asgs)
-        _handle_asg_property(kwargs, 'destination_application_security_groups', destination_asgs)
+    _handle_asg_property(kwargs, 'source_asgs', source_asgs)
+    _handle_asg_property(kwargs, 'destination_asgs', destination_asgs)
 
-    SecurityRule = cmd.get_models('SecurityRule')
-    settings = SecurityRule(**kwargs)
-    ncf = network_client_factory(cmd.cli_ctx)
-    return ncf.security_rules.begin_create_or_update(
-        resource_group_name, network_security_group_name, security_rule_name, settings)
+    from .aaz.latest.network.nsg.rule import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=kwargs)
 
 
-def create_nsg_rule_2017_03_01(cmd, resource_group_name, network_security_group_name, security_rule_name,
-                               priority, description=None, protocol=None, access=None, direction=None,
-                               source_port_range='*', source_address_prefix='*',
-                               destination_port_range=80, destination_address_prefix='*'):
-    SecurityRule = cmd.get_models('SecurityRule')
-    settings = SecurityRule(protocol=protocol, source_address_prefix=source_address_prefix,
-                            destination_address_prefix=destination_address_prefix, access=access,
-                            direction=direction,
-                            description=description, source_port_range=source_port_range,
-                            destination_port_range=destination_port_range, priority=priority,
-                            name=security_rule_name)
+class NsgRuleUpdate(_NsgRuleUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArgFormat, AAZResourceIdArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.destination_asgs = AAZListArg(
+            options=['--destination-asgs'],
+            arg_group="Destination",
+            help="Space-separated list of application security group names or supports one application security group name or ID.",
+        )
+        args_schema.destination_asgs.Element = AAZResourceIdArg(
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/applicationSecurityGroups/{}"
+            )
+        )
+        args_schema.source_asgs = AAZListArg(
+            options=['--source-asgs'],
+            arg_group="Source",
+            help="Space-separated list of application security group names or IDs. Limited by backend server, temporarily this argument only supports one application security group name or ID.")
+        args_schema.source_asgs.Element = AAZResourceIdArg(
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/applicationSecurityGroups/{}"
+            ))
 
-    ncf = network_client_factory(cmd.cli_ctx)
-    return ncf.security_rules.begin_create_or_update(
-        resource_group_name, network_security_group_name, security_rule_name, settings)
+        return args_schema
 
+    def _cli_arguments_loader(self):
+        args = super()._cli_arguments_loader()
+        args = [(name, arg) for (name, arg) in args if name not in ("destination_asgs_id", "source_asgs_id")]
+        return args
 
-def _update_singular_or_plural_property(instance, val, singular_name, plural_name):
+    def pre_operations(self):
+        args = self.ctx.args
+        if args.destination_asgs:
+            destination_asg = str(args.destination_asgs[0])
+            if destination_asg == 'None' or parse_resource_id(destination_asg)["resource_name"] == '':
+                args.destination_asgs_id = None
+            else:
+                args.destination_asgs_id = [{"id": asg} for asg in args.destination_asgs]
 
-    if val is None:
-        return
-    if not isinstance(val, list):
-        val = [val]
-    if len(val) > 1:
-        setattr(instance, plural_name, val)
-        setattr(instance, singular_name, None)
-    else:
-        setattr(instance, plural_name, None)
-        setattr(instance, singular_name, val[0])
+        if args.source_asgs:
+            source_asg = str(args.source_asgs[0])
+            if source_asg == 'None' or parse_resource_id(source_asg)["resource_name"] == '':
+                args.source_asgs_id = None
+            else:
+                args.source_asgs_id = [{"id": asg} for asg in args.source_asgs]
 
+    def pre_instance_update(self, instance):
+        if instance.properties.sourceAddressPrefix:
+            instance.properties.sourceAddressPrefixes = [instance.properties.sourceAddressPrefix]
+            instance.properties.sourceAddressPrefix = ''
+        if instance.properties.destinationAddressPrefix:
+            instance.properties.destinationAddressPrefixes = [instance.properties.destinationAddressPrefix]
+            instance.properties.destinationAddressPrefix = ''
+        if instance.properties.sourcePortRange:
+            instance.properties.sourcePortRanges = [instance.properties.sourcePortRange]
+            instance.properties.sourcePortRange = None
+        if instance.properties.destinationPortRange:
+            instance.properties.destinationPortRanges = [instance.properties.destinationPortRange]
+            instance.properties.destinationPortRange = None
 
-def update_nsg_rule_2017_06_01(instance, protocol=None, source_address_prefixes=None,
-                               destination_address_prefixes=None, access=None, direction=None, description=None,
-                               source_port_ranges=None, destination_port_ranges=None, priority=None,
-                               source_asgs=None, destination_asgs=None):
-    # No client validation as server side returns pretty good errors
-    instance.protocol = protocol if protocol is not None else instance.protocol
-    instance.access = access if access is not None else instance.access
-    instance.direction = direction if direction is not None else instance.direction
-    instance.description = description if description is not None else instance.description
-    instance.priority = priority if priority is not None else instance.priority
-
-    _update_singular_or_plural_property(instance, source_address_prefixes,
-                                        'source_address_prefix', 'source_address_prefixes')
-    _update_singular_or_plural_property(instance, destination_address_prefixes,
-                                        'destination_address_prefix', 'destination_address_prefixes')
-    _update_singular_or_plural_property(instance, source_port_ranges,
-                                        'source_port_range', 'source_port_ranges')
-    _update_singular_or_plural_property(instance, destination_port_ranges,
-                                        'destination_port_range', 'destination_port_ranges')
-
-    # workaround for issue https://github.com/Azure/azure-rest-api-specs/issues/1591
-    instance.source_address_prefix = instance.source_address_prefix or ''
-    instance.destination_address_prefix = instance.destination_address_prefix or ''
-
-    if source_asgs == ['']:
-        instance.source_application_security_groups = None
-    elif source_asgs:
-        instance.source_application_security_groups = source_asgs
-
-    if destination_asgs == ['']:
-        instance.destination_application_security_groups = None
-    elif destination_asgs:
-        instance.destination_application_security_groups = destination_asgs
-
-    return instance
-
-
-def update_nsg_rule_2017_03_01(instance, protocol=None, source_address_prefix=None,
-                               destination_address_prefix=None, access=None, direction=None, description=None,
-                               source_port_range=None, destination_port_range=None, priority=None):
-    # No client validation as server side returns pretty good errors
-    instance.protocol = protocol if protocol is not None else instance.protocol
-    instance.source_address_prefix = (source_address_prefix if source_address_prefix is not None
-                                      else instance.source_address_prefix)
-    instance.destination_address_prefix = destination_address_prefix \
-        if destination_address_prefix is not None else instance.destination_address_prefix
-    instance.access = access if access is not None else instance.access
-    instance.direction = direction if direction is not None else instance.direction
-    instance.description = description if description is not None else instance.description
-    instance.source_port_range = source_port_range \
-        if source_port_range is not None else instance.source_port_range
-    instance.destination_port_range = destination_port_range \
-        if destination_port_range is not None else instance.destination_port_range
-    instance.priority = priority if priority is not None else instance.priority
-    return instance
+    def post_instance_update(self, instance):
+        if instance.properties.sourceAddressPrefixes and len(instance.properties.sourceAddressPrefixes) == 1:
+            instance.properties.sourceAddressPrefix = instance.properties.sourceAddressPrefixes[0]
+            instance.properties.sourceAddressPrefixes = None
+        if instance.properties.destinationAddressPrefixes and len(instance.properties.destinationAddressPrefixes) == 1:
+            instance.properties.destinationAddressPrefix = instance.properties.destinationAddressPrefixes[0]
+            instance.properties.destinationAddressPrefixes = None
+        if instance.properties.sourcePortRanges and len(instance.properties.sourcePortRanges) == 1:
+            instance.properties.sourcePortRange = instance.properties.sourcePortRanges[0]
+            instance.properties.sourcePortRanges = None
+        if instance.properties.destinationPortRanges and len(instance.properties.destinationPortRanges) == 1:
+            instance.properties.destinationPortRange = instance.properties.destinationPortRanges[0]
+            instance.properties.destinationPortRanges = None
 # endregion
 
 
@@ -6661,37 +6650,6 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
     return Create(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
 
 
-def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, version=None,
-                     idle_timeout=None, reverse_fqdn=None, tags=None, sku=None, ip_tags=None,
-                     public_ip_prefix=None):
-    if dns_name is not None or reverse_fqdn is not None:
-        if instance.dns_settings:
-            if dns_name is not None:
-                instance.dns_settings.domain_name_label = dns_name
-            if reverse_fqdn is not None:
-                instance.dns_settings.reverse_fqdn = reverse_fqdn
-        else:
-            PublicIPAddressDnsSettings = cmd.get_models('PublicIPAddressDnsSettings')
-            instance.dns_settings = PublicIPAddressDnsSettings(domain_name_label=dns_name, fqdn=None,
-                                                               reverse_fqdn=reverse_fqdn)
-    if allocation_method is not None:
-        instance.public_ip_allocation_method = allocation_method
-    if version is not None:
-        instance.public_ip_address_version = version
-    if idle_timeout is not None:
-        instance.idle_timeout_in_minutes = idle_timeout
-    if tags is not None:
-        instance.tags = tags
-    if sku is not None:
-        instance.sku.name = sku
-    if ip_tags:
-        instance.ip_tags = ip_tags
-    if public_ip_prefix:
-        SubResource = cmd.get_models('SubResource')
-        instance.public_ip_prefix = SubResource(id=public_ip_prefix)
-    return instance
-
-
 def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
                             version=None, location=None, tags=None, zone=None, edge_zone=None,
                             custom_ip_prefix_name=None):
@@ -6815,7 +6773,7 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     endpoint_status=None, weight=None, priority=None,
                                     endpoint_location=None, endpoint_monitor_status=None,
                                     min_child_endpoints=None, min_child_ipv4=None, min_child_ipv6=None,
-                                    geo_mapping=None, monitor_custom_headers=None, subnets=None):
+                                    geo_mapping=None, monitor_custom_headers=None, subnets=None, always_serve=None):
     from .aaz.latest.network.traffic_manager.endpoint import Create
     Create_Endpoint = Create(cmd.loader)
 
@@ -6836,7 +6794,8 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
         "subnets": subnets,
         "target": target,
         "target_resource_id": target_resource_id,
-        "weight": weight
+        "weight": weight,
+        "always_serve": always_serve,
     }
 
     return Create_Endpoint(args)
@@ -6848,7 +6807,7 @@ def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     priority=None, target=None, target_resource_id=None,
                                     weight=None, min_child_endpoints=None, min_child_ipv4=None,
                                     min_child_ipv6=None, geo_mapping=None,
-                                    subnets=None, monitor_custom_headers=None):
+                                    subnets=None, monitor_custom_headers=None, always_serve=None):
     from .aaz.latest.network.traffic_manager.endpoint import Update
     Update_Endpoint = Update(cmd.loader)
 
@@ -6884,6 +6843,8 @@ def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
         args["target_resource_id"] = target_resource_id
     if weight is not None:
         args["weight"] = weight
+    if always_serve is not None:
+        args["always_serve"] = always_serve
 
     return Update_Endpoint(args)
 
@@ -7780,7 +7741,7 @@ def remove_vnet_gateway_nat_rule(cmd, resource_group_name, gateway_name, name, n
 
 
 # region VirtualHub
-def create_virtual_hub(cmd, client,
+def create_virtual_hub(cmd,
                        resource_group_name,
                        virtual_hub_name,
                        hosted_subnet,
@@ -7789,23 +7750,27 @@ def create_virtual_hub(cmd, client,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
     from azure.cli.core.commands import LongRunningOperation
+    from .aaz.latest.network.routeserver import Show
+    from .aaz.latest.network.routeserver import List
 
-    try:
-        client.get(resource_group_name, virtual_hub_name)
-        raise CLIError('The VirtualHub "{}" under resource group "{}" exists'.format(
-            virtual_hub_name, resource_group_name))
-    except HttpResponseError:
-        pass
+    list_result = List(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name})
+    for x in list_result:
+        if x['name'] == virtual_hub_name:
+            raise CLIError('The VirtualHub "{}" under resource group "{}" exists'.format(
+                virtual_hub_name, resource_group_name))
 
-    SubResource = cmd.get_models('SubResource')
+    SubResource, HubIpConfiguration, PublicIPAddress = cmd.get_models('SubResource',
+                                                                      'HubIpConfiguration', 'PublicIPAddress')
 
-    VirtualHub, HubIpConfiguration, PublicIPAddress = cmd.get_models('VirtualHub', 'HubIpConfiguration',
-                                                                     'PublicIPAddress')
-
-    hub = VirtualHub(tags=tags, location=location,
-                     virtual_wan=None,
-                     sku='Standard')
-    vhub_poller = client.begin_create_or_update(resource_group_name, virtual_hub_name, hub)
+    args = {
+        'resource_group': resource_group_name,
+        'name': virtual_hub_name,
+        'location': location,
+        'tags': tags,
+        'sku': 'Standard',
+    }
+    from azure.cli.command_modules.network.aaz.latest.network.routeserver import Create
+    vhub_poller = Create(cli_ctx=cmd.cli_ctx)(command_args=args)
     LongRunningOperation(cmd.cli_ctx)(vhub_poller)
 
     ip_config = HubIpConfiguration(
@@ -7823,13 +7788,14 @@ def create_virtual_hub(cmd, client,
             vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, 'Default')
         except HttpResponseError:
             pass
-        client.begin_delete(resource_group_name, virtual_hub_name)
+        from .aaz.latest.network.routeserver import Delete
+        Delete(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': virtual_hub_name})
         raise ex
 
-    return client.get(resource_group_name, virtual_hub_name)
+    return Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': virtual_hub_name})
 
 
-def delete_virtual_hub(cmd, client, resource_group_name, virtual_hub_name, no_wait=False):
+def delete_virtual_hub(cmd, resource_group_name, virtual_hub_name):
     from azure.cli.core.commands import LongRunningOperation
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
     ip_configs = list(vhub_ip_config_client.list(resource_group_name, virtual_hub_name))
@@ -7837,7 +7803,8 @@ def delete_virtual_hub(cmd, client, resource_group_name, virtual_hub_name, no_wa
         ip_config = ip_configs[0]   # There will always be only 1
         poller = vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, ip_config.name)
         LongRunningOperation(cmd.cli_ctx)(poller)
-    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, virtual_hub_name)
+    from .aaz.latest.network.routeserver import Delete
+    return Delete(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': virtual_hub_name})
 # endregion
 
 
@@ -8346,7 +8313,7 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
         tunnel_server.cleanup()
 
 
-def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, disable_gateway=False, configure=False):
+def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, disable_gateway=False, configure=False, enable_mfa=False):
     from azure.cli.core._profile import Profile
     import os
     from ._process_helper import launch_and_wait
@@ -8370,7 +8337,7 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
             logger.debug("Response %s", access_token)
             client = network_client_factory(cmd.cli_ctx).bastion_hosts
             bastion = client.get(resource_group_name, bastion_host_name)
-            web_address = 'https://{}/api/rdpfile?resourceId={}&format=rdp'.format(bastion.dns_name, target_resource_id)
+            web_address = 'https://{}/api/rdpfile?resourceId={}&format=rdp&rdpport={}&enablerdsaad={}'.format(bastion.dns_name, target_resource_id, resource_port, enable_mfa)
             headers = {}
             headers['Authorization'] = 'Bearer {}'.format(access_token)
             headers['Accept'] = '*/*'

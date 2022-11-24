@@ -5392,11 +5392,6 @@ def show_capacity_reservation(client, resource_group_name, capacity_reservation_
                       capacity_reservation_name=capacity_reservation_name, expand=expand)
 
 
-def list_capacity_reservation(client, resource_group_name, capacity_reservation_group_name):
-    return client.list_by_capacity_reservation_group(resource_group_name=resource_group_name,
-                                                     capacity_reservation_group_name=capacity_reservation_group_name)
-
-
 def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
