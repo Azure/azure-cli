@@ -69,17 +69,17 @@ class Create(AAZCommand):
         )
         _args_schema.allow_forwarded_traffic = AAZBoolArg(
             options=["--allow-forwarded-traffic"],
-            help="Allows forwarded traffic from the local VNet to the remote VNet.",
+            help="Whether the forwarded traffic from the VMs in the local virtual network will be allowed/disallowed in remote virtual network.",
             default=False,
         )
         _args_schema.allow_gateway_transit = AAZBoolArg(
             options=["--allow-gateway-transit"],
-            help="Allows gateway link to be used in the remote VNet.",
+            help="If gateway links can be used in remote virtual networking to link to this virtual network.",
             default=False,
         )
         _args_schema.allow_vnet_access = AAZBoolArg(
             options=["--allow-vnet-access"],
-            help="Allows access from the local VNet to the remote VNet.",
+            help="Whether the VMs in the local virtual network space would be able to access the VMs in remote virtual network space.",
             default=False,
         )
         _args_schema.remote_vnet = AAZResourceIdArg(

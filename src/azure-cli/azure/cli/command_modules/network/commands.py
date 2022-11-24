@@ -1057,20 +1057,17 @@ def load_command_table(self, _):
         self.command_table["network vnet create"] = VNetCreate(loader=self)
         self.command_table["network vnet update"] = VNetUpdate(loader=self)
         self.command_table['network vnet list'] = List(loader=self, table_transformer=transform_vnet_table_output)
-
         g.custom_command("list-available-ips", "list_available_ips", is_preview=True)
 
     with self.command_group("network vnet peering") as g:
         from .custom import VNetPeeringCreate
         self.command_table["network vnet peering create"] = VNetPeeringCreate(loader=self)
-
         g.custom_command("sync", "sync_vnet_peering")
 
     with self.command_group("network vnet subnet") as g:
         from .custom import VNetSubnetCreate, VNetSubnetUpdate
         self.command_table["network vnet subnet create"] = VNetSubnetCreate(loader=self)
         self.command_table["network vnet subnet update"] = VNetSubnetUpdate(loader=self)
-
         g.custom_command("list-available-ips", "subnet_list_available_ips", is_preview=True)
     # endregion
 
