@@ -470,10 +470,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('iops', arg_type=iops_arg_type)
                 c.argument('auto_grow', default='Enabled', arg_type=auto_grow_arg_type)
                 c.argument('backup_retention', default=7, arg_type=mysql_backup_retention_arg_type)
-                c.argument('byok_identity', arg_type=identity_arg_type)
                 c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
-                c.argument('byok_key', arg_type=key_arg_type)
                 c.argument('backup_byok_key', arg_type=backup_key_arg_type)
+            c.argument('byok_identity', arg_type=identity_arg_type)
+            c.argument('byok_key', arg_type=key_arg_type)
             c.argument('geo_redundant_backup', default='Disabled', arg_type=geo_redundant_backup_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             c.argument('administrator_login', default=generate_username(), arg_type=administrator_login_arg_type)
@@ -508,6 +508,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             if command_group == 'mysql':
                 c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']),
                            help='Determines the public access. ')
+            elif command_group == 'postgres':
+                c.argument('byok_key', arg_type=key_arg_type)
+                c.argument('byok_identity', arg_type=identity_arg_type)
 
         with self.argument_context('{} flexible-server geo-restore'. format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=True)
@@ -535,6 +538,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('storage_gb', arg_type=storage_gb_arg_type)
             c.argument('standby_availability_zone', arg_type=standby_availability_zone_arg_type)
             c.argument('high_availability', arg_type=high_availability_arg_type)
+            c.argument('byok_key', arg_type=key_arg_type)
+            c.argument('byok_identity', arg_type=identity_arg_type)
             if command_group == 'mysql':
                 c.argument('auto_grow', arg_type=auto_grow_arg_type)
                 c.argument('replication_role', options_list=['--replication-role'],
@@ -542,9 +547,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('iops', arg_type=iops_arg_type)
                 c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
                 c.argument('geo_redundant_backup', arg_type=geo_redundant_backup_arg_type)
-                c.argument('byok_identity', arg_type=identity_arg_type)
                 c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
-                c.argument('byok_key', arg_type=key_arg_type)
                 c.argument('backup_byok_key', arg_type=backup_key_arg_type)
                 c.argument('disable_data_encryption', arg_type=disable_data_encryption_arg_type)
             elif command_group == 'postgres':
@@ -646,6 +649,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('subnet', arg_type=subnet_arg_type)
                 c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
                 c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
+                c.argument('byok_key', arg_type=key_arg_type)
+                c.argument('byok_identity', arg_type=identity_arg_type)
                 c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server replica stop-replication'.format(command_group)) as c:

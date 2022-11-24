@@ -17,7 +17,7 @@ logger = get_logger(__name__)
 
 def check_name_availability(cmd, client, name):
     StorageAccountCheckNameAvailabilityParameters = cmd.get_models('StorageAccountCheckNameAvailabilityParameters')
-    account_name = StorageAccountCheckNameAvailabilityParameters(name=name)
+    account_name = StorageAccountCheckNameAvailabilityParameters(name=name, type="Microsoft.Storage/storageAccounts")
     return client.check_name_availability(account_name)
 
 
@@ -81,7 +81,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         logger.warning("The default kind for created storage account will change to 'StorageV2' from 'Storage' "
                        "in the future")
     params = StorageAccountCreateParameters(sku=Sku(name=sku), kind=Kind(kind), location=location, tags=tags,
-                                            encryption=Encryption())
+                                            encryption=Encryption(key_source="Microsoft.Storage"))
     # TODO: remove this part when server side remove the constraint
     if encryption_services is None:
         params.encryption.services = {'blob': {}}
