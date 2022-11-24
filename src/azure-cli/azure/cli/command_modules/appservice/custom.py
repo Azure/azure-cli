@@ -1619,10 +1619,13 @@ def _filter_for_container_settings(cmd, resource_group_name, name, settings,
 
 # TODO: remove this when #3660(service tracking issue) is resolved
 def _mask_creds_related_appsettings(settings):
-    for x in [x1 for x1 in settings if x1 in APPSETTINGS_TO_MASK]:
-        settings[x] = None
-    return settings
+    if isinstance(settings, list):
+        return [
+            {**x, **{'value': None if x['name'] in APPSETTINGS_TO_MASK else x['value']}}
+            for x in settings
+        ]
 
+    return {k: None if k in APPSETTINGS_TO_MASK else v for k, v in settings.items()}
 
 def add_hostname(cmd, resource_group_name, webapp_name, hostname, slot=None):
     from azure.mgmt.web.models import HostNameBinding
