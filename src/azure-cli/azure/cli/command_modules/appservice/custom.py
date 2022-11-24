@@ -1627,6 +1627,7 @@ def _mask_creds_related_appsettings(settings):
 
     return {k: None if k in APPSETTINGS_TO_MASK else v for k, v in settings.items()}
 
+
 def add_hostname(cmd, resource_group_name, webapp_name, hostname, slot=None):
     from azure.mgmt.web.models import HostNameBinding
     client = web_client_factory(cmd.cli_ctx)
