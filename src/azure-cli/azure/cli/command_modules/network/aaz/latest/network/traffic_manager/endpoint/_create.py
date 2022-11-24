@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2018-08-01",
+        "version": "2022-04-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}/{}/{}", "2018-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}/{}/{}", "2022-04-01-preview"],
         ]
     }
 
@@ -69,58 +69,82 @@ class Create(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+        _args_schema.always_serve = AAZStrArg(
+            options=["--always-serve"],
+            help="If Always Serve is enabled, probing for endpoint health will be disabled and endpoints will be included in the traffic routing method.",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+
+        # define Arg Group "Parameters"
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
         _args_schema.custom_headers = AAZListArg(
             options=["--custom-headers"],
+            arg_group="Properties",
             help="Space-separated list of custom headers in KEY=VALUE format.",
         )
         _args_schema.endpoint_location = AAZStrArg(
             options=["--endpoint-location"],
+            arg_group="Properties",
             help="Location of the external or nested endpoints when using the 'Performance' routing method.",
         )
         _args_schema.endpoint_monitor_status = AAZStrArg(
             options=["--endpoint-monitor-status"],
+            arg_group="Properties",
             help="The monitoring status of the endpoint.",
             enum={"CheckingEndpoint": "CheckingEndpoint", "Degraded": "Degraded", "Disabled": "Disabled", "Inactive": "Inactive", "Online": "Online", "Stopped": "Stopped"},
         )
         _args_schema.endpoint_status = AAZStrArg(
             options=["--endpoint-status"],
+            arg_group="Properties",
             help="The status of the endpoint. If enabled the endpoint is probed for endpoint health and included in the traffic routing method.",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
         _args_schema.geo_mapping = AAZListArg(
             options=["--geo-mapping"],
+            arg_group="Properties",
             help="Space-separated list of country/region codes mapped to this endpoint when using the 'Geographic' routing method.  Values                                      from: az network traffic-manager endpoint show-geographic-hierarchy.",
         )
         _args_schema.min_child_endpoints = AAZIntArg(
             options=["--min-child-endpoints"],
+            arg_group="Properties",
             help="The minimum number of endpoints that must be available in the child profile for the parent profile to be considered available. Only applicable to an endpoint of type 'NestedEndpoints'.",
         )
         _args_schema.min_child_ipv4 = AAZIntArg(
             options=["--min-child-ipv4"],
+            arg_group="Properties",
             help="The minimum number of IPv4 (DNS record type A) endpoints that must be available in the child profile in order for the parent profile to be considered available. Only applicable to endpoint of type 'NestedEndpoints'.",
         )
         _args_schema.min_child_ipv6 = AAZIntArg(
             options=["--min-child-ipv6"],
+            arg_group="Properties",
             help="The minimum number of IPv6 (DNS record type AAAA) endpoints that must be available in the child profile in order for the parent profile to be considered available. Only applicable to endpoint of type 'NestedEndpoints'.",
         )
         _args_schema.priority = AAZIntArg(
             options=["--priority"],
+            arg_group="Properties",
             help="Priority of the endpoint when using the 'Priority' traffic routing method. Values range from 1 to 1000, with lower values representing higher priority.",
         )
         _args_schema.subnets = AAZListArg(
             options=["--subnets"],
+            arg_group="Properties",
             help="Space-separated list of subnet CIDR prefixes or subnet ranges.",
         )
         _args_schema.target = AAZStrArg(
             options=["--target"],
+            arg_group="Properties",
             help="Fully-qualified DNS name of the endpoint.",
         )
         _args_schema.target_resource_id = AAZStrArg(
             options=["--target-resource-id"],
+            arg_group="Properties",
             help="The Azure Resource URI of the endpoint. Not applicable for endpoints of type 'ExternalEndpoints'.",
         )
         _args_schema.weight = AAZIntArg(
             options=["--weight"],
+            arg_group="Properties",
             help="Weight of the endpoint when using the 'Weighted' traffic routing method. Values range from 1 to 1000.",
         )
 
@@ -156,12 +180,20 @@ class Create(AAZCommand):
             options=["scope"],
             help="Block size (number of leading bits in the subnet mask).",
         )
-
-        # define Arg Group "Parameters"
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         self.EndpointsCreateOrUpdate(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -223,7 +255,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-08-01",
+                    "api-version", "2022-04-01-preview",
                     required=True,
                 ),
             }
@@ -253,6 +285,7 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("alwaysServe", AAZStrType, ".always_serve")
                 properties.set_prop("customHeaders", AAZListType, ".custom_headers")
                 properties.set_prop("endpointLocation", AAZStrType, ".endpoint_location")
                 properties.set_prop("endpointMonitorStatus", AAZStrType, ".endpoint_monitor_status")
@@ -318,6 +351,9 @@ class Create(AAZCommand):
             _schema_on_200_201.type = AAZStrType()
 
             properties = cls._schema_on_200_201.properties
+            properties.always_serve = AAZStrType(
+                serialized_name="alwaysServe",
+            )
             properties.custom_headers = AAZListType(
                 serialized_name="customHeaders",
             )
