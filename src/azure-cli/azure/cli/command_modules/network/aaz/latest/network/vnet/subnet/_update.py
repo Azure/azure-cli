@@ -25,6 +25,9 @@ class Update(AAZCommand):
 
     :example: Disable the private endpoint network policies
         az network vnet subnet update -n MySubnet --vnet-name MyVnet -g MyResourceGroup --disable-private-endpoint-network-policies
+
+    :example: Detach a network security group in a subnet.
+        az network vnet subnet update -g MyResourceGroup --vnet-name MyVNet -n MySubnet --nsg null
     """
 
     _aaz_info = {
@@ -85,7 +88,7 @@ class Update(AAZCommand):
         )
         _args_schema.nat_gateway = AAZResourceIdArg(
             options=["--nat-gateway"],
-            help="Name or ID of a NAT gateway to attach.",
+            help="Name or ID of a NAT gateway to attach. Use null to detach it.",
             nullable=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
@@ -94,7 +97,7 @@ class Update(AAZCommand):
         )
         _args_schema.network_security_group = AAZResourceIdArg(
             options=["--nsg", "--network-security-group"],
-            help="Name or ID of a network security group (NSG). Use empty string \"\"('\"\"' in PowerShell) to detach it.",
+            help="Name or ID of a network security group (NSG). Use null to detach it.",
             nullable=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
@@ -115,7 +118,7 @@ class Update(AAZCommand):
         )
         _args_schema.route_table = AAZResourceIdArg(
             options=["--route-table"],
-            help="Name or ID of a route table to associate with the subnet. Use empty string \"\"('\"\"' in PowerShell) to detach it. You can also append \"--remove routeTable\" in \"az network vnet subnet update\" to detach it.",
+            help="Name or ID of a route table to associate with the subnet. Use null to detach it.",
             nullable=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
