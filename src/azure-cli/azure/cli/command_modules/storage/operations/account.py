@@ -881,7 +881,7 @@ def update_encryption_scope(cmd, client, resource_group_name, account_name, encr
 
 
 def list_encryption_scope(client, resource_group_name, account_name,
-                          maxpagesize=None, marker=None, filter=None, include=None):
+                          maxpagesize=None, marker=None, filter=None, include=None):  # pylint: redefined-builtin
     generator = client.list(resource_group_name, account_name, maxpagesize=maxpagesize, filter=filter, include=include)
     pages = generator.by_page(continuation_token=marker)
 

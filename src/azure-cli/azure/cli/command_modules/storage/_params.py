@@ -584,7 +584,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'all blob read/write operations using this encryption scope will fail.')
 
     with self.argument_context('storage account encryption-scope list') as c:
-        t_encryption_scope_include = self.get_models("ListEncryptionScopesInclude", resource_type=ResourceType.MGMT_STORAGE)
+        t_encryption_scope_include = self.get_models("ListEncryptionScopesInclude",
+                                                     resource_type=ResourceType.MGMT_STORAGE)
         c.argument('filter', help='When specified, only encryption scope names starting with the filter will be listed')
         c.argument('include', arg_type=get_enum_type(t_encryption_scope_include),
                    help='when specified, will list encryption scopes with the specific state')
