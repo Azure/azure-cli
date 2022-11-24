@@ -6,25 +6,27 @@
 from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings import List as _DiagnosticSettingsList
 from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings import Show as _DiagnosticSettingsShow
 from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings import Delete as _DiagnosticSettingsDelete
+from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings.categories import List as _DiagnosticSettingsCategoryList
+from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings.categories import Show as _DiagnosticSettingsCategoryShow
 from knack.util import CLIError
 
-def create_resource_parameters(arg_schema):
+def create_resource_parameters(arg_schema, arg_group=None):
     from azure.cli.core.aaz import AAZResourceGroupNameArg, AAZStrArg, AAZResourceIdArgFormat
-    arg_schema.resource_group_name = AAZResourceGroupNameArg(arg_group="Target Resource")
+    arg_schema.resource_group_name = AAZResourceGroupNameArg(arg_group=arg_group)
     arg_schema.namespace = AAZStrArg(
         options=['--resource-namespace'],
         help="Target resource provider namespace.",
-        arg_group="Target Resource",
+        arg_group=arg_group,
     )
     arg_schema.parent = AAZStrArg(
         options=['--resource-parent'],
         help="Target resource parent path, if applicable.",
-        arg_group="Target Resource",
+        arg_group=arg_group,
     )
     arg_schema.resource_type = AAZStrArg(
         options=['--resource-type'],
         help="Target resource type. Can also accept namespace/type format (Ex: 'Microsoft.Compute/virtualMachines')",
-        arg_group="Target Resource",
+        arg_group=arg_group,
     )
 
 def update_resource_parameters(ctx, alias="resource"):
@@ -64,7 +66,7 @@ class DiagnosticSettingsShow(_DiagnosticSettingsShow):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         arg_schema = super()._build_arguments_schema(*args, **kwargs)
-        create_resource_parameters(arg_schema)
+        create_resource_parameters(arg_schema, arg_group="Target Resource")
         return arg_schema
 
     def pre_operations(self):
@@ -77,7 +79,7 @@ class DiagnosticSettingsList(_DiagnosticSettingsList):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         arg_schema = super()._build_arguments_schema(*args, **kwargs)
-        create_resource_parameters(arg_schema)
+        create_resource_parameters(arg_schema, arg_group="Target Resource")
         return arg_schema
 
     def pre_operations(self):
@@ -89,6 +91,18 @@ class DiagnosticSettingsDelete(_DiagnosticSettingsDelete):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         arg_schema = super()._build_arguments_schema(*args, **kwargs)
+        create_resource_parameters(arg_schema, arg_group="Target Resource")
+        return arg_schema
+
+    def pre_operations(self):
+        ctx = self.ctx
+        update_resource_parameters(ctx)
+
+
+class DiagnosticSettingsCategoryList(_DiagnosticSettingsCategoryList):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        arg_schema = super()._build_arguments_schema(*args, **kwargs)
         create_resource_parameters(arg_schema)
         return arg_schema
 
@@ -96,6 +110,16 @@ class DiagnosticSettingsDelete(_DiagnosticSettingsDelete):
         ctx = self.ctx
         update_resource_parameters(ctx)
 
+class DiagnosticSettingsCategoryShow(_DiagnosticSettingsCategoryShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        arg_schema = super()._build_arguments_schema(*args, **kwargs)
+        create_resource_parameters(arg_schema)
+        return arg_schema
+
+    def pre_operations(self):
+        ctx = self.ctx
+        update_resource_parameters(ctx)
 
 # pylint: disable=unused-argument, line-too-long
 def create_diagnostics_settings(client, name, resource_uri,

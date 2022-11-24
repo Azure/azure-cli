@@ -241,9 +241,13 @@ def load_command_table(self, _):
     self.command_table['monitor diagnostic-settings list'] = DiagnosticSettingsList(loader=self)
     self.command_table['monitor diagnostic-settings delete'] = DiagnosticSettingsDelete(loader=self)
 
-    with self.command_group('monitor diagnostic-settings categories', diagnostics_categories_sdk) as g:
-        g.show_command('show', 'get')
-        g.command('list', 'list')
+    # with self.command_group('monitor diagnostic-settings categories', diagnostics_categories_sdk) as g:
+    #     g.show_command('show', 'get')
+    #     g.command('list', 'list')
+
+    from .operations.diagnostics_settings import DiagnosticSettingsCategoryShow, DiagnosticSettingsCategoryList
+    self.command_table['monitor diagnostic-settings categories show'] = DiagnosticSettingsCategoryShow(loader=self)
+    self.command_table['monitor diagnostic-settings categories list'] = DiagnosticSettingsCategoryList(loader=self)
 
     with self.command_group('monitor log-profiles', log_profiles_sdk, custom_command_type=log_profiles_custom) as g:
         g.custom_command('create', 'create_log_profile_operations')
