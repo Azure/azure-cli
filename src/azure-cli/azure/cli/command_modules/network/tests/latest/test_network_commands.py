@@ -2716,7 +2716,13 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         self.kwargs.update({
             'ip1': 'pubipdns',
             'ip2': 'pubipnodns',
-            'dns': 'woot1'
+            'ip3': 'pubip3',
+            'dns': 'woot1',
+            'zone': '1 2 3',
+            'location': 'eastus2',
+            'ip_tags': 'RoutingPreference=Internet',
+            'version': 'ipv4',
+            'sku': 'standard'
         })
         self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --allocation-method static', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
@@ -2728,6 +2734,21 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
             self.check('publicIp.publicIPAllocationMethod', 'Dynamic'),
             self.check('publicIp.dnsSettings', None)
         ])
+
+        self.cmd('network public-ip create -g {rg} -n {ip3}'
+                 ' --version {version} '
+                 '--sku {sku} '
+                 '--zone {zone} '
+                 '-l {location} '
+                 '--ip-tags {ip_tags} ',
+                 checks=[
+                     self.check('publicIp.provisioningState', 'Succeeded'),
+                     self.check('publicIp.publicIPAllocationMethod', 'Static'),
+                     self.check('publicIp.dnsSettings', None),
+                     self.check('publicIp.ipTags[0].ipTagType', 'RoutingPreference'),
+                     self.check('publicIp.ipTags[0].tag', 'Internet'),
+        ])
+
         self.cmd(
             'network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --tags foo=doo',
             checks=[
