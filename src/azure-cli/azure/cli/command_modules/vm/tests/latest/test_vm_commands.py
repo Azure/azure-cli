@@ -5749,17 +5749,15 @@ class VMGalleryImage(ScenarioTest):
                      self.check('storageProfile.dataDiskImages[1].source.uri', vhd_uri),
                      self.check('storageProfile.dataDiskImages[1].lun', 1)])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_image_version_create_os_vhd')
-    @StorageAccountPreparer(name_prefix='clitestosvhd', sku='Standard_LRS')
     @AllowLargeResponse()
-    def test_image_version_create_os_vhd(self, resource_group, storage_account_info):
+    @ResourceGroupPreparer(name_prefix='cli_test_image_version_create_os_vhd')
+    def test_image_version_create_os_vhd(self, resource_group):
         from msrestazure.tools import resource_id
 
         self.kwargs.update({
             'vm': 'myvm',
             'gallery': 'gallery',
-            'image': 'image',
-            'account': storage_account_info[0]
+            'image': 'image'
         })
 
         self.cmd('vm create -g {rg} -n vm1 --image centos --use-unmanaged-disk --nsg-rule NONE '
