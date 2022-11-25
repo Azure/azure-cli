@@ -4563,20 +4563,30 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                 data_snapshots[i] = resource_id(
                     subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                     namespace='Microsoft.Compute', type='snapshots', name=s)
+
+    profile = ImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest,
+                                            end_of_life_date=end_of_life_date,
+                                            target_regions=target_regions or [TargetRegion(name=location)],
+                                            replica_count=replica_count, storage_account_type=storage_account_type)
+    if replication_mode is not None:
+        profile.replication_mode = replication_mode
+    if not cmd.supported_api_version(min_api='2022-03-03', operation_group='gallery_image_versions'):
+        source = GalleryArtifactSource(managed_image=ManagedArtifact(id=managed_image))
+        profile.source = source
+
     if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
-        profile = ImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest,
-                                                end_of_life_date=end_of_life_date,
-                                                target_regions=target_regions or [TargetRegion(name=location)],
-                                                replica_count=replica_count, storage_account_type=storage_account_type)
-        if replication_mode is not None:
-            profile.replication_mode = replication_mode
         if managed_image is None and os_snapshot is None and os_vhd_uri is None:
             raise RequiredArgumentMissingError('usage error: Please provide --managed-image or --os-snapshot or --vhd')
         GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
-        GalleryArtifactVersionFullSource = cmd.get_models('GalleryArtifactVersionFullSource')
-        GalleryDiskImageSource = cmd.get_models('GalleryDiskImageSource')
         GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
         GalleryDataDiskImage = cmd.get_models('GalleryDataDiskImage')
+        if cmd.supported_api_version(min_api='2022-03-03', operation_group='gallery_image_versions'):
+            GalleryArtifactVersionFullSource = cmd.get_models('GalleryArtifactVersionFullSource')
+            GalleryDiskImageSource = cmd.get_models('GalleryDiskImageSource')
+        else:
+            GalleryArtifactVersionFullSource = cmd.get_models('GalleryArtifactVersionSource')
+            GalleryDiskImageSource = cmd.get_models('GalleryArtifactVersionSource')
+
         source = os_disk_image = data_disk_images = None
         if managed_image is not None:
             source = GalleryArtifactVersionFullSource(id=managed_image)
@@ -4647,14 +4657,6 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             image_version.safety_profile = GalleryImageVersionSafetyProfile(
                 allow_deletion_of_replicated_locations=allow_replicated_location_deletion)
     else:
-        source = GalleryArtifactSource(managed_image=ManagedArtifact(id=managed_image))
-        profile = ImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest,
-                                                end_of_life_date=end_of_life_date,
-                                                target_regions=target_regions or [TargetRegion(name=location)],
-                                                source=source, replica_count=replica_count,
-                                                storage_account_type=storage_account_type)
-        if replication_mode is not None:
-            profile.replication_mode = replication_mode
         if managed_image is None:
             raise RequiredArgumentMissingError('usage error: Please provide --managed-image')
         image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
