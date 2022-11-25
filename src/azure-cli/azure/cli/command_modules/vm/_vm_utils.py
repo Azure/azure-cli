@@ -541,6 +541,6 @@ def trusted_launch_warning_log(namespace, generation_version, features):
 
     if generation_version == 'V2':
         if is_trusted_launch_supported(features) and not namespace.security_type:
-            logger.warning('Starting Build 2023 event az vm/vmss create command will deploy Trusted Launch VM'
+            logger.warning('Starting Build 2023 event, "az vm/vmss create" command will deploy Trusted Launch VM'
                            ' by default. To know more about Trusted Launch, please visit'
                            ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
