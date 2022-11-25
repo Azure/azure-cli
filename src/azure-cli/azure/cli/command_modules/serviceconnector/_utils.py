@@ -90,8 +90,9 @@ def run_cli_cmd(cmd, retry=0, interval=0, should_retry_func=None):
         raise CLIInternalError('Command execution failed, command is: '
                                '{}, error message is: {}'.format(cmd, output.stderr))
     try:
-        return json.loads(output.stdout) if output.stdout else None
-    except ValueError:
+        return json.loads(output.stdout.decode(encoding='UTF-8', errors='ignore')) if output.stdout else None
+    except ValueError as e:
+        logger.debug(e)
         return output.stdout or None
 
 
@@ -315,3 +316,12 @@ def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_
         auth_info['clientId'] = client_id
         auth_info['subscriptionId'] = subscription_id
     return auth_info
+
+
+def is_packaged_installed(package_name):
+    import pkg_resources
+    installed_packages = pkg_resources.working_set
+    # pylint: disable=not-an-iterable
+    pkg_installed = any((package_name) in d.key.lower()
+                        for d in installed_packages)
+    return pkg_installed

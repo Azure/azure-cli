@@ -6745,7 +6745,7 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     endpoint_status=None, weight=None, priority=None,
                                     endpoint_location=None, endpoint_monitor_status=None,
                                     min_child_endpoints=None, min_child_ipv4=None, min_child_ipv6=None,
-                                    geo_mapping=None, monitor_custom_headers=None, subnets=None):
+                                    geo_mapping=None, monitor_custom_headers=None, subnets=None, always_serve=None):
     from .aaz.latest.network.traffic_manager.endpoint import Create
     Create_Endpoint = Create(cmd.loader)
 
@@ -6766,7 +6766,8 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
         "subnets": subnets,
         "target": target,
         "target_resource_id": target_resource_id,
-        "weight": weight
+        "weight": weight,
+        "always_serve": always_serve,
     }
 
     return Create_Endpoint(args)
@@ -6778,7 +6779,7 @@ def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     priority=None, target=None, target_resource_id=None,
                                     weight=None, min_child_endpoints=None, min_child_ipv4=None,
                                     min_child_ipv6=None, geo_mapping=None,
-                                    subnets=None, monitor_custom_headers=None):
+                                    subnets=None, monitor_custom_headers=None, always_serve=None):
     from .aaz.latest.network.traffic_manager.endpoint import Update
     Update_Endpoint = Update(cmd.loader)
 
@@ -6814,6 +6815,8 @@ def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
         args["target_resource_id"] = target_resource_id
     if weight is not None:
         args["weight"] = weight
+    if always_serve is not None:
+        args["always_serve"] = always_serve
 
     return Update_Endpoint(args)
 
