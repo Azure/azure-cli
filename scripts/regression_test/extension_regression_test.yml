@@ -115,4 +115,14 @@ jobs:
     inputs:
       testResultsFiles: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
       testRunTitle: 'CLI Regression test results of instance $(Instance_idx)'
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_error_modules.txt'
+      ArtifactName: 'test_results_error_modules_$(Instance_idx).txt'
+      publishLocation: 'Container'
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_failure_tests.txt'
+      ArtifactName: 'test_results_failure_tests_$(Instance_idx).txt'
+      publishLocation: 'Container'
 
