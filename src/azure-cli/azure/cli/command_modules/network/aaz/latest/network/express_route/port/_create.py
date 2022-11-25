@@ -11,6 +11,9 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "network express-route port create"
+)
 class Create(AAZCommand):
     """Create an ExpressRoute port.
 

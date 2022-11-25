@@ -16,7 +16,7 @@ from azure.cli.core.aaz import *
     is_preview=True,
 )
 class List(AAZCommand):
-    """Gets all global reach peer connections associated with a private peering in an express route circuit.
+    """List all global reach peer connections associated with a private peering in an express route circuit.
 
     :example: List ExpressRouteCircuit PeerConnection
         az network express-route peering connection list --circuit-name MyCircuit --peering-name MyPeering --resource-group MyResourceGroup

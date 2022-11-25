@@ -56,8 +56,8 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
         )
-        _args_schema.peering_name = AAZStrArg(
-            options=["-n", "--name", "--peering-name"],
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
             help="The name of the peering.",
             required=True,
             id_part="child_name_1",
@@ -128,13 +128,12 @@ class Update(AAZCommand):
             help="Internet Routing Registry / Regional Internet Registry. Allowed values: AFRINIC, ALTDB, APNIC, ARIN, LACNIC, LEVEL3, RADB, RIPENCC.",
             nullable=True,
         )
-        _args_schema.route_filter = AAZObjectArg(
+        _args_schema.route_filter = AAZStrArg(
             options=["--route-filter"],
             arg_group="Microsoft Peering",
-            help="The reference to the RouteFilter resource.",
+            help="Name or ID of a route filter to apply to the peering settings.",
             nullable=True,
         )
-        cls._build_args_sub_resource_update(_args_schema.route_filter)
 
         advertised_public_prefixes = cls._args_schema.advertised_public_prefixes
         advertised_public_prefixes.Element = AAZStrArg(
@@ -148,70 +147,10 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.connections = AAZListArg(
-            options=["--connections"],
-            arg_group="Properties",
-            help="The list of circuit connections associated with Azure Private Peering for this circuit.",
-            nullable=True,
-        )
         _args_schema.ipv6_peering_config = AAZObjectArg(
             options=["--ipv6-peering-config"],
             arg_group="Properties",
             help="The IPv6 peering configuration.",
-            nullable=True,
-        )
-
-        connections = cls._args_schema.connections
-        connections.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.connections.Element
-        _element.id = AAZResourceIdArg(
-            options=["id"],
-            help="Resource ID.",
-            nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/expressRouteCircuits/{}/peerings/{}/connections/{}",
-            ),
-        )
-        _element.name = AAZStrArg(
-            options=["name"],
-            help="The name of the resource that is unique within a resource group. This name can be used to access the resource.",
-            nullable=True,
-        )
-        _element.address_prefix = AAZStrArg(
-            options=["address-prefix"],
-            help="/29 IP address space to carve out Customer addresses for tunnels.",
-            nullable=True,
-        )
-        _element.authorization_key = AAZStrArg(
-            options=["authorization-key"],
-            help="The authorization key.",
-            nullable=True,
-        )
-        _element.express_route_circuit_peering = AAZObjectArg(
-            options=["express-route-circuit-peering"],
-            help="Reference to Express Route Circuit Private Peering Resource of the circuit initiating connection.",
-            nullable=True,
-        )
-        cls._build_args_sub_resource_update(_element.express_route_circuit_peering)
-        _element.ipv6_circuit_connection_config = AAZObjectArg(
-            options=["ipv6-circuit-connection-config"],
-            help="IPv6 Address PrefixProperties of the express route circuit connection.",
-            nullable=True,
-        )
-        _element.peer_express_route_circuit_peering = AAZObjectArg(
-            options=["peer-express-route-circuit-peering"],
-            help="Reference to Express Route Circuit Private Peering Resource of the peered circuit.",
-            nullable=True,
-        )
-        cls._build_args_sub_resource_update(_element.peer_express_route_circuit_peering)
-
-        ipv6_circuit_connection_config = cls._args_schema.connections.Element.ipv6_circuit_connection_config
-        ipv6_circuit_connection_config.address_prefix = AAZStrArg(
-            options=["address-prefix"],
-            help="/125 IP address space to carve out customer addresses for global reach.",
             nullable=True,
         )
 
@@ -390,7 +329,7 @@ class Update(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "peeringName", self.ctx.args.peering_name,
+                    "peeringName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -493,7 +432,7 @@ class Update(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "peeringName", self.ctx.args.peering_name,
+                    "peeringName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -569,43 +508,20 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("name", AAZStrType, ".peering_name")
+            _builder.set_prop("name", AAZStrType, ".name")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("connections", AAZListType, ".connections")
                 properties.set_prop("ipv6PeeringConfig", AAZObjectType, ".ipv6_peering_config")
                 properties.set_prop("microsoftPeeringConfig", AAZObjectType)
                 properties.set_prop("peerASN", AAZIntType, ".peer_asn")
                 properties.set_prop("peeringType", AAZStrType, ".peering_type")
                 properties.set_prop("primaryPeerAddressPrefix", AAZStrType, ".primary_peer_subnet")
-                _build_schema_sub_resource_update(properties.set_prop("routeFilter", AAZObjectType, ".route_filter"))
+                properties.set_prop("routeFilter", AAZObjectType)
                 properties.set_prop("secondaryPeerAddressPrefix", AAZStrType, ".secondary_peer_subnet")
                 properties.set_prop("sharedKey", AAZStrType, ".shared_key")
                 properties.set_prop("vlanId", AAZIntType, ".vlan_id")
-
-            connections = _builder.get(".properties.connections")
-            if connections is not None:
-                connections.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.connections[]")
-            if _elements is not None:
-                _elements.set_prop("id", AAZStrType, ".id")
-                _elements.set_prop("name", AAZStrType, ".name")
-                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-
-            properties = _builder.get(".properties.connections[].properties")
-            if properties is not None:
-                properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
-                properties.set_prop("authorizationKey", AAZStrType, ".authorization_key")
-                _build_schema_sub_resource_update(properties.set_prop("expressRouteCircuitPeering", AAZObjectType, ".express_route_circuit_peering"))
-                properties.set_prop("ipv6CircuitConnectionConfig", AAZObjectType, ".ipv6_circuit_connection_config")
-                _build_schema_sub_resource_update(properties.set_prop("peerExpressRouteCircuitPeering", AAZObjectType, ".peer_express_route_circuit_peering"))
-
-            ipv6_circuit_connection_config = _builder.get(".properties.connections[].properties.ipv6CircuitConnectionConfig")
-            if ipv6_circuit_connection_config is not None:
-                ipv6_circuit_connection_config.set_prop("addressPrefix", AAZStrType, ".address_prefix")
 
             ipv6_peering_config = _builder.get(".properties.ipv6PeeringConfig")
             if ipv6_peering_config is not None:
@@ -625,6 +541,10 @@ class Update(AAZCommand):
             advertised_public_prefixes = _builder.get(".properties.microsoftPeeringConfig.advertisedPublicPrefixes")
             if advertised_public_prefixes is not None:
                 advertised_public_prefixes.set_elements(AAZStrType, ".")
+
+            route_filter = _builder.get(".properties.routeFilter")
+            if route_filter is not None:
+                route_filter.set_prop("id", AAZStrType, ".route_filter")
 
             return _instance_value
 

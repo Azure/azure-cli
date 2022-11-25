@@ -220,18 +220,18 @@ class Create(AAZCommand):
     @classmethod
     def _build_args_sub_resource_create(cls, _schema):
         if cls._args_sub_resource_create is not None:
-            _schema.filter_id = cls._args_sub_resource_create.filter_id
+            _schema.id = cls._args_sub_resource_create.id
             return
 
         cls._args_sub_resource_create = AAZObjectArg()
 
         sub_resource_create = cls._args_sub_resource_create
-        sub_resource_create.filter_id = AAZStrArg(
-            options=["filter-id"],
+        sub_resource_create.id = AAZStrArg(
+            options=["id"],
             help="Resource ID.",
         )
 
-        _schema.filter_id = cls._args_sub_resource_create.filter_id
+        _schema.id = cls._args_sub_resource_create.id
 
     def _execute_operations(self):
         self.pre_operations()
@@ -629,7 +629,7 @@ def _build_schema_express_route_circuit_peering_config_create(_builder):
 def _build_schema_sub_resource_create(_builder):
     if _builder is None:
         return
-    _builder.set_prop("id", AAZStrType, ".filter_id")
+    _builder.set_prop("id", AAZStrType, ".id")
 
 
 _schema_express_route_circuit_peering_config_read = None

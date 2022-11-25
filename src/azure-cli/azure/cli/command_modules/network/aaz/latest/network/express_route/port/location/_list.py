@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "network express-route port location list",
 )
 class List(AAZCommand):
-    """Get the details of an ExpressRoute port location.
+    """List ExpressRoute port locations.
 
     :example: List ExpressRoute port location.
         az network express-route port location list --subscription 00000000-0000-0000-0000-000000000000

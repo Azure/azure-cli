@@ -84,10 +84,13 @@ class Create(AAZCommand):
         # define Arg Group "ExpressRouteCircuitPeering"
 
         _args_schema = cls._args_schema
-        _args_schema.source_circuit = AAZStrArg(
+        _args_schema.source_circuit = AAZResourceIdArg(
             options=["--source-circuit"],
             arg_group="ExpressRouteCircuitPeering",
             help="Reference to Express Route Circuit Private Peering Resource of the circuit initiating connection.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{circuit_name}/peerings/{peering_name}"
+            )
         )
 
         # define Arg Group "Properties"

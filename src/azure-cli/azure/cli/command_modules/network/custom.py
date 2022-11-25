@@ -18,12 +18,19 @@ from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumen
     UnrecognizedArgumentError, ResourceNotFoundError, CLIInternalError, ArgumentUsageError, \
     MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, supported_api_version
+from azure.cli.core.aaz import has_value
 
 from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
 from .aaz.latest.network.application_gateway._update import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
+from .aaz.latest.network.express_route.gateway.connection import Create as _ExpressRouteConnectionCreate, \
+    Update as _ExpressRouteConnectionUpdate
+from .aaz.latest.network.express_route.peering import Create as _ExpressRoutePeeringCreate, \
+    Update as _ExpressRoutePeeringUpdate
+from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCreate
 
 import threading
 import time
@@ -32,11 +39,7 @@ import subprocess
 import tempfile
 import requests
 
-from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
-from .aaz.latest.network.express_route.gateway.connection import Create as _ExpressRouteConnectionCreate, \
-    Update as _ExpressRouteConnectionUpdate
-from .aaz.latest.network.express_route.peering import Create as _ExpressRoutePeeringCreate, \
-    Update as _ExpressRoutePeeringUpdate
+
 
 logger = get_logger(__name__)
 
@@ -3091,27 +3094,27 @@ def lists_match(l1, l2):
 
 # region ExpressRoutes
 class ExpressRouteCreate(_ExpressRouteCreate):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZIntArg
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.bandwidth = AAZIntArg(
+        args_schema.bandwidth = AAZListArg(
             options=["--bandwidth"],
-            help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps.",
-            nullable=True,
+            help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps."
         )
+        args_schema.bandwidth.Element = AAZStrArg()
+        args_schema.bandwidth_in_mbps._registered = False
+        args_schema.bandwidth_of_circuit._registered = False
         return args_schema
-
-    def _cli_arguments_loader(self):
-        args = super()._cli_arguments_loader()
-        args = [(name, arg) for (name, arg) in args if name not in ("bandwidth_in_mbps", "bandwidth_of_circuit")]
-        return args
 
     def pre_operations(self):
         args = self.ctx.args
+        if has_value(args.bandwidth):
+            converted_bandwidth = _validate_bandwidth(args.bandwidth)
         args.sku_name = '{}_{}'.format(args.sku_tier, args.sku_family)
-        args.bandwidth_of_circuit = (args.bandwidth.to_serialized_data() / 1000.0) if args.express_route_port else None
-        args.bandwidth_in_mbps = (args.bandwidth) if not args.express_route_port else None
+        args.bandwidth_of_circuit = (converted_bandwidth / 1000.0) if args.express_route_port else None
+        args.bandwidth_in_mbps = converted_bandwidth if not args.express_route_port else None
         if args.express_route_port:
             args.provider = None
             args.peering_location = None
@@ -3121,53 +3124,30 @@ class ExpressRouteUpdate(_ExpressRouteUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZIntArg
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.bandwidth = AAZIntArg(
+        args_schema.bandwidth = AAZListArg(
             options=["--bandwidth"],
             help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps.",
             nullable=True,
         )
+        args_schema.bandwidth.Element = AAZStrArg()
+        args_schema.bandwidth_in_mbps._registered = False
+        args_schema.bandwidth_of_circuit._registered = False
         return args_schema
-
-    def _cli_arguments_loader(self):
-        args = super()._cli_arguments_loader()
-        args = [(name, arg) for (name, arg) in args if name not in ("bandwidth_in_mbps", "bandwidth_of_circuit")]
-        return args
 
     def pre_operations(self):
         args = self.ctx.args
-        if args.bandwidth:
-            args.bandwidth_of_circuit = (args.bandwidth.to_serialized_data() / 1000.0)
-            args.bandwidth_in_mbps = args.bandwidth
+        if has_value(args.bandwidth):
+            converted_bandwidth = _validate_bandwidth(args.bandwidth)
+            args.bandwidth_of_circuit = (converted_bandwidth / 1000.0)
+            args.bandwidth_in_mbps = converted_bandwidth
 
     def post_instance_update(self, instance):
         if instance.properties.expressRoutePort is not None:
             instance.properties.serviceProviderProperties = None
         else:
             instance.properties.bandwidthInGbps = None
-
-
-def create_express_route_peering_connection(cmd, resource_group_name, circuit_name, peering_name, connection_name,
-                                            peer_circuit, address_prefix, authorization_key=None):
-    client = network_client_factory(cmd.cli_ctx).express_route_circuit_connections
-    ExpressRouteCircuitConnection, SubResource = cmd.get_models('ExpressRouteCircuitConnection', 'SubResource')
-    source_circuit = resource_id(
-        subscription=get_subscription_id(cmd.cli_ctx),
-        resource_group=resource_group_name,
-        namespace='Microsoft.Network',
-        type='expressRouteCircuits',
-        name=circuit_name,
-        child_type_1='peerings',
-        child_name_1=peering_name
-    )
-    conn = ExpressRouteCircuitConnection(
-        express_route_circuit_peering=SubResource(id=source_circuit),
-        peer_express_route_circuit_peering=SubResource(id=peer_circuit),
-        address_prefix=address_prefix,
-        authorization_key=authorization_key
-    )
-    return client.begin_create_or_update(resource_group_name, circuit_name, peering_name, connection_name, conn)
 
 
 def set_express_route_peering_connection_config(cmd, resource_group_name, circuit_name, peering_name, connection_name,
@@ -3224,54 +3204,6 @@ def _validate_ipv6_address_prefixes(prefixes):
     return version == IPv6Network
 
 
-def create_express_route_peering(
-        cmd, client, resource_group_name, circuit_name, peering_type, peer_asn, vlan_id,
-        primary_peer_address_prefix, secondary_peer_address_prefix, shared_key=None,
-        advertised_public_prefixes=None, customer_asn=None, routing_registry_name=None,
-        route_filter=None, legacy_mode=None, ip_version='IPv4'):
-    (ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, RouteFilter) = \
-        cmd.get_models('ExpressRouteCircuitPeering', 'ExpressRouteCircuitPeeringConfig', 'RouteFilter')
-
-    if cmd.supported_api_version(min_api='2018-02-01'):
-        ExpressRoutePeeringType = cmd.get_models('ExpressRoutePeeringType')
-    else:
-        ExpressRoutePeeringType = cmd.get_models('ExpressRouteCircuitPeeringType')
-
-    if ip_version == 'IPv6' and cmd.supported_api_version(min_api='2020-08-01'):
-        Ipv6ExpressRouteCircuitPeeringConfig = cmd.get_models('Ipv6ExpressRouteCircuitPeeringConfig')
-        if peering_type == ExpressRoutePeeringType.microsoft_peering.value:
-            microsoft_config = ExpressRouteCircuitPeeringConfig(advertised_public_prefixes=advertised_public_prefixes,
-                                                                customer_asn=customer_asn,
-                                                                routing_registry_name=routing_registry_name)
-        else:
-            microsoft_config = None
-        ipv6 = Ipv6ExpressRouteCircuitPeeringConfig(primary_peer_address_prefix=primary_peer_address_prefix,
-                                                    secondary_peer_address_prefix=secondary_peer_address_prefix,
-                                                    microsoft_peering_config=microsoft_config,
-                                                    route_filter=route_filter)
-        peering = ExpressRouteCircuitPeering(peering_type=peering_type, ipv6_peering_config=ipv6, peer_asn=peer_asn,
-                                             vlan_id=vlan_id)
-
-    else:
-        peering = ExpressRouteCircuitPeering(
-            peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
-            primary_peer_address_prefix=primary_peer_address_prefix,
-            secondary_peer_address_prefix=secondary_peer_address_prefix,
-            shared_key=shared_key)
-
-        if peering_type == ExpressRoutePeeringType.microsoft_peering.value:
-            peering.microsoft_peering_config = ExpressRouteCircuitPeeringConfig(
-                advertised_public_prefixes=advertised_public_prefixes,
-                customer_asn=customer_asn,
-                routing_registry_name=routing_registry_name)
-        if cmd.supported_api_version(min_api='2016-12-01') and route_filter:
-            peering.route_filter = RouteFilter(id=route_filter)
-        if cmd.supported_api_version(min_api='2017-10-01') and legacy_mode is not None:
-            peering.microsoft_peering_config.legacy_mode = legacy_mode
-
-    return client.begin_create_or_update(resource_group_name, circuit_name, peering_type, peering)
-
-
 class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -3283,6 +3215,8 @@ class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
             help="The IP version to update Microsoft Peering settings for. Allowed values: IPv4, IPv6.  Default: IPv4.",
             default='IPv4'
         )
+        args_schema.ipv6_peering_config._registered = False
+        args_schema.peering_name._registered = False
 
         return args_schema
 
@@ -3292,7 +3226,6 @@ class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
         return args
 
     def pre_operations(self):
-        from azure.cli.core.aaz import AAZUndefined
         args = self.ctx.args
         args.peering_name = args.peering_type
         if args.ip_version == 'IPv6':
@@ -3318,10 +3251,11 @@ class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
             args.routing_registry_name = None
 
         else:
-            if args.peering_type != 'MicrosoftPeering':
+            if has_value(args.peering_type) and args.peering_type != 'MicrosoftPeering':
                 args.advertised_public_prefixes = None
                 args.customer_asn = None
                 args.routing_registry_name = None
+                args.legacy_mode = None
 
 
 def _create_or_update_ipv6_peering(cmd, config, primary_peer_address_prefix, secondary_peer_address_prefix,
@@ -3366,80 +3300,35 @@ class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
             help="The IP version to update Microsoft Peering settings for. Allowed values: IPv4, IPv6.  Default: IPv4.",
             default='IPv4'
         )
-
+        args_schema.ipv6_peering_config._registered = False
+        args_schema.peering_type._registered = False
         return args_schema
-
-    def _cli_arguments_loader(self):
-        args = super()._cli_arguments_loader()
-        args = [(name, arg) for (name, arg) in args if name not in ("ipv6_peering_config", "peering_type", "connections")]
-        return args
 
     def pre_operations(self):
         args = self.ctx.args
         if args.ip_version == 'IPv6':
             microsoft_config = {}
             args.ipv6_peering_config = {}
-            if args.primary_peer_address_prefix:
+            if has_value(args.primary_peer_address_prefix):
                 args.ipv6_peering_config['primary_peer_address_prefix'] = args.primary_peer_subnet
                 args.primary_peer_subnet = None
-            if args.secondary_peer_subnet:
+            if has_value(args.secondary_peer_subnet):
                 args.ipv6_peering_config['secondary_peer_address_prefix'] = args.secondary_peer_subnet
                 args.secondary_peer_subnet = None
-            if args.advertised_public_prefixes:
+            if has_value(args.advertised_public_prefixes):
                 microsoft_config['advertised_public_prefixes'] = args.advertised_public_prefixes
                 args.advertised_public_prefixes = None
-            if args.customer_asn:
+            if has_value(args.customer_asn):
                 microsoft_config['customer_asn'] = args.customer_asn
                 args.customer_asn = None
-            if args.routing_registry_name:
+            if has_value(args.routing_registry_name):
                 microsoft_config['routing_registry_name'] = args.routing_registry_name
                 args.routing_registry_name = None
-            if args.route_filter:
+            if has_value(args.route_filter):
                 args.ipv6_peering_config['route_filter'] = args.route_filter
                 args.route_filter = None
             if microsoft_config is not None:
-                args.ipv6_peering_config['microsoft-peering-config'] = microsoft_config
-
-
-def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_address_prefix=None,
-                                 secondary_peer_address_prefix=None, vlan_id=None, shared_key=None,
-                                 advertised_public_prefixes=None, customer_asn=None,
-                                 routing_registry_name=None, route_filter=None, ip_version='IPv4',
-                                 legacy_mode=None):
-
-    # update settings common to all peering types
-    with cmd.update_context(instance) as c:
-        c.set_param('peer_asn', peer_asn)
-        c.set_param('vlan_id', vlan_id)
-        c.set_param('shared_key', shared_key)
-
-    if ip_version == 'IPv6':
-        # update is the only way to add IPv6 peering options
-        instance.ipv6_peering_config = _create_or_update_ipv6_peering(cmd, instance.ipv6_peering_config,
-                                                                      primary_peer_address_prefix,
-                                                                      secondary_peer_address_prefix, route_filter,
-                                                                      advertised_public_prefixes, customer_asn,
-                                                                      routing_registry_name)
-    else:
-        # IPv4 Microsoft Peering (or non-Microsoft Peering)
-        with cmd.update_context(instance) as c:
-            c.set_param('primary_peer_address_prefix', primary_peer_address_prefix)
-            c.set_param('secondary_peer_address_prefix', secondary_peer_address_prefix)
-
-        if route_filter is not None:
-            RouteFilter = cmd.get_models('RouteFilter')
-            instance.route_filter = RouteFilter(id=route_filter)
-
-        try:
-            with cmd.update_context(instance.microsoft_peering_config) as c:
-                c.set_param('advertised_public_prefixes', advertised_public_prefixes)
-                c.set_param('customer_asn', customer_asn)
-                c.set_param('routing_registry_name', routing_registry_name)
-                c.set_param('legacy_mode', legacy_mode)
-        except AttributeError:
-            raise CLIError('--advertised-public-prefixes, --customer-asn, --routing-registry-name and '
-                           '--legacy-mode are only applicable for Microsoft Peering.')
-    return instance
+                args.ipv6_peering_config['microsoft_peering_config'] = microsoft_config
 # endregion
 
 
@@ -3466,19 +3355,15 @@ class ExpressRouteConnectionCreate(_ExpressRouteConnectionCreate):
             options=['--circuit-name'],
             arg_group="Peering",
             help="ExpressRoute circuit name.")
-
+        args_schema.associated_id._registered = False
+        args_schema.propagated_ids._registered = False
         return args_schema
-
-    def _cli_arguments_loader(self):
-        args = super()._cli_arguments_loader()
-        args = [(name, arg) for (name, arg) in args if name not in ("associated_id", "propagated_ids")]
-        return args
 
     def pre_operations(self):
         args = self.ctx.args
-        if args.associated_route_table is not None:
+        if has_value(args.associated_route_table):
             args.associated_id = {"id": args.associated_route_table}
-        if args.propagated_route_tables is not None:
+        if has_value(args.propagated_route_tables):
             args.propagated_ids = [{"id": propagated_route_table} for propagated_route_table in args.propagated_route_tables]
 
 
@@ -3506,39 +3391,70 @@ class ExpressRouteConnectionUpdate(_ExpressRouteConnectionUpdate):
             options=['--circuit-name'],
             arg_group="Peering",
             help="ExpressRoute circuit name.")
-
+        args_schema.associated_id._registered = False
+        args_schema.propagated_ids._registered = False
         return args_schema
-
-    def _cli_arguments_loader(self):
-        args = super()._cli_arguments_loader()
-        args = [(name, arg) for (name, arg) in args if name not in ("associated_id", "propagated_ids")]
-        return args
 
     def pre_operations(self):
         args = self.ctx.args
-        if args.associated_route_table is not None:
+        if has_value(args.associated_route_table):
             args.associated_id = {"id": args.associated_route_table}
-        if args.propagated_route_tables is not None:
+        if has_value(args.propagated_route_tables):
             args.propagated_ids = [{"id": propagated_route_table} for propagated_route_table in args.propagated_route_tables]
 # endregion
 
 
 # region ExpressRoute ports
-def create_express_route_port(cmd, resource_group_name, express_route_port_name, location=None, tags=None,
-                              peering_location=None, bandwidth_in_gbps=None, encapsulation=None):
-    from .aaz.latest.network.express_route.port import Create
-    if bandwidth_in_gbps is not None:
-        bandwidth_in_gbps = int(bandwidth_in_gbps)
-    port_args = {
-        'resource_group': resource_group_name,
-        'name': express_route_port_name,
-        'location': location,
-        'tags': tags,
-        'peering_location': peering_location,
-        'bandwidth_in_gbps': bandwidth_in_gbps,
-        'encapsulation': encapsulation
-    }
-    return Create(cli_ctx=cmd.cli_ctx)(command_args=port_args)
+class ExpressRoutePortCreate(_ExpressRoutePortCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.bandwidth = AAZListArg(
+            options=["--bandwidth"],
+            help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps.",
+            nullable=True,
+        )
+        args_schema.bandwidth.Element = AAZStrArg()
+        args_schema.bandwidth_in_gbps._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        from azure.cli.core.aaz import has_value
+        if has_value(args.bandwidth):
+            converted_bandwidth = _validate_bandwidth(args.bandwidth, mbps=False)
+
+        args.bandwidth_in_gbps = int(converted_bandwidth)
+
+
+def _validate_bandwidth(bandwidth, mbps=True):
+    unit = 'mbps' if mbps else 'gbps'
+    if bandwidth is None:
+        return
+    if len(bandwidth) == 1:
+        bandwidth_comps = bandwidth[0].to_serialized_data().split(' ')
+    else:
+        bandwidth_comps = bandwidth
+
+    usage_error = CLIError('usage error: --bandwidth INT {Mbps,Gbps}')
+    if len(bandwidth_comps) == 1:
+        bandwidth_comps.append(unit)
+    if len(bandwidth_comps) > 2:
+        raise usage_error
+    input_value = bandwidth_comps[0].to_serialized_data()
+    input_unit = bandwidth_comps[1].to_serialized_data().lower()
+    if float(input_value) and input_unit in ['mbps', 'gbps']:
+        if input_unit == unit:
+            converted_bandwidth = float(bandwidth_comps[0])
+        elif input_unit == 'gbps':
+            converted_bandwidth = float(bandwidth_comps[0]) * 1000
+        else:
+            converted_bandwidth = float(bandwidth_comps[0]) / 1000
+    else:
+        raise usage_error
+    return converted_bandwidth
 
 
 def update_express_route_port(cmd, instance, tags=None):
@@ -3578,13 +3494,6 @@ def download_generated_loa_as_pdf(cmd,
         raise FileOperationError(ex)
 
     logger.warning("The generated letter of authorization is saved at %s", file_path)
-
-
-def list_express_route_ports(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).express_route_ports
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
 
 
 def assign_express_route_port_identity(cmd, resource_group_name, express_route_port_name,
