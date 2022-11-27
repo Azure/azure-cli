@@ -15,7 +15,9 @@ from azure.cli.core.aaz import *
     "eventhubs eventhub",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Command group allows for CRUD operations on EventHub entities
+    """Command Group that allows for CRUD operations on EventHub entities.
+
+    Command Group that allows for CRUD operations on EventHub entities.
     """
     pass
 

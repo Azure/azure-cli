@@ -41,8 +41,8 @@ class Create(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
+        _args_schema.eventhub_name = AAZStrArg(
+            options=["-n", "--name", "--eventhub-name"],
             help="The Event Hub name",
             required=True,
             id_part="child_name_1",
@@ -68,6 +68,26 @@ class Create(AAZCommand):
         # define Arg Group "CaptureDescription"
 
         _args_schema = cls._args_schema
+        _args_schema.destination_name = AAZStrArg(
+            options=["--destination-name"],
+            arg_group="CaptureDescription",
+            help="Name for capture destination",
+        )
+        _args_schema.archive_name_format = AAZStrArg(
+            options=["--archive-name-format"],
+            arg_group="CaptureDescription",
+            help="Blob naming convention for archive, e.g. {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}. Here all the parameters (Namespace,EventHub .. etc) are mandatory irrespective of order",
+        )
+        _args_schema.blob_container = AAZStrArg(
+            options=["--blob-container"],
+            arg_group="CaptureDescription",
+            help="Blob container Name",
+        )
+        _args_schema.storage_account_resource_id = AAZStrArg(
+            options=["--storage-account-resource-id"],
+            arg_group="CaptureDescription",
+            help="Resource id of the storage account to be used to create the blobs",
+        )
         _args_schema.enable_capture = AAZBoolArg(
             options=["--enable-capture"],
             arg_group="CaptureDescription",
@@ -93,25 +113,6 @@ class Create(AAZCommand):
             options=["--skip-empty-archives"],
             arg_group="CaptureDescription",
             help="A value that indicates whether to Skip Empty Archives",
-        )
-
-        # define Arg Group "Destination"
-
-        _args_schema = cls._args_schema
-        _args_schema.archive_name_format = AAZStrArg(
-            options=["--archive-name-format"],
-            arg_group="Destination",
-            help="Blob naming convention for archive, e.g. {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}. Here all the parameters (Namespace,EventHub .. etc) are mandatory irrespective of order",
-        )
-        _args_schema.blob_container = AAZStrArg(
-            options=["--blob-container"],
-            arg_group="Destination",
-            help="Blob container Name",
-        )
-        _args_schema.storage_account = AAZStrArg(
-            options=["--storage-account"],
-            arg_group="Destination",
-            help="Resource id of the storage account to be used to create the blobs",
         )
 
         # define Arg Group "Properties"
@@ -188,7 +189,7 @@ class Create(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "eventHubName", self.ctx.args.name,
+                    "eventHubName", self.ctx.args.eventhub_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -255,14 +256,14 @@ class Create(AAZCommand):
 
             destination = _builder.get(".properties.captureDescription.destination")
             if destination is not None:
-                destination.set_prop("name", AAZStrType, ".name")
+                destination.set_prop("name", AAZStrType, ".destination_name")
                 destination.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
             properties = _builder.get(".properties.captureDescription.destination.properties")
             if properties is not None:
                 properties.set_prop("archiveNameFormat", AAZStrType, ".archive_name_format")
                 properties.set_prop("blobContainer", AAZStrType, ".blob_container")
-                properties.set_prop("storageAccountResourceId", AAZStrType, ".storage_account")
+                properties.set_prop("storageAccountResourceId", AAZStrType, ".storage_account_resource_id")
 
             return self.serialize_content(_content_value)
 

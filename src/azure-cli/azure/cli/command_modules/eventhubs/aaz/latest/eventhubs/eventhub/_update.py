@@ -43,8 +43,8 @@ class Update(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
+        _args_schema.eventhub_name = AAZStrArg(
+            options=["-n", "--name", "--eventhub-name"],
             help="The Event Hub name",
             required=True,
             id_part="child_name_1",
@@ -70,6 +70,30 @@ class Update(AAZCommand):
         # define Arg Group "CaptureDescription"
 
         _args_schema = cls._args_schema
+        _args_schema.destination_name = AAZStrArg(
+            options=["--destination-name"],
+            arg_group="CaptureDescription",
+            help="Name for capture destination",
+            nullable=True,
+        )
+        _args_schema.archive_name_format = AAZStrArg(
+            options=["--archive-name-format"],
+            arg_group="CaptureDescription",
+            help="Blob naming convention for archive, e.g. {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}. Here all the parameters (Namespace,EventHub .. etc) are mandatory irrespective of order",
+            nullable=True,
+        )
+        _args_schema.blob_container = AAZStrArg(
+            options=["--blob-container"],
+            arg_group="CaptureDescription",
+            help="Blob container Name",
+            nullable=True,
+        )
+        _args_schema.storage_account_resource_id = AAZStrArg(
+            options=["--storage-account-resource-id"],
+            arg_group="CaptureDescription",
+            help="Resource id of the storage account to be used to create the blobs",
+            nullable=True,
+        )
         _args_schema.enable_capture = AAZBoolArg(
             options=["--enable-capture"],
             arg_group="CaptureDescription",
@@ -89,8 +113,8 @@ class Update(AAZCommand):
             help="The time window allows you to set the frequency with which the capture to Azure Blobs will happen, value should between 60 to 900 seconds",
             nullable=True,
         )
-        _args_schema.size_limit_in_bytes = AAZIntArg(
-            options=["--size-limit-in-bytes"],
+        _args_schema.capture_size_limit = AAZIntArg(
+            options=["--capture-size-limit"],
             arg_group="CaptureDescription",
             help="The size window defines the amount of data built up in your Event Hub before an capture operation, value should be between 10485760 to 524288000 bytes",
             nullable=True,
@@ -99,28 +123,6 @@ class Update(AAZCommand):
             options=["--skip-empty-archives"],
             arg_group="CaptureDescription",
             help="A value that indicates whether to Skip Empty Archives",
-            nullable=True,
-        )
-
-        # define Arg Group "Destination"
-
-        _args_schema = cls._args_schema
-        _args_schema.archive_name_format = AAZStrArg(
-            options=["--archive-name-format"],
-            arg_group="Destination",
-            help="Blob naming convention for archive, e.g. {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}. Here all the parameters (Namespace,EventHub .. etc) are mandatory irrespective of order",
-            nullable=True,
-        )
-        _args_schema.blob_container = AAZStrArg(
-            options=["--blob-container"],
-            arg_group="Destination",
-            help="Blob container Name",
-            nullable=True,
-        )
-        _args_schema.storage_account_resource_id = AAZStrArg(
-            options=["--storage-account-resource-id"],
-            arg_group="Destination",
-            help="Resource id of the storage account to be used to create the blobs",
             nullable=True,
         )
 
@@ -214,7 +216,7 @@ class Update(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "eventHubName", self.ctx.args.name,
+                    "eventHubName", self.ctx.args.eventhub_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -301,7 +303,7 @@ class Update(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "eventHubName", self.ctx.args.name,
+                    "eventHubName", self.ctx.args.eventhub_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -396,12 +398,12 @@ class Update(AAZCommand):
                 capture_description.set_prop("enabled", AAZBoolType, ".enable_capture")
                 capture_description.set_prop("encoding", AAZStrType, ".encoding")
                 capture_description.set_prop("intervalInSeconds", AAZIntType, ".capture_interval")
-                capture_description.set_prop("sizeLimitInBytes", AAZIntType, ".size_limit_in_bytes")
+                capture_description.set_prop("sizeLimitInBytes", AAZIntType, ".capture_size_limit")
                 capture_description.set_prop("skipEmptyArchives", AAZBoolType, ".skip_empty_archives")
 
             destination = _builder.get(".properties.captureDescription.destination")
             if destination is not None:
-                destination.set_prop("name", AAZStrType, ".name")
+                destination.set_prop("name", AAZStrType, ".destination_name")
                 destination.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
             properties = _builder.get(".properties.captureDescription.destination.properties")

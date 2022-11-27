@@ -12,23 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "eventhubs eventhub show",
+    "eventhubs namespace schema-registry list",
 )
-class Show(AAZCommand):
-    """Get an Event Hubs description for the specified Event Hub.
+class List(AAZCommand):
+    """List all the Schema Groups in a Namespace.
     """
 
     _aaz_info = {
         "version": "2022-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}", "2022-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/schemagroups", "2022-01-01-preview"],
         ]
     }
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return self._output()
+        return self.build_paging(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -41,21 +40,10 @@ class Show(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.eventhub_name = AAZStrArg(
-            options=["-n", "--name", "--eventhub-name"],
-            help="The Event Hub name",
-            required=True,
-            id_part="child_name_1",
-            fmt=AAZStrArgFormat(
-                max_length=256,
-                min_length=1,
-            ),
-        )
         _args_schema.namespace_name = AAZStrArg(
             options=["--namespace-name"],
             help="The Namespace name",
             required=True,
-            id_part="name",
             fmt=AAZStrArgFormat(
                 max_length=50,
                 min_length=6,
@@ -64,11 +52,27 @@ class Show(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+        _args_schema.skip = AAZIntArg(
+            options=["--skip"],
+            help="Skip is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skip parameter that specifies a starting point to use for subsequent calls.",
+            fmt=AAZIntArgFormat(
+                maximum=1000,
+                minimum=0,
+            ),
+        )
+        _args_schema.top = AAZIntArg(
+            options=["--top"],
+            help="May be used to limit the number of results to the most recent N usageDetails.",
+            fmt=AAZIntArgFormat(
+                maximum=1000,
+                minimum=1,
+            ),
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.EventHubsGet(ctx=self.ctx)()
+        self.SchemaRegistryListByNamespace(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -80,10 +84,11 @@ class Show(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
+        return result, next_link
 
-    class EventHubsGet(AAZHttpOperation):
+    class SchemaRegistryListByNamespace(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -97,7 +102,7 @@ class Show(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventHub/namespaces/{namespaceName}/eventhubs/{eventHubName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventHub/namespaces/{namespaceName}/schemagroups",
                 **self.url_parameters
             )
 
@@ -112,10 +117,6 @@ class Show(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
-                **self.serialize_url_param(
-                    "eventHubName", self.ctx.args.eventhub_name,
-                    required=True,
-                ),
                 **self.serialize_url_param(
                     "namespaceName", self.ctx.args.namespace_name,
                     required=True,
@@ -134,6 +135,12 @@ class Show(AAZCommand):
         @property
         def query_parameters(self):
             parameters = {
+                **self.serialize_query_param(
+                    "$skip", self.ctx.args.skip,
+                ),
+                **self.serialize_query_param(
+                    "$top", self.ctx.args.top,
+                ),
                 **self.serialize_query_param(
                     "api-version", "2022-01-01-preview",
                     required=True,
@@ -168,94 +175,62 @@ class Show(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.id = AAZStrType(
+            _schema_on_200.next_link = AAZStrType(
+                serialized_name="nextLink",
+            )
+            _schema_on_200.value = AAZListType()
+
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
+            _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.location = AAZStrType(
+            _element.location = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.name = AAZStrType(
+            _element.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.properties = AAZObjectType(
+            _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _schema_on_200.system_data = AAZObjectType(
+            _element.system_data = AAZObjectType(
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _schema_on_200.type = AAZStrType(
+            _element.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200.properties
-            properties.capture_description = AAZObjectType(
-                serialized_name="captureDescription",
-            )
-            properties.created_at = AAZStrType(
-                serialized_name="createdAt",
+            properties = cls._schema_on_200.value.Element.properties
+            properties.created_at_utc = AAZStrType(
+                serialized_name="createdAtUtc",
                 flags={"read_only": True},
             )
-            properties.message_retention_in_days = AAZIntType(
-                serialized_name="messageRetentionInDays",
-            )
-            properties.partition_count = AAZIntType(
-                serialized_name="partitionCount",
-            )
-            properties.partition_ids = AAZListType(
-                serialized_name="partitionIds",
+            properties.e_tag = AAZStrType(
+                serialized_name="eTag",
                 flags={"read_only": True},
             )
-            properties.status = AAZStrType()
-            properties.updated_at = AAZStrType(
-                serialized_name="updatedAt",
+            properties.group_properties = AAZDictType(
+                serialized_name="groupProperties",
+            )
+            properties.schema_compatibility = AAZStrType(
+                serialized_name="schemaCompatibility",
+            )
+            properties.schema_type = AAZStrType(
+                serialized_name="schemaType",
+            )
+            properties.updated_at_utc = AAZStrType(
+                serialized_name="updatedAtUtc",
                 flags={"read_only": True},
             )
 
-            capture_description = cls._schema_on_200.properties.capture_description
-            capture_description.destination = AAZObjectType()
-            capture_description.enabled = AAZBoolType()
-            capture_description.encoding = AAZStrType()
-            capture_description.interval_in_seconds = AAZIntType(
-                serialized_name="intervalInSeconds",
-            )
-            capture_description.size_limit_in_bytes = AAZIntType(
-                serialized_name="sizeLimitInBytes",
-            )
-            capture_description.skip_empty_archives = AAZBoolType(
-                serialized_name="skipEmptyArchives",
-            )
+            group_properties = cls._schema_on_200.value.Element.properties.group_properties
+            group_properties.Element = AAZStrType()
 
-            destination = cls._schema_on_200.properties.capture_description.destination
-            destination.name = AAZStrType()
-            destination.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-
-            properties = cls._schema_on_200.properties.capture_description.destination.properties
-            properties.archive_name_format = AAZStrType(
-                serialized_name="archiveNameFormat",
-            )
-            properties.blob_container = AAZStrType(
-                serialized_name="blobContainer",
-            )
-            properties.data_lake_account_name = AAZStrType(
-                serialized_name="dataLakeAccountName",
-            )
-            properties.data_lake_folder_path = AAZStrType(
-                serialized_name="dataLakeFolderPath",
-            )
-            properties.data_lake_subscription_id = AAZStrType(
-                serialized_name="dataLakeSubscriptionId",
-            )
-            properties.storage_account_resource_id = AAZStrType(
-                serialized_name="storageAccountResourceId",
-            )
-
-            partition_ids = cls._schema_on_200.properties.partition_ids
-            partition_ids.Element = AAZStrType()
-
-            system_data = cls._schema_on_200.system_data
+            system_data = cls._schema_on_200.value.Element.system_data
             system_data.created_at = AAZStrType(
                 serialized_name="createdAt",
             )
@@ -278,4 +253,4 @@ class Show(AAZCommand):
             return cls._schema_on_200
 
 
-__all__ = ["Show"]
+__all__ = ["List"]

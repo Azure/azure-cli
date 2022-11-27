@@ -12,17 +12,17 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "eventhubs eventhub delete",
+    "eventhubs namespace schema-registry delete",
     confirmation="",
 )
 class Delete(AAZCommand):
-    """Delete an Event Hub from the specified Namespace and resource group.
+    """Deletes an EventHub schema group
     """
 
     _aaz_info = {
         "version": "2022-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}", "2022-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/schemagroups/{}", "2022-01-01-preview"],
         ]
     }
 
@@ -42,16 +42,6 @@ class Delete(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.eventhub_name = AAZStrArg(
-            options=["-n", "--name", "--eventhub-name"],
-            help="The Event Hub name",
-            required=True,
-            id_part="child_name_1",
-            fmt=AAZStrArgFormat(
-                max_length=256,
-                min_length=1,
-            ),
-        )
         _args_schema.namespace_name = AAZStrArg(
             options=["--namespace-name"],
             help="The Namespace name",
@@ -65,11 +55,21 @@ class Delete(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+        _args_schema.schema_group_name = AAZStrArg(
+            options=["-n", "--name", "--schema-group-name"],
+            help="The Schema Group name ",
+            required=True,
+            id_part="child_name_1",
+            fmt=AAZStrArgFormat(
+                max_length=256,
+                min_length=1,
+            ),
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.EventHubsDelete(ctx=self.ctx)()
+        self.SchemaRegistryDelete(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -80,7 +80,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class EventHubsDelete(AAZHttpOperation):
+    class SchemaRegistryDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -96,7 +96,7 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventHub/namespaces/{namespaceName}/eventhubs/{eventHubName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventHub/namespaces/{namespaceName}/schemagroups/{schemaGroupName}",
                 **self.url_parameters
             )
 
@@ -112,15 +112,15 @@ class Delete(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "eventHubName", self.ctx.args.eventhub_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
                     "namespaceName", self.ctx.args.namespace_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "schemaGroupName", self.ctx.args.schema_group_name,
                     required=True,
                 ),
                 **self.serialize_url_param(

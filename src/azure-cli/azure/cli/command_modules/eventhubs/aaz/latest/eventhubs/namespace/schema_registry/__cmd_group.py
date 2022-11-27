@@ -12,12 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "eventhubs",
+    "eventhubs namespace schema-registry",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Command Group allows for CRUD operations on all EventHub management api's
-
-    Command Group allows for CRUD operations on all EventHub management api's
+    """Command Group that allows for CRUD operations on EventHub schema groups.
     """
     pass
 
