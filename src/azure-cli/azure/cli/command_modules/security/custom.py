@@ -64,9 +64,9 @@ def get_security_task(client, resource_name, resource_group_name=None):
         client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     if resource_group_name:
-        return client.tasks.get_resource_group_level_task(resource_group_name, resource_name)
+        return client.tasks.get_resource_group_level_task(resource_group_name, client._config.asc_location, resource_name)
 
-    return client.tasks.get_subscription_level_task(resource_name)
+    return client.tasks.get_subscription_level_task(client._config.asc_location, resource_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -79,9 +79,9 @@ def list_security_alerts(client, resource_group_name=None, location=None):
         client._config.asc_location = location  # pylint: disable=protected-access
 
         if resource_group_name:
-            return client.list_resource_group_level_by_region(resource_group_name)
+            return client.list_resource_group_level_by_region(client._config.asc_location, resource_group_name)
 
-        return client.list_subscription_level_by_region()
+        return client.list_subscription_level_by_region(client._config.asc_location)
 
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
@@ -94,7 +94,7 @@ def get_security_alert(client, location, resource_name, resource_group_name=None
     client._config.asc_location = location  # pylint: disable=protected-access
 
     if resource_group_name:
-        return client.get_resource_group_level(resource_name, resource_group_name)
+        return client.get_resource_group_level(resource_group_name, location, resource_name)
 
     return client.get_subscription_level(location, resource_name)
 
@@ -105,13 +105,13 @@ def update_security_alert(client, location, resource_name, status, resource_grou
 
     if resource_group_name:
         if status == "Dismiss":
-            client.update_resource_group_level_state_to_dismiss(location, resource_name, resource_group_name)
+            client.update_resource_group_level_state_to_dismiss(resource_group_name, location, resource_name)
         if status == "Activate":
-            client.update_resource_group_level_state_to_activate(location, resource_name, resource_group_name)
+            client.update_resource_group_level_state_to_activate(resource_group_name, location, resource_name)
         if status == "Resolve":
-            client.update_resource_group_level_state_to_resolve(location, resource_name, resource_group_name)
+            client.update_resource_group_level_state_to_resolve(resource_group_name, location, resource_name)
         if status == "InProgress":
-            client.update_resource_group_level_state_to_in_progress(location, resource_name, resource_group_name)
+            client.update_resource_group_level_state_to_in_progress(resource_group_name, location, resource_name)
     else:
         if status == "Dismiss":
             client.update_subscription_level_state_to_dismiss(location, resource_name)
@@ -399,7 +399,7 @@ def get_security_location(client, resource_name):
 
     client._config.asc_location = resource_name  # pylint: disable=protected-access
 
-    return client.get()
+    return client.get(client._config.asc_location)
 
 
 # --------------------------------------------------------------------------------------------
