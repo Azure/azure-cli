@@ -880,6 +880,19 @@ def update_encryption_scope(cmd, client, resource_group_name, account_name, encr
                         encryption_scope_name=encryption_scope_name, encryption_scope=encryption_scope)
 
 
+def list_encryption_scope(client, resource_group_name, account_name,
+                          maxpagesize=None, marker=None, filter=None, include=None):  # pylint: disable=redefined-builtin
+    generator = client.list(resource_group_name, account_name, maxpagesize=maxpagesize, filter=filter, include=include)
+    pages = generator.by_page(continuation_token=marker)
+
+    result = list(next(pages))
+    if pages.continuation_token:
+        next_marker = {"nextMarker": pages.continuation_token}
+        result.append(next_marker)
+
+    return result
+
+
 # pylint: disable=no-member
 def create_or_policy(cmd, client, account_name, resource_group_name=None, properties=None, source_account=None,
                      destination_account=None, policy_id="default", rule_id=None, source_container=None,
