@@ -3112,11 +3112,13 @@ class ExpressRouteCreate(_ExpressRouteCreate):
         if has_value(args.bandwidth):
             converted_bandwidth = _validate_bandwidth(args.bandwidth)
         args.sku_name = '{}_{}'.format(args.sku_tier, args.sku_family)
-        args.bandwidth_in_gbps = (converted_bandwidth / 1000.0) if args.express_route_port else None
-        args.bandwidth_in_mbps = int(converted_bandwidth) if not args.express_route_port else None
-        if args.express_route_port:
+
+        if has_value(args.express_route_port):
             args.provider = None
             args.peering_location = None
+            args.bandwidth_in_gbps = (converted_bandwidth / 1000.0)
+        else:
+            args.bandwidth_in_mbps = int(converted_bandwidth)
 
 
 class ExpressRouteUpdate(_ExpressRouteUpdate):
@@ -3130,7 +3132,7 @@ class ExpressRouteUpdate(_ExpressRouteUpdate):
             help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps.",
             nullable=True,
         )
-        args_schema.bandwidth.Element = AAZStrArg()
+        args_schema.bandwidth.Element = AAZStrArg(nullable=True)
         args_schema.bandwidth_in_mbps._registered = False
         args_schema.bandwidth_in_gbps._registered = False
         args_schema.sku_name._registered = False
@@ -3221,11 +3223,6 @@ class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
         args_schema.peering_name._registered = False
 
         return args_schema
-
-    def _cli_arguments_loader(self):
-        args = super()._cli_arguments_loader()
-        args = [(name, arg) for (name, arg) in args if name not in ("ipv6_peering_config", "peering_name")]
-        return args
 
     def pre_operations(self):
         args = self.ctx.args
@@ -3338,7 +3335,7 @@ class ExpressRouteConnectionCreate(_ExpressRouteConnectionCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.associated_route_table = AAZStrArg(
             options=['--associated-route-table', '--associated'],
@@ -3351,13 +3348,13 @@ class ExpressRouteConnectionCreate(_ExpressRouteConnectionCreate):
             help="Space-separated list of resource id of propagated route tables.",
             is_preview=True)
         args_schema.propagated_route_tables.Element = AAZStrArg()
-        args_schema.circuit_name = AAZStrArg(
+        args_schema.circuit_name = AAZResourceIdArg(
             options=['--circuit-name'],
             arg_group="Peering",
             help="ExpressRoute circuit name.",
-        )
-        args_schema.peering._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{circuit_name}/peerings/{}"
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{}/peerings/"
+            )
         )
         args_schema.associated_id._registered = False
         args_schema.propagated_ids._registered = False
@@ -3365,6 +3362,15 @@ class ExpressRouteConnectionCreate(_ExpressRouteConnectionCreate):
 
     def pre_operations(self):
         args = self.ctx.args
+        if has_value(args.peering) and '/' not in args.peering.to_serialized_data():
+            usage_error = InvalidArgumentValueError('circuit name is missing, please provide a circuit name by --circuit-name')
+
+            if has_value(args.circuit_name):
+                peering_id = args.circuit_name.to_serialized_data().join(args.peering.to_serialized_data())
+                args.peering = peering_id
+            else:
+                raise usage_error
+
         if has_value(args.associated_route_table):
             args.associated_id = {"id": args.associated_route_table}
         if has_value(args.propagated_route_tables):
@@ -3376,7 +3382,7 @@ class ExpressRouteConnectionUpdate(_ExpressRouteConnectionUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.associated_route_table = AAZStrArg(
             options=['--associated-route-table', '--associated'],
@@ -3390,14 +3396,15 @@ class ExpressRouteConnectionUpdate(_ExpressRouteConnectionUpdate):
             help="Space-separated list of resource id of propagated route tables.",
             is_preview=True,
             nullable=True,)
-        args_schema.propagated_route_tables.Element = AAZStrArg()
-        args_schema.circuit_name = AAZStrArg(
+        args_schema.propagated_route_tables.Element = AAZStrArg(nullable=True)
+        args_schema.circuit_name = AAZResourceIdArg(
             options=['--circuit-name'],
             arg_group="Peering",
-            help="ExpressRoute circuit name."
-        )
-        args_schema.peering._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{circuit_name}/peerings/{}"
+            help="ExpressRoute circuit name.",
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{}/peerings/"
+            )
         )
         args_schema.associated_id._registered = False
         args_schema.propagated_ids._registered = False
@@ -3405,6 +3412,14 @@ class ExpressRouteConnectionUpdate(_ExpressRouteConnectionUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
+        if has_value(args.peering) and '/' not in args.peering.to_serialized_data():
+            usage_error = InvalidArgumentValueError('circuit name is missing, please provide a circuit name by --circuit-name')
+
+            if has_value(args.circuit_name):
+                peering_id = args.circuit_name.to_serialized_data().join(args.peering.to_serialized_data())
+                args.peering = peering_id
+            else:
+                raise usage_error
 
         if has_value(args.associated_route_table):
             args.associated_id = {"id": args.associated_route_table}
