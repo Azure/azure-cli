@@ -3114,7 +3114,7 @@ class ExpressRouteCreate(_ExpressRouteCreate):
             converted_bandwidth = _validate_bandwidth(args.bandwidth)
         args.sku_name = '{}_{}'.format(args.sku_tier, args.sku_family)
         args.bandwidth_of_circuit = (converted_bandwidth / 1000.0) if args.express_route_port else None
-        args.bandwidth_in_mbps = converted_bandwidth if not args.express_route_port else None
+        args.bandwidth_in_mbps = int(converted_bandwidth) if not args.express_route_port else None
         if args.express_route_port:
             args.provider = None
             args.peering_location = None
@@ -3141,7 +3141,7 @@ class ExpressRouteUpdate(_ExpressRouteUpdate):
         if has_value(args.bandwidth):
             converted_bandwidth = _validate_bandwidth(args.bandwidth)
             args.bandwidth_of_circuit = (converted_bandwidth / 1000.0)
-            args.bandwidth_in_mbps = converted_bandwidth
+            args.bandwidth_in_mbps = int(converted_bandwidth)
 
     def post_instance_update(self, instance):
         if instance.properties.expressRoutePort is not None:
@@ -3338,7 +3338,7 @@ class ExpressRouteConnectionCreate(_ExpressRouteConnectionCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.associated_route_table = AAZStrArg(
             options=['--associated-route-table', '--associated'],
@@ -3351,16 +3351,29 @@ class ExpressRouteConnectionCreate(_ExpressRouteConnectionCreate):
             help="Space-separated list of resource id of propagated route tables.",
             is_preview=True)
         args_schema.propagated_route_tables.Element = AAZStrArg()
-        args_schema.circuit_name = AAZStrArg(
+        args_schema.circuit_name = AAZResourceIdArg(
             options=['--circuit-name'],
             arg_group="Peering",
-            help="ExpressRoute circuit name.")
+            help="ExpressRoute circuit name.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{}/peerings/"
+            )
+        )
         args_schema.associated_id._registered = False
         args_schema.propagated_ids._registered = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
+        if has_value(args.peering) and '/' not in args.peering.to_serialized_data():
+            usage_error = CLIError('usage error: --peering ID | --peering NAME --circuit-name CIRCUIT')
+
+            if has_value(args.circuit_name):
+                peering_id = args.circuit_name.to_serialized_data().join(args.peering.to_serialized_data())
+                args.peering = peering_id
+            else:
+                raise usage_error
+
         if has_value(args.associated_route_table):
             args.associated_id = {"id": args.associated_route_table}
         if has_value(args.propagated_route_tables):
@@ -3372,7 +3385,7 @@ class ExpressRouteConnectionUpdate(_ExpressRouteConnectionUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.associated_route_table = AAZStrArg(
             options=['--associated-route-table', '--associated'],
@@ -3387,16 +3400,33 @@ class ExpressRouteConnectionUpdate(_ExpressRouteConnectionUpdate):
             is_preview=True,
             nullable=True,)
         args_schema.propagated_route_tables.Element = AAZStrArg()
-        args_schema.circuit_name = AAZStrArg(
+        args_schema.circuit_name = AAZResourceIdArg(
             options=['--circuit-name'],
             arg_group="Peering",
-            help="ExpressRoute circuit name.")
+            help="ExpressRoute circuit name.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{}/peerings/"
+            )
+        )
         args_schema.associated_id._registered = False
         args_schema.propagated_ids._registered = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
+        if has_value(args.peering) and '/' not in args.peering.to_serialized_data():
+            usage_error = CLIError('usage error: --peering ID | --peering NAME --circuit-name CIRCUIT')
+
+            if has_value(args.circuit_name):
+                peering_id = args.circuit_name.to_serialized_data().join(args.peering.to_serialized_data())
+                args.peering = peering_id
+            else:
+                raise usage_error
+        # args.policies = (
+        #     args.policies,
+        #     args.service_endpoint_policy,
+        #     element_transformer=lambda _, policy_id: {"id": policy_id}
+        # )
         if has_value(args.associated_route_table):
             args.associated_id = {"id": args.associated_route_table}
         if has_value(args.propagated_route_tables):
@@ -3436,15 +3466,15 @@ def _validate_bandwidth(bandwidth, mbps=True):
     if len(bandwidth) == 1:
         bandwidth_comps = bandwidth[0].to_serialized_data().split(' ')
     else:
-        bandwidth_comps = bandwidth
+        bandwidth_comps = bandwidth.to_serialized_data()
 
     usage_error = CLIError('usage error: --bandwidth INT {Mbps,Gbps}')
     if len(bandwidth_comps) == 1:
         bandwidth_comps.append(unit)
     if len(bandwidth_comps) > 2:
         raise usage_error
-    input_value = bandwidth_comps[0].to_serialized_data()
-    input_unit = bandwidth_comps[1].to_serialized_data().lower()
+    input_value = bandwidth_comps[0]
+    input_unit = bandwidth_comps[1].lower()
     if float(input_value) and input_unit in ['mbps', 'gbps']:
         if input_unit == unit:
             converted_bandwidth = float(bandwidth_comps[0])
