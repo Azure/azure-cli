@@ -64,8 +64,8 @@ class Create(AAZCommand):
             options=["--allow-classic-operations"],
             help="Allow classic operations. Allowed values: false, true.",
         )
-        _args_schema.bandwidth_of_circuit = AAZFloatArg(
-            options=["--bandwidth-of-circuit"],
+        _args_schema.bandwidth_in_gbps = AAZFloatArg(
+            options=["--bandwidth-in-gbps"],
             help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps.  Values from: az network express-route list-service-providers.",
         )
         _args_schema.express_route_port = AAZStrArg(
@@ -302,7 +302,7 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("allowClassicOperations", AAZBoolType, ".allow_classic_operations")
-                properties.set_prop("bandwidthInGbps", AAZFloatType, ".bandwidth_of_circuit")
+                properties.set_prop("bandwidthInGbps", AAZFloatType, ".bandwidth_in_gbps")
                 properties.set_prop("expressRoutePort", AAZObjectType)
                 properties.set_prop("globalReachEnabled", AAZBoolType, ".allow_global_reach")
                 properties.set_prop("serviceProviderProperties", AAZObjectType)

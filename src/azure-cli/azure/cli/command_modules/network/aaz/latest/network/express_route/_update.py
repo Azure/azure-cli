@@ -58,12 +58,12 @@ class Update(AAZCommand):
         )
         _args_schema.allow_classic_operations = AAZBoolArg(
             options=["--allow-classic-operations"],
-            help="Allow classic operations.",
+            help="Allow classic operations.  Allowed values: false, true.",
             nullable=True,
         )
-        _args_schema.bandwidth_of_circuit = AAZFloatArg(
-            options=["--bandwidth-of-circuit"],
-            help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps.",
+        _args_schema.bandwidth_in_gbps = AAZFloatArg(
+            options=["--bandwidth-in-gbps"],
+            help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps.  Values from: az network express-route list-service-providers.",
             nullable=True,
         )
         _args_schema.express_route_port = AAZStrArg(
@@ -91,6 +91,11 @@ class Update(AAZCommand):
             help="Chosen SKU family of ExpressRoute circuit.  Allowed values: MeteredData, UnlimitedData.  Default: MeteredData.",
             nullable=True,
             enum={"MeteredData": "MeteredData", "UnlimitedData": "UnlimitedData"},
+        )
+        _args_schema.sku_name = AAZStrArg(
+            options=["--sku-name"],
+            help="The name of the SKU.",
+            nullable=True,
         )
         _args_schema.sku_tier = AAZStrArg(
             options=["--sku-tier"],
@@ -446,7 +451,7 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("allowClassicOperations", AAZBoolType, ".allow_classic_operations")
-                properties.set_prop("bandwidthInGbps", AAZFloatType, ".bandwidth_of_circuit")
+                properties.set_prop("bandwidthInGbps", AAZFloatType, ".bandwidth_in_gbps")
                 properties.set_prop("expressRoutePort", AAZObjectType)
                 properties.set_prop("globalReachEnabled", AAZBoolType, ".allow_global_reach")
                 properties.set_prop("serviceProviderProperties", AAZObjectType)
@@ -464,6 +469,7 @@ class Update(AAZCommand):
             sku = _builder.get(".sku")
             if sku is not None:
                 sku.set_prop("family", AAZStrType, ".sku_family")
+                sku.set_prop("name", AAZStrType, ".sku_name")
                 sku.set_prop("tier", AAZStrType, ".sku_tier")
 
             tags = _builder.get(".tags")
