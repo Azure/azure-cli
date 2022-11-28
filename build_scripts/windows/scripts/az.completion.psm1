@@ -1,8 +1,8 @@
 Register-ArgumentCompleter -Native -CommandName az -ScriptBlock {
     param($commandName, $wordToComplete, $cursorPosition)
     $completion_file = New-TemporaryFile
-    $env:_ARGCOMPLETE_STDOUT_FILENAME = $completion_file
     $env:ARGCOMPLETE_USE_TEMPFILES = 1
+    $env:_ARGCOMPLETE_STDOUT_FILENAME = $completion_file
     $env:COMP_LINE = $wordToComplete
     $env:COMP_POINT = $cursorPosition
     $env:_ARGCOMPLETE = 1
