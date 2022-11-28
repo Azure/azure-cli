@@ -6756,7 +6756,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd = 'aks create --resource-group {resource_group} --name {aks_name2} --location {location} ' \
                      '--nodepool-name {nodepool_name} ' \
                      '--node-count 1 --snapshot-id {snapshot_resource_id} ' \
-                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/SnapshotPreview ' \
                      '-k {k8s_version} ' \
                      '--ssh-key-value={ssh_key_value} -o json'
         self.cmd(create_cmd, checks=[
@@ -6766,7 +6765,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # add a new nodepool to this cluster using this snapshot
         add_nodepool_cmd = 'aks nodepool add --resource-group={resource_group} --cluster-name={aks_name2} --name={nodepool_name2} --node-count 1 ' \
-                           '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/SnapshotPreview ' \
                            '-k {k8s_version} ' \
                            '--snapshot-id {snapshot_resource_id} -o json'
         self.cmd(add_nodepool_cmd,
@@ -6775,20 +6773,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 self.check('creationData.sourceResourceId', snapshot_resource_id)
         ])
 
-        # upgrade this cluster (snapshot is not allowed for cluster upgrading), snapshot info is reset
-        create_cmd = 'aks upgrade --resource-group {resource_group} --name {aks_name2} -k {upgrade_k8s_version} --yes -o json'
-        self.cmd(create_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('agentPoolProfiles[0].creationData', None),
-            self.check('agentPoolProfiles[1].creationData', None)
-        ])
-
         # upgrade the nodepool2 using this snapshot again
         upgrade_node_image_only_nodepool_cmd = 'aks nodepool upgrade ' \
                                                '--resource-group {resource_group} ' \
                                                '--cluster-name {aks_name2} ' \
                                                '-n {nodepool_name2} ' \
-                                               '--node-image-only --no-wait ' \
+                                               '--node-image-only ' \
                                                '--snapshot-id {snapshot_resource_id} -o json'
         self.cmd(upgrade_node_image_only_nodepool_cmd)
 
@@ -6797,8 +6787,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                            '--cluster-name={aks_name2} ' \
                            '-n {nodepool_name2} '
         self.cmd(get_nodepool_cmd, checks=[
-            self.check('provisioningState', 'UpgradingNodeImageVersion'),
+            self.check('provisioningState', 'Succeeded'),
             self.check('creationData.sourceResourceId', snapshot_resource_id)
+        ])
+
+        # upgrade this cluster (snapshot is not allowed for cluster upgrading), snapshot info is reset
+        create_cmd = 'aks upgrade --resource-group {resource_group} --name {aks_name2} -k {upgrade_k8s_version} --yes -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].creationData', None),
+            self.check('agentPoolProfiles[1].creationData', None)
         ])
 
         # delete the 2nd AKS cluster
