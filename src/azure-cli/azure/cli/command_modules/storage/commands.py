@@ -184,7 +184,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
         g.custom_command('create', 'create_encryption_scope')
         g.show_command('show', 'get')
-        g.command('list', 'list')
+        g.custom_command('list', 'list_encryption_scope')
         g.custom_command('update', 'update_encryption_scope')
 
     management_policy_sdk = CliCommandType(
