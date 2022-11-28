@@ -8,7 +8,7 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_
 
 from knack.log import get_logger
 
-# pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
+# pylint: disable=no-self-use,no-member,too-many-lines,unused-argument,protected-access
 from azure.cli.core.aaz import has_value
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from azure.cli.command_modules.network.aaz.latest.network.nsg.rule import Update as _NsgRuleUpdate
@@ -290,7 +290,6 @@ class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
         return args
 
     def pre_operations(self):
-        from azure.cli.core.aaz import has_value
         args = self.ctx.args
         if has_value(args.custom_error_pages):
             configurations = []
@@ -3339,7 +3338,7 @@ class ExpressRouteConnectionCreate(_ExpressRouteConnectionCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.associated_route_table = AAZStrArg(
             options=['--associated-route-table', '--associated'],
@@ -3377,7 +3376,7 @@ class ExpressRouteConnectionUpdate(_ExpressRouteConnectionUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.associated_route_table = AAZStrArg(
             options=['--associated-route-table', '--associated'],
@@ -3436,7 +3435,6 @@ class ExpressRoutePortCreate(_ExpressRoutePortCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        from azure.cli.core.aaz import has_value
         if has_value(args.bandwidth):
             converted_bandwidth = _validate_bandwidth(args.bandwidth, mbps=False)
 
@@ -3452,7 +3450,7 @@ def _validate_bandwidth(bandwidth, mbps=True):
     else:
         bandwidth_comps = bandwidth.to_serialized_data()
 
-    usage_error = CLIError('--bandwidth INT {Mbps,Gbps}')
+    usage_error = InvalidArgumentValueError('--bandwidth INT {Mbps,Gbps}')
     if len(bandwidth_comps) == 1:
         bandwidth_comps.append(unit)
     if len(bandwidth_comps) > 2:
