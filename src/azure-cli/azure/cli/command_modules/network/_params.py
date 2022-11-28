@@ -1811,6 +1811,7 @@ def load_arguments(self, _):
         c.argument('geo_mapping', help="Space-separated list of country/region codes mapped to this endpoint when using the 'Geographic' routing method.", nargs='+')
         c.argument('subnets', nargs='+', help='Space-separated list of subnet CIDR prefixes (10.0.0.0/24) or subnet ranges (10.0.0.0-11.0.0.0).', validator=validate_subnet_ranges)
         c.argument('monitor_custom_headers', nargs='+', options_list='--custom-headers', help='Space-separated list of custom headers in KEY=VALUE format.', validator=validate_custom_headers)
+        c.argument('always_serve', arg_type=get_enum_type(['Enabled', 'Disabled']), help='If Always Serve is enabled, probing for endpoint health will be disabled and endpoints will be included in the traffic routing method.')
     # endregion
 
     # region VirtualNetworks

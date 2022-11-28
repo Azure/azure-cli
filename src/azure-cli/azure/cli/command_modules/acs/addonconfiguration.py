@@ -319,13 +319,15 @@ def ensure_container_insights_for_monitoring(
     aad_route=False,
     create_dcr=False,
     create_dcra=False,
+    enable_syslog=False,
 ):
     """
     Either adds the ContainerInsights solution to a LA Workspace OR sets up a DCR (Data Collection Rule) and DCRA
     (Data Collection Rule Association). Both let the monitoring addon send data to a Log Analytics Workspace.
 
     Set aad_route == True to set up the DCR data route. Otherwise the solution route will be used. Create_dcr and
-    create_dcra have no effect if aad_route == False.
+    create_dcra have no effect if aad_route == False. If syslog data is to be collected set aad_route == True and
+    enable_syslog == True
 
     Set remove_monitoring to True and create_dcra to True to remove the DCRA from a cluster. The association makes
     it very hard to delete either the DCR or cluster. (It is not obvious how to even navigate to the association from
@@ -440,7 +442,7 @@ def ensure_container_insights_for_monitoring(
             existing_tags = get_existing_container_insights_extension_dcr_tags(
                 cmd, dcr_url)
             # create the DCR
-            dcr_creation_body = json.dumps(
+            dcr_creation_body_without_syslog = json.dumps(
                 {
                     "location": location,
                     "tags": existing_tags,
@@ -475,11 +477,94 @@ def ensure_container_insights_for_monitoring(
                     },
                 }
             )
+
+            dcr_creation_body_with_syslog = json.dumps(
+                {
+                    "location": location,
+                    "tags": existing_tags,
+                    "properties": {
+                        "dataSources": {
+                            "syslog": [
+                                {
+                                    "streams": [
+                                        "Microsoft-Syslog"
+                                    ],
+                                    "facilityNames": [
+                                        "auth",
+                                        "authpriv",
+                                        "cron",
+                                        "daemon",
+                                        "mark",
+                                        "kern",
+                                        "local0",
+                                        "local1",
+                                        "local2",
+                                        "local3",
+                                        "local4",
+                                        "local5",
+                                        "local6",
+                                        "local7",
+                                        "lpr",
+                                        "mail",
+                                        "news",
+                                        "syslog",
+                                        "user",
+                                        "uucp"
+                                    ],
+                                    "logLevels": [
+                                        "Debug",
+                                        "Info",
+                                        "Notice",
+                                        "Warning",
+                                        "Error",
+                                        "Critical",
+                                        "Alert",
+                                        "Emergency"
+                                    ],
+                                    "name": "sysLogsDataSource"
+                                }
+                            ],
+                            "extensions": [
+                                {
+                                    "name": "ContainerInsightsExtension",
+                                    "streams": [
+                                        "Microsoft-ContainerInsights-Group-Default"
+                                    ],
+                                    "extensionName": "ContainerInsights",
+                                }
+                            ]
+                        },
+                        "dataFlows": [
+                            {
+                                "streams": [
+                                    "Microsoft-ContainerInsights-Group-Default",
+                                    "Microsoft-Syslog"
+                                ],
+                                "destinations": ["la-workspace"],
+                            }
+                        ],
+                        "destinations": {
+                            "logAnalytics": [
+                                {
+                                    "workspaceResourceId": workspace_resource_id,
+                                    "name": "la-workspace",
+                                }
+                            ]
+                        },
+                    },
+                }
+            )
+
             for _ in range(3):
                 try:
-                    send_raw_request(
-                        cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body
-                    )
+                    if enable_syslog:
+                        send_raw_request(
+                            cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body_with_syslog
+                        )
+                    else:
+                        send_raw_request(
+                            cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body_without_syslog
+                        )
                     error = None
                     break
                 except AzCLIError as e:

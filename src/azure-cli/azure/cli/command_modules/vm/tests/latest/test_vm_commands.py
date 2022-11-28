@@ -802,7 +802,7 @@ class TestSnapShotAccess(ScenarioTest):
         self.kwargs.update({
             'vm': self.create_random_name('vm', 10),
             'snapshot': self.create_random_name('snap', 10)
-    })
+        })
         self.cmd('vm create -g {rg} -n {vm} --image debian --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
         vm_info = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
         self.kwargs.update({
@@ -5749,6 +5749,42 @@ class VMGalleryImage(ScenarioTest):
                      self.check('storageProfile.dataDiskImages[1].source.uri', vhd_uri),
                      self.check('storageProfile.dataDiskImages[1].lun', 1)])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_image_version_create_os_vhd')
+    def test_image_version_create_os_vhd(self, resource_group):
+        from msrestazure.tools import resource_id
+
+        self.kwargs.update({
+            'vm': 'myvm',
+            'gallery': 'gallery',
+            'image': 'image'
+        })
+
+        self.cmd('vm create -g {rg} -n vm1 --image centos --use-unmanaged-disk --nsg-rule NONE '
+                 '--generate-ssh-key --admin-username vmtest')
+        vhd_uri = self.cmd('vm show -g {rg} -n vm1').get_output_in_json()['storageProfile']['osDisk']['vhd']['uri']
+
+        storage_account_os = vhd_uri.split('.')[0].split('/')[-1]
+        subscription_id = self.get_subscription_id()
+        account_id = resource_id(subscription=subscription_id, resource_group=resource_group, namespace='Microsoft.Storage', type='storageAccounts', name=storage_account_os)
+
+        self.kwargs.update({
+            'vhd_uri': vhd_uri,
+            'account_id': account_id
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} '
+                 '--os-type linux -p publisher1 -f offer1 -s sku1')
+
+        self.cmd('sig image-version create --resource-group {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image} --gallery-image-version 1.0.0 '
+                 '--os-vhd-storage-account {account_id} --os-vhd-uri {vhd_uri}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.osDiskImage.source.id', '{account_id}'),
+            self.check('storageProfile.osDiskImage.source.uri', '{vhd_uri}')
+        ])
+
     @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
     @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='CentralUSEUAP',
                       additional_params='--enable-purge-protection true')
@@ -9021,6 +9057,48 @@ class CapacityReservationScenarioTest(ScenarioTest):
 
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
         self.cmd('capacity reservation group delete -n {reservation_group2} -g {rg} --yes')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_delete', location='centraluseuap')
+    def test_capacity_reservation_list_delete(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'reservation_group': self.create_random_name('cli_reservation_group_', 40),
+            'reservation_name': self.create_random_name('cli_reservation_name_', 40),
+            'sku': 'Standard_DS1_v2'
+        })
+
+        self.kwargs['reservation_group_id1'] = \
+            self.cmd('capacity reservation group create -n {reservation_group} -g {rg} --tags key=val --zones 1 2',
+                     checks=[
+                         self.check('name', '{reservation_group}'),
+                         self.check('zones', ['1', '2']),
+                         self.check('tags', {'key': 'val'})
+                     ]).get_output_in_json()['id']
+
+        self.cmd('capacity reservation create -c {reservation_group} -n {reservation_name} -g {rg} '
+                 '--sku {sku} --capacity 5 --zone 1 --tags key=val',
+                 checks=[
+                     self.check('name', '{reservation_name}'),
+                     self.check('sku.name', '{sku}'),
+                     self.check('sku.capacity', 5),
+                     self.check('zones', ['1']),
+                     self.check('tags', {'key': 'val'}),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('capacity reservation list -c {reservation_group} -g {rg} --query "[?name==\'{reservation_name}\']" ',
+                 checks=[
+                     self.check('[0].name', '{reservation_name}'),
+                     self.check('[0].sku.name', '{sku}'),
+                     self.check('[0].sku.capacity', 5),
+                     self.check('[0].tags', {'key': 'val'}),
+                     self.check('[0].zones', ['1']),
+                     self.check('[0].provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('capacity reservation delete -c {reservation_group} -n {reservation_name} -g {rg} --yes')
+        self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
 
 
 class VMVMSSAddApplicationTestScenario(ScenarioTest):

@@ -22,7 +22,7 @@ from ._field_type import AAZObjectType
 from ._paging import AAZPaged
 from ._poller import AAZLROPoller
 from ._command_ctx import AAZCommandCtx
-from .exceptions import AAZUnknownFieldError
+from .exceptions import AAZUnknownFieldError, AAZUnregisteredArg
 
 
 class AAZCommandGroup:
@@ -160,7 +160,10 @@ class AAZCommand(CLICommand):
         args = {}
         for name, field in schema._fields.items():
             # generate command arguments from argument schema.
-            args[name] = field.to_cmd_arg(name)
+            try:
+                args[name] = field.to_cmd_arg(name, cli_ctx=self.cli_ctx)
+            except AAZUnregisteredArg:
+                continue
         return list(args.items())
 
     def update_argument(self, param_name, argtype):
