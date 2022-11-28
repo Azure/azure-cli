@@ -173,7 +173,6 @@ setup(
         'az.completion.sh',
         'az.bat',
         'azps.ps1'
-        'az.completion.psm1'
     ],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
