@@ -6773,7 +6773,7 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     endpoint_status=None, weight=None, priority=None,
                                     endpoint_location=None, endpoint_monitor_status=None,
                                     min_child_endpoints=None, min_child_ipv4=None, min_child_ipv6=None,
-                                    geo_mapping=None, monitor_custom_headers=None, subnets=None):
+                                    geo_mapping=None, monitor_custom_headers=None, subnets=None, always_serve=None):
     from .aaz.latest.network.traffic_manager.endpoint import Create
     Create_Endpoint = Create(cmd.loader)
 
@@ -6794,7 +6794,8 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
         "subnets": subnets,
         "target": target,
         "target_resource_id": target_resource_id,
-        "weight": weight
+        "weight": weight,
+        "always_serve": always_serve,
     }
 
     return Create_Endpoint(args)
@@ -6806,7 +6807,7 @@ def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     priority=None, target=None, target_resource_id=None,
                                     weight=None, min_child_endpoints=None, min_child_ipv4=None,
                                     min_child_ipv6=None, geo_mapping=None,
-                                    subnets=None, monitor_custom_headers=None):
+                                    subnets=None, monitor_custom_headers=None, always_serve=None):
     from .aaz.latest.network.traffic_manager.endpoint import Update
     Update_Endpoint = Update(cmd.loader)
 
@@ -6842,6 +6843,8 @@ def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
         args["target_resource_id"] = target_resource_id
     if weight is not None:
         args["weight"] = weight
+    if always_serve is not None:
+        args["always_serve"] = always_serve
 
     return Update_Endpoint(args)
 
@@ -8310,7 +8313,7 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
         tunnel_server.cleanup()
 
 
-def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, disable_gateway=False, configure=False, enable_mfa=False):
+def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, disable_gateway=False, configure=False):
     from azure.cli.core._profile import Profile
     import os
     from ._process_helper import launch_and_wait
@@ -8334,7 +8337,7 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
             logger.debug("Response %s", access_token)
             client = network_client_factory(cmd.cli_ctx).bastion_hosts
             bastion = client.get(resource_group_name, bastion_host_name)
-            web_address = 'https://{}/api/rdpfile?resourceId={}&format=rdp&rdpport={}&enablerdsaad={}'.format(bastion.dns_name, target_resource_id, resource_port, enable_mfa)
+            web_address = 'https://{}/api/rdpfile?resourceId={}&format=rdp'.format(bastion.dns_name, target_resource_id)
             headers = {}
             headers['Authorization'] = 'Bearer {}'.format(access_token)
             headers['Accept'] = '*/*'
