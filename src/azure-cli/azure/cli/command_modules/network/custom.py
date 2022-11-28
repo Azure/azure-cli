@@ -19,6 +19,7 @@ from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumen
     MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, supported_api_version
 from azure.cli.core.aaz import has_value
+from azure.cli.core.aaz.utils import assign_aaz_list_arg
 
 from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
@@ -3422,15 +3423,15 @@ class ExpressRouteConnectionUpdate(_ExpressRouteConnectionUpdate):
                 args.peering = peering_id
             else:
                 raise usage_error
-        # args.policies = (
-        #     args.policies,
-        #     args.service_endpoint_policy,
-        #     element_transformer=lambda _, policy_id: {"id": policy_id}
-        # )
+
         if has_value(args.associated_route_table):
             args.associated_id = {"id": args.associated_route_table}
-        if has_value(args.propagated_route_tables):
-            args.propagated_ids = [{"id": propagated_route_table} for propagated_route_table in args.propagated_route_tables]
+
+        args.propagated_ids = assign_aaz_list_arg(
+            args.propagated_ids,
+            args.propagated_route_tables,
+            element_transformer=lambda _, propagated_route_table: {"id": propagated_route_table}
+        )
 # endregion
 
 
