@@ -6,7 +6,7 @@ Register-ArgumentCompleter -Native -CommandName az -ScriptBlock {
     $env:COMP_LINE = $wordToComplete
     $env:COMP_POINT = $cursorPosition
     $env:_ARGCOMPLETE = 1
-    $env:_ARGCOMPLETE_SUPPRESS_SPACE = 1
+    $env:_ARGCOMPLETE_SUPPRESS_SPACE = 0
     $env:_ARGCOMPLETE_IFS = "`n"
     az 2>&1 | Out-Null
     
