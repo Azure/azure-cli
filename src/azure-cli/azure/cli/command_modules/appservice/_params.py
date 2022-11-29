@@ -993,6 +993,12 @@ def load_arguments(self, _):
         c.argument('allow_new_private_endpoint_connections', arg_type=get_three_state_flag(),
                    options_list=['--allow-new-private-endpoint-connections', '-p'],
                    help='(ASEv3 only) Configure Apps in App Service Environment to allow new private endpoint connections.')
+        c.argument('allow_remote_debugging', arg_type=get_three_state_flag(),
+                   options_list=['--allow-remote-debugging', '-d'],
+                   help='(ASEv3 only) Configure App Service Environment to allow remote debugging. You will still have to configure remote debugging at the individual app level')
+        c.argument('allow_incoming_ftp_connections', arg_type=get_three_state_flag(),
+                   options_list=['--allow-incoming-ftp-connections', '-f'],
+                   help='(ASEv3 only) Configure App Service Environment to allow FTP access. This ftpEnabled setting allows you to allow or deny FTP connections on the App Service Environment level. Individual apps will still need to configure FTP access.')
     with self.argument_context('appservice ase list-addresses') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))

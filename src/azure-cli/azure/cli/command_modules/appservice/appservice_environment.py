@@ -97,12 +97,28 @@ def delete_appserviceenvironment(cmd, name, resource_group_name=None, no_wait=Fa
 
 
 def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_scale_factor=None,
-                                 front_end_sku=None, allow_new_private_endpoint_connections=None, no_wait=False):
+                                 front_end_sku=None, allow_new_private_endpoint_connections=None, allow_incoming_ftp_connections=None, allow_remote_debugging=None, no_wait=False):
     ase_client = _get_ase_client_factory(cmd.cli_ctx)
     if resource_group_name is None:
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
     ase_def = ase_client.get(resource_group_name, name)
     if ase_def.kind.lower() == 'asev3':
+        if allow_remote_debugging is not None:
+            ase_networking_conf = ase_client.get_ase_v3_networking_configuration(resource_group_name, name)
+            if ase_networking_conf.remote_debug_enabled != allow_remote_debugging:
+                ase_networking_conf.remote_debug_enabled = allow_remote_debugging
+                return ase_client.update_ase_networking_configuration(resource_group_name=resource_group_name,
+                                                                      name=name,
+                                                                      ase_networking_configuration=ase_networking_conf)
+            return ase_networking_conf
+        if allow_incoming_ftp_connections is not None:
+            ase_networking_conf = ase_client.get_ase_v3_networking_configuration(resource_group_name, name)
+            if ase_networking_conf.ftp_enabled != allow_incoming_ftp_connections:
+                ase_networking_conf.ftp_enabled = allow_incoming_ftp_connections
+                return ase_client.update_ase_networking_configuration(resource_group_name=resource_group_name,
+                                                                      name=name,
+                                                                      ase_networking_configuration=ase_networking_conf)
+            return ase_networking_conf
         if allow_new_private_endpoint_connections is not None:
             ase_networking_conf = ase_client.get_ase_v3_networking_configuration(resource_group_name, name)
             if ase_networking_conf.allow_new_private_endpoint_connections != allow_new_private_endpoint_connections:
