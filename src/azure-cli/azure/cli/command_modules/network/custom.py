@@ -3211,7 +3211,7 @@ def _validate_ipv6_address_prefixes(prefixes):
 class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.ip_version = AAZStrArg(
             options=['--ip-version'],
@@ -3289,7 +3289,7 @@ class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.ip_version = AAZStrArg(
             options=['--ip-version'],
@@ -3374,7 +3374,7 @@ class ExpressRouteConnectionUpdate(_ExpressRouteConnectionUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.associated_route_table = AAZStrArg(
             options=['--associated-route-table', '--associated'],

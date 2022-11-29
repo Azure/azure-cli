@@ -74,9 +74,12 @@ class Create(AAZCommand):
             options=["--authorization-key"],
             help="The authorization key used when the peer circuit is in another subscription.",
         )
-        _args_schema.peer_circuit = AAZStrArg(
+        _args_schema.peer_circuit = AAZResourceIdArg(
             options=["--peer-circuit"],
             help="Name or ID of the peer ExpressRoute circuit.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{}/peerings/{peering_name}"
+            )
         )
 
         # define Arg Group "ExpressRouteCircuitConnectionParameters"

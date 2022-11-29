@@ -128,11 +128,14 @@ class Update(AAZCommand):
             help="Internet Routing Registry / Regional Internet Registry. Allowed values: AFRINIC, ALTDB, APNIC, ARIN, LACNIC, LEVEL3, RADB, RIPENCC.",
             nullable=True,
         )
-        _args_schema.route_filter = AAZStrArg(
+        _args_schema.route_filter = AAZResourceIdArg(
             options=["--route-filter"],
             arg_group="Microsoft Peering",
             help="Name or ID of a route filter to apply to the peering settings.",
             nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/routeFilters/{}"
+            )
         )
 
         advertised_public_prefixes = cls._args_schema.advertised_public_prefixes
@@ -166,12 +169,11 @@ class Update(AAZCommand):
             help="The primary address prefix.",
             nullable=True,
         )
-        ipv6_peering_config.route_filter = AAZObjectArg(
+        ipv6_peering_config.route_filter = AAZStrArg(
             options=["route-filter"],
             help="The reference to the RouteFilter resource.",
             nullable=True,
         )
-        cls._build_args_sub_resource_update(ipv6_peering_config.route_filter)
         ipv6_peering_config.secondary_peer_address_prefix = AAZStrArg(
             options=["secondary-peer-address-prefix"],
             help="The secondary address prefix.",
@@ -527,9 +529,13 @@ class Update(AAZCommand):
             if ipv6_peering_config is not None:
                 _build_schema_express_route_circuit_peering_config_update(ipv6_peering_config.set_prop("microsoftPeeringConfig", AAZObjectType, ".microsoft_peering_config"))
                 ipv6_peering_config.set_prop("primaryPeerAddressPrefix", AAZStrType, ".primary_peer_address_prefix")
-                _build_schema_sub_resource_update(ipv6_peering_config.set_prop("routeFilter", AAZObjectType, ".route_filter"))
+                ipv6_peering_config.set_prop("routeFilter", AAZObjectType)
                 ipv6_peering_config.set_prop("secondaryPeerAddressPrefix", AAZStrType, ".secondary_peer_address_prefix")
                 ipv6_peering_config.set_prop("state", AAZStrType, ".state")
+
+            route_filter = _builder.get(".properties.ipv6PeeringConfig.routeFilter")
+            if route_filter is not None:
+                route_filter.set_prop("id", AAZStrType, ".route_filter")
 
             microsoft_peering_config = _builder.get(".properties.microsoftPeeringConfig")
             if microsoft_peering_config is not None:

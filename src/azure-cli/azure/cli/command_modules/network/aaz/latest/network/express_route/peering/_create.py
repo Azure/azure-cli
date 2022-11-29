@@ -61,7 +61,7 @@ class Create(AAZCommand):
             options=["-n", "--name", "--peering-name"],
             help="The name of the peering.",
             # required=True,
-            id_part="child_name_1"
+            id_part="child_name_1",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -119,10 +119,13 @@ class Create(AAZCommand):
             arg_group="Microsoft Peering",
             help="Internet Routing Registry / Regional Internet Registry. Allowed values: AFRINIC, ALTDB, APNIC, ARIN, LACNIC, LEVEL3, RADB, RIPENCC.",
         )
-        _args_schema.route_filter = AAZStrArg(
+        _args_schema.route_filter = AAZResourceIdArg(
             options=["--route-filter"],
             arg_group="Microsoft Peering",
             help="Name or ID of a route filter to apply to the peering settings.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/routeFilters/{}"
+            )
         )
 
         advertised_public_prefixes = cls._args_schema.advertised_public_prefixes
@@ -151,11 +154,10 @@ class Create(AAZCommand):
             options=["primary-peer-address-prefix"],
             help="The primary address prefix.",
         )
-        ipv6_peering_config.route_filter = AAZObjectArg(
+        ipv6_peering_config.route_filter = AAZStrArg(
             options=["route-filter"],
             help="The reference to the RouteFilter resource.",
         )
-        cls._build_args_sub_resource_create(ipv6_peering_config.route_filter)
         ipv6_peering_config.secondary_peer_address_prefix = AAZStrArg(
             options=["secondary-peer-address-prefix"],
             help="The secondary address prefix.",
@@ -220,18 +222,18 @@ class Create(AAZCommand):
     @classmethod
     def _build_args_sub_resource_create(cls, _schema):
         if cls._args_sub_resource_create is not None:
-            _schema.id = cls._args_sub_resource_create.id
+            _schema.filter_id = cls._args_sub_resource_create.filter_id
             return
 
         cls._args_sub_resource_create = AAZObjectArg()
 
         sub_resource_create = cls._args_sub_resource_create
-        sub_resource_create.id = AAZStrArg(
-            options=["id"],
+        sub_resource_create.filter_id = AAZStrArg(
+            options=["filter-id"],
             help="Resource ID.",
         )
 
-        _schema.id = cls._args_sub_resource_create.id
+        _schema.filter_id = cls._args_sub_resource_create.filter_id
 
     def _execute_operations(self):
         self.pre_operations()
@@ -362,9 +364,13 @@ class Create(AAZCommand):
             if ipv6_peering_config is not None:
                 _build_schema_express_route_circuit_peering_config_create(ipv6_peering_config.set_prop("microsoftPeeringConfig", AAZObjectType, ".microsoft_peering_config"))
                 ipv6_peering_config.set_prop("primaryPeerAddressPrefix", AAZStrType, ".primary_peer_address_prefix")
-                _build_schema_sub_resource_create(ipv6_peering_config.set_prop("routeFilter", AAZObjectType, ".route_filter"))
+                ipv6_peering_config.set_prop("routeFilter", AAZObjectType)
                 ipv6_peering_config.set_prop("secondaryPeerAddressPrefix", AAZStrType, ".secondary_peer_address_prefix")
                 ipv6_peering_config.set_prop("state", AAZStrType, ".state")
+
+            route_filter = _builder.get(".properties.ipv6PeeringConfig.routeFilter")
+            if route_filter is not None:
+                route_filter.set_prop("id", AAZStrType, ".route_filter")
 
             microsoft_peering_config = _builder.get(".properties.microsoftPeeringConfig")
             if microsoft_peering_config is not None:
@@ -629,7 +635,7 @@ def _build_schema_express_route_circuit_peering_config_create(_builder):
 def _build_schema_sub_resource_create(_builder):
     if _builder is None:
         return
-    _builder.set_prop("id", AAZStrType, ".id")
+    _builder.set_prop("id", AAZStrType, ".filter_id")
 
 
 _schema_express_route_circuit_peering_config_read = None
