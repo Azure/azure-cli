@@ -3228,27 +3228,27 @@ class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
         args = self.ctx.args
         args.peering_name = args.peering_type
         if args.ip_version.to_serialized_data().lower() == 'ipv6':
-            if args.peering_type == 'MicrosoftPeering':
+            if args.peering_type.to_serialized_data().lower() == 'microsoftpeering':
                 microsoft_config = {'advertised_public_prefixes': args.advertised_public_prefixes,
                                     'customer_asn': args.customer_asn,
                                     'routing_registry_name': args.routing_registry_name}
             else:
                 microsoft_config = None
             args.ipv6_peering_config = {
-                'primary_peer_address_prefix': args.primary_peer_address_prefix,
-                'secondary_peer_address_prefix': args.secondary_peer_address_prefix,
+                'primary_peer_address_prefix': args.primary_peer_subnet,
+                'secondary_peer_address_prefix': args.secondary_peer_subnet,
                 'microsoft_peering_config': microsoft_config,
                 'route_filter': args.route_filter
             }
-            args.primary_peer_address_prefix = None
-            args.secondary_peer_address_prefix = None
+            args.primary_peer_subnet = None
+            args.secondary_peer_subnet = None
             args.route_filter = None
             args.advertised_public_prefixes = None
             args.customer_asn = None
             args.routing_registry_name = None
 
         else:
-            if has_value(args.peering_type) and args.peering_type != 'MicrosoftPeering':
+            if has_value(args.peering_type) and args.peering_type.to_serialized_data().lower() != 'microsoftpeering':
                 args.advertised_public_prefixes = None
                 args.customer_asn = None
                 args.routing_registry_name = None
@@ -3264,7 +3264,7 @@ class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
         args_schema.ip_version = AAZStrArg(
             options=['--ip-version'],
             arg_group="Microsoft Peering",
-            help="The IP version to update Microsoft Peering settings for. Allowed values: IPv4, IPv6.  Default: IPv4.",
+            help="The IP version to update Microsoft Peering settings for. Allowed values: IPv4, IPv6. Default: IPv4.",
             default='IPv4'
         )
         args_schema.ipv6_peering_config._registered = False
@@ -3276,7 +3276,7 @@ class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
         if args.ip_version.to_serialized_data().lower() == 'ipv6':
             microsoft_config = {}
             args.ipv6_peering_config = {}
-            if has_value(args.primary_peer_address_prefix):
+            if has_value(args.primary_peer_subnet):
                 args.ipv6_peering_config['primary_peer_address_prefix'] = args.primary_peer_subnet
                 args.primary_peer_subnet = None
             if has_value(args.secondary_peer_subnet):
