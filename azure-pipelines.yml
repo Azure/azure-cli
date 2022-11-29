@@ -17,7 +17,6 @@ variables:
 
 jobs:
 - job: CheckPullRequest
-  timeoutInMinutes: 120
   displayName: "Check the Format of Pull Request Title and Content"
   condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release'))
 
@@ -808,6 +807,7 @@ jobs:
       ArtifactName: $(deb_system)-$(distro)
 
 - job: TestDebPackages
+  timeoutInMinutes: 120
   displayName: Test Deb Packages
   dependsOn:
   - BuildDebPackages
