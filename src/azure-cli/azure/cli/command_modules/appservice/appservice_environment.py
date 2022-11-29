@@ -97,7 +97,7 @@ def delete_appserviceenvironment(cmd, name, resource_group_name=None, no_wait=Fa
 
 
 def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_scale_factor=None,
-                                 front_end_sku=None, allow_new_private_endpoint_connections=None, 
+                                 front_end_sku=None, allow_new_private_endpoint_connections=None,
                                  allow_incoming_ftp_connections=None, allow_remote_debugging=None, no_wait=False):
     ase_client = _get_ase_client_factory(cmd.cli_ctx)
     if resource_group_name is None:
