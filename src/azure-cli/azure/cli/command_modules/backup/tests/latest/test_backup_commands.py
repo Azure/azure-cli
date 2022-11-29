@@ -763,38 +763,42 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @StorageAccountPreparer(parameter_name="secondary_region_sa", location="eastus2euap")
     def test_backup_crr_des(self, resource_group, target_resource_group, vault_name, vm_name, des_name, secondary_region_sa):
 
-       self.kwargs.update({
-           'vault': vault_name,
-           'vm': vm_name,
-           'des_id': des_name,
-           'target_rg': target_resource_group,
-           'rg': resource_group,
-           'secondary_sa': secondary_region_sa,
-           'vm_id': "VM;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
-           'container_id': "IaasVMContainer;iaasvmcontainerv2;" + resource_group + ";" + vm_name
-       })
-       self.cmd('backup vault backup-properties set -g {rg} -n {vault} --cross-region-restore-flag true', checks=[
-           self.check("properties.crossRegionRestoreFlag", True)
-       ]).get_output_in_json()
-       time.sleep(300)
+        self.kwargs.update({
+            'vault': vault_name,
+            'vm': vm_name,
+            'des_id': des_name,
+            'target_rg': target_resource_group,
+            'rg': resource_group,
+            'secondary_sa': secondary_region_sa,
+            'vm_id': "VM;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
+            'container_id': "IaasVMContainer;iaasvmcontainerv2;" + resource_group + ";" + vm_name
+        })
 
-       # Trigger Cross Region Restore
-       self.kwargs['crr_rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container_id} -i {vm_id} --use-secondary-region --query [0].name').get_output_in_json()
+        print("des_id: {des_id}, rg: {rg}, target_rg: {target_rg}")
 
-       trigger_restore_job4_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {container_id} -i {vm_id} -r {crr_rp} --storage-account {secondary_sa} -t {target_rg} --disk-encryption-set-id {des_id} --use-secondary-region', checks=[
-           self.check("properties.entityFriendlyName", vm_name),
-           self.check("properties.operation", "CrossRegionRestore"),
-           self.check("properties.status", "InProgress")
-       ]).get_output_in_json()
-       self.kwargs['job4'] = trigger_restore_job4_json['name']
+        if input() == "yes":
+            self.cmd('backup vault backup-properties set -g {rg} -n {vault} --cross-region-restore-flag true', checks=[
+                self.check("properties.crossRegionRestoreFlag", True)
+            ]).get_output_in_json()
+            time.sleep(300)
 
-       self.cmd('backup job wait -g {rg} -v {vault} -n {job3} --use-secondary-region')
+            # Trigger Cross Region Restore
+            self.kwargs['crr_rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container_id} -i {vm_id} --use-secondary-region --query [0].name').get_output_in_json()
 
-       self.cmd('backup job show -g {rg} -v {vault} -n {job3} --use-secondary-region', checks=[
-           self.check("properties.entityFriendlyName", vm_name),
-           self.check("properties.operation", "CrossRegionRestore"),
-           self.check("properties.status", "Completed")
-       ])   
+            trigger_restore_job4_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {container_id} -i {vm_id} -r {crr_rp} --storage-account {secondary_sa} -t {target_rg} --disk-encryption-set-id {des_id} --use-secondary-region', checks=[
+                self.check("properties.entityFriendlyName", vm_name),
+                self.check("properties.operation", "CrossRegionRestore"),
+                self.check("properties.status", "InProgress")
+            ]).get_output_in_json()
+            self.kwargs['job4'] = trigger_restore_job4_json['name']
+
+            self.cmd('backup job wait -g {rg} -v {vault} -n {job4} --use-secondary-region')
+
+            self.cmd('backup job show -g {rg} -v {vault} -n {job4} --use-secondary-region', checks=[
+                self.check("properties.entityFriendlyName", vm_name),
+                self.check("properties.operation", "CrossRegionRestore"),
+                self.check("properties.status", "Completed")
+            ])   
 
     @ResourceGroupPreparer(location="eastasia")
     @VaultPreparer(soft_delete=False)

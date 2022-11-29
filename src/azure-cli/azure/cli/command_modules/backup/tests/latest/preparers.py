@@ -319,7 +319,7 @@ class KeyPreparer(AbstractPreparer, SingleValueReplacer):
             keyvault = self._get_keyvault(**kwargs)
 
             command_string = 'az keyvault key create --vault-name {} -n {}'
-            command_string = command_string.format(keyvault, self.parameter_name)
+            command_string = command_string.format(keyvault, name)
             execute(self.cli_ctx, command_string)
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
@@ -330,7 +330,7 @@ class KeyPreparer(AbstractPreparer, SingleValueReplacer):
 
     def _get_keyvault(self, **kwargs):
         try:
-            return kwargs.get(self.keyvault_parameter_name)
+            return kwargs.get(self.key_vault)
         except KeyError:
             template = 'To create a Key, a keyvault is required. Please add ' \
                         'decorator @{}} in front of this Key Preparer.'
@@ -356,7 +356,7 @@ class DESPreparer(AbstractPreparer, SingleValueReplacer):
             key_url = self._get_key(**kwargs)
 
             command_string = 'az disk-encryption-set create -g {} -n {} --key-url {}'
-            command_string = command_string.format(self.resource_group, self.parameter_name, key_url)
+            command_string = command_string.format(self.resource_group, name, key_url)
             execute(self.cli_ctx, command_string)
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
@@ -376,12 +376,12 @@ class DESPreparer(AbstractPreparer, SingleValueReplacer):
 
     def _get_key(self, **kwargs):
         try:
-            return kwargs.get(self.key_parameter_name)
+            return kwargs.get(self.key_name)
         except KeyError:
             template = 'To create a Disk Encryption Set, a key is required. Please add ' \
                         'decorator @{}} in front of this DES Preparer.'
             raise CliTestError(template.format(KeyPreparer.__name__,
-                                               self.key_parameter_name))
+                                               self.key_name))
 
 
 class AFSPolicyPreparer(AbstractPreparer, SingleValueReplacer):
