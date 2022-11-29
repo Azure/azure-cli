@@ -3211,12 +3211,12 @@ def _validate_ipv6_address_prefixes(prefixes):
 class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.ip_version = AAZStrArg(
             options=['--ip-version'],
             arg_group="Microsoft Peering",
-            help="The IP version to update Microsoft Peering settings for. Allowed values: IPv4, IPv6.  Default: IPv4.",
+            help="The IP version to update Microsoft Peering settings for. Allowed values: IPv4, IPv6. Default: IPv4.",
             default='IPv4'
         )
         args_schema.ipv6_peering_config._registered = False
@@ -3227,7 +3227,7 @@ class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
     def pre_operations(self):
         args = self.ctx.args
         args.peering_name = args.peering_type
-        if args.ip_version == 'IPv6':
+        if args.ip_version.to_serialized_data().lower() == 'ipv6':
             if args.peering_type == 'MicrosoftPeering':
                 microsoft_config = {'advertised_public_prefixes': args.advertised_public_prefixes,
                                     'customer_asn': args.customer_asn,
@@ -3255,41 +3255,11 @@ class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
                 args.legacy_mode = None
 
 
-def _create_or_update_ipv6_peering(cmd, config, primary_peer_address_prefix, secondary_peer_address_prefix,
-                                   route_filter, advertised_public_prefixes, customer_asn, routing_registry_name):
-    if config:
-        # update scenario
-        with cmd.update_context(config) as c:
-            c.set_param('primary_peer_address_prefix', primary_peer_address_prefix)
-            c.set_param('secondary_peer_address_prefix', secondary_peer_address_prefix)
-            c.set_param('advertised_public_prefixes', advertised_public_prefixes)
-            c.set_param('customer_asn', customer_asn)
-            c.set_param('routing_registry_name', routing_registry_name)
-
-        if route_filter:
-            RouteFilter = cmd.get_models('RouteFilter')
-            config.route_filter = RouteFilter(id=route_filter)
-    else:
-        # create scenario
-
-        IPv6Config, MicrosoftPeeringConfig = cmd.get_models(
-            'Ipv6ExpressRouteCircuitPeeringConfig', 'ExpressRouteCircuitPeeringConfig')
-        microsoft_config = MicrosoftPeeringConfig(advertised_public_prefixes=advertised_public_prefixes,
-                                                  customer_asn=customer_asn,
-                                                  routing_registry_name=routing_registry_name)
-        config = IPv6Config(primary_peer_address_prefix=primary_peer_address_prefix,
-                            secondary_peer_address_prefix=secondary_peer_address_prefix,
-                            microsoft_peering_config=microsoft_config,
-                            route_filter=route_filter)
-
-    return config
-
-
 class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.ip_version = AAZStrArg(
             options=['--ip-version'],
@@ -3303,7 +3273,7 @@ class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if args.ip_version == 'IPv6':
+        if args.ip_version.to_serialized_data().lower() == 'ipv6':
             microsoft_config = {}
             args.ipv6_peering_config = {}
             if has_value(args.primary_peer_address_prefix):
