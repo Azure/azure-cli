@@ -388,14 +388,14 @@ def load_arguments(self, _):
         c.argument('acr', validator=validate_registry_name)
         c.argument('node_name')
 
-    with self.argument_context('aks nodepool', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
+    with self.argument_context('aks nodepool', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('cluster_name', help='The cluster name.')
-        # the following argument is declared for the wait command
-        c.argument('agent_pool_name', options_list=['--nodepool-name', '--agent-pool-name'], validator=validate_agent_pool_name, help='The node pool name.')
+        c.argument('nodepool_name', options_list=['--nodepool-name', '--name', '-n'], validator=validate_nodepool_name, help='The node pool name.')
 
-    for sub_command in ['add', 'update', 'upgrade', 'scale', 'show', 'list', 'delete']:
-        with self.argument_context('aks nodepool ' + sub_command) as c:
-            c.argument('nodepool_name', options_list=['--nodepool-name', '--name', '-n'], validator=validate_nodepool_name, help='The node pool name.')
+    with self.argument_context('aks nodepool wait', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
+        c.argument('resource_name', options_list=['--cluster-name'], help='The cluster name.')
+        # the option name '--agent-pool-name' is depracated, left for compatibility only
+        c.argument('agent_pool_name', options_list=['--nodepool-name', '--name', '-n', c.deprecate(target='--agent-pool-name', redirect='--nodepool-name', hide=True)], validator=validate_agent_pool_name, help='The node pool name.')
 
     with self.argument_context('aks nodepool add') as c:
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
