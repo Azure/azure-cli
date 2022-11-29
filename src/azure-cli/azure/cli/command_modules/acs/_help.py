@@ -211,6 +211,7 @@ parameters:
                                          Specify "--workspace-resource-id" to use an existing workspace.
                                          Specify "--enable-msi-auth-for-monitoring" to use Managed Identity Auth.
                                          Specify "--enable-syslog" to enable syslog data collection from nodes. Note MSI must be enabled
+                                         Specify "--data-collection-settings" to configure data collection settings
                                          If monitoring addon is enabled --no-wait argument will have no effect
             - azure-policy             : enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
                                          Learn more at aka.ms/aks/policy.
@@ -808,6 +809,9 @@ parameters:
   - name: --enable-syslog
     type: bool
     short-summary: Enable syslog data collection for Monitoring addon
+  - name: --data-collection-settings
+    type: string
+    short-summary: Path to JSON file containing data collection settings for Monitoring addon.
   - name: --appgw-name
     type: string
     short-summary: Name of the application gateway to create/use in the node resource group. Use with ingress-azure addon.

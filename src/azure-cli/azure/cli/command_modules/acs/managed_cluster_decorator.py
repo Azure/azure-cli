@@ -100,6 +100,7 @@ ManagedClusterAddonProfile = TypeVar("ManagedClusterAddonProfile")
 Snapshot = TypeVar("Snapshot")
 KubeletConfig = TypeVar("KubeletConfig")
 LinuxOSConfig = TypeVar("LinuxOSConfig")
+DataCollectionSettings = TypeVar("DataCollectionSettings")
 ManagedClusterOIDCIssuerProfile = TypeVar("ManagedClusterOIDCIssuerProfile")
 ManagedClusterSecurityProfileDefender = TypeVar("ManagedClusterSecurityProfileDefender")
 ManagedClusterStorageProfile = TypeVar('ManagedClusterStorageProfile')
@@ -2438,6 +2439,31 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return enable_syslog
+
+    def get_data_collection_settings(self) -> Union[Dict, DataCollectionSettings, None]:
+        """Obtain the value of data_collection_settings.
+
+        :return: dictionary, DataCollectionSettings or None
+        """
+        # read the original value passed by the command
+        data_collection_settings = None
+        data_collection_settings_file_path = self.raw_param.get("data_collection_settings")
+        # validate user input
+        if data_collection_settings_file_path:
+            if not os.path.isfile(data_collection_settings_file_path):
+                raise InvalidArgumentValueError(
+                    "{} is not valid file, or not accessable.".format(
+                        data_collection_settings_file_path
+                    )
+                )
+            data_collection_settings = get_file_json(data_collection_settings_file_path)
+            if not isinstance(data_collection_settings, dict):
+                raise InvalidArgumentValueError(
+                    "Error reading data collection settings from {}.".format(
+                        data_collection_settings_file_path
+                    )
+                )
+        return data_collection_settings
 
     # pylint: disable=no-self-use
     def get_virtual_node_addon_os_type(self) -> str:
@@ -4871,6 +4897,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             create_dcr=True,
             create_dcra=False,
             enable_syslog=self.context.get_enable_syslog(),
+            data_collection_settings=self.context.get_data_collection_settings()
         )
         # set intermediate
         self.context.set_intermediate("monitoring_addon_enabled", True, overwrite_exists=True)
