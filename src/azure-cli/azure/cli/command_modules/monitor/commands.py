@@ -230,13 +230,14 @@ def load_command_table(self, _):
     with self.command_group('monitor diagnostic-settings', diagnostics_sdk,
                             custom_command_type=diagnostics_custom) as g:
         from .validators import validate_diagnostic_settings
-        g.custom_command('create', 'create_diagnostics_settings', validator=validate_diagnostic_settings)
+        # g.custom_command('create', 'create_diagnostics_settings', validator=validate_diagnostic_settings)
         # g.show_command('show', 'get')
         # g.command('list', 'list')
         # g.command('delete', 'delete')
         g.generic_update_command('update')
 
-    from .operations.diagnostics_settings import DiagnosticSettingsShow, DiagnosticSettingsList, DiagnosticSettingsDelete
+    from .operations.diagnostics_settings import DiagnosticSettingsCreate, DiagnosticSettingsShow, DiagnosticSettingsList, DiagnosticSettingsDelete
+    self.command_table['monitor diagnostic-settings create'] = DiagnosticSettingsCreate(loader=self)
     self.command_table['monitor diagnostic-settings show'] = DiagnosticSettingsShow(loader=self)
     self.command_table['monitor diagnostic-settings list'] = DiagnosticSettingsList(loader=self)
     self.command_table['monitor diagnostic-settings delete'] = DiagnosticSettingsDelete(loader=self)
@@ -357,14 +358,20 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_private_endpoint_connection', client_factory=cf_private_endpoint_connections,
                          validator=validate_private_endpoint_connection_id, confirmation=True)
 
-    with self.command_group('monitor diagnostic-settings subscription', subscription_dianostic_settings_sdk,
-                            custom_command_type=subscription_dianostic_settings_custom) as g:
-        g.custom_command('create', 'create_subscription_diagnostic_settings')
+    # with self.command_group('monitor diagnostic-settings subscription', subscription_dianostic_settings_sdk,
+    #                         custom_command_type=subscription_dianostic_settings_custom) as g:
+        # g.custom_command('create', 'create_subscription_diagnostic_settings')
         # g.command('delete', 'delete', confirmation=True)
         # g.show_command('show', 'get')
         # g.command('list', 'list')
-        g.generic_update_command('update', custom_func_name='update_subscription_diagnostic_settings')
-    from .operations.diagnostics_settings import SubscriptionDiagnosticSettingsShow, SubscriptionDiagnosticSettingsList, SubscriptionDiagnosticSettingsDelete
+        # g.generic_update_command('update', custom_func_name='update_subscription_diagnostic_settings')
+    from .operations.diagnostics_settings import SubscriptionDiagnosticSettingsCreate, \
+        SubscriptionDiagnosticSettingsUpdate, SubscriptionDiagnosticSettingsShow, SubscriptionDiagnosticSettingsList, \
+        SubscriptionDiagnosticSettingsDelete
+    self.command_table['monitor diagnostic-settings subscription create'] = SubscriptionDiagnosticSettingsCreate(
+        loader=self)
+    self.command_table['monitor diagnostic-settings subscription update'] = SubscriptionDiagnosticSettingsUpdate(
+        loader=self)
     self.command_table['monitor diagnostic-settings subscription show'] = SubscriptionDiagnosticSettingsShow(loader=self)
     self.command_table['monitor diagnostic-settings subscription list'] = SubscriptionDiagnosticSettingsList(loader=self)
     self.command_table['monitor diagnostic-settings subscription delete'] = SubscriptionDiagnosticSettingsDelete(loader=self)

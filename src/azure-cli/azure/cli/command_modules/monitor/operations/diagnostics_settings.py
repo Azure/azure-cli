@@ -3,14 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings import Create as _DiagnosticSettingsCreate
 from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings import List as _DiagnosticSettingsList
 from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings import Show as _DiagnosticSettingsShow
 from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings import Delete as _DiagnosticSettingsDelete
 from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings.categories import List as _DiagnosticSettingsCategoryList
 from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings.categories import Show as _DiagnosticSettingsCategoryShow
+from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings.subscription import Create as _SubscriptionDiagnosticSettingsCreate
 from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings.subscription import Delete as _SubscriptionDiagnosticSettingsDelete
 from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings.subscription import Show as _SubscriptionDiagnosticSettingsShow
 from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings.subscription import List as _SubscriptionDiagnosticSettingsList
+from azure.cli.command_modules.monitor.aaz.latest.monitor.diagnostic_settings.subscription import Update as _SubscriptionDiagnosticSettingsUpdate
 from knack.util import CLIError
 
 def create_resource_parameters(arg_schema, arg_group=None):
@@ -64,6 +67,9 @@ def update_resource_parameters(ctx, alias="resource"):
 
         args.resource = f"/subscriptions/{ctx.subscription_id}/resourceGroups/{rg}/providers/{res_ns}/{parent + '/' if parent else ''}{res_type}/{name_or_id}"
 
+class DiagnosticSettingsCreate(_DiagnosticSettingsCreate):
+    pass
+
 class DiagnosticSettingsShow(_DiagnosticSettingsShow):
 
     @classmethod
@@ -101,7 +107,6 @@ class DiagnosticSettingsDelete(_DiagnosticSettingsDelete):
         ctx = self.ctx
         update_resource_parameters(ctx)
 
-
 class DiagnosticSettingsCategoryList(_DiagnosticSettingsCategoryList):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -123,6 +128,12 @@ class DiagnosticSettingsCategoryShow(_DiagnosticSettingsCategoryShow):
     def pre_operations(self):
         ctx = self.ctx
         update_resource_parameters(ctx)
+
+class SubscriptionDiagnosticSettingsCreate(_SubscriptionDiagnosticSettingsCreate):
+    pass
+
+class SubscriptionDiagnosticSettingsUpdate(_SubscriptionDiagnosticSettingsUpdate):
+    pass
 
 class SubscriptionDiagnosticSettingsShow(_SubscriptionDiagnosticSettingsShow):
     pass
