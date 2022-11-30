@@ -48,12 +48,20 @@ def load_command_table(self, _):
             for target in supported_target_resources:
                 with self.command_group('{} connection create'.format(source.value),
                                         connection_type, client_factory=cf_linker) as ig:
-                    ig.custom_command(target.value, 'connection_create',
-                                      supports_no_wait=True, transform=transform_linker_properties)
+                    if target == RESOURCE.Mysql:
+                        ig.custom_command(target.value, 'connection_create', deprecate_info=self.deprecate(hide=False),
+                                          supports_no_wait=True, transform=transform_linker_properties)
+                    else:
+                        ig.custom_command(target.value, 'connection_create',
+                                          supports_no_wait=True, transform=transform_linker_properties)
                 with self.command_group('{} connection update'.format(source.value),
                                         connection_type, client_factory=cf_linker) as ig:
-                    ig.custom_command(target.value, 'connection_update',
-                                      supports_no_wait=True, transform=transform_linker_properties)
+                    if target == RESOURCE.Mysql:
+                        ig.custom_command(target.value, 'connection_update', deprecate_info=self.deprecate(hide=False),
+                                          supports_no_wait=True, transform=transform_linker_properties)
+                    else:
+                        ig.custom_command(target.value, 'connection_update',
+                                          supports_no_wait=True, transform=transform_linker_properties)
 
             # special target resource, independent implementation
             target = RESOURCE.ConfluentKafka
