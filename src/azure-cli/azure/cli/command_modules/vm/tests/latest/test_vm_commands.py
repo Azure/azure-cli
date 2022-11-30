@@ -7623,8 +7623,8 @@ class DiskEncryptionSetTest(ScenarioTest):
         ])
 
 
-    @unittest.skip('The requested VM size is not available, others VM siz also not availiable :https://github.com/Azure/azure-cli/issues/22199#issue-1216780069')
-    @ResourceGroupPreparer(name_prefix='cli_test_os_disk_security_encryption', location='CentralUSEUAP')
+    # @unittest.skip('The requested VM size is not available, others VM siz also not availiable :https://github.com/Azure/azure-cli/issues/22199#issue-1216780069')
+    @ResourceGroupPreparer(name_prefix='cli_test_os_disk_security_encryption', location='NorthEurope')
     def test_os_disk_security_encryption(self, resource_group):
         self.kwargs.update({
             'vault': self.create_random_name(prefix='vault', length=15),
@@ -7657,7 +7657,7 @@ class DiskEncryptionSetTest(ScenarioTest):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role assignment create --assignee {des1_sp_id} --role Reader --scope {vault_id}')
 
-        self.cmd('vm create -n {vm1} -g {rg} --size Standard_DC2ads_v5 --security-type confidentialvm --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --admin-username testuser --admin-password testPassword0 --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type diskwithvmgueststate --os-disk-secure-vm-disk-encryption-set {des1}')
+        self.cmd('vm create -n {vm1} -g {rg} --size Standard_DC2as_v5 --security-type confidentialvm --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --admin-username testuser --admin-password testPassword0 --enable-vtpm true --enable-secure-boot true --os-disk-security-encryption-type diskwithvmgueststate --os-disk-secure-vm-disk-encryption-set {des1}')
         self.cmd('vm show -n {vm1} -g {rg}', checks=[
             self.check('storageProfile.osDisk.managedDisk.securityProfile.securityEncryptionType', 'DiskWithVMGuestState'),
             self.check('storageProfile.osDisk.managedDisk.securityProfile.diskEncryptionSet.id', '{des1_id}')
