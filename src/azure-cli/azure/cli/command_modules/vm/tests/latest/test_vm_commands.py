@@ -5722,7 +5722,6 @@ class VMGalleryImage(ScenarioTest):
                      self.check('safetyProfile.allowDeletionOfReplicatedLocations', False)
                  ])
 
-    @unittest.skip('az image-version create: Service error: The source id: xxx must be a managed disk or snapshot. Target: galleryImageVersion.properties.storageProfile.dataDiskImages.source.id')
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_image_version_vhd')
     def test_gallery_image_version_vhd(self, resource_group):
