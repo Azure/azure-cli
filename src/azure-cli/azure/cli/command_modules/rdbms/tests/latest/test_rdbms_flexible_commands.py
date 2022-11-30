@@ -247,7 +247,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             self.cmd('config param-persist off')
 
         if database_engine == 'postgres':
-            version = '12'
+            version = '14'
             storage_size = 32
             location = 'westcentralus'
             location_result = 'West Central US'

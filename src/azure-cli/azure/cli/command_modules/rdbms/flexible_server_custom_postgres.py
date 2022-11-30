@@ -283,7 +283,10 @@ def flexible_server_fast_create(cmd, client, resource_group_name=None, location=
                                    network=network,
                                    version=version,
                                    high_availability=None,
-                                   availability_zone=None)
+                                   availability_zone=None,
+                                   identity=None,
+                                   data_encryption=None,
+                                   auth_config=None)
 
     firewall_id = None
     if public_access is not None and str(public_access).lower() != 'none':
