@@ -20,6 +20,7 @@ from knack.experimental import ExperimentalItem
 from knack.util import CLIError
 from knack.arguments import ArgumentsContext, CaseInsensitiveList  # pylint: disable=unused-import
 from .local_context import AzCLILocalContext, LocalContextAction
+from azure.cli.core.util import is_autocomplete
 
 logger = get_logger(__name__)
 
@@ -449,6 +450,18 @@ class MainCommandsLoader(CLICommandsLoader):
                 if raw_cmd in self.command_group_table:
                     logger.debug("Found a match in the command group table for '%s'.", raw_cmd)
                     return self.command_table
+                if is_autocomplete():
+                    # If the command is not complete in autocomplete mode, we should match shorter command.
+                    # For example, `account sho` should match `account`. Finally, suggestion `show` is returned.
+                    logger.debug("Could not find a match in the command or command group table for '%s'", raw_cmd)
+                    raw_cmd = ' '.join(raw_cmd.split()[:-1])
+                    logger.debug("In autocomplete mode, try to match shorter cmd: '%s'", raw_cmd)
+                    if not raw_cmd:
+                        logger.debug("Cmd is empty, return")
+                        return self.command_table
+                    if raw_cmd in self.command_group_table:
+                        logger.debug("Found a match in the command group table for '%s'.", raw_cmd)
+                        return self.command_table
 
                 logger.debug("Could not find a match in the command or command group table for '%s'. "
                              "The index may be outdated.", raw_cmd)
@@ -555,6 +568,14 @@ class CommandIndex:
         # Check the command index for (command: [module]) mapping, like
         # "network": ["azure.cli.command_modules.natgateway", "azure.cli.command_modules.network", "azext_firewall"]
         index_modules_extensions = index.get(top_command)
+        if not index_modules_extensions and is_autocomplete():
+            # If user type `az stor`, command begin with `stor` will be matched.
+            # It's possible that he installed an extension that contains a command named `stor`, it's okay to ignore it.
+            logger.debug("In autocomplete mode, load command begin with: '%s'", top_command)
+            index_modules_extensions = []
+            for command in index:
+                if command.startswith(top_command):
+                    index_modules_extensions += index[command]
 
         if index_modules_extensions:
             # This list contains both built-in modules and extensions

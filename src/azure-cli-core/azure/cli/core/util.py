@@ -1365,3 +1365,8 @@ def should_encrypt_token_cache(cli_ctx):
     encrypt = cli_ctx.config.getboolean('core', 'encrypt_token_cache', fallback=fallback)
 
     return encrypt
+
+
+def is_autocomplete():
+    """Detect if the command is running in autocomplete mode"""
+    return os.environ.get('COMP_LINE') is not None
