@@ -110,17 +110,32 @@ jobs:
       az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
 
       python ../scripts/ci/automation_full_test.py "12" "$(Instance_idx)" "latest" "" "True" "extension"
+
+      publishErrorModules='false'
+      if [[ -f '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_error_modules.txt' ]]; then
+        publishErrorModules='true'
+      fi
+      echo "##vso[task.setvariable variable=publishErrorModules]$publishErrorModules"
+
+      publishFailureTests='false'
+      if [[ -f '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_failure_tests.txt' ]]; then
+        publishFailureTests='true'
+      fi
+      echo "##vso[task.setvariable variable=publishFailureTests]$publishFailureTests"
     displayName: "Rerun tests"
   - task: PublishTestResults@2
+    condition: succeededOrFailed()
     inputs:
       testResultsFiles: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
       testRunTitle: 'CLI Regression test results of instance $(Instance_idx)'
   - task: PublishBuildArtifacts@1
+    condition: and(succeededOrFailed(), eq(variables.publishErrorModules, 'true'))
     inputs:
       PathtoPublish: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_error_modules.txt'
       ArtifactName: 'test_results_error_modules_$(Instance_idx).txt'
       publishLocation: 'Container'
   - task: PublishBuildArtifacts@1
+    condition: and(succeededOrFailed(), eq(variables.publishFailureTests, 'true'))
     inputs:
       PathtoPublish: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_failure_tests.txt'
       ArtifactName: 'test_results_failure_tests_$(Instance_idx).txt'
