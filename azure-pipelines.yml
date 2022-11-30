@@ -13,7 +13,7 @@ pr:
     - '*'
 
 variables:
-- template: .azure-pipelines/templates/variables.yml
+- template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
 
 jobs:
 - job: CheckPullRequest
@@ -46,8 +46,8 @@ jobs:
       echo "Reject pull request directly to master branch"
       exit 1
 
-- job: CredScan
-  displayName: "Credential Scan"
+- job: CredentialScanner
+  displayName: "Credential Scanner"
   pool:
     name: ${{ variables.windows_pool }}
   steps:
@@ -57,15 +57,35 @@ jobs:
       toolMajorVersion: V2
       suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
       toolVersionV2: '2.1.17'
+
   - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-postanalysis.PostAnalysis@1
     displayName: 'Post Analysis'
     inputs:
       AllTools: false
       BinSkim: false
       CredScan: true
+      PoliCheck: false
       RoslynAnalyzers: false
       TSLint: false
       ToolLogsNotFoundAction: 'Standard'
+
+- job: PolicyCheck
+  displayName: "Policy Check"
+  pool:
+    name: ${{ variables.windows_pool }}
+  steps:
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@2
+    displayName: 'Run Policy Check'
+    inputs:
+      targetType: F
+      result: PoliCheckResult.xml
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@2
+    displayName: 'Post Analysis'
+    inputs:
+      GdnBreakAllTools: false
+      GdnBreakGdnToolPoliCheck: true
+      GdnBreakGdnToolPoliCheckSeverity: Error
 
 - job: ExtractMetadata
   displayName: Extract Metadata
@@ -95,9 +115,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3'
+    displayName: 'Use Python 3.10'
     inputs:
-      versionSpec: 3.x
+      versionSpec: 3.10
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
@@ -110,9 +130,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3'
+    displayName: 'Use Python 3.10'
     inputs:
-      versionSpec: 3.x
+      versionSpec: 3.10
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
@@ -787,6 +807,7 @@ jobs:
       ArtifactName: $(deb_system)-$(distro)
 
 - job: TestDebPackages
+  timeoutInMinutes: 120
   displayName: Test Deb Packages
   dependsOn:
   - BuildDebPackages
@@ -918,6 +939,31 @@ jobs:
       else
         azdev linter --ci-exclusions --min-severity medium
       fi
+
+- job: CodegenCoverage
+  displayName: "Codegen Coverage"
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.10'
+    inputs:
+      versionSpec: 3.10
+  - template: .azure-pipelines/templates/azdev_setup.yml
+  - bash: |
+      set -ev
+      . env/bin/activate
+      # clone azure-cli-extensions
+      cd ..
+      git clone --depth 1 -b main https://github.com/Azure/azure-cli-extensions.git ./azure-cli-extensions
+      azdev extension repo add ./azure-cli-extensions
+      azdev extension add "*"
+      # Some extension will change the dependence, so run `azdev setup` again after all extensions installed.
+      azdev setup -c $CLI_REPO_PATH -r ./azure-cli-extensions
+      # CLI repo only
+      azdev statistics list-command-table CLI --statistics-only
+      # CLI + EXT repos
+      azdev statistics list-command-table --statistics-only
 
 - job: VerifySphinxDocumentGenerator
   displayName: "Verify Sphinx Document Generator"

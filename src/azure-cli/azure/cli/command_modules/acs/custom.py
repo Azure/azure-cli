@@ -415,6 +415,7 @@ def aks_create(
     aad_server_app_id=None,
     aad_server_app_secret=None,
     aad_tenant_id=None,
+    enable_oidc_issuer=False,
     windows_admin_username=None,
     windows_admin_password=None,
     enable_ahub=False,
@@ -428,6 +429,7 @@ def aks_create(
     defender_config=None,
     disable_disk_driver=False,
     disable_file_driver=False,
+    enable_blob_driver=None,
     disable_snapshot_controller=False,
     enable_azure_keyvault_kms=False,
     azure_keyvault_kms_key_id=None,
@@ -478,6 +480,7 @@ def aks_create(
     aks_custom_headers=None,
     host_group_id=None,
     gpu_instance_profile=None,
+    enable_syslog=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -530,6 +533,7 @@ def aks_update(
     disable_azure_rbac=False,
     aad_tenant_id=None,
     aad_admin_group_object_ids=None,
+    enable_oidc_issuer=False,
     windows_admin_password=None,
     enable_ahub=False,
     disable_ahub=False,
@@ -545,6 +549,8 @@ def aks_update(
     disable_disk_driver=False,
     enable_file_driver=False,
     disable_file_driver=False,
+    enable_blob_driver=None,
+    disable_blob_driver=None,
     enable_snapshot_controller=False,
     disable_snapshot_controller=False,
     enable_azure_keyvault_kms=False,
@@ -770,7 +776,8 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
                 remove_monitoring=True,
                 aad_route=True,
                 create_dcr=False,
-                create_dcra=True
+                create_dcra=True,
+                enable_syslog=False,
             )
     except TypeError:
         pass
@@ -803,7 +810,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       enable_secret_rotation=False,
                       rotation_poll_interval=None,
                       no_wait=False,
-                      enable_msi_auth_for_monitoring=False):
+                      enable_msi_auth_for_monitoring=False,
+                      enable_syslog=False):
     instance = client.get(resource_group_name, name)
     msi_auth = False
     if instance.service_principal_profile.client_id == "msi":
@@ -822,7 +830,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                               enable_sgxquotehelper=enable_sgxquotehelper,
                               enable_secret_rotation=enable_secret_rotation,
                               rotation_poll_interval=rotation_poll_interval,
-                              no_wait=no_wait)
+                              no_wait=no_wait,
+                              enable_syslog=enable_syslog)
 
     enable_monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
         and instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
@@ -850,12 +859,16 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                         instance.location,
                         aad_route=True,
                         create_dcr=True,
-                        create_dcra=True)
+                        create_dcra=True,
+                        enable_syslog=enable_syslog)
                 else:
                     raise ArgumentUsageError(
                         "--enable-msi-auth-for-monitoring can not be used on clusters with service principal auth.")
             else:
                 # monitoring addon will use legacy path
+                if enable_syslog:
+                    raise ArgumentUsageError(
+                        "--enable-syslog can not be used without MSI auth.")
                 ensure_container_insights_for_monitoring(
                     cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME], subscription_id, resource_group_name, name, instance.location, aad_route=False)
 
@@ -909,7 +922,8 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                    enable_secret_rotation=False,
                    disable_secret_rotation=False,
                    rotation_poll_interval=None,
-                   no_wait=False):
+                   no_wait=False,
+                   enable_syslog=False):
     ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
                                                 resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                                 operation_group='managed_clusters')
@@ -2220,3 +2234,7 @@ def aks_nodepool_snapshot_list(cmd, client, resource_group_name=None):  # pylint
         return client.list()
 
     return client.list_by_resource_group(resource_group_name)
+
+
+def aks_rotate_service_account_signing_keys(cmd, client, resource_group_name, name, no_wait=True):
+    return sdk_no_wait(no_wait, client.begin_rotate_service_account_signing_keys, resource_group_name, name)

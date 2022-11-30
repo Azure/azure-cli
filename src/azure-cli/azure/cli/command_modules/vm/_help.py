@@ -1053,13 +1053,13 @@ examples:
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.0.0 \\
         --target-regions westcentralus=2 eastus2
-  - name: Replicate to an additional region. Optional, you can set the replica count for the region.
+  - name: Replicate to an additional region. Optional, you can set the replica count for the region and exclude this image when using the latest version of the image definition.
     text: |
         az sig image-version update --resource-group MyResourceGroup \\
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.0.0 \\
         --add publishingProfile.targetRegions name=westcentralus \\
-        regionalReplicaCount=3
+        regionalReplicaCount=3 excludeFromLatest=true
   - name: Change whether an image should be included in consideration for latest version in the image definition. Setting this value to true excludes the image from consideration and setting this value to false includes the image for consideration.
     text: |
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
@@ -1070,6 +1070,11 @@ examples:
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
         --gallery-image-definition MyImage --gallery-image-version 1.0.0 \\
         --set publishingProfile.endOfLifeDate=2024-08-02T00:00:00+00:00
+  - name: Allow to remove the gallery image version from replicated regions.
+    text: |
+        az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
+        --gallery-image-definition MyImage --gallery-image-version 1.0.0 \\
+        --set safetyProfile.allowDeletionOfReplicatedLocations=true
 """
 
 helps['sig image-version list-community'] = """
@@ -3725,14 +3730,6 @@ examples:
     text: az capacity reservation group update -n ReservationGroupName -g MyResourceGroup --tags key=val
 """
 
-helps['capacity reservation group delete'] = """
-type: command
-short-summary: Delete capacity reservation group.
-examples:
-  - name: Delete a capacity reservation group.
-    text: az capacity reservation group delete -n ReservationGroupName -g MyResourceGroup --yes
-"""
-
 helps['capacity reservation group show'] = """
 type: command
 short-summary: Show capacity reservation group.
@@ -3788,16 +3785,6 @@ examples:
             -g MyResourceGroup --capacity 5 --tags key=val
 """
 
-helps['capacity reservation delete'] = """
-type: command
-short-summary: Delete capacity reservation.
-examples:
-  - name: Delete a capacity reservation.
-    text: |
-        az capacity reservation delete -c ReservationGroupName -n ReservationName \\
-            -g MyResourceGroup --yes
-"""
-
 helps['capacity reservation show'] = """
 type: command
 short-summary: Show capacity reservation.
@@ -3820,14 +3807,6 @@ examples:
     text: |
         az capacity reservation show -c ReservationGroupName -n ReservationName \\
             -g MyResourceGroup --instance-view
-"""
-
-helps['capacity reservation list'] = """
-type: command
-short-summary: List capacity reservation.
-examples:
-  - name: List the capacity reservations.
-    text: az capacity reservation list -c ReservationGroupName -g MyResourceGroup
 """
 
 helps['vmss list-instances'] = """

@@ -13,7 +13,8 @@ from azure.cli.command_modules.appservice.static_sites import \
     set_staticsite_app_settings, delete_staticsite_app_settings, list_staticsite_users, \
     invite_staticsite_users, update_staticsite_users, update_staticsite, list_staticsite_secrets, \
     reset_staticsite_api_key, delete_staticsite_environment, link_user_function, unlink_user_function, get_user_function, \
-    assign_identity, remove_identity, show_identity, enable_staticwebapp_enterprise_edge, disable_staticwebapp_enterprise_edge, show_staticwebapp_enterprise_edge_status
+    assign_identity, remove_identity, show_identity, enable_staticwebapp_enterprise_edge, disable_staticwebapp_enterprise_edge, \
+    show_staticwebapp_enterprise_edge_status, validate_backend, link_backend, get_backend, unlink_backend
 from azure.core.exceptions import ResourceNotFoundError
 
 
@@ -611,6 +612,35 @@ class TestStaticAppCommands(unittest.TestCase):
         get_user_function(self.mock_cmd, self.name1, self.rg1)
 
         self.staticapp_client.get_user_provided_function_apps_for_static_site.assert_called_once()
+
+    def test_backends_validate(self, *args, **kwargs):
+        backend_name = "backend"
+        backend_resource_id = "/subscriptions/sub/resourceGroups/{}/providers/Microsoft.App/containerApps/{}".format(
+            self.rg1, backend_name
+        )
+        validate_backend(self.mock_cmd, self.name1, self.rg1, backend_resource_id)
+
+        self.staticapp_client.begin_validate_backend_for_build.assert_called_once()
+
+    def test_backends_link(self, *args, **kwargs):
+        backend_name = "backend"
+        backend_resource_id = "/subscriptions/sub/resourceGroups/{}/providers/Microsoft.Web/sites/{}".format(
+            self.rg1, backend_name
+        )
+        link_backend(self.mock_cmd, self.name1, self.rg1, backend_resource_id)
+
+        self.staticapp_client.begin_link_backend_to_build.assert_called_once()
+
+    @mock.patch("azure.cli.command_modules.appservice.static_sites.get_backend", return_value=[mock.MagicMock()])
+    def test_backends_unlink(self, *args, **kwargs):
+        unlink_backend(self.mock_cmd, self.name1, self.rg1)
+
+        self.staticapp_client.unlink_backend_from_build.assert_called_once()
+
+    def test_backends_show(self, *args, **kwargs):
+        get_backend(self.mock_cmd, self.name1, self.rg1)
+
+        self.staticapp_client.get_linked_backends_for_build.assert_called_once()
 
     def test_enterprise_edge(self):
         self.staticapp_client.get_static_site.return_value = self.app1

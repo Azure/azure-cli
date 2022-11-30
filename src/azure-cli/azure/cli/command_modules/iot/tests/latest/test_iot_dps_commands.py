@@ -9,6 +9,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.command_modules.iot.tests.latest._test_utils import (
     _create_test_cert, _delete_test_cert, _create_verification_cert, _create_fake_chain_cert
 )
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.iot.tests.latest.recording_processors import KeyReplacer
 from azure.core.exceptions import HttpResponseError
 import random
@@ -129,10 +130,11 @@ class IoTDpsTest(ScenarioTest):
         chain_name = self.create_random_name(prefix='certificate-', length=48)
 
         # Set up cert file for test
-        verification_file = "verify.cer"
-        cert_file = "testcert.cer"
-        key_file = "testkey.pvk"
-        chain_file = "testcert-chain.pem"
+        random_suffix = self.create_random_name(prefix='_', length=6)
+        verification_file = f"verify{random_suffix}.cer"
+        cert_file = f"testcert{random_suffix}.cer"
+        key_file = f"testkey{random_suffix}.pvk"
+        chain_file = f"testcert-chain{random_suffix}.pem"
         max_int = 9223372036854775807
         _create_test_cert(cert_file, key_file, self.create_random_name(prefix='TESTCERT', length=24), 3, random.randint(0, max_int))
         _create_fake_chain_cert(cert_file, chain_file)
@@ -210,7 +212,7 @@ class IoTDpsTest(ScenarioTest):
         # Delete DPS
         self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dps_name))
 
-
+    @AllowLargeResponse(size_kb=4096)
     @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
     def test_dps_linked_hub_lifecycle(self, group_name, group_location):
         dps_name = self.create_random_name('dps', 20)
@@ -256,11 +258,6 @@ class IoTDpsTest(ScenarioTest):
         connection_string = self._show_hub_connection_string(hub_name, group_name)
         self.cmd('az iot dps linked-hub create --dps-name {} -g {} --connection-string {}'
                  .format(dps_name, group_name, connection_string))
-        self.cmd('az iot dps linked-hub delete --dps-name {} -g {} --linked-hub {}'.format(dps_name, group_name, hub_name))
-
-        # Create linked-hub using only connection string in lower case
-        self.cmd('az iot dps linked-hub create --dps-name {} -g {} --connection-string {}'
-                 .format(dps_name, group_name, connection_string.lower()))
         self.cmd('az iot dps linked-hub delete --dps-name {} -g {} --linked-hub {}'.format(dps_name, group_name, hub_name))
 
         # Create linked-hub using connection string and location

@@ -8,7 +8,11 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.appconfiguration import AzureAppConfigurationClient
 from azure.core.exceptions import HttpResponseError
-from azure.cli.core.azclierror import ValidationError, AzureResponseError, ResourceNotFoundError
+from azure.cli.core.azclierror import (ValidationError,
+                                       AzureResponseError,
+                                       ResourceNotFoundError,
+                                       RequiredArgumentMissingError,
+                                       MutuallyExclusiveArgumentError)
 
 from ._client_factory import cf_configstore
 from ._constants import HttpHeaders
@@ -98,7 +102,7 @@ Please specify exactly ONE (suggest connection string) in one of the following o
 
     if connection_string:
         if string and ';'.join(sorted(connection_string.split(';'))) != string:
-            raise CLIError(error_message)
+            raise MutuallyExclusiveArgumentError(error_message)
         string = connection_string
 
     connection_string_env = cmd.cli_ctx.config.get(
@@ -106,15 +110,15 @@ Please specify exactly ONE (suggest connection string) in one of the following o
 
     if connection_string_env:
         if not is_valid_connection_string(connection_string_env):
-            raise CLIError(
+            raise ValidationError(
                 "The environment variable connection string is invalid. Correct format should be Endpoint=https://example.appconfig.io;Id=xxxxx;Secret=xxxx")
 
         if string and ';'.join(sorted(connection_string_env.split(';'))) != string:
-            raise CLIError(error_message)
+            raise MutuallyExclusiveArgumentError(error_message)
         string = connection_string_env
 
     if not string:
-        raise CLIError(
+        raise RequiredArgumentMissingError(
             'Please specify config store name or connection string(suggested).')
     return string
 
@@ -170,7 +174,7 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
                 if name:
                     _, endpoint = resolve_store_metadata(cmd, name)
                 else:
-                    raise CLIError("App Configuration endpoint or name should be provided if auth mode is 'login'.")
+                    raise RequiredArgumentMissingError("App Configuration endpoint or name should be provided if auth mode is 'login'.")
             except Exception as ex:
                 raise CLIError(str(ex) + "\nYou may be able to resolve this issue by providing App Configuration endpoint instead of name.")
 

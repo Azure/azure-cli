@@ -195,6 +195,7 @@ def load_arguments(self, _):
         c.argument('aad_server_app_secret')
         c.argument('aad_tenant_id')
         c.argument('aad_admin_group_object_ids')
+        c.argument('enable_oidc_issuer', action='store_true')
         c.argument('windows_admin_username')
         c.argument('windows_admin_password')
         c.argument('enable_ahub', action='store_true')
@@ -208,6 +209,7 @@ def load_arguments(self, _):
         c.argument('defender_config', validator=validate_defender_config_parameter)
         c.argument('disable_disk_driver', action='store_true')
         c.argument('disable_file_driver', action='store_true')
+        c.argument('enable_blob_driver', action='store_true')
         c.argument('disable_snapshot_controller', action='store_true')
         c.argument('enable_azure_keyvault_kms', action='store_true')
         c.argument('azure_keyvault_kms_key_id', validator=validate_azure_keyvault_kms_key_id)
@@ -217,6 +219,7 @@ def load_arguments(self, _):
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
         c.argument('workspace_resource_id')
         c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag(), is_preview=True)
+        c.argument('enable_syslog', arg_type=get_three_state_flag(), is_preview=True)
         c.argument('aci_subnet_name')
         c.argument('appgw_name', arg_group='Application Gateway')
         c.argument('appgw_subnet_cidr', arg_group='Application Gateway')
@@ -287,6 +290,7 @@ def load_arguments(self, _):
         c.argument('aad_tenant_id')
         c.argument('aad_admin_group_object_ids')
         c.argument('windows_admin_password')
+        c.argument('enable_oidc_issuer', action='store_true')
         c.argument('enable_ahub', action='store_true')
         c.argument('disable_ahub', action='store_true')
         c.argument('enable_windows_gmsa', action='store_true')
@@ -298,6 +302,8 @@ def load_arguments(self, _):
         c.argument('disable_disk_driver', action='store_true')
         c.argument('enable_file_driver', action='store_true')
         c.argument('disable_file_driver', action='store_true')
+        c.argument('enable_blob_driver', action='store_true')
+        c.argument('disable_blob_driver', action='store_true')
         c.argument('enable_snapshot_controller', action='store_true')
         c.argument('disable_snapshot_controller', action='store_true')
         c.argument('disable_defender', action='store_true', validator=validate_defender_disable_and_enable_parameters)
@@ -382,14 +388,14 @@ def load_arguments(self, _):
         c.argument('acr', validator=validate_registry_name)
         c.argument('node_name')
 
-    with self.argument_context('aks nodepool', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
+    with self.argument_context('aks nodepool', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('cluster_name', help='The cluster name.')
-        # the following argument is declared for the wait command
-        c.argument('agent_pool_name', options_list=['--nodepool-name', '--agent-pool-name'], validator=validate_agent_pool_name, help='The node pool name.')
+        c.argument('nodepool_name', options_list=['--nodepool-name', '--name', '-n'], validator=validate_nodepool_name, help='The node pool name.')
 
-    for sub_command in ['add', 'update', 'upgrade', 'scale', 'show', 'list', 'delete']:
-        with self.argument_context('aks nodepool ' + sub_command) as c:
-            c.argument('nodepool_name', options_list=['--nodepool-name', '--name', '-n'], validator=validate_nodepool_name, help='The node pool name.')
+    with self.argument_context('aks nodepool wait', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
+        c.argument('resource_name', options_list=['--cluster-name'], help='The cluster name.')
+        # the option name '--agent-pool-name' is depracated, left for compatibility only
+        c.argument('agent_pool_name', options_list=['--nodepool-name', '--name', '-n', c.deprecate(target='--agent-pool-name', redirect='--nodepool-name', hide=True)], validator=validate_agent_pool_name, help='The node pool name.')
 
     with self.argument_context('aks nodepool add') as c:
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)

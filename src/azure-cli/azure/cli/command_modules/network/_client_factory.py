@@ -32,48 +32,16 @@ def cf_flow_logs(cli_ctx, _):
     return network_client_factory(cli_ctx).flow_logs
 
 
-def cf_express_route_circuit_authorizations(cli_ctx, _):
-    return network_client_factory(cli_ctx).express_route_circuit_authorizations
-
-
 def cf_express_route_circuit_connections(cli_ctx, _):
     return network_client_factory(cli_ctx).express_route_circuit_connections
-
-
-def cf_peer_express_route_circuit_connections(cli_ctx, _):
-    return network_client_factory(cli_ctx).peer_express_route_circuit_connections
-
-
-def cf_express_route_circuit_peerings(cli_ctx, _):
-    return network_client_factory(cli_ctx).express_route_circuit_peerings
 
 
 def cf_express_route_circuits(cli_ctx, _):
     return network_client_factory(cli_ctx).express_route_circuits
 
 
-def cf_express_route_service_providers(cli_ctx, _):
-    return network_client_factory(cli_ctx).express_route_service_providers
-
-
-def cf_express_route_connections(cli_ctx, _):
-    return network_client_factory(cli_ctx).express_route_connections
-
-
-def cf_express_route_gateways(cli_ctx, _):
-    return network_client_factory(cli_ctx).express_route_gateways
-
-
 def cf_express_route_ports(cli_ctx, _):
     return network_client_factory(cli_ctx).express_route_ports
-
-
-def cf_express_route_port_locations(cli_ctx, _):
-    return network_client_factory(cli_ctx).express_route_ports_locations
-
-
-def cf_express_route_links(cli_ctx, _):
-    return network_client_factory(cli_ctx).express_route_links
 
 
 def cf_private_endpoints(cli_ctx, _):
@@ -108,10 +76,6 @@ def cf_network_interfaces(cli_ctx, _):
     return network_client_factory(cli_ctx).network_interfaces
 
 
-def cf_network_security_groups(cli_ctx, _):
-    return network_client_factory(cli_ctx).network_security_groups
-
-
 def cf_network_watcher(cli_ctx, _):
     return network_client_factory(cli_ctx).network_watchers
 
@@ -132,16 +96,8 @@ def cf_public_ip_prefixes(cli_ctx, _):
     return network_client_factory(cli_ctx).public_ip_prefixes
 
 
-def cf_security_rules(cli_ctx, _):
-    return network_client_factory(cli_ctx).security_rules
-
-
 def cf_subnets(cli_ctx, _):
     return network_client_factory(cli_ctx).subnets
-
-
-def cf_usages(cli_ctx, _):
-    return network_client_factory(cli_ctx).usages
 
 
 def cf_virtual_network_gateway_connections(cli_ctx, _):

@@ -44,17 +44,17 @@ def billing_invoice_download_validator(namespace):
             raise MutuallyExclusiveArgumentError(valid_combs)
         if namespace.download_token is None:
             raise RequiredArgumentMissingError(
-                "--account-name, --download-token / --download-token is also required"
+                "--account-name and --download-token are also required"
             )
 
     if namespace.download_token is not None:
         if namespace.download_urls is not None:
             raise MutuallyExclusiveArgumentError(valid_combs)
-        if namespace.account_name is not None:
+        if namespace.account_name is not None and namespace.invoice_name is None:
             raise RequiredArgumentMissingError("--invoice-name is also required")
         if namespace.invoice_name is None:
             raise RequiredArgumentMissingError(
-                "--account-name, --invoice-name / --invoice-name is also required"
+                "--account-name and --invoice-name are also required"
             )
 
     if namespace.download_urls is not None:
