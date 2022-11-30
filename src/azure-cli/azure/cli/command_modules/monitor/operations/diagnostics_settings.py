@@ -74,6 +74,16 @@ class DiagnosticSettingsCreate(_DiagnosticSettingsCreate):
     def _build_arguments_schema(cls, *args, **kwargs):
         arg_schema = super()._build_arguments_schema(*args, **kwargs)
         create_resource_parameters(arg_schema, arg_group="Target Resource")
+
+        from azure.cli.core.aaz import AAZBoolArg
+        arg_schema.export_to_resource_specific = AAZBoolArg(
+            options=['--export-to-resource-specific'],
+            help="Indicate that the export to LA must be done to a resource specific table, a.k.a. "
+                 "dedicated or fixed schema table, as opposed to the default dynamic schema table called "
+                 "AzureDiagnostics. This argument is effective only when the argument --workspace is also given."
+                 "  Allowed values: false, true."
+        )
+        arg_schema.log_analytics_destination_type._registered = False
         return arg_schema
 
     def pre_operations(self):
@@ -139,6 +149,13 @@ class DiagnosticSettingsCreate(_DiagnosticSettingsCreate):
                 'usage error - expected one or more:  --storage-account NAME_OR_ID | --workspace NAME_OR_ID '
                 '| --event-hub NAME_OR_ID | --event-hub-rule ID')
 
+        export_to_resource_specific = args.export_to_resource_specific.to_serialized_data()
+        if has_value(export_to_resource_specific) and export_to_resource_specific:
+            args.log_analytics_destination_type = 'Dedicated'
+        else:
+            args.log_analytics_destination_type = None
+
+
 class DiagnosticSettingsShow(_DiagnosticSettingsShow):
 
     @classmethod
@@ -197,21 +214,6 @@ class DiagnosticSettingsCategoryShow(_DiagnosticSettingsCategoryShow):
     def pre_operations(self):
         ctx = self.ctx
         update_resource_parameters(ctx)
-
-class SubscriptionDiagnosticSettingsCreate(_SubscriptionDiagnosticSettingsCreate):
-    pass
-
-class SubscriptionDiagnosticSettingsUpdate(_SubscriptionDiagnosticSettingsUpdate):
-    pass
-
-class SubscriptionDiagnosticSettingsShow(_SubscriptionDiagnosticSettingsShow):
-    pass
-
-class SubscriptionDiagnosticSettingsDelete(_SubscriptionDiagnosticSettingsDelete):
-    pass
-
-class SubscriptionDiagnosticSettingsList(_SubscriptionDiagnosticSettingsList):
-    pass
 
 
 # pylint: disable=unused-argument, line-too-long
