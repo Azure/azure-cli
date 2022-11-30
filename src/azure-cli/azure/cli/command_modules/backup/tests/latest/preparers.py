@@ -305,7 +305,7 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
 
 
 class KeyPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest-key', parameter_name='key_name', keyvault_parameter_name='key_vault',
+    def __init__(self, name_prefix='clitest-key', parameter_name='key_url', keyvault_parameter_name='key_vault',
                  dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_KEY_NAME'):
         super(KeyPreparer, self).__init__(name_prefix, 24)
         from azure.cli.core.mock import DummyCli
@@ -320,8 +320,8 @@ class KeyPreparer(AbstractPreparer, SingleValueReplacer):
 
             command_string = 'az keyvault key create --vault-name {} -n {}'
             command_string = command_string.format(keyvault, name)
-            execute(self.cli_ctx, command_string)
-            return {self.parameter_name: name}
+            key_job = execute(self.cli_ctx, command_string).get_output_in_json()
+            return {self.parameter_name: key_job["key"]["kid"]}
         return {self.parameter_name: self.dev_setting_value}
     
     def remove_resource(self, name, **kwargs):
@@ -339,21 +339,21 @@ class KeyPreparer(AbstractPreparer, SingleValueReplacer):
     
 
 class DESPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest-des', parameter_name='des_name', key_parameter_name='key_name',
+    def __init__(self, name_prefix='clitest-des', parameter_name='des_name', key_parameter_name='key_url',
                  resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_DES_NAME'):
         super(DESPreparer, self).__init__(name_prefix, 24)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
         self.resource_group = None
         self.parameter_name = parameter_name
-        self.key_name = key_parameter_name
+        self.key_url = key_parameter_name
         self.resource_group_parameter_name = resource_group_parameter_name
         self.dev_setting_value = os.environ.get(dev_setting_name, None)
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_value:
             self.resource_group = self._get_resource_group(**kwargs)
-            key_url = self._get_key(**kwargs)
+            key_url = self._get_key_url(**kwargs)
 
             command_string = 'az disk-encryption-set create -g {} -n {} --key-url {}'
             command_string = command_string.format(self.resource_group, name, key_url)
@@ -374,14 +374,14 @@ class DESPreparer(AbstractPreparer, SingleValueReplacer):
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
 
-    def _get_key(self, **kwargs):
+    def _get_key_url(self, **kwargs):
         try:
-            return kwargs.get(self.key_name)
+            return kwargs.get(self.key_url)
         except KeyError:
             template = 'To create a Disk Encryption Set, a key is required. Please add ' \
                         'decorator @{}} in front of this DES Preparer.'
             raise CliTestError(template.format(KeyPreparer.__name__,
-                                               self.key_name))
+                                               self.key_url))
 
 
 class AFSPolicyPreparer(AbstractPreparer, SingleValueReplacer):
