@@ -1327,7 +1327,20 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
         return
     from ._vm_utils import trusted_launch_warning_log
     if namespace.image is not None:
-        from ._vm_utils import parse_shared_gallery_image_id, parse_community_gallery_image_id
+        from ._vm_utils import parse_shared_gallery_image_id, parse_community_gallery_image_id,\
+            is_valid_image_version_id, parse_gallery_image_id
+        if is_valid_image_version_id(namespace.image):
+            from ._client_factory import cf_gallery_images
+            image_info = parse_gallery_image_id(namespace.image)
+            gallery_image_info = cf_gallery_images(cmd.cli_ctx, '').get(
+                resource_group_name=namespace.resource_group_name, gallery_name=image_info[0],
+                gallery_image_name=image_info[1])
+            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
+                                                                                  'hyper_v_generation') else None
+            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
+            return
+
         image_type = _parse_image_argument(cmd, namespace)
 
         if image_type == 'image_id':
