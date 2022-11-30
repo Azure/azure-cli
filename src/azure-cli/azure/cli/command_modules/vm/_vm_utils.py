@@ -455,7 +455,7 @@ def parse_gallery_image_id(image_reference):
 
     if not image_reference:
         raise InvalidArgumentValueError(
-            'Please pass in the shared gallery image id through the parameter --image')
+            'Please pass in the gallery image id through the parameter --image')
 
     image_info = re.search(r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/'
                            r'galleries/([^/]*)/images/([^/]*)/versions/.*$', image_reference, re.IGNORECASE)
@@ -553,13 +553,13 @@ def trusted_launch_warning_log(namespace, generation_version, features):
     if not generation_version:
         return
 
+    log_message = 'Starting Build 2023 event, "az vm/vmss create" command will deploy Trusted Launch VM by default.' \
+                  ' To know more about Trusted Launch, please visit' \
+                  ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch'
+
     if generation_version == 'V1':
-        logger.warning('Please consider upgrading security for your VM resources by using Trusted Launch security type.'
-                       ' To know more about Trusted Launch, please visit'
-                       ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+        logger.warning(log_message)
 
     if generation_version == 'V2':
         if is_trusted_launch_supported(features) and not namespace.security_type:
-            logger.warning('Starting Build 2023 event, "az vm/vmss create" command will deploy Trusted Launch VM'
-                           ' by default. To know more about Trusted Launch, please visit'
-                           ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+            logger.warning(log_message)
