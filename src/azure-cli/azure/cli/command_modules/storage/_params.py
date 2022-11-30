@@ -305,6 +305,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('name', options_list=['--name', '-n'],
                    help='The name of the storage account within the specified resource group')
 
+    with self.argument_context('storage account failover') as c:
+        c.argument('failover_type', options_list=['--failover-type', '--type'], is_preview=True, default=None,
+                   help="The parameter is set to 'Planned' to indicate whether a Planned failover is requested")
+
     with self.argument_context('storage account delete') as c:
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
 
@@ -578,6 +582,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('state', arg_type=get_enum_type(t_state),
                    help='Change the state the encryption scope. When disabled, '
                    'all blob read/write operations using this encryption scope will fail.')
+
+    with self.argument_context('storage account encryption-scope list') as c:
+        t_encryption_scope_include = self.get_models("ListEncryptionScopesInclude",
+                                                     resource_type=ResourceType.MGMT_STORAGE)
+        c.argument('filter', help='When specified, only encryption scope names starting with the filter will be listed')
+        c.argument('include', arg_type=get_enum_type(t_encryption_scope_include),
+                   help='when specified, will list encryption scopes with the specific state')
+        c.argument('maxpagesize', type=int,
+                   help='the maximum number of encryption scopes that will be included in the list response')
+        c.argument('marker', arg_type=marker_type)
 
     with self.argument_context('storage account keys list', resource_type=ResourceType.MGMT_STORAGE) as c:
         t_expand_key_type = self.get_models('ListKeyExpand', resource_type=ResourceType.MGMT_STORAGE)

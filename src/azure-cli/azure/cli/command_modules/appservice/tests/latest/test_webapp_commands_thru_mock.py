@@ -348,7 +348,7 @@ class TestWebappMocked(unittest.TestCase):
         restore_snapshot(cmd_mock, 'rg', 'web1', '2018-12-07T02:01:31.4708832Z', restore_content_only=False)
 
         # assert
-        client.web_apps.begin_restore_snapshot_slot.assert_called_with('rg', 'web1', request, 'slot1')
+        client.web_apps.begin_restore_snapshot_slot.assert_called_with('rg', 'web1', 'slot1', request)
         client.web_apps.begin_restore_snapshot.assert_called_with('rg', 'web1', overwrite_request)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
