@@ -461,8 +461,9 @@ def parse_gallery_image_id(image_reference):
                            r'galleries/([^/]*)/images/([^/]*)/versions/.*$', image_reference, re.IGNORECASE)
     if not image_info or len(image_info.groups()) < 2:
         raise InvalidArgumentValueError(
-            'The shared gallery image id is invalid. The valid format should be '
-            '"/galleries/{gallery_name}/Images/{gallery_image_name}/Versions/{image_version}"')
+            'The gallery image id is invalid. The valid format should be "/subscriptions/{sub_id}'
+            '/resourceGroups/{rg}/providers/Microsoft.Compute/galleries/{gallery_name}'
+            '/Images/{gallery_image_name}/Versions/{image_version}"')
 
     # Return the gallery unique name and gallery image name parsed from shared gallery image id
     return image_info.group(1), image_info.group(2)
