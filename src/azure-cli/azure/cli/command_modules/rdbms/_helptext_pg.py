@@ -525,3 +525,87 @@ examples:
   - name: Upgrade server 'testsvr' to PostgreSQL major version 14.
     text: az postgres flexible-server upgrade -g testgroup -n testsvr -v 14
 """
+
+helps['postgres flexible-server identity'] = """
+type: group
+short-summary: Manage server user assigned identities.
+"""
+
+helps['postgres flexible-server identity assign'] = """
+type: command
+short-summary: Add user asigned managed identities to the server.
+examples:
+  - name: Add identities 'test-identity' and 'test-identity-2' to server 'testsvr'.
+    text: az postgres flexible-server identity assign -g testgroup -s testsvr --identity test-identity test-identity-2
+"""
+
+helps['postgres flexible-server identity remove'] = """
+type: command
+short-summary: Remove user asigned managed identites from the server.
+examples:
+  - name: Remove identity 'test-identity' from server 'testsvr'.
+    text: az postgres flexible-server identity remove -g testgroup -s testsvr --identity test-identity
+"""
+
+helps['postgres flexible-server identity show'] = """
+type: command
+short-summary: Get an user assigned managed identity from the server.
+examples:
+  - name: Get identity 'test-identity' from server 'testsvr'.
+    text: az postgres flexible-server identity show -g testgroup -s testsvr --identity test-identity
+"""
+
+helps['postgres flexible-server identity list'] = """
+type: command
+short-summary: List all user assigned managed identities from the server.
+examples:
+  - name: List all identities from server 'testsvr'.
+    text: az postgres flexible-server identity list -g testgroup -s testsvr
+"""
+
+helps['postgres flexible-server ad-admin'] = """
+type: group
+short-summary: Manage server Active Directory administrators.
+"""
+
+helps['postgres flexible-server ad-admin create'] = """
+type: command
+short-summary: Create an Active Directory administrator.
+examples:
+  - name: Create Active Directory administrator with user 'john@contoso.com', administrator ID '00000000-0000-0000-0000-000000000000' and type User.
+    text: az postgres flexible-server ad-admin create -g testgroup -s testsvr -u john@contoso.com -i 00000000-0000-0000-0000-000000000000 -t User
+"""
+
+helps['postgres flexible-server ad-admin delete'] = """
+type: command
+short-summary: Delete an Active Directory administrator.
+examples:
+  - name: Delete Active Directory administrator with ID '00000000-0000-0000-0000-000000000000'.
+    text: az postgres flexible-server ad-admin delete -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000
+"""
+
+helps['postgres flexible-server ad-admin list'] = """
+type: command
+short-summary: List all Active Directory administrators.
+examples:
+  - name: List Active Directory administrators.
+    text: az postgres flexible-server ad-admin list -g testgroup -s testsvr
+"""
+
+helps['postgres flexible-server ad-admin show'] = """
+type: command
+short-summary: Get an Active Directory administrator.
+examples:
+  - name: Get Active Directory administrator with ID '00000000-0000-0000-0000-000000000000'.
+    text: az postgres flexible-server ad-admin show -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000
+"""
+
+helps['postgres flexible-server ad-admin wait'] = """
+type: command
+short-summary: Wait for an Active Directory administrator to satisfy certain conditions.
+examples:
+  - name: Wait until an Active Directory administrator exists.
+    text: az postgres flexible-server ad-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --exists
+  - name: Wait for an Active Directory administrator to be deleted.
+    text: az postgres flexible-server ad-admin wait -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000 --deleted
+"""
