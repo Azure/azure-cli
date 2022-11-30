@@ -44,6 +44,8 @@ def update_resource_parameters(ctx, alias="resource"):
     usage_error = CLIError('usage error: --{0} ID | --{0} NAME --resource-group NAME '
                            '--{0}-type TYPE [--{0}-parent PARENT] '
                            '[--{0}-namespace NAMESPACE]'.format(alias))
+    if not name_or_id:
+        raise usage_error
     if is_valid_resource_id(name_or_id):
         if has_value(args.namespace) or has_value(args.parent) or has_value(args.resource_type):
             raise usage_error
@@ -68,7 +70,74 @@ def update_resource_parameters(ctx, alias="resource"):
         args.resource = f"/subscriptions/{ctx.subscription_id}/resourceGroups/{rg}/providers/{res_ns}/{parent + '/' if parent else ''}{res_type}/{name_or_id}"
 
 class DiagnosticSettingsCreate(_DiagnosticSettingsCreate):
-    pass
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        arg_schema = super()._build_arguments_schema(*args, **kwargs)
+        create_resource_parameters(arg_schema, arg_group="Target Resource")
+        return arg_schema
+
+    def pre_operations(self):
+        ctx = self.ctx
+        from azure.cli.core.aaz import has_value
+        from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
+        update_resource_parameters(ctx)
+        args = ctx.args
+        res_ns = args.namespace.to_serialized_data()
+        rg = args.resource_group_name.to_serialized_data()
+        res_type = args.resource_type.to_serialized_data()
+        parent = args.parent.to_serialized_data()
+
+        if not has_value(rg):
+            rg = parse_resource_id(ctx.resource)['resource_group']
+            args.resource_group_name = rg
+
+        storage_account = args.storage_account.to_serialized_data()
+        if has_value(storage_account) and not is_valid_resource_id(storage_account):
+            storage_account = resource_id(subscription=ctx.subscription_id,
+                                          resource_group=rg,
+                                          namespace='microsoft.Storage',
+                                          type='storageAccounts',
+                                          name=storage_account)
+            args.storage_account = storage_account
+
+        workspace = args.workspace.to_serialized_data()
+        if has_value(workspace) and not is_valid_resource_id(workspace):
+            workspace = resource_id(subscription=ctx.subscription_id,
+                                    resource_group=rg,
+                                    namespace='microsoft.OperationalInsights',
+                                    type='workspaces',
+                                    name=workspace)
+            args.workspace = workspace
+
+        event_hub = args.event_hub.to_serialized_data()
+        if has_value(event_hub) and is_valid_resource_id(event_hub):
+            event_hub = parse_resource_id(event_hub)['name']
+            args.event_hub = event_hub
+
+        event_hub_rule = args.event_hub_rule.to_serialized_data()
+        if has_value(event_hub_rule):
+            if not is_valid_resource_id(event_hub_rule):
+                if not has_value(event_hub):
+                    raise CLIError('usage error: --event-hub-rule ID | --event-hub-rule NAME --event-hub NAME')
+                # use value from --event-hub if the rule is a name
+                event_hub_rule = resource_id(
+                    subscription=ctx.subscription_id,
+                    resource_group=rg,
+                    namespace='Microsoft.EventHub',
+                    type='namespaces',
+                    name=event_hub,
+                    child_type_1='AuthorizationRules',
+                    child_name_1=event_hub_rule)
+                args.event_hub_rule = event_hub_rule
+
+            elif not has_value(event_hub):
+                # extract the event hub name from `--event-hub-rule` if provided as an ID
+                event_hub = parse_resource_id(event_hub_rule)['name']
+                args.event_hub = event_hub
+        if not (has_value(storage_account) or has_value(workspace) or has_value(event_hub)):
+            raise CLIError(
+                'usage error - expected one or more:  --storage-account NAME_OR_ID | --workspace NAME_OR_ID '
+                '| --event-hub NAME_OR_ID | --event-hub-rule ID')
 
 class DiagnosticSettingsShow(_DiagnosticSettingsShow):
 
