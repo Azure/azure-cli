@@ -569,8 +569,9 @@ class CommandIndex:
         # "network": ["azure.cli.command_modules.natgateway", "azure.cli.command_modules.network", "azext_firewall"]
         index_modules_extensions = index.get(top_command)
         if not index_modules_extensions and is_autocomplete():
-            # If user type `az stor`, command begin with `stor` will be matched.
-            # It's possible that he installed an extension that contains a command named `stor`, it's okay to ignore it.
+            # If user type `az acco`, command begin with `acco` will be matched.
+            # If the user just installed a new extension which contains a command named `acco`, he can't get the
+            # expected suggestion. But it's a rare scenario, and it's okay to ignore.
             logger.debug("In autocomplete mode, load command begin with: '%s'", top_command)
             index_modules_extensions = []
             for command in index:
