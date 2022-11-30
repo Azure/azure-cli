@@ -21,6 +21,7 @@ from azure.cli.command_modules.appservice.appservice_environment import (show_ap
                                                                          list_appserviceenvironment_addresses,
                                                                          create_appserviceenvironment_arm,
                                                                          update_appserviceenvironment,
+                                                                         upgrade_appserviceenvironment,
                                                                          delete_appserviceenvironment)
 
 
@@ -278,6 +279,27 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         call_args = resource_client_mock.deployments.begin_create_or_update.call_args
         self.assertEqual(call_args[0][0], rg_name)
         self.assertEqual(call_args[0][1], deployment_name)
+
+    def test_app_service_environment_upgrade_asev3(self, ase_client_factory_mock, resource_group_mock):
+        ase_name = 'mock_ase_name'
+        rg_name = 'mock_rg_name'
+
+        ase_client = mock.MagicMock()
+        ase_client_factory_mock.return_value = ase_client
+
+        resource_group_mock.return_value = rg_name
+
+        host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
+        host_env.name = ase_name
+        host_env.kind = 'ASEv3'
+        ase_client.get.return_value = host_env
+        ase_client.list.return_value = [host_env]
+        ase_client.upgrade_availability = 'Ready'
+
+        upgrade_appserviceenvironment(self.mock_cmd, ase_name, test_notification=False, no_wait=False)
+
+        # Assert create_or_update is called with correct properties
+        ase_client.begin_upgrade(resource_group_name=rg_name, name=ase_name)
 
 
 if __name__ == '__main__':
