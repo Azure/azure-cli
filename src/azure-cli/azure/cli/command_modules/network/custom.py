@@ -4784,7 +4784,7 @@ def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, pro
                     path=None, interval=None, threshold=None, probe_threshold=None):
     if probe_threshold is not None:
         logger.warning(
-            "Please note that the parameter --probeThreshold is currently in preview and is not recommended "
+            "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
             "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
             "by not specifying the value of the property."
         )
@@ -4844,7 +4844,7 @@ def set_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protoc
                 probe['number_of_probes'] = threshold
             if probe_threshold is not None:
                 logger.warning(
-                    "Please note that the parameter --probeThreshold is currently in preview and is not recommended "
+                    "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
                     "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
                     "by not specifying the value of the property."
                 )
