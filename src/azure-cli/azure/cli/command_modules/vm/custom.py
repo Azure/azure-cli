@@ -339,7 +339,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         raise RequiredArgumentMissingError(
             'usage error: --upload-size-bytes should be used together with --upload-type')
 
-    log_message = 'Starting Build 2023 event, az disk create command will deploy Trusted Launch VM by default.' \
+    log_message = 'Starting Build 2023 event, "az disk create command" will deploy Trusted Launch VM by default.' \
                   ' To know more about Trusted Launch, please visit' \
                   ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch'
     if image_reference is not None:
