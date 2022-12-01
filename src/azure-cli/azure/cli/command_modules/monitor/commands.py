@@ -11,10 +11,8 @@ def load_command_table(self, _):
         cf_alert_rules, cf_metric_def, cf_log_profiles, cf_autoscale,
         cf_diagnostics, cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories,
         cf_metric_alerts, cf_metric_ns, cf_log_analytics_workspace,
-        cf_diagnostics_category,
         cf_private_link_resources, cf_private_link_scoped_resources,
-        cf_private_link_scopes, cf_private_endpoint_connections, cf_log_analytics_linked_storage,
-        cf_subscription_diagnostics)
+        cf_private_link_scopes, cf_private_endpoint_connections, cf_log_analytics_linked_storage)
     from .transformers import (action_group_list_table)
     from .validators import (process_autoscale_create_namespace,
                              validate_private_endpoint_connection_id,
@@ -73,11 +71,11 @@ def load_command_table(self, _):
         operation_group='diagnostic_settings',
         exception_handler=exception_handler)
 
-    diagnostics_categories_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#DiagnosticSettingsCategoryOperations.{}',
-        client_factory=cf_diagnostics_category,
-        operation_group='diagnostic_settings_category',
-        exception_handler=exception_handler)
+    # diagnostics_categories_sdk = CliCommandType(
+    #     operations_tmpl='azure.mgmt.monitor.operations#DiagnosticSettingsCategoryOperations.{}',
+    #     client_factory=cf_diagnostics_category,
+    #     operation_group='diagnostic_settings_category',
+    #     exception_handler=exception_handler)
 
     diagnostics_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.diagnostics_settings#{}',
@@ -97,17 +95,17 @@ def load_command_table(self, _):
         operation_group='log_profiles',
         exception_handler=exception_handler)
 
-    subscription_dianostic_settings_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#SubscriptionDiagnosticSettingsOperations.{}',
-        client_factory=cf_subscription_diagnostics,
-        operation_group='subscription_diagnostic_settings',
-        exception_handler=exception_handler)
+    # subscription_dianostic_settings_sdk = CliCommandType(
+    #     operations_tmpl='azure.mgmt.monitor.operations#SubscriptionDiagnosticSettingsOperations.{}',
+    #     client_factory=cf_subscription_diagnostics,
+    #     operation_group='subscription_diagnostic_settings',
+    #     exception_handler=exception_handler)
 
-    subscription_dianostic_settings_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.monitor.operations.subscription_diagnostic_settings#{}',
-        client_factory=cf_subscription_diagnostics,
-        operation_group='subscription_diagnostic_settings',
-        exception_handler=exception_handler)
+    # subscription_dianostic_settings_custom = CliCommandType(
+    #     operations_tmpl='azure.cli.command_modules.monitor.operations.subscription_diagnostic_settings#{}',
+    #     client_factory=cf_subscription_diagnostics,
+    #     operation_group='subscription_diagnostic_settings',
+    #     exception_handler=exception_handler)
 
     alert_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.metric_alert#{}',
@@ -229,16 +227,21 @@ def load_command_table(self, _):
 
     with self.command_group('monitor diagnostic-settings', diagnostics_sdk,
                             custom_command_type=diagnostics_custom) as g:
-        from .validators import validate_diagnostic_settings
-        g.custom_command('create', 'create_diagnostics_settings', validator=validate_diagnostic_settings)
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.command('delete', 'delete')
         g.generic_update_command('update')
 
-    with self.command_group('monitor diagnostic-settings categories', diagnostics_categories_sdk) as g:
-        g.show_command('show', 'get')
-        g.command('list', 'list')
+    from .operations.diagnostics_settings import DiagnosticSettingsCreate, DiagnosticSettingsShow, DiagnosticSettingsList, DiagnosticSettingsDelete
+    self.command_table['monitor diagnostic-settings create'] = DiagnosticSettingsCreate(loader=self)
+    self.command_table['monitor diagnostic-settings show'] = DiagnosticSettingsShow(loader=self)
+    self.command_table['monitor diagnostic-settings list'] = DiagnosticSettingsList(loader=self)
+    self.command_table['monitor diagnostic-settings delete'] = DiagnosticSettingsDelete(loader=self)
+
+    # with self.command_group('monitor diagnostic-settings categories', diagnostics_categories_sdk) as g:
+    #     g.show_command('show', 'get')
+    #     g.command('list', 'list')
+
+    from .operations.diagnostics_settings import DiagnosticSettingsCategoryShow, DiagnosticSettingsCategoryList
+    self.command_table['monitor diagnostic-settings categories show'] = DiagnosticSettingsCategoryShow(loader=self)
+    self.command_table['monitor diagnostic-settings categories list'] = DiagnosticSettingsCategoryList(loader=self)
 
     with self.command_group('monitor log-profiles', log_profiles_sdk, custom_command_type=log_profiles_custom) as g:
         g.custom_command('create', 'create_log_profile_operations')
@@ -347,11 +350,3 @@ def load_command_table(self, _):
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('delete', 'delete_private_endpoint_connection', client_factory=cf_private_endpoint_connections,
                          validator=validate_private_endpoint_connection_id, confirmation=True)
-
-    with self.command_group('monitor diagnostic-settings subscription', subscription_dianostic_settings_sdk,
-                            custom_command_type=subscription_dianostic_settings_custom) as g:
-        g.custom_command('create', 'create_subscription_diagnostic_settings')
-        g.command('delete', 'delete', confirmation=True)
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.generic_update_command('update', custom_func_name='update_subscription_diagnostic_settings')
