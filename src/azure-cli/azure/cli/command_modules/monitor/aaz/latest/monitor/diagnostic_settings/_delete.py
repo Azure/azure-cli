@@ -46,8 +46,13 @@ class Delete(AAZCommand):
             help="The name of the diagnostic setting. Required.",
             required=True,
         )
+
+        # define Arg Group "Target Resource"
+
+        _args_schema = cls._args_schema
         _args_schema.resource = AAZStrArg(
             options=["--resource"],
+            arg_group="Target Resource",
             help="Name or ID of the target resource.",
             required=True,
         )

@@ -16,6 +16,12 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List the diagnostic settings categories for the specified resource.
+
+    :example: List diagnostic settings categories by using resource ID
+        az monitor diagnostic-settings categories list --resource /subscriptions/00000000-0000-0000- 0000-000000000000/resourcegroups/myRG/providers/microsoft.logic/workflows/myWorkflow
+
+    :example: List diagnostic settings categories by using resource name
+        az monitor diagnostic-settings categories list -g myRG --resource-type microsoft.logic/workflows --resource myWorkflow
     """
 
     _aaz_info = {

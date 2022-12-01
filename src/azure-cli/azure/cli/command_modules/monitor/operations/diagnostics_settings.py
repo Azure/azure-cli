@@ -84,6 +84,7 @@ class DiagnosticSettingsCreate(_DiagnosticSettingsCreate):
                  "  Allowed values: false, true."
         )
         arg_schema.log_analytics_destination_type._registered = False
+        arg_schema.service_bus_rule_id._registered = False
         return arg_schema
 
     def pre_operations(self):
@@ -174,7 +175,7 @@ class DiagnosticSettingsList(_DiagnosticSettingsList):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         arg_schema = super()._build_arguments_schema(*args, **kwargs)
-        create_resource_parameters(arg_schema, arg_group="Target Resource")
+        create_resource_parameters(arg_schema)
         return arg_schema
 
     def pre_operations(self):

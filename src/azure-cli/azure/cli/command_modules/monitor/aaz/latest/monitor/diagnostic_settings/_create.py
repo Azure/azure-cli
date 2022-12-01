@@ -15,7 +15,10 @@ from azure.cli.core.aaz import *
     "monitor diagnostic-settings create",
 )
 class Create(AAZCommand):
-    """Create diagnostic settings for the specified resource.
+    """Create diagnostic settings for the specified resource. For more information, visit: https://docs.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#metricsettings.
+
+    :example: Create diagnostic settings, retention here only applies when the target is a storage account.
+        az monitor diagnostic-settings create --resource {ID} -n {name} --storage-account {storageAccount} --logs '[ { "category": "WorkflowRuntime", "enabled": true, "retentionPolicy": { "enabled": false, "days": 0 } } ]' --metrics '[ { "category": "WorkflowRuntime", "enabled": true, "retentionPolicy": { "enabled": false, "days": 0 } } ]'
     """
 
     _aaz_info = {

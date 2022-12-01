@@ -103,11 +103,11 @@ def load_command_table(self, _):
     #     operation_group='subscription_diagnostic_settings',
     #     exception_handler=exception_handler)
 
-    subscription_dianostic_settings_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.monitor.operations.subscription_diagnostic_settings#{}',
-        client_factory=cf_subscription_diagnostics,
-        operation_group='subscription_diagnostic_settings',
-        exception_handler=exception_handler)
+    # subscription_dianostic_settings_custom = CliCommandType(
+    #     operations_tmpl='azure.cli.command_modules.monitor.operations.subscription_diagnostic_settings#{}',
+    #     client_factory=cf_subscription_diagnostics,
+    #     operation_group='subscription_diagnostic_settings',
+    #     exception_handler=exception_handler)
 
     alert_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.metric_alert#{}',
