@@ -11,10 +11,8 @@ def load_command_table(self, _):
         cf_alert_rules, cf_metric_def, cf_log_profiles, cf_autoscale,
         cf_diagnostics, cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories,
         cf_metric_alerts, cf_metric_ns, cf_log_analytics_workspace,
-        cf_diagnostics_category,
         cf_private_link_resources, cf_private_link_scoped_resources,
-        cf_private_link_scopes, cf_private_endpoint_connections, cf_log_analytics_linked_storage,
-        cf_subscription_diagnostics)
+        cf_private_link_scopes, cf_private_endpoint_connections, cf_log_analytics_linked_storage)
     from .transformers import (action_group_list_table)
     from .validators import (process_autoscale_create_namespace,
                              validate_private_endpoint_connection_id,
@@ -229,11 +227,6 @@ def load_command_table(self, _):
 
     with self.command_group('monitor diagnostic-settings', diagnostics_sdk,
                             custom_command_type=diagnostics_custom) as g:
-        from .validators import validate_diagnostic_settings
-        # g.custom_command('create', 'create_diagnostics_settings', validator=validate_diagnostic_settings)
-        # g.show_command('show', 'get')
-        # g.command('list', 'list')
-        # g.command('delete', 'delete')
         g.generic_update_command('update')
 
     from .operations.diagnostics_settings import DiagnosticSettingsCreate, DiagnosticSettingsShow, DiagnosticSettingsList, DiagnosticSettingsDelete
@@ -357,4 +350,3 @@ def load_command_table(self, _):
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('delete', 'delete_private_endpoint_connection', client_factory=cf_private_endpoint_connections,
                          validator=validate_private_endpoint_connection_id, confirmation=True)
-        
