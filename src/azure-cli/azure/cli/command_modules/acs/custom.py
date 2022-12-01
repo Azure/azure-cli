@@ -875,8 +875,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                     raise ArgumentUsageError(
                         "--enable-syslog can not be used without MSI auth.")
                 if data_collection_settings is not None:
-                     raise ArgumentUsageError(
-                        "--data-collection-settings can not be used without MSI auth.")
+                    raise ArgumentUsageError("--data-collection-settings can not be used without MSI auth.")
                 ensure_container_insights_for_monitoring(
                     cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME], subscription_id, resource_group_name, name, instance.location, aad_route=False)
 

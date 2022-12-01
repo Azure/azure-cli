@@ -448,23 +448,23 @@ def ensure_container_insights_for_monitoring(
             # get data collection settings
             extensionSettings = {}
             if data_collection_settings is not None:
-               dataCollectionSettings = _get_data_collection_settings(data_collection_settings)
-               if 'interval' in dataCollectionSettings.keys():
+                dataCollectionSettings = _get_data_collection_settings(data_collection_settings)
+                if 'interval' in dataCollectionSettings.keys():
                     intervalValue = dataCollectionSettings["interval"]
-               if (bool(re.match(r'^[0-9]+[m]$', intervalValue))) is False:
+                if (bool(re.match(r'^[0-9]+[m]$', intervalValue))) is False:
                     raise InvalidArgumentValueError('interval format must be in <number>m')
-               intervalValue = int(intervalValue.rstrip("m"))
-               if intervalValue <= 0 or intervalValue > 30:
+                intervalValue = int(intervalValue.rstrip("m"))
+                if intervalValue <= 0 or intervalValue > 30:
                     raise InvalidArgumentValueError('interval value MUST be in the range from 1m to 30m')
-               if 'namespaceFilteringMode' in dataCollectionSettings.keys():
+                if 'namespaceFilteringMode' in dataCollectionSettings.keys():
                     namespaceFilteringModeValue = dataCollectionSettings["namespaceFilteringMode"].lower()
                     if namespaceFilteringModeValue not in ["off", "exclude", "include"]:
                         raise InvalidArgumentValueError('namespaceFilteringMode value MUST be either Off or Exclude or Include')
-               if 'namespaces' in dataCollectionSettings.keys():
+                if 'namespaces' in dataCollectionSettings.keys():
                     namspaces = dataCollectionSettings["namespaces"]
                     if isinstance(namspaces, list) is False:
-                       raise InvalidArgumentValueError('namespaces must be an array type')
-               extensionSettings["dataCollectionSettings"] = dataCollectionSettings
+                        raise InvalidArgumentValueError('namespaces must be an array type')
+                extensionSettings["dataCollectionSettings"] = dataCollectionSettings
             # create the DCR
             dcr_creation_body_without_syslog = json.dumps(
                 {
@@ -839,6 +839,7 @@ def add_virtual_node_role_assignment(cmd, result, vnet_subnet_id):
             "Could not find service principal or user assigned MSI for role"
             "assignment"
         )
+
 
 def _get_data_collection_settings(file_path):
     if not os.path.isfile(file_path):
