@@ -2447,3 +2447,27 @@ def load_arguments(self, _):
 
     with self.argument_context('sql db classification recommendation list') as c:
         c.ignore('skip_token')
+
+###################################################
+#           sql server ipv6-firewall-rule
+###################################################
+    with self.argument_context('sql server ipv6-firewall-rule') as c:
+        # Help text needs to be specified because 'sql server ipv6-firewall-rule update' is a custom
+        # command.
+        c.argument('server_name',
+                   options_list=['--server', '-s'],
+                   arg_type=server_param_type)
+
+        c.argument('firewall_rule_name',
+                   options_list=['--name', '-n'],
+                   help='The name of the IPv6 firewall rule.',
+                   # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
+                   id_part='child_name_1')
+
+        c.argument('start_ipv6_address',
+                   options_list=['--start-ipv6-address'],
+                   help='The start IPv6 address of the firewall rule. Must be IPv6 format.')
+
+        c.argument('end_ipv6_address',
+                   options_list=['--end-ipv6-address'],
+                   help='The end IPv6 address of the firewall rule. Must be IPv6 format.')

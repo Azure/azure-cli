@@ -524,6 +524,89 @@ class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server), checks=[NoneCheck()])
 
 
+class SqlServerIPv6FirewallMgmtScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    @SqlServerPreparer(location='eastus')
+    def test_sql_ipv6_firewall_mgmt(self, resource_group, resource_group_location, server):
+        ipv6_firewall_rule_1 = 'rule1'
+        start_ipv6_address_1 = '0229:e3a4:e0d7:36d3:d228:73fa:12fc:ae30'
+        end_ipv6_address_1 = '0229:e3a4:e0d7:36d3:d228:73fa:12fc:ae30'
+        ipv6_firewall_rule_2 = 'rule2'
+        start_ipv6_address_2 = '8798:d2cb:efea:2d56:0d4a:41fb:c61d:e532'
+        end_ipv6_address_2 = '8798:d2cb:efea:2d56:0d4a:41fb:c61d:e532'
+
+        # test sql server ipv6-firewall-rule create
+        ipv6fw_rule_1 = self.cmd('sql server ipv6-firewall-rule create -n {} -g {} -s {} '
+                             '--start-ipv6-address {} --end-ipv6-address {}'
+                             .format(ipv6_firewall_rule_1, resource_group, server,
+                                     start_ipv6_address_1, end_ipv6_address_1),
+                             checks=[
+                                 JMESPathCheck('name', ipv6_firewall_rule_1),
+                                 JMESPathCheck('resourceGroup', resource_group),
+                                 JMESPathCheck('startIPv6Address', start_ipv6_address_1),
+                                 JMESPathCheck('endIPv6Address', end_ipv6_address_1)]).get_output_in_json()
+
+        # test sql server ipv6-firewall-rule show by group/server/name
+        self.cmd('sql server ipv6-firewall-rule show --name {} -g {} --server {}'
+                 .format(ipv6_firewall_rule_1, resource_group, server),
+                 checks=[
+                     JMESPathCheck('name', ipv6_firewall_rule_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('startIPv6Address', start_ipv6_address_1),
+                     JMESPathCheck('endIPv6Address', end_ipv6_address_1)])
+
+        # test sql server ipv6-firewall-rule show by id
+        self.cmd('sql server ipv6-firewall-rule show --id {}'
+                 .format(ipv6fw_rule_1['id']),
+                 checks=[
+                     JMESPathCheck('name', ipv6_firewall_rule_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('startIPv6Address', start_ipv6_address_1),
+                     JMESPathCheck('endIPv6Address', end_ipv6_address_1)])
+
+        # test sql server ipv6-firewall-rule update by group/server/name
+        self.cmd('sql server ipv6-firewall-rule update --name {} -g {} --server {} '
+                 '--start-ipv6-address {} --end-ipv6-address {}'
+                 .format(ipv6_firewall_rule_1, resource_group, server,
+                         start_ipv6_address_2, end_ipv6_address_2),
+                 checks=[
+                     JMESPathCheck('name', ipv6_firewall_rule_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('startIPv6Address', start_ipv6_address_2),
+                     JMESPathCheck('endIPv6Address', end_ipv6_address_2)])
+
+        # test sql server ipv6-firewall-rule update by id
+        self.cmd('sql server ipv6-firewall-rule update --id {} '
+                 '--start-ipv6-address {} --end-ipv6-address {}'
+                 .format(ipv6fw_rule_1['id'], start_ipv6_address_1, end_ipv6_address_1),
+                 checks=[
+                     JMESPathCheck('name', ipv6_firewall_rule_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('startIPv6Address', start_ipv6_address_1),
+                     JMESPathCheck('endIPv6Address', end_ipv6_address_1)])
+
+        # test sql server ipv6-firewall-rule create another rule
+        self.cmd('sql server ipv6-firewall-rule create --name {} -g {} --server {} '
+                 '--start-ipv6-address {} --end-ipv6-address {}'
+                 .format(ipv6_firewall_rule_2, resource_group, server,
+                         start_ipv6_address_2, end_ipv6_address_2),
+                 checks=[
+                     JMESPathCheck('name', ipv6_firewall_rule_2),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('startIPv6Address', start_ipv6_address_2),
+                     JMESPathCheck('endIPv6Address', end_ipv6_address_2)])
+
+        # test sql server ipv6-firewall-rule list
+        self.cmd('sql server ipv6-firewall-rule list -g {} -s {}'
+                 .format(resource_group, server), checks=[JMESPathCheck('length(@)', 2)])
+
+        # test sql server ipv6-firewall-rule delete
+        self.cmd('sql server ipv6-firewall-rule delete --name {} -g {} -s {}'
+                 .format(ipv6_firewall_rule_2, resource_group, server), checks=NoneCheck())
+        self.cmd('sql server ipv6-firewall-rule list -g {} --server {}'
+                 .format(resource_group, server), checks=[JMESPathCheck('length(@)', 1)])
+
+
 class SqlServerOutboundFirewallMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
     @SqlServerPreparer(location='eastus')
