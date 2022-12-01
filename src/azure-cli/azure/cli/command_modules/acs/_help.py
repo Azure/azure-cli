@@ -275,6 +275,9 @@ parameters:
   - name: --enable-syslog
     type: bool
     short-summary: Enable syslog data collection for Monitoring addon
+  - name: --data-collection-settings
+    type: string
+    short-summary: Path to JSON file containing data collection settings for Monitoring addon.
   - name: --uptime-sla
     type: bool
     short-summary: Enable a paid managed cluster service with a financially backed SLA.
