@@ -280,6 +280,8 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         self.assertEqual(call_args[0][0], rg_name)
         self.assertEqual(call_args[0][1], deployment_name)
 
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
     def test_app_service_environment_upgrade_asev3(self, ase_client_factory_mock, resource_group_mock):
         ase_name = 'mock_ase_name'
         rg_name = 'mock_rg_name'
@@ -292,9 +294,10 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
         host_env.name = ase_name
         host_env.kind = 'ASEv3'
+        host_env.upgrade_availability = 'Ready'
+        host_env.upgrade_preference ='Manual'
         ase_client.get.return_value = host_env
         ase_client.list.return_value = [host_env]
-        ase_client.upgrade_availability = 'Ready'
 
         upgrade_appserviceenvironment(self.mock_cmd, ase_name, test_notification=False, no_wait=False)
 
