@@ -4799,6 +4799,10 @@ def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, pro
     for item in lb["probes"]:
         probe = dict()
         probe["name"] = item.pop("name", None)
+        if probe["name"] == item_name:
+            logger.warning(f"Item {item_name} already exists. Replacing with new values.")
+            continue
+
         probe["interval_in_seconds"] = item.pop("intervalInSeconds", None)
         probe["number_of_probes"] = item.pop("numberOfProbes", None)
         probe["port"] = item.pop("port", None)
@@ -4827,8 +4831,8 @@ def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, pro
     return [r for r in result if r["name"] == item_name][0]
 
 
-def set_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol=None, port=None,
-                 path=None, interval=None, threshold=None, probe_threshold=None):
+def update_lb_probe(cmd, resource_group_name, load_balancer_name, item_name,
+                    protocol=None, port=None, path=None, interval=None, threshold=None, probe_threshold=None):
     from .aaz.latest.network.lb import Show
     lb = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "name": load_balancer_name,
