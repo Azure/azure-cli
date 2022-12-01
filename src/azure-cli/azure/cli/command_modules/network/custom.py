@@ -4800,7 +4800,7 @@ def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, pro
         probe = dict()
         probe["name"] = item.pop("name", None)
         if probe["name"] == item_name:
-            logger.warning(f"Item {item_name} already exists. Replacing with new values.")
+            logger.warning("Item '%s' already exists. Replacing with new values.", item_name)
             continue
 
         probe["interval_in_seconds"] = item.pop("intervalInSeconds", None)
