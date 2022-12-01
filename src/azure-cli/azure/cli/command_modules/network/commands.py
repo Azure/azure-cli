@@ -707,9 +707,9 @@ def load_command_table(self, _):
                                  setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_rule')
 
-    with self.command_group('network lb probe') as g:
-        g.custom_command('create', 'create_lb_probe')
-        g.custom_command('update', 'set_lb_probe')
+    with self.command_group("network lb probe") as g:
+        g.custom_command("create", "create_lb_probe")
+        g.custom_command("update", "update_lb_probe")
 
     with self.command_group('network lb probe', network_util) as g:
         g.command('delete', delete_lb_resource_property_entry('load_balancers', 'probes'))
