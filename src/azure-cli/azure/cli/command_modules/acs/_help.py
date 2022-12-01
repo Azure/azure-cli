@@ -275,7 +275,7 @@ parameters:
   - name: --enable-syslog
     type: bool
     short-summary: Enable syslog data collection for Monitoring addon
-  - name: --data-collection-settings -dcs
+  - name: --data-collection-settings -d
     type: string
     short-summary: Path to JSON file containing data collection settings for Monitoring addon.
   - name: --uptime-sla
@@ -812,7 +812,7 @@ parameters:
   - name: --enable-syslog
     type: bool
     short-summary: Enable syslog data collection for Monitoring addon
-  - name: --data-collection-settings -dcs
+  - name: --data-collection-settings -d
     type: string
     short-summary: Path to JSON file containing data collection settings for Monitoring addon.
   - name: --appgw-name
