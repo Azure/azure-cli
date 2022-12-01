@@ -5074,9 +5074,11 @@ class NetworkVirtualHubRouter(ScenarioTest):
 
         self.cmd('network routeserver peering show -g {rg} --routeserver {vrouter} -n {peer}')
 
-        self.cmd('network routeserver peering list-advertised-routes -g {rg} --routeserver {vrouter} -n {peer}')
+        self.cmd('network routeserver peering list-advertised-routes -g {rg} --routeserver {vrouter} -n {peer}',
+                 checks=[self.check("contains(keys(@), 'RouteServiceRole_IN_0')", True)])
 
-        self.cmd('network routeserver peering list-learned-routes -g {rg} --routeserver {vrouter} -n {peer}')
+        self.cmd('network routeserver peering list-learned-routes -g {rg} --routeserver {vrouter} -n {peer}',
+                 checks=[self.check("contains(keys(@), 'RouteServiceRole_IN_1')", True)])
 
         # unable to update unless the ASN's range is required
         # self.cmd('network routeserver peering update -g {rg} --routeserver {vrouter} -n {peer} --peer-ip 10.0.0.0')

@@ -4734,65 +4734,106 @@ def set_lb_outbound_rule(instance, cmd, parent, item_name, protocol=None, outbou
 
 def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol, port,
                     path=None, interval=None, threshold=None, probe_threshold=None):
+    if probe_threshold is not None:
+        logger.warning(
+            "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
+            "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
+            "by not specifying the value of the property."
+        )
+
     from .aaz.latest.network.lb import Show
     lb = Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": load_balancer_name,
         "resource_group": resource_group_name,
-        "name": load_balancer_name
     })
 
-    for probe in lb["probes"]:
-        probe["interval_in_seconds"] = probe.pop("intervalInSeconds")
-        probe["number_of_probes"] = probe.pop("numberOfProbes")
-        probe["probe_threshold"] = probe.pop("probeThreshold")
-        if "requestPath" in probe:
-            probe["request_path"] = probe.pop("requestPath")
+    probes = []
+    for item in lb["probes"]:
+        probe = dict()
+        probe["name"] = item.pop("name", None)
+        if probe["name"] == item_name:
+            logger.warning("Item '%s' already exists. Replacing with new values.", item_name)
+            continue
 
-    probe_args = {
+        probe["interval_in_seconds"] = item.pop("intervalInSeconds", None)
+        probe["number_of_probes"] = item.pop("numberOfProbes", None)
+        probe["port"] = item.pop("port", None)
+        probe["probe_threshold"] = item.pop("probeThreshold", None)
+        probe["protocol"] = item.pop("protocol", None)
+        probe["request_path"] = item.pop("requestPath", None)
+        probes.append(probe)
+
+    probes.append({
         "name": item_name,
         "interval_in_seconds": interval,
         "number_of_probes": threshold,
         "port": port,
+        "probe_threshold": probe_threshold,
         "protocol": protocol,
         "request_path": path,
-        "probe_threshold": probe_threshold
-    }
-    lb["probes"].append(probe_args)
-    lb["resource_group"] = resource_group_name
+    })
 
-    from .aaz.latest.network.lb import Create
-    probes = Create(cli_ctx=cmd.cli_ctx)(command_args=lb).result()["probes"]
-    return [probe for probe in probes if probe["name"] == item_name][0]
-
-
-def set_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol=None, port=None,
-                 path=None, interval=None, threshold=None, probe_threshold=None):
-    from .aaz.latest.network.lb import Show
-    lb = Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': load_balancer_name})
-    for probe in lb['probes']:
-        probe['interval_in_seconds'] = probe.pop('intervalInSeconds')
-        probe['number_of_probes'] = probe.pop('numberOfProbes')
-        probe['probe_threshold'] = probe.pop('probeThreshold')
-        if 'requestPath' in probe:
-            probe['request_path'] = probe.pop('requestPath')
-        if probe['name'] == item_name:
-            if protocol is not None:
-                probe['protocol'] = protocol
-            if port is not None:
-                probe['port'] = port
-            if path == '':
-                probe['request_path'] = None
-            elif path is not None:
-                probe['request_path'] = path
-            if interval is not None:
-                probe['interval_in_seconds'] = interval
-            if threshold is not None:
-                probe['number_of_probes'] = threshold
-            if probe_threshold is not None:
-                probe['probe_threshold'] = probe_threshold
-    lb['resource_group'] = resource_group_name
     from .aaz.latest.network.lb import Update
-    poller = Update(cli_ctx=cmd.cli_ctx)(command_args=lb).result()['probes']
-    return [probe for probe in poller if probe['name'] == item_name][0]
+    result = Update(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": load_balancer_name,
+        "resource_group": resource_group_name,
+        "probes": probes,
+    }).result()["probes"]
+
+    return [r for r in result if r["name"] == item_name][0]
+
+
+def update_lb_probe(cmd, resource_group_name, load_balancer_name, item_name,
+                    protocol=None, port=None, path=None, interval=None, threshold=None, probe_threshold=None):
+    from .aaz.latest.network.lb import Show
+    lb = Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": load_balancer_name,
+        "resource_group": resource_group_name,
+    })
+
+    probes = []
+    for item in lb["probes"]:
+        probe = dict()
+        probe["name"] = item.pop("name", None)
+        probe["interval_in_seconds"] = item.pop("intervalInSeconds", None)
+        probe["number_of_probes"] = item.pop("numberOfProbes", None)
+        probe["port"] = item.pop("port", None)
+        probe["probe_threshold"] = item.pop("probeThreshold", None)
+        probe["protocol"] = item.pop("protocol", None)
+        probe["request_path"] = item.pop("requestPath", None)
+        probes.append(probe)
+
+    for probe in probes:
+        if probe["name"] == item_name:
+            if interval is not None:
+                probe["interval_in_seconds"] = interval
+            if threshold is not None:
+                probe["number_of_probes"] = threshold
+            if port is not None:
+                probe["port"] = port
+            if probe_threshold is not None:
+                logger.warning(
+                    "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
+                    "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
+                    "by not specifying the value of the property."
+                )
+                probe["probe_threshold"] = probe_threshold
+            if protocol is not None:
+                probe["protocol"] = protocol
+            if path is not None:
+                if path == "":
+                    probe["request_path"] = None
+                else:
+                    probe["request_path"] = path
+
+    from .aaz.latest.network.lb import Update
+    result = Update(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": load_balancer_name,
+        "resource_group": resource_group_name,
+        "probes": probes,
+    }).result()["probes"]
+
+    return [r for r in result if r["name"] == item_name][0]
 
 
 def create_cross_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol, port,

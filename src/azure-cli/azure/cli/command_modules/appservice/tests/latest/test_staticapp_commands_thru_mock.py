@@ -126,6 +126,27 @@ class TestStaticAppCommands(unittest.TestCase):
         self.staticapp_client.begin_create_or_update_static_site.assert_called_once()
 
 
+    @mock.patch('azure.cli.core.util', autospec=True)
+    def test_create_staticapp_azure_devops(self, util):
+        from azure.mgmt.web.models import StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
+        self.mock_cmd.get_models.return_value = StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
+
+        with mock.patch("azure.cli.command_modules.appservice.static_sites.show_staticsite", side_effect=[ResourceNotFoundError("msg"), None]):
+            with mock.patch('azure.cli.command_modules.appservice.static_sites._get_ado_token', autospec=True):
+                create_staticsites(
+                    self.mock_cmd, self.rg1, self.name1, self.location1,
+                    self.source_ado, self.branch1, login_with_ado=True)
+
+        self.staticapp_client.begin_create_or_update_static_site.assert_called_once()
+        arg_list = self.staticapp_client.begin_create_or_update_static_site.call_args[1]
+        self.assertEqual(self.name1, arg_list["name"])
+        self.assertEqual(self.rg1, arg_list["resource_group_name"])
+        self.assertEqual(self.location1, arg_list["static_site_envelope"].location)
+        self.assertEqual(self.source_ado, arg_list["static_site_envelope"].repository_url)
+        self.assertEqual(self.branch1, arg_list["static_site_envelope"].branch)
+        self.assertEqual('Free', arg_list["static_site_envelope"].sku.name)
+
+
     def test_create_staticapp_with_standard_sku(self):
         from azure.mgmt.web.models import StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
         self.mock_cmd.get_models.return_value = StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
@@ -682,6 +703,7 @@ def _set_up_fake_apps(self):
     self.name1_not_exist = 'name1_not_exist'
     self.location1 = 'location1'
     self.source1 = 'https://github.com/Contoso/My-First-Static-App'
+    self.source_ado = ' https://dev.azure.com/username/Test/_git/Test'
     self.branch1 = 'dev'
     self.token1 = 'TOKEN_1'
     self.environment1 = 'default'
