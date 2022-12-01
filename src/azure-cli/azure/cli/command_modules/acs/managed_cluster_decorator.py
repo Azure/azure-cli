@@ -100,7 +100,6 @@ ManagedClusterAddonProfile = TypeVar("ManagedClusterAddonProfile")
 Snapshot = TypeVar("Snapshot")
 KubeletConfig = TypeVar("KubeletConfig")
 LinuxOSConfig = TypeVar("LinuxOSConfig")
-DataCollectionSettings = TypeVar("DataCollectionSettings")
 ManagedClusterOIDCIssuerProfile = TypeVar("ManagedClusterOIDCIssuerProfile")
 ManagedClusterSecurityProfileDefender = TypeVar("ManagedClusterSecurityProfileDefender")
 ManagedClusterStorageProfile = TypeVar('ManagedClusterStorageProfile')
@@ -2440,13 +2439,12 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return enable_syslog
 
-    def get_data_collection_settings(self) -> Union[Dict, DataCollectionSettings, None]:
+    def get_data_collection_settings(self) -> Union[str, None]:
         """Obtain the value of data_collection_settings.
 
-        :return: dictionary, DataCollectionSettings or None
+        :return: string or None
         """
         # read the original value passed by the command
-        data_collection_settings = None
         data_collection_settings_file_path = self.raw_param.get("data_collection_settings")
         # validate user input
         if data_collection_settings_file_path:
@@ -2456,14 +2454,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                         data_collection_settings_file_path
                     )
                 )
-            data_collection_settings = get_file_json(data_collection_settings_file_path)
-            if not isinstance(data_collection_settings, dict):
-                raise InvalidArgumentValueError(
-                    "Error reading data collection settings from {}.".format(
-                        data_collection_settings_file_path
-                    )
-                )
-        return data_collection_settings
+        return data_collection_settings_file_path
 
     # pylint: disable=no-self-use
     def get_virtual_node_addon_os_type(self) -> str:
