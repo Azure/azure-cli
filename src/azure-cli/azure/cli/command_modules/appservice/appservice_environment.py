@@ -118,12 +118,10 @@ def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_
             if ase_networking_conf.allow_new_private_endpoint_connections != allow_new_private_endpoint_connections:
                 ase_networking_conf.allow_new_private_endpoint_connections = allow_new_private_endpoint_connections
                 config_update = True
-        if config_update == True:
+        if config_update:
             return ase_client.update_ase_networking_configuration(resource_group_name=resource_group_name,
-                                                              name=name,
-                                                              ase_networking_configuration=ase_networking_conf)
-        else:
-            return ase_networking_conf
+                                                                  name=name,
+                                                                  ase_networking_configuration=ase_networking_conf)
     elif ase_def.kind.lower() == 'asev2':
         if front_end_scale_factor is not None or front_end_sku is not None:
             worker_sku = _map_worker_sku(front_end_sku)
