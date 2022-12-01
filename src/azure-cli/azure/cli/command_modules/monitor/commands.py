@@ -73,11 +73,11 @@ def load_command_table(self, _):
         operation_group='diagnostic_settings',
         exception_handler=exception_handler)
 
-    diagnostics_categories_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#DiagnosticSettingsCategoryOperations.{}',
-        client_factory=cf_diagnostics_category,
-        operation_group='diagnostic_settings_category',
-        exception_handler=exception_handler)
+    # diagnostics_categories_sdk = CliCommandType(
+    #     operations_tmpl='azure.mgmt.monitor.operations#DiagnosticSettingsCategoryOperations.{}',
+    #     client_factory=cf_diagnostics_category,
+    #     operation_group='diagnostic_settings_category',
+    #     exception_handler=exception_handler)
 
     diagnostics_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.diagnostics_settings#{}',
@@ -97,11 +97,11 @@ def load_command_table(self, _):
         operation_group='log_profiles',
         exception_handler=exception_handler)
 
-    subscription_dianostic_settings_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#SubscriptionDiagnosticSettingsOperations.{}',
-        client_factory=cf_subscription_diagnostics,
-        operation_group='subscription_diagnostic_settings',
-        exception_handler=exception_handler)
+    # subscription_dianostic_settings_sdk = CliCommandType(
+    #     operations_tmpl='azure.mgmt.monitor.operations#SubscriptionDiagnosticSettingsOperations.{}',
+    #     client_factory=cf_subscription_diagnostics,
+    #     operation_group='subscription_diagnostic_settings',
+    #     exception_handler=exception_handler)
 
     subscription_dianostic_settings_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.subscription_diagnostic_settings#{}',
