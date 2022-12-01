@@ -49,7 +49,7 @@ DEPENDENCIES = [
     'cryptography',
     'humanfriendly~=10.0',
     'jmespath',
-    'knack~=0.10.0',
+    'knack~=0.10.1',
     'msal-extensions~=1.0.0',
     'msal[broker]==1.20.0',
     'msrestazure~=0.6.4',
