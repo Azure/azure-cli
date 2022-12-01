@@ -142,7 +142,7 @@ def upgrade_appserviceenvironment(cmd, name, resource_group_name=None, test_noti
             raise ValidationError('Upgrade preference in ASEv3 must be set to manual, please check \
                 https://learn.microsoft.com/azure/app-service/environment/how-to-upgrade-preference')
     else:
-        logger.warning('No updates were applied. The version of ASE may not be applicable to this update.')
+        logger.warning('No upgrade were applied. This version of ASE not support upgrade.')
 
 
 def list_appserviceenvironment_addresses(cmd, name, resource_group_name=None):
