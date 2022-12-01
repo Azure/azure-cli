@@ -134,7 +134,7 @@ def set_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_wait
                                                                     name, hostname, domain_envelope)
 
     if validation_method.lower() == "dns-txt-token":
-        validation_cmd = ("az staticwebapp hostname get -n {} -g {} "
+        validation_cmd = ("az staticwebapp hostname show -n {} -g {} "
                           "--hostname {} --query \"validationToken\"".format(name,
                                                                              resource_group_name,
                                                                              hostname))
