@@ -46,11 +46,6 @@ class Create(AAZCommand):
             help="The name of the diagnostic setting. Required.",
             required=True,
         )
-        _args_schema.resource = AAZStrArg(
-            options=["--resource"],
-            help="Name or ID of the target resource.",
-            required=True,
-        )
         _args_schema.event_hub_rule = AAZStrArg(
             options=["--event-hub-rule"],
             help="Name or ID of the event hub authorization rule.",
@@ -132,6 +127,16 @@ class Create(AAZCommand):
         _element.time_grain = AAZDurationArg(
             options=["time-grain"],
             help="the timegrain of the metric in ISO8601 format.",
+        )
+
+        # define Arg Group "Target Resource"
+
+        _args_schema = cls._args_schema
+        _args_schema.resource = AAZStrArg(
+            options=["--resource"],
+            arg_group="Target Resource",
+            help="Name or ID of the target resource.",
+            required=True,
         )
         return cls._args_schema
 
