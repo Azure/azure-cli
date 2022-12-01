@@ -34,12 +34,12 @@ class TestMonitorDiagnosticSettings(ScenarioTest):
             {
                 "category": "NetworkSecurityGroupEvent",
                 "enabled": True,
-                "retention-policy": {"days": 0, "enabled": False}
+                "retentionPolicy": {"days": 0, "enabled": False}
             },
             {
                 "category": "NetworkSecurityGroupRuleCounter",
                 "enabled": True,
-                "retention-policy": {"days": 0, "enabled": False}
+                "retentionPolicy": {"days": 0, "enabled": False}
             }
         ])
 
