@@ -12,27 +12,23 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network routeserver peering list-advertised-routes",
+    "monitor diagnostic-settings subscription show",
 )
-class ListAdvertisedRoutes(AAZCommand):
-    """List all routes the route server bgp connection is advertising to the specified peer.
-
-    :example: List.
-        az network routeserver peering list-advertised-routes -g MyResourceGroup --routeserver MyRouteServer -n MyRouteServerPeer
+class Show(AAZCommand):
+    """Gets the active subscription diagnostic settings for the specified resource.
     """
 
     _aaz_info = {
-        "version": "2022-01-01",
+        "version": "2017-05-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualhubs/{}/bgpconnections/{}/advertisedroutes", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.insights/diagnosticsettings/{}", "2017-05-01-preview"],
         ]
     }
 
-    AZ_SUPPORT_NO_WAIT = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._execute_operations, self._output)
+        self._execute_operations()
+        return self._output()
 
     _args_schema = None
 
@@ -47,22 +43,15 @@ class ListAdvertisedRoutes(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the Route Server Peering.",
+            help="The name of the diagnostic setting.",
             required=True,
-        )
-        _args_schema.routeserver = AAZStrArg(
-            options=["--routeserver"],
-            help="The name of the Route Server.",
-            required=True,
-        )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
-            required=True,
+            id_part="name",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.VirtualHubBgpConnectionsListAdvertisedRoutes(ctx=self.ctx)()
+        self.SubscriptionDiagnosticSettingsGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -77,43 +66,27 @@ class ListAdvertisedRoutes(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class VirtualHubBgpConnectionsListAdvertisedRoutes(AAZHttpOperation):
+    class SubscriptionDiagnosticSettingsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [202]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
             if session.http_response.status_code in [200]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
+                return self.on_200(session)
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualHubs/{hubName}/bgpConnections/{connectionName}/advertisedRoutes",
+                "/subscriptions/{subscriptionId}/providers/microsoft.insights/diagnosticSettings/{name}",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "POST"
+            return "GET"
 
         @property
         def error_format(self):
@@ -123,15 +96,7 @@ class ListAdvertisedRoutes(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "connectionName", self.ctx.args.name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "hubName", self.ctx.args.routeserver,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "name", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -145,7 +110,7 @@ class ListAdvertisedRoutes(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2017-05-01-preview",
                     required=True,
                 ),
             }
@@ -175,42 +140,51 @@ class ListAdvertisedRoutes(AAZCommand):
             if cls._schema_on_200 is not None:
                 return cls._schema_on_200
 
-            cls._schema_on_200 = AAZDictType()
+            cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.Element = AAZListType()
+            _schema_on_200.id = AAZStrType(
+                flags={"read_only": True},
+            )
+            _schema_on_200.location = AAZStrType()
+            _schema_on_200.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _schema_on_200.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _schema_on_200.type = AAZStrType(
+                flags={"read_only": True},
+            )
 
-            _element = cls._schema_on_200.Element
-            _element.Element = AAZObjectType()
+            properties = cls._schema_on_200.properties
+            properties.event_hub_authorization_rule_id = AAZStrType(
+                serialized_name="eventHubAuthorizationRuleId",
+            )
+            properties.event_hub_name = AAZStrType(
+                serialized_name="eventHubName",
+            )
+            properties.logs = AAZListType()
+            properties.service_bus_rule_id = AAZStrType(
+                serialized_name="serviceBusRuleId",
+            )
+            properties.storage_account_id = AAZStrType(
+                serialized_name="storageAccountId",
+            )
+            properties.workspace_id = AAZStrType(
+                serialized_name="workspaceId",
+            )
 
-            _element = cls._schema_on_200.Element.Element
-            _element.as_path = AAZStrType(
-                serialized_name="asPath",
-                flags={"read_only": True},
-            )
-            _element.local_address = AAZStrType(
-                serialized_name="localAddress",
-                flags={"read_only": True},
-            )
-            _element.network = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.next_hop = AAZStrType(
-                serialized_name="nextHop",
-                flags={"read_only": True},
-            )
-            _element.origin = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.source_peer = AAZStrType(
-                serialized_name="sourcePeer",
-                flags={"read_only": True},
-            )
-            _element.weight = AAZIntType(
-                flags={"read_only": True},
+            logs = cls._schema_on_200.properties.logs
+            logs.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.logs.Element
+            _element.category = AAZStrType()
+            _element.enabled = AAZBoolType(
+                flags={"required": True},
             )
 
             return cls._schema_on_200
 
 
-__all__ = ["ListAdvertisedRoutes"]
+__all__ = ["Show"]
