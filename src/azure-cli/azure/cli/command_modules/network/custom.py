@@ -7303,11 +7303,9 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
         active = False
     vnet_gateway = VirtualNetworkGateway(
         gateway_type=gateway_type, vpn_gateway_generation=vpn_gateway_generation, location=location,
-        tags=tags, active=active, ip_configurations=[],
-        gateway_default_site=SubResource(id=gateway_default_site) if gateway_default_site else None)
+        tags=tags, active=active, vpn_type=vpn_type, sku=VirtualNetworkGatewaySku(name=sku, tier=sku),
+        ip_configurations=[], gateway_default_site=SubResource(id=gateway_default_site) if gateway_default_site else None)
     if gateway_type != "LocalGateway":
-        vpn_type=vpn_type
-        sku=VirtualNetworkGatewaySku(name=sku, tier=sku)
         for i, public_ip in enumerate(public_ip_address):
             ip_configuration = VirtualNetworkGatewayIPConfiguration(
                 subnet=SubResource(id=subnet),
@@ -7316,6 +7314,9 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
                 name='vnetGatewayConfig{}'.format(i)
             )
         vnet_gateway.ip_configurations.append(ip_configuration)
+    else :
+        vnet_gateway.vpn_type = None
+        vnet_gateway.sku = None
     if asn or bgp_peering_address or peer_weight:
         vnet_gateway.enable_bgp = True
         vnet_gateway.bgp_settings = BgpSettings(asn=asn, bgp_peering_address=bgp_peering_address,
