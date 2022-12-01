@@ -22,7 +22,8 @@ from azure.cli.command_modules.appservice.appservice_environment import (show_ap
                                                                          create_appserviceenvironment_arm,
                                                                          update_appserviceenvironment,
                                                                          upgrade_appserviceenvironment,
-                                                                         delete_appserviceenvironment)
+                                                                         delete_appserviceenvironment,
+                                                                         upgrade_test_notification_appserviceenvironment)
 
 
 class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
@@ -299,10 +300,63 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         ase_client.get.return_value = host_env
         ase_client.list.return_value = [host_env]
 
-        upgrade_appserviceenvironment(self.mock_cmd, ase_name, test_notification=False, no_wait=False)
+        upgrade_appserviceenvironment(self.mock_cmd, ase_name, no_wait=False)
 
-        # Assert create_or_update is called with correct properties
-        ase_client.begin_upgrade(resource_group_name=rg_name, name=ase_name)
+        # Assert upgrade is called with correct properties
+        ase_client.begin_upgrade.assert_called_once_with(resource_group_name=rg_name, name=ase_name, no_wait=False)
+
+#remove
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
+    def test_app_service_environment_upgrade(self, ase_client_factory_mock, resource_group_mock):
+        ase_name = 'mock_ase_name'
+        rg_name = 'mock_rg_name'
+
+        ase_client = mock.MagicMock()
+        ase_client_factory_mock.return_value = ase_client
+
+        resource_group_mock.return_value = rg_name
+
+        host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
+        host_env.name = ase_name
+        host_env.kind = 'ASEv2'
+        ase_client.get.return_value = host_env
+        ase_client.list.return_value = [host_env]
+
+        upgrade_appserviceenvironment(self.mock_cmd, ase_name, no_wait=False)
+
+        # Assert upgrade is called with correct properties
+        #assert_host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
+        #ase_name = 'mock_ase_name'
+        #assert_host_env.name = ase_name
+        #assert_host_env.kind = 'ASEv2'
+        #result = upgrade_appserviceenvironment(self.mock_cmd, ase_name, no_wait=False)
+        #self.assertIn('No upgrade were applied. This version of ASE not support upgrade.' in result)
+#remove
+
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
+    def test_app_service_environment_upgrade_test_notification_appserviceenvironment_asev3(self, ase_client_factory_mock, resource_group_mock):
+        ase_name = 'mock_ase_name'
+        rg_name = 'mock_rg_name'
+
+        ase_client = mock.MagicMock()
+        ase_client_factory_mock.return_value = ase_client
+
+        resource_group_mock.return_value = rg_name
+
+        host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
+        host_env.name = ase_name
+        host_env.kind = 'ASEv3'
+        host_env.upgrade_availability = 'Ready'
+        host_env.upgrade_preference ='Manual'
+        ase_client.get.return_value = host_env
+        ase_client.list.return_value = [host_env]
+
+        upgrade_test_notification_appserviceenvironment(self.mock_cmd, ase_name)
+
+        # Assert upgrade-test-notification is called with correct properties
+        ase_client.test_upgrade_available_notification.assert_called_once_with(resource_group_name=rg_name, name=ase_name)
 
 
 if __name__ == '__main__':
