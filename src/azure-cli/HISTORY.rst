@@ -57,10 +57,6 @@ Release History
 
 * `az keyvault`: Add check-name command, support Security Domain Properties (#24636)
 
-**Misc.**
-
-* Change name of Bash completion function (#23287)
-
 **Monitor**
 
 * `az monitor diagnostic-settings`: Migrate show, delete, list cmds (#24725)
