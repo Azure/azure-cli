@@ -111,7 +111,6 @@ def load_arguments(self, _):
         choices=['1', '2', '3']
     )
     edge_zone = CLIArgumentType(help='The name of edge zone.', min_api='2021-02-01')
-    v_net_extended_location_resource_id = CLIArgumentType(help='The Extended vnet resource id of the local gateway', min_api='2021-02-01')
     gateway_lb = CLIArgumentType(help='The reference to gateway load balancer frontend IP. If you want to delete it, '
                                       'input \'\"\"\'(Powershell) or \"\"(Linux)', is_preview=True, min_api='2020-08-01')
 
@@ -1927,6 +1926,7 @@ def load_arguments(self, _):
     vnet_gateway_type = CLIArgumentType(help='The gateway type.', arg_type=get_enum_type(VirtualNetworkGatewayType), default=VirtualNetworkGatewayType.vpn.value)
     vnet_gateway_sku_type = CLIArgumentType(help='VNet gateway SKU.', arg_type=get_enum_type(VirtualNetworkGatewaySkuName), default=VirtualNetworkGatewaySkuName.basic.value)
     vnet_gateway_routing_type = CLIArgumentType(help='VPN routing type.', arg_type=get_enum_type(VpnType), default=VpnType.route_based.value)
+    edge_zone_vnet_id = CLIArgumentType(help='The Extended vnet resource id of the local gateway', min_api='2021-02-01')
     with self.argument_context('network vnet-gateway') as c:
         c.argument('virtual_network_gateway_name', options_list=['--name', '-n'], help='Name of the VNet gateway.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworkGateways'), id_part='name')
         c.argument('cert_name', help='Root certificate name', options_list=['--name', '-n'])
@@ -1936,7 +1936,7 @@ def load_arguments(self, _):
         c.argument('sku', vnet_gateway_sku_type)
         c.argument('vpn_type', vnet_gateway_routing_type)
         c.argument('bgp_peering_address', arg_group='BGP Peering', help='IP address to use for BGP peering.')
-        c.argument('public_ip_address', required=False, options_list=['--public-ip-addresses'], nargs='+', help='Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
+        c.argument('public_ip_address', options_list=['--public-ip-addresses'], nargs='+', help='Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
         c.argument('address_prefixes', help='Space-separated list of CIDR prefixes representing the address space for the P2S Vpnclient.', nargs='+', arg_group='VPN Client')
         c.argument('radius_server', min_api='2017-06-01', help='Radius server address to connect to.', arg_group='VPN Client')
         c.argument('radius_secret', min_api='2017-06-01', help='Radius secret to use for authentication.', arg_group='VPN Client')
@@ -1966,7 +1966,7 @@ def load_arguments(self, _):
         c.argument('virtual_network', options_list='--vnet', help=vnet_help)
         c.argument('vpn_gateway_generation', arg_type=get_enum_type(['Generation1', 'Generation2']), min_api='2019-07-01', help='The generation for the virtual network gateway. vpn_gateway_generation should not be provided if gateway_type is not Vpn.')
         c.argument('edge_zone', edge_zone, min_api='2021-02-01')
-        c.argument('v_net_extended_location_resource_id', v_net_extended_location_resource_id)
+        c.argument('edge_zone_vnet_id', edge_zone_vnet_id)
 
     with self.argument_context('network vnet-gateway update') as c:
         c.argument('enable_bgp', help='Enable BGP (Border Gateway Protocol)', arg_group='BGP Peering', arg_type=get_enum_type(['true', 'false']))

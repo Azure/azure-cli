@@ -6229,10 +6229,11 @@ class NetworkExtendedLocation(ScenarioTest):
             'rg': resource_group,
             'vnet': 'vnet',
             'edge_name': 'microsoftrrdclab3',
-            'v_net_extended_location_resource_id' : 'v_net_extended_location_resource_id'
+            'edge_zone_vnet_id' : 'edge_zone_vnet_id'
         })
         self.cmd('az network vnet create -g {rg} -n {vnet} --location eastus2euap --address-prefix 10.50.0.0/16 --edge-zone {edge_name}')
-        self.cmd('network vnet-gateway create -g {rg} -n vnet-gateway --vnet {vnet} --v_net_extended_location_resource_id {v_net_extended_location_resource_id} '
+        self.kwargs['edge_zone_vnet_id'] = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()['id']
+        self.cmd('network vnet-gateway create -g {rg} -n vnet-gateway --vnet {vnet} --edge-zone-vnet-id {edge_zone_vnet_id} '
                  '--edge-zone {edge_name}',
                  checks=self.check('vnetGateway.v_net_extended_location_resource_id', '{v_net_extended_location_resource_id}'))     
 

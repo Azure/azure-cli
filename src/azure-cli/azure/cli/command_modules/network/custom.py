@@ -7279,14 +7279,14 @@ def _prep_cert_create(cmd, gateway_name, resource_group_name):
     return config, gateway, ncf
 
 
-def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, public_ip_address,
-                        virtual_network, location=None, tags=None,
+def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name,
+                        virtual_network, public_ip_address=None, location=None, tags=None,
                         no_wait=False, gateway_type=None, sku=None, vpn_type=None, vpn_gateway_generation=None,
                         asn=None, bgp_peering_address=None, peer_weight=None,
                         address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
                         gateway_default_site=None, custom_routes=None, aad_tenant=None, aad_audience=None,
                         aad_issuer=None, root_cert_data=None, root_cert_name=None, vpn_auth_type=None, edge_zone=None,
-                        nat_rule=None,v_net_extended_location_resource_id=None):
+                        nat_rule=None, edge_zone_vnet_id=None):
     (VirtualNetworkGateway, BgpSettings, SubResource, VirtualNetworkGatewayIPConfiguration, VirtualNetworkGatewaySku,
      VpnClientConfiguration, AddressSpace, VpnClientRootCertificate, VirtualNetworkGatewayNatRule,
      VpnNatRuleMapping) = cmd.get_models(
@@ -7298,7 +7298,7 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
     subnet = virtual_network + '/subnets/GatewaySubnet'
     active = True
     if gateway_type != "LocalGateway":
-        active = len(public_ip_address) != 2
+        active = len(public_ip_address) == 2
     else:
         active = False
     vnet_gateway = VirtualNetworkGateway(
@@ -7347,8 +7347,8 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
 
     if edge_zone:
         vnet_gateway.extended_location = _edge_zone_model(cmd, edge_zone)
-    if v_net_extended_location_resource_id:
-        vnet_gateway.v_net_extended_location_resource_id = v_net_extended_location_resource_id
+    if edge_zone_vnet_id:
+        vnet_gateway.v_net_extended_location_resource_id = edge_zone_vnet_id
     if nat_rule:
         vnet_gateway.nat_rules = [
             VirtualNetworkGatewayNatRule(type_properties_type=rule.get('type'), mode=rule.get('mode'), name=rule.get('name'),
