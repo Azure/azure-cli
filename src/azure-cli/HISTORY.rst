@@ -55,7 +55,7 @@ Release History
 
 **Monitor**
 
-* `az monitor diagnostic-settings`: Migrate show, delete, list cmds (#24725)
+* `az monitor diagnostic-settings`: Add `--marketplace-partner-id` parameter (#24725)
 
 **Network**
 
@@ -80,7 +80,7 @@ Release History
 
 **SQL**
 
-* `az sql server ipv6-firewall-rule`: New command group for AZ SQL server IPv6 firewall rule (#24790)
+* `az sql server ipv6-firewall-rule`: Add new command group for AZ SQL server IPv6 firewall rule (#24790)
 
 **SQL VM**
 
