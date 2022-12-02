@@ -242,7 +242,7 @@ def load_arguments(self, _):
 
     with self.argument_context('batch pool set') as c:
         c.argument('target_node_communication_mode', options_list=['--target-communication'])
-                    
+
     with self.argument_context('batch certificate') as c:
         c.argument('thumbprint', help='The certificate thumbprint.')
         c.argument('password', help='The password to access the certificate\'s private key.')
