@@ -308,7 +308,7 @@ def apim_api_create(client, resource_group_name, service_name, api_id, descripti
             protocols = ['wss']
         else:
             protocols = ['https']
-    
+
     if api_type is None:
         if parsed_url.scheme in ('ws', 'wss'):
             api_type = ApiType.websocket.value
