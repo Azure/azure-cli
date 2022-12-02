@@ -404,6 +404,12 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         updated = self.batch_cmd('batch pool show --pool-id {pool_j} --select "startTask"').get_output_in_json()
         self.assertNotEqual(current['startTask']['commandLine'], updated['startTask']['commandLine'])
 
+        # test patch pool with target-node-communication-mode
+        self.batch_cmd('batch pool set --pool-id {pool_j} --target-node-communication-mode classic')
+        self.batch_cmd('batch pool show --pool-id {pool_j}').assert_with_checks([
+            self.check('targetNodeCommunicationMode', 'classic')
+        ])
+
         # test list node agent skus
         self.batch_cmd('batch pool supported-images list')
 
