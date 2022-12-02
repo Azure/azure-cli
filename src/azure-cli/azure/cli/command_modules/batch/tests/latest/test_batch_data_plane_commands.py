@@ -306,7 +306,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch pool create --id {pool_i} --vm-size Standard_A1 '
                        '--image Canonical:UbuntuServer:18.04-LTS '
                        '--node-agent-sku-id "batch.node.ubuntu 18.04" '
-                       '--target-node-communication-mode classic')
+                       '--target-communication classic')
         self.batch_cmd('batch pool show --pool-id {pool_i}').assert_with_checks([
             self.check('targetNodeCommunicationMode', 'classic')
         ])
@@ -405,7 +405,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.assertNotEqual(current['startTask']['commandLine'], updated['startTask']['commandLine'])
 
         # test patch pool with target-node-communication-mode
-        self.batch_cmd('batch pool set --pool-id {pool_j} --target-node-communication-mode classic')
+        self.batch_cmd('batch pool set --pool-id {pool_j} --target-communication classic')
         self.batch_cmd('batch pool show --pool-id {pool_j}').assert_with_checks([
             self.check('targetNodeCommunicationMode', 'classic')
         ])
