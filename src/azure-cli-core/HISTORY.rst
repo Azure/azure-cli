@@ -10,6 +10,7 @@ Release History
 * `aaz`: Add registered property for `AAZBaseArg` (#24640)
 * `aaz`: Add aazlist and aazdict args transform help functions (#24690)
 * `aaz`: Support camel case key in `AAZObjectType` (#24771)
+* Disable removing and updating system extension in Cloud Shell (#24361)
 
 2.42.0
 ++++++
