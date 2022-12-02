@@ -8,7 +8,7 @@ Release History
 
 **AKS**
 
-* `aks enable-addons`: Add `--enable-syslog` parameter to monitoring addon (#24320)
+* `az aks enable-addons`: Add `--enable-syslog` parameter to monitoring addon (#24320)
 * `az aks nodepool`: Unify the option names used to specify the nodepool name and cluster name. For nodepool name, option names are `--nodepool-name`, `--name` and `-n`. For cluster name, option name is `--cluster-name` (#24754)
 * `az aks nodepool add`: Support the new SKU Mariner for parameter `--os-sku` (#24616)
 
