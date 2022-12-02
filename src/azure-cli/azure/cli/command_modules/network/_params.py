@@ -28,7 +28,7 @@ from azure.cli.command_modules.network._validators import (
     validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
     validate_er_peer_circuit, validate_ag_address_pools, validate_custom_error_pages,
     validate_custom_headers, validate_status_code_ranges, validate_subnet_ranges,
-    WafConfigExclusionAction, validate_express_route_peering, validate_virtual_hub,
+    WafConfigExclusionAction,
     validate_express_route_port, bandwidth_validator_factory,
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
     validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs,
@@ -55,7 +55,7 @@ def load_arguments(self, _):
      Direction, VpnAuthenticationType,
      ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, ExpressRoutePortsEncapsulation,
      FlowLogFormatType, HTTPMethod, IPAllocationMethod,
-     IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName, PublicIPAddressSkuTier,
+     IPVersion, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName, PublicIPAddressSkuTier,
      SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
      VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType,
      ExpressRouteLinkMacSecCipher,
@@ -67,7 +67,7 @@ def load_arguments(self, _):
          'Direction', 'VpnAuthenticationType',
          'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier', 'ExpressRoutePortsEncapsulation',
          'FlowLogFormatType', 'HTTPMethod', 'IPAllocationMethod',
-         'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName', 'PublicIPAddressSkuTier',
+         'IPVersion', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName', 'PublicIPAddressSkuTier',
          'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
          'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType',
          'ExpressRouteLinkMacSecCipher',
@@ -110,9 +110,9 @@ def load_arguments(self, _):
         help='Space-separated list of availability zones into which to provision the resource.',
         choices=['1', '2', '3']
     )
-    edge_zone = CLIArgumentType(help='The name of edge zone.', is_preview=True, min_api='2021-02-01')
+    edge_zone = CLIArgumentType(help='The name of edge zone.', min_api='2021-02-01')
     gateway_lb = CLIArgumentType(help='The reference to gateway load balancer frontend IP. If you want to delete it, '
-                                      'input \'\"\"\'(Powershell) or \"\"(Linux)', is_preview=True, min_api='2020-08-01')
+                                      'input \'\"\"\'(Powershell) or \"\"(Linux)', min_api='2020-08-01')
 
     # region NetworkRoot
     with self.argument_context('network') as c:
@@ -508,7 +508,7 @@ def load_arguments(self, _):
         c.argument('protocol', http_protocol_type, help='The HTTP settings protocol.')
         c.argument('host', help='The name of the host to send the probe.')
         c.argument('path', help='The relative path of the probe. Valid paths start from "/"')
-        c.argument('timeout', help='The probe timeout in seconds.')
+        c.argument('timeout', type=int, help='The probe timeout in seconds.')
         c.argument('host_name_from_http_settings', help='Use host header from HTTP settings.',
                    arg_type=get_three_state_flag())
         c.argument('match_body', help='Body that must be contained in the health response.')
@@ -763,8 +763,6 @@ def load_arguments(self, _):
 
     # region ExpressRoutes
     device_path_values = ['primary', 'secondary']
-    er_circuit_name_type = CLIArgumentType(options_list='--circuit-name', metavar='NAME', help='ExpressRoute circuit name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'))
-    er_gateway_name_type = CLIArgumentType(options_list='--gateway-name', metavar='NAME', help='ExpressRoute gateway name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/expressRouteGateways'))
     er_port_name_type = CLIArgumentType(options_list='--port-name', metavar='NAME', help='ExpressRoute port name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/expressRoutePorts'))
     er_bandwidth_type = CLIArgumentType(options_list='--bandwidth', nargs='+')
     sku_family_type = CLIArgumentType(help='Chosen SKU family of ExpressRoute circuit.', arg_type=get_enum_type(ExpressRouteCircuitSkuFamily), default=ExpressRouteCircuitSkuFamily.metered_data.value)
@@ -783,10 +781,6 @@ def load_arguments(self, _):
         c.argument('allow_global_reach', arg_type=get_three_state_flag(), min_api='2018-07-01', help='Enable global reach on the circuit.')
         c.argument('express_route_port', help='Name or ID of an ExpressRoute port.', min_api='2018-08-01', validator=validate_express_route_port)
         c.argument('allow_classic_operations', arg_type=get_three_state_flag(), min_api='2017-10-01', help='Allow classic operations.')
-
-    with self.argument_context('network express-route update') as c:
-        c.argument('sku_family', sku_family_type, default=None)
-        c.argument('sku_tier', sku_tier_type, default=None)
 
     with self.argument_context('network express-route auth') as c:
         c.argument('circuit_name', circuit_name_type)
@@ -837,31 +831,6 @@ def load_arguments(self, _):
     # endregion
 
     # region ExpressRoute Gateways
-    with self.argument_context('network express-route gateway', min_api='2018-08-01') as c:
-        c.argument('express_route_gateway_name', er_gateway_name_type, options_list=['--name', '-n'])
-        c.argument('min_val', help='Minimum number of scale units deployed for gateway.', type=int, arg_group='Autoscale')
-        c.argument('max_val', help='Maximum number of scale units deployed for gateway.', type=int, arg_group='Autoscale')
-        c.argument('virtual_hub', help='Name or ID of the virtual hub to associate with the gateway.', validator=validate_virtual_hub)
-
-    with self.argument_context('network express-route gateway connection', min_api='2018-08-01') as c:
-        c.argument('express_route_gateway_name', er_gateway_name_type)
-        c.argument('connection_name', options_list=['--name', '-n'], help='ExpressRoute connection name.', id_part='child_name_1')
-        c.argument('routing_weight', help='Routing weight associated with the connection.', type=int)
-        c.argument('authorization_key', help='Authorization key to establish the connection.')
-        c.argument('enable_internet_security', options_list='--internet-security', arg_type=get_three_state_flag(), help='Enable internet security. A virtual hub can have the ability to propagate a learned default route to this ExpressRoute connection. This ref https://review.docs.microsoft.com/en-us/azure/virtual-wan/effective-routes-virtual-hub?branch=pr-en-us-91866#aboutdefaultroute might be helpful.', min_api='2019-09-01')
-
-    with self.argument_context('network express-route gateway connection', arg_group='Peering', min_api='2018-08-01') as c:
-        c.argument('peering', help='Name or ID of an ExpressRoute peering.', validator=validate_express_route_peering)
-        c.argument('circuit_name', er_circuit_name_type, id_part=None)
-
-    with self.argument_context('network express-route gateway connection', arg_group='Routing Configuration', min_api='2020-04-01', is_preview=True) as c:
-        c.argument('associated_route_table', options_list=['--associated', '--associated-route-table'], help='The resource id of route table associated with this routing configuration.')
-        c.argument('propagated_route_tables', options_list=['--propagated', '--propagated-route-tables'], nargs='+', help='Space-separated list of resource id of propagated route tables.')
-        c.argument('labels', nargs='+', help='Space-separated list of labels for propagated route tables.')
-
-    with self.argument_context('network express-route gateway connection list', min_api='2018-08-01') as c:
-        c.argument('express_route_gateway_name', er_gateway_name_type, id_part=None)
-
     with self.argument_context('network express-route port', min_api='2018-08-01') as c:
         c.argument('express_route_port_name', er_port_name_type, options_list=['--name', '-n'])
         c.argument('encapsulation', arg_type=get_enum_type(ExpressRoutePortsEncapsulation), help='Encapsulation method on physical ports.')
@@ -1026,13 +995,13 @@ def load_arguments(self, _):
     with self.argument_context('network lb create') as c:
         c.argument('frontend_ip_zone', zone_type, min_api='2017-06-01', options_list=['--frontend-ip-zone'], help='used to create internal facing Load balancer')
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
-        c.argument('sku', min_api='2017-08-01', help='Load balancer SKU', arg_type=get_enum_type(LoadBalancerSkuName, default='basic'))
+        c.argument('sku', min_api='2017-08-01', help='Load balancer SKU', arg_type=get_enum_type(['Basic', 'Gateway', 'Standard'], default='basic'))
         c.argument('edge_zone', edge_zone)
 
     with self.argument_context('network lb create', arg_group='Public IP') as c:
         public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, allow_new=True)
         c.argument('public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
-        c.argument('public_ip_address_allocation', help='IP allocation method.', arg_type=get_enum_type(IPAllocationMethod))
+        c.argument('public_ip_address_allocation', help='IP allocation method.', arg_type=get_enum_type(['Static', 'Dynamic']))
         c.argument('public_ip_dns_name', help='Globally unique DNS name for a new public IP.')
         c.argument('public_ip_zone', zone_type, min_api='2017-06-01', options_list=['--public-ip-zone'], help='used to created a new public ip for the load balancer, a.k.a public facing Load balancer')
         c.ignore('public_ip_address_type')
@@ -1092,11 +1061,13 @@ def load_arguments(self, _):
         c.argument('gateway_lb', gateway_lb)
 
     with self.argument_context('network lb probe') as c:
-        c.argument('interval', help='Probing time interval in seconds.')
+        c.argument('interval', type=int, help='Probing time interval in seconds.')
         c.argument('path', help='The endpoint to interrogate (http only).')
-        c.argument('port', help='The port to interrogate.')
+        c.argument('port', type=int, help='The port to interrogate.')
         c.argument('protocol', help='The protocol to probe.', arg_type=get_enum_type(ProbeProtocol))
-        c.argument('threshold', help='The number of consecutive probe failures before an instance is deemed unhealthy.')
+        c.argument('threshold', type=int, help='The number of consecutive probe failures before an instance is deemed unhealthy.')
+        c.argument('probe_threshold', type=int, help='The number of consecutive successful or failed probes in order '
+                                                     'to allow or deny traffic from being delivered to this endpoint.')
 
     with self.argument_context('network lb outbound-rule') as c:
         c.argument('backend_address_pool', options_list='--address-pool', help='Name or ID of the backend address pool.')
@@ -1235,7 +1206,7 @@ def load_arguments(self, _):
 
     for item in ['create', 'ip-config update', 'ip-config create']:
         with self.argument_context('network nic {}'.format(item)) as c:
-            c.argument('application_security_groups', min_api='2017-09-01', help='Space-separated list of application security groups.', nargs='+', validator=get_asg_validator(self, 'application_security_groups'))
+            c.argument('application_security_groups', options_list=['--application-security-groups', '--asgs'], min_api='2017-09-01', help='Space-separated list of application security groups.', nargs='+', validator=get_asg_validator(self, 'application_security_groups'))
 
         with self.argument_context('network nic {}'.format(item), arg_group='Load Balancer') as c:
             c.extra('load_balancer_name', options_list='--lb-name', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), help='The name of the load balancer to use when adding NAT rules or address pools by name (ignored when IDs are specified).')
@@ -1762,20 +1733,6 @@ def load_arguments(self, _):
         c.argument('destination_port', options_list='--port', help="Traffic destination port. Accepted values are '*', port number (3389) or port range (80-100).")
     # endregion
 
-    # region CustomIpPrefix
-    with self.argument_context('network custom-ip prefix') as c:
-        c.argument('custom_ip_prefix_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/customIpPrefixes'), id_part='name', help='The name of the custom IP prefix.')
-        c.argument('signed_message', help='Signed message for WAN validation.')
-        c.argument('authorization_message', help='Authorization message for WAN validation.')
-        c.argument('custom_ip_prefix_parent', help='The Parent CustomIpPrefix for IPv6 /64 CustomIpPrefix.', options_list=['--cip-prefix-parent', '-c'])
-        c.argument('zone', zone_type, min_api='2017-06-01', max_api='2020-07-01')
-        c.argument('zone', zone_compatible_type, min_api='2020-08-01')
-        c.argument('cidr', help='The prefix range in CIDR notation. Should include the start address and the prefix length.')
-
-    with self.argument_context('network custom-ip prefix update') as c:
-        c.argument('commissioned_state', options_list='--state', help='Commissioned State of the custom ip prefix.', arg_type=get_enum_type(['commission', 'decommission', 'deprovision', 'provision']))
-    # endregion
-
     # region PublicIPAddresses
     with self.argument_context('network public-ip') as c:
         c.argument('public_ip_address_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), id_part='name', help='The name of the public IP address.')
@@ -1796,9 +1753,10 @@ def load_arguments(self, _):
         c.argument('edge_zone', edge_zone)
 
     with self.argument_context('network public-ip create') as c:
-        c.argument('allocation_method', help='IP address allocation method', arg_type=get_enum_type(IPAllocationMethod))
+        c.argument('allocation_method', help='IP address allocation method', arg_type=get_enum_type(['Static', 'Dynamic']))
         c.argument('version', min_api='2016-09-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
-        c.argument('protection_mode', min_api='2022-01-01', help='The DDoS protection mode of the public IP', arg_type=get_enum_type(['Enabled', 'Disabled', 'VirtualNetworkInherited']))
+        c.argument('protection_mode', options_list=['--ddos-protection-mode', '--protection-mode'],
+                   min_api='2022-01-01', help='The DDoS protection mode of the public IP', arg_type=get_enum_type(['Enabled', 'Disabled', 'VirtualNetworkInherited']))
 
     for scope in ['public-ip', 'lb frontend-ip', 'cross-region-lb frontend-ip']:
         with self.argument_context('network {}'.format(scope), min_api='2018-07-01') as c:
@@ -1853,6 +1811,7 @@ def load_arguments(self, _):
         c.argument('geo_mapping', help="Space-separated list of country/region codes mapped to this endpoint when using the 'Geographic' routing method.", nargs='+')
         c.argument('subnets', nargs='+', help='Space-separated list of subnet CIDR prefixes (10.0.0.0/24) or subnet ranges (10.0.0.0-11.0.0.0).', validator=validate_subnet_ranges)
         c.argument('monitor_custom_headers', nargs='+', options_list='--custom-headers', help='Space-separated list of custom headers in KEY=VALUE format.', validator=validate_custom_headers)
+        c.argument('always_serve', arg_type=get_enum_type(['Enabled', 'Disabled']), help='If Always Serve is enabled, probing for endpoint health will be disabled and endpoints will be included in the traffic routing method.')
     # endregion
 
     # region VirtualNetworks
@@ -2160,6 +2119,7 @@ def load_arguments(self, _):
         c.argument('ssh_key', help='SSH key file location for SSH connections.', options_list=['--ssh-key'])
     with self.argument_context('network bastion rdp') as c:
         c.argument('disable_gateway', arg_type=get_three_state_flag(), help='Flag to disable access through RD gateway.')
+        c.argument('configure', help='Flag to configure RDP session.', action='store_true')
     with self.argument_context('network bastion tunnel') as c:
         c.argument('port', help='Local port to use for the tunneling.', options_list=['--port'])
         c.argument('timeout', help='Timeout for connection to bastion host tunnel.', options_list=['--timeout'])

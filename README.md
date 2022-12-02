@@ -207,6 +207,8 @@ If you would like to setup a development environment and contribute to the CLI, 
 
 [Authoring Command Modules](https://github.com/Azure/azure-cli/tree/dev/doc/authoring_command_modules)
 
+[Code Generation](https://github.com/Azure/aaz-dev-tools)
+
 ## Contribute code
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).

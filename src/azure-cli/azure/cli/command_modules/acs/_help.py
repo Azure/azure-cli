@@ -75,7 +75,7 @@ parameters:
     short-summary: Number of nodes in the Kubernetes node pool. After creating a cluster, you can change the size of its node pool with `az aks scale`.
   - name: --zones -z
     type: string array
-    short-summary: Availability zones where agent nodes will be placed.
+    short-summary: Availability zones where agent nodes will be placed. Also, to install agent nodes to more than one zones you need to pass zone numbers (1,2 or 3) separated by blanks.  For example -  To have all 3 zones, you are expected to enter `--zones 1 2 3`
   - name: --node-osdisk-size
     type: int
     short-summary: Size in GB of the OS disk for each node in the node pool. Minimum 30 GB.
@@ -210,6 +210,7 @@ parameters:
             - monitoring               : turn on Log Analytics monitoring. Uses the Log Analytics Default Workspace if it exists, else creates one.
                                          Specify "--workspace-resource-id" to use an existing workspace.
                                          Specify "--enable-msi-auth-for-monitoring" to use Managed Identity Auth.
+                                         Specify "--enable-syslog" to enable syslog data collection from nodes. Note MSI must be enabled
                                          If monitoring addon is enabled --no-wait argument will have no effect
             - azure-policy             : enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
                                          Learn more at aka.ms/aks/policy.
@@ -270,6 +271,9 @@ parameters:
   - name: --enable-msi-auth-for-monitoring
     type: bool
     short-summary: Enable Managed Identity Auth for Monitoring addon.
+  - name: --enable-syslog
+    type: bool
+    short-summary: Enable syslog data collection for Monitoring addon
   - name: --uptime-sla
     type: bool
     short-summary: Enable a paid managed cluster service with a financially backed SLA.
@@ -413,12 +417,18 @@ parameters:
   - name: --disable-snapshot-controller
     type: bool
     short-summary: Disable CSI Snapshot Controller.
+  - name: --enable-blob-driver
+    type: bool
+    short-summary: Enable AzureBlob CSI Driver.
   - name: --http-proxy-config
     type: string
     short-summary: HTTP Proxy configuration for this cluster.
   - name: --gpu-instance-profile
     type: string
     short-summary: GPU instance profile to partition multi-gpu Nvidia GPUs.
+  - name: --enable-oidc-issuer
+    type: bool
+    short-summary: Enable OIDC issuer.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -683,9 +693,18 @@ parameters:
   - name: --disable-snapshot-controller
     type: bool
     short-summary: Disable CSI Snapshot Controller.
+  - name: --enable-blob-driver
+    type: bool
+    short-summary: Enable AzureBlob CSI Driver.
+  - name: --disable-blob-driver
+    type: bool
+    short-summary: Disable AzureBlob CSI Driver.
   - name: --http-proxy-config
     type: string
     short-summary: HTTP Proxy configuration for this cluster.
+  - name: --enable-oidc-issuer
+    type: bool
+    short-summary: Enable OIDC issuer.
 
 examples:
   - name: Reconcile the cluster back to its current state.
@@ -694,7 +713,7 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
   - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ips <ip-resource-id-1,ip-resource-id-2>
-  - name: Create a kubernetes cluster with a standard SKU load balancer, with two outbound AKS managed IPs an idle flow timeout of 5 minutes and 8000 allocated ports per machine
+  - name: Update a kubernetes cluster with a standard SKU load balancer, with two outbound AKS managed IPs an idle flow timeout of 5 minutes and 8000 allocated ports per machine
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2 --load-balancer-idle-timeout 5 --load-balancer-outbound-ports 8000
   - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IP prefixes for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ip-prefixes <ip-prefix-resource-id-1,ip-prefix-resource-id-2>
@@ -767,7 +786,8 @@ long-summary: |-
     These addons are available:
         - http_application_routing : configure ingress with automatic public DNS name creation.
         - monitoring               : turn on Log Analytics monitoring. Requires "--workspace-resource-id".
-                                     Requires "--enable_msi_auth_for_monitoring" for managed identity auth.
+                                     Requires "--enable-msi-auth-for-monitoring" for managed identity auth.
+                                     Requires "--enable-syslog" to enable syslog data collection from nodes. Note MSI must be enabled
                                      If monitoring addon is enabled --no-wait argument will have no effect
         - virtual-node             : enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
         - azure-policy             : enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
@@ -785,6 +805,9 @@ parameters:
   - name: --enable-msi-auth-for-monitoring
     type: bool
     short-summary: Enable Managed Identity Auth for Monitoring addon.
+  - name: --enable-syslog
+    type: bool
+    short-summary: Enable syslog data collection for Monitoring addon
   - name: --appgw-name
     type: string
     short-summary: Name of the application gateway to create/use in the node resource group. Use with ingress-azure addon.
@@ -912,7 +935,7 @@ parameters:
     long-summary: If not specified, defaults based on network-plugin. 30 for "azure", 110 for "kubenet", or 250 for "none".
   - name: --zones -z
     type: string array
-    short-summary: Availability zones where agent nodes will be placed.
+    short-summary: Availability zones where agent nodes will be placed. Also, to install agent nodes to more than one zone you need to pass zone numbers separated by blanks.  For example -  To have all 3 zones, you are expected to enter `--zones 1 2 3`
   - name: --enable-node-public-ip
     type: bool
     short-summary: Enable VMSS node public IP.
@@ -1023,10 +1046,6 @@ examples:
   - name: Get the available upgrade versions for an agent pool of the managed Kubernetes cluster.
     text: az aks nodepool get-upgrades --resource-group MyResourceGroup --cluster-name MyManagedCluster --nodepool-name MyNodePool
     crafted: true
-parameters:
-  - name: --nodepool-name
-    type: string
-    short-summary: name of the node pool.
 """
 
 helps['aks nodepool list'] = """
@@ -1122,9 +1141,6 @@ helps['aks nodepool stop'] = """
     type: command
     short-summary: Stop running agent pool in the managed Kubernetes cluster.
     parameters:
-        - name: --nodepool-name
-          type: string
-          short-summary: Agent pool name
         - name: --aks-custom-headers
           type: string
           short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
@@ -1137,9 +1153,6 @@ helps['aks nodepool start'] = """
     type: command
     short-summary: Start stopped agent pool in the managed Kubernetes cluster.
     parameters:
-        - name: --nodepool-name
-          type: string
-          short-summary: Agent pool name
         - name: --aks-custom-headers
           type: string
           short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
@@ -1290,7 +1303,7 @@ long-summary: If an operation on a node pool was interrupted or was started with
 examples:
   - name: Wait for a node pool to reach a desired state, polling every minute for up to thirty minutes.
     text: |-
-        az aks nodepool wait --created --interval 60 --name MyManagedCluster --resource-group MyResourceGroup --nodepool-name MyNodePool --timeout 1800
+        az aks nodepool wait --created --interval 60 --cluster-name MyManagedCluster --resource-group MyResourceGroup --nodepool-name MyNodePool --timeout 1800
 """
 
 helps['aks nodepool snapshot wait'] = """
@@ -1414,4 +1427,13 @@ helps['aks nodepool snapshot create'] = """
 helps['aks nodepool snapshot delete'] = """
     type: command
     short-summary: Delete a nodepool snapshot.
+"""
+
+helps['aks oidc-issuer'] = """
+    type: group
+    short-summary: oidc issuer related commands
+"""
+helps['aks oidc-issuer rotate-signing-keys'] = """
+    type: command
+    short-summary: Rotate oidc issuer service account signing keys
 """

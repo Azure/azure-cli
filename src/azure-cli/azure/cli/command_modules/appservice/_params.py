@@ -36,6 +36,7 @@ ACCESS_RESTRICTION_ACTION_TYPES = ['Allow', 'Deny']
 ASE_LOADBALANCER_MODES = ['Internal', 'External']
 ASE_KINDS = ['ASEv2', 'ASEv3']
 ASE_OS_PREFERENCE_TYPES = ['Windows', 'Linux']
+PUBLIC_NETWORK_ACCESS_MODES = ['Enabled', 'Disabled']
 
 
 # pylint: disable=too-many-statements, too-many-lines
@@ -46,9 +47,9 @@ def load_arguments(self, _):
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     sku_arg_type = CLIArgumentType(
-        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large), I1v2 (Isolated V2 Small), I2v2 (Isolated V2 Medium), I3v2 (Isolated V2 Large), WS1 (Logic Apps Workflow Standard 1), WS2 (Logic Apps Workflow Standard 2), WS3 (Logic Apps Workflow Standard 3)',
+        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large), I1v2 (Isolated V2 Small), I2v2 (Isolated V2 Medium), I3v2 (Isolated V2 Large), I4v2 (Isolated V2 I4v2), I5v2 (Isolated V2 I5v2), I6v2 (Isolated V2 I6v2), WS1 (Logic Apps Workflow Standard 1), WS2 (Logic Apps Workflow Standard 2), WS3 (Logic Apps Workflow Standard 3)',
         arg_type=get_enum_type(
-            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P1V3', 'P2V3', 'P3V3', 'I1', 'I2', 'I3', 'I1v2', 'I2v2', 'I3v2', 'WS1', 'WS2', 'WS3']))
+            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P1V3', 'P2V3', 'P3V3', 'I1', 'I2', 'I3', 'I1v2', 'I2v2', 'I3v2', 'I4v2', 'I5v2', 'I6v2', 'WS1', 'WS2', 'WS3']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                                            id_part='name',
@@ -153,6 +154,7 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('vnet', help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
         c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the webapp join. The --vnet is argument also needed if specifying subnet by name.")
+        c.argument('public_network_access', help="Enable or disable public access to the web app", arg_type=get_enum_type(PUBLIC_NETWORK_ACCESS_MODES))
         c.ignore('language')
         c.ignore('using_webapp_up')
 
@@ -879,10 +881,10 @@ def load_arguments(self, _):
     with self.argument_context('functionapp keys set', id_part=None) as c:
         c.argument('key_name', help="Name of the key to set.")
         c.argument('key_value', help="Value of the new key. If not provided, a value will be generated.")
-        c.argument('key_type', help="Type of key.", arg_type=get_enum_type(['systemKey', 'functionKeys', 'masterKey']))
+        c.argument('key_type', help="Type of key.", arg_type=get_enum_type(['systemKeys', 'functionKeys', 'masterKey']))
     with self.argument_context('functionapp keys delete', id_part=None) as c:
         c.argument('key_name', help="Name of the key to set.")
-        c.argument('key_type', help="Type of key.", arg_type=get_enum_type(['systemKey', 'functionKeys', 'masterKey']))
+        c.argument('key_type', help="Type of key.", arg_type=get_enum_type(['systemKeys', 'functionKeys', 'masterKey']))
 
     with self.argument_context('functionapp function', id_part=None) as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type,)
@@ -1028,14 +1030,12 @@ def load_arguments(self, _):
         c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
 
     with self.argument_context('staticwebapp', validator=validate_public_cloud) as c:
-        c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.", arg_group="Github")
-        c.argument('token', options_list=['--token', '-t'], arg_group="Github",
-                   help="A user's GitHub repository token. This is used to setup the Github Actions workflow file and "
-                        "API secrets. If you need to create a Github Personal Access Token, "
-                        "please run with the '--login-with-github' flag or follow the steps found at the following link:\n"
-                        "https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line")
-        c.argument('login_with_github', help="Interactively log in with Github to retrieve the Personal Access Token", arg_group="Github")
-        c.argument('branch', options_list=['--branch', '-b'], help="The target branch in the repository.", arg_group="Github")
+        c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.", arg_group="Source Control")
+        c.argument('token', options_list=['--token', '-t'], arg_group="Source Control",
+                   help="A user's GitHub or Azure Dev Ops repository token. This is used to create the Github Action or Dev Ops pipeline.")
+        c.argument('login_with_github', help="Interactively log in with Github to retrieve the Personal Access Token", arg_group="Source Control")
+        c.argument('login_with_ado', help='Use azure credentials to create an Azure Dev Ops personal access token', arg_group="Source Control")
+        c.argument('branch', options_list=['--branch', '-b'], help="The target branch in the repository.", arg_group="Source Control")
         c.ignore('format_output')
         c.argument('name', options_list=['--name', '-n'], metavar='NAME', help="Name of the static site")
     with self.argument_context('staticwebapp environment') as c:
@@ -1103,6 +1103,18 @@ def load_arguments(self, _):
     with self.argument_context('staticwebapp functions link') as c:
         c.argument('function_resource_id', help="Resource ID of the functionapp to link. Can be retrieved with 'az functionapp --query id'")
         c.argument('force', help="Force the function link even if the function is already linked to a static webapp. May be needed if the function was previously linked to a static webapp.")
-
+    with self.argument_context('staticwebapp backends link') as c:
+        c.argument('backend_resource_id', help="Resource ID of the backend to link.")
+        c.argument('backend_region', help="Region of the backend resource.")
+        c.argument('environment_name', help="Name of the environment of static site")
+    with self.argument_context('staticwebapp backends validate') as c:
+        c.argument('backend_resource_id', help="Resource ID of the backend to link.")
+        c.argument('backend_region', help="Region of the backend resource.")
+        c.argument('environment_name', help="Name of the environment of static site")
+    with self.argument_context('staticwebapp backends show') as c:
+        c.argument('environment_name', help="Name of the environment of static site")
+    with self.argument_context('staticwebapp backends unlink') as c:
+        c.argument('remove_backend_auth', help="If set to true, removes the identity provider configured on the backend during the linking process.")
+        c.argument('environment_name', help="Name of the environment of static site")
     with self.argument_context('staticwebapp enterprise-edge') as c:
         c.argument("no_register", help="Don't try to register the Microsoft.CDN provider. Registration can be done manually with: az provider register --wait --namespace Microsoft.CDN. For more details, please review the documentation available at https://go.microsoft.com/fwlink/?linkid=2184995 .", default=False)

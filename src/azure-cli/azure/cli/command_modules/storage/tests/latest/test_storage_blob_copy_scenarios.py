@@ -167,6 +167,108 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
                                   target_container1, source_uri)
 
     @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='account1', kind='StorageV2')
+    @StorageAccountPreparer(parameter_name='account2', kind='StorageV2')
+    def test_storage_blob_copy_destination_blob_type(self, resource_group, account1, account2):
+        source_file = self.create_temp_file(16, full_random=True)
+        account1_info = self.get_account_info(resource_group, account1)
+        account2_info = self.get_account_info(resource_group, account2)
+
+        # Prepare
+        source_container = self.create_container(account1_info)
+        target_container = self.create_container(account1_info)
+        target_container_different_account = self.create_container(account2_info)
+
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n srcBlockBlob', account1_info,
+                         source_container, source_file)
+
+        # same account
+        dst_types = ['', 'Detect', 'BlockBlob', 'AppendBlob', 'PageBlob']
+        src_type = 'BlockBlob'
+        src_blob_name = 'srcBlockBlob'
+        for dst_type in dst_types:
+            self.storage_cmd('storage blob copy start --destination-blob {} --destination-container {} '
+                             '--source-account-name {} --source-container {} --source-blob {} '
+                             '{}',
+                             account1_info, 'dst'+dst_type, target_container, account1, source_container,
+                             src_blob_name, '--destination-blob-type '+dst_type if dst_type != '' else '')
+            self.storage_cmd('storage blob show -c {} -n {}', account1_info, target_container, 'dst'+dst_type). \
+                assert_with_checks([JMESPathCheck('properties.blobType',
+                                                  dst_type if (dst_type != '' and dst_type != 'Detect')
+                                                  else src_type)])
+
+        src_type = 'AppendBlob'
+        src_blob_name = 'dstAppendBlob'
+        for dst_type in dst_types:
+            self.storage_cmd('storage blob copy start --destination-blob {} --destination-container {} '
+                             '--source-account-name {} --source-container {} --source-blob {} '
+                             '{}',
+                             account1_info, 'dst2' + dst_type, target_container, account1, target_container,
+                             src_blob_name, '--destination-blob-type ' + dst_type if dst_type != '' else '')
+            self.storage_cmd('storage blob show -c {} -n {}', account1_info, target_container, 'dst2' + dst_type). \
+                assert_with_checks([JMESPathCheck('properties.blobType',
+                                                  dst_type if (dst_type != '' and dst_type != 'Detect')
+                                                  else src_type)])
+
+        src_type = 'PageBlob'
+        src_blob_name = 'dstPageBlob'
+        for dst_type in dst_types:
+            self.storage_cmd('storage blob copy start --destination-blob {} --destination-container {} '
+                             '--source-account-name {} --source-container {} --source-blob {} '
+                             '{}',
+                             account1_info, 'dst3' + dst_type, target_container, account1, target_container,
+                             src_blob_name, '--destination-blob-type ' + dst_type if dst_type != '' else '')
+            self.storage_cmd('storage blob show -c {} -n {}', account1_info, target_container, 'dst3' + dst_type). \
+                assert_with_checks([JMESPathCheck('properties.blobType',
+                                                  dst_type if (dst_type != '' and dst_type != 'Detect')
+                                                  else src_type)])
+
+        # different account
+        src_type = 'BlockBlob'
+        src_blob_name = 'srcBlockBlob'
+        for dst_type in dst_types:
+            self.storage_cmd('storage blob copy start --destination-blob {} --destination-container {} '
+                             '--source-account-name {} --source-container {} --source-blob {} '
+                             '{}',
+                             account2_info, 'dst' + dst_type, target_container_different_account, account1,
+                             source_container, src_blob_name,
+                             '--destination-blob-type ' + dst_type if dst_type != '' else '')
+            self.storage_cmd('storage blob show -c {} -n {}', account2_info, target_container_different_account,
+                             'dst' + dst_type).\
+                assert_with_checks([JMESPathCheck('properties.blobType',
+                                                  dst_type if (dst_type != '' and dst_type != 'Detect')
+                                                  else src_type)])
+
+        src_type = 'AppendBlob'
+        src_blob_name = 'dstAppendBlob'
+        for dst_type in dst_types:
+            self.storage_cmd('storage blob copy start --destination-blob {} --destination-container {} '
+                             '--source-account-name {} --source-container {} --source-blob {} '
+                             '{}',
+                             account2_info, 'dst2' + dst_type, target_container_different_account, account1,
+                             target_container, src_blob_name,
+                             '--destination-blob-type ' + dst_type if dst_type != '' else '')
+            self.storage_cmd('storage blob show -c {} -n {}', account2_info, target_container_different_account, 'dst2' + dst_type). \
+                assert_with_checks([JMESPathCheck('properties.blobType',
+                                                  dst_type if (dst_type != '' and dst_type != 'Detect')
+                                                  else src_type)])
+
+        src_type = 'PageBlob'
+        src_blob_name = 'dstPageBlob'
+        for dst_type in dst_types:
+            self.storage_cmd('storage blob copy start --destination-blob {} --destination-container {} '
+                             '--source-account-name {} --source-container {} --source-blob {} '
+                             '{}',
+                             account2_info, 'dst3' + dst_type, target_container_different_account, account1,
+                             target_container, src_blob_name,
+                             '--destination-blob-type ' + dst_type if dst_type != '' else '')
+            self.storage_cmd('storage blob show -c {} -n {}', account2_info, target_container_different_account, 'dst3' + dst_type). \
+                assert_with_checks([JMESPathCheck('properties.blobType',
+                                                  dst_type if (dst_type != '' and dst_type != 'Detect')
+                                                  else src_type)])
+
+
+    @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='account1', kind='StorageV2', hns=True)
     @StorageAccountPreparer(parameter_name='account2', kind='StorageV2')
     def test_storage_blob_copy_batch(self, resource_group, account1, account2):

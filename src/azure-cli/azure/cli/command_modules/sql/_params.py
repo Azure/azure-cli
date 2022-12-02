@@ -2131,6 +2131,10 @@ def load_arguments(self, _):
     ###############################################
     #                sql managed db               #
     ###############################################
+    class ContainerIdentityType(Enum):
+        managed_identity = "ManagedIdentity"
+        sas = "SharedAccessSignature"
+
     with self.argument_context('sql midb') as c:
         c.argument('managed_instance_name',
                    arg_type=managed_instance_param_type,
@@ -2340,7 +2344,8 @@ def load_arguments(self, _):
                 'auto_complete',
                 'last_backup_name',
                 'storage_container_uri',
-                'storage_container_sas_token'
+                'storage_container_sas_token',
+                'storage_container_identity'
             ])
 
         c.argument('auto_complete',
@@ -2363,6 +2368,12 @@ def load_arguments(self, _):
                    required=True,
                    options_list=['--storage-sas', '--ss'],
                    help='The authorization Sas token to access storage container where backups are.')
+
+        c.argument('storage_container_identity',
+                   arg_type=get_enum_type(ContainerIdentityType),
+                   required=False,
+                   options_list=['--storage-identity', '--si'],
+                   help='The storage container identity to use.')
 
     with self.argument_context('sql midb log-replay complete') as c:
         create_args_for_complex_type(

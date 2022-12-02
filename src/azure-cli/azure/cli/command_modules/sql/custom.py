@@ -1427,7 +1427,7 @@ def db_delete_replica_link(
         # No link exists, nothing to be done
         return
 
-    return client.delete(
+    return client.begin_delete(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -5215,6 +5215,7 @@ def managed_db_log_replay_start(
         last_backup_name,
         storage_container_uri,
         storage_container_sas_token,
+        storage_container_identity,
         **kwargs):
     '''
     Start a log replay restore.
@@ -5236,6 +5237,7 @@ def managed_db_log_replay_start(
 
     kwargs['storageContainerUri'] = storage_container_uri
     kwargs['storageContainerSasToken'] = storage_container_sas_token
+    kwargs['storage_container_identity'] = storage_container_identity
 
     # Create
     return client.begin_create_or_update(
@@ -5256,24 +5258,32 @@ def managed_db_log_replay_stop(
     '''
 
     restore_details_client = get_sql_managed_database_restore_details_operations(cmd.cli_ctx, None)
+    try:
+        # Determine if managed DB was created using log replay service
+        # Raises RestoreDetailsNotAvailableOrExpired exception if there are no restore details
+        restore_details = restore_details_client.get(
+            database_name=database_name,
+            managed_instance_name=managed_instance_name,
+            resource_group_name=resource_group_name,
+            restore_details_name=RestoreDetailsName.DEFAULT)
 
-    # Determine if managed DB was created using log replay service, raise exception if not
-    restore_details = restore_details_client.get(
-        database_name=database_name,
-        managed_instance_name=managed_instance_name,
-        resource_group_name=resource_group_name,
-        restore_details_name=RestoreDetailsName.DEFAULT)
+        # Type must be LRSRestore in order to proceed with stop-log-replay, else raise exception
+        if restore_details.type_properties_type.lower() == 'lrsrestore':
+            return client.begin_delete(
+                database_name=database_name,
+                managed_instance_name=managed_instance_name,
+                resource_group_name=resource_group_name)
 
-    # If type is present, it must be lrsrestore in order to proceed with stop-log-replay
-    if (hasattr(restore_details, 'type_properties_type') and restore_details.type_properties_type.lower() != 'lrsrestore'):
         raise CLIError(
             f'Cannot stop the log replay as database {database_name} on the instance {managed_instance_name} '
             f'in the resource group {resource_group_name} was not created with log replay service.')
-
-    return client.begin_delete(
-        database_name=database_name,
-        managed_instance_name=managed_instance_name,
-        resource_group_name=resource_group_name)
+    except Exception as ex:
+        # Map RestoreDetailsNotAvailableOrExpired to a more descriptive error
+        if (ex and 'RestoreDetailsNotAvailableOrExpired' in str(ex)):
+            raise CLIError(
+                f'Cannot stop the log replay as database {database_name} on the instance {managed_instance_name} '
+                f'in the resource group {resource_group_name} was not created with log replay service.')
+        raise ex
 
 
 def managed_db_log_replay_complete_restore(

@@ -50,6 +50,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.feedback = None
         self.extension_management_detail = None
         self.raw_command = None
+        self.show_survey_message = False
         self.mode = 'default'
         # The AzCLIError sub-class name
         self.error_type = 'None'
@@ -66,6 +67,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.suppress_new_event = False
         self.poll_start_time = None
         self.poll_end_time = None
+        self.allow_broker = None
 
     def add_event(self, name, properties):
         for key in self.instrumentation_key:
@@ -204,6 +206,8 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'PollStartTime', str(self.poll_start_time))
         set_custom_properties(result, 'PollEndTime', str(self.poll_end_time))
         set_custom_properties(result, 'CloudName', _get_cloud_name())
+        set_custom_properties(result, 'ShowSurveyMessage', str(self.show_survey_message))
+        set_custom_properties(result, 'AllowBroker', str(self.allow_broker))
 
         return result
 
@@ -415,6 +419,18 @@ def set_module_correlation_data(correlation_data):
 def set_raw_command_name(command):
     # the raw command name user inputs
     _session.raw_command = command
+
+
+@decorators.suppress_all_exceptions()
+def set_survey_info(show_survey_message):
+    # whether showed the intercept survey message or not
+    _session.show_survey_message = show_survey_message
+
+
+@decorators.suppress_all_exceptions()
+def set_broker_info(allow_broker):
+    # whether customer has configured `allow_broker` to enable WAM(Web Account Manager) login for authentication
+    _session.allow_broker = allow_broker
 
 
 @decorators.suppress_all_exceptions()

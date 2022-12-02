@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network traffic-manager endpoint delete"
+    "network traffic-manager endpoint delete",
 )
 class Delete(AAZCommand):
     """Delete a traffic manager endpoint.
@@ -25,9 +25,9 @@ class Delete(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2018-08-01",
+        "version": "2022-04-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}/{}/{}", "2018-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}/{}/{}", "2022-04-01-preview"],
         ]
     }
 
@@ -72,7 +72,17 @@ class Delete(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         self.EndpointsDelete(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -136,7 +146,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-08-01",
+                    "api-version", "2022-04-01-preview",
                     required=True,
                 ),
             }

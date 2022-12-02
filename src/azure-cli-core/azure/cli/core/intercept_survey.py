@@ -88,6 +88,9 @@ def prompt_survey_message(cli):
     ])
     print_styled_text((SURVEY_STYLE, NEW_LINE))
 
+    from azure.cli.core import telemetry
+    telemetry.set_survey_info(show_survey_message=True)
+
     # log prompt time
     next_prompt_time = datetime.utcnow() + timedelta(days=PROMPT_INTERVAL_IN_DAYS)
     survey_note = {
