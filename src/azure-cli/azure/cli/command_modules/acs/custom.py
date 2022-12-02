@@ -2408,6 +2408,7 @@ def aks_upgrade(cmd,
         return _remove_nulls([mc])[0]
 
     if instance.kubernetes_version == kubernetes_version or kubernetes_version == '':
+        #don't prompt here because there is another prompt below?
         if instance.provisioning_state == "Succeeded":
             logger.warning("The cluster is already on version %s and is not in a failed state. No operations "
                            "will occur when upgrading to the same version if the cluster is not in a failed state.",
@@ -3227,14 +3228,26 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         )
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    
+    if kubernetes_version != '' or instance.orchestrator_version == kubernetes_version:
+        msg = "The new kubernetes version is the same as the current kubernetes version."
+        if instance.provisioning_state == "Succeeded":
+            msg = "The cluster is already on version {} and is not in a failed state. No operations will occur when upgrading to the same version if the cluster is not in a failed state.".format(instance.kubernetes_version)
+        elif instance.provisioning_state == "Failed":
+            msg = "Cluster currently in failed state. Proceeding with upgrade to existing version {} to attempt resolution of failed cluster state.".format(instance.kubernetes_version)
+        if not yes and not prompt_y_n(msg):
+            return None
+
     instance.orchestrator_version = kubernetes_version
     instance.creation_data = creationData
+
 
     if not instance.upgrade_settings:
         instance.upgrade_settings = AgentPoolUpgradeSettings()
 
     if max_surge:
         instance.upgrade_settings.max_surge = max_surge
+        
 
     # custom headers
     aks_custom_headers = extract_comma_separated_string(
