@@ -44,10 +44,6 @@ Release History
 
 * Fix #24624: `az sig image-version create`: Fix the error that the `--os-vhd-storage-account` must be a managed disk or snapshot (#24709)
 
-**Extension**
-
-* Disable removing and updating system extension in Cloud Shell (#24361)
-
 **IoT**
 
 * Fix #22257: `az iot dps linked-hub create`: Improve error handling for linked hubs (#24261)
