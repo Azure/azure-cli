@@ -837,6 +837,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup job stop -g {rg} -v {vault} -n {job}')
 
+    @unittest.skip('CloudInternalError: Microsoft Azure Backup encountered an internal error. Wait for a few minutes and then try the operation again. If the issue persists, please contact Microsoft support.')
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer()

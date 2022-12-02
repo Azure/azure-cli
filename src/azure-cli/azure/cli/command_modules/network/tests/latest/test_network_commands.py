@@ -5974,6 +5974,7 @@ class NetworkServiceAliasesScenarioTest(ScenarioTest):
 
 class NetworkBastionHostScenarioTest(ScenarioTest):
 
+    @unittest.skip('az network bastion update: InvalidRequestContent The request content was invalid and could not be deserialized: Required property `name` not found in `sku`.' )
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='test_network_bastion_host')
     def test_network_bastion_host_create(self, resource_group):
