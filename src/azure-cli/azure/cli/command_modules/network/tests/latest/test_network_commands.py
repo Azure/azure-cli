@@ -6222,6 +6222,20 @@ class NetworkExtendedLocation(ScenarioTest):
                  '--edge-zone {edge_name}',
                  checks=self.check('vnetGateway.extendedLocation.name', '{edge_name}'))
 
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_local_gateway', location='eastus2euap')
+    def test_network_vnet_gateway_local_gateway(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'vnet': 'vnet',
+            'edge_name': 'microsoftrrdclab3',
+            'v_net_extended_location_resource_id' : 'v_net_extended_location_resource_id'
+        })
+        self.cmd('az network vnet create -g {rg} -n {vnet} --location eastus2euap --address-prefix 10.50.0.0/16 --edge-zone {edge_name}')
+        self.cmd('network vnet-gateway create -g {rg} -n vnet-gateway --vnet {vnet} --v_net_extended_location_resource_id {v_net_extended_location_resource_id} '
+                 '--edge-zone {edge_name}',
+                 checks=self.check('vnetGateway.v_net_extended_location_resource_id', '{v_net_extended_location_resource_id}'))     
+
     @ResourceGroupPreparer(name_prefix='test_network_private_endpoint_edge_zone', location='eastus2euap')
     def test_network_private_endpoint_edge_zone(self, resource_group):
 
