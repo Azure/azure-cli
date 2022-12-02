@@ -71,8 +71,8 @@ Release History
 * `az postgres flexible-server geo-restore/replica`: Introduce read replicas and geo-restore (#24639)
 * `az postgres flexible-server upgrade`: Add major version upgrade for PostgreSQL flexible server (#24649)
 * `az postgres flexible-server create/update/restore/replica`: Postgres flex byok (#24651)
-* `az postgres flexible-server identity`: User managed identity operations for PostgreSQL flexible server (#24713)
-* `az postgres flexible-server create/update/ad-admin`: Azure Active Directory Administrator operations for PostgreSQL flexible server (#24713)
+* `az postgres flexible-server identity`: Add user managed identity operations for PostgreSQL flexible server (#24713)
+* `az postgres flexible-server create/update/ad-admin`: Add Azure Active Directory Administrator operations for PostgreSQL flexible server (#24713)
 
 **Service Connector**
 
