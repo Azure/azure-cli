@@ -7314,7 +7314,7 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name,
                 name='vnetGatewayConfig{}'.format(i)
             )
         vnet_gateway.ip_configurations.append(ip_configuration)
-    else :
+    else:
         vnet_gateway.vpn_type = None
         vnet_gateway.sku = None
     if asn or bgp_peering_address or peer_weight:
