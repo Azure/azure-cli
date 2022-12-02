@@ -63,7 +63,7 @@ Release History
 * `az network private-endpoint-connection`: Enable private link support for provider `Microsoft.DesktopVirtualization/hostpools` and `Microsoft.DesktopVirtualization/workspaces` (#24568)
 * `az network application-gateway`: Support OCSP revocation check on client certificate (#24556)
 * `az network traffic-manager endpoint`: Add `--always-serve` to manage the health check on endpoints (#24716)
-* `az network public-ip create`: Fix the issue when using `--ip-tags` (#24728)
+* `az network public-ip create`: Fix `--ip-tags` cannot be used (#24728)
 * `az network private-endpoint-connection`: Add Provider `Microsoft.MachineLearningServices/registries` (#24712)
 
 **RDBMS**
