@@ -413,8 +413,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
-            'http_proxy_path': get_test_data_file_path('httpproxyconfig.json'),
-            'custom_data_path': get_test_data_file_path('setup_proxy.sh'),
+            'http_proxy_path': get_test_data_file_path('httpproxyconfig.json').replace('\\', '\\\\'),
+            'custom_data_path': get_test_data_file_path('setup_proxy.sh').replace('\\', '\\\\'),
             'ssh_key_value': self.generate_ssh_keys()
         })
 
@@ -482,7 +482,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
-            'http_proxy_path': get_test_data_file_path('httpproxyconfig_update.json'),
+            'http_proxy_path': get_test_data_file_path('httpproxyconfig_update.json').replace('\\', '\\\\'),
         })
 
         update_cmd = 'aks update --resource-group={resource_group} --name={name} --http-proxy-config={http_proxy_path}'

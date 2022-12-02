@@ -953,13 +953,13 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
                                     source_resource_id, target_rg_id,
                                     use_original_storage_account, restore_disk_lun_list,
                                     rehydration_duration, rehydration_priority, tier, disk_encryption_set_id,
-                                    encryption, recovery_point, use_secondary_region, mi_system_assigned,
+                                    encryption, recovery_point, mi_system_assigned,
                                     mi_user_assigned, restore_mode):
 
     if disk_encryption_set_id is not None:
         if not(encryption.properties.encryption_at_rest_type == "CustomerManaged" and
                recovery_point.properties.is_managed_virtual_machine and
-               not(recovery_point.properties.is_source_vm_encrypted) and use_secondary_region is None):
+               not recovery_point.properties.is_source_vm_encrypted):
             raise InvalidArgumentValueError("disk_encryption_set_id can't be specified")
 
     identity_info = None
@@ -1154,8 +1154,8 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                                                  None if recovery_point.
                                                                  properties.recovery_point_tier_details is None else
                                                                  recovery_point.tier_type, disk_encryption_set_id,
-                                                                 encryption, recovery_point, use_secondary_region,
-                                                                 mi_system_assigned, mi_user_assigned, restore_mode)
+                                                                 encryption, recovery_point, mi_system_assigned,
+                                                                 mi_user_assigned, restore_mode)
 
     _set_trigger_restore_properties(cmd, trigger_restore_properties, target_vm_name, target_vnet_name,
                                     target_vnet_resource_group, target_subnet_name, vault_name, resource_group_name,
