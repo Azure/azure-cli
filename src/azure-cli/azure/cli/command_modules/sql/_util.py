@@ -92,6 +92,10 @@ def get_sql_firewall_rules_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).firewall_rules
 
 
+def get_sql_ipv6_firewall_rules_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).ipv6_firewall_rules
+
+
 def get_sql_outbound_firewall_rules_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).outbound_firewall_rules
 
