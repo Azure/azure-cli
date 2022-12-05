@@ -837,7 +837,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup job stop -g {rg} -v {vault} -n {job}')
 
-    @unittest.skip('CloudInternalError: Microsoft Azure Backup encountered an internal error. Wait for a few minutes and then try the operation again. If the issue persists, please contact Microsoft support.')
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer()
@@ -1020,7 +1019,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length(@)", 0)
         ])
 
-
     @ResourceGroupPreparer()
     @VaultPreparer()
     def test_backup_identity(self, resource_group, vault_name):
@@ -1131,7 +1129,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("identity.userAssignedIdentities", None),
             self.check("properties.provisioningState", "Succeeded")
         ]).get_output_in_json()
-
 
     @ResourceGroupPreparer()
     @VaultPreparer(parameter_name='vault1')
@@ -1335,9 +1332,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-    @unittest.skip('ServiceResourceNotEmptyWithBackendMessage: Recovery Services vault cannot be deleted as there are backup items still present in soft delete state. Visit the following link for the steps to permanently delete soft deleted items: https://aka.ms/undeletesoftdeleteditems.  : clitest-vm000003. Please ensure all containers have been unregistered from the vault and all private endpoints associated with the vault have been deleted, and retry operation.')
+    #@unittest.skip('ServiceResourceNotEmptyWithBackendMessage: Recovery Services vault cannot be deleted as there are backup items still present in soft delete state. Visit the following link for the steps to permanently delete soft deleted items: https://aka.ms/undeletesoftdeleteditems.  : clitest-vm000003. Please ensure all containers have been unregistered from the vault and all private endpoints associated with the vault have been deleted, and retry operation.')
     @ResourceGroupPreparer(location="centraluseuap")
-    @VaultPreparer()
+    @VaultPreparer(soft_delete=False)
     @VMPreparer(parameter_name='vm1')
     @ItemPreparer(vm_parameter_name='vm1')
     @PolicyPreparer(parameter_name='policy1', instant_rp_days='4')
