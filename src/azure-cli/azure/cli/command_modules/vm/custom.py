@@ -302,7 +302,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None,
                         public_network_access=None, accelerated_network=None, architecture=None,
                         data_access_auth_mode=None, gallery_image_reference_type=None, security_data_uri=None,
-                        upload_type=None, secure_vm_disk_encryption_set=None):
+                        upload_type=None, secure_vm_disk_encryption_set=None, performance_plus=None):
 
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -435,7 +435,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                                  storage_account_id=source_storage_account_id,
                                  upload_size_bytes=upload_size_bytes,
                                  logical_sector_size=logical_sector_size,
-                                 security_data_uri=security_data_uri)
+                                 security_data_uri=security_data_uri,
+                                 performance_plus=performance_plus)
 
     if size_gb is None and upload_size_bytes is None:
         if option == DiskCreateOption.empty:

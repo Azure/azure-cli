@@ -7845,6 +7845,14 @@ class DiskBurstingTest(ScenarioTest):
             self.check('burstingEnabled', True)
         ])
 
+    def tet_disk_performance_plus(self, resource_group):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk', 10)
+        })
+
+        self.cmd('disk create -n {disk} -g {rg} --size-gb 10 --performance-plus', checks=[
+
+        ])
 
 class VMSSCreateDiskOptionTest(ScenarioTest):
 
