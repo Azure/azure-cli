@@ -30,7 +30,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 # In the future, for any reasons the repository get removed, the source code is under "sample-repo-for-deployment-test"
 # you can use to rebuild the repository
 TEST_REPO_URL = 'https://github.com/yugangw-msft/azure-site-test.git'
-WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
+WINDOWS_ASP_LOCATION_WEBAPP = 'westeurope'
 WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
@@ -66,11 +66,12 @@ class WebappBasicE2ETest(ScenarioTest):
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
             JMESPathCheck('name', plan)
         ])
-        self.cmd('webapp create -g {} -n {} --plan {} --https-only'.format(resource_group, webapp_name, plan, 'true'), checks=[
+        self.cmd('webapp create -g {} -n {} --plan {} --https-only {} --public-network-access {}'.format(resource_group, webapp_name, plan, 'true', 'Enabled'), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net'),
-            JMESPathCheck('httpsOnly', 'True')
+            JMESPathCheck('httpsOnly', 'True'),
+            JMESPathCheck('publicNetworkAccess', 'Enabled')
         ])
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group,
                                                               webapp_name, plan))  # test idempotency

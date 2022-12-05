@@ -93,7 +93,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
-                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False):
+                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, public_network_access=None):
     from azure.mgmt.web.models import Site
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -177,7 +177,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         https_only = using_webapp_up
 
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
-                      https_only=https_only, virtual_network_subnet_id=subnet_resource_id)
+                      https_only=https_only, virtual_network_subnet_id=subnet_resource_id,
+                      public_network_access=public_network_access)
     if runtime:
         runtime = _StackRuntimeHelper.remove_delimiters(runtime)
 
@@ -194,7 +195,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             match = helper.resolve(runtime, is_linux)
             if not match:
                 raise ValidationError("Linux Runtime '{}' is not supported."
-                                      " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
+                                      "Run 'az webapp list-runtimes --os-type linux' to cross check".format(runtime))
             helper.get_site_config_setter(match, linux=is_linux)(cmd=cmd, stack=match, site_config=site_config)
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
@@ -224,8 +225,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                      "only appliable on linux webapp")
         match = helper.resolve(runtime, linux=is_linux)
         if not match:
-            raise ValidationError("Windows runtime '{}' is not supported. "
-                                  "Please invoke 'az webapp list-runtimes' to cross check".format(runtime))
+            raise ValidationError("Windows runtime '{}' is not supported."
+                                  "Run 'az webapp list-runtimes --os-type windows' to cross check".format(runtime))
         helper.get_site_config_setter(match, linux=is_linux)(cmd=cmd, stack=match, site_config=site_config)
 
         # TODO: Ask Calvin the purpose of this - seems like unneeded set of calls
@@ -273,7 +274,6 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         identity = assign_identity(cmd, resource_group_name, name, assign_identities,
                                    role, None, scope)
         webapp.identity = identity
-
     return webapp
 
 
@@ -2166,7 +2166,7 @@ def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_co
         request = SnapshotRestoreRequest(overwrite=False, snapshot_time=time, recovery_source=source,
                                          recover_configuration=recover_config)
         if slot:
-            return client.web_apps.begin_restore_snapshot_slot(resource_group_name, name, request, slot)
+            return client.web_apps.begin_restore_snapshot_slot(resource_group_name, name, slot, request)
         return client.web_apps.begin_restore_snapshot(resource_group_name, name, request)
     if any([source_resource_group, source_name]):
         raise ArgumentUsageError('usage error: --source-resource-group and '
@@ -2174,7 +2174,7 @@ def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_co
     # Overwrite app with its own snapshot
     request = SnapshotRestoreRequest(overwrite=True, snapshot_time=time, recover_configuration=recover_config)
     if slot:
-        return client.web_apps.begin_restore_snapshot_slot(resource_group_name, name, request, slot)
+        return client.web_apps.begin_restore_snapshot_slot(resource_group_name, name, slot, request)
     return client.web_apps.begin_restore_snapshot(resource_group_name, name, request)
 
 
@@ -3441,7 +3441,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
-        raise MutuallyExclusiveArgumentError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
+        raise MutuallyExclusiveArgumentError("usage error: You must specify one of these parameter "
+                                             "--plan NAME_OR_ID | --consumption-plan-location LOCATION")
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
