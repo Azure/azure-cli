@@ -25,7 +25,7 @@ from ._validators import (validate_appservice_name_or_id,
                           validate_key, validate_feature, validate_feature_key,
                           validate_identity, validate_auth_mode,
                           validate_resolve_keyvault, validate_export_profile, validate_import_profile,
-                          validate_strict_import, validate_export_as_reference)
+                          validate_strict_import, validate_export_as_reference, validate_snapshot_filters)
 
 
 def load_arguments(self, _):
@@ -77,6 +77,20 @@ def load_arguments(self, _):
         type=str,
         help='Name of the replica of the App Configuration.',
         configured_default=None
+    )
+
+    snapshot_name_arg_type = CLIArgumentType(
+        options_list=['snapshot-name', '-s'],
+        type=str,
+        help='Name of the App Configuration snapshot.',
+        configured_default=None
+    )
+
+    snapshot_filter_arg_type = CLIArgumentType(
+        options_list = ['--filters'],
+        validator=validate_snapshot_filters,
+        nargs='+',
+        help='Space-separated key and label filters used to build an app configuration snapshot. These values should escaped JSON objects.'
     )
 
     with self.argument_context('appconfig') as c:
@@ -326,3 +340,13 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig replica create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help='Location at which to create the replica.')
+
+    with self.argument_context('appconfig snapshot') as c:
+        c.argument('name', arg_type=store_name_arg_type)
+        c.argument('snapshot_name', options_list=['--snapshot-name'], arg_type=snapshot_name_arg_type)
+
+    with self.argument_context('appconfig snapshot create') as c:
+        c.argument('filters', arg_type=snapshot_filter_arg_type)
+        c.argument('composition_type', options_list=['--composition-type'], arg_type=get_enum_type(["all", "group_by_key"]), help='Composition type used in building app configuration snapshots.') #TODO: Update help message.
+        c.argument('retention_period', options_list=['--retention-period'], type=int, help='Duration in seconds for which a snapshot can remain archived before expiry. If not specified, retention period defaults to the equivalent of 30 days. (2592000s)')
+        c.argument('tags', arg_type=tags_type, help="Space-separated tags: key[=value] [key[=value] ...].")

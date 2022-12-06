@@ -42,6 +42,10 @@ def configstore_replica_output_format(result):
     return _output_format(result, _configstore_replica_format_group)
 
 
+def configstore_snapshot_output_format(result):
+    return _output_format(result, _snapshot_output_format_group)
+
+
 def _output_format(result, format_group):
     if 'value' in result and isinstance(result['value'], list):
         result = result['value']
@@ -144,6 +148,29 @@ def _featureflag_entry_format_group(item):
         ('DESCRIPTION', _get_value(item, 'description')),
         ('LAST MODIFIED', _format_datetime(last_modified)),
         ('CONDITIONS', _get_value(item, 'conditions'))
+    ])
+
+
+def _snapshot_output_format_group(item):
+    content_type = _get_value(item, 'contentType')
+    content_type = content_type if content_type != ' ' else _get_value(item, 'content_type')
+
+    last_modified = _get_value(item, 'lastModified')
+    last_modified = last_modified if last_modified != ' ' else _get_value(item, 'last_modified')
+
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('FILTERS', _get_value(item, 'filters')),
+        ('COMPOSITION TYPE', _get_value(item, 'composition_type')),
+        ('CREATED', _format_datetime(_get_value(item, 'created'))),
+        ('EXPIRES', _format_datetime(_get_value(item, 'expires'))),
+        ('RETENTION PERIOD', _get_value(item, 'retention_period')),
+        ('SIZE', _get_value(item, 'size')),
+        ('STATUS', _get_value(item, 'status')),
+        ('STATUS CODE', _get_value(item, 'status_code')),
+        ('ITEMS COUNT', _get_value(item, 'items_count')),
+        ('ITEMS LINK', _get_value(item, 'items_link')),
+        ('TAGS', _get_value(item, 'tags')),
     ])
 
 

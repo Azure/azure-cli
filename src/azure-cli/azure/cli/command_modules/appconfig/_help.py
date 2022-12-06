@@ -590,3 +590,14 @@ helps['appconfig feature filter list'] = """
           text:
             az appconfig feature filter list --endpoint https://myappconfiguration.azconfig.io --feature color --all --auth-mode login
     """
+
+
+helps['appconfig snapshot'] = """
+    type: group
+    short-summary: Manage snapshots associated with an app configuration store.
+    """
+
+helps['appconfig snapshot create'] = """
+    type: command
+    short-summary: Create and app configuration snapshot.
+    """
