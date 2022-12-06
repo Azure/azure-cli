@@ -8827,7 +8827,6 @@ class VMListFilterScenarioTest(ScenarioTest):
         self.kwargs.update({
             'vmss_id': vmss_id
         })
-        # The vmss can only be listed after the deployment is completely successful
         time.sleep(600)
         self.cmd('vm list -g {rg} --vmss {vmss_id}', checks=[
             self.check('length(@)', 2)
