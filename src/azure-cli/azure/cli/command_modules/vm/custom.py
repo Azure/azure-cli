@@ -1353,9 +1353,12 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
     return result
 
 
-def list_vm(cmd, resource_group_name=None, show_details=False):
+def list_vm(cmd, resource_group_name=None, show_details=False, vmss=None):
     ccf = _compute_client_factory(cmd.cli_ctx)
-    vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name) \
+    filter = None
+    if vmss is not None:
+        filter = "'virtualMachineScaleSet/id' eq '{}'".format(vmss)
+    vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name, filter=filter) \
         if resource_group_name else ccf.virtual_machines.list_all()
     if show_details:
         return [get_vm_details(cmd, _parse_rg_name(v.id)[0], v.name) for v in vm_list]
