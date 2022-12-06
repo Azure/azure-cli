@@ -1353,6 +1353,7 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
     return result
 
 
+# pylint: disable=redefined-builtin
 def list_vm(cmd, resource_group_name=None, show_details=False, vmss=None):
     ccf = _compute_client_factory(cmd.cli_ctx)
     filter = None
