@@ -459,7 +459,7 @@ def load_arguments(self, _):
         c.argument('priority', help='Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.', type=int)
 
     with self.argument_context('vm list') as c:
-        c.argument('vmss', help='The system query option to filter VMs. Allowed value is vmss id.')
+        c.argument('vmss', min_api='2021-11-01', help='The system query option to filter VMs. Allowed value is vmss id.')
 
     for scope in ['vm show', 'vm list']:
         with self.argument_context(scope) as c:
