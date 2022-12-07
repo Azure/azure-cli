@@ -242,7 +242,7 @@ def load_arguments(self, _):
                 help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.  Allowed values: classic, default, simplified.")
 
     with self.argument_context('batch pool set') as c:
-        c.argument('target_node_communication_mode', options_list=['--target-communication'], 
+        c.argument('target_node_communication_mode', options_list=['--target-communication'],
                 help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.  Allowed values: classic, default, simplified.")
 
     with self.argument_context('batch certificate') as c:
