@@ -205,7 +205,7 @@ def build_pipeline_result(job_name, instance_id, python_version, profile):
         |Type|Test Case|Error Message|Line|\n|---|---|---|---|\n|Failed|test_aks_create_and_update_with_http_proxy_config|azure.cli.core.azclierror.InvalidArgumentValueError: C:Codeazure-clisrcazure-cliazureclicommand_modulesacstestslatestdatahttpproxyconfig.json is not valid file, or not accessable.|azure-cli\\src\\azure-cli\\azure\\cli\\command_modules\\acs\\tests\\latest\\test_aks_commands.py:408|\n
     '''
     selected_modules = get_path_table()['mod']
-    unique_job_name = ' '.join([job_name, python_version, profile, instance_id])
+    unique_job_name = ' '.join([job_name, python_version, profile, str(instance_id)])
     pipeline_result = {
         # "Automation Full Test Python310 Profile Latest instance1"
         unique_job_name: {
