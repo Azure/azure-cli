@@ -985,7 +985,7 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment')
     with self.argument_context('appservice ase upgrade') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment')
-    with self.argument_context('appservice ase upgrade-test-notification') as c:
+    with self.argument_context('appservice ase send-test-notification') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment')
     with self.argument_context('appservice ase update') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
