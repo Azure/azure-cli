@@ -32,6 +32,7 @@ class AAZCommandCtx:
         self._clients = {}
         self._vars_schema = AAZObjectType()
         self.vars = AAZObject(schema=self._vars_schema, data={})
+        self.selectors = object()
         self.generic_update_args = command_args.get(AAZGenericUpdateAction.DEST, None)
         # support no wait
         self.lro_no_wait = command_args.get(no_wait_arg, False) if no_wait_arg else False

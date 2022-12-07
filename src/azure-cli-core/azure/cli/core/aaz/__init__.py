@@ -23,3 +23,4 @@ from ._command import AAZCommand, AAZWaitCommand, AAZCommandGroup, \
 from ._field_type import AAZIntType, AAZFloatType, AAZStrType, AAZBoolType, AAZDictType, AAZFreeFormDictType, \
     AAZListType, AAZObjectType
 from ._operation import AAZHttpOperation, AAZJsonInstanceUpdateOperation, AAZGenericInstanceUpdateOperation
+from ._selector import AAZJsonSelector
