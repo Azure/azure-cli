@@ -667,7 +667,6 @@ def load_command_table(self, _):
                             client_factory=cf_capacity_reservation_groups, is_preview=True) as g:
         g.custom_command('create', 'create_capacity_reservation_group')
         g.custom_command('update', 'update_capacity_reservation_group')
-        g.command('delete', 'delete', confirmation=True)
         g.custom_show_command('show', 'show_capacity_reservation_group')
         g.custom_command('list', 'list_capacity_reservation_group')
 
@@ -675,9 +674,7 @@ def load_command_table(self, _):
                             client_factory=cf_capacity_reservations, is_preview=True) as g:
         g.custom_command('create', 'create_capacity_reservation', supports_no_wait=True)
         g.custom_command('update', 'update_capacity_reservation', supports_no_wait=True)
-        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.custom_show_command('show', 'show_capacity_reservation')
-        g.custom_command('list', 'list_capacity_reservation')
 
     with self.command_group('restore-point', restore_point, client_factory=cf_restore_point, min_api='2021-03-01') as g:
         g.custom_show_command('show', 'restore_point_show')

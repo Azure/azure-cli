@@ -1321,6 +1321,87 @@ def _validate_trusted_launch(namespace):
         namespace.enable_secure_boot = True
 
 
+def _validate_generation_version_and_trusted_launch(cmd, namespace):
+    from azure.cli.core.profiles import ResourceType
+    if not cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE, min_api='2020-12-01'):
+        return
+    from ._vm_utils import trusted_launch_warning_log
+    if namespace.image is not None:
+        from ._vm_utils import parse_shared_gallery_image_id, parse_community_gallery_image_id,\
+            is_valid_image_version_id, parse_gallery_image_id
+        if is_valid_image_version_id(namespace.image):
+            from ._client_factory import cf_gallery_images
+            image_info = parse_gallery_image_id(namespace.image)
+            gallery_image_info = cf_gallery_images(cmd.cli_ctx, '').get(
+                resource_group_name=namespace.resource_group_name, gallery_name=image_info[0],
+                gallery_image_name=image_info[1])
+            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
+                                                                                  'hyper_v_generation') else None
+            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
+            return
+
+        image_type = _parse_image_argument(cmd, namespace)
+
+        if image_type == 'image_id':
+            # managed image does not support trusted launch
+            return
+
+        if image_type == 'uri':
+            # vhd does not support trusted launch
+            return
+
+        if image_type == 'shared_gallery_image_id':
+            from ._client_factory import cf_shared_gallery_image
+            image_info = parse_shared_gallery_image_id(namespace.image)
+            gallery_image_info = cf_shared_gallery_image(cmd.cli_ctx).get(
+                location=namespace.location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
+            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
+                                                                                  'hyper_v_generation') else None
+            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
+            return
+
+        if image_type == 'community_gallery_image_id':
+            from ._client_factory import cf_community_gallery_image
+            image_info = parse_community_gallery_image_id(namespace.image)
+            gallery_image_info = cf_community_gallery_image(cmd.cli_ctx).get(
+                location=namespace.location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
+            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
+                                                                                  'hyper_v_generation') else None
+            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
+            return
+
+        if image_type == 'urn':
+            client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
+            os_version = namespace.os_version
+            if os_version.lower() == 'latest':
+                os_version = _get_latest_image_version(cmd.cli_ctx, namespace.location, namespace.os_publisher,
+                                                       namespace.os_offer, namespace.os_sku)
+            vm_image_info = client.get(namespace.location, namespace.os_publisher, namespace.os_offer,
+                                       namespace.os_sku, os_version)
+            generation_version = vm_image_info.hyper_v_generation if hasattr(vm_image_info,
+                                                                             'hyper_v_generation') else None
+            features = vm_image_info.features if hasattr(vm_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
+            return
+
+    # create vm with os disk
+    if hasattr(namespace, 'attach_os_disk') and namespace.attach_os_disk is not None:
+        from msrestazure.tools import parse_resource_id
+        if urlparse(namespace.attach_os_disk).scheme and "://" in namespace.attach_os_disk:
+            # vhd does not support trusted launch
+            return
+        client = _compute_client_factory(cmd.cli_ctx).disks
+        attach_os_disk_name = parse_resource_id(namespace.attach_os_disk)['name']
+        attach_os_disk_info = client.get(namespace.resource_group_name, attach_os_disk_name)
+        generation_version = attach_os_disk_info.hyper_v_generation if hasattr(attach_os_disk_info,
+                                                                               'hyper_v_generation') else None
+        features = attach_os_disk_info.features if hasattr(attach_os_disk_info, 'features') else None
+        trusted_launch_warning_log(namespace, generation_version, features)
+
+
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
     if namespace.application_configuration_overrides and \
        len(namespace.application_version_ids) != len(namespace.application_configuration_overrides):
@@ -1394,6 +1475,7 @@ def process_vm_create_namespace(cmd, namespace):
         _validate_secrets(namespace.secrets, namespace.os_type)
     _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
+    _validate_generation_version_and_trusted_launch(cmd, namespace)
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
 
@@ -1692,6 +1774,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_vmss_create_auth(namespace, cmd)
     _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
+    _validate_generation_version_and_trusted_launch(cmd, namespace)
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vmss_terminate_notification(cmd, namespace)
     _validate_vmss_create_automatic_repairs(cmd, namespace)

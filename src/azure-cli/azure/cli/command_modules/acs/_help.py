@@ -210,6 +210,7 @@ parameters:
             - monitoring               : turn on Log Analytics monitoring. Uses the Log Analytics Default Workspace if it exists, else creates one.
                                          Specify "--workspace-resource-id" to use an existing workspace.
                                          Specify "--enable-msi-auth-for-monitoring" to use Managed Identity Auth.
+                                         Specify "--enable-syslog" to enable syslog data collection from nodes. Note MSI must be enabled
                                          If monitoring addon is enabled --no-wait argument will have no effect
             - azure-policy             : enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
                                          Learn more at aka.ms/aks/policy.
@@ -270,6 +271,9 @@ parameters:
   - name: --enable-msi-auth-for-monitoring
     type: bool
     short-summary: Enable Managed Identity Auth for Monitoring addon.
+  - name: --enable-syslog
+    type: bool
+    short-summary: Enable syslog data collection for Monitoring addon
   - name: --uptime-sla
     type: bool
     short-summary: Enable a paid managed cluster service with a financially backed SLA.
@@ -782,7 +786,8 @@ long-summary: |-
     These addons are available:
         - http_application_routing : configure ingress with automatic public DNS name creation.
         - monitoring               : turn on Log Analytics monitoring. Requires "--workspace-resource-id".
-                                     Requires "--enable_msi_auth_for_monitoring" for managed identity auth.
+                                     Requires "--enable-msi-auth-for-monitoring" for managed identity auth.
+                                     Requires "--enable-syslog" to enable syslog data collection from nodes. Note MSI must be enabled
                                      If monitoring addon is enabled --no-wait argument will have no effect
         - virtual-node             : enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
         - azure-policy             : enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
@@ -800,6 +805,9 @@ parameters:
   - name: --enable-msi-auth-for-monitoring
     type: bool
     short-summary: Enable Managed Identity Auth for Monitoring addon.
+  - name: --enable-syslog
+    type: bool
+    short-summary: Enable syslog data collection for Monitoring addon
   - name: --appgw-name
     type: string
     short-summary: Name of the application gateway to create/use in the node resource group. Use with ingress-azure addon.
@@ -1038,10 +1046,6 @@ examples:
   - name: Get the available upgrade versions for an agent pool of the managed Kubernetes cluster.
     text: az aks nodepool get-upgrades --resource-group MyResourceGroup --cluster-name MyManagedCluster --nodepool-name MyNodePool
     crafted: true
-parameters:
-  - name: --nodepool-name
-    type: string
-    short-summary: name of the node pool.
 """
 
 helps['aks nodepool list'] = """
@@ -1137,9 +1141,6 @@ helps['aks nodepool stop'] = """
     type: command
     short-summary: Stop running agent pool in the managed Kubernetes cluster.
     parameters:
-        - name: --nodepool-name
-          type: string
-          short-summary: Agent pool name
         - name: --aks-custom-headers
           type: string
           short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
@@ -1152,9 +1153,6 @@ helps['aks nodepool start'] = """
     type: command
     short-summary: Start stopped agent pool in the managed Kubernetes cluster.
     parameters:
-        - name: --nodepool-name
-          type: string
-          short-summary: Agent pool name
         - name: --aks-custom-headers
           type: string
           short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
@@ -1305,7 +1303,7 @@ long-summary: If an operation on a node pool was interrupted or was started with
 examples:
   - name: Wait for a node pool to reach a desired state, polling every minute for up to thirty minutes.
     text: |-
-        az aks nodepool wait --created --interval 60 --name MyManagedCluster --resource-group MyResourceGroup --nodepool-name MyNodePool --timeout 1800
+        az aks nodepool wait --created --interval 60 --cluster-name MyManagedCluster --resource-group MyResourceGroup --nodepool-name MyNodePool --timeout 1800
 """
 
 helps['aks nodepool snapshot wait'] = """

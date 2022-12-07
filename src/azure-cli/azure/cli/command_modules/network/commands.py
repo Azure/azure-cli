@@ -12,9 +12,9 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
 
 from azure.cli.command_modules.network._client_factory import (
-    cf_application_gateways, cf_express_route_circuit_authorizations,
-    cf_express_route_circuit_peerings, cf_express_route_circuits,
-    cf_express_route_service_providers, cf_load_balancers,
+    cf_application_gateways,
+    cf_express_route_circuits,
+    cf_load_balancers,
     cf_network_interfaces, cf_network_watcher, cf_packet_capture,
     cf_virtual_networks, cf_virtual_network_peerings, cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways,
@@ -22,9 +22,9 @@ from azure.cli.command_modules.network._client_factory import (
     cf_subnets,
     cf_public_ip_addresses, cf_connection_monitor,
     cf_public_ip_prefixes, cf_dns_references, cf_private_endpoints,
-    cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
-    cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
-    cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
+    cf_express_route_circuit_connections,
+    cf_express_route_ports, cf_app_gateway_waf_policy,
+    cf_private_link_services, cf_private_endpoint_types,
     cf_virtual_router, cf_virtual_router_peering, cf_bastion_hosts, cf_flow_logs,
     cf_private_dns_zone_groups, cf_load_balancer_backend_pools)
 from azure.cli.command_modules.network._util import (
@@ -46,7 +46,7 @@ from azure.cli.command_modules.network._validators import (
     get_network_watcher_from_location,
     process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace, process_ag_settings_create_namespace, process_ag_http_settings_create_namespace,
     process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
-    process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace, process_nic_create_namespace,
+    process_ag_url_path_map_rule_create_namespace, process_nic_create_namespace,
     process_lb_create_namespace, process_lb_frontend_ip_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
@@ -107,63 +107,16 @@ def load_command_table(self, _):
         min_api='2016-09-01'
     )
 
-    network_er_connection_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRouteConnectionsOperations.{}',
-        client_factory=cf_express_route_connections,
-        min_api='2018-08-01'
-    )
-
-    network_er_gateway_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRouteGatewaysOperations.{}',
-        client_factory=cf_express_route_gateways,
-        min_api='2018-08-01'
-    )
-
     network_er_ports_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#ExpressRoutePortsOperations.{}',
         client_factory=cf_express_route_ports,
         min_api='2018-08-01'
     )
 
-    network_er_port_locations_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRoutePortsLocationsOperations.{}',
-        client_factory=cf_express_route_port_locations,
-        min_api='2018-08-01'
-    )
-
-    network_er_links_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRouteLinksOperations.{}',
-        client_factory=cf_express_route_links,
-        min_api='2018-08-01'
-    )
-
-    network_erca_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRouteCircuitAuthorizationsOperations.{}',
-        client_factory=cf_express_route_circuit_authorizations,
-        min_api='2016-09-01'
-    )
-
     network_erconn_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#ExpressRouteCircuitConnectionsOperations.{}',
         client_factory=cf_express_route_circuit_connections,
         min_api='2018-07-01'
-    )
-
-    network_perconn_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#PeerExpressRouteCircuitConnectionsOperations.{}',
-        client_factory=cf_peer_express_route_circuit_connections,
-        min_api='2019-02-01'
-    )
-
-    network_ersp_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRouteServiceProvidersOperations.{}',
-        client_factory=cf_express_route_service_providers,
-        min_api='2016-09-01'
-    )
-
-    network_er_peering_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRouteCircuitPeeringsOperations.{}',
-        client_factory=cf_express_route_circuit_peerings
     )
 
     network_private_endpoint_sdk = CliCommandType(
@@ -580,78 +533,34 @@ def load_command_table(self, _):
 
     # region ExpressRoutes
     with self.command_group('network express-route', network_er_sdk) as g:
-        g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.command('get-stats', 'get_stats')
-        g.command('list-arp-tables', 'begin_list_arp_table')
-        g.command('list-route-tables', 'begin_list_routes_table', is_preview=True)
         g.command('list-route-tables-summary', 'begin_list_routes_table_summary', is_preview=True)
-        g.custom_command('create', 'create_express_route', supports_no_wait=True)
-        g.custom_command('list', 'list_express_route_circuits')
-        g.command('list-service-providers', 'list', command_type=network_ersp_sdk)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_express_route', supports_no_wait=True)
-        g.wait_command('wait')
+        from azure.cli.command_modules.network.custom import ExpressRouteCreate, ExpressRouteUpdate
+        self.command_table['network express-route create'] = ExpressRouteCreate(loader=self)
+        self.command_table['network express-route update'] = ExpressRouteUpdate(loader=self)
 
-    with self.command_group('network express-route auth', network_erca_sdk) as g:
-        g.custom_command('create', 'create_express_route_auth', min_api='2019-09-01')
-        g.command('create', 'begin_create_or_update', max_api='2019-08-01', validator=process_auth_create_namespace)
-        g.command('delete', 'begin_delete')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
+    with self.command_group('network express-route gateway connection'):
+        from azure.cli.command_modules.network.custom import ExpressRouteConnectionUpdate, ExpressRouteConnectionCreate
+        self.command_table['network express-route gateway connection create'] = ExpressRouteConnectionCreate(loader=self)
+        self.command_table['network express-route gateway connection update'] = ExpressRouteConnectionUpdate(loader=self)
 
-    with self.command_group('network express-route gateway', network_er_gateway_sdk) as g:
-        g.custom_command('create', 'create_express_route_gateway')
-        g.command('delete', 'begin_delete')
-        g.custom_command('list', 'list_express_route_gateways')
-        g.show_command('show', 'get')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_express_route_gateway', setter_arg_name='put_express_route_gateway_parameters')
-
-    with self.command_group('network express-route gateway connection', network_er_connection_sdk) as g:
-        g.custom_command('create', 'create_express_route_connection')
-        g.command('delete', 'begin_delete')
-        g.command('list', 'list')
-        g.show_command('show', 'get')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_express_route_connection', setter_arg_name='put_express_route_connection_parameters')
-
-    with self.command_group('network express-route peering', network_er_peering_sdk) as g:
-        g.custom_command('create', 'create_express_route_peering', client_factory=cf_express_route_circuit_peerings)
-        g.command('delete', 'begin_delete')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.command('get-stats', 'get_peering_stats', command_type=network_er_sdk, is_preview=True)
-        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='peering_parameters', custom_func_name='update_express_route_peering')
-
-    with self.command_group('network express-route peering connection', network_erconn_sdk) as g:
-        g.custom_command('create', 'create_express_route_peering_connection')
-        g.command('delete', 'begin_delete')
-        g.show_command('show')
-        g.command('list', 'list')
+    with self.command_group('network express-route peering'):
+        from azure.cli.command_modules.network.custom import ExpressRoutePeeringCreate, ExpressRoutePeeringUpdate
+        self.command_table['network express-route peering create'] = ExpressRoutePeeringCreate(loader=self)
+        self.command_table['network express-route peering update'] = ExpressRoutePeeringUpdate(loader=self)
 
     with self.command_group('network express-route peering connection ipv6-config', network_erconn_sdk) as g:
         g.custom_command('set', 'set_express_route_peering_connection_config')
         g.custom_command('remove', 'remove_express_route_peering_connection_config')
 
-    with self.command_group('network express-route peering peer-connection', network_perconn_sdk, is_preview=True) as g:
-        g.show_command('show', is_preview=True)
-        g.show_command('list', 'list', is_preview=True)
-
     with self.command_group('network express-route port', network_er_ports_sdk) as g:
-        g.custom_command('create', 'create_express_route_port')
-        g.command('delete', 'begin_delete')
-        g.custom_command('list', 'list_express_route_ports')
-        g.show_command('show')
-        g.generic_update_command('update', custom_func_name='update_express_route_port')
+        from azure.cli.command_modules.network.custom import ExpressRoutePortCreate
+        self.command_table['network express-route port create'] = ExpressRoutePortCreate(loader=self)
         g.custom_command('generate-loa', 'download_generated_loa_as_pdf')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_express_route_port')
 
     with self.command_group('network express-route port identity', min_api='2019-08-01') as g:
         g.custom_command('assign', 'assign_express_route_port_identity', supports_no_wait=True)
         g.custom_command('remove', 'remove_express_route_port_identity', supports_no_wait=True)
         g.custom_show_command('show', 'show_express_route_port_identity')
-
-    with self.command_group('network express-route port link', network_er_links_sdk) as g:
-        g.command('list', 'list')
-        g.show_command('show')
 
     with self.command_group('network express-route port link', network_er_ports_sdk) as g:
         g.generic_update_command('update',
@@ -661,10 +570,6 @@ def load_command_table(self, _):
                                  child_collection_prop_name='links',
                                  child_arg_name='link_name',
                                  min_api='2019-08-01')
-
-    with self.command_group('network express-route port location', network_er_port_locations_sdk) as g:
-        g.command('list', 'list')
-        g.show_command('show')
     # endregion
 
     # region PrivateEndpoint
@@ -802,9 +707,9 @@ def load_command_table(self, _):
                                  setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_rule')
 
-    with self.command_group('network lb probe') as g:
-        g.custom_command('create', 'create_lb_probe')
-        g.custom_command('update', 'set_lb_probe')
+    with self.command_group("network lb probe") as g:
+        g.custom_command("create", "create_lb_probe")
+        g.custom_command("update", "update_lb_probe")
 
     with self.command_group('network lb probe', network_util) as g:
         g.command('delete', delete_lb_resource_property_entry('load_balancers', 'probes'))
