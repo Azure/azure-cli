@@ -6933,11 +6933,18 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_monitoring_aad_auth_msi_with_datacollectionsettings(self, resource_group, resource_group_location,):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.create_new_cluster_with_monitoring_aad_auth(resource_group, resource_group_location, aks_name, user_assigned_identity=False, syslog_enabled=False, data_collection_settings=get_test_data_file_path('dataCollectionSettings.json'))
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_with_monitoring_aad_auth_uai_with_syslog(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         self.create_new_cluster_with_monitoring_aad_auth(resource_group, resource_group_location, aks_name, user_assigned_identity=True, syslog_enabled=True)
 
-    def create_new_cluster_with_monitoring_aad_auth(self, resource_group, resource_group_location, aks_name, user_assigned_identity=False, syslog_enabled=False):
+    def create_new_cluster_with_monitoring_aad_auth(self, resource_group, resource_group_location, aks_name, user_assigned_identity=False, syslog_enabled=False, data_collection_settings=None):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
@@ -6962,6 +6969,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--ssh-key-value={ssh_key_value} '
         create_cmd += f'--assign-identity {identity_id} ' if user_assigned_identity else ''
         create_cmd += f'--enable-syslog' if syslog_enabled else ''
+        create_cmd += f'--data-collection-settings {data_collection_settings} ' if data_collection_settings else ''
 
         response = self.cmd(create_cmd, checks=[
             self.check('addonProfiles.omsagent.enabled', True),
@@ -6984,6 +6992,20 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         if syslog_enabled:
             self.cmd(get_cmd, checks=[
                 self.check('properties.dataSources.syslog[0].streams[0]', f'Microsoft-Syslog')
+            ])
+
+        if data_collection_settings:
+             self.cmd(get_cmd, checks=[
+                self.check('properties.dataSources.extensions[0].name', f'ContainerInsightsExtension')
+            ])
+             self.cmd(get_cmd, checks=[
+                self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.interval', f'1m')
+            ])
+             self.cmd(get_cmd, checks=[
+                self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.namespaceFilteringMode', f'Include')
+            ])
+             self.cmd(get_cmd, checks=[
+                self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.namespaces[0]', f'kube-system')
             ])
 
         # check that the DCR-A was created
