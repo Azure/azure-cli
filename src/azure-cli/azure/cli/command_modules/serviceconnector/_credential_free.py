@@ -162,7 +162,7 @@ class MysqlFlexibleHandler(TargetHandler):
                 "Provide '--system-identity mysql-identity-id=xx' to set {} as AAD administrator.".format(self.user))
         mysql_umi = run_cli_cmd(
             'az mysql flexible-server identity list -g {} -s {} --subscription {}'.format(self.resource_group, self.server, self.subscription))
-        if (not mysql_umi) or mysql_identity_id not in mysql_umi.get("userAssignedIdentities"):
+        if (not mysql_umi) or (not mysql_umi.get("userAssignedIdentities"))  or mysql_identity_id not in mysql_umi.get("userAssignedIdentities"):
             run_cli_cmd('az mysql flexible-server identity assign -g {} -s {} --subscription {} --identity {}'.format(
                 self.resource_group, self.server, self.subscription, mysql_identity_id))
         run_cli_cmd('az mysql flexible-server ad-admin create -g {} -s {} --subscription {} -u {} -i {} --identity {}'.format(
