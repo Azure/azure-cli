@@ -171,10 +171,10 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         host_env.kind = 'ASEv3'
         ase_client.get.return_value = host_env
         ase_client.list.return_value = [host_env]
-        ase_networking_conf = AseV3NetworkingConfiguration(allow_new_private_endpoint_connections=False)
+        ase_networking_conf = AseV3NetworkingConfiguration(allow_new_private_endpoint_connections=False, allow_remote_debugging=False, allow_incoming_ftp_connections=False)
         ase_client.get_ase_v3_networking_configuration.return_value = ase_networking_conf
 
-        update_appserviceenvironment(self.mock_cmd, ase_name, allow_new_private_endpoint_connections=True)
+        update_appserviceenvironment(self.mock_cmd, ase_name, allow_new_private_endpoint_connections=True, allow_remote_debugging=True,allow_incoming_ftp_connections=True)
 
         # Assert create_or_update is called with correct properties
         ase_client.update_ase_networking_configuration.assert_called_once_with(resource_group_name=rg_name,
