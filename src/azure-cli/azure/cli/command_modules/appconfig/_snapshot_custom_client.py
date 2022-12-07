@@ -1,13 +1,12 @@
-from azure.appconfiguration import AzureAppConfigurationClient
+from azure.appconfiguration import AzureAppConfigurationClient, _models
 from enum import Enum
-from azure.appconfiguration import _models
 from azure.core.rest import HttpRequest
 from azure.core.utils import case_insensitive_dict
 from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, ResourceNotFoundError, HttpResponseError, map_error
 from azure.core.tracing.decorator import distributed_trace
 from msrest import Serializer
 from typing import Dict, List, Optional, Any
-from _snapshotmodels import Snapshot, SnapshotListResult
+from ._snapshotmodels import Snapshot, SnapshotListResult
 import json
 
 
@@ -52,7 +51,7 @@ def _build_request(
     
     # Construct parameters
     _params["api-version"] = _serializer.query("api_version", api_version, "str")
-   
+        
     # Construct headers
     if sync_token is not None:
         _headers["Sync-Token"] = _serializer.header("sync_token", sync_token, "str")
@@ -87,13 +86,24 @@ def build_get_snapshot_request(
 
 
 def build_list_snapshots_request(
+    name_filter = None,
+    status_filter = None,
     sync_token: Optional[str] = None,
     **kwargs: Any
 ) -> HttpRequest:
+    _params = {}
+    
+    if name_filter:
+        _params['name'] = name_filter
+
+    if status_filter:
+        _params['status'] = status_filter
+    
     return _build_request(
         "/snapshots",
         RequestMethod.GET.value,
         sync_token=sync_token,
+        params=_params,
         **kwargs
     )
 
@@ -187,14 +197,16 @@ def _format_url_section(template, **kwargs):
 class AppConfigSnapshotClient:
 
     def __init__(self, appConfigClient):
-        self.appConfigurationImpl = appConfigClient._impl
+        self.appConfigurationImpl: AzureAppConfiguration = appConfigClient._impl
         self._serializer = self.appConfigurationImpl._serialize
         self._deserializer = self.appConfigurationImpl._deserialize
         self._sync_token = self.appConfigurationImpl._config.sync_token
 
+
     @classmethod
     def from_connection_string(cls, connection_string):
         return cls(AzureAppConfigurationClient.from_connection_string(connection_string))
+
 
     def create_snapshot(self,
                         name: str,
@@ -221,9 +233,12 @@ class AppConfigSnapshotClient:
 
         request = _convert_request(request)
 
-        path_format_arguments = {
-            'endpoint': self._serializer.url("self._config.endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True),
-        }
+        # path_format_arguments = {
+        #     'endpoint': self._serializer.url("self._config.endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True),
+        # }
+
+        serialized_endpoint = self._serializer.url("self._config.endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
+        request.url = serialized_endpoint + request.url
         # request.url = _format_url_section(
         #     http_request.url, **path_format_arguments)
         # stream = kwargs.pop("stream", True)
@@ -259,7 +274,10 @@ class AppConfigSnapshotClient:
 
         request = _convert_request(request)
 
-        response = self.appConfigurationImpl._send_request(request)
+        serialized_endpoint = self._serializer.url("self._config.endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
+        request.url = serialized_endpoint + request.url
+
+        response = self.appConfigurationImpl._client.send_request(request)
 
         if response.status_code not in [200]:
             map_error(status_code=response.status_code, response=response, error_map=_ERROR_MAP)
@@ -270,7 +288,10 @@ class AppConfigSnapshotClient:
 
 
     @distributed_trace
-    def list_snapshots(self, **kwargs: Any):
+    def list_snapshots(self,
+                       name=None,
+                       status=None,
+                       **kwargs: Any):
 
         _headers = kwargs.pop("headers", {}) or {}
 
@@ -279,13 +300,18 @@ class AppConfigSnapshotClient:
         cls = kwargs.pop("cls", None)
 
         request = build_list_snapshots_request(
+            name_filter=name,
+            status_filter=status,
             sync_token=self._sync_token,
             headers=_headers
         )
 
         request = _convert_request(request)
 
-        response = self.appConfigurationImpl._send_request(request)
+        serialized_endpoint = self._serializer.url("self._config.endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
+        request.url = serialized_endpoint + request.url
+
+        response = self.appConfigurationImpl._client.send_request(request)
 
         if response.status_code not in [200]:
             map_error(status_code=response.status_code, response=response, error_map=_ERROR_MAP)
@@ -317,7 +343,10 @@ class AppConfigSnapshotClient:
 
         request = _convert_request(request)
 
-        response = self.appConfigurationImpl._send_request(request)
+        serialized_endpoint = self._serializer.url("self._config.endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
+        request.url = serialized_endpoint + request.url
+
+        response = self.appConfigurationImpl._client.send_request(request)
 
         if response.status_code not in [200]:
             map_error(status_code=response.status_code, response=response, error_map=_ERROR_MAP)
@@ -325,6 +354,7 @@ class AppConfigSnapshotClient:
             raise HttpResponseError(response=response, model=error)
 
         return Snapshot.from_json(json.loads(response.body().decode()))
+
 
     @distributed_trace
     def recover_snapshot(self,
@@ -348,7 +378,10 @@ class AppConfigSnapshotClient:
 
         request = _convert_request(request)
 
-        response =self.appConfigurationImpl._send_request(request)
+        serialized_endpoint = self._serializer.url("self._config.endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
+        request.url = serialized_endpoint + request.url
+
+        response =self.appConfigurationImpl._client.send_request(request)
 
         if response.status_code not in [200]:
             map_error(status_code=response.status_code, response=response, error_map=_ERROR_MAP)
