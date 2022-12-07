@@ -271,6 +271,8 @@ def build_markdown_content(state, test_case, message, line, content):
 def save_pipeline_result(pipeline_result):
     # save pipeline result to file
     # /mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_3.8_latest_1.json
+    filename = os.path.join(azdev_test_result_dir, f'pipeline_result_{python_version}_{profile}_{instance_idx}.json')
+    logger.info(f"save pipeline result to file: {filename}")
     with open(os.path.join(azdev_test_result_dir, f'pipeline_result_{python_version}_{profile}_{instance_idx}.json'), 'w') as f:
         json.dump(pipeline_result, f, indent=4)
 
