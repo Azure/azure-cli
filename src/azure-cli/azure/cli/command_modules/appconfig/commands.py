@@ -135,7 +135,7 @@ def load_command_table(self, _):
 
     with self.command_group('appconfig snapshot', configstore_snapshot_util) as g:
         g.command('create', 'create_snapshot')
-        # g.command('show', 'show_snapshot')
-        # g.command('list', 'list_snapshots')
-        # g.command('archive', 'archive_snapshot')
-        # g.command('recover', 'recover_snapshot')
+        g.command('show', 'show_snapshot')
+        g.command('list', 'list_snapshots')
+        g.command('archive', 'archive_snapshot')
+        g.command('recover', 'recover_snapshot')

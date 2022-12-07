@@ -599,5 +599,57 @@ helps['appconfig snapshot'] = """
 
 helps['appconfig snapshot create'] = """
     type: command
-    short-summary: Create and app configuration snapshot.
+    short-summary: Create an app configuration snapshot.
+    examples:
+        - name: Create a snapshot MySnapshot of all keys starting with 'Test' in configuration store MyAppConfiguration.
+          text:
+            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\"key\":\"Test*\"}'
+        - name: Create a snapshot MySnapshot of all keys starting with 'abc' and a retention period of 5 minutes.
+          text:
+            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\"key\":\"abc*\"}' --retention-period 300
+        - name: Create a snapshot of all keys starting with 'app/' with the label 'dev' as default, and override the key-values with keys with the label 'prod' if they exist.
+          text:
+            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\"key\":\"app/*\", \"label\":\"dev\"}' '{\"key\":\"app/*\", \"label\":\"prod\"}' --composition-type 'group_by_key'
+    """
+
+helps['appconfig snapshot show'] = """
+    type: command
+    short-summary: Show all attributes  of an app configuration snapshot.
+    examples:
+        - name: Show an app configuration snapshot with name MySnapshot in configuration store MyAppConfiguration.
+          text:
+            az appconfig snapshot show -s MySnapshot -n MyAppConfiguration
+    """
+
+helps['appconfig snapshot list'] = """
+    type: command
+    short-summary: List snapshots.
+    examples:
+        - name: List all snapshots with names starting with the prefix 'abc'.
+          text:
+            az appconfig snapshot list -s abc* -n MyAppConfiguration
+        - name: List all archived snapshots.
+          text:
+            az appconfig snapshot list --status archived -n MyAppConfiguration
+        - name: List all provisioning snapshots with names starting with the prefix 'app'.
+          text:
+            az appconfig snapshot list -s app* --status provisioning -n MyAppConfiguration
+    """
+
+helps['appconfig snapshot archive'] = """
+    type: command
+    short-summary: Archive a snapshot.
+    examples:
+        - name: Archive snapshot MySnapshot in configuration store MyAppConfiguration.
+          text:
+            az appconfig snapshot archive -s MySnapshot -n MyAppConfiguration
+    """
+
+helps['appconfig snapshot recover'] = """
+    type: command
+    short-summary: Recover an archived snapshot.
+    examples:
+        - name: Recover snapshot MySnapshot in configuration store MyAppConfiguration.
+          text:
+            az appconfig snapshot recover -s MySnapshot -n MyAppConfiguration
     """
