@@ -315,7 +315,7 @@ def validate_snapshot_filters(namespace):
                 raise InvalidArgumentValueError("At least one filter is required.")
             
         if len(namespace.filters) > 3:
-            raise InvalidArgumentValueError("Too many filters supplied. A maximum of 3 filters required.")
+            raise InvalidArgumentValueError("Too many filters supplied. A maximum of 3 filters allowed.")
 
         filter_parameters = []
         
