@@ -23,10 +23,10 @@ parameters:
   displayName: Run test for specific module
   type: string
   default: ''
-- name: jobDisplayName
-  displayName: Job display name
+- name: jobName
+  displayName: Job name
   type: string
-  default: 'Automation Test'
+  default: 'FullTest'
 
 steps:
   - task: UsePythonVersion@0
@@ -38,7 +38,7 @@ steps:
       set -ev
 
       source env/bin/activate
-      echo jobDisplayName: ${{ parameters.jobDisplayName }}
+      echo jobName: ${{ parameters.jobName }}
       echo pythonVersion: ${{ parameters.pythonVersion }}
       echo profile: ${{ parameters.profile }}
       echo fullTest: ${{ parameters.fullTest }}
@@ -74,7 +74,7 @@ steps:
     env:
       ADO_PULL_REQUEST_LATEST_COMMIT: $(System.PullRequest.TargetBranch)
       PYTHON_VERSION: ${{ parameters.pythonVersion }}
-      JOB_DISPLAY_NAME: ${{ parameters.jobDisplayName }}
+      JOB_NAME: ${{ parameters.jobName }}
   - task: PublishBuildArtifacts@1
     inputs:
       # /mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_3.8_latest_1.json

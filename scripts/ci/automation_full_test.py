@@ -106,8 +106,8 @@ jobs = {
             'azure-cli-testsdk': 20,
         }
 python_version = os.environ.get('PYTHON_VERSION')
-job_display_name = os.environ.get('JOB_DISPLAY_NAME')
-unique_job_name = ' '.join([job_display_name, python_version, profile, str(instance_idx)])
+job_name = os.environ.get('JOB_NAME')
+unique_job_name = ' '.join([job_name, python_version, profile, str(instance_idx)])
 
 
 def run_command(cmd, check_return_code=False):
@@ -197,7 +197,7 @@ def process_test(cmd, azdev_test_result_fp, live_rerun=False):
     return False
 
 
-def build_pipeline_result(job_name, instance_id, python_version, profile):
+def build_pipeline_result():
     '''
 
         |Type|Test Case|Error Message|Line|
@@ -358,7 +358,7 @@ class AutomaticScheduling(object):
                 serial_tests.append(k)
             else:
                 parallel_tests.append(k)
-        pipeline_result = build_pipeline_result(job_display_name, instance_idx, python_version, profile)
+        pipeline_result = build_pipeline_result()
         if serial_tests:
             azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{instance_idx}.serial.xml")
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + serial_tests + \
