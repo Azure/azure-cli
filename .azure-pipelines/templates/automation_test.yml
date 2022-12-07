@@ -23,6 +23,10 @@ parameters:
   displayName: Run test for specific module
   type: string
   default: ''
+- name: jobDisplayName
+  displayName: Job display name
+  type: string
+  default: 'Automation Test'
 
 steps:
   - task: UsePythonVersion@0
@@ -69,3 +73,11 @@ steps:
     displayName: "azdev test"
     env:
       ADO_PULL_REQUEST_LATEST_COMMIT: $(System.PullRequest.TargetBranch)
+      PYTHON_VERSION: $(parameters.pythonVersion)
+      JOB_DISPLAY_NAME: $(parameters.jobDisplayName)
+  - task: PublishBuildArtifacts@1
+    inputs:
+      # /mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_3.8_latest_1.json
+      PathtoPublish: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_$(parameters.pythonVersion)_$(parameters.profile)_$(parameters.instance_idx).txt'
+      ArtifactName: 'test_results'
+      publishLocation: 'Container'

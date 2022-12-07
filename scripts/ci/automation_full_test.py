@@ -5,13 +5,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azdev.utilities import get_path_table
+import json
 import logging
 import os
 import subprocess
 import sys
 import time
 import xml.etree.ElementTree as ET
-from azdev.utilities import get_path_table
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -104,7 +105,8 @@ jobs = {
             'azure-cli-telemetry': 18,
             'azure-cli-testsdk': 20,
         }
-
+python_version = os.environ.get('PYTHON_VERSION')
+job_display_name = os.environ.get('JOB_DISPLAY_NAME')
 
 def run_command(cmd, check_return_code=False):
     error_flag = False
@@ -193,6 +195,83 @@ def process_test(cmd, azdev_test_result_fp, live_rerun=False):
     return False
 
 
+def build_pipeline_result(job_name, instance_id, python_version, profile):
+    '''
+
+        |Type|Test Case|Error Message|Line|
+        |---|---|---|---|
+        |Failed|test_aks_create_and_update_with_http_proxy_config|azure.cli.core.azclierror.InvalidArgumentValueError: C:Codeazure-clisrcazure-cliazureclicommand_modulesacstestslatestdatahttpproxyconfig.json is not valid file, or not accessable.|azure-cli\\src\\azure-cli\\azure\\cli\\command_modules\\acs\\tests\\latest\\test_aks_commands.py:408|
+        -->
+        |Type|Test Case|Error Message|Line|\n|---|---|---|---|\n|Failed|test_aks_create_and_update_with_http_proxy_config|azure.cli.core.azclierror.InvalidArgumentValueError: C:Codeazure-clisrcazure-cliazureclicommand_modulesacstestslatestdatahttpproxyconfig.json is not valid file, or not accessable.|azure-cli\\src\\azure-cli\\azure\\cli\\command_modules\\acs\\tests\\latest\\test_aks_commands.py:408|\n
+    '''
+    selected_modules = get_path_table()['mod']
+    unique_job_name = ' '.join([job_name, python_version, profile, instance_id])
+    pipeline_result = {
+        # "Automation Full Test Python310 Profile Latest instance1"
+        unique_job_name: {
+            "Name": job_name,
+            "Details": [{
+                "PythonVersion": python_version,
+                "Profile": profile,
+                "Modules": []
+            }]
+        }
+    }
+    for k, v in selected_modules.items():
+        pipeline_result['Automation Full Test Python310 Profile Latest instance1']['Details'][0]['Modules'].append({
+            "Module": k,
+            "Status": "Success",
+            "Content": ""
+        })
+    print(json.dumps(pipeline_result, indent=4))
+    return pipeline_result
+
+
+def get_pipeline_result(test_result_fp, pipeline_result):
+    tree = ET.parse(test_result_fp)
+    root = tree.getroot()
+    for testsuite in root:
+        for testcase in testsuite:
+            # Collect failed tests
+            failures = testcase.findall('failure')
+            if failures:
+                # logger.info(f"failed testcase attributes: {testcase.attrib}")
+                state = "Failed"
+                test_case = testcase.attrib['name']
+                # extensiont[2] module[6]
+                class_name = testcase.attrib['classname'].split('.')
+                if class_name[0] == 'azure-cli':
+                    module = testcase.attrib['classname'].split('.')[6]
+                elif class_name[0] == 'azure-cli-extensions':
+                    module = testcase.attrib['classname'].split('.')[2]
+                line = testcase.attrib['file'] + ':' + testcase.attrib['line']
+                # only get first failure
+                for failure in failures:
+                    message = failure.attrib['message']
+                    break
+                for i in pipeline_result['Automation Full Test Python310 Profile Latest instance1']['Details'][0]['Modules']:
+                    if i['Module'] == module:
+                        i['Status'] = 'Failed'
+                        i['Content'] = build_markdown_content(state, test_case, message, line, i['Content'])
+                        break
+    print(json.dumps(pipeline_result, indent=4))
+    return pipeline_result
+
+
+def build_markdown_content(state, test_case, message, line, content):
+    if content == "":
+        content = f'|Type|Test Case|Error Message|Line|\n|---|---|---|---|\n'
+    content += f'|{state}|{test_case}|{message}|{line}|\n'
+    return content
+
+
+def save_pipeline_result(pipeline_result):
+    # save pipeline result to file
+    # /mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_3.8_latest_1.json
+    with open(os.path.join(azdev_test_result_dir, f'pipeline_result_{python_version}_{profile}_{instance_idx}'.json), 'w') as f:
+        json.dump(pipeline_result, f, indent=4)
+
+
 class AutomaticScheduling(object):
 
     def __init__(self):
@@ -274,16 +353,20 @@ class AutomaticScheduling(object):
                 serial_tests.append(k)
             else:
                 parallel_tests.append(k)
+        pipeline_result = build_pipeline_result(job_display_name, instance_idx, python_version, profile)
         if serial_tests:
             azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{instance_idx}.serial.xml")
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + serial_tests + \
                   ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '"--durations=10"']
             serial_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
+            pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result)
         if parallel_tests:
             azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{instance_idx}.parallel.xml")
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + parallel_tests + \
                   ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '"--durations=10"']
             parallel_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
+            pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result)
+            save_pipeline_result(pipeline_result)
         return serial_error_flag or parallel_error_flag
 
 
