@@ -33,7 +33,7 @@ jobs:
       pythonVersion: '$(python.version)'
       profile: '2020-09-01-hybrid'
       fullTest: true
-      JobDisplayName: ${{ System.JobDisplayName }}
+      JobDisplayName: $(System.JobDisplayName)
 
 - job: AutomationTest20190301
   displayName: Automation Test (Profile 2019-03-01)
@@ -105,7 +105,7 @@ jobs:
       instance_cnt: '8'
       instance_idx: '$(Instance_idx)'
       fullTest: true
-      JobDisplayName: ${{ System.JobDisplayName }}
+      JobDisplayName: $(System.JobDisplayName)
 
 - job: AutomationFullTestPython310ProfileLatest
   displayName: Automation Full Test Python310 Profile Latest
