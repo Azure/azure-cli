@@ -293,7 +293,6 @@ class TestAAZField(unittest.TestCase):
             "nullable_additional": None
         })
 
-
     def test_aaz_list_type(self):
         from azure.cli.core.aaz._field_type import AAZObjectType, AAZListType, AAZStrType
         from azure.cli.core.aaz._field_value import AAZObject
@@ -641,6 +640,8 @@ class TestAAZField(unittest.TestCase):
             v.actions[2].logic_app_resource_id = "6666"
         self.assertTrue(v.actions[2].action_configuration.classification._is_patch)
         v.actions[2].action_configuration.classification = "FalsePositive"
+        self.assertEqual(v.actions[2].action_configuration.classification, "FalsePositive")
+        self.assertEqual(v.actions[2].actionConfiguration.classification, "FalsePositive")
 
         self.assertTrue(v.to_serialized_data() == {
             "actions": [
@@ -670,7 +671,7 @@ class TestAAZField(unittest.TestCase):
         })
 
         # change the action_type will disable the access to previous discriminator, event though the data still in _data
-        v.actions[2].action_type = "RunPlaybook"
+        v.actions[2]['actionType'] = "RunPlaybook"
         with self.assertRaises(AAZUnknownFieldError):
             v.actions[2].action_configuration
         self.assertTrue(v.actions[2].logic_app_resource_id._is_patch)
