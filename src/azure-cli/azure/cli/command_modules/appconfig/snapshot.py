@@ -103,7 +103,7 @@ def archive_snapshot(cmd,
     _client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        _client.archive_snapshot(snapshot_name)
+        return _client.archive_snapshot(snapshot_name)
 
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.NOT_FOUND:
@@ -125,7 +125,7 @@ def recover_snapshot(cmd,
     _client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        _client.recover_snapshot(snapshot_name)
+        return _client.recover_snapshot(snapshot_name)
 
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.NOT_FOUND:
