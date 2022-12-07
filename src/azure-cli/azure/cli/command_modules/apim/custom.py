@@ -304,16 +304,16 @@ def apim_api_create(client, resource_group_name, service_name, api_id, descripti
 
     parsed_url = urlparse(service_url)
     if protocols is None:
-        if parsed_url.scheme in ('ws', 'wss'):
-            protocols = ['wss']
+        if parsed_url.scheme in (Protocol.WS.value, Protocol.WSS.value):
+            protocols = [Protocol.WSS.value]
         else:
-            protocols = ['https']
+            protocols = [Protocol.HTTPS.value]
 
     if api_type is None:
-        if parsed_url.scheme in ('ws', 'wss'):
-            api_type = ApiType.websocket.value
+        if parsed_url.scheme in (Protocol.WS.value, Protocol.WSS.value):
+            api_type = ApiType.WEBSOCKET.value
         else:
-            api_type = ApiType.http.value
+            api_type = ApiType.HTTP.value
 
     parameters = ApiContract(
         api_id=api_id,
