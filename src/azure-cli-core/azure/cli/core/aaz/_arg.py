@@ -21,6 +21,7 @@ from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AA
     AAZSubscriptionIdArgFormat, AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat, AAZDateFormat, \
     AAZTimeFormat, AAZDateTimeFormat, AAZDurationFormat
 from .exceptions import AAZUnregisteredArg
+from ._base import has_value
 
 # pylint: disable=redefined-builtin, protected-access, too-few-public-methods
 
@@ -631,9 +632,3 @@ class AAZGenericUpdateRemoveArg(AAZGenericUpdateArg):
             ACTION_NAME = "remove"
         return Action
 
-
-def has_value(arg_value):
-    if isinstance(arg_value, AAZBaseValue):
-        # handle patch value for list, object, dict
-        return arg_value.to_serialized_data() != AAZUndefined
-    return arg_value != AAZUndefined
