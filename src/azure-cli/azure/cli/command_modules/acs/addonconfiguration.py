@@ -612,6 +612,7 @@ def ensure_container_insights_for_monitoring(
             else:
                 raise error
 
+
 def validate_data_collection_settings(dataCollectionSettings):
     if 'interval' in dataCollectionSettings.keys():
         intervalValue = dataCollectionSettings["interval"]
