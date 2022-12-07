@@ -614,7 +614,7 @@ helps['appconfig snapshot create'] = """
 
 helps['appconfig snapshot show'] = """
     type: command
-    short-summary: Show all attributes  of an app configuration snapshot.
+    short-summary: Show all attributes of an app configuration snapshot.
     examples:
         - name: Show an app configuration snapshot with name MySnapshot in configuration store MyAppConfiguration.
           text:
