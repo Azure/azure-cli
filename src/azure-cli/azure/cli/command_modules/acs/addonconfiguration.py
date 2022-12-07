@@ -449,21 +449,7 @@ def ensure_container_insights_for_monitoring(
             extensionSettings = {}
             if data_collection_settings is not None:
                 dataCollectionSettings = _get_data_collection_settings(data_collection_settings)
-                if 'interval' in dataCollectionSettings.keys():
-                    intervalValue = dataCollectionSettings["interval"]
-                if (bool(re.match(r'^[0-9]+[m]$', intervalValue))) is False:
-                    raise InvalidArgumentValueError('interval format must be in <number>m')
-                intervalValue = int(intervalValue.rstrip("m"))
-                if intervalValue <= 0 or intervalValue > 30:
-                    raise InvalidArgumentValueError('interval value MUST be in the range from 1m to 30m')
-                if 'namespaceFilteringMode' in dataCollectionSettings.keys():
-                    namespaceFilteringModeValue = dataCollectionSettings["namespaceFilteringMode"].lower()
-                    if namespaceFilteringModeValue not in ["off", "exclude", "include"]:
-                        raise InvalidArgumentValueError('namespaceFilteringMode value MUST be either Off or Exclude or Include')
-                if 'namespaces' in dataCollectionSettings.keys():
-                    namspaces = dataCollectionSettings["namespaces"]
-                    if isinstance(namspaces, list) is False:
-                        raise InvalidArgumentValueError('namespaces must be an array type')
+                validate_data_collection_settings(dataCollectionSettings)
                 extensionSettings["dataCollectionSettings"] = dataCollectionSettings
             # create the DCR
             dcr_creation_body_without_syslog = json.dumps(
@@ -625,6 +611,23 @@ def ensure_container_insights_for_monitoring(
                     error = e
             else:
                 raise error
+
+def validate_data_collection_settings(dataCollectionSettings):
+    if 'interval' in dataCollectionSettings.keys():
+        intervalValue = dataCollectionSettings["interval"]
+    if (bool(re.match(r'^[0-9]+[m]$', intervalValue))) is False:
+        raise InvalidArgumentValueError('interval format must be in <number>m')
+    intervalValue = int(intervalValue.rstrip("m"))
+    if intervalValue <= 0 or intervalValue > 30:
+        raise InvalidArgumentValueError('interval value MUST be in the range from 1m to 30m')
+    if 'namespaceFilteringMode' in dataCollectionSettings.keys():
+        namespaceFilteringModeValue = dataCollectionSettings["namespaceFilteringMode"].lower()
+        if namespaceFilteringModeValue not in ["off", "exclude", "include"]:
+            raise InvalidArgumentValueError('namespaceFilteringMode value MUST be either Off or Exclude or Include')
+    if 'namespaces' in dataCollectionSettings.keys():
+        namspaces = dataCollectionSettings["namespaces"]
+        if isinstance(namspaces, list) is False:
+            raise InvalidArgumentValueError('namespaces must be an array type')
 
 
 def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
