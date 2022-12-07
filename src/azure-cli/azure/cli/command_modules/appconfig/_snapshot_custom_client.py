@@ -2,7 +2,7 @@ from azure.appconfiguration import AzureAppConfigurationClient, _models
 from enum import Enum
 from azure.core.rest import HttpRequest
 from azure.core.utils import case_insensitive_dict
-from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, ResourceNotFoundError, HttpResponseError, map_error
+from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, ResourceNotFoundError, HttpResponseError, ResourceModifiedError, map_error
 from azure.core.tracing.decorator import distributed_trace
 from msrest import Serializer
 from typing import Dict, List, Optional, Any
@@ -21,7 +21,8 @@ class RequestMethod(Enum):
 _ERROR_MAP = {
             401: ClientAuthenticationError,
             404: ResourceNotFoundError,
-            409: ResourceExistsError
+            409: ResourceExistsError,
+            412: ResourceModifiedError
         }
 
 
@@ -233,18 +234,9 @@ class AppConfigSnapshotClient:
 
         request = _convert_request(request)
 
-        # path_format_arguments = {
-        #     'endpoint': self._serializer.url("self._config.endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True),
-        # }
-
-        serialized_endpoint = self._serializer.url("self._config.endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
+        serialized_endpoint = self._serializer.url("endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
         request.url = serialized_endpoint + request.url
-        # request.url = _format_url_section(
-        #     http_request.url, **path_format_arguments)
-        # stream = kwargs.pop("stream", True)
-        # pipeline_response = self._client._pipeline.run(
-        #     http_request, stream=stream, **kwargs)
-        # return pipeline_response.http_response
+
         response = self.appConfigurationImpl._client.send_request(request)
 
         if response.status_code not in [201]:
@@ -274,7 +266,7 @@ class AppConfigSnapshotClient:
 
         request = _convert_request(request)
 
-        serialized_endpoint = self._serializer.url("self._config.endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
+        serialized_endpoint = self._serializer.url("endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
         request.url = serialized_endpoint + request.url
 
         response = self.appConfigurationImpl._client.send_request(request)
@@ -308,7 +300,7 @@ class AppConfigSnapshotClient:
 
         request = _convert_request(request)
 
-        serialized_endpoint = self._serializer.url("self._config.endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
+        serialized_endpoint = self._serializer.url("endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
         request.url = serialized_endpoint + request.url
 
         response = self.appConfigurationImpl._client.send_request(request)
@@ -343,7 +335,7 @@ class AppConfigSnapshotClient:
 
         request = _convert_request(request)
 
-        serialized_endpoint = self._serializer.url("self._config.endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
+        serialized_endpoint = self._serializer.url("endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
         request.url = serialized_endpoint + request.url
 
         response = self.appConfigurationImpl._client.send_request(request)
@@ -378,7 +370,7 @@ class AppConfigSnapshotClient:
 
         request = _convert_request(request)
 
-        serialized_endpoint = self._serializer.url("self._config.endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
+        serialized_endpoint = self._serializer.url("endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
         request.url = serialized_endpoint + request.url
 
         response =self.appConfigurationImpl._client.send_request(request)
