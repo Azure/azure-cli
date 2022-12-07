@@ -34,7 +34,7 @@ def create_snapshot(cmd,
                     ):
 
     _client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
-    print(filters)
+
     try :
         return _client.create_snapshot(snapshot_name, filters, composition_type, str(retention_period) if retention_period else None, tags)
     
