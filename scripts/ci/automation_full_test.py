@@ -107,6 +107,8 @@ jobs = {
         }
 python_version = os.environ.get('PYTHON_VERSION')
 job_display_name = os.environ.get('JOB_DISPLAY_NAME')
+unique_job_name = ' '.join([job_display_name, python_version, profile, str(instance_idx)])
+
 
 def run_command(cmd, check_return_code=False):
     error_flag = False
@@ -205,7 +207,7 @@ def build_pipeline_result(job_name, instance_id, python_version, profile):
         |Type|Test Case|Error Message|Line|\n|---|---|---|---|\n|Failed|test_aks_create_and_update_with_http_proxy_config|azure.cli.core.azclierror.InvalidArgumentValueError: C:Codeazure-clisrcazure-cliazureclicommand_modulesacstestslatestdatahttpproxyconfig.json is not valid file, or not accessable.|azure-cli\\src\\azure-cli\\azure\\cli\\command_modules\\acs\\tests\\latest\\test_aks_commands.py:408|\n
     '''
     selected_modules = get_path_table()['mod']
-    unique_job_name = ' '.join([job_name, python_version, profile, str(instance_id)])
+
     pipeline_result = {
         # "Automation Full Test Python310 Profile Latest instance1"
         unique_job_name: {
@@ -217,8 +219,9 @@ def build_pipeline_result(job_name, instance_id, python_version, profile):
             }]
         }
     }
+
     for k, v in selected_modules.items():
-        pipeline_result['Automation Full Test Python310 Profile Latest instance1']['Details'][0]['Modules'].append({
+        pipeline_result[unique_job_name]['Details'][0]['Modules'].append({
             "Module": k,
             "Status": "Success",
             "Content": ""
@@ -249,7 +252,7 @@ def get_pipeline_result(test_result_fp, pipeline_result):
                 for failure in failures:
                     message = failure.attrib['message']
                     break
-                for i in pipeline_result['Automation Full Test Python310 Profile Latest instance1']['Details'][0]['Modules']:
+                for i in pipeline_result[unique_job_name]['Details'][0]['Modules']:
                     if i['Module'] == module:
                         i['Status'] = 'Failed'
                         i['Content'] = build_markdown_content(state, test_case, message, line, i['Content'])
