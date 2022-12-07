@@ -4550,7 +4550,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     profile = ImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest,
                                             end_of_life_date=end_of_life_date,
                                             target_regions=target_regions or [TargetRegion(name=location)],
-                                            replica_count=replica_count,storage_account_type=storage_account_type,
+                                            replica_count=replica_count, storage_account_type=storage_account_type,
                                             target_extended_locations=target_edge_zones)
     if replication_mode is not None:
         profile.replication_mode = replication_mode
