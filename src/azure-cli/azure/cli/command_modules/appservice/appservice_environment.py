@@ -143,7 +143,7 @@ https://learn.microsoft.com/azure/app-service/environment/how-to-upgrade-prefere
         raise ValidationError('No upgrade were applied. This version of ASE not support upgrade.')
 
 
-def upgrade_test_notification_appserviceenvironment(cmd, name, resource_group_name=None):
+def send_test_notification_appserviceenvironment(cmd, name, resource_group_name=None):
     ase_client = _get_ase_client_factory(cmd.cli_ctx)
     if resource_group_name is None:
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
