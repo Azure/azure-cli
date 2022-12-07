@@ -2303,13 +2303,13 @@ helps['appservice ase upgrade'] = """
           az appservice ase upgrade -n MyAseV3Name -g MyResourceGroup
 """
 
-helps['appservice ase upgrade-test-notification'] = """
+helps['appservice ase send-test-notification'] = """
     type: command
     short-summary: Send test notifications.
     examples:
     - name: Send test notification about upgrade - app service environment v3.
       text: |
-          az appservice ase upgrade-test-notification -n MyAseV3Name -g MyResourceGroup
+          az appservice ase send-test-notification -n MyAseV3Name -g MyResourceGroup
 """
 
 helps['appservice ase update'] = """
