@@ -382,7 +382,7 @@ class AAZJsonInstanceDeleteOperation(AAZJsonInstanceOperationHelper, AAZOperatio
     def __call__(self, *args, **kwargs):
         raise NotImplementedError()
 
-    def _delete_instance(self, *args, **kwargs):
+    def _delete_instance(self, *args, **kwargs):  # pylint: disable=unused-argument, no-self-use
         return AAZUndefined
 
 

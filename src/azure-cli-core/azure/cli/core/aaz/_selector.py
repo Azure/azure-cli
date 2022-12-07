@@ -26,7 +26,7 @@ class AAZSelectors:
             self._selectors[key] = value
 
 
-class AAZSelector:
+class AAZSelector:  # pylint: disable=too-few-public-methods
 
     def __init__(self, ctx, name):
         self.ctx = ctx
