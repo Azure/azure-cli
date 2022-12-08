@@ -135,7 +135,7 @@ def build_put_snapshot_request(
     name: str,
     filters: List[Dict[str, str]],
     composition_type: str,
-    retention_period: str=None,
+    retention_period: int=None,
     tags: Dict[str, str]=None,
     if_match: Optional[str] = None,
     if_none_match: Optional[str] = None,
@@ -156,9 +156,9 @@ def build_put_snapshot_request(
 
         request_body["composition_type"] = composition_type
 
-    if retention_period:
-        if not retention_period.isdigit():
-            raise ValueError("Retention period value should be numeric.")
+    if retention_period != None:
+        if not isinstance(retention_period, int) or retention_period < 0:
+            raise ValueError("Retention period value should be a non-negative integer value.")
 
         request_body["retention_period"] = retention_period
 
@@ -213,7 +213,7 @@ class AppConfigSnapshotClient:
                         name: str,
                         filters: List[Dict[str, str]],
                         composition_type: str=None,
-                        retention_period: str=None,
+                        retention_period: int=None,
                         tags: Dict[str, str]=None,
                         if_match: Optional[str] = None,
                         if_none_match: Optional[str] = None,

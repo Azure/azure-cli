@@ -36,11 +36,11 @@ def create_snapshot(cmd,
     _client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try :
-        return _client.create_snapshot(snapshot_name, filters, composition_type, str(retention_period) if retention_period else None, tags)
+        return _client.create_snapshot(snapshot_name, filters, composition_type, retention_period, tags)
     
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.CONFLICT:
-            raise AzureResponseError("The snapshot with name {} already exists.".format(snapshot_name))
+            raise AzureResponseError("A snapshot with name '{}' already exists.".format(snapshot_name))
 
         raise AzureResponseError(str(exception))
     
