@@ -35,19 +35,18 @@ def load_arguments_sb(self, _):
         c.argument('namespace_name', id_part='name', arg_type=name_type, completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='Name of Namespace')
         c.argument('tags', arg_type=tags_type)
         c.argument('sku', arg_type=get_enum_type(SkuName), help='Namespace SKU.')
+        c.argument('tier', arg_type=get_enum_type(SkuName), help='The billing tier of this particular SKU.')
         c.argument('disable_local_auth', options_list=['--disable-local-auth'], is_preview=True, arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether SAS authentication is enabled/disabled for the Service Bus')
         c.argument('capacity', type=int, choices=[1, 2, 4, 8, 16], help='Number of message units. This property is only applicable to namespaces of Premium SKU', validator=validate_premiumsku_capacity)
-        c.argument('mi_system_assigned', arg_group='Managed Identity',
-                   arg_type=get_three_state_flag(),
+        c.argument('mi_system_assigned', arg_group='Managed Identity',arg_type=get_three_state_flag(),
                    help='Enable System Assigned Identity')
         c.argument('mi_user_assigned', arg_group='Managed Identity', nargs='+', help='List of User Assigned Identity ids.')
         c.argument('encryption_config', action=AlertAddEncryption, nargs='+',
                    help='List of KeyVaultProperties objects.')
-        c.argument('minimum_tls_version',
-                   options_list=['--minimum-tls-version', '--min-tls'], arg_type=get_enum_type(TlsVersion),
+        c.argument('minimum_tls_version', options_list=['--minimum-tls-version', '--min-tls'], arg_type=get_enum_type(TlsVersion),
                    help='The minimum TLS version for the cluster to support, e.g. 1.2')
-
+        #c.argument('type',options_list=['--type'],choices=["None","SystemAssigned","UserAssigned"],arg_type='Identity')
     with self.argument_context('servicebus namespace exists') as c:
         c.argument('name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
 

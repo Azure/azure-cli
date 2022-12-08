@@ -13,6 +13,8 @@ def cf_servicebus(cli_ctx, **_):
 def namespaces_mgmt_client_factory(cli_ctx, _):
     return cf_servicebus(cli_ctx).namespaces
 
+#def cf_Namespace_custom_file(cli_ctx, _):
+#    return cf_servicebus(cli_ctx).namespaces
 
 def queues_mgmt_client_factory(cli_ctx, _):
     return cf_servicebus(cli_ctx).queues

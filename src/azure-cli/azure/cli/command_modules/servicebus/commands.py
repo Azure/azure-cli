@@ -21,10 +21,15 @@ def load_command_table(self, _):
                                                                       private_endpoint_connections_mgmt_client_factory,
                                                                       private_link_mgmt_client_factory)
 
+    #from ._exception_handler import exception_handler
     sb_namespace_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicebus.operations#NamespacesOperations.{}',
         client_factory=namespaces_mgmt_client_factory,
         resource_type=ResourceType.MGMT_SERVICEBUS)
+
+    sb_namespace_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.servicebus.Operation.Namespace_custom_file#{}',
+    )
 
     sb_queue_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicebus.operations#QueuesOperations.{}',
@@ -69,10 +74,15 @@ def load_command_table(self, _):
     from ._validators import validate_subnet
 
 # Namespace Region
+    from azure.cli.command_modules.servicebus.Operation.Namespace_custom_file import create_servicebus_namespace
+    with self.command_group('servicebus namespace', custom_command_type=sb_namespace_custom,
+                            is_preview=True) as g:
+        g.custom_command('create', 'create_servicebus_namespace', supports_no_wait=True)
+
     custom_tmpl = 'azure.cli.command_modules.servicebus.custom#{}'
     servicebus_custom = CliCommandType(operations_tmpl=custom_tmpl)
     with self.command_group('servicebus namespace', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, min_api='2021-06-01-preview') as g:
-        g.custom_command('create', 'cli_namespace_create')
+        #g.custom_command('create', 'cli_namespace_create')
         g.show_command('show', 'get')
         g.custom_command('list', 'cli_namespace_list')
         g.command('delete', 'begin_delete')
