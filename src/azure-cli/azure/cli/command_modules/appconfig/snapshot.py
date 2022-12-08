@@ -4,13 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long, too-many-statements, too-many-locals, too-many-branches
+from azure.cli.core.azclierror import CLIError, AzureResponseError, ResourceNotFoundError
+from azure.core.exceptions import HttpResponseError
 
 from ._constants import StatusCodes, SearchFilterOptions
 from ._snapshot_custom_client import AppConfigSnapshotClient
 from ._utils import get_appconfig_data_client
-from azure.cli.core.azclierror import CLIError, AzureResponseError, ResourceNotFoundError
-from azure.core.exceptions import HttpResponseError
-
 
 def _get_snapshot_client(cmd,
                          name,

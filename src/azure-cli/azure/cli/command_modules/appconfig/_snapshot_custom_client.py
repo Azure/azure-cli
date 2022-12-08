@@ -6,9 +6,9 @@ from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError
 from azure.core.tracing.decorator import distributed_trace
 from msrest import Serializer
 from typing import Dict, List, Optional, Any
-from ._snapshotmodels import Snapshot, SnapshotListResult
 import json
 
+from ._snapshotmodels import Snapshot, SnapshotListResult
 
 
 class RequestMethod(Enum):
