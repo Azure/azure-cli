@@ -33,6 +33,9 @@ class AAZSimpleType(AAZBaseType):
                 return None
             return AAZValuePatch.build(self)
 
+        if data == AAZUndefined:
+            return AAZValuePatch.build(self)
+
         if isinstance(data, AAZSimpleValue):
             if data._is_patch:
                 # return value patch
@@ -65,6 +68,9 @@ class AAZFloatType(AAZSimpleType):
             # data can be None or AAZSimpleValue == None
             if self._nullable:
                 return None
+            return AAZValuePatch.build(self)
+
+        if data == AAZUndefined:
             return AAZValuePatch.build(self)
 
         if isinstance(data, AAZSimpleValue):
@@ -179,6 +185,9 @@ class AAZObjectType(AAZBaseType):
                 return None
             return AAZValuePatch.build(self)
 
+        if data == AAZUndefined:
+            return AAZValuePatch.build(self)
+
         if isinstance(data, AAZObject) and data._is_patch:
             # use value patch
             result = AAZValuePatch.build(self)
@@ -270,6 +279,9 @@ class AAZBaseDictType(AAZBaseType):
             # data can be None or AAZSimpleValue == None
             if self._nullable:
                 return None
+            return AAZValuePatch.build(self)
+
+        if data == AAZUndefined:
             return AAZValuePatch.build(self)
 
         if isinstance(data, self._ValueCls) and data._is_patch:
@@ -364,6 +376,9 @@ class AAZListType(AAZBaseType):
             # data can be None or AAZSimpleValue == None
             if self._nullable:
                 return None
+            return AAZValuePatch.build(self)
+
+        if data == AAZUndefined:
             return AAZValuePatch.build(self)
 
         if isinstance(data, AAZList) and data._is_patch:
