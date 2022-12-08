@@ -115,13 +115,13 @@ examples:
 
       # add testIdentity as an access policy with key permissions 'Wrap Key', 'Unwrap Key', 'Get' and 'List' inside testVault
 
-      az keyvault set-policy -g testGroup -n testVault --object-id '<principalID of testIdentity>' --key-permissions wrapKey unwrapKey get list
+      az keyvault set-policy -g testGroup -n testVault --object-id "<principalID of testIdentity>" --key-permissions wrapKey unwrapKey get list
 
 
       # create flexible server with data encryption enabled
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation \\
-        --key '<key identifier of testKey>' --identity testIdentity
+        --key "<key identifier of testKey>" --identity testIdentity
 """
 
 helps['postgres flexible-server show'] = """
