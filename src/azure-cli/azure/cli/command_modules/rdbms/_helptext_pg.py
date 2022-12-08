@@ -157,7 +157,7 @@ examples:
   - name: Change key/identity for data encryption. Data encryption cannot be enabled post server creation, this will only update the key/identity.
     text: >
       az postgres flexible-server update --resource-group testGroup --name testserver \\
-        --key '<key identifier of newKey>' --identity newIdentity
+        --key "<key identifier of newKey>" --identity newIdentity
 """
 
 helps['postgres flexible-server restore'] = """
