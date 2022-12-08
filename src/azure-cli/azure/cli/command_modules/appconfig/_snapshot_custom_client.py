@@ -287,10 +287,6 @@ class AppConfigSnapshotClient:
 
         _headers = kwargs.pop("headers", {}) or {}
 
-
-# TODO: Add deserialization
-        cls = kwargs.pop("cls", None)
-
         request = build_list_snapshots_request(
             name_filter=name,
             status_filter=status,
@@ -320,9 +316,6 @@ class AppConfigSnapshotClient:
                          if_none_match: Optional[str] = None,
                          **kwargs: Any):
         _headers = kwargs.pop("headers", {}) or {}
-
-# TODO: Add deserialization
-        cls = kwargs.pop("cls", None)
 
         request = build_status_update_request(
             name=name,
@@ -355,9 +348,6 @@ class AppConfigSnapshotClient:
                          if_none_match: Optional[str] = None,
                          **kwargs: Any):
         _headers = kwargs.pop("headers", {}) or {}
-
-# TODO: Add deserialization
-        cls = kwargs.pop("cls", None)
 
         request = build_status_update_request(
             name=name,
