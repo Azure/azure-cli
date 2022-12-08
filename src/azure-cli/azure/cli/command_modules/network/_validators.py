@@ -442,8 +442,7 @@ def validate_inbound_nat_rule_name_or_id(cmd, namespace):
 
 def validate_ip_tags(cmd, namespace):
     ''' Extracts multiple space-separated tags in TYPE=VALUE format '''
-    IpTag = cmd.get_models('IpTag')
-    if namespace.ip_tags and IpTag:
+    if namespace.ip_tags:
         ip_tags = []
         for item in namespace.ip_tags:
             tag_type, tag_value = item.split('=', 1)

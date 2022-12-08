@@ -32,6 +32,8 @@ from .aaz.latest.network.express_route.gateway.connection import Create as _Expr
 from .aaz.latest.network.express_route.peering import Create as _ExpressRoutePeeringCreate, \
     Update as _ExpressRoutePeeringUpdate
 from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCreate
+from .aaz.latest.network.public_ip import Create as _PublicIpCreate
+from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
 
 import threading
 import time
@@ -39,6 +41,8 @@ import platform
 import subprocess
 import tempfile
 import requests
+
+
 
 logger = get_logger(__name__)
 
@@ -6601,11 +6605,12 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         public_ip_args["public_ip_prefix"] = public_ip_prefix
 
         # reuse prefix information
-        pip_client = network_client_factory(cmd.cli_ctx).public_ip_prefixes
-        pip_obj = pip_client.get(resource_group_name, public_ip_prefix_name)
-        version = pip_obj.public_ip_address_version
-        sku, tier = pip_obj.sku.name, pip_obj.sku.tier
-        zone = pip_obj.zones
+        from .aaz.latest.network.public_ip.prefix import Show
+        pip_obj = Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': public_ip_prefix_name})
+        version = pip_obj['publicIPAddressVersion']
+        sku = pip_obj['sku']['name']
+        tier = pip_obj['sku']['tier']
+        zone = pip_obj['zones'] if 'zones' in pip_obj else None
 
     if sku is None:
         logger.warning(
@@ -6641,6 +6646,34 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
 
     from .aaz.latest.network.public_ip import Create
     return Create(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
+
+
+class PublicIpPrefixCreate(_PublicIpPrefixCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.custom_ip_prefix_name = AAZResourceIdArg(
+            options=['--custom-ip-prefix-name'],
+            help="A custom prefix from which the public prefix derived. If you'd like to cross subscription, please use Resource ID instead.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/customIPPrefixes/{}"
+            )
+        )
+        args_schema.custom_ip_prefix._registered = False
+        args_schema.type._registered = False
+        args_schema.sku._registered = False
+
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.sku = {'name': 'Standard'}
+        if has_value(args.edge_zone):
+            args.type = 'EdgeZone'
+        if has_value(args.custom_ip_prefix_name):
+            args.custom_ip_prefix = {'id': args.custom_ip_prefix_name}
 
 
 def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,

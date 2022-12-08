@@ -946,11 +946,13 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
 
     with self.command_group('network public-ip prefix', network_public_ip_prefix_sdk, client_factory=cf_public_ip_prefixes) as g:
-        g.custom_command('create', 'create_public_ip_prefix')
-        g.command('delete', 'begin_delete')
-        g.custom_command('list', 'list_public_ip_prefixes')
-        g.show_command('show')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_public_ip_prefix')
+        from azure.cli.command_modules.network.custom import PublicIpPrefixCreate
+        self.command_table['network public-ip prefix create'] = PublicIpPrefixCreate(loader=self)
+        # g.custom_command('create', 'create_public_ip_prefix')
+        # g.command('delete', 'begin_delete')
+        # g.custom_command('list', 'list_public_ip_prefixes')
+        # g.show_command('show')
+        # g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_public_ip_prefix')
 
     # endregion
 

@@ -614,13 +614,13 @@ class NetworkPublicIpPrefix(ScenarioTest):
 
         # Check the default ip address version value
         self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv4} --length 30', checks=[
-            self.check('publicIpAddressVersion', 'IPv4')
+            self.check('publicIPAddressVersion', 'IPv4')
         ])
 
         # Check the creation of public IP prefix with IPv6 address option
         # Note: prefix length for IPv6 is minimal 124 and maximal 127 respectively
         self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv6} --length 127 --version IPv6', checks=[
-            self.check('publicIpAddressVersion', 'IPv6')
+            self.check('publicIPAddressVersion', 'IPv6')
         ])
 
         # Check with unsupported IP address version: IPv5
@@ -647,7 +647,7 @@ class NetworkPublicIpPrefix(ScenarioTest):
         })
 
         ip_prefix = self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv4} --length 28', checks=[
-            self.check('publicIpAddressVersion', 'IPv4')
+            self.check('publicIPAddressVersion', 'IPv4')
         ]).get_output_in_json()
 
         ip_address = ip_prefix['ipPrefix'][:-3]
