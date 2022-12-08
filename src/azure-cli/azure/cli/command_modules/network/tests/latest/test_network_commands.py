@@ -6230,7 +6230,6 @@ class NetworkExtendedLocation(ScenarioTest):
             'vnet': 'vnet',
             'gateway_type' : 'LocalGateway',
             'edge_name': 'microsoftrrdclab3',
-            'edge_zone_vnet_id' : 'edge_zone_vnet_id'
         })
         self.cmd('az network vnet create -g {rg} -n {vnet} --location eastus2euap --address-prefix 10.30.0.0/16 --edge-zone {edge_name}')
         self.kwargs['edge_zone_vnet_id'] = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()['id']
