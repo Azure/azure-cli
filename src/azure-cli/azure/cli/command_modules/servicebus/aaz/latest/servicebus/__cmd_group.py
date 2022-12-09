@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "servicebus",
 )
 class __CMDGroup(AAZCommandGroup):
-    """dfsd
+    """Servicebus NamespaceV2
     """
     pass
 

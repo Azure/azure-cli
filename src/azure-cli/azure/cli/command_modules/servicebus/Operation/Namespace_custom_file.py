@@ -64,7 +64,7 @@ def update_servicebus_namespace(cmd, resource_group_name, namespace_name, locati
         "capacity": capacity,
         "tier":tier,
         "minimum_tls_version": minimum_tls_version,
-        "encryption_config":encryption_config,
+        "key_vault_properties":encryption_config,
         "location":location,
         "user_assigned_identity": user_assigned,
         "identity_type":a,

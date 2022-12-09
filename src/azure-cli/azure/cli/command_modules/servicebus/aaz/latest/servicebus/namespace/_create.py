@@ -55,8 +55,8 @@ class Create(AAZCommand):
         # define Arg Group "Encryption"
 
         _args_schema = cls._args_schema
-        _args_schema.encryption_config = AAZListArg(
-            options=["--encryption-config"],
+        _args_schema.key_vault_properties = AAZListArg(
+            options=["--key-vault-properties"],
             arg_group="Encryption",
             help="Properties of KeyVault",
         )
@@ -66,10 +66,10 @@ class Create(AAZCommand):
             help="Enable Infrastructure Encryption (Double Encryption)",
         )
 
-        encryption_config = cls._args_schema.encryption_config
-        encryption_config.Element = AAZObjectArg()
+        key_vault_properties = cls._args_schema.key_vault_properties
+        key_vault_properties.Element = AAZObjectArg()
 
-        _element = cls._args_schema.encryption_config.Element
+        _element = cls._args_schema.key_vault_properties.Element
         _element.user_assigned_identity = AAZStrArg(
             options=["user-assigned-identity"],
             help="ARM ID of user Identity selected for encryption",
@@ -111,7 +111,6 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.location = AAZResourceLocationArg(
-            options=["--location"],
             arg_group="Parameters",
             help="The Geo-location where the resource lives",
             required=True,
@@ -355,7 +354,7 @@ class Create(AAZCommand):
 
             encryption = _builder.get(".properties.encryption")
             if encryption is not None:
-                encryption.set_prop("keyVaultProperties", AAZListType, ".encryption_config")
+                encryption.set_prop("keyVaultProperties", AAZListType, ".key_vault_properties")
                 encryption.set_prop("requireInfrastructureEncryption", AAZBoolType, ".require_infrastructure_encryption")
 
             key_vault_properties = _builder.get(".properties.encryption.keyVaultProperties")
