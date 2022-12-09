@@ -141,7 +141,7 @@ def upgrade_appserviceenvironment(cmd, name, resource_group_name=None, no_wait=F
             raise ValidationError('Upgrade preference in ASEv3 must be set to manual, please check \
 https://learn.microsoft.com/azure/app-service/environment/how-to-upgrade-preference for more information.')
     else:
-        raise ValidationError('No upgrade were applied. This version of ASE not support upgrade.')
+        raise ValidationError('No upgrade has been applied. This version of ASE not support upgrade.')
 
 
 def send_test_notification_appserviceenvironment(cmd, name, resource_group_name=None):
