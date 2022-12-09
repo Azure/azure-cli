@@ -42,7 +42,6 @@ import tempfile
 import requests
 
 
-
 logger = get_logger(__name__)
 
 
