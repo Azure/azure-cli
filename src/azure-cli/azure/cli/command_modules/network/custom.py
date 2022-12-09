@@ -32,7 +32,6 @@ from .aaz.latest.network.express_route.gateway.connection import Create as _Expr
 from .aaz.latest.network.express_route.peering import Create as _ExpressRoutePeeringCreate, \
     Update as _ExpressRoutePeeringUpdate
 from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCreate
-from .aaz.latest.network.public_ip import Create as _PublicIpCreate
 from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
 
 import threading
@@ -118,10 +117,6 @@ def list_custom_ip_prefixes(cmd, resource_group_name=None):
 
 def list_public_ips(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'public_ip_addresses', resource_group_name)
-
-
-def list_public_ip_prefixes(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'public_ip_prefixes', resource_group_name)
 
 
 def list_route_tables(cmd, resource_group_name=None):
@@ -6674,46 +6669,6 @@ class PublicIpPrefixCreate(_PublicIpPrefixCreate):
             args.type = 'EdgeZone'
         if has_value(args.custom_ip_prefix_name):
             args.custom_ip_prefix = {'id': args.custom_ip_prefix_name}
-
-
-def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
-                            version=None, location=None, tags=None, zone=None, edge_zone=None,
-                            custom_ip_prefix_name=None):
-    PublicIPPrefix, PublicIPPrefixSku, SubResource = cmd.get_models('PublicIPPrefix', 'PublicIPPrefixSku', 'SubResource')
-    prefix = PublicIPPrefix(
-        location=location,
-        prefix_length=prefix_length,
-        sku=PublicIPPrefixSku(name='Standard'),
-        tags=tags,
-        zones=zone
-    )
-
-    if cmd.supported_api_version(min_api='2019-08-01'):
-        prefix.public_ip_address_version = version if version is not None else 'ipv4'
-
-    if cmd.supported_api_version(min_api='2020-06-01') and custom_ip_prefix_name:
-        # support cross-subscription
-        if is_valid_resource_id(custom_ip_prefix_name):
-            custom_ip_prefix_id = custom_ip_prefix_name
-        else:
-            custom_ip_prefix_id = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=resource_group_name,
-                namespace='Microsoft.Network',
-                type='customIPPrefixes',
-                name=custom_ip_prefix_name
-            )
-        prefix.custom_ip_prefix = SubResource(id=custom_ip_prefix_id)
-
-    if edge_zone:
-        prefix.extended_location = _edge_zone_model(cmd, edge_zone)
-    return client.begin_create_or_update(resource_group_name, public_ip_prefix_name, prefix)
-
-
-def update_public_ip_prefix(instance, tags=None):
-    if tags is not None:
-        instance.tags = tags
-    return instance
 # endregion
 
 
