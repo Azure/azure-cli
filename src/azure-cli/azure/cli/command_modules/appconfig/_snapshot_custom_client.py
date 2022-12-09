@@ -1,15 +1,20 @@
-from azure.appconfiguration import AzureAppConfigurationClient, _models
+from azure.appconfiguration import AzureAppConfigurationClient
+from azure.appconfiguration._generated.models import Error as AppConfigError
 from enum import Enum
 from azure.core.rest import HttpRequest
 from azure.core.utils import case_insensitive_dict
 from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, ResourceNotFoundError, HttpResponseError, ResourceModifiedError, map_error
-from azure.core.tracing.decorator import distributed_trace
 from msrest import Serializer
 from typing import Dict, List, Optional, Any
 import json
 
 from ._snapshotmodels import Snapshot, SnapshotListResult
 
+class ProvisioningStatus(Enum):
+    PROVISIONING = "provisioning"
+    READY = "ready"
+    ARCHIVED = "archived"
+    FAILED = "failed"
 
 class RequestMethod(Enum):
     GET = "GET"
@@ -209,6 +214,56 @@ class AppConfigSnapshotClient:
         return cls(AzureAppConfigurationClient.from_connection_string(connection_string))
 
 
+    def begin_create_snapshot(self,
+                              name: str,
+                              filters: List[Dict[str, str]],
+                              composition_type: str = None,
+                              retention_period: int = None,
+                              tags: Dict[str, str] = None,
+                              if_match: Optional[str] = None,
+                              if_none_match: Optional[str] = None,
+                              **kwargs: Any):
+        """
+        Poll after a given interval (default 5s) to ensure that the snapshot is in 'ready' status. 
+        The request times out after 30s by default unless specified otherwise.
+        """
+        timeout = kwargs.pop("timeout", 30)
+        polling_interval = kwargs.pop("polling_interval", 5)
+
+        from datetime import datetime
+
+        def _get_elapsed_time(start_time: datetime):
+            return (datetime.now() - start_time).total_seconds()
+
+        print("Starting...")
+        current_state = self.create_snapshot(
+            name,
+            filters,
+            composition_type,
+            retention_period,
+            tags,
+            if_match=if_match,
+            if_none_match=if_none_match,
+            **kwargs
+        )
+
+        print("Provisioning...")
+
+        import time
+        start_time = datetime.now()
+        while current_state.status == ProvisioningStatus.PROVISIONING.value:
+            if _get_elapsed_time(start_time) > timeout:
+                raise TimeoutError("The create request timed out.")
+            
+            time.sleep(polling_interval)
+            current_state = self.get_snapshot(name)
+
+        if current_state.status == ProvisioningStatus.READY.value:
+            return current_state
+
+        raise HttpResponseError('Snapshot creation failed with status code: {}'.format(current_state.status_code))
+
+
     def create_snapshot(self,
                         name: str,
                         filters: List[Dict[str, str]],
@@ -242,7 +297,7 @@ class AppConfigSnapshotClient:
         if response.status_code not in [201]:
             map_error(status_code=response.status_code,
                       response=response, error_map=_ERROR_MAP)
-            error = self._deserializer.failsafe_deserialize(_models.Error, response)
+            error = self._deserializer.failsafe_deserialize(AppConfigError, response)
             raise HttpResponseError(response=response, model=error)
 
         return Snapshot.from_json(json.loads(response.body().decode()))
@@ -273,13 +328,13 @@ class AppConfigSnapshotClient:
 
         if response.status_code not in [200]:
             map_error(status_code=response.status_code, response=response, error_map=_ERROR_MAP)
-            error = self._deserializer.failsafe_deserialize(_models.Error, response)
+            error = self._deserializer.failsafe_deserialize(AppConfigError, response)
             raise HttpResponseError(response=response, model=error)
 
         return Snapshot.from_json(json.loads(response.body().decode()))
+            
 
 
-    @distributed_trace
     def list_snapshots(self,
                        name=None,
                        status=None,
@@ -303,13 +358,12 @@ class AppConfigSnapshotClient:
 
         if response.status_code not in [200]:
             map_error(status_code=response.status_code, response=response, error_map=_ERROR_MAP)
-            error = self._deserializer.failsafe_deserialize(_models.Error, response)
+            error = self._deserializer.failsafe_deserialize(AppConfigError, response)
             raise HttpResponseError(response=response, model=error)
 
         return SnapshotListResult.from_json(json.loads(response.body().decode()))
 
 
-    @distributed_trace
     def archive_snapshot(self,
                          name: str,
                          if_match: Optional[str] = None,
@@ -335,13 +389,12 @@ class AppConfigSnapshotClient:
 
         if response.status_code not in [200]:
             map_error(status_code=response.status_code, response=response, error_map=_ERROR_MAP)
-            error = self._deserializer.failsafe_deserialize(_models.Error, response)
+            error = self._deserializer.failsafe_deserialize(AppConfigError, response)
             raise HttpResponseError(response=response, model=error)
 
         return Snapshot.from_json(json.loads(response.body().decode()))
 
 
-    @distributed_trace
     def recover_snapshot(self,
                          name: str,
                          if_match: Optional[str] = None,
@@ -367,7 +420,7 @@ class AppConfigSnapshotClient:
 
         if response.status_code not in [200]:
             map_error(status_code=response.status_code, response=response, error_map=_ERROR_MAP)
-            error = self._deserializer.failsafe_deserialize(_models.Error, response)
+            error = self._deserializer.failsafe_deserialize(AppConfigError, response)
             raise HttpResponseError(response=response, model=error)
 
         return Snapshot.from_json(json.loads(response.body().decode()))

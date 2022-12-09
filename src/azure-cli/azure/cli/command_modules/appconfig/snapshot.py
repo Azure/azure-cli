@@ -35,7 +35,7 @@ def create_snapshot(cmd,
     _client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try :
-        return _client.create_snapshot(snapshot_name, filters, composition_type, retention_period, tags)
+        return _client.begin_create_snapshot(snapshot_name, filters, composition_type, retention_period, tags)
     
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.CONFLICT:
