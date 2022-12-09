@@ -107,6 +107,8 @@ def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_
     if ase_def.kind.lower() == 'asev3':
         ase_networking_conf = ase_client.get_ase_v3_networking_configuration(resource_group_name, name)
         config_update = False
+        if front_end_scale_factor is not None or front_end_sku is not None:
+            raise ValidationError('No updates were applied. The version of ASE may not be applicable to this update.')
         if allow_remote_debugging is not None or allow_incoming_ftp_connections is not None \
            or allow_new_private_endpoint_connections is not None:
             if ase_networking_conf.remote_debug_enabled != allow_remote_debugging:
@@ -123,6 +125,8 @@ def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_
                                                                   name=name,
                                                                   ase_networking_configuration=ase_networking_conf)
     elif ase_def.kind.lower() == 'asev2':
+        if allow_new_private_endpoint_connections is not None or allow_incoming_ftp_connections is not None or allow_remote_debugging is not None:
+            raise ValidationError('No updates were applied. The version of ASE may not be applicable to this update.')
         if front_end_scale_factor is not None or front_end_sku is not None:
             worker_sku = _map_worker_sku(front_end_sku)
             ase_def.internal_load_balancing_mode = None  # Workaround issue with flag enums in Swagger
@@ -133,7 +137,7 @@ def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_
 
             return sdk_no_wait(no_wait, ase_client.begin_create_or_update, resource_group_name=resource_group_name,
                                name=name, hosting_environment_envelope=ase_def)
-    logger.warning('No updates were applied. The version of ASE may not be applicable to this update.')
+    raise ValidationError('No updates were applied. The version of ASE may not be applicable to this update.')
 
 
 def list_appserviceenvironment_addresses(cmd, name, resource_group_name=None):

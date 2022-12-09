@@ -146,6 +146,10 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
 
         update_appserviceenvironment(self.mock_cmd, ase_name, front_end_scale_factor=10)
 
+        # Assert that ValidationError raised when called with not supported parameters
+        with self.assertRaises(ValidationError):
+            update_appserviceenvironment(self.mock_cmd, ase_name, allow_new_private_endpoint_connections=True, allow_remote_debugging=True,allow_incoming_ftp_connections=True)
+
         # Assert create_or_update is called with correct properties
         assert_host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
         assert_host_env.name = ase_name
@@ -175,6 +179,10 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         ase_client.get_ase_v3_networking_configuration.return_value = ase_networking_conf
 
         update_appserviceenvironment(self.mock_cmd, ase_name, allow_new_private_endpoint_connections=True, allow_remote_debugging=True,allow_incoming_ftp_connections=True)
+
+        # assert that ValidationError raised when called with not supported parameters
+        with self.assertRaises(ValidationError):
+            update_appserviceenvironment(self.mock_cmd, ase_name, front_end_scale_factor=10)
 
         # Assert create_or_update is called with correct properties
         ase_client.update_ase_networking_configuration.assert_called_once_with(resource_group_name=rg_name,
