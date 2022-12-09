@@ -198,7 +198,7 @@ def _format_url_section(template, **kwargs):
 class AppConfigSnapshotClient:
 
     def __init__(self, appConfigClient):
-        self.appConfigurationImpl: AzureAppConfiguration = appConfigClient._impl
+        self.appConfigurationImpl = appConfigClient._impl
         self._serializer = self.appConfigurationImpl._serialize
         self._deserializer = self.appConfigurationImpl._deserialize
         self._sync_token = self.appConfigurationImpl._config.sync_token
