@@ -2296,7 +2296,7 @@ helps['appservice ase create-inbound-services'] = """
 
 helps['appservice ase upgrade'] = """
     type: command
-    short-summary: Upgrade app service environment.
+    short-summary: Upgrade app service environment v3.
     examples:
     - name: Upgrade app service environment v3.
       text: |
@@ -2305,9 +2305,9 @@ helps['appservice ase upgrade'] = """
 
 helps['appservice ase send-test-notification'] = """
     type: command
-    short-summary: Send test notifications.
+    short-summary: Send a test upgrade notification in app service environment v3.
     examples:
-    - name: Send test notification about upgrade - app service environment v3.
+    - name: Send a test upgrade notification in app service environment v3.
       text: |
           az appservice ase send-test-notification -n MyAseV3Name -g MyResourceGroup
 """
