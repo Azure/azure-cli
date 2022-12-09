@@ -82,7 +82,7 @@ class Snapshot(Model):
         self.etag = etag
         self.composition_type = composition_type
         self.created = created.isoformat() if isinstance(created, datetime) else str(created)
-        self.expires = expires.isoformat() if isinstance(expires, datetime) else str(expires)
+        self.expires = expires.isoformat() if isinstance(expires, datetime) else (str(expires) if expires else None)
         self.size = size
         self.items_count = items_count
         self.tags = tags
