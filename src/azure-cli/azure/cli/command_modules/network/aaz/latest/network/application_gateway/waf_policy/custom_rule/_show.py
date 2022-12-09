@@ -94,7 +94,8 @@ class Show(AAZCommand):
                 lambda e: e[1].name == self.ctx.args.name,
                 filters
             )
-            return result[next(filters, [len(result)])[0]]
+            idx = next(filters)[0]
+            return result[idx]
 
         def _set(self, value):
             result = self.ctx.vars.instance
@@ -104,7 +105,8 @@ class Show(AAZCommand):
                 lambda e: e[1].name == self.ctx.args.name,
                 filters
             )
-            result[next(filters, [len(result)])[0]] = value
+            idx = next(filters, [len(result)])[0]
+            result[idx] = value
             return
 
     class WebApplicationFirewallPoliciesGet(AAZHttpOperation):

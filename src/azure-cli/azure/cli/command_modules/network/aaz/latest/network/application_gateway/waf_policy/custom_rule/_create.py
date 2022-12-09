@@ -104,7 +104,7 @@ class Create(AAZCommand):
         )
         _element.match_variables = AAZListArg(
             options=["match-variables"],
-            help="List of match variables.",
+            help="Space-separated list of variables to use when matching. Variable values: RemoteAddr, RequestMethod, QueryString, PostArgs, RequestUri, RequestHeaders, RequestBody, RequestCookies.",
             required=True,
         )
         _element.negation_conditon = AAZBoolArg(
@@ -113,13 +113,13 @@ class Create(AAZCommand):
         )
         _element.operator = AAZStrArg(
             options=["operator"],
-            help="The operator to be matched.",
+            help="Operator for matching.",
             required=True,
             enum={"Any": "Any", "BeginsWith": "BeginsWith", "Contains": "Contains", "EndsWith": "EndsWith", "Equal": "Equal", "GeoMatch": "GeoMatch", "GreaterThan": "GreaterThan", "GreaterThanOrEqual": "GreaterThanOrEqual", "IPMatch": "IPMatch", "LessThan": "LessThan", "LessThanOrEqual": "LessThanOrEqual", "Regex": "Regex"},
         )
         _element.transforms = AAZListArg(
             options=["transforms"],
-            help="List of transforms.",
+            help="Space-separated list of transforms to apply when matching. Allowed values: HtmlEntityDecode, Uppercase, Lowercase, RemoveNulls, Trim, UrlDecode, UrlEncode.",
         )
 
         match_values = cls._args_schema.match_conditions.Element.match_values
@@ -175,7 +175,8 @@ class Create(AAZCommand):
                 lambda e: e[1].name == self.ctx.args.name,
                 filters
             )
-            return result[next(filters, [len(result)])[0]]
+            idx = next(filters)[0]
+            return result[idx]
 
         def _set(self, value):
             result = self.ctx.vars.instance
@@ -185,7 +186,8 @@ class Create(AAZCommand):
                 lambda e: e[1].name == self.ctx.args.name,
                 filters
             )
-            result[next(filters, [len(result)])[0]] = value
+            idx = next(filters, [len(result)])[0]
+            result[idx] = value
             return
 
     class WebApplicationFirewallPoliciesGet(AAZHttpOperation):
