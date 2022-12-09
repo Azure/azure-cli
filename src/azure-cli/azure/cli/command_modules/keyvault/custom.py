@@ -569,7 +569,8 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                               bypass=bypass,
                               default_action=default_action,
                               tags=tags,
-                              no_wait=no_wait)
+                              no_wait=no_wait,
+                              public_network_access=public_network_access)
         except ValidationError as ex:
             error_msg = str(ex)
             if 'Parameter \'name\' must conform to the following pattern' in error_msg:
@@ -586,7 +587,8 @@ def create_hsm(cmd, client,
                bypass=None,
                default_action=None,
                tags=None,
-               no_wait=False):  # pylint: disable=unused-argument
+               no_wait=False,
+               public_network_access=None):  # pylint: disable=unused-argument
 
     if not administrators:
         raise CLIError('Please specify --administrators')
@@ -610,7 +612,8 @@ def create_hsm(cmd, client,
                                       enable_purge_protection=enable_purge_protection,
                                       soft_delete_retention_in_days=retention_days,
                                       initial_admin_object_ids=administrators,
-                                      network_acls=_create_network_rule_set(cmd, bypass, default_action))
+                                      network_acls=_create_network_rule_set(cmd, bypass, default_action),
+                                      public_network_access=public_network_access)
     parameters = ManagedHsm(location=location,
                             tags=tags,
                             sku=ManagedHsmSku(name=sku, family='B'),
@@ -849,7 +852,8 @@ def update_hsm(cmd, instance,
                enable_purge_protection=None,
                bypass=None,
                default_action=None,
-               secondary_locations=None):
+               secondary_locations=None,
+               public_network_access=None):
     if enable_purge_protection is not None:
         instance.properties.enable_purge_protection = enable_purge_protection
 
@@ -865,6 +869,10 @@ def update_hsm(cmd, instance,
                 instance.properties.network_acls.bypass = bypass
             if default_action:
                 instance.properties.network_acls.default_action = default_action
+
+    if public_network_access is not None:
+        instance.properties.public_network_access = public_network_access
+
     return instance
 
 
