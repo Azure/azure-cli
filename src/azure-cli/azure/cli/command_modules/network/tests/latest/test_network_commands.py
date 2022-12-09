@@ -2261,7 +2261,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         # create a custom rule
         self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
                  '--policy-name {waf} -n {rule} '
-                 '--priority 50 --action LOG --rule-type MatchRule',
+                 '--priority 50 --action LOG --rule-type MatchRule --match-conditions []',
                  checks=[
                      self.check('priority', 50),
                      self.check('ruleType', 'MatchRule'),

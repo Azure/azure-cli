@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network application-gateway waf-policy delete",
+    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
     """Delete an application gateway WAF policy.
@@ -64,11 +65,11 @@ class Delete(AAZCommand):
         yield self.WebApplicationFirewallPoliciesDelete(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -156,6 +157,10 @@ class Delete(AAZCommand):
 
         def on_204(self, session):
             pass
+
+
+class _DeleteHelper:
+    """Helper class for Delete"""
 
 
 __all__ = ["Delete"]
