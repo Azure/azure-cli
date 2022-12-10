@@ -17,7 +17,7 @@ import json
 
 from ._snapshotmodels import Snapshot, SnapshotListResult
 
-class ProvisioningStatus(Enum):
+class ProvisioningStatus:
     PROVISIONING = "provisioning"
     READY = "ready"
     ARCHIVED = "archived"
@@ -258,14 +258,14 @@ class AppConfigSnapshotClient:
 
         import time
         start_time = datetime.now()
-        while current_state.status == ProvisioningStatus.PROVISIONING.value:
+        while current_state.status == ProvisioningStatus.PROVISIONING:
             if _get_elapsed_time(start_time) > timeout:
                 raise TimeoutError("The create request timed out.")
             
             time.sleep(polling_interval)
             current_state = self.get_snapshot(name)
 
-        if current_state.status == ProvisioningStatus.READY.value:
+        if current_state.status == ProvisioningStatus.READY:
             return current_state
 
         raise HttpResponseError('Snapshot creation failed with status code: {}'.format(current_state.status_code))
