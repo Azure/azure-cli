@@ -16,6 +16,7 @@ from msrest import Serializer
 from typing import Dict, List, Optional, Any
 import json
 
+from ._constants import SnapshotConstants
 from ._snapshotmodels import Snapshot, SnapshotListResult
 
 class ProvisioningStatus:
@@ -52,7 +53,7 @@ def _build_request(
     _headers = case_insensitive_dict(kwargs.pop("headers", {}) or {})
     _params = case_insensitive_dict(kwargs.pop("params", {}) or {})
 
-    api_version = kwargs.pop("api_version", "2022-11-01-preview")  # type: str
+    api_version = kwargs.pop("api_version", SnapshotConstants.API_VERSION)  # type: str
     accept = _headers.pop(
         "Accept", "application/vnd.microsoft.appconfig.keyset+json, application/json, application/problem+json"
     )
