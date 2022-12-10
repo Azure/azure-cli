@@ -2891,6 +2891,105 @@ class AppconfigReplicaLiveScenarioTest(ScenarioTest):
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
 
+class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    @AllowLargeResponse()
+    def test_azconfig_snapshot_mgmt(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='SnapshotStore', length=24)
+        snapshot_name = self.create_random_name(prefix='Snapshot', length=24)
+
+        store_location = 'swedencentral'
+        sku = 'standard'
+
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'snapshot_name': snapshot_name,
+            'rg_loc': store_location,
+            'rg': resource_group,
+            'sku': sku,
+            'retention_days': 1,
+            'enable_purge_protection': False
+        })
+
+        _create_config_store(self, self.kwargs)
+
+        credential_list =  self.cmd('appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'connection_string': credential_list[0]['connectionString']
+        })
+
+        entry_key = "TestKey1"
+        entry_value = "TestValue1"
+        entry_key2 = "TestKey2"
+        entry_value2 = "TestValue2"
+        dev_label = "dev"
+        
+        # Create 2 keys with a common prefix and label "dev"
+        self.kwargs.update({
+            "key": entry_key,
+            "value": entry_value,
+            "label": dev_label
+        })
+
+        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --label {label} -y',
+                 checks=[self.check('key', entry_key),
+                         self.check('value', entry_value),
+                         self.check('label', dev_label)])
+
+        self.kwargs.update({
+            'key': entry_key2,
+            'value': entry_value2,
+        })
+
+        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --label {label} -y',
+                 checks=[self.check('key', entry_key2),
+                         self.check('value', entry_value2),
+                         self.check('label', dev_label)])
+
+        # Create a snapshot of all key-values that begin with the prefix 'Test'
+        filter_dict = { "key": "Test*", "label": dev_label }
+        retention_period = 180 # Set retention period of 3 mins 
+        self.kwargs.update({
+            'filter': '\'{}\''.format(json.dumps(filter_dict)),
+            'retention_period': retention_period
+        })
+
+
+        self.cmd('appconfig snapshot create --connection-string {connection_string} -s {snapshot_name} --filters {filter}',
+                 checks=[self.check('name', snapshot_name),
+                         self.check('itemsCount', 2),
+                         self.check('status', 'ready')])
+
+        
+        # Test showing created snapshot
+        created_snapshot = self.cmd('appconfig snapshot show --connection-string {connection_string} -s {snapshot_name}').get_output_in_json()
+        
+        self.assertEqual(created_snapshot['name'], snapshot_name)
+        self.assertEqual(created_snapshot['itemsCount'], 2)
+        self.check(created_snapshot['status'], 'ready')
+        self.assertDictEqual(created_snapshot['filters'][0], filter_dict)
+        
+        # Test list snapshots
+        created_snapshots = self.cmd('appconfig snapshot list --connection-string {connection_string}').get_output_in_json()['items']
+        self.assertEqual(created_snapshots[0]['name'], snapshot_name)
+        self.assertEqual(created_snapshots[0]['itemsCount'], 2)
+        self.assertEqual(created_snapshots[0]['status'], 'ready')
+        self.assertDictEqual(created_snapshots[0]['filters'][0], filter_dict)
+        
+        archived_snapshot = self.cmd('appconfig snapshot archive --connection-string {connection_string} -s {snapshot_name}').get_output_in_json()
+        self.assertIsNotNone(archived_snapshot['expires'])        
+        self.assertEqual(archived_snapshot['name'], snapshot_name)
+        self.assertEqual(archived_snapshot['status'], 'archived')
+        
+        
+        # Test recover snapshot
+        self.cmd('appconfig snapshot recover --connection-string {connection_string} -s {snapshot_name}',
+                                     checks=[self.check('name', snapshot_name),
+                                             self.check('itemsCount', 2),
+                                             self.check('status', 'ready'),
+                                             self.check('expires', None)])
+        
+
 def _create_config_store(test, kwargs):
     if 'retention_days' not in kwargs:
         kwargs.update({
