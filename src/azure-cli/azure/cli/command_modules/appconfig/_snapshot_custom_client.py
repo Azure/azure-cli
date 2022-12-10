@@ -1,3 +1,10 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+# pylint: disable=line-too-long, too-many-locals, too-many-statements, too-many-branches
+
 from azure.appconfiguration import AzureAppConfigurationClient
 from azure.appconfiguration._generated.models import Error as AppConfigError
 from enum import Enum
