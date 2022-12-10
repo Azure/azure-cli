@@ -74,6 +74,8 @@ def list_snapshots(cmd,
                    snapshot_name=SearchFilterOptions.ANY_KEY,
                    status=SearchFilterOptions.ANY_KEY,
                    name=None,
+                   top=None,
+                   all_=None,
                    connection_string=None,
                    auth_mode='key',
                    endpoint=None):
@@ -81,10 +83,7 @@ def list_snapshots(cmd,
     _client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        return _client.list_snapshots(
-            name=snapshot_name,
-            status=status
-        )
+        snapshots_iterable = _client.list_snapshots(name=snapshot_name, status=status)
 
     except HttpResponseError as exception:
         raise AzureResponseError(str(exception))
@@ -92,7 +91,24 @@ def list_snapshots(cmd,
     except Exception as exception:
         raise CLIError('Request failed, {}'.format(str(exception)))
 
+    if all_:
+        top = float('inf')
+    elif top is None:
+        top = 100
 
+    snapshots = []
+    current_snapshot_count = 0
+
+    for snapshot in snapshots_iterable:
+        snapshots.append(snapshot)
+        current_snapshot_count += 1
+
+        if current_snapshot_count >= top:
+            break
+
+    return snapshots
+
+    
 def archive_snapshot(cmd,
                      snapshot_name,
                      name=None,

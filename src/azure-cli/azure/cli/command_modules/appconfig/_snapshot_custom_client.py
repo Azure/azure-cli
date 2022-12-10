@@ -9,6 +9,7 @@ from azure.appconfiguration import AzureAppConfigurationClient
 from azure.appconfiguration._generated.models import Error as AppConfigError
 from enum import Enum
 from azure.core.rest import HttpRequest
+from azure.core.paging import ItemPaged
 from azure.core.utils import case_insensitive_dict
 from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, ResourceNotFoundError, HttpResponseError, ResourceModifiedError, map_error
 from msrest import Serializer
@@ -347,29 +348,51 @@ class AppConfigSnapshotClient:
                        status=None,
                        **kwargs: Any):
 
+        '''
+        Returns an "ItemPaged" object that takes two methods. 
+        One method to fetch the next page data, and another method to extract the next page link and output page data.
+        '''
         _headers = kwargs.pop("headers", {}) or {}
 
-        request = build_list_snapshots_request(
-            name_filter=name,
-            status_filter=status,
-            sync_token=self._sync_token,
-            headers=_headers
-        )
+        def build_next_page_data_request(next_page_link=None):
+            if not next_page_link:
+                return build_list_snapshots_request(
+                    name_filter=name,
+                    status_filter=status,
+                    sync_token=self._sync_token,
+                    headers=_headers)
 
-        request = _convert_request(request)
+            else:
+                return _build_request(
+                    next_page_link,
+                    RequestMethod.GET.value,
+                    sync_token=self._sync_token,
+                    **kwargs)
 
-        serialized_endpoint = self._serializer.url("endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
-        request.url = serialized_endpoint + request.url
+        # Fetch next page data
+        def get_next_page_data(next_page_link=None):
+            request = build_next_page_data_request(next_page_link)
+            request = _convert_request(request)
 
-        response = self.appConfigurationImpl._client.send_request(request)
+            serialized_endpoint = self._serializer.url(
+                "endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
+            request.url = serialized_endpoint + request.url
 
-        if response.status_code not in [200]:
-            map_error(status_code=response.status_code, response=response, error_map=_ERROR_MAP)
-            error = self._deserializer.failsafe_deserialize(AppConfigError, response)
-            raise HttpResponseError(response=response, model=error)
+            response = self.appConfigurationImpl._client.send_request(request)
 
-        return SnapshotListResult.from_json(json.loads(response.body().decode()))
+            if response.status_code not in [200]:
+                map_error(status_code=response.status_code,response=response, error_map=_ERROR_MAP)
+                error = self._deserializer.failsafe_deserialize(AppConfigError, response)
+                raise HttpResponseError(response=response, model=error)
 
+            return response
+
+        # Extract next page link and page data
+        def extract_data(response):
+            deserialized_data = SnapshotListResult.from_json(json.loads(response.body().decode()))
+            return deserialized_data.next_link or None, iter(deserialized_data.items)
+
+        return ItemPaged(get_next_page_data, extract_data)
 
     def archive_snapshot(self,
                          name: str,

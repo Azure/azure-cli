@@ -355,6 +355,7 @@ def load_arguments(self, _):
         c.argument('snapshot_name', options_list=['--snapshot-name', '-s'], help='If no name specified, return all snapshots by default. Support star sign as filters, for instance abc* means snapshots with abc as prefix to the name.')
         c.argument('status', help='Value used to filter snapshots by their status.')
         c.argument('top', arg_type=top_arg_type)
+        c.argument('all_', options_list=['--all'], action='store_true', help="List all snapshots.")
 
     with self.argument_context('appconfig snapshot archive') as c:
         c.argument('snapshot_name', arg_type=snapshot_name_arg_type)
