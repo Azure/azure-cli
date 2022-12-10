@@ -25,7 +25,7 @@ class ProvisioningStatus:
     ARCHIVED = "archived"
     FAILED = "failed"
 
-class RequestMethod(Enum):
+class RequestMethod:
     GET = "GET"
     PUT = "PUT"
     PATCH = "PATCH"
@@ -91,7 +91,7 @@ def build_get_snapshot_request(
 ) -> HttpRequest:
     return _build_request(
         "/snapshots/{name}",
-        RequestMethod.GET.value,
+        RequestMethod.GET,
         path_arguments={"name": name},
         if_match=if_match,
         if_none_match=if_none_match,
@@ -116,7 +116,7 @@ def build_list_snapshots_request(
     
     return _build_request(
         "/snapshots",
-        RequestMethod.GET.value,
+        RequestMethod.GET,
         sync_token=sync_token,
         params=_params,
         **kwargs
@@ -135,7 +135,7 @@ def build_status_update_request(
 
     return _build_request(
         "/snapshots/{name}",
-        RequestMethod.PATCH.value,
+        RequestMethod.PATCH,
         path_arguments={"name": name},
         json=request_body,
         if_match=if_match,
@@ -181,7 +181,7 @@ def build_put_snapshot_request(
 
     return _build_request(
         "/snapshots/{name}",
-        RequestMethod.PUT.value,
+        RequestMethod.PUT,
         path_arguments={"name": name},
         json=request_body,
         if_match=if_match,
@@ -366,7 +366,7 @@ class AppConfigSnapshotClient:
             else:
                 return _build_request(
                     next_page_link,
-                    RequestMethod.GET.value,
+                    RequestMethod.GET,
                     sync_token=self._sync_token,
                     **kwargs)
 
