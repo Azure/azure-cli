@@ -31,9 +31,8 @@ from azure.mgmt.security.models import (SecurityContact,
                                         AutomationActionLogicApp,
                                         AutomationActionEventHub,
                                         AutomationRuleSet,
-                                        AutomationTriggeringRule)
-#from azure.mgmt.security.models import SettingName
-from azure.mgmt.security.models._security_center_enums import Enum69
+                                        AutomationTriggeringRule,
+                                        SettingName)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError)
 from msrestazure.tools import resource_id
@@ -64,9 +63,12 @@ def get_security_task(client, resource_name, resource_group_name=None):
         client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     if resource_group_name:
-        return client.tasks.get_resource_group_level_task(resource_group_name, client._config.asc_location, resource_name)
+        return client.tasks.get_resource_group_level_task(resource_group_name,
+                                                          client._config.asc_location,  # pylint: disable=protected-access
+                                                          resource_name)
 
-    return client.tasks.get_subscription_level_task(client._config.asc_location, resource_name)
+    return client.tasks.get_subscription_level_task(client._config.asc_location,  # pylint: disable=protected-access
+                                                    resource_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -79,9 +81,10 @@ def list_security_alerts(client, resource_group_name=None, location=None):
         client._config.asc_location = location  # pylint: disable=protected-access
 
         if resource_group_name:
-            return client.list_resource_group_level_by_region(client._config.asc_location, resource_group_name)
+            return client.list_resource_group_level_by_region(client._config.asc_location,  # pylint: disable=protected-access
+                                                              resource_group_name)
 
-        return client.list_subscription_level_by_region(client._config.asc_location)
+        return client.list_subscription_level_by_region(client._config.asc_location)  # pylint: disable=protected-access
 
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
@@ -236,7 +239,7 @@ def get_security_setting(client, setting_name):
 
 def update_security_setting(client, setting_name, enabled):
 
-    if setting_name == Enum69.SENTINEL:
+    if setting_name == SettingName.SENTINEL:
         setting = AlertSyncSettings()
     else:
         setting = DataExportSettings()
@@ -399,7 +402,7 @@ def get_security_location(client, resource_name):
 
     client._config.asc_location = resource_name  # pylint: disable=protected-access
 
-    return client.get(client._config.asc_location)
+    return client.get(client._config.asc_location)  # pylint: disable=protected-access
 
 
 # --------------------------------------------------------------------------------------------
@@ -741,7 +744,8 @@ def get_security_adaptive_application_controls(client, group_name):
     for loc in client.locations.list():
         client._config.asc_location = loc.name  # pylint: disable=protected-access
 
-    return client.adaptive_application_controls.get(client._config.asc_location, group_name=group_name)
+    return client.adaptive_application_controls.get(client._config.asc_location,  # pylint: disable=protected-access
+                                                    group_name=group_name)
 
 
 # --------------------------------------------------------------------------------------------
