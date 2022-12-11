@@ -36,6 +36,7 @@ from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
 from._featuremodels import (map_keyvalue_to_featureflag,
                             map_featureflag_to_keyvalue,
                             FeatureFlagValue)
+from ._snapshot_custom_client import AppConfigSnapshotClient
 
 logger = get_logger(__name__)
 FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "feature_management", "feature-management"]
@@ -309,6 +310,7 @@ def __map_to_appservice_config_reference(key_value, endpoint, prefix):
 def __read_kv_from_config_store(azconfig_client,
                                 key=None,
                                 label=None,
+                                snapshot=None,
                                 datetime=None,
                                 fields=None,
                                 top=None,
@@ -334,10 +336,14 @@ def __read_kv_from_config_store(azconfig_client,
             query_fields.append(field.name.lower())
 
     try:
-        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key,
-                                                                             label_filter=label,
-                                                                             accept_datetime=datetime,
-                                                                             fields=query_fields)
+        if snapshot:
+            configsetting_iterable = AppConfigSnapshotClient(azconfig_client).list_snapshot_kv(snapshot)
+        
+        else:
+            configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key,
+                                                                                label_filter=label,
+                                                                                accept_datetime=datetime,
+                                                                                fields=query_fields)
     except HttpResponseError as exception:
         raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
 

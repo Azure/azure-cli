@@ -199,6 +199,8 @@ examples:
     text: az appconfig kv list --label test,prod,\\0 -n MyAppConfiguration
   - name: List all key-values with all labels using your 'az login' credentials.
     text: az appconfig kv list --endpoint https://myappconfiguration.azconfig.io --auth-mode login
+  - name: List all key-values in a given snapshot of the app configuration store.
+    text: az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --snapshot MySnapshot
 """
 
 helps['appconfig kv lock'] = """

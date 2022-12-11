@@ -242,6 +242,7 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv list') as c:
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Use '\\0' for null label.")
+        c.argument('snapshot', help="List all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are listed.")
         c.argument('resolve_keyvault', arg_type=get_three_state_flag(), help="Resolve the content of key vault reference. This argument should NOT be specified along with --fields. Instead use --query for customized query.")
 
     with self.argument_context('appconfig kv restore') as c:

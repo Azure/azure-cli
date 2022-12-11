@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long, too-many-locals, too-many-statements, too-many-branches
 
-from azure.appconfiguration import AzureAppConfigurationClient
+from azure.appconfiguration import AzureAppConfigurationClient, ConfigurationSetting
 from azure.appconfiguration._generated.models import Error as AppConfigError
 from enum import Enum
 from azure.core.rest import HttpRequest
@@ -190,6 +190,21 @@ def build_put_snapshot_request(
         **kwargs
     )
 
+
+def build_list_snapshot_keys_request(
+    name,
+    sync_token: Optional[str] = None,
+    **kwargs: Any
+) -> HttpRequest:
+    return _build_request(
+        "/kv",
+        RequestMethod.GET,
+        sync_token=sync_token,
+        params={"snapshot": name},
+        **kwargs
+    )
+
+
 def _convert_request(request, files=None):
     data = request.content if not files else None
     request = HttpRequest(method=request.method, url=request.url, headers=request.headers, data=data)
@@ -309,7 +324,7 @@ class AppConfigSnapshotClient:
             error = self._deserializer.failsafe_deserialize(AppConfigError, response)
             raise HttpResponseError(response=response, model=error)
 
-        return Snapshot.from_json(json.loads(response.body().decode()))
+        return Snapshot.from_json(json.loads(response.text()))
 
 
     def get_snapshot(self,
@@ -340,60 +355,29 @@ class AppConfigSnapshotClient:
             error = self._deserializer.failsafe_deserialize(AppConfigError, response)
             raise HttpResponseError(response=response, model=error)
 
-        return Snapshot.from_json(json.loads(response.body().decode()))
+        return Snapshot.from_json(json.loads(response.text()))
             
-
 
     def list_snapshots(self,
                        name=None,
                        status=None,
                        **kwargs: Any):
 
-        '''
-        Returns an "ItemPaged" object that takes two methods. 
-        One method to fetch the next page data, and another method to extract the next page link and output page data.
-        '''
         _headers = kwargs.pop("headers", {}) or {}
 
-        def build_next_page_data_request(next_page_link=None):
-            if not next_page_link:
-                return build_list_snapshots_request(
+        initial_request = build_list_snapshots_request(
                     name_filter=name,
                     status_filter=status,
                     sync_token=self._sync_token,
                     headers=_headers)
 
-            else:
-                return _build_request(
-                    next_page_link,
-                    RequestMethod.GET,
-                    sync_token=self._sync_token,
-                    **kwargs)
-
-        # Fetch next page data
-        def get_next_page_data(next_page_link=None):
-            request = build_next_page_data_request(next_page_link)
-            request = _convert_request(request)
-
-            serialized_endpoint = self._serializer.url(
-                "endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
-            request.url = serialized_endpoint + request.url
-
-            response = self.appConfigurationImpl._client.send_request(request)
-
-            if response.status_code not in [200]:
-                map_error(status_code=response.status_code,response=response, error_map=_ERROR_MAP)
-                error = self._deserializer.failsafe_deserialize(AppConfigError, response)
-                raise HttpResponseError(response=response, model=error)
-
-            return response
-
         # Extract next page link and page data
         def extract_data(response):
-            deserialized_data = SnapshotListResult.from_json(json.loads(response.body().decode()))
+            deserialized_data = SnapshotListResult.from_json(json.loads(response.text()))
             return deserialized_data.next_link or None, iter(deserialized_data.items)
 
-        return ItemPaged(get_next_page_data, extract_data)
+        return self._fetch_paged(initial_request, extract_data, **kwargs)
+
 
     def archive_snapshot(self,
                          name: str,
@@ -423,7 +407,7 @@ class AppConfigSnapshotClient:
             error = self._deserializer.failsafe_deserialize(AppConfigError, response)
             raise HttpResponseError(response=response, model=error)
 
-        return Snapshot.from_json(json.loads(response.body().decode()))
+        return Snapshot.from_json(json.loads(response.text()))
 
 
     def recover_snapshot(self,
@@ -454,4 +438,78 @@ class AppConfigSnapshotClient:
             error = self._deserializer.failsafe_deserialize(AppConfigError, response)
             raise HttpResponseError(response=response, model=error)
 
-        return Snapshot.from_json(json.loads(response.body().decode()))
+        return Snapshot.from_json(json.loads(response.text()))
+
+    
+    def list_snapshot_kv(self,
+                         name: str,
+                         **kwargs: Any):
+
+        _headers = kwargs.pop("headers", {}) or {}
+
+        initial_request = build_list_snapshot_keys_request(
+            name=name,
+            sync_token=self._sync_token,
+            headers=_headers,
+            **kwargs)
+
+        # Returns an iterable that converts returned items to Configuration Settings
+        def _to_configurationsetting_iter(kv_items=None):
+            if kv_items is None:
+                return None
+
+            for kv_dict in kv_items:
+                if kv_dict is None:
+                    yield None
+
+                yield ConfigurationSetting(key=kv_dict.get("key", None),
+                                        label=kv_dict.get("label", None),
+                                        content_type=kv_dict.get( "content_type", None),
+                                        value=kv_dict.get("value", None),
+                                        last_modified=kv_dict.get("last_modified", None),
+                                        tags=kv_dict.get("tags", None),
+                                        read_only=kv_dict.get("locked", None),
+                                        etag=kv_dict.get("etag", None))
+        
+        def extract_kv_data(response):
+            response_data_dict = json.loads(response.text())
+            return response_data_dict.pop("@nextLink", None), _to_configurationsetting_iter(response_data_dict.pop("items", None))
+        
+        return self._fetch_paged(initial_request, extract_kv_data, **kwargs)
+          
+    
+    def _fetch_paged(self, initial_request, data_extraction_method, **kwargs):
+        '''
+        Returns an "ItemPaged" object that takes two methods. 
+        One method to fetch the next page data, and another method to extract the next page link and output page data.
+        '''
+
+        def build_next_page_data_request(next_page_link=None):
+            if not next_page_link:
+                return initial_request
+            else:
+                return _build_request(
+                    next_page_link,
+                    RequestMethod.GET,
+                    sync_token=self._sync_token,
+                    **kwargs)
+
+        # Fetch next page data
+        def get_next_page_data(next_page_link=None):
+            request = build_next_page_data_request(next_page_link)
+            request = _convert_request(request)
+
+            serialized_endpoint = self._serializer.url(
+                "endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
+            request.url = serialized_endpoint + request.url
+
+            response = self.appConfigurationImpl._client.send_request(request)
+
+            if response.status_code not in [200]:
+                map_error(status_code=response.status_code,response=response, error_map=_ERROR_MAP)
+                error = self._deserializer.failsafe_deserialize(AppConfigError, response)
+                raise HttpResponseError(response=response, model=error)
+
+            return response
+
+        return ItemPaged(get_next_page_data, data_extraction_method)
