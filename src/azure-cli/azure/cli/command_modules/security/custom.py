@@ -733,12 +733,15 @@ def get_security_sub_assessment(cmd, client, resource_name, assessment_name, ass
 
 def list_security_adaptive_application_controls(client):
 
-    return client.list()
+    return client.adaptive_application_controls.list()
 
 
 def get_security_adaptive_application_controls(client, group_name):
 
-    return client.get(group_name=group_name)
+    for loc in client.locations.list():
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
+
+    return client.adaptive_application_controls.get(client._config.asc_location, group_name=group_name)
 
 
 # --------------------------------------------------------------------------------------------
