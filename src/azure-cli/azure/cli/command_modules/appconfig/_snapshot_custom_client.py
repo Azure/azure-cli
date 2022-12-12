@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long, too-many-locals, too-many-statements, too-many-branches
+# pylint: disable=line-too-long, too-many-locals, too-many-statements, too-many-branches, too-few-public-methods
 
 from azure.appconfiguration import AzureAppConfigurationClient, ConfigurationSetting
 from azure.appconfiguration._generated.models import Error as AppConfigError
@@ -19,11 +19,13 @@ import json
 from ._constants import SnapshotConstants
 from ._snapshotmodels import Snapshot, SnapshotListResult
 
+
 class ProvisioningStatus:
     PROVISIONING = "provisioning"
     READY = "ready"
     ARCHIVED = "archived"
     FAILED = "failed"
+
 
 class RequestMethod:
     GET = "GET"
@@ -41,19 +43,19 @@ _ERROR_MAP = {
 
 
 def _build_request(
-    template_url_default: str,
-    method: str,
+    template_url_default,
+    method,
     *,
-    path_arguments: dict[str] = {},
-    if_match: Optional[str] = None,
-    if_none_match: Optional[str] = None,
-    sync_token: Optional[str] = None,
-    **kwargs: Any
-) -> HttpRequest:
+    path_arguments={},
+    if_match=None,
+    if_none_match=None,
+    sync_token=None,
+    **kwargs
+):
     _headers = case_insensitive_dict(kwargs.pop("headers", {}) or {})
     _params = case_insensitive_dict(kwargs.pop("params", {}) or {})
 
-    api_version = kwargs.pop("api_version", SnapshotConstants.API_VERSION)  # type: str
+    api_version = kwargs.pop("api_version", SnapshotConstants.API_VERSION)
     accept = _headers.pop(
         "Accept", "application/vnd.microsoft.appconfig.keyset+json, application/json, application/problem+json"
     )
@@ -63,7 +65,7 @@ def _build_request(
     _url = _format_url_section(_url, **path_arguments)
 
     _serializer = Serializer()
-    
+
     # Construct parameters
     _params["api-version"] = _serializer.query("api_version", api_version, "str")
         
@@ -83,12 +85,12 @@ def _build_request(
 
 # Requests
 def build_get_snapshot_request(
-    name: str,
-    if_match: Optional[str] = None,
-    if_none_match: Optional[str] = None,
-    sync_token: Optional[str] = None,
-    **kwargs: Any
-) -> HttpRequest:
+    name,
+    if_match=None,
+    if_none_match=None,
+    sync_token=None,
+    **kwargs
+):
     return _build_request(
         "/snapshots/{name}",
         RequestMethod.GET,
@@ -101,19 +103,19 @@ def build_get_snapshot_request(
 
 
 def build_list_snapshots_request(
-    name_filter = None,
-    status_filter = None,
-    sync_token: Optional[str] = None,
-    **kwargs: Any
-) -> HttpRequest:
+    name_filter=None,
+    status_filter=None,
+    sync_token=None,
+    **kwargs
+):
     _params = {}
-    
+
     if name_filter:
         _params['name'] = name_filter
 
     if status_filter:
         _params['status'] = status_filter
-    
+
     return _build_request(
         "/snapshots",
         RequestMethod.GET,
@@ -124,14 +126,14 @@ def build_list_snapshots_request(
 
 
 def build_status_update_request(
-    name: str,
-    archive_snapshot: bool,
-    if_match: Optional[str] = None,
-    if_none_match: Optional[str] = None,
-    sync_token: Optional[str] = None,
-    **kwargs: Any
-) -> HttpRequest:
-    request_body = { "status" : "archived" if archive_snapshot else "ready" }
+    name,
+    archive_snapshot,
+    if_match=None,
+    if_none_match=None,
+    sync_token=None,
+    **kwargs
+):
+    request_body = {"status": "archived" if archive_snapshot else "ready"}
 
     return _build_request(
         "/snapshots/{name}",
@@ -146,16 +148,16 @@ def build_status_update_request(
 
 
 def build_put_snapshot_request(
-    name: str,
-    filters: List[Dict[str, str]],
-    composition_type: str,
+    name,
+    filters,
+    composition_type,
     retention_period: int=None,
-    tags: Dict[str, str]=None,
-    if_match: Optional[str] = None,
-    if_none_match: Optional[str] = None,
-    sync_token: Optional[str] = None,
-    **kwargs: Any
-) -> HttpRequest:
+    tags=None,
+    if_match=None,
+    if_none_match=None,
+    sync_token=None,
+    **kwargs
+):
 
     request_body = {}
 
@@ -170,7 +172,7 @@ def build_put_snapshot_request(
 
         request_body["composition_type"] = composition_type
 
-    if retention_period != None:
+    if retention_period is not None:
         if not isinstance(retention_period, int) or retention_period < 0:
             raise ValueError("Retention period value should be a non-negative integer value.")
 
@@ -193,9 +195,9 @@ def build_put_snapshot_request(
 
 def build_list_snapshot_keys_request(
     name,
-    sync_token: Optional[str] = None,
-    **kwargs: Any
-) -> HttpRequest:
+    sync_token=None,
+    **kwargs
+):
     return _build_request(
         "/kv",
         RequestMethod.GET,
@@ -227,26 +229,27 @@ def _format_url_section(template, **kwargs):
 class AppConfigSnapshotClient:
 
     def __init__(self, appConfigClient):
-        self.appConfigurationImpl = appConfigClient._impl
-        self._serializer = self.appConfigurationImpl._serialize
-        self._deserializer = self.appConfigurationImpl._deserialize
-        self._sync_token = self.appConfigurationImpl._config.sync_token
-
+        appConfiguration = appConfigClient._impl
+        self._serializer = appConfiguration._serialize
+        self._deserializer = appConfiguration._deserialize
+        self._sync_token = appConfiguration._config.sync_token
+        self._endpoint = appConfiguration._config.endpoint
+        self._client = appConfiguration._client
 
     @classmethod
     def from_connection_string(cls, connection_string):
         return cls(AzureAppConfigurationClient.from_connection_string(connection_string))
 
-
-    def begin_create_snapshot(self,
-                              name: str,
-                              filters: List[Dict[str, str]],
-                              composition_type: str = None,
-                              retention_period: int = None,
-                              tags: Dict[str, str] = None,
-                              if_match: Optional[str] = None,
-                              if_none_match: Optional[str] = None,
-                              **kwargs: Any):
+    def begin_create_snapshot(
+            self,
+            name,
+            filters,
+            composition_type=None,
+            retention_period: int = None,
+            tags=None,
+            if_match=None,
+            if_none_match=None,
+            **kwargs):
         """
         Poll after a given interval (default 5s) to ensure that the snapshot is in 'ready' status. 
         The request times out after 30s by default unless specified otherwise.
@@ -278,7 +281,7 @@ class AppConfigSnapshotClient:
         while current_state.status == ProvisioningStatus.PROVISIONING:
             if _get_elapsed_time(start_time) > timeout:
                 raise TimeoutError("The create request timed out.")
-            
+
             time.sleep(polling_interval)
             current_state = self.get_snapshot(name)
 
@@ -287,16 +290,16 @@ class AppConfigSnapshotClient:
 
         raise HttpResponseError('Snapshot creation failed with status code: {}'.format(current_state.status_code))
 
-
-    def create_snapshot(self,
-                        name: str,
-                        filters: List[Dict[str, str]],
-                        composition_type: str=None,
-                        retention_period: int=None,
-                        tags: Dict[str, str]=None,
-                        if_match: Optional[str] = None,
-                        if_none_match: Optional[str] = None,
-                        **kwargs: Any):
+    def create_snapshot(
+            self,
+            name,
+            filters,
+            composition_type=None,
+            retention_period: int = None,
+            tags=None,
+            if_match=None,
+            if_none_match=None,
+            **kwargs):
         _headers = kwargs.pop("headers", {}) or {}
 
         request = build_put_snapshot_request(
@@ -313,10 +316,10 @@ class AppConfigSnapshotClient:
 
         request = _convert_request(request)
 
-        serialized_endpoint = self._serializer.url("endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
+        serialized_endpoint = self._serializer.url("endpoint", self._endpoint, 'str', skip_quote=True)
         request.url = serialized_endpoint + request.url
 
-        response = self.appConfigurationImpl._client.send_request(request)
+        response = self._client.send_request(request)
 
         if response.status_code not in [201]:
             map_error(status_code=response.status_code,
@@ -326,12 +329,12 @@ class AppConfigSnapshotClient:
 
         return Snapshot.from_json(json.loads(response.text()))
 
-
-    def get_snapshot(self,
-                     name: str,
-                     if_match: Optional[str] = None,
-                     if_none_match: Optional[str] = None,
-                     **kwargs: Any):
+    def get_snapshot(
+            self,
+            name,
+            if_match=None,
+            if_none_match=None,
+            **kwargs):
 
         _headers = kwargs.pop("headers", {}) or {}
 
@@ -345,10 +348,10 @@ class AppConfigSnapshotClient:
 
         request = _convert_request(request)
 
-        serialized_endpoint = self._serializer.url("endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
+        serialized_endpoint = self._serializer.url("endpoint", self._endpoint, 'str', skip_quote=True)
         request.url = serialized_endpoint + request.url
 
-        response = self.appConfigurationImpl._client.send_request(request)
+        response = self._client.send_request(request)
 
         if response.status_code not in [200]:
             map_error(status_code=response.status_code, response=response, error_map=_ERROR_MAP)
@@ -356,20 +359,20 @@ class AppConfigSnapshotClient:
             raise HttpResponseError(response=response, model=error)
 
         return Snapshot.from_json(json.loads(response.text()))
-            
 
-    def list_snapshots(self,
-                       name=None,
-                       status=None,
-                       **kwargs: Any):
+    def list_snapshots(
+            self,
+            name=None,
+            status=None,
+            **kwargs):
 
         _headers = kwargs.pop("headers", {}) or {}
 
         initial_request = build_list_snapshots_request(
-                    name_filter=name,
-                    status_filter=status,
-                    sync_token=self._sync_token,
-                    headers=_headers)
+            name_filter=name,
+            status_filter=status,
+            sync_token=self._sync_token,
+            headers=_headers)
 
         # Extract next page link and page data
         def extract_data(response):
@@ -378,12 +381,12 @@ class AppConfigSnapshotClient:
 
         return self._fetch_paged(initial_request, extract_data, **kwargs)
 
-
-    def archive_snapshot(self,
-                         name: str,
-                         if_match: Optional[str] = None,
-                         if_none_match: Optional[str] = None,
-                         **kwargs: Any):
+    def archive_snapshot(
+            self,
+            name,
+            if_match=None,
+            if_none_match=None,
+            **kwargs):
         _headers = kwargs.pop("headers", {}) or {}
 
         request = build_status_update_request(
@@ -397,10 +400,10 @@ class AppConfigSnapshotClient:
 
         request = _convert_request(request)
 
-        serialized_endpoint = self._serializer.url("endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
+        serialized_endpoint = self._serializer.url("endpoint", self._endpoint, 'str', skip_quote=True)
         request.url = serialized_endpoint + request.url
 
-        response = self.appConfigurationImpl._client.send_request(request)
+        response = self._client.send_request(request)
 
         if response.status_code not in [200]:
             map_error(status_code=response.status_code, response=response, error_map=_ERROR_MAP)
@@ -409,12 +412,12 @@ class AppConfigSnapshotClient:
 
         return Snapshot.from_json(json.loads(response.text()))
 
-
-    def recover_snapshot(self,
-                         name: str,
-                         if_match: Optional[str] = None,
-                         if_none_match: Optional[str] = None,
-                         **kwargs: Any):
+    def recover_snapshot(
+            self,
+            name,
+            if_match=None,
+            if_none_match=None,
+            **kwargs):
         _headers = kwargs.pop("headers", {}) or {}
 
         request = build_status_update_request(
@@ -428,10 +431,10 @@ class AppConfigSnapshotClient:
 
         request = _convert_request(request)
 
-        serialized_endpoint = self._serializer.url("endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
+        serialized_endpoint = self._serializer.url("endpoint", self._endpoint, 'str', skip_quote=True)
         request.url = serialized_endpoint + request.url
 
-        response =self.appConfigurationImpl._client.send_request(request)
+        response =self._client.send_request(request)
 
         if response.status_code not in [200]:
             map_error(status_code=response.status_code, response=response, error_map=_ERROR_MAP)
@@ -439,11 +442,11 @@ class AppConfigSnapshotClient:
             raise HttpResponseError(response=response, model=error)
 
         return Snapshot.from_json(json.loads(response.text()))
-
     
-    def list_snapshot_kv(self,
-                         name: str,
-                         **kwargs: Any):
+    def list_snapshot_kv(
+            self,
+            name,
+            **kwargs):
 
         _headers = kwargs.pop("headers", {}) or {}
 
@@ -462,22 +465,22 @@ class AppConfigSnapshotClient:
                 if kv_dict is None:
                     yield None
 
-                yield ConfigurationSetting(key=kv_dict.get("key", None),
-                                        label=kv_dict.get("label", None),
-                                        content_type=kv_dict.get( "content_type", None),
-                                        value=kv_dict.get("value", None),
-                                        last_modified=kv_dict.get("last_modified", None),
-                                        tags=kv_dict.get("tags", None),
-                                        read_only=kv_dict.get("locked", None),
-                                        etag=kv_dict.get("etag", None))
-        
+                yield ConfigurationSetting(
+                    key=kv_dict.get("key", None),
+                    label=kv_dict.get("label", None),
+                    content_type=kv_dict.get("content_type", None),
+                    value=kv_dict.get("value", None),
+                    last_modified=kv_dict.get("last_modified", None),
+                    tags=kv_dict.get("tags", None),
+                    read_only=kv_dict.get("locked", None),
+                    etag=kv_dict.get("etag", None))
+
         def extract_kv_data(response):
             response_data_dict = json.loads(response.text())
             return response_data_dict.pop("@nextLink", None), _to_configurationsetting_iter(response_data_dict.pop("items", None))
-        
+
         return self._fetch_paged(initial_request, extract_kv_data, **kwargs)
-          
-    
+
     def _fetch_paged(self, initial_request, data_extraction_method, **kwargs):
         '''
         Returns an "ItemPaged" object that takes two methods. 
@@ -500,10 +503,10 @@ class AppConfigSnapshotClient:
             request = _convert_request(request)
 
             serialized_endpoint = self._serializer.url(
-                "endpoint", self.appConfigurationImpl._config.endpoint, 'str', skip_quote=True)
+                "endpoint", self._endpoint, 'str', skip_quote=True)
             request.url = serialized_endpoint + request.url
 
-            response = self.appConfigurationImpl._client.send_request(request)
+            response = self._client.send_request(request)
 
             if response.status_code not in [200]:
                 map_error(status_code=response.status_code,response=response, error_map=_ERROR_MAP)

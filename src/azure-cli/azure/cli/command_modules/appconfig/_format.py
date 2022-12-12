@@ -116,7 +116,7 @@ def _configstore_credential_format_group(item):
 
 
 def _keyvalue_entry_format_group(item):
-  
+
     return OrderedDict([
         ('CONTENT TYPE', _get_value_by_names(item, ['contentType', 'content_type'])),
         ('KEY', _get_value(item, 'key')),
@@ -146,7 +146,7 @@ def _snapshot_output_format_group(item):
     return OrderedDict([
         ('NAME', _get_value(item, 'name')),
         ('FILTERS', _get_value(item, 'filters')),
-        ('COMPOSITION TYPE',  _get_value_by_names(item, ['compositionType', 'composition_type'])),
+        ('COMPOSITION TYPE', _get_value_by_names(item, ['compositionType', 'composition_type'])),
         ('CREATED', _format_datetime(_get_value(item, 'created'))),
         ('EXPIRES', _format_datetime(_get_value(item, 'expires'))),
         ('RETENTION PERIOD', _get_value_by_names(item, ['retentionPeriod', 'retention_period'])),

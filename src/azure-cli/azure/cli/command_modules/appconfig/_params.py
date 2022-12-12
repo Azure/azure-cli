@@ -87,7 +87,7 @@ def load_arguments(self, _):
     )
 
     snapshot_filter_arg_type = CLIArgumentType(
-        options_list = ['--filters'],
+        options_list=['--filters'],
         validator=validate_snapshot_filters,
         nargs='+',
         help='Space-separated key and label filters used to build an app configuration snapshot. These values should escaped JSON objects.'
@@ -345,7 +345,7 @@ def load_arguments(self, _):
     with self.argument_context('appconfig snapshot create') as c:
         c.argument('snapshot_name', arg_type=snapshot_name_arg_type)
         c.argument('filters', arg_type=snapshot_filter_arg_type)
-        c.argument('composition_type', options_list=['--composition-type'], arg_type=get_enum_type(["all", "group_by_key"]), help='Composition type used in building app configuration snapshots.') #TODO: Update help message.
+        c.argument('composition_type', options_list=['--composition-type'], arg_type=get_enum_type(["all", "group_by_key"]), help='Composition type used in building app configuration snapshots.')
         c.argument('retention_period', options_list=['--retention-period'], type=int, help='Duration in seconds for which a snapshot can remain archived before expiry. If not specified, retention period defaults to the equivalent of 30 days. (2592000s)')
         c.argument('tags', arg_type=tags_type, help="Space-separated tags: key[=value] [key[=value] ...].")
 
