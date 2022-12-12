@@ -938,6 +938,38 @@ class FunctionAppServicePlan(ScenarioTest):
         ])
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, plan))
 
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_retain_plan(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(prefix='functionapp', length=24)
+        plan = self.create_random_name(prefix='funcappplan', length=24)
+        self.cmd('functionapp plan create -g {} -n {} --sku S1' .format(resource_group, plan), checks=[
+            JMESPathCheck('sku.name', 'S1')
+        ])
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp_name, plan, storage_account), checks=[
+            JMESPathCheck('name', functionapp_name)
+        ])
+        self.cmd('functionapp delete -g {} -n {} --keep-empty-plan'.format(resource_group, functionapp_name))
+        self.cmd('functionapp plan list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('[0].name', plan)
+        ])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_auto_delete_plan(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(prefix='functionapp', length=24)
+        plan = self.create_random_name(prefix='funcappplan', length=24)
+        self.cmd('functionapp plan create -g {} -n {} --sku S1' .format(resource_group, plan), checks=[
+            JMESPathCheck('sku.name', 'S1')
+        ])
+        self.cmd(
+            'functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp_name, plan, storage_account), checks=[
+            JMESPathCheck('name', functionapp_name)
+        ])
+        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+        self.cmd('functionapp plan list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
 
 class FunctionAppServicePlanLinux(ScenarioTest):
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
