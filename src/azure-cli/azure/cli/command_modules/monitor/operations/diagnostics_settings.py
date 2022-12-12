@@ -95,7 +95,7 @@ class DiagnosticSettingsCreate(_DiagnosticSettingsCreate):
         rg = args.resource_group_name.to_serialized_data()
 
         if not has_value(rg):
-            rg = parse_resource_id(ctx.resource)['resource_group']
+            rg = parse_resource_id(args.resource.to_serialized_data())['resource_group']
             args.resource_group_name = rg
 
         storage_account = args.storage_account.to_serialized_data()
@@ -149,6 +149,8 @@ class DiagnosticSettingsCreate(_DiagnosticSettingsCreate):
         export_to_resource_specific = args.export_to_resource_specific.to_serialized_data()
         if has_value(export_to_resource_specific) and export_to_resource_specific:
             args.log_analytics_destination_type = 'Dedicated'
+            if not has_value(workspace):
+                raise CLIError('usage error: --workspace and --export-to-specific-resource')
         else:
             args.log_analytics_destination_type = None
 
