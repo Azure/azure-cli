@@ -337,7 +337,8 @@ def __read_kv_from_config_store(azconfig_client,
 
     try:
         if snapshot:
-            configsetting_iterable = AppConfigSnapshotClient(azconfig_client).list_snapshot_kv(snapshot)
+            configsetting_iterable = AppConfigSnapshotClient(azconfig_client).list_snapshot_kv(name=snapshot,
+                                                                                               fields=query_fields)
         
         else:
             configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key,

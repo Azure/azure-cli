@@ -13,12 +13,14 @@ from ._snapshot_custom_client import AppConfigSnapshotClient
 from ._snapshotmodels import SnapshotQueryFields
 from ._utils import get_appconfig_data_client
 
+
 def _get_snapshot_client(cmd,
                          name,
                          connection_string,
                          auth_mode,
                          endpoint):
     return AppConfigSnapshotClient(get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint))
+
 
 # Snapshot commands #
 
@@ -36,15 +38,15 @@ def create_snapshot(cmd,
 
     _client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
 
-    try :
+    try:
         return _client.begin_create_snapshot(snapshot_name, filters, composition_type, retention_period, tags)
-    
+
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.CONFLICT:
             raise AzureResponseError("A snapshot with name '{}' already exists.".format(snapshot_name))
 
         raise AzureResponseError(str(exception))
-    
+
     except Exception as exception:
         raise CLIError("Failed to create snapshot. {}".format(str(exception)))
 
@@ -84,7 +86,7 @@ def show_snapshot(cmd,
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.NOT_FOUND:
             raise ResourceNotFoundError("No snapshot with name {} was found.".format(snapshot_name))
-        
+
         raise AzureResponseError(str(exception))
 
     except Exception as exception:

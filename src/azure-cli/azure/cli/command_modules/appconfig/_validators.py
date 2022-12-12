@@ -317,25 +317,26 @@ def __construct_kvset_invalid_argument_error(is_exporting, argument):
     action = 'exporting' if is_exporting else 'importing'
     return InvalidArgumentValueError("The option '{0}' is not supported when {1} using '{2}' profile".format(argument, action, ImportExportProfiles.KVSET))
 
+
 def validate_snapshot_filters(namespace):
-    if not namespace.filters: 
+    if not namespace.filters:
         raise RequiredArgumentMissingError("A list of at least one filter is required.")
-    
+
     if isinstance(namespace.filters, list):
         if len(namespace.filters) < 1:
-                raise InvalidArgumentValueError("At least one filter is required.")
-            
+            raise InvalidArgumentValueError("At least one filter is required.")
+
         if len(namespace.filters) > 3:
             raise InvalidArgumentValueError("Too many filters supplied. A maximum of 3 filters allowed.")
 
         filter_parameters = []
-        
-        for filter in namespace.filters:
+
+        for filter_param in namespace.filters:
             try:
-                parsed_filter = json.loads(filter)
+                parsed_filter = json.loads(filter_param)
                 if not isinstance(parsed_filter, dict):
                     raise InvalidArgumentValueError('Parameter must be an escaped JSON object. Value of type {} was supplied.'.format(type(parsed_filter).__name__))
-                
+
                 key_filter_value = parsed_filter.get("key", None)
 
                 if not key_filter_value:
@@ -348,8 +349,8 @@ def validate_snapshot_filters(namespace):
                     raise InvalidArgumentValueError("Label filter must be a string if specified.")
 
                 filter_parameters.append(parsed_filter)
-            
+
             except ValueError:
-                raise InvalidArgumentValueError("Parameter must be an escaped JSON. {} is not a valid JSON object.".format(filter))
+                raise InvalidArgumentValueError("Parameter must be an escaped JSON. {} is not a valid JSON object.".format(filter_param))
 
         namespace.filters = filter_parameters

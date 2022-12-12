@@ -74,7 +74,7 @@ class Snapshot(Model):
     }
 
     def __init__(self,
-                *,
+                 *,
                  name,
                  status,
                  filters,

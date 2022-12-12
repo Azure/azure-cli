@@ -52,8 +52,8 @@ def load_command_table(self, _):
     )
 
     configstore_snapshot_util = CliCommandType(
-            operations_tmpl='azure.cli.command_modules.appconfig.snapshot#{}',
-            table_transformer=configstore_snapshot_output_format
+        operations_tmpl='azure.cli.command_modules.appconfig.snapshot#{}',
+        table_transformer=configstore_snapshot_output_format
     )
 
     def get_custom_sdk(custom_module, client_factory, table_transformer):
