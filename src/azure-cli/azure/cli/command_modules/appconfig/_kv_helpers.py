@@ -339,12 +339,12 @@ def __read_kv_from_config_store(azconfig_client,
         if snapshot:
             configsetting_iterable = AppConfigSnapshotClient(azconfig_client).list_snapshot_kv(name=snapshot,
                                                                                                fields=query_fields)
-        
+
         else:
             configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key,
-                                                                                label_filter=label,
-                                                                                accept_datetime=datetime,
-                                                                                fields=query_fields)
+                                                                                 label_filter=label,
+                                                                                 accept_datetime=datetime,
+                                                                                 fields=query_fields)
     except HttpResponseError as exception:
         raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
 

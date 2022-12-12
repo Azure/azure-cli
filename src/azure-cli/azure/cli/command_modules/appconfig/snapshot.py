@@ -60,7 +60,7 @@ def show_snapshot(cmd,
                   endpoint=None):
 
     query_fields = []
-    
+
     if fields:
         for field in fields:
             if field == SnapshotQueryFields.ALL:
@@ -75,14 +75,14 @@ def show_snapshot(cmd,
 
         if not query_fields:
             return snapshot
-        
+
         partial_snapshot = {}
 
         for field in query_fields:
             partial_snapshot[field] = snapshot.__dict__[field]
-        
+
         return partial_snapshot
-        
+
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.NOT_FOUND:
             raise ResourceNotFoundError("No snapshot with name {} was found.".format(snapshot_name))
@@ -105,14 +105,14 @@ def list_snapshots(cmd,
                    endpoint=None):
 
     query_fields = []
-    
+
     if fields:
         for field in fields:
             if field == SnapshotQueryFields.ALL:
                 query_fields.clear()
                 break
             query_fields.append(field.name.lower())
-    
+
     _client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
@@ -140,7 +140,7 @@ def list_snapshots(cmd,
             snapshots.append(partial_snapshot)
         else:
             snapshots.append(snapshot)
-        
+
         current_snapshot_count += 1
 
         if current_snapshot_count >= top:
@@ -148,7 +148,7 @@ def list_snapshots(cmd,
 
     return snapshots
 
-    
+
 def archive_snapshot(cmd,
                      snapshot_name,
                      name=None,
