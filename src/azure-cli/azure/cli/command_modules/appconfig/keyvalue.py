@@ -674,7 +674,7 @@ def list_key(cmd,
         raise CLIErrors.MutuallyExclusiveArgumentError("Please provide only one of these arguments: '--fields' or '--resolve-keyvault'. See 'az appconfig kv list -h' for examples.")
 
     if snapshot and (key or label or datetime):
-        raise CLIErrors.MutuallyExclusiveArgumentError("snapshot cannot be specified with key, label, or datetime filters.")
+        raise CLIErrors.MutuallyExclusiveArgumentError("'snapshot' cannot be specified with 'key', 'label', or 'datetime' filters.")
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 

@@ -16,7 +16,7 @@ from azure.cli.core.commands.validators import \
     get_default_location_from_resource_group
 from ._constants import ImportExportProfiles
 
-from ._validators import (validate_appservice_name_or_id,
+from ._validators import (validate_appservice_name_or_id, validate_snapshot_query_fields,
                           validate_connection_string, validate_datetime,
                           validate_export, validate_import,
                           validate_import_depth, validate_query_fields,
@@ -42,6 +42,12 @@ def load_arguments(self, _):
         help='Customize output fields for Feature Flags.',
         validator=validate_feature_query_fields,
         arg_type=get_enum_type(['name', 'key', 'label', 'locked', 'last_modified', 'state', 'description', 'conditions'])
+    )
+    snapshot_fields_arg_type = CLIArgumentType(
+        nargs='+',
+        help='Customize output fields for Snapshots',
+        validator=validate_snapshot_query_fields,
+        arg_type=get_enum_type(['name', 'etag', 'retention_period', 'filters', 'status', 'created', 'expires', 'size', 'items_count', 'size', 'items_link'])
     )
     filter_parameters_arg_type = CLIArgumentType(
         validator=validate_filter_parameters,
@@ -242,7 +248,7 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv list') as c:
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Use '\\0' for null label.")
-        c.argument('snapshot', help="List all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are listed.")
+        c.argument('snapshot', help="List all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are listed.", is_preview=True)
         c.argument('resolve_keyvault', arg_type=get_three_state_flag(), help="Resolve the content of key vault reference. This argument should NOT be specified along with --fields. Instead use --query for customized query.")
 
     with self.argument_context('appconfig kv restore') as c:
@@ -351,12 +357,14 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig snapshot show') as c:
         c.argument('snapshot_name', arg_type=snapshot_name_arg_type)
+        c.argument('fields', arg_type=snapshot_fields_arg_type)
 
     with self.argument_context('appconfig snapshot list') as c:
         c.argument('snapshot_name', options_list=['--snapshot-name', '-s'], help='If no name specified, return all snapshots by default. Support star sign as filters, for instance abc* means snapshots with abc as prefix to the name.')
         c.argument('status', help='Value used to filter snapshots by their status.')
         c.argument('top', arg_type=top_arg_type)
         c.argument('all_', options_list=['--all'], action='store_true', help="List all snapshots.")
+        c.argument('fields', arg_type=snapshot_fields_arg_type)
 
     with self.argument_context('appconfig snapshot archive') as c:
         c.argument('snapshot_name', arg_type=snapshot_name_arg_type)

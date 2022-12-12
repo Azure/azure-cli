@@ -84,11 +84,17 @@ def _build_request(
 # Requests
 def build_get_snapshot_request(
     name: str,
+    select=None,
     if_match: Optional[str] = None,
     if_none_match: Optional[str] = None,
     sync_token: Optional[str] = None,
     **kwargs: Any
 ) -> HttpRequest:
+    _params = {}
+    
+    if select is not None:
+        _params["$Select"] = Serializer().query("select", select, "[str]", div=",")
+    
     return _build_request(
         "/snapshots/{name}",
         RequestMethod.GET,
@@ -96,6 +102,7 @@ def build_get_snapshot_request(
         if_match=if_match,
         if_none_match=if_none_match,
         sync_token=sync_token,
+        params=_params,
         **kwargs
     )
 
@@ -103,17 +110,21 @@ def build_get_snapshot_request(
 def build_list_snapshots_request(
     name_filter = None,
     status_filter = None,
+    select = None,
     sync_token: Optional[str] = None,
     **kwargs: Any
 ) -> HttpRequest:
     _params = {}
     
-    if name_filter:
+    if name_filter is not None:
         _params['name'] = name_filter
 
-    if status_filter:
+    if status_filter is not None:
         _params['status'] = status_filter
     
+    if select is not None:
+        _params["$Select"] = Serializer().query("select", select, "[str]", div=",")
+
     return _build_request(
         "/snapshots",
         RequestMethod.GET,
@@ -329,6 +340,7 @@ class AppConfigSnapshotClient:
 
     def get_snapshot(self,
                      name: str,
+                     fields=None,
                      if_match: Optional[str] = None,
                      if_none_match: Optional[str] = None,
                      **kwargs: Any):
@@ -337,6 +349,7 @@ class AppConfigSnapshotClient:
 
         request = build_get_snapshot_request(
             name=name,
+            select=fields,
             if_match=if_match,
             if_none_match=if_none_match,
             sync_token=self._sync_token,
@@ -361,6 +374,7 @@ class AppConfigSnapshotClient:
     def list_snapshots(self,
                        name=None,
                        status=None,
+                       fields=None,
                        **kwargs: Any):
 
         _headers = kwargs.pop("headers", {}) or {}
@@ -368,6 +382,7 @@ class AppConfigSnapshotClient:
         initial_request = build_list_snapshots_request(
                     name_filter=name,
                     status_filter=status,
+                    select=fields,
                     sync_token=self._sync_token,
                     headers=_headers)
 
@@ -443,6 +458,7 @@ class AppConfigSnapshotClient:
     
     def list_snapshot_kv(self,
                          name: str,
+                         select,
                          **kwargs: Any):
 
         _headers = kwargs.pop("headers", {}) or {}

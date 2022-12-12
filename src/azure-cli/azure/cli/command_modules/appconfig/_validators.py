@@ -18,6 +18,7 @@ from ._utils import is_valid_connection_string, resolve_store_metadata, get_stor
 from ._models import QueryFields
 from ._constants import FeatureFlagConstants, ImportExportProfiles
 from ._featuremodels import FeatureQueryFields
+from ._snapshotmodels import SnapshotQueryFields
 
 logger = get_logger(__name__)
 
@@ -139,6 +140,16 @@ def validate_feature_query_fields(namespace):
             for feature_query_field in FeatureQueryFields:
                 if field.lower() == feature_query_field.name.lower():
                     fields.append(feature_query_field)
+        namespace.fields = fields
+
+
+def validate_snapshot_query_fields(namespace):
+    if namespace.fields:
+        fields = []
+        for field in namespace.fields:
+            for snapshot_query_field in SnapshotQueryFields:
+                if field.lower() == snapshot_query_field.name.lower():
+                    fields.append(snapshot_query_field)
         namespace.fields = fields
 
 

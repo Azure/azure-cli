@@ -4,11 +4,28 @@
 # --------------------------------------------------------------------------------------------
 
 from datetime import datetime
+from enum import Enum
 from typing import Optional
 from msrest.serialization import Model
 
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-instance-attributes
+
+
+class SnapshotQueryFields(Enum):
+    NAME = 0x001
+    STATUS = 0x002
+    FILTERS = 0x004
+    COMPOSITION_TYPE = 0x008
+    CREATED = 0x010
+    EXPIRES = 0x020
+    SIZE = 0x040
+    ITEMS_COUNT = 0x080
+    TAGS = 0x100
+    ITEMS_LINK = 0x200
+    RETENTION_PERIOD = 0x400
+    ETAG = 0x800
+    ALL = NAME | STATUS | FILTERS | COMPOSITION_TYPE | CREATED | EXPIRES | SIZE | ITEMS_COUNT | TAGS | RETENTION_PERIOD | ITEMS_LINK | ETAG
 
 
 class Snapshot(Model):

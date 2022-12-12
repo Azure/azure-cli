@@ -10,6 +10,7 @@ from azure.core.exceptions import HttpResponseError
 
 from ._constants import StatusCodes, SearchFilterOptions
 from ._snapshot_custom_client import AppConfigSnapshotClient
+from ._snapshotmodels import SnapshotQueryFields
 from ._utils import get_appconfig_data_client
 
 def _get_snapshot_client(cmd,
@@ -51,15 +52,35 @@ def create_snapshot(cmd,
 def show_snapshot(cmd,
                   snapshot_name,
                   name=None,
+                  fields=None,
                   connection_string=None,
                   auth_mode='key',
                   endpoint=None):
 
+    query_fields = []
+    
+    if fields:
+        for field in fields:
+            if field == SnapshotQueryFields.ALL:
+                query_fields.clear()
+                break
+            query_fields.append(field.name.lower())
+
     _client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        return _client.get_snapshot(snapshot_name)
+        snapshot = _client.get_snapshot(snapshot_name, fields=query_fields)
 
+        if not query_fields:
+            return snapshot
+        
+        partial_snapshot = {}
+
+        for field in query_fields:
+            partial_snapshot[field] = snapshot.__dict__[field]
+        
+        return partial_snapshot
+        
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.NOT_FOUND:
             raise ResourceNotFoundError("No snapshot with name {} was found.".format(snapshot_name))
@@ -73,6 +94,7 @@ def show_snapshot(cmd,
 def list_snapshots(cmd,
                    snapshot_name=SearchFilterOptions.ANY_KEY,
                    status=SearchFilterOptions.ANY_KEY,
+                   fields=None,
                    name=None,
                    top=None,
                    all_=None,
@@ -80,10 +102,19 @@ def list_snapshots(cmd,
                    auth_mode='key',
                    endpoint=None):
 
+    query_fields = []
+    
+    if fields:
+        for field in fields:
+            if field == SnapshotQueryFields.ALL:
+                query_fields.clear()
+                break
+            query_fields.append(field.name.lower())
+    
     _client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        snapshots_iterable = _client.list_snapshots(name=snapshot_name, status=status)
+        snapshots_iterable = _client.list_snapshots(name=snapshot_name, status=status, fields=query_fields)
 
     except HttpResponseError as exception:
         raise AzureResponseError(str(exception))
@@ -100,7 +131,14 @@ def list_snapshots(cmd,
     current_snapshot_count = 0
 
     for snapshot in snapshots_iterable:
-        snapshots.append(snapshot)
+        if query_fields:
+            partial_snapshot = {}
+            for field in query_fields:
+                partial_snapshot[field] = snapshot.__dict__[field]
+            snapshots.append(partial_snapshot)
+        else:
+            snapshots.append(snapshot)
+        
         current_snapshot_count += 1
 
         if current_snapshot_count >= top:
