@@ -35,11 +35,11 @@ class RequestMethod:
 
 
 _ERROR_MAP = {
-            401: ClientAuthenticationError,
-            404: ResourceNotFoundError,
-            409: ResourceExistsError,
-            412: ResourceModifiedError
-        }
+    401: ClientAuthenticationError,
+    404: ResourceNotFoundError,
+    409: ResourceExistsError,
+    412: ResourceModifiedError
+}
 
 
 def _build_request(
@@ -60,7 +60,7 @@ def _build_request(
         "Accept", "application/vnd.microsoft.appconfig.keyset+json, application/json, application/problem+json"
     )
 
-     # Construct URL
+    # Construct URL
     _url = kwargs.pop("template_url", template_url_default)
     _url = _format_url_section(_url, **path_arguments)
 
@@ -68,7 +68,7 @@ def _build_request(
 
     # Construct parameters
     _params["api-version"] = _serializer.query("api_version", api_version, "str")
-        
+
     # Construct headers
     if sync_token is not None:
         _headers["Sync-Token"] = _serializer.header("sync_token", sync_token, "str")
@@ -150,8 +150,8 @@ def build_status_update_request(
 def build_put_snapshot_request(
     name,
     filters,
-    composition_type,
-    retention_period: int=None,
+    composition_type=None,
+    retention_period=None,
     tags=None,
     if_match=None,
     if_none_match=None,
@@ -166,7 +166,7 @@ def build_put_snapshot_request(
 
     request_body["filters"] = filters
 
-    if composition_type:
+    if composition_type is not None:
         if composition_type not in ("all", "group_by_key"):
             raise ValueError("Value should either be 'all' or 'group_by_key'.")
 
@@ -245,13 +245,13 @@ class AppConfigSnapshotClient:
             name,
             filters,
             composition_type=None,
-            retention_period: int = None,
+            retention_period=None,
             tags=None,
             if_match=None,
             if_none_match=None,
             **kwargs):
         """
-        Poll after a given interval (default 5s) to ensure that the snapshot is in 'ready' status. 
+        Poll after a given interval (default 5s) to ensure that the snapshot is in 'ready' status.
         The request times out after 30s by default unless specified otherwise.
         """
         timeout = kwargs.pop("timeout", 30)
@@ -295,7 +295,7 @@ class AppConfigSnapshotClient:
             name,
             filters,
             composition_type=None,
-            retention_period: int = None,
+            retention_period=None,
             tags=None,
             if_match=None,
             if_none_match=None,
@@ -322,8 +322,7 @@ class AppConfigSnapshotClient:
         response = self._client.send_request(request)
 
         if response.status_code not in [201]:
-            map_error(status_code=response.status_code,
-                      response=response, error_map=_ERROR_MAP)
+            map_error(status_code=response.status_code, response=response, error_map=_ERROR_MAP)
             error = self._deserializer.failsafe_deserialize(AppConfigError, response)
             raise HttpResponseError(response=response, model=error)
 
@@ -434,7 +433,7 @@ class AppConfigSnapshotClient:
         serialized_endpoint = self._serializer.url("endpoint", self._endpoint, 'str', skip_quote=True)
         request.url = serialized_endpoint + request.url
 
-        response =self._client.send_request(request)
+        response = self._client.send_request(request)
 
         if response.status_code not in [200]:
             map_error(status_code=response.status_code, response=response, error_map=_ERROR_MAP)
@@ -442,7 +441,7 @@ class AppConfigSnapshotClient:
             raise HttpResponseError(response=response, model=error)
 
         return Snapshot.from_json(json.loads(response.text()))
-    
+
     def list_snapshot_kv(
             self,
             name,
@@ -483,7 +482,7 @@ class AppConfigSnapshotClient:
 
     def _fetch_paged(self, initial_request, data_extraction_method, **kwargs):
         '''
-        Returns an "ItemPaged" object that takes two methods. 
+        Returns an "ItemPaged" object that takes two methods.
         One method to fetch the next page data, and another method to extract the next page link and output page data.
         '''
 
@@ -509,7 +508,7 @@ class AppConfigSnapshotClient:
             response = self._client.send_request(request)
 
             if response.status_code not in [200]:
-                map_error(status_code=response.status_code,response=response, error_map=_ERROR_MAP)
+                map_error(status_code=response.status_code, response=response, error_map=_ERROR_MAP)
                 error = self._deserializer.failsafe_deserialize(AppConfigError, response)
                 raise HttpResponseError(response=response, model=error)
 
