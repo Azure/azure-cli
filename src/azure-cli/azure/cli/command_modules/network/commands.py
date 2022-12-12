@@ -21,7 +21,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_subnets,
     cf_public_ip_addresses, cf_connection_monitor,
-    cf_public_ip_prefixes, cf_dns_references, cf_private_endpoints,
+    cf_dns_references, cf_private_endpoints,
     cf_express_route_circuit_connections,
     cf_express_route_ports, cf_app_gateway_waf_policy,
     cf_private_link_services, cf_private_endpoint_types,
@@ -156,12 +156,6 @@ def load_command_table(self, _):
     network_public_ip_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#PublicIPAddressesOperations.{}',
         client_factory=cf_public_ip_addresses
-    )
-
-    network_public_ip_prefix_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#PublicIPPrefixesOperations.{}',
-        client_factory=cf_public_ip_prefixes,
-        min_api='2018-07-01'
     )
 
     network_subnet_sdk = CliCommandType(
@@ -945,13 +939,9 @@ def load_command_table(self, _):
         self.command_table['network public-ip show'] = Show(loader=self, table_transformer=public_ip_show_table_transform)
         g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
 
-    with self.command_group('network public-ip prefix', network_public_ip_prefix_sdk, client_factory=cf_public_ip_prefixes) as g:
-        g.custom_command('create', 'create_public_ip_prefix')
-        g.command('delete', 'begin_delete')
-        g.custom_command('list', 'list_public_ip_prefixes')
-        g.show_command('show')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_public_ip_prefix')
-
+    with self.command_group('network public-ip prefix'):
+        from azure.cli.command_modules.network.custom import PublicIpPrefixCreate
+        self.command_table['network public-ip prefix create'] = PublicIpPrefixCreate(loader=self)
     # endregion
 
     # region RouteFilters

@@ -92,10 +92,6 @@ def cf_public_ip_addresses(cli_ctx, _):
     return network_client_factory(cli_ctx).public_ip_addresses
 
 
-def cf_public_ip_prefixes(cli_ctx, _):
-    return network_client_factory(cli_ctx).public_ip_prefixes
-
-
 def cf_subnets(cli_ctx, _):
     return network_client_factory(cli_ctx).subnets
 
