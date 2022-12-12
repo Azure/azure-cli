@@ -6,7 +6,7 @@
 import json
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer
 from azure.core.exceptions import HttpResponseError
-from azure.cli.core.azclierror import CLIInternalError
+from azure.cli.core.azclierror import ArgumentUsageError
 
 class TestMonitorDiagnosticSettings(ScenarioTest):
     @ResourceGroupPreparer(location='southcentralus')
@@ -135,7 +135,7 @@ class TestMonitorDiagnosticSettings(ScenarioTest):
                      self.check('logAnalyticsDestinationType', 'Dedicated')
                  ])
 
-        with self.assertRaises(CLIInternalError):
+        with self.assertRaises(ArgumentUsageError):
             self.cmd('monitor diagnostic-settings create -n test02 --resource {resource_id} --storage-account {sa} --export-to-resource-specific -o json')
 
 

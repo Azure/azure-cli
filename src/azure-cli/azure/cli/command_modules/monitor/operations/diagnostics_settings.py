@@ -10,7 +10,7 @@ from ..aaz.latest.monitor.diagnostic_settings import Delete as _DiagnosticSettin
 from ..aaz.latest.monitor.diagnostic_settings.categories import List as _DiagnosticSettingsCategoryList
 from ..aaz.latest.monitor.diagnostic_settings.categories import Show as _DiagnosticSettingsCategoryShow
 from knack.util import CLIError
-from azure.cli.core.azclierror import CLIInternalError
+from azure.cli.core.azclierror import ArgumentUsageError
 
 
 def create_resource_parameters(arg_schema, arg_group=None):
@@ -151,7 +151,7 @@ class DiagnosticSettingsCreate(_DiagnosticSettingsCreate):
         if has_value(export_to_resource_specific) and export_to_resource_specific:
             args.log_analytics_destination_type = 'Dedicated'
             if not has_value(workspace):
-                raise CLIInternalError('usage error: --workspace and --export-to-specific-resource')
+                raise ArgumentUsageError('usage error: --workspace and --export-to-specific-resource')
         else:
             args.log_analytics_destination_type = None
 
