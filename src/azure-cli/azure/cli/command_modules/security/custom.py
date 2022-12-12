@@ -37,9 +37,12 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError)
 from msrestazure.tools import resource_id
 from msrestazure.azure_exceptions import CloudError
+from knack.log import get_logger
 from ._utils import (
     run_cli_cmd
 )
+
+logger = get_logger(__name__)
 
 # --------------------------------------------------------------------------------------------
 # Security Tasks
@@ -736,16 +739,17 @@ def get_security_sub_assessment(cmd, client, resource_name, assessment_name, ass
 
 def list_security_adaptive_application_controls(client):
 
-    return client.adaptive_application_controls.list()
+    return client.list()
 
 
-def get_security_adaptive_application_controls(client, group_name):
+def get_security_adaptive_application_controls(client, group_name, location=None):
 
-    for loc in client.locations.list():
-        client._config.asc_location = loc.name  # pylint: disable=protected-access
+    if location is None:
+        default_location = "centralus"
+        logger.warning("Please be aware that default location '%s' used. Use can use 'list' operation to get all resources and locations", default_location)
+        return client.get("centralus", group_name=group_name)
 
-    return client.adaptive_application_controls.get(client._config.asc_location,  # pylint: disable=protected-access
-                                                    group_name=group_name)
+    return client.get(location, group_name=group_name)
 
 
 # --------------------------------------------------------------------------------------------
