@@ -6,7 +6,7 @@
 import json
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer
 from azure.core.exceptions import HttpResponseError
-from knack.util import CLIError
+from azure.cli.core.azclierror import CLIInternalError
 
 class TestMonitorDiagnosticSettings(ScenarioTest):
     @ResourceGroupPreparer(location='southcentralus')
@@ -118,7 +118,8 @@ class TestMonitorDiagnosticSettings(ScenarioTest):
                  checks=self.check('name', 'test01'))
 
     @ResourceGroupPreparer(location='southcentralus')
-    def test_monitor_diagnostic_settings_workspace(self, resource_group):
+    @StorageAccountPreparer(location='southcentralus')
+    def test_monitor_diagnostic_settings_workspace(self, resource_group, storage_account):
 
         self.kwargs.update({
             'nsg': self.create_random_name(prefix='nsg', length=16),
@@ -128,14 +129,14 @@ class TestMonitorDiagnosticSettings(ScenarioTest):
         self.kwargs['resource_id'] = self.cmd('network nsg show -n {nsg} -g {rg}').get_output_in_json()['id']
         self.cmd('monitor log-analytics workspace create -g {rg} -n {ws}')
 
-        self.cmd('monitor diagnostic-settings create -n test01 --resource {resource_id} --workspace {ws} --export-to-resource-specific -o json',
+        self.cmd('monitor diagnostic-settings create -n test01 --resource {resource_id} --storage-account {sa} --workspace {ws} --export-to-resource-specific -o json',
                  checks=[
                      self.check('name', 'test01'),
                      self.check('logAnalyticsDestinationType', 'Dedicated')
                  ])
 
-        with self.assertRaises(CLIError):
-            self.cmd('monitor diagnostic-settings create -n test02 --resource {resource_id} --export-to-resource-specific -o json')
+        with self.assertRaises(CLIInternalError):
+            self.cmd('monitor diagnostic-settings create -n test02 --resource {resource_id} --storage-account {sa} --export-to-resource-specific -o json')
 
 
 if __name__ == '__main__':
