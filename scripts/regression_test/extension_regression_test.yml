@@ -37,8 +37,8 @@ jobs:
           git config --global user.email "AzPyCLI@microsoft.com"
           git config --global user.name "Azure CLI Team"
           git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli-extensions.git
-          git checkout -b extension_regression_test_$(Build.BuildId)
-          git push --set-upstream azclibot extension_regression_test_$(Build.BuildId)
+          git checkout -b regression_test_$(Build.BuildId)
+          git push --set-upstream azclibot regression_test_$(Build.BuildId)
 
 - job: CLIExtensionRegressionTest
   displayName: CLI Extension Regression Test
@@ -96,7 +96,7 @@ jobs:
         git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli-extensions.git
 
         git fetch azclibot
-        git checkout -b extension_regression_test_$(Build.BuildId) azclibot/extension_regression_test_$(Build.BuildId)
+        git checkout -b regression_test_$(Build.BuildId) azclibot/regression_test_$(Build.BuildId)
   - template: ../../.azure-pipelines/templates/azdev_setup.yml
     parameters:
       CLIExtensionRepoPath: ./azure-cli-extensions
@@ -133,13 +133,13 @@ jobs:
   - task: PublishBuildArtifacts@1
     condition: and(succeededOrFailed(), eq(variables.publishErrorModules, 'true'))
     inputs:
-      PathtoPublish: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_error_modules.txt'
-      ArtifactName: 'test_results_error_modules_$(Instance_idx).txt'
+      PathtoPublish: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_error_modules_$(Instance_idx).txt'
+      ArtifactName: 'error_modules'
       publishLocation: 'Container'
   - task: PublishBuildArtifacts@1
     condition: and(succeededOrFailed(), eq(variables.publishFailureTests, 'true'))
     inputs:
-      PathtoPublish: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_failure_tests.txt'
-      ArtifactName: 'test_results_failure_tests_$(Instance_idx).txt'
+      PathtoPublish: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_failure_tests_$(Instance_idx).txt'
+      ArtifactName: 'failure_tests'
       publishLocation: 'Container'
 

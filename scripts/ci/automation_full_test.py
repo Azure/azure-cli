@@ -277,12 +277,18 @@ def git_restore(file_path):
         logger.warning(err)
 
 
-def git_push(message):
+def git_push(message, modules=[]):
     out = subprocess.Popen(["git", "status"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, _ = out.communicate()
     if "nothing to commit, working tree clean" in str(stdout):
         return
     try:
+        build_id = os.getenv("BUILD_BUILDID")
+        branch_name = f"regression_test_{build_id}"
+        if modules:
+            module_name = '_'.join(modules)
+            branch_name = f"regression_test_{build_id}_{module_name}"
+            run_command(["git", "checkout", "-b"])
         run_command(["git", "add", "src/*"], check_return_code=True)
         run_command(["git", "commit", "-m", message], check_return_code=True)
     except RuntimeError as ex:
@@ -292,7 +298,7 @@ def git_push(message):
         try:
             run_command(["git", "fetch"], check_return_code=True)
             run_command(["git", "pull", "--rebase"], check_return_code=True)
-            run_command(["git", "push"], check_return_code=True)
+            run_command(["git", "push", "azclibot", branch_name], check_return_code=True)
 
             logger.info("git push all recording files")
             break
@@ -314,23 +320,22 @@ def get_failed_tests(test_result_fp):
             if failures:
                 logger.info(f"failed testcase attributes: {testcase.attrib}")
                 test_case = testcase.attrib['name']
+                test_case_class = testcase.attrib['classname'] + '.' + test_case
                 recording_folder = os.path.join(os.path.dirname(testcase.attrib['file']), 'recordings')
-                failed_tests[test_case] = os.path.join(recording_folder, test_case + '.yaml')
-                test_results_failure_tests_fp = os.path.join(azdev_test_result_dir, 'test_results_failure_tests.txt')
-                with open(test_results_failure_tests_fp, 'a') as fp:
-                    fp.write(testcase.attrib['file'])
+                failed_tests[test_case_class] = os.path.join(recording_folder, test_case + '.yaml')
     return failed_tests
 
 
-def process_test(cmd, azdev_test_result_fp, live_rerun=False):
+def process_test(cmd, azdev_test_result_fp, live_rerun=False, modules=[]):
     error_flag = run_command(cmd)
     if not error_flag or not live_rerun:
         return error_flag
     if not os.path.exists(azdev_test_result_fp):
         logger.warning(f"{cmd} failed directly. The related module can't work!")
-        test_results_error_modules_fp = os.path.join(azdev_test_result_dir, 'test_results_error_modules.txt')
-        with open(test_results_error_modules_fp, 'a') as fp:
-            fp.write(cmd)
+        if modules:
+            test_results_error_modules_fp = os.path.join(azdev_test_result_dir, f'test_results_error_modules_{instance_idx}.txt')
+            with open(test_results_error_modules_fp, 'a') as fp:
+                fp.write(','.join(modules)+"\n")
         return error_flag
     # drop the original `--pytest-args` and add new arguments
     cmd = cmd[:-2] + ['--lf', '--live', '--pytest-args', '-o junit_family=xunit1']
@@ -340,10 +345,13 @@ def process_test(cmd, azdev_test_result_fp, live_rerun=False):
         failed_tests = get_failed_tests(azdev_test_result_fp)
         for (test, file) in failed_tests.items():
             git_restore(file)
+            test_results_failure_tests_fp = os.path.join(azdev_test_result_dir, f'test_results_failure_tests_{instance_idx}.txt')
+            with open(test_results_failure_tests_fp, 'a') as fp:
+                fp.write(test + "\n")
 
     # save live run recording changes to git
     commit_message = f"Rerun tests from instance {instance_idx}. See {os.path.basename(azdev_test_result_fp)} for details"
-    git_push(commit_message)
+    git_push(commit_message, modules=modules)
     return False
 
 
@@ -456,9 +464,9 @@ class AutomaticScheduling(object):
             error_flag = install_extension(module)
             if not error_flag:
                 azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{module}.xml")
-                cmd = ['azdev', 'test', '--discover' , '--no-exitfirst', '--verbose', module,
+                cmd = ['azdev', 'test', module, '--discover', '--no-exitfirst', '--verbose',
                        '--xml-path', azdev_test_result_fp, '--pytest-args', '"--durations=10"']
-                error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
+                error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests, modules=[module])
             remove_extension(module)
             global_error_flag = global_error_flag or error_flag
         return global_error_flag
