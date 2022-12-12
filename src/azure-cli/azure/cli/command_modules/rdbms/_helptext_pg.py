@@ -100,28 +100,32 @@ examples:
     text: >
       # create keyvault
 
-      az keyvault create -g testGroup -n testVault --location testLocation --enable-purge-protection true
+      az keyvault create -g testGroup -n testVault --location testLocation \\
+        --enable-purge-protection true
 
 
-      # create key in keyvault
+      # create key in keyvault and save its key identifier
 
-      az keyvault key create --name testKey -p software --vault-name testVault
+      keyIdentifier=$(az keyvault key create --name testKey -p software \\
+        --vault-name testVault --query key.kid -o tsv)
 
 
-      # create identity
+      # create identity and save its principalId
 
-      az identity create -g testGroup --name testIdentity --location testLocation
+      identityPrincipalId=$(az identity create -g testGroup --name testIdentity \\
+        --location testLocation --query principalId -o tsv)
 
 
       # add testIdentity as an access policy with key permissions 'Wrap Key', 'Unwrap Key', 'Get' and 'List' inside testVault
 
-      az keyvault set-policy -g testGroup -n testVault --object-id '<principalID of testIdentity>' --key-permissions wrapKey unwrapKey get list
+      az keyvault set-policy -g testGroup -n testVault --object-id $identityPrincipalId \\
+        --key-permissions wrapKey unwrapKey get list
 
 
       # create flexible server with data encryption enabled
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation \\
-        --key '<key identifier of testKey>' --identity testIdentity
+        --key $keyIdentifier --identity testIdentity
 """
 
 helps['postgres flexible-server show'] = """
@@ -156,8 +160,16 @@ examples:
     text: az postgres flexible-server update --resource-group testGroup --name testserver -p password123
   - name: Change key/identity for data encryption. Data encryption cannot be enabled post server creation, this will only update the key/identity.
     text: >
+      # get key identifier of the existing key
+
+      newKeyIdentifier=$(az keyvault key show --vault-name testVault --name testKey \\
+        --query key.kid -o tsv)
+
+
+      # update server with new key/identity
+
       az postgres flexible-server update --resource-group testGroup --name testserver \\
-        --key '<key identifier of newKey>' --identity newIdentity
+        --key $newKeyIdentifier --identity newIdentity
 """
 
 helps['postgres flexible-server restore'] = """
