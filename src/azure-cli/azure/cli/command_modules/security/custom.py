@@ -747,7 +747,7 @@ def get_security_adaptive_application_controls(client, group_name, location=None
     if location is None:
         default_location = "centralus"
         logger.warning("Please be aware that default location '%s' used. Use can use 'list' operation to get all resources and locations", default_location)
-        return client.get("centralus", group_name=group_name)
+        return client.get(default_location, group_name=group_name)
 
     return client.get(location, group_name=group_name)
 
