@@ -116,7 +116,7 @@ DEPENDENCIES = [
     'azure-mgmt-relay~=0.1.0',
     'azure-mgmt-resource==21.1.0b1',
     'azure-mgmt-search~=8.0',
-    'azure-mgmt-security==2.0.0b1',
+    'azure-mgmt-security==3.0.0',
     'azure-mgmt-servicebus~=8.1.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
     'azure-mgmt-servicelinker==1.0.0',
