@@ -11,6 +11,9 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "network application-gateway waf-policy custom-rule match-condition add",
+)
 class Add(AAZCommand):
     """Add a match condition to an application gateway WAF policy custom rule.
 
@@ -64,10 +67,9 @@ class Add(AAZCommand):
         _args_schema.values = AAZListArg(
             options=["--values"],
             help="Space-separated list of values to match.",
-            required=True,
         )
-        _args_schema.match_variables = AAZListArg(
-            options=["--match-variables"],
+        _args_schema.variables = AAZListArg(
+            options=["--variables"],
             help="Space-separated list of variables to use when matching. Variable values: RemoteAddr, RequestMethod, QueryString, PostArgs, RequestUri, RequestHeaders, RequestBody, RequestCookies.",
             required=True,
         )
@@ -89,6 +91,7 @@ class Add(AAZCommand):
             options=["-n", "--name"],
             help="Name of the WAF policy rule.",
             required=True,
+            id_part="child_name_1",
             fmt=AAZStrArgFormat(
                 max_length=128,
             ),
@@ -97,10 +100,10 @@ class Add(AAZCommand):
         values = cls._args_schema.values
         values.Element = AAZStrArg()
 
-        match_variables = cls._args_schema.match_variables
-        match_variables.Element = AAZObjectArg()
+        variables = cls._args_schema.variables
+        variables.Element = AAZObjectArg()
 
-        _element = cls._args_schema.match_variables.Element
+        _element = cls._args_schema.variables.Element
         _element.selector = AAZStrArg(
             options=["selector"],
             help="The selector of match variable.",
@@ -368,7 +371,7 @@ class Add(AAZCommand):
                 typ=AAZObjectType
             )
             _builder.set_prop("matchValues", AAZListType, ".values", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("matchVariables", AAZListType, ".match_variables", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("matchVariables", AAZListType, ".variables", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("negationConditon", AAZBoolType, ".negate")
             _builder.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("transforms", AAZListType, ".transforms")
