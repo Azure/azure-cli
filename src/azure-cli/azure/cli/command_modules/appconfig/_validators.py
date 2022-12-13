@@ -351,6 +351,6 @@ def validate_snapshot_filters(namespace):
                 filter_parameters.append(parsed_filter)
 
             except ValueError:
-                raise InvalidArgumentValueError("Parameter must be an escaped JSON. {} is not a valid JSON object.".format(filter_param))
+                raise InvalidArgumentValueError("Parameter must be an escaped JSON object. {} is not a valid JSON object.".format(filter_param))
 
         namespace.filters = filter_parameters

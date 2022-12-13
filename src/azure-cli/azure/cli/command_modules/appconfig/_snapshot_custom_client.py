@@ -7,13 +7,11 @@
 
 from azure.appconfiguration import AzureAppConfigurationClient, ConfigurationSetting
 from azure.appconfiguration._generated.models import Error as AppConfigError
-from enum import Enum
 from azure.core.rest import HttpRequest
 from azure.core.paging import ItemPaged
 from azure.core.utils import case_insensitive_dict
 from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, ResourceNotFoundError, HttpResponseError, ResourceModifiedError, map_error
 from msrest import Serializer
-from typing import Dict, List, Optional, Any
 import json
 
 from ._constants import SnapshotConstants
@@ -57,7 +55,7 @@ def _build_request(
 
     api_version = kwargs.pop("api_version", SnapshotConstants.API_VERSION)
     accept = _headers.pop(
-        "Accept", "application/vnd.microsoft.appconfig.keyset+json, application/json, application/problem+json"
+        "Accept", "application/json, application/problem+json"
     )
 
     # Construct URL
@@ -224,14 +222,6 @@ def build_list_snapshot_keys_request(
     )
 
 
-def _convert_request(request, files=None):
-    data = request.content if not files else None
-    request = HttpRequest(method=request.method, url=request.url, headers=request.headers, data=data)
-    if files:
-        request.set_formdata_body(files)
-    return request
-
-
 def _format_url_section(template, **kwargs):
     components = template.split("/")
     while components:
@@ -331,8 +321,6 @@ class AppConfigSnapshotClient:
             headers=_headers
         )
 
-        request = _convert_request(request)
-
         serialized_endpoint = self._serializer.url("endpoint", self._endpoint, 'str', skip_quote=True)
         request.url = serialized_endpoint + request.url
 
@@ -363,8 +351,6 @@ class AppConfigSnapshotClient:
             sync_token=self._sync_token,
             headers=_headers
         )
-
-        request = _convert_request(request)
 
         serialized_endpoint = self._serializer.url("endpoint", self._endpoint, 'str', skip_quote=True)
         request.url = serialized_endpoint + request.url
@@ -418,8 +404,6 @@ class AppConfigSnapshotClient:
             headers=_headers
         )
 
-        request = _convert_request(request)
-
         serialized_endpoint = self._serializer.url("endpoint", self._endpoint, 'str', skip_quote=True)
         request.url = serialized_endpoint + request.url
 
@@ -448,8 +432,6 @@ class AppConfigSnapshotClient:
             sync_token=self._sync_token,
             headers=_headers
         )
-
-        request = _convert_request(request)
 
         serialized_endpoint = self._serializer.url("endpoint", self._endpoint, 'str', skip_quote=True)
         request.url = serialized_endpoint + request.url
@@ -512,17 +494,16 @@ class AppConfigSnapshotClient:
         def build_next_page_data_request(next_page_link=None):
             if not next_page_link:
                 return initial_request
-            else:
-                return _build_request(
-                    next_page_link,
-                    RequestMethod.GET,
-                    sync_token=self._sync_token,
-                    **kwargs)
+
+            return _build_request(
+                next_page_link,
+                RequestMethod.GET,
+                sync_token=self._sync_token,
+                **kwargs)
 
         # Fetch next page data
         def get_next_page_data(next_page_link=None):
             request = build_next_page_data_request(next_page_link)
-            request = _convert_request(request)
 
             serialized_endpoint = self._serializer.url(
                 "endpoint", self._endpoint, 'str', skip_quote=True)

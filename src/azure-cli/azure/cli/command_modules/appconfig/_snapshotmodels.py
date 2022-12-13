@@ -5,7 +5,6 @@
 
 from datetime import datetime
 from enum import Enum
-from msrest.serialization import Model
 
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-instance-attributes
