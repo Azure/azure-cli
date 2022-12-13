@@ -7,6 +7,7 @@ import abc
 from collections import OrderedDict
 from ._base import AAZBaseType, AAZValuePatch, AAZUndefined
 from ._field_value import AAZObject, AAZDict, AAZFreeFormDict, AAZList, AAZSimpleValue
+from ._utils import to_snack_case
 from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, AAZValuePrecisionLossError, \
     AAZInvalidFieldError
 
@@ -30,6 +31,9 @@ class AAZSimpleType(AAZBaseType):
             # data can be None or AAZSimpleValue == None
             if self._nullable:
                 return None
+            return AAZValuePatch.build(self)
+
+        if data == AAZUndefined:
             return AAZValuePatch.build(self)
 
         if isinstance(data, AAZSimpleValue):
@@ -64,6 +68,9 @@ class AAZFloatType(AAZSimpleType):
             # data can be None or AAZSimpleValue == None
             if self._nullable:
                 return None
+            return AAZValuePatch.build(self)
+
+        if data == AAZUndefined:
             return AAZValuePatch.build(self)
 
         if isinstance(data, AAZSimpleValue):
@@ -164,6 +171,11 @@ class AAZObjectType(AAZBaseType):
             return key
         if key in self._fields_alias_map:
             return self._fields_alias_map[key]
+        if isinstance(key, str) and key != key.lower():
+            # if key is not found convert camel case key to snack case key
+            key = to_snack_case(key)
+            if key in self._fields:
+                return key
         return None
 
     def process_data(self, data, **kwargs):
@@ -171,6 +183,9 @@ class AAZObjectType(AAZBaseType):
             # data can be None or AAZSimpleValue == None
             if self._nullable:
                 return None
+            return AAZValuePatch.build(self)
+
+        if data == AAZUndefined:
             return AAZValuePatch.build(self)
 
         if isinstance(data, AAZObject) and data._is_patch:
@@ -266,6 +281,9 @@ class AAZBaseDictType(AAZBaseType):
                 return None
             return AAZValuePatch.build(self)
 
+        if data == AAZUndefined:
+            return AAZValuePatch.build(self)
+
         if isinstance(data, self._ValueCls) and data._is_patch:
             # use value patch
             result = AAZValuePatch.build(self)
@@ -358,6 +376,9 @@ class AAZListType(AAZBaseType):
             # data can be None or AAZSimpleValue == None
             if self._nullable:
                 return None
+            return AAZValuePatch.build(self)
+
+        if data == AAZUndefined:
             return AAZValuePatch.build(self)
 
         if isinstance(data, AAZList) and data._is_patch:

@@ -13,7 +13,7 @@ from knack.util import status_tag_messages
 
 from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgAction, AAZFreeFormDictArgAction, \
     AAZListArgAction, AAZGenericUpdateAction, AAZGenericUpdateForceStringAction
-from ._base import AAZBaseType, AAZUndefined, AAZBaseValue
+from ._base import AAZBaseType, AAZUndefined
 from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZFloatType, AAZListType, AAZDictType, \
     AAZSimpleType, AAZFreeFormDictType
 from ._field_value import AAZObject
@@ -630,10 +630,3 @@ class AAZGenericUpdateRemoveArg(AAZGenericUpdateArg):
         class Action(AAZGenericUpdateAction):
             ACTION_NAME = "remove"
         return Action
-
-
-def has_value(arg_value):
-    if isinstance(arg_value, AAZBaseValue):
-        # handle patch value for list, object, dict
-        return arg_value.to_serialized_data() != AAZUndefined
-    return arg_value != AAZUndefined

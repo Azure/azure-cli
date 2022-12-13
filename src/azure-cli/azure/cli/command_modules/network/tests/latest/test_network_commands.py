@@ -2868,7 +2868,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         self.cmd('network express-route peering create -g {rg} --circuit-name {er} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30 --advertised-public-prefixes 104.0.0.0/30 --customer-asn 10000 --routing-registry-name level3')
         self.cmd('network express-route peering show -g {rg} --circuit-name {er} -n MicrosoftPeering', checks=[
             self.check('microsoftPeeringConfig.advertisedPublicPrefixes[0]', '104.0.0.0/30'),
-            self.check('microsoftPeeringConfig.customerAsn', 10000),
+            self.check('microsoftPeeringConfig.customerASN', 10000),
             self.check('microsoftPeeringConfig.routingRegistryName', 'LEVEL3')
         ])
 
@@ -3081,10 +3081,10 @@ class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
         self.cmd('network express-route peering update -g {rg} --circuit-name {er} -n MicrosoftPeering --ip-version ipv6 --primary-peer-subnet 2001:db00::/126 --secondary-peer-subnet 2002:db00::/126 --advertised-public-prefixes 2001:db00::/126 --customer-asn 100001 --routing-registry-name level3')
         self.cmd('network express-route peering show -g {rg} --circuit-name {er} -n MicrosoftPeering', checks=[
             self.check('microsoftPeeringConfig.advertisedPublicPrefixes[0]', '104.0.0.0/30'),
-            self.check('microsoftPeeringConfig.customerAsn', 10000),
+            self.check('microsoftPeeringConfig.customerASN', 10000),
             self.check('microsoftPeeringConfig.routingRegistryName', 'LEVEL3'),
             self.check('ipv6PeeringConfig.microsoftPeeringConfig.advertisedPublicPrefixes[0]', '2001:db00::/126'),
-            self.check('ipv6PeeringConfig.microsoftPeeringConfig.customerAsn', 100001),
+            self.check('ipv6PeeringConfig.microsoftPeeringConfig.customerASN', 100001),
             self.check('ipv6PeeringConfig.state', 'Enabled')
         ])
         self.cmd('network express-route peering get-stats -g {rg} --circuit-name {er} -n MicrosoftPeering', checks=[
@@ -3134,7 +3134,7 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_peer_connection')
     def test_network_express_route_peer_connection(self, resource_group):
         from msrestazure.azure_exceptions import CloudError
-
+        from azure.core.exceptions import ResourceNotFoundError
         self.kwargs.update({
             'er1': 'er1',
             'er2': 'er2',
@@ -3148,7 +3148,7 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
         self.cmd('network express-route peering create -g {rg} --circuit-name {er2} --peering-type AzurePrivatePeering --peer-asn 10002 --vlan-id 102 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30')
 
         # cannot create it, so this test will fail due to resource is not found.
-        with self.assertRaisesRegex(SystemExit, '3'):
+        with self.assertRaisesRegex(ResourceNotFoundError, 'NotFound'):
             self.cmd('network express-route peering peer-connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {peconn12}')
         self.cmd('network express-route peering peer-connection list -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering')
 
@@ -5074,9 +5074,11 @@ class NetworkVirtualHubRouter(ScenarioTest):
 
         self.cmd('network routeserver peering show -g {rg} --routeserver {vrouter} -n {peer}')
 
-        self.cmd('network routeserver peering list-advertised-routes -g {rg} --routeserver {vrouter} -n {peer}')
+        self.cmd('network routeserver peering list-advertised-routes -g {rg} --routeserver {vrouter} -n {peer}',
+                 checks=[self.check("contains(keys(@), 'RouteServiceRole_IN_0')", True)])
 
-        self.cmd('network routeserver peering list-learned-routes -g {rg} --routeserver {vrouter} -n {peer}')
+        self.cmd('network routeserver peering list-learned-routes -g {rg} --routeserver {vrouter} -n {peer}',
+                 checks=[self.check("contains(keys(@), 'RouteServiceRole_IN_1')", True)])
 
         # unable to update unless the ASN's range is required
         # self.cmd('network routeserver peering update -g {rg} --routeserver {vrouter} -n {peer} --peer-ip 10.0.0.0')
@@ -5972,6 +5974,7 @@ class NetworkServiceAliasesScenarioTest(ScenarioTest):
 
 class NetworkBastionHostScenarioTest(ScenarioTest):
 
+    @unittest.skip('az network bastion update: InvalidRequestContent The request content was invalid and could not be deserialized: Required property `name` not found in `sku`.' )
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='test_network_bastion_host')
     def test_network_bastion_host_create(self, resource_group):
@@ -6285,6 +6288,21 @@ class NetworkExtendedLocation(ScenarioTest):
         self.cmd('network vnet-gateway create -g {rg} -n vnet-gateway --vnet {vnet} --public-ip-address {ip1} '
                  '--edge-zone {edge_name}',
                  checks=self.check('vnetGateway.extendedLocation.name', '{edge_name}'))
+
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_local_gateway', location='eastus2euap')
+    def test_network_vnet_gateway_local_gateway(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'vnet': 'vnet',
+            'gateway_type' : 'LocalGateway',
+            'edge_name': 'microsoftrrdclab3',
+        })
+        self.cmd('az network vnet create -g {rg} -n {vnet} --location eastus2euap --address-prefix 10.30.0.0/16 --edge-zone {edge_name}')
+        self.kwargs['edge_zone_vnet_id'] = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()['id']
+        self.cmd('network vnet-gateway create -g {rg} -n vnet-gateway --vnet {vnet} --gateway-type {gateway_type} --edge-zone {edge_name} '
+                 '--edge-zone-vnet-id {edge_zone_vnet_id}',
+                 checks=self.check('vnetGateway.vNetExtendedLocationResourceId', '{edge_zone_vnet_id}'))     
 
     @ResourceGroupPreparer(name_prefix='test_network_private_endpoint_edge_zone', location='eastus2euap')
     def test_network_private_endpoint_edge_zone(self, resource_group):
