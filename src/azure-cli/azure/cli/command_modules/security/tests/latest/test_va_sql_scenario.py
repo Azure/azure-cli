@@ -14,9 +14,9 @@ from .preparers import (SqlVirtualMachinePreparer)
 
 
 class VulnerabilityAssessmentForSqlTests(LiveScenarioTest):
-    @ResourceGroupPreparer(location='eastus')
-    @SqlVirtualMachinePreparer(location='eastus')
-    @LogAnalyticsWorkspacePreparer(location='eastus')
+    @ResourceGroupPreparer()
+    @SqlVirtualMachinePreparer()
+    @LogAnalyticsWorkspacePreparer()
     def test_va_sql_scenario(self, resource_group, resource_group_location, sqlvm, laworkspace):
 
         # Use prepared sql virtual machine and log analytics workspace to setup OMS agent with VA management pack
