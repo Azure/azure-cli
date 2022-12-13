@@ -142,5 +142,5 @@ class SnapshotListResult:
 
         return cls(
             items=[Snapshot.from_json(snapshot) for snapshot in data_dict.get("items", [])],
-            next_link=data_dict.get("next_link", None)
+            next_link=data_dict.get("@nextLink", None)
         )
