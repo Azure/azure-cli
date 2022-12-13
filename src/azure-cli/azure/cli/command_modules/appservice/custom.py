@@ -1136,8 +1136,10 @@ def list_function_app_runtimes(cmd, os_type=None):
         return windows_stacks
     return {WINDOWS_OS_NAME: windows_stacks, LINUX_OS_NAME: linux_stacks}
 
+
 def delete_logic_app(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'delete', slot)
+
 
 def delete_function_app(cmd, resource_group_name, name, keep_empty_plan=None, slot=None):
     client = web_client_factory(cmd.cli_ctx)
