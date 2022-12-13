@@ -90,6 +90,7 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="List of match conditions.",
             required=True,
+            default=[],
         )
 
         match_conditions = cls._args_schema.match_conditions

@@ -58,7 +58,7 @@ class Remove(AAZCommand):
         )
         _args_schema.index = AAZIntArg(
             options=["--index"],
-            help="Index of match condition. If no index is provided, the default behavior is `append`.",
+            help="Index of the match condition to remove.",
             required=True,
         )
         _args_schema.name = AAZStrArg(

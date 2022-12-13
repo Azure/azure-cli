@@ -422,26 +422,9 @@ def load_command_table(self, _):
                                  client_factory=cf_app_gateway_waf_policy,
                                  custom_func_name='update_waf_policy_setting')
 
-    with self.command_group('network application-gateway waf-policy custom-rule', network_ag_waf_sdk,
-                            client_factory=cf_app_gateway_waf_policy,
-                            min_api='2018-12-01') as g:
-        g.custom_command('create', 'create_waf_custom_rule')
-        g.custom_command('delete', 'delete_waf_custom_rule')
-        g.custom_command('list', 'list_waf_custom_rules')
-        g.custom_show_command('show', 'show_waf_custom_rule')
-        g.generic_update_command('update',
-                                 command_type=network_ag_waf_sdk,
-                                 client_factory=cf_app_gateway_waf_policy,
-                                 custom_func_name='update_waf_custom_rule',
-                                 child_collection_prop_name='custom_rules',
-                                 child_arg_name='rule_name')
-
-    with self.command_group('network application-gateway waf-policy custom-rule match-condition', network_ag_waf_sdk,
-                            client_factory=cf_app_gateway_waf_policy,
-                            min_api='2018-12-01') as g:
-        g.custom_command('add', 'add_waf_custom_rule_match_cond')
-        g.custom_command('list', 'list_waf_custom_rule_match_cond')
-        g.custom_command('remove', 'remove_waf_custom_rule_match_cond')
+    with self.command_group("network application-gateway waf-policy custom-rule match-condition"):
+        from .custom import WAFCustomRuleMatchConditionAdd
+        self.command_table["network application-gateway waf-policy custom-rule match-condition add"] = WAFCustomRuleMatchConditionAdd(loader=self)
 
     with self.command_group('network application-gateway waf-policy managed-rule rule-set', min_api='2019-09-01') as g:
         g.custom_command('add', 'add_waf_managed_rule_set')
