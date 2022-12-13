@@ -117,8 +117,8 @@ class Update(AAZCommand):
             help="List of match conditions.",
         )
         _element.name = AAZStrArg(
-            options=["name"],
-            help="The name of the resource that is unique within a policy. This name can be used to access the resource.",
+            options=["n", "name"],
+            help="Name of the WAF policy rule.",
             nullable=True,
             fmt=AAZStrArgFormat(
                 max_length=128,
@@ -140,17 +140,18 @@ class Update(AAZCommand):
         )
 
         _element = cls._args_schema.custom_rules.Element.match_conditions.Element
-        _element.match_values = AAZListArg(
-            options=["match-values"],
-            help="Match value.",
+        _element.values = AAZListArg(
+            options=["values"],
+            help="Space-separated list of values to match.",
+            nullable=True,
         )
-        _element.match_variables = AAZListArg(
-            options=["match-variables"],
+        _element.variables = AAZListArg(
+            options=["variables"],
             help="Space-separated list of variables to use when matching. Variable values: RemoteAddr, RequestMethod, QueryString, PostArgs, RequestUri, RequestHeaders, RequestBody, RequestCookies.",
         )
-        _element.negation_conditon = AAZBoolArg(
-            options=["negation-conditon"],
-            help="Whether this is negate condition or not.",
+        _element.negate = AAZBoolArg(
+            options=["negate"],
+            help="Match the negative of the condition.",
             nullable=True,
         )
         _element.operator = AAZStrArg(
@@ -164,17 +165,17 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        match_values = cls._args_schema.custom_rules.Element.match_conditions.Element.match_values
-        match_values.Element = AAZStrArg(
+        values = cls._args_schema.custom_rules.Element.match_conditions.Element.values
+        values.Element = AAZStrArg(
             nullable=True,
         )
 
-        match_variables = cls._args_schema.custom_rules.Element.match_conditions.Element.match_variables
-        match_variables.Element = AAZObjectArg(
+        variables = cls._args_schema.custom_rules.Element.match_conditions.Element.variables
+        variables.Element = AAZObjectArg(
             nullable=True,
         )
 
-        _element = cls._args_schema.custom_rules.Element.match_conditions.Element.match_variables.Element
+        _element = cls._args_schema.custom_rules.Element.match_conditions.Element.variables.Element
         _element.selector = AAZStrArg(
             options=["selector"],
             help="The selector of match variable.",
@@ -617,9 +618,9 @@ class Update(AAZCommand):
 
             _elements = _builder.get(".properties.customRules[].matchConditions[]")
             if _elements is not None:
-                _elements.set_prop("matchValues", AAZListType, ".match_values", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("matchVariables", AAZListType, ".match_variables", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("negationConditon", AAZBoolType, ".negation_conditon")
+                _elements.set_prop("matchValues", AAZListType, ".values")
+                _elements.set_prop("matchVariables", AAZListType, ".variables", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("negationConditon", AAZBoolType, ".negate")
                 _elements.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("transforms", AAZListType, ".transforms")
 
@@ -4242,7 +4243,6 @@ class _UpdateHelper:
         _element = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.match_conditions.Element
         _element.match_values = AAZListType(
             serialized_name="matchValues",
-            flags={"required": True},
         )
         _element.match_variables = AAZListType(
             serialized_name="matchVariables",

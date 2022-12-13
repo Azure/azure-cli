@@ -49,7 +49,6 @@ class Create(AAZCommand):
             options=["--policy-name"],
             help="Name of the application gateway WAF policy.",
             required=True,
-            id_part="name",
             fmt=AAZStrArgFormat(
                 max_length=128,
             ),
@@ -97,19 +96,18 @@ class Create(AAZCommand):
         match_conditions.Element = AAZObjectArg()
 
         _element = cls._args_schema.match_conditions.Element
-        _element.match_values = AAZListArg(
-            options=["match-values"],
-            help="Match value.",
-            required=True,
+        _element.values = AAZListArg(
+            options=["values"],
+            help="Space-separated list of values to match.",
         )
-        _element.match_variables = AAZListArg(
-            options=["match-variables"],
+        _element.variables = AAZListArg(
+            options=["variables"],
             help="Space-separated list of variables to use when matching. Variable values: RemoteAddr, RequestMethod, QueryString, PostArgs, RequestUri, RequestHeaders, RequestBody, RequestCookies.",
             required=True,
         )
-        _element.negation_conditon = AAZBoolArg(
-            options=["negation-conditon"],
-            help="Whether this is negate condition or not.",
+        _element.negate = AAZBoolArg(
+            options=["negate"],
+            help="Match the negative of the condition.",
         )
         _element.operator = AAZStrArg(
             options=["operator"],
@@ -122,13 +120,13 @@ class Create(AAZCommand):
             help="Space-separated list of transforms to apply when matching. Allowed values: HtmlEntityDecode, Uppercase, Lowercase, RemoveNulls, Trim, UrlDecode, UrlEncode.",
         )
 
-        match_values = cls._args_schema.match_conditions.Element.match_values
-        match_values.Element = AAZStrArg()
+        values = cls._args_schema.match_conditions.Element.values
+        values.Element = AAZStrArg()
 
-        match_variables = cls._args_schema.match_conditions.Element.match_variables
-        match_variables.Element = AAZObjectArg()
+        variables = cls._args_schema.match_conditions.Element.variables
+        variables.Element = AAZObjectArg()
 
-        _element = cls._args_schema.match_conditions.Element.match_variables.Element
+        _element = cls._args_schema.match_conditions.Element.variables.Element
         _element.selector = AAZStrArg(
             options=["selector"],
             help="The selector of match variable.",
@@ -390,9 +388,9 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".matchConditions[]")
             if _elements is not None:
-                _elements.set_prop("matchValues", AAZListType, ".match_values", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("matchVariables", AAZListType, ".match_variables", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("negationConditon", AAZBoolType, ".negation_conditon")
+                _elements.set_prop("matchValues", AAZListType, ".values")
+                _elements.set_prop("matchVariables", AAZListType, ".variables", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("negationConditon", AAZBoolType, ".negate")
                 _elements.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("transforms", AAZListType, ".transforms")
 
@@ -3923,7 +3921,6 @@ class _CreateHelper:
         _element = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.match_conditions.Element
         _element.match_values = AAZListType(
             serialized_name="matchValues",
-            flags={"required": True},
         )
         _element.match_variables = AAZListType(
             serialized_name="matchVariables",
