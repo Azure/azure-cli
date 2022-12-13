@@ -5362,7 +5362,7 @@ class NsgRuleUpdate(_NsgRuleUpdate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
 
-        class EmptyListArgFormat(AAZListArgFormat):
+        class EmptyListArgFormat(AAZListArgFormat):  # pylint: disable=too-few-public-methods
             def __call__(self, ctx, value):
                 data = value._data
                 if has_value(data) and len(data) == 1 and data[0] == "":
@@ -5370,7 +5370,7 @@ class NsgRuleUpdate(_NsgRuleUpdate):
                     value._data = None
                 return super().__call__(ctx, value)
 
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
+        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):  # pylint: disable=too-few-public-methods
             def __call__(self, ctx, value):
                 if value._data == "":
                     logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
