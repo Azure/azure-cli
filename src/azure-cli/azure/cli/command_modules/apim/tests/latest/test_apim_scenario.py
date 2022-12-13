@@ -448,6 +448,25 @@ class ApimScenarioTest(ScenarioTest):
         
         schema_count = len(self.cmd('apim api schema list -g "{rg}" -n "{service_name}" --api-id "{graphql_api_id}"').get_output_in_json())
         self.assertEqual(schema_count, 0)
+
+        # websocket api
+        self.kwargs.update({
+            'ws_api_id': self.create_random_name('ws-api', 10),
+            'ws_display_name': 'ws API',
+            'ws_protocol': 'wss',
+            'ws_api_type': 'websocket',
+            'ws_path': 'wstestpath',
+            'ws_service_url': 'wss://httpbin.org'
+        })
+
+        # create websocket api
+        self.cmd(
+            'apim api create -g "{rg}" --service-name "{service_name}" --display-name "{ws_display_name}" --path "{ws_path}" --api-id "{ws_api_id}" --service-url "{ws_service_url}"',
+            checks=[self.check('displayName', '{ws_display_name}'),
+                    self.check('path', '{ws_path}'),
+                    self.check('serviceUrl', '{ws_service_url}'),
+                    self.check('apiType','{ws_api_type}'),
+                    self.check('protocols[0]', '{ws_protocol}')])
         
         # named value operations
         self.kwargs.update({

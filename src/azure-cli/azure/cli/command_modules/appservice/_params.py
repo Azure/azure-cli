@@ -208,7 +208,7 @@ def load_arguments(self, _):
         c.argument('logs', options_list=['--logs', '-l'], action='store_true',
                    help='Enable viewing the log stream immediately after launching the web app')
     with self.argument_context('webapp delete') as c:
-        c.argument('name', arg_type=webapp_name_arg_type, local_context_attribute=None)
+        c.argument('name', arg_type=webapp_name_arg_type, local_context_attribute=None, help='The name of the webapp')
         c.argument('keep_empty_plan', action='store_true', help='keep empty app service plan')
         c.argument('keep_metrics', action='store_true', help='keep app metrics')
         c.argument('keep_dns_registration', action='store_true', help='keep DNS registration',
