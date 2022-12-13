@@ -44,7 +44,7 @@ def _build_request(
     template_url_default,
     method,
     *,
-    path_arguments={},
+    path_arguments=None,
     if_match=None,
     if_none_match=None,
     sync_token=None,
@@ -60,7 +60,8 @@ def _build_request(
 
     # Construct URL
     _url = kwargs.pop("template_url", template_url_default)
-    _url = _format_url_section(_url, **path_arguments)
+    _path_arguments = path_arguments or {}
+    _url = _format_url_section(_url, **_path_arguments)
 
     _serializer = Serializer()
 
