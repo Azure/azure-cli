@@ -5381,26 +5381,25 @@ class NsgRuleUpdate(_NsgRuleUpdate):
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/applicationSecurityGroups/{}"
             ))
+        args_schema.destination_asgs_id._registered = False
+        args_schema.source_asgs_id._registered = False
 
         return args_schema
-
-    def _cli_arguments_loader(self):
-        args = super()._cli_arguments_loader()
-        args = [(name, arg) for (name, arg) in args if name not in ("destination_asgs_id", "source_asgs_id")]
-        return args
 
     def pre_operations(self):
         args = self.ctx.args
         if args.destination_asgs:
             destination_asg = str(args.destination_asgs[0])
-            if destination_asg == 'None' or parse_resource_id(destination_asg)["resource_name"] == '':
+            destination_asg_name = parse_resource_id(destination_asg)["resource_name"]
+            if destination_asg_name.lower() == 'none' or destination_asg_name == '':
                 args.destination_asgs_id = None
             else:
                 args.destination_asgs_id = [{"id": asg} for asg in args.destination_asgs]
 
         if args.source_asgs:
             source_asg = str(args.source_asgs[0])
-            if source_asg == 'None' or parse_resource_id(source_asg)["resource_name"] == '':
+            source_asg_name = parse_resource_id(source_asg)["resource_name"]
+            if source_asg_name.lower() == 'none' or source_asg_name == '':
                 args.source_asgs_id = None
             else:
                 args.source_asgs_id = [{"id": asg} for asg in args.source_asgs]

@@ -4321,14 +4321,23 @@ class NetworkSecurityGroupScenarioTest(ScenarioTest):
         self.kwargs.update({
             'nsg2': 'test-nsg2',
             'asg': 'test-asg1',
+            'asg2': 'test-asg2',
             'rule2': 'test-rule2',
+            'prefix': '1234',
         })
         # test --destination-asgs in nsg rule
         self.cmd('network nsg create --name {nsg2} -g {rg}')
         self.cmd('network asg create --name {asg} -g {rg}')
+        self.cmd('network asg create --name {asg2} -g {rg}')
         self.cmd('network nsg rule create -g {rg} --nsg-name {nsg2} -n {rule2} --priority 500 --source-address-prefixes Internet --destination-port-ranges 80 8080 --destination-asgs {asg} --access Allow --protocol Tcp',
                  checks=[self.check('name', '{rule2}'),
                          self.check('ends_with(@.destinationApplicationSecurityGroups[0].id, `/{asg}`)', True)])
+        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg2} -n {rule2} --destination-asgs {asg2}',
+                 checks=[self.check('name', '{rule2}'),
+                         self.check('ends_with(@.destinationApplicationSecurityGroups[0].id, `/{asg2}`)', True)])
+        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg2} -n {rule2} --destination-asgs None --destination-address-prefix {prefix}',
+                 checks=[self.check('name', '{rule2}'),
+                         self.check('destinationAddressPrefix', '{prefix}')])
 
         self.cmd('network nsg rule delete --resource-group {rg} --nsg-name {nsg} --name {rule}')
         self.cmd('network nsg rule delete --resource-group {rg} --nsg-name {nsg2} --name {rule2}')
