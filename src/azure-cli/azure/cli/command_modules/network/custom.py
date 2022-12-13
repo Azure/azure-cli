@@ -5316,7 +5316,7 @@ def _create_singular_or_plural_property(kwargs, val, singular_name, plural_name)
 def _handle_asg_property(kwargs, key, asgs):
     prefix = key.split('_', 1)[0] + '_'
     if asgs:
-        kwargs[key] = [{"id": asg} for asg in asgs]
+        kwargs[key] = [{"id": asg.id} for asg in asgs]
         if kwargs[prefix + 'address_prefix']:
             kwargs[prefix + 'address_prefix'] = ''
 
