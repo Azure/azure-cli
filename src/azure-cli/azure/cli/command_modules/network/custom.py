@@ -5357,30 +5357,53 @@ def create_nsg_rule(cmd, resource_group_name, network_security_group_name, secur
 
 
 class NsgRuleUpdate(_NsgRuleUpdate):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArgFormat, AAZResourceIdArg
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
+
+        class EmptyListArgFormat(AAZListArgFormat):
+            def __call__(self, ctx, value):
+                data = value._data
+                if has_value(data) and len(data) == 1 and data[0] == "":
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
+        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
+            def __call__(self, ctx, value):
+                if value._data == "":
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.destination_asgs = AAZListArg(
             options=['--destination-asgs'],
             arg_group="Destination",
-            help="Space-separated list of application security group names or supports one application security group name or ID.",
+            nullable=True,
+            help="Space-separated list of application security group names or supports one application security group name or ID. Use null to detach it.",
+            fmt=EmptyListArgFormat()
         )
         args_schema.destination_asgs.Element = AAZResourceIdArg(
             nullable=True,
-            fmt=AAZResourceIdArgFormat(
+            fmt=EmptyResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/applicationSecurityGroups/{}"
             )
         )
         args_schema.source_asgs = AAZListArg(
             options=['--source-asgs'],
             arg_group="Source",
-            help="Space-separated list of application security group names or IDs. Limited by backend server, temporarily this argument only supports one application security group name or ID.")
+            nullable=True,
+            help="Space-separated list of application security group names or IDs. Limited by backend server, temporarily this argument only supports one application security group name or ID. Use null to detach it.",
+            fmt=EmptyListArgFormat()
+        )
         args_schema.source_asgs.Element = AAZResourceIdArg(
             nullable=True,
-            fmt=AAZResourceIdArgFormat(
+            fmt=EmptyResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/applicationSecurityGroups/{}"
-            ))
+            )
+        )
         args_schema.destination_asgs_id._registered = False
         args_schema.source_asgs_id._registered = False
 
@@ -5388,21 +5411,19 @@ class NsgRuleUpdate(_NsgRuleUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if args.destination_asgs:
-            destination_asg = str(args.destination_asgs[0])
-            destination_asg_name = parse_resource_id(destination_asg)["resource_name"]
-            if destination_asg_name.lower() == 'none' or destination_asg_name == '':
-                args.destination_asgs_id = None
-            else:
-                args.destination_asgs_id = [{"id": asg} for asg in args.destination_asgs]
+        if has_value(args.destination_asgs):
+            args.destination_asgs_id = assign_aaz_list_arg(
+                args.destination_asgs_id,
+                args.destination_asgs,
+                element_transformer=lambda _, destination_asgs_id: {"id": destination_asgs_id}
+            )
 
-        if args.source_asgs:
-            source_asg = str(args.source_asgs[0])
-            source_asg_name = parse_resource_id(source_asg)["resource_name"]
-            if source_asg_name.lower() == 'none' or source_asg_name == '':
-                args.source_asgs_id = None
-            else:
-                args.source_asgs_id = [{"id": asg} for asg in args.source_asgs]
+        if has_value(args.source_asgs):
+            args.source_asgs_id = assign_aaz_list_arg(
+                args.source_asgs_id,
+                args.source_asgs,
+                element_transformer=lambda _, source_asgs_id: {"id": source_asgs_id}
+            )
 
     def pre_instance_update(self, instance):
         if instance.properties.sourceAddressPrefix:

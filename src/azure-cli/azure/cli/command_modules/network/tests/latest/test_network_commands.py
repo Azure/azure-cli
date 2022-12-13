@@ -4335,7 +4335,7 @@ class NetworkSecurityGroupScenarioTest(ScenarioTest):
         self.cmd('network nsg rule update -g {rg} --nsg-name {nsg2} -n {rule2} --destination-asgs {asg2}',
                  checks=[self.check('name', '{rule2}'),
                          self.check('ends_with(@.destinationApplicationSecurityGroups[0].id, `/{asg2}`)', True)])
-        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg2} -n {rule2} --destination-asgs None --destination-address-prefix {prefix}',
+        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg2} -n {rule2} --destination-asgs "" --destination-address-prefix {prefix}',
                  checks=[self.check('name', '{rule2}'),
                          self.check('destinationAddressPrefix', '{prefix}')])
 
