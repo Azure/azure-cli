@@ -5,7 +5,6 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Optional
 from msrest.serialization import Model
 
 # pylint: disable=too-few-public-methods
@@ -13,24 +12,25 @@ from msrest.serialization import Model
 
 
 class SnapshotQueryFields(Enum):
-    NAME = 0x001
-    STATUS = 0x002
-    FILTERS = 0x004
-    COMPOSITION_TYPE = 0x008
-    CREATED = 0x010
-    EXPIRES = 0x020
-    SIZE = 0x040
-    ITEMS_COUNT = 0x080
-    TAGS = 0x100
-    ITEMS_LINK = 0x200
-    RETENTION_PERIOD = 0x400
-    ETAG = 0x800
-    ALL = NAME | STATUS | FILTERS | COMPOSITION_TYPE | CREATED | EXPIRES | SIZE | ITEMS_COUNT | TAGS | RETENTION_PERIOD | ITEMS_LINK | ETAG
+    NAME = 0x0001
+    STATUS = 0x0002
+    FILTERS = 0x0004
+    COMPOSITION_TYPE = 0x0008
+    CREATED = 0x0010
+    EXPIRES = 0x0020
+    SIZE = 0x0040
+    ITEMS_COUNT = 0x0080
+    TAGS = 0x0100
+    ITEMS_LINK = 0x0200
+    RETENTION_PERIOD = 0x0400
+    ETAG = 0x0800
+    STATUS_CODE = 0x1000
+    ALL = NAME | STATUS | FILTERS | COMPOSITION_TYPE | CREATED | EXPIRES | SIZE | ITEMS_COUNT | TAGS | RETENTION_PERIOD | ITEMS_LINK | ETAG | STATUS_CODE
 
 
-class Snapshot(Model):
+class Snapshot:
     '''
-    Class used to represent Snapshot entity returned from requests
+    Class used to represent the Snapshot entity returned from requests
 
     :ivar str name:
         Name of the snapshot.
@@ -56,25 +56,11 @@ class Snapshot(Model):
         Endpoint that can be used to query keys-values in a snapshot
     :ivar int retention_period:
         Number of days for which an archived snapshot will be kept before being deleted.
+    :ivar int status_code:
+        The status code returned in the event where snapshot creation fails.
     '''
 
-    _attribute_map = {
-        'name': {'key': 'name', 'type': 'str'},
-        'status': {'key': 'status', 'type': 'str'},
-        'filters': {'key': 'content_type', 'type': '[Filter]'},
-        'etag': {'key': 'etag', 'type': 'str'},
-        'created': {'key': 'created', 'type': 'iso-8601'},
-        'expires': {'key': 'expires', 'type': 'iso-8601'},
-        'composition_type': {'key': 'composition_type', 'type': 'str'},
-        'size': {'key': 'size', 'type': 'int'},
-        'items_count': {'key': 'items_count', 'type': 'int'},
-        'items_link': {'key': 'items_link', 'type': 'str'},
-        'retention_period': {'key': 'retention_period', 'type': 'int'},
-        'tags': {'key': 'tags', 'type': '{str}'}
-    }
-
     def __init__(self,
-                 *,
                  name,
                  status,
                  filters,
@@ -88,10 +74,8 @@ class Snapshot(Model):
                  tags=None,
                  items_link=None,
                  retention_period=None,
-                 **kwargs
                  ):
 
-        super(Snapshot, self).__init__(**kwargs)
         self.name = name
         self.status = status
         self.filters = filters
@@ -138,19 +122,15 @@ class Snapshot(Model):
         )
 
 
-class Filter(Model):
-    _attribute_map = {
-        'key': {'key': 'key', 'type': 'str'},
-        'label': {'key': 'label', 'type': 'str'}
-    }
-
-    def __init__(self, *, key: Optional[str] = None, label: Optional[str] = None, **kwargs):
-        super(Filter, self).__init__(**kwargs)
-        self.key = key
-        self.label = label
-
-
 class SnapshotListResult:
+    '''
+    Class representing a paginated list of snapshots.
+    :ivar str next_link:
+        Shows the link to the next page of snapshots
+    :ivar [Snapshot] items:
+        List of Snapshot entities in the current page.
+    '''
+
     def __init__(self, items=None, next_link=None):
         self.items = items
         self.next_link = next_link

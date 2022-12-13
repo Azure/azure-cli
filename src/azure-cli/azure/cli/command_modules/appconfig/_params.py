@@ -47,7 +47,7 @@ def load_arguments(self, _):
         nargs='+',
         help='Customize output fields for Snapshots',
         validator=validate_snapshot_query_fields,
-        arg_type=get_enum_type(['name', 'etag', 'retention_period', 'filters', 'status', 'created', 'expires', 'size', 'items_count', 'size', 'items_link'])
+        arg_type=get_enum_type(['name', 'etag', 'status_code', 'retention_period', 'filters', 'status', 'created', 'expires', 'size', 'items_count', 'size', 'items_link'])
     )
     filter_parameters_arg_type = CLIArgumentType(
         validator=validate_filter_parameters,
@@ -96,7 +96,7 @@ def load_arguments(self, _):
         options_list=['--filters'],
         validator=validate_snapshot_filters,
         nargs='+',
-        help='Space-separated key and label filters used to build an app configuration snapshot. These values should escaped JSON objects.'
+        help='Space-separated key and label filters used to build an app configuration snapshot. These values should be escaped JSON objects.'
     )
 
     with self.argument_context('appconfig') as c:
@@ -352,7 +352,7 @@ def load_arguments(self, _):
         c.argument('snapshot_name', arg_type=snapshot_name_arg_type)
         c.argument('filters', arg_type=snapshot_filter_arg_type)
         c.argument('composition_type', options_list=['--composition-type'], arg_type=get_enum_type(["all", "group_by_key"]), help='Composition type used in building app configuration snapshots.')
-        c.argument('retention_period', options_list=['--retention-period'], type=int, help='Duration in seconds for which a snapshot can remain archived before expiry. If not specified, retention period defaults to the equivalent of 30 days. (2592000s)')
+        c.argument('retention_period', options_list=['--retention-period'], type=int, help='Duration in seconds for which a snapshot can remain archived before expiry.')
         c.argument('tags', arg_type=tags_type, help="Space-separated tags: key[=value] [key[=value] ...].")
 
     with self.argument_context('appconfig snapshot show') as c:
