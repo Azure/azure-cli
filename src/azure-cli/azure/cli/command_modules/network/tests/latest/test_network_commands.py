@@ -2303,7 +2303,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
                  '--policy-name {waf} -n {rule} '
                  '--match-variables RequestHeaders.value --operator contains '
-                 '--values remove this --transform lowercase')
+                 '--values remove this --transform uppercase')
         self.cmd('network application-gateway waf-policy custom-rule show -g {rg} '
                  '--policy-name {waf} -n {rule}',
                  checks=[
