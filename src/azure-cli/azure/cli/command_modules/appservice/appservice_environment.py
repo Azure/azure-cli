@@ -153,12 +153,12 @@ def send_test_notification_appserviceenvironment(cmd, name, resource_group_name=
         if ase_def.upgrade_preference == "Manual":
             ase_client.test_upgrade_available_notification(resource_group_name=resource_group_name,
                                                            name=name)
-            logger.info('The test notification has been sent.')
+            logger.info('The test notification is being processed.')
         else:
             raise ValidationError('Upgrade preference in ASEv3 must be set to manual, please check \
 https://learn.microsoft.com/azure/app-service/environment/how-to-upgrade-preference for more information.')
     else:
-        raise ValidationError('The test notification has not been sent. \
+        raise ValidationError('The test notification has not been processed. \
 This version of ASE does not support test notification.')
 
 
