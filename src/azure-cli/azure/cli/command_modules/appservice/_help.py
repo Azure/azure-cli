@@ -667,6 +667,16 @@ examples:
     crafted: true
 """
 
+helps['functionapp function list'] = """
+type: command
+short-summary: List functions in a function app.
+examples:
+  - name: List functions.
+    text: >
+        az functionapp function list -g MyResourceGroup -n MyFunctionAppName
+    crafted: true
+"""
+
 helps['functionapp function keys'] = """
 type: group
 short-summary: Manage function keys.
