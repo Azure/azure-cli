@@ -25,7 +25,9 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
-from .aaz.latest.network.application_gateway._update import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.application_gateway import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condition import \
+    Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
 from .aaz.latest.network.express_route.gateway.connection import Create as _ExpressRouteConnectionCreate, \
     Update as _ExpressRouteConnectionUpdate
@@ -1868,85 +1870,42 @@ def list_waf_policy_setting(cmd, client, resource_group_name, policy_name):
 # endregion
 
 
-# region ApplicationGatewayWAFPolicyRules
-def create_waf_custom_rule(cmd, client, resource_group_name, policy_name, rule_name, priority, rule_type, action):
-    """
-    Initialize custom rule for WAF policy
-    """
-    WebApplicationFirewallCustomRule = cmd.get_models('WebApplicationFirewallCustomRule')
-    waf_policy = client.get(resource_group_name, policy_name)
-    new_custom_rule = WebApplicationFirewallCustomRule(
-        name=rule_name,
-        action=action,
-        match_conditions=[],
-        priority=priority,
-        rule_type=rule_type
-    )
-    upsert_to_collection(waf_policy, 'custom_rules', new_custom_rule, 'name')
-    parent = client.create_or_update(resource_group_name, policy_name, waf_policy)
-    return find_child_item(parent, rule_name, path='custom_rules', key_path='name')
-
-
-# pylint: disable=unused-argument
-def update_waf_custom_rule(instance, parent, cmd, rule_name, priority=None, rule_type=None, action=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('priority', priority)
-        c.set_param('rule_type', rule_type)
-        c.set_param('action', action)
-    return parent
-
-
-def show_waf_custom_rule(cmd, client, resource_group_name, policy_name, rule_name):
-    waf_policy = client.get(resource_group_name, policy_name)
-    return find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
-
-
-def list_waf_custom_rules(cmd, client, resource_group_name, policy_name):
-    return client.get(resource_group_name, policy_name).custom_rules
-
-
-def delete_waf_custom_rule(cmd, client, resource_group_name, policy_name, rule_name, no_wait=None):
-    waf_policy = client.get(resource_group_name, policy_name)
-    rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
-    waf_policy.custom_rules.remove(rule)
-    sdk_no_wait(no_wait, client.create_or_update, resource_group_name, policy_name, waf_policy)
-# endregion
-
-
 # region ApplicationGatewayWAFPolicyRuleMatchConditions
-def add_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name, match_variables, operator,
-                                   match_values=None, negation_condition=None, transforms=None):
-    if operator.lower() == "any" and match_values is not None:
-        raise ArgumentUsageError("Any operator does not require --match-values.")
-    if operator.lower() != "any" and match_values is None:
-        raise ArgumentUsageError("Non-any operator requires --match-values.")
+class WAFCustomRuleMatchConditionAdd(_WAFCustomRuleMatchConditionAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.match_variables = AAZListArg(
+            options=["--match-variables"],
+            help="Space-separated list of variables to use when matching. Variable values: RemoteAddr, RequestMethod, "
+                 "QueryString, PostArgs, RequestUri, RequestHeaders, RequestBody, RequestCookies.",
+            required=True,
+        )
+        args_schema.match_variables.Element = AAZStrArg()
+        # filter arguments
+        args_schema.variables._required = False
+        args_schema.variables._registered = False
+        return args_schema
 
-    MatchCondition = cmd.get_models('MatchCondition')
-    waf_policy = client.get(resource_group_name, policy_name)
-    custom_rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
-    new_cond = MatchCondition(
-        match_variables=match_variables,
-        operator=operator,
-        match_values=match_values,
-        negation_conditon=negation_condition,
-        transforms=transforms
-    )
-    custom_rule.match_conditions.append(new_cond)
-    upsert_to_collection(waf_policy, 'custom_rules', custom_rule, 'name', warn=False)
-    client.create_or_update(resource_group_name, policy_name, waf_policy)
-    return new_cond
-
-
-def list_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name):
-    waf_policy = client.get(resource_group_name, policy_name)
-    return find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name').match_conditions
-
-
-def remove_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name, index):
-    waf_policy = client.get(resource_group_name, policy_name)
-    rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
-    rule.match_conditions.pop(index)
-    client.create_or_update(resource_group_name, policy_name, waf_policy)
+    def pre_operations(self):
+        args = self.ctx.args
+        variables = []
+        for variable in args.match_variables:
+            try:
+                name, selector = str(variable).split(".", 1)
+            except ValueError:
+                name, selector = variable, None
+            variables.append({
+                "variable_name": name,
+                "selector": selector,
+            })
+        args.variables = variables
+        # validate
+        if str(args.operator).lower() == "any" and has_value(args.values):
+            raise ArgumentUsageError("Any operator does not require --match-values.")
+        if str(args.operator).lower() != "any" and not has_value(args.values):
+            raise ArgumentUsageError("Non-any operator requires --match-values.")
 # endregion
 
 
