@@ -319,6 +319,7 @@ def __read_kv_from_config_store(azconfig_client,
                                 cli_ctx=None,
                                 prefix_to_remove="",
                                 prefix_to_add=""):
+    # pylint: disable=too-many-branches
 
     # list_configuration_settings returns kv with null label when:
     # label = ASCII null 0x00 (or URL encoded %00)
