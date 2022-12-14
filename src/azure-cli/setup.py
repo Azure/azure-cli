@@ -119,7 +119,7 @@ DEPENDENCIES = [
     'azure-mgmt-security==2.0.0b1',
     'azure-mgmt-servicebus~=8.1.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
-    'azure-mgmt-servicelinker==1.0.0',
+    'azure-mgmt-servicelinker==1.2.0b1',
     'azure-mgmt-servicefabric~=1.0.0',
     'azure-mgmt-signalr==1.1.0',
     'azure-mgmt-sqlvirtualmachine==1.0.0b4',
@@ -145,6 +145,7 @@ DEPENDENCIES = [
     'PyGithub~=1.38',
     'PyMySQL~=1.0.2',
     'PyNaCl~=1.5.0',
+    'pyodbc~=4.0.35',
     'scp~=0.13.2',
     'semver==2.13.0',
     'six>=1.10.0',  # six is still used by countless extensions

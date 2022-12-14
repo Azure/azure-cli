@@ -1,0 +1,320 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - connection create cosmos-cassandra
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --connection --target-id --secret --client-type
+      User-Agent:
+      - AZURECLI/2.43.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.8
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/servicelinker-cli-test-group?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-cli-test-group",
+        "name": "servicelinker-cli-test-group", "type": "Microsoft.Resources/resourceGroups",
+        "location": "eastus", "tags": {}, "properties": {"provisioningState": "Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '275'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 14 Dec 2022 02:24:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"targetService": {"type": "AzureResource", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-cassandra-cosmos1/cassandraKeyspaces/coredb"},
+      "authInfo": {"authType": "secret"}, "clientType": "python", "publicNetworkSolution":
+      {"firewallRules": {"callerClientIP": "true"}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - connection create cosmos-cassandra
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '403'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --connection --target-id --secret --client-type
+      User-Agent:
+      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.8.8
+        (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/servicelinker-cli-test-group/providers/Microsoft.ServiceLinker/locations/eastus/connectors/testconn2?api-version=2022-11-01-preview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-cli-test-group/providers/Microsoft.ServiceLinker/locations/eastus/connectors/testconn2",
+        "name": "testconn2", "type": "microsoft.servicelinker/locations/connectors",
+        "systemData": {"createdBy": "xiaofanzhou@microsoft.com", "createdByType":
+        "User", "createdAt": "2022-12-14T02:24:56.5720121Z", "lastModifiedBy": "xiaofanzhou@microsoft.com",
+        "lastModifiedByType": "User", "lastModifiedAt": "2022-12-14T02:24:56.5720121Z"},
+        "properties": {"publicNetworkSolution": {"firewallRules": {"ipRanges": null,
+        "callerClientIP": "true"}, "deleteOrUpdateBehavior": "Default", "action":
+        "enable"}, "configurationInfo": null, "provisioningState": "Accepted", "targetService":
+        {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-win-group/providers/Microsoft.DocumentDB/databaseAccounts/servicelinker-cassandra-cosmos1/cassandraKeyspaces/coredb",
+        "resourceProperties": null, "type": "AzureResource"}, "authInfo": {"name":
+        null, "secretInfo": null, "authType": "secret"}, "clientType": "python", "scope":
+        null, "vNetSolution": null, "secretStore": null}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/bb334c92-010b-4aa4-a5eb-44102bc8f46f*719EA56D340BA14F6EC9AC3A002B67B2E1C94151EBA918F34D6C4CD2ED8B2829?api-version=2021-01-01-privatepreview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1167'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 14 Dec 2022 02:24:56 GMT
+      etag:
+      - '"5800e458-0000-0100-0000-639933f90000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 32dc66e0-a7e5-44f9-a249-4829c3bd87a5
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - connection create cosmos-cassandra
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --connection --target-id --secret --client-type
+      User-Agent:
+      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.8.8
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/bb334c92-010b-4aa4-a5eb-44102bc8f46f*719EA56D340BA14F6EC9AC3A002B67B2E1C94151EBA918F34D6C4CD2ED8B2829?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/bb334c92-010b-4aa4-a5eb-44102bc8f46f*719EA56D340BA14F6EC9AC3A002B67B2E1C94151EBA918F34D6C4CD2ED8B2829",
+        "name": "bb334c92-010b-4aa4-a5eb-44102bc8f46f*719EA56D340BA14F6EC9AC3A002B67B2E1C94151EBA918F34D6C4CD2ED8B2829",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-cli-test-group/providers/Microsoft.ServiceLinker/locations/eastus/connectors/testconn2",
+        "status": "Accepted", "startTime": "2022-12-14T02:24:56.8310373Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '597'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 14 Dec 2022 02:25:27 GMT
+      etag:
+      - '"0f00c648-0000-0100-0000-639933f80000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - connection create cosmos-cassandra
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --connection --target-id --secret --client-type
+      User-Agent:
+      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.8.8
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/bb334c92-010b-4aa4-a5eb-44102bc8f46f*719EA56D340BA14F6EC9AC3A002B67B2E1C94151EBA918F34D6C4CD2ED8B2829?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/bb334c92-010b-4aa4-a5eb-44102bc8f46f*719EA56D340BA14F6EC9AC3A002B67B2E1C94151EBA918F34D6C4CD2ED8B2829",
+        "name": "bb334c92-010b-4aa4-a5eb-44102bc8f46f*719EA56D340BA14F6EC9AC3A002B67B2E1C94151EBA918F34D6C4CD2ED8B2829",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-cli-test-group/providers/Microsoft.ServiceLinker/locations/eastus/connectors/testconn2",
+        "status": "Accepted", "startTime": "2022-12-14T02:24:56.8310373Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '597'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 14 Dec 2022 02:25:58 GMT
+      etag:
+      - '"0f00c648-0000-0100-0000-639933f80000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - connection create cosmos-cassandra
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --connection --target-id --secret --client-type
+      User-Agent:
+      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.8.8
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/bb334c92-010b-4aa4-a5eb-44102bc8f46f*719EA56D340BA14F6EC9AC3A002B67B2E1C94151EBA918F34D6C4CD2ED8B2829?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/bb334c92-010b-4aa4-a5eb-44102bc8f46f*719EA56D340BA14F6EC9AC3A002B67B2E1C94151EBA918F34D6C4CD2ED8B2829",
+        "name": "bb334c92-010b-4aa4-a5eb-44102bc8f46f*719EA56D340BA14F6EC9AC3A002B67B2E1C94151EBA918F34D6C4CD2ED8B2829",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-cli-test-group/providers/Microsoft.ServiceLinker/locations/eastus/connectors/testconn2",
+        "status": "Accepted", "startTime": "2022-12-14T02:24:56.8310373Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '597'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 14 Dec 2022 02:26:29 GMT
+      etag:
+      - '"0f00c648-0000-0100-0000-639933f80000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - connection create cosmos-cassandra
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --connection --target-id --secret --client-type
+      User-Agent:
+      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-servicelinker/1.2.0b1 Python/3.8.8
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/bb334c92-010b-4aa4-a5eb-44102bc8f46f*719EA56D340BA14F6EC9AC3A002B67B2E1C94151EBA918F34D6C4CD2ED8B2829?api-version=2021-01-01-privatepreview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/bb334c92-010b-4aa4-a5eb-44102bc8f46f*719EA56D340BA14F6EC9AC3A002B67B2E1C94151EBA918F34D6C4CD2ED8B2829",
+        "name": "bb334c92-010b-4aa4-a5eb-44102bc8f46f*719EA56D340BA14F6EC9AC3A002B67B2E1C94151EBA918F34D6C4CD2ED8B2829",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-cli-test-group/providers/Microsoft.ServiceLinker/locations/eastus/connectors/testconn2",
+        "status": "Failed", "startTime": "2022-12-14T02:24:56.8310373Z", "endTime":
+        "2022-12-14T02:26:31.250332Z", "error": {"code": "GeneralUserError", "message":
+        "Execution failed.. There is already an operation in progress which requires
+        exclusive lock on this service servicelinker-cassandra-cosmos1. Please retry
+        the operation after sometime.\r\nActivityId: b917a83c-94ca-44b5-ae01-545d4bce4099,
+        Microsoft.Azure.Documents.Common/2.14.0"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '966'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 14 Dec 2022 02:27:00 GMT
+      etag:
+      - '"0f001e4a-0000-0100-0000-639934570000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

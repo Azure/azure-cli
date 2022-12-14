@@ -22,6 +22,7 @@ from azure.cli.core.commands.arm import ArmTemplateBuilder
 from ._utils import run_cli_cmd, generate_random_string, is_packaged_installed
 from ._resource_config import (
     RESOURCE,
+    AUTH_TYPE
 )
 from ._validators import (
     get_source_resource_name,
@@ -30,13 +31,18 @@ from ._validators import (
 
 logger = get_logger(__name__)
 
+PasswordlessIdentity = {
+    AUTH_TYPE.SystemIdentity: 'systemAssignedIdentity',
+    AUTH_TYPE.UserAccount: 'userAccount'
+}
+
 
 # pylint: disable=line-too-long
 # For db(mysqlFlex/psql/psqlFlex/sql) linker with auth type=systemAssignedIdentity, enable AAD auth and create db user on data plane
 # For other linker, ignore the steps
 def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, client_type, connection_name):
     # return if connection is not for db mi
-    if auth_info['auth_type'] not in {'systemAssignedIdentity'}:
+    if auth_info['auth_type'] not in {PasswordlessIdentity[AUTH_TYPE.SystemIdentity], PasswordlessIdentity[AUTH_TYPE.UserAccount]}:
         return
 
     source_type = get_source_resource_name(cmd)
@@ -57,13 +63,18 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, client_type, c
         raise Exception(
             "No object id found for user {}".format(target_handler.login_username))
 
-    # enable source mi
-    source_object_id = source_handler.get_identity_pid()
+    client_id = None
+    if source_type == RESOURCE.Local:
+        client_id = user_object_id
+        identity_name = target_handler.login_username
+    else:
+        # enable source mi
+        source_object_id = source_handler.get_identity_pid()
 
-    identity_info = run_cli_cmd(
-        'az ad sp show --id {}'.format(source_object_id), 15, 10)
-    client_id = identity_info.get('appId')
-    identity_name = identity_info.get('displayName')
+        identity_info = run_cli_cmd(
+            'az ad sp show --id {}'.format(source_object_id), 15, 10)
+        client_id = identity_info.get('appId')
+        identity_name = identity_info.get('displayName')
 
     # enable target aad authentication and set login user as db aad admin
     target_handler.enable_target_aad_auth()
@@ -72,7 +83,7 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, client_type, c
 
     # create an aad user in db
     target_handler.create_aad_user(identity_name, client_id)
-    return target_handler.get_auth_config()
+    return target_handler.get_auth_config(user_object_id)
 
 
 # pylint: disable=no-self-use, unused-argument, too-many-instance-attributes
@@ -107,7 +118,6 @@ class TargetHandler:
         self.cmd = cmd
         self.target_id = target_id
         self.target_type = target_type
-        self.aad_username = "aad_" + connection_name
         self.tenant_id = Profile(
             cli_ctx=cmd.cli_ctx).get_subscription().get("tenantId")
         target_segments = parse_resource_id(target_id)
@@ -116,6 +126,10 @@ class TargetHandler:
         self.auth_type = auth_type
         self.login_username = run_cli_cmd(
             'az account show').get("user").get("name")
+        if auth_type == PasswordlessIdentity[AUTH_TYPE.UserAccount]:
+            self.aad_username = self.login_username
+        else:
+            self.aad_username = "aad_" + connection_name
 
     def enable_target_aad_auth(self):
         return
@@ -129,8 +143,18 @@ class TargetHandler:
     def create_aad_user(self, identity_name, client_id):
         return
 
-    def get_auth_config(self):
-        return
+    def get_auth_config(self, user_object_id):
+        if self.auth_type == PasswordlessIdentity[AUTH_TYPE.UserAccount]:
+            return {
+                'auth_type': self.auth_type,
+                'username': self.aad_username,
+                'PrincipalId': user_object_id
+            }
+        if self.auth_type == PasswordlessIdentity[AUTH_TYPE.SystemIdentity]:
+            return {
+                'auth_type': self.auth_type,
+                'username': self.aad_username,
+            }
 
 
 class MysqlFlexibleHandler(TargetHandler):
@@ -159,10 +183,11 @@ class MysqlFlexibleHandler(TargetHandler):
         # set user as AAD admin
         if mysql_identity_id is None:
             raise ValidationError(
-                "Provide '--system-identity mysql-identity-id=xx' to set {} as AAD administrator.".format(self.user))
+                "Provide '{} mysql-identity-id=xx' to set {} as AAD administrator.".format(
+                    '--system-identity' if self.auth_type == PasswordlessIdentity[AUTH_TYPE.SystemIdentity] else '--user-account', self.user))
         mysql_umi = run_cli_cmd(
             'az mysql flexible-server identity list -g {} -s {} --subscription {}'.format(self.resource_group, self.server, self.subscription))
-        if (not mysql_umi) or mysql_identity_id not in mysql_umi.get("userAssignedIdentities"):
+        if (not mysql_umi) or (not mysql_umi.get("userAssignedIdentities")) or mysql_identity_id not in mysql_umi.get("userAssignedIdentities"):
             run_cli_cmd('az mysql flexible-server identity assign -g {} -s {} --subscription {} --identity {}'.format(
                 self.resource_group, self.server, self.subscription, mysql_identity_id))
         run_cli_cmd('az mysql flexible-server ad-admin create -g {} -s {} --subscription {} -u {} -i {} --identity {}'.format(
@@ -216,7 +241,8 @@ class MysqlFlexibleHandler(TargetHandler):
             import pymysql
             from pymysql.constants import CLIENT
         except ModuleNotFoundError:
-            raise CLIInternalError("Dependency pymysql can't be installed, please install it manually with `" + sys.executable + " -m pip install pymysql`.")
+            raise CLIInternalError(
+                "Dependency pymysql can't be installed, please install it manually with `" + sys.executable + " -m pip install pymysql`.")
 
         connection_kwargs['client_flag'] = CLIENT.MULTI_STATEMENTS
         try:
@@ -253,23 +279,13 @@ class MysqlFlexibleHandler(TargetHandler):
     def get_create_query(self, client_id):
         return [
             "SET aad_auth_validate_oids_in_tenant = OFF;",
-            "DROP USER IF EXISTS '{}'@'%';".format(self.aad_username),
+            # "DROP USER IF EXISTS '{}'@'%';".format(self.aad_username),
             "CREATE AADUSER '{}' IDENTIFIED BY '{}';".format(
                 self.aad_username, client_id),
             "GRANT ALL PRIVILEGES ON `{}`.* TO '{}'@'%';".format(
                 self.dbname, self.aad_username),
             "FLUSH privileges;"
         ]
-
-    def get_auth_config(self):
-        if self.auth_type in {'systemAssignedIdentity'}:
-            return {
-                'auth_type': 'secret',
-                'name': self.aad_username,
-                'secret_info': {
-                    'secret_type': 'rawValue'
-                }
-            }
 
 
 class SqlHandler(TargetHandler):
@@ -346,12 +362,13 @@ class SqlHandler(TargetHandler):
         except ModuleNotFoundError:
             raise CLIInternalError(
                 "Dependency pyodbc can't be installed, please install it manually with `" + sys.executable + " -m pip install pyodbc`.")
-        drivers = [x for x in pyodbc.drivers() if x == 'ODBC Driver 18 for SQL Server']
+        drivers = [x for x in pyodbc.drivers() if x in [
+            'ODBC Driver 17 for SQL Server', 'ODBC Driver 18 for SQL Server']]
         if not drivers:
             raise CLIInternalError(
-                "Please manually install odbc 18 for SQL server, reference: https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16")
+                "Please manually install odbc 17/18 for SQL server, reference: https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16")
         try:
-            with pyodbc.connect(connection_args.get("connection_string"), attrs_before=connection_args.get("attrs_before")) as conn:
+            with pyodbc.connect(connection_args.get("connection_string").format(driver=drivers[0]), attrs_before=connection_args.get("attrs_before")) as conn:
                 with conn.cursor() as cursor:
                     for execution_query in query_list:
                         try:
@@ -366,10 +383,11 @@ class SqlHandler(TargetHandler):
         token_bytes = run_cli_cmd(
             'az account get-access-token --output json --resource https://database.windows.net/').get('accessToken').encode('utf-16-le')
 
-        token_struct = struct.pack(f'<I{len(token_bytes)}s', len(token_bytes), token_bytes)
+        token_struct = struct.pack(
+            f'<I{len(token_bytes)}s', len(token_bytes), token_bytes)
         # This connection option is defined by microsoft in msodbcsql.h
         SQL_COPT_SS_ACCESS_TOKEN = 1256
-        conn_string = 'DRIVER={ODBC Driver 18 for SQL Server};server=' + \
+        conn_string = 'DRIVER={{{driver}}};server=' + \
             self.server + self.endpoint + ';database=' + self.dbname + ';'
         return {'connection_string': conn_string, 'attrs_before': {SQL_COPT_SS_ACCESS_TOKEN: token_struct}}
 
@@ -399,7 +417,8 @@ class PostgresFlexHandler(TargetHandler):
 
     def enable_pg_extension(self):
         try:
-            run_cli_cmd('az postgres flexible-server parameter set -g {} -s {} --subscription {} --name azure.extensions --value uuid-ossp'.format(self.resource_group, self.db_server, self.subscription))
+            run_cli_cmd('az postgres flexible-server parameter set -g {} -s {} --subscription {} --name azure.extensions --value uuid-ossp'.format(
+                self.resource_group, self.db_server, self.subscription))
         except Exception as e:  # pylint: disable=broad-except
             logger.warning(e)
 
@@ -585,7 +604,7 @@ class PostgresFlexHandler(TargetHandler):
 
     def get_create_query(self, client_id):
         return [
-            'drop role IF EXISTS "{0}";'.format(self.aad_username),
+            # 'drop role IF EXISTS "{0}";'.format(self.aad_username),
             "select * from pgaadauth_create_principal_with_oid('{0}', '{1}', 'ServicePrincipal', false, false);".format(
                 self.aad_username, client_id),
             'GRANT ALL PRIVILEGES ON DATABASE "{0}" TO "{1}";'.format(
@@ -594,16 +613,6 @@ class PostgresFlexHandler(TargetHandler):
                 self.aad_username),
             'GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "{}";'.format(
                 self.aad_username)]
-
-    def get_auth_config(self):
-        if self.auth_type in {'systemAssignedIdentity'}:
-            return {
-                'auth_type': 'secret',
-                'name': self.aad_username,
-                'secret_info': {
-                    'secret_type': 'rawValue'
-                }
-            }
 
 
 class PostgresSingleHandler(PostgresFlexHandler):
@@ -653,7 +662,8 @@ class PostgresSingleHandler(PostgresFlexHandler):
         #     run_cli_cmd('az postgres server update --public Disabled --ids {}'.format(target_id))
 
     def get_connection_string(self):
-        password = run_cli_cmd('az account get-access-token --resource-type oss-rdbms').get('accessToken')
+        password = run_cli_cmd(
+            'az account get-access-token --resource-type oss-rdbms').get('accessToken')
 
         # extension functions require the extension to be available, which is the case for postgres (default) database.
         conn_string = "host={} user={} dbname=postgres password={} sslmode=require".format(
@@ -664,7 +674,7 @@ class PostgresSingleHandler(PostgresFlexHandler):
 
         return [
             'SET aad_validate_oids_in_tenant = off;',
-            'drop role IF EXISTS "{0}";'.format(self.aad_username),
+            # 'drop role IF EXISTS "{0}";'.format(self.aad_username),
             "CREATE ROLE {0} WITH LOGIN PASSWORD '{1}' IN ROLE azure_ad_user;".format(
                 self.aad_username, client_id),
             'GRANT ALL PRIVILEGES ON DATABASE "{0}" TO "{1}";'.format(
@@ -683,6 +693,8 @@ def getSourceHandler(source_id, source_type):
         return ContainerappHandler(source_id, source_type)
     if source_type in {RESOURCE.SpringCloud, RESOURCE.SpringCloudDeprecated}:
         return SpringHandler(source_id, source_type)
+    if source_type in {RESOURCE.Local}:
+        return LocalHandler(source_id, source_type)
 
 
 # pylint: disable=too-few-public-methods
@@ -700,6 +712,11 @@ class SourceHandler:
 
 def output_is_none(output):
     return not output.stdout
+
+
+class LocalHandler(SourceHandler):
+    def get_identity_pid(self):
+        pass
 
 
 class SpringHandler(SourceHandler):
