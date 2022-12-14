@@ -203,26 +203,6 @@ def build_put_snapshot_request(
     )
 
 
-def build_list_snapshot_keys_request(
-    name,
-    select=None,
-    sync_token=None,
-    **kwargs
-):
-    _params = {"snapshot": name}
-
-    if select is not None:
-        _params["$Select"] = Serializer().query("select", select, "[str]", div=",")
-
-    return _build_request(
-        "/kv",
-        RequestMethod.GET,
-        sync_token=sync_token,
-        params=_params,
-        **kwargs
-    )
-
-
 def _format_url_section(template, **kwargs):
     components = template.split("/")
     while components:
@@ -454,10 +434,18 @@ class AppConfigSnapshotClient:
 
         _headers = kwargs.pop("headers", {}) or {}
 
-        initial_request = build_list_snapshot_keys_request(
-            name=name,
-            select=fields,
+        items_link = self.get_snapshot(name=name).items_link
+
+        _params = {}
+
+        if fields is not None:
+            _params["$Select"] = Serializer().query("select", fields, "[str]", div=",")
+
+        initial_request = _build_request(
+            items_link,
+            RequestMethod.GET,
             sync_token=self._sync_token,
+            params=_params,
             headers=_headers,
             **kwargs)
 

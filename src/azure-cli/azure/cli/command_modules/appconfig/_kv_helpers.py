@@ -27,9 +27,10 @@ from azure.cli.core.azclierror import (FileOperationError,
                                        AzureInternalError,
                                        ValidationError,
                                        AzureResponseError,
-                                       RequiredArgumentMissingError)
+                                       RequiredArgumentMissingError,
+                                       ResourceNotFoundError)
 
-from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants)
+from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants, StatusCodes)
 from ._utils import prep_label_filter_for_url_encoding
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
@@ -335,18 +336,24 @@ def __read_kv_from_config_store(azconfig_client,
                 break
             query_fields.append(field.name.lower())
 
-    try:
-        if snapshot:
+    if snapshot:
+        try:
             configsetting_iterable = AppConfigSnapshotClient(azconfig_client).list_snapshot_kv(name=snapshot,
                                                                                                fields=query_fields)
 
-        else:
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.NOT_FOUND:
+                raise ResourceNotFoundError('No snapshot with name {} was found.'.format(snapshot))
+            raise AzureResponseError('Failed to read key-values(s) from snapshot {}. '.format(snapshot) + str(exception))
+
+    else:
+        try:
             configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key,
                                                                                  label_filter=label,
                                                                                  accept_datetime=datetime,
                                                                                  fields=query_fields)
-    except HttpResponseError as exception:
-        raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
+        except HttpResponseError as exception:
+            raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
 
     retrieved_kvs = []
     count = 0
