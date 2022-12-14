@@ -886,23 +886,14 @@ def load_arguments(self, _):
         c.argument('key_name', help="Name of the key to set.")
         c.argument('key_type', help="Type of key.", arg_type=get_enum_type(['systemKeys', 'functionKeys', 'masterKey']))
 
-    with self.argument_context('functionapp function show', id_part=None) as c:
-        c.argument('resource_group_name', arg_type=resource_group_name_type,)
-        c.argument('name', arg_type=functionapp_name_arg_type,
-                   completer=get_resource_name_completion_list('Microsoft.Web/sites'),
-                   help='Name of the function app')
-        c.argument('function_name', help="Name of the Function")
-    with self.argument_context('functionapp function delete', id_part=None) as c:
+    with self.argument_context('functionapp function', id_part=None) as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type,)
         c.argument('name', arg_type=functionapp_name_arg_type,
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                    help='Name of the function app')
         c.argument('function_name', help="Name of the Function")
     with self.argument_context('functionapp function list', id_part=None) as c:
-        c.argument('resource_group_name', arg_type=resource_group_name_type,)
-        c.argument('name', arg_type=functionapp_name_arg_type,
-                   completer=get_resource_name_completion_list('Microsoft.Web/sites'),
-                   help='Name of the function app')
+        c.ignore('function_name')
     with self.argument_context('functionapp function keys', id_part=None) as c:
         c.argument('slot', options_list=['--slot', '-s'],
                    help="The name of the slot. Defaults to the productions slot if not specified")
