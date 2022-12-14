@@ -12,29 +12,25 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network application-gateway waf-policy update",
+    "network application-gateway waf-policy custom-rule show",
 )
-class Update(AAZCommand):
-    """Update an application gateway WAF policy.
+class Show(AAZCommand):
+    """Get the details of an application gateway WAF policy custom rule.
 
-    :example: Update an application gateway WAF policy.
-        az network application-gateway waf-policy update --add communities='12076:5010' --name MyApplicationGatewayWAFPolicy --resource-group MyResourceGroup
-
-    :example: Override existing managed rule set via shorthand syntax.
-        az network application-gateway waf-policy update --managed-rules "{managed-rule-sets:[{rule-group-overrides:[{rule-group-name:REQUEST-921-PROTOCOL-ATTACK,rules:[{rule-id:921100},{rule-id:921100}]}],rule-set-type:OWASP,rule-set-version:3.0}]}"
+    :example: Get the details of an application gateway WAF policy custom rule.
+        az network application-gateway waf-policy custom-rule show --name MyWAFPolicyRule --policy-name MyPolicy --resource-group MyResourceGroup
     """
 
     _aaz_info = {
         "version": "2022-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies/{}", "2022-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies/{}", "2022-05-01", "properties.customRules[]"],
         ]
     }
 
-    AZ_SUPPORT_GENERIC_UPDATE = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
+        self.SubresourceSelector(ctx=self.ctx, name="subresource")
         self._execute_operations()
         return self._output()
 
@@ -49,11 +45,10 @@ class Update(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            help="The name of the application gateway WAF policy.",
+        _args_schema.policy_name = AAZStrArg(
+            options=["--policy-name"],
+            help="Name of the application gateway WAF policy.",
             required=True,
-            id_part="name",
             fmt=AAZStrArgFormat(
                 max_length=128,
             ),
@@ -61,319 +56,19 @@ class Update(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            help="Space-separated tags: key[=value] [key[=value] ...].",
-            nullable=True,
-        )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg(
-            nullable=True,
-        )
-
-        # define Arg Group "Parameters"
-
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.custom_rules = AAZListArg(
-            options=["--custom-rules"],
-            arg_group="Properties",
-            help="The custom rules inside the policy.",
-            nullable=True,
-        )
-        _args_schema.managed_rules = AAZObjectArg(
-            options=["--managed-rules"],
-            arg_group="Properties",
-            help="Describes the managedRules structure.",
-        )
-        _args_schema.policy_settings = AAZObjectArg(
-            options=["--policy-settings"],
-            arg_group="Properties",
-            help="The PolicySettings for policy.",
-            nullable=True,
-        )
-
-        custom_rules = cls._args_schema.custom_rules
-        custom_rules.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.custom_rules.Element
-        _element.action = AAZStrArg(
-            options=["action"],
-            help="Action to take.",
-            enum={"Allow": "Allow", "Block": "Block", "Log": "Log"},
-        )
-        _element.match_conditions = AAZListArg(
-            options=["match-conditions"],
-            help="List of match conditions.",
-        )
-        _element.name = AAZStrArg(
-            options=["n", "name"],
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
             help="Name of the WAF policy rule.",
-            nullable=True,
+            required=True,
             fmt=AAZStrArgFormat(
                 max_length=128,
             ),
-        )
-        _element.priority = AAZIntArg(
-            options=["priority"],
-            help="Rule priority. Lower values are evaluated prior to higher values.",
-        )
-        _element.rule_type = AAZStrArg(
-            options=["rule-type"],
-            help="Type of rule.",
-            enum={"Invalid": "Invalid", "MatchRule": "MatchRule"},
-        )
-
-        match_conditions = cls._args_schema.custom_rules.Element.match_conditions
-        match_conditions.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.custom_rules.Element.match_conditions.Element
-        _element.values = AAZListArg(
-            options=["values"],
-            help="Space-separated list of values to match.",
-            nullable=True,
-        )
-        _element.variables = AAZListArg(
-            options=["variables"],
-            help="Space-separated list of variables to use when matching. Variable values: RemoteAddr, RequestMethod, QueryString, PostArgs, RequestUri, RequestHeaders, RequestBody, RequestCookies.",
-        )
-        _element.negate = AAZBoolArg(
-            options=["negate"],
-            help="Match the negative of the condition.",
-            nullable=True,
-        )
-        _element.operator = AAZStrArg(
-            options=["operator"],
-            help="Operator for matching.",
-            enum={"Any": "Any", "BeginsWith": "BeginsWith", "Contains": "Contains", "EndsWith": "EndsWith", "Equal": "Equal", "GeoMatch": "GeoMatch", "GreaterThan": "GreaterThan", "GreaterThanOrEqual": "GreaterThanOrEqual", "IPMatch": "IPMatch", "LessThan": "LessThan", "LessThanOrEqual": "LessThanOrEqual", "Regex": "Regex"},
-        )
-        _element.transforms = AAZListArg(
-            options=["transforms"],
-            help="Space-separated list of transforms to apply when matching. Allowed values: HtmlEntityDecode, Uppercase, Lowercase, RemoveNulls, Trim, UrlDecode, UrlEncode.",
-            nullable=True,
-        )
-
-        values = cls._args_schema.custom_rules.Element.match_conditions.Element.values
-        values.Element = AAZStrArg(
-            nullable=True,
-        )
-
-        variables = cls._args_schema.custom_rules.Element.match_conditions.Element.variables
-        variables.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.custom_rules.Element.match_conditions.Element.variables.Element
-        _element.selector = AAZStrArg(
-            options=["selector"],
-            help="The selector of match variable.",
-            nullable=True,
-        )
-        _element.variable_name = AAZStrArg(
-            options=["variable-name"],
-            help="Match Variable.",
-            enum={"PostArgs": "PostArgs", "QueryString": "QueryString", "RemoteAddr": "RemoteAddr", "RequestBody": "RequestBody", "RequestCookies": "RequestCookies", "RequestHeaders": "RequestHeaders", "RequestMethod": "RequestMethod", "RequestUri": "RequestUri"},
-        )
-
-        transforms = cls._args_schema.custom_rules.Element.match_conditions.Element.transforms
-        transforms.Element = AAZStrArg(
-            nullable=True,
-            enum={"HtmlEntityDecode": "HtmlEntityDecode", "Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
-        )
-
-        managed_rules = cls._args_schema.managed_rules
-        managed_rules.exclusions = AAZListArg(
-            options=["exclusions"],
-            help="The Exclusions that are applied on the policy.",
-            nullable=True,
-        )
-        managed_rules.managed_rule_sets = AAZListArg(
-            options=["managed-rule-sets"],
-            help="The managed rule sets that are associated with the policy.",
-        )
-
-        exclusions = cls._args_schema.managed_rules.exclusions
-        exclusions.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.managed_rules.exclusions.Element
-        _element.exclusion_managed_rule_sets = AAZListArg(
-            options=["exclusion-managed-rule-sets"],
-            help="The managed rule sets that are associated with the exclusion.",
-            nullable=True,
-        )
-        _element.match_variable = AAZStrArg(
-            options=["match-variable"],
-            help="The variable to be excluded.",
-            enum={"RequestArgKeys": "RequestArgKeys", "RequestArgNames": "RequestArgNames", "RequestArgValues": "RequestArgValues", "RequestCookieKeys": "RequestCookieKeys", "RequestCookieNames": "RequestCookieNames", "RequestCookieValues": "RequestCookieValues", "RequestHeaderKeys": "RequestHeaderKeys", "RequestHeaderNames": "RequestHeaderNames", "RequestHeaderValues": "RequestHeaderValues"},
-        )
-        _element.selector = AAZStrArg(
-            options=["selector"],
-            help="When matchVariable is a collection, operator used to specify which elements in the collection this exclusion applies to.",
-        )
-        _element.selector_match_operator = AAZStrArg(
-            options=["selector-match-operator"],
-            help="When matchVariable is a collection, operate on the selector to specify which elements in the collection this exclusion applies to.",
-            enum={"Contains": "Contains", "EndsWith": "EndsWith", "Equals": "Equals", "EqualsAny": "EqualsAny", "StartsWith": "StartsWith"},
-        )
-
-        exclusion_managed_rule_sets = cls._args_schema.managed_rules.exclusions.Element.exclusion_managed_rule_sets
-        exclusion_managed_rule_sets.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element
-        _element.rule_groups = AAZListArg(
-            options=["rule-groups"],
-            help="Defines the rule groups to apply to the rule set.",
-            nullable=True,
-        )
-        _element.rule_set_type = AAZStrArg(
-            options=["rule-set-type"],
-            help="Defines the rule set type to use.",
-        )
-        _element.rule_set_version = AAZStrArg(
-            options=["rule-set-version"],
-            help="Defines the version of the rule set to use.",
-        )
-
-        rule_groups = cls._args_schema.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element.rule_groups
-        rule_groups.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element.rule_groups.Element
-        _element.rule_group_name = AAZStrArg(
-            options=["rule-group-name"],
-            help="The managed rule group for exclusion.",
-        )
-        _element.rules = AAZListArg(
-            options=["rules"],
-            help="List of rules that will be excluded. If none specified, all rules in the group will be excluded.",
-            nullable=True,
-        )
-
-        rules = cls._args_schema.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element.rule_groups.Element.rules
-        rules.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element.rule_groups.Element.rules.Element
-        _element.rule_id = AAZStrArg(
-            options=["rule-id"],
-            help="Identifier for the managed rule.",
-        )
-
-        managed_rule_sets = cls._args_schema.managed_rules.managed_rule_sets
-        managed_rule_sets.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.managed_rules.managed_rule_sets.Element
-        _element.rule_group_overrides = AAZListArg(
-            options=["rule-group-overrides"],
-            help="Defines the rule group overrides to apply to the rule set.",
-            nullable=True,
-        )
-        _element.rule_set_type = AAZStrArg(
-            options=["rule-set-type"],
-            help="Defines the rule set type to use.",
-        )
-        _element.rule_set_version = AAZStrArg(
-            options=["rule-set-version"],
-            help="Defines the version of the rule set to use.",
-        )
-
-        rule_group_overrides = cls._args_schema.managed_rules.managed_rule_sets.Element.rule_group_overrides
-        rule_group_overrides.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.managed_rules.managed_rule_sets.Element.rule_group_overrides.Element
-        _element.rule_group_name = AAZStrArg(
-            options=["rule-group-name"],
-            help="The managed rule group to override.",
-        )
-        _element.rules = AAZListArg(
-            options=["rules"],
-            help="List of rules that will be disabled. If none specified, all rules in the group will be disabled.",
-            nullable=True,
-        )
-
-        rules = cls._args_schema.managed_rules.managed_rule_sets.Element.rule_group_overrides.Element.rules
-        rules.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.managed_rules.managed_rule_sets.Element.rule_group_overrides.Element.rules.Element
-        _element.action = AAZStrArg(
-            options=["action"],
-            help="Describes the override action to be applied when rule matches.",
-            nullable=True,
-            enum={"Allow": "Allow", "AnomalyScoring": "AnomalyScoring", "Block": "Block", "Log": "Log"},
-        )
-        _element.rule_id = AAZStrArg(
-            options=["rule-id"],
-            help="Identifier for the managed rule.",
-        )
-        _element.state = AAZStrArg(
-            options=["state"],
-            help="The state of the managed rule. Defaults to Disabled if not specified.",
-            nullable=True,
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
-        )
-
-        policy_settings = cls._args_schema.policy_settings
-        policy_settings.file_upload_limit_in_mb = AAZIntArg(
-            options=["file-upload-limit-in-mb"],
-            help="Maximum file upload size in Mb for WAF.",
-            nullable=True,
-            fmt=AAZIntArgFormat(
-                minimum=0,
-            ),
-        )
-        policy_settings.max_request_body_size_in_kb = AAZIntArg(
-            options=["max-request-body-size-in-kb"],
-            help="Maximum request body size in Kb for WAF.",
-            nullable=True,
-            fmt=AAZIntArgFormat(
-                minimum=8,
-            ),
-        )
-        policy_settings.mode = AAZStrArg(
-            options=["mode"],
-            help="The mode of the policy.",
-            nullable=True,
-            enum={"Detection": "Detection", "Prevention": "Prevention"},
-        )
-        policy_settings.request_body_check = AAZBoolArg(
-            options=["request-body-check"],
-            help="Whether to allow WAF to check request Body.",
-            nullable=True,
-        )
-        policy_settings.state = AAZStrArg(
-            options=["state"],
-            help="The state of the policy.",
-            nullable=True,
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.WebApplicationFirewallPoliciesGet(ctx=self.ctx)()
-        self.pre_instance_update(self.ctx.vars.instance)
-        self.InstanceUpdateByJson(ctx=self.ctx)()
-        self.InstanceUpdateByGeneric(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.vars.instance)
-        self.WebApplicationFirewallPoliciesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -384,17 +79,34 @@ class Update(AAZCommand):
     def post_operations(self):
         pass
 
-    @register_callback
-    def pre_instance_update(self, instance):
-        pass
-
-    @register_callback
-    def post_instance_update(self, instance):
-        pass
-
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
         return result
+
+    class SubresourceSelector(AAZJsonSelector):
+
+        def _get(self):
+            result = self.ctx.vars.instance
+            result = result.properties.customRules
+            filters = enumerate(result)
+            filters = filter(
+                lambda e: e[1].name == self.ctx.args.name,
+                filters
+            )
+            idx = next(filters)[0]
+            return result[idx]
+
+        def _set(self, value):
+            result = self.ctx.vars.instance
+            result = result.properties.customRules
+            filters = enumerate(result)
+            filters = filter(
+                lambda e: e[1].name == self.ctx.args.name,
+                filters
+            )
+            idx = next(filters, [len(result)])[0]
+            result[idx] = value
+            return
 
     class WebApplicationFirewallPoliciesGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -426,7 +138,7 @@ class Update(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "policyName", self.ctx.args.name,
+                    "policyName", self.ctx.args.policy_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -475,263 +187,13 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_web_application_firewall_policy_read(cls._schema_on_200)
+            _ShowHelper._build_schema_web_application_firewall_policy_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
-    class WebApplicationFirewallPoliciesCreateOrUpdate(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
 
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200, 201]:
-                return self.on_200_201(session)
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/{policyName}",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "PUT"
-
-        @property
-        def error_format(self):
-            return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "policyName", self.ctx.args.name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "api-version", "2022-05-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=self.ctx.vars.instance,
-            )
-
-            return self.serialize_content(_content_value)
-
-        def on_200_201(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200_201
-            )
-
-        _schema_on_200_201 = None
-
-        @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
-
-            cls._schema_on_200_201 = AAZObjectType()
-            _UpdateHelper._build_schema_web_application_firewall_policy_read(cls._schema_on_200_201)
-
-            return cls._schema_on_200_201
-
-    class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
-
-        def __call__(self, *args, **kwargs):
-            self._update_instance(self.ctx.vars.instance)
-
-        def _update_instance(self, instance):
-            _instance_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=instance,
-                typ=AAZObjectType
-            )
-            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _builder.set_prop("tags", AAZDictType, ".tags")
-
-            properties = _builder.get(".properties")
-            if properties is not None:
-                properties.set_prop("customRules", AAZListType, ".custom_rules")
-                properties.set_prop("managedRules", AAZObjectType, ".managed_rules", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("policySettings", AAZObjectType, ".policy_settings")
-
-            custom_rules = _builder.get(".properties.customRules")
-            if custom_rules is not None:
-                custom_rules.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.customRules[]")
-            if _elements is not None:
-                _elements.set_prop("action", AAZStrType, ".action", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("matchConditions", AAZListType, ".match_conditions", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("name", AAZStrType, ".name")
-                _elements.set_prop("priority", AAZIntType, ".priority", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("ruleType", AAZStrType, ".rule_type", typ_kwargs={"flags": {"required": True}})
-
-            match_conditions = _builder.get(".properties.customRules[].matchConditions")
-            if match_conditions is not None:
-                match_conditions.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.customRules[].matchConditions[]")
-            if _elements is not None:
-                _elements.set_prop("matchValues", AAZListType, ".values")
-                _elements.set_prop("matchVariables", AAZListType, ".variables", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("negationConditon", AAZBoolType, ".negate")
-                _elements.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("transforms", AAZListType, ".transforms")
-
-            match_values = _builder.get(".properties.customRules[].matchConditions[].matchValues")
-            if match_values is not None:
-                match_values.set_elements(AAZStrType, ".")
-
-            match_variables = _builder.get(".properties.customRules[].matchConditions[].matchVariables")
-            if match_variables is not None:
-                match_variables.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.customRules[].matchConditions[].matchVariables[]")
-            if _elements is not None:
-                _elements.set_prop("selector", AAZStrType, ".selector")
-                _elements.set_prop("variableName", AAZStrType, ".variable_name", typ_kwargs={"flags": {"required": True}})
-
-            transforms = _builder.get(".properties.customRules[].matchConditions[].transforms")
-            if transforms is not None:
-                transforms.set_elements(AAZStrType, ".")
-
-            managed_rules = _builder.get(".properties.managedRules")
-            if managed_rules is not None:
-                managed_rules.set_prop("exclusions", AAZListType, ".exclusions")
-                managed_rules.set_prop("managedRuleSets", AAZListType, ".managed_rule_sets", typ_kwargs={"flags": {"required": True}})
-
-            exclusions = _builder.get(".properties.managedRules.exclusions")
-            if exclusions is not None:
-                exclusions.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.managedRules.exclusions[]")
-            if _elements is not None:
-                _elements.set_prop("exclusionManagedRuleSets", AAZListType, ".exclusion_managed_rule_sets")
-                _elements.set_prop("matchVariable", AAZStrType, ".match_variable", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("selector", AAZStrType, ".selector", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("selectorMatchOperator", AAZStrType, ".selector_match_operator", typ_kwargs={"flags": {"required": True}})
-
-            exclusion_managed_rule_sets = _builder.get(".properties.managedRules.exclusions[].exclusionManagedRuleSets")
-            if exclusion_managed_rule_sets is not None:
-                exclusion_managed_rule_sets.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.managedRules.exclusions[].exclusionManagedRuleSets[]")
-            if _elements is not None:
-                _elements.set_prop("ruleGroups", AAZListType, ".rule_groups")
-                _elements.set_prop("ruleSetType", AAZStrType, ".rule_set_type", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("ruleSetVersion", AAZStrType, ".rule_set_version", typ_kwargs={"flags": {"required": True}})
-
-            rule_groups = _builder.get(".properties.managedRules.exclusions[].exclusionManagedRuleSets[].ruleGroups")
-            if rule_groups is not None:
-                rule_groups.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.managedRules.exclusions[].exclusionManagedRuleSets[].ruleGroups[]")
-            if _elements is not None:
-                _elements.set_prop("ruleGroupName", AAZStrType, ".rule_group_name", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("rules", AAZListType, ".rules")
-
-            rules = _builder.get(".properties.managedRules.exclusions[].exclusionManagedRuleSets[].ruleGroups[].rules")
-            if rules is not None:
-                rules.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.managedRules.exclusions[].exclusionManagedRuleSets[].ruleGroups[].rules[]")
-            if _elements is not None:
-                _elements.set_prop("ruleId", AAZStrType, ".rule_id", typ_kwargs={"flags": {"required": True}})
-
-            managed_rule_sets = _builder.get(".properties.managedRules.managedRuleSets")
-            if managed_rule_sets is not None:
-                managed_rule_sets.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.managedRules.managedRuleSets[]")
-            if _elements is not None:
-                _elements.set_prop("ruleGroupOverrides", AAZListType, ".rule_group_overrides")
-                _elements.set_prop("ruleSetType", AAZStrType, ".rule_set_type", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("ruleSetVersion", AAZStrType, ".rule_set_version", typ_kwargs={"flags": {"required": True}})
-
-            rule_group_overrides = _builder.get(".properties.managedRules.managedRuleSets[].ruleGroupOverrides")
-            if rule_group_overrides is not None:
-                rule_group_overrides.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.managedRules.managedRuleSets[].ruleGroupOverrides[]")
-            if _elements is not None:
-                _elements.set_prop("ruleGroupName", AAZStrType, ".rule_group_name", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("rules", AAZListType, ".rules")
-
-            rules = _builder.get(".properties.managedRules.managedRuleSets[].ruleGroupOverrides[].rules")
-            if rules is not None:
-                rules.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.managedRules.managedRuleSets[].ruleGroupOverrides[].rules[]")
-            if _elements is not None:
-                _elements.set_prop("action", AAZStrType, ".action")
-                _elements.set_prop("ruleId", AAZStrType, ".rule_id", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("state", AAZStrType, ".state")
-
-            policy_settings = _builder.get(".properties.policySettings")
-            if policy_settings is not None:
-                policy_settings.set_prop("fileUploadLimitInMb", AAZIntType, ".file_upload_limit_in_mb")
-                policy_settings.set_prop("maxRequestBodySizeInKb", AAZIntType, ".max_request_body_size_in_kb")
-                policy_settings.set_prop("mode", AAZStrType, ".mode")
-                policy_settings.set_prop("requestBodyCheck", AAZBoolType, ".request_body_check")
-                policy_settings.set_prop("state", AAZStrType, ".state")
-
-            tags = _builder.get(".tags")
-            if tags is not None:
-                tags.set_elements(AAZStrType, ".")
-
-            return _instance_value
-
-    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
-
-        def __call__(self, *args, **kwargs):
-            self._update_instance_by_generic(
-                self.ctx.vars.instance,
-                self.ctx.generic_update_args
-            )
-
-
-class _UpdateHelper:
-    """Helper class for Update"""
+class _ShowHelper:
+    """Helper class for Show"""
 
     _schema_application_gateway_backend_address_pool_read = None
 
@@ -4397,4 +3859,4 @@ class _UpdateHelper:
         _schema.type = cls._schema_web_application_firewall_policy_read.type
 
 
-__all__ = ["Update"]
+__all__ = ["Show"]
