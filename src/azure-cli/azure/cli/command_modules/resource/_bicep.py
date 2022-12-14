@@ -147,7 +147,7 @@ def is_bicep_file(file_path):
 def get_bicep_available_release_tags():
     try:
         os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
-        response = requests.get("https://api.bicep-df.azure.com/releases", verify=_requests_verify)
+        response = requests.get("https://bicepcdnsadf.blob.core.windows.net/bicep-cdn-container/releases", verify=_requests_verify)
         return [release["tag_name"] for release in response.json()]
     except IOError as err:
         raise ClientRequestError(f"Error while attempting to retrieve available Bicep versions: {err}.")
@@ -156,7 +156,7 @@ def get_bicep_available_release_tags():
 def get_bicep_latest_release_tag():
     try:
         os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
-        response = requests.get("https://api.bicep-df.azure.com/releases/latest", verify=_requests_verify)
+        response = requests.get("https://bicepcdnsadf.blob.core.windows.net/bicep-cdn-container/releases/latest", verify=_requests_verify)
         response.raise_for_status()
         return response.json()["tag_name"]
     except IOError as err:
