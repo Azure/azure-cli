@@ -145,7 +145,7 @@ class AddUserAccountAuthInfo(argparse.Action):
             kl = k.lower()
             v = properties[k]
             if kl == 'object-id':
-                d['principal-id'] = v[0]
+                d['principal_id'] = v[0]
             elif kl == 'mysql-identity-id':
                 d['mysql-identity-id'] = v[0]
             else:

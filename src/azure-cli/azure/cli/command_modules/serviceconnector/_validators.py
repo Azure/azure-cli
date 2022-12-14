@@ -87,7 +87,7 @@ def get_resource_regex(resource):
     '''
     regex = resource
     for item in re.findall(r'(\{[^\{\}]*\})', resource):
-        regex = regex.replace(item, '([^/]*)')
+        regex = regex.replace(item, '[^/]*')
     return regex
 
 
@@ -238,7 +238,7 @@ def interactive_input(arg, hint):
             'User Account object-id (--user-account object-id=): ')
         value = {
             'auth_type': 'userAccount',
-            'object_id': object_id
+            'principal_id': object_id
         }
         cmd_value = 'object-id={}'.format(object_id)
     else:
@@ -499,8 +499,11 @@ def validate_local_default_params(cmd, namespace):  # pylint: disable=unused-arg
         if not is_valid_resource_id(namespace.id):
             raise InvalidArgumentValueError(
                 'Resource id is invalid: {}'.format(namespace.id))
-        matched = re.match(get_resource_regex(
-            LOCAL_CONNECTION_RESOURCE.lower()), namespace.id)
+        resource = LOCAL_CONNECTION_RESOURCE.lower()
+        for item in re.findall(r'(\{[^\{\}]*\})', resource):
+            resource = resource.replace(item, '([^/]*)')
+
+        matched = re.match(resource, namespace.id)
         if matched:
             namespace.resource_group_name = matched.group(2)
             namespace.location = matched.group(3)
@@ -830,7 +833,7 @@ def validate_service_state(linker_parameters):
 
 def get_default_object_id_of_current_user(cmd, namespace):  # pylint: disable=unused-argument
     user_account_auth_info = getattr(namespace, 'user_account_auth_info', None)
-    if user_account_auth_info and not getattr(user_account_auth_info, 'object_id', None):
+    if user_account_auth_info and not user_account_auth_info.get('principal_id', None):
         user_info = run_cli_cmd('az ad signed-in-user show')
         user_object_id = user_info.get('objectId') if user_info.get(
             'objectId') else user_info.get('id')

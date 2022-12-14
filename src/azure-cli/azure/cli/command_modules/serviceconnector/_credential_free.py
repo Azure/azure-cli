@@ -55,13 +55,14 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, client_type, c
     if target_handler is None:
         return
 
-    user_info = run_cli_cmd(
-        'az ad user show --id {}'.format(target_handler.login_username))
-    user_object_id = user_info.get('objectId') if user_info.get('objectId') is not None \
-        else user_info.get('id')
+    user_object_id = auth_info.get('principal_id')
+    if user_object_id is None:
+        user_info = run_cli_cmd('az ad signed-in-user show')
+        user_object_id = user_info.get('objectId') if user_info.get(
+            'objectId') else user_info.get('id')
     if user_object_id is None:
         raise Exception(
-            "No object id found for user {}".format(target_handler.login_username))
+            "No object id for user {}".format(target_handler.login_username))
 
     client_id = None
     if source_type == RESOURCE.Local:
@@ -148,7 +149,7 @@ class TargetHandler:
             return {
                 'auth_type': self.auth_type,
                 'username': self.aad_username,
-                'PrincipalId': user_object_id
+                'principal_id': user_object_id
             }
         if self.auth_type == PasswordlessIdentity[AUTH_TYPE.SystemIdentity]:
             return {
@@ -279,7 +280,7 @@ class MysqlFlexibleHandler(TargetHandler):
     def get_create_query(self, client_id):
         return [
             "SET aad_auth_validate_oids_in_tenant = OFF;",
-            # "DROP USER IF EXISTS '{}'@'%';".format(self.aad_username),
+            "DROP USER IF EXISTS '{}'@'%';".format(self.aad_username),
             "CREATE AADUSER '{}' IDENTIFIED BY '{}';".format(
                 self.aad_username, client_id),
             "GRANT ALL PRIVILEGES ON `{}`.* TO '{}'@'%';".format(

@@ -46,14 +46,14 @@ class LocalConnectionScenarioTest(ScenarioTest):
 
         # create connection
         self.cmd('connection create appconfig -g {} --connection {} --target-id {} '
-                 '--secret --client-type python'.format(resource_group, name, target_id))
+                 '--user-account --client-type python'.format(resource_group, name, target_id))
 
         # list connection
         connections = self.cmd(
             'connection list -g {}'.format(resource_group),
             checks=[
                 self.check('length(@)', 1),
-                self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].authInfo.authType', 'userAccount'),
                 self.check('[0].clientType', 'python')
             ]
         ).get_output_in_json()
@@ -167,7 +167,8 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+    # @record_only()
+    @unittest.skip('')
     def test_local_cosmosmongo_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -183,7 +184,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
 
         # create connection
         self.cmd('connection create cosmos-mongo -g {} --connection {} --target-id {} '
-                 '--secret --client-type dotnet'.format(resource_group, name, target_id))
+                 '--user-account --client-type dotnet'.format(resource_group, name, target_id))
 
         # list connection
         connections = self.cmd(
@@ -258,7 +259,8 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()    # @unittest.skip('')
+    @record_only()
+    @unittest.skip('')
     def test_local_cosmostable_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -304,7 +306,6 @@ class LocalConnectionScenarioTest(ScenarioTest):
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
     @record_only()
-
     def test_local_eventhub_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -363,14 +364,14 @@ class LocalConnectionScenarioTest(ScenarioTest):
 
         # create connection
         self.cmd('connection create servicebus -g {} --connection {} --target-id {} '
-                 '--secret --client-type python'.format(resource_group, name, target_id))
+                 '--user-account --client-type python'.format(resource_group, name, target_id))
 
         # list connection
         connections = self.cmd(
             'connection list -g {}'.format(resource_group),
             checks=[
                 self.check('length(@)', 1),
-                self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].authInfo.authType', 'userAccount'),
                 self.check('[0].clientType', 'python')
             ]
         ).get_output_in_json()
