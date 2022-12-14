@@ -9,6 +9,7 @@ import json
 
 from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, ResourceNotFoundError, \
     HttpResponseError
+from azure.cli.core.azclierror import ArgumentUsageError
 
 from ._arg_browser import AAZArgBrowser
 from ._base import AAZUndefined, AAZBaseValue, AAZBaseType
@@ -393,48 +394,90 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
     def __call__(self, *args, **kwargs):
         raise NotImplementedError()
 
-    @staticmethod
-    def _update_instance_by_generic(instance, generic_update_args):  # pylint: disable=unused-argument
-        from azure.cli.core.commands.arm import add_usage, remove_usage, set_usage, \
-            add_properties, remove_properties, set_properties
+    def _update_instance_by_generic(self, instance, generic_update_args):  # pylint: disable=unused-argument
+        from azure.cli.core.commands.arm import add_usage, remove_usage, set_usage
         from azure.cli.core.azclierror import InvalidArgumentValueError
         if not generic_update_args or not generic_update_args['actions']:
             return instance
         assert isinstance(instance, AAZBaseValue)
 
-        data = instance.to_serialized_data()  # to raw data
+        # data = instance.to_serialized_data()  # to raw data
         force_string = generic_update_args.get('force_string', False)
         for action_name, values in generic_update_args['actions']:
             if action_name == "set":
                 try:
                     for expression in values:
-                        set_properties(data, expression, force_string)
+                        self._set_properties(instance, expression, force_string)
                 except ValueError:
                     raise InvalidArgumentValueError('invalid syntax: {}'.format(set_usage))
             elif action_name == "add":
                 try:
-                    add_properties(data, values, force_string)
+                    self._add_properties(instance, values, force_string)
                 except ValueError:
                     raise InvalidArgumentValueError('invalid syntax: {}'.format(add_usage))
             elif action_name == "remove":
                 try:
-                    remove_properties(data, values)
+                    self._remove_properties(instance, values)
                 except ValueError:
                     raise InvalidArgumentValueError('invalid syntax: {}'.format(remove_usage))
-
-        # verify and update instance
-        try:
-            data = instance._schema.process_data(data)
-        except AssertionError as err:
-            raise InvalidArgumentValueError(f'invalid argument: {err}')
-
-        if isinstance(instance, AAZSimpleValue):
-            # should be combined with
-            #   self.ctx.var.instance = _update_instance_by_generic(self.ctx.var.instance, self.ctx.generic_update_args)
-            instance._data = data
-        else:
-            # in place update _data. Cannot use instance._data = data, because the original _data will not be changed.
-            assert isinstance(instance._data, dict)
-            instance._data.clear()
-            instance._data.update(data)
         return instance
+
+    def _set_properties(self, instance, expression, force_string):
+        from azure.cli.core.commands.arm import _split_key_value_pair, shell_safe_json_parse
+        key, value = _split_key_value_pair(expression)
+
+        if key is None or key.strip() == '':
+            raise ArgumentUsageError('usage error: Empty key in --set. Correct syntax: --set KEY=VALUE [KEY=VALUE ...]')
+
+        if not force_string:
+            try:
+                value = shell_safe_json_parse(value)
+            except:  # pylint:disable=bare-except
+                pass
+
+        # TODO:
+
+    def _add_properties(self, instance, argument_values, force_string):
+        # The first argument indicates the path to the collection to add to.
+        argument_values = list(argument_values)
+        list_attribute_path = self._get_internal_path(argument_values.pop(0))
+
+        pass
+
+    def _remove_properties(self, instance, argument_values):
+        # The first argument indicates the path to the collection to remove from.
+        argument_values = list(argument_values) if isinstance(argument_values, list) else [argument_values]
+        list_attribute_path = self._get_internal_path(argument_values.pop(0))
+        list_index = None
+        try:
+            list_index = argument_values.pop(0)
+        except IndexError:
+            pass
+
+        if not list_index:
+            pass
+        else:
+
+            pass
+
+    def _find_property(self, instance, path):
+        from azure.cli.core.commands.arm import index_or_filter_regex
+        try:
+            for part in path:
+                pass
+        except (AttributeError, KeyError):
+            self._throw_and_show_options(instance, part, path)
+
+    @staticmethod
+    def _get_internal_path(path):
+        from azure.cli.core.commands.arm import _get_internal_path
+        return _get_internal_path(path)
+
+    @staticmethod
+    def _get_name_path(path):
+        from azure.cli.core.commands.arm import _get_name_path
+        return _get_name_path(path)
+
+    @staticmethod
+    def _throw_and_show_options(instance, part, path):
+        pass
