@@ -1530,7 +1530,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
         self.cmd(
-            'functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp_name, plan, storage_account))
+            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan, storage_account))
         self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
             resource_group, functionapp_name, vnet_name, subnet_name))
         self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
@@ -1590,7 +1590,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku B1'.format(resource_group, plan))
         self.cmd(
-            'functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp_name, plan, storage_account))
+            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan, storage_account))
         self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
             resource_group, functionapp_name, vnet_name, subnet_name))
         self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
@@ -1612,7 +1612,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
         self.cmd(
             'functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, plan))
         self.cmd(
-            'functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp_name, plan, storage_account))
+            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan, storage_account))
         self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
             resource_group, functionapp_name, vnet_name, subnet_name))
         self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
@@ -1643,7 +1643,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
         self.cmd(
-            'functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp_name, plan, storage_account))
+            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan, storage_account))
         self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(resource_group, functionapp_name, vnet_name, subnet_name), checks=[
                 JMESPathCheck('subnetResourceId', subnet_id)
         ])
