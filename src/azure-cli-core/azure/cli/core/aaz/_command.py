@@ -6,6 +6,7 @@
 # pylint: disable=too-few-public-methods, too-many-instance-attributes, protected-access, not-callable
 import importlib
 import os
+import copy
 from functools import partial
 
 from knack.commands import CLICommand, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
@@ -21,7 +22,7 @@ from ._field_type import AAZObjectType
 from ._paging import AAZPaged
 from ._poller import AAZLROPoller
 from ._command_ctx import AAZCommandCtx
-from .exceptions import AAZUnknownFieldError
+from .exceptions import AAZUnknownFieldError, AAZUnregisteredArg
 
 
 class AAZCommandGroup:
@@ -159,16 +160,20 @@ class AAZCommand(CLICommand):
         args = {}
         for name, field in schema._fields.items():
             # generate command arguments from argument schema.
-            args[name] = field.to_cmd_arg(name)
+            try:
+                args[name] = field.to_cmd_arg(name, cli_ctx=self.cli_ctx)
+            except AAZUnregisteredArg:
+                continue
         return list(args.items())
 
     def update_argument(self, param_name, argtype):
         """ This function is called by core to add global arguments
         """
         schema = self.get_arguments_schema()
-        # not support to overwrite arguments defined in schema
-        if not hasattr(schema, param_name):
-            super().update_argument(param_name, argtype)
+        if hasattr(schema, param_name):
+            # not support to overwrite arguments defined in schema, use arg.type as overrides
+            argtype = copy.deepcopy(self.arguments[param_name].type)
+        super().update_argument(param_name, argtype)
 
     @staticmethod
     def deserialize_output(value, client_flatten=True):

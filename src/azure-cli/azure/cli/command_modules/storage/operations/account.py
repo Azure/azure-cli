@@ -17,7 +17,7 @@ logger = get_logger(__name__)
 
 def check_name_availability(cmd, client, name):
     StorageAccountCheckNameAvailabilityParameters = cmd.get_models('StorageAccountCheckNameAvailabilityParameters')
-    account_name = StorageAccountCheckNameAvailabilityParameters(name=name)
+    account_name = StorageAccountCheckNameAvailabilityParameters(name=name, type="Microsoft.Storage/storageAccounts")
     return client.check_name_availability(account_name)
 
 
@@ -66,7 +66,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
                            require_infrastructure_encryption=None, allow_blob_public_access=None,
                            min_tls_version=None, allow_shared_key_access=None, edge_zone=None,
-                           identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
+                           identity_type=None, user_identity_id=None,
+                           key_vault_user_identity_id=None, federated_identity_client_id=None,
                            sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow', enable_alw=None,
@@ -80,7 +81,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         logger.warning("The default kind for created storage account will change to 'StorageV2' from 'Storage' "
                        "in the future")
     params = StorageAccountCreateParameters(sku=Sku(name=sku), kind=Kind(kind), location=location, tags=tags,
-                                            encryption=Encryption())
+                                            encryption=Encryption(key_source="Microsoft.Storage"))
     # TODO: remove this part when server side remove the constraint
     if encryption_services is None:
         params.encryption.services = {'blob': {}}
@@ -106,10 +107,12 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.identity = Identity(type=identity_type, user_assigned_identities={user_identity_id: {}})
     elif identity_type:
         params.identity = Identity(type=identity_type)
-    if key_vault_user_identity_id is not None:
+    if key_vault_user_identity_id is not None or federated_identity_client_id is not None:
         EncryptionIdentity = cmd.get_models('EncryptionIdentity')
         params.encryption.encryption_identity = EncryptionIdentity(
-            encryption_user_assigned_identity=key_vault_user_identity_id)
+            encryption_user_assigned_identity=key_vault_user_identity_id,
+            encryption_federated_identity_client_id=federated_identity_client_id
+        )
 
     if access_tier:
         params.access_tier = AccessTier(access_tier)
@@ -281,7 +284,7 @@ def list_storage_accounts(cmd, resource_group_name=None):
 
 def show_storage_account_connection_string(cmd, resource_group_name, account_name, protocol='https', blob_endpoint=None,
                                            file_endpoint=None, queue_endpoint=None, table_endpoint=None, sas_token=None,
-                                           key_name='primary'):
+                                           key_name='key1'):
 
     endpoint_suffix = cmd.cli_ctx.cloud.suffixes.storage_endpoint
     connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={}'.format(protocol, endpoint_suffix)
@@ -308,7 +311,7 @@ def show_storage_account_connection_string(cmd, resource_group_name, account_nam
         connection_string = '{}{}{}'.format(
             connection_string,
             ';AccountName={}'.format(account_name),
-            ';AccountKey={}'.format(keys[0] if key_name == 'primary' else keys[1]))  # pylint: disable=no-member
+            ';AccountKey={}'.format(keys[0] if key_name == 'key1' else keys[1]))  # pylint: disable=no-member
 
     connection_string = '{}{}'.format(connection_string,
                                       ';BlobEndpoint={}'.format(blob_endpoint) if blob_endpoint else '')
@@ -355,7 +358,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            domain_sid=None, azure_storage_sid=None, sam_account_name=None, account_type=None,
                            routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
                            allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None,
-                           identity_type=None, user_identity_id=None, key_vault_user_identity_id=None,
+                           identity_type=None, user_identity_id=None,
+                           key_vault_user_identity_id=None, federated_identity_client_id=None,
                            sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
@@ -417,10 +421,15 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     elif identity_type:
         params.identity = Identity(type=identity_type)
 
-    if key_vault_user_identity_id is not None:
+    if key_vault_user_identity_id is not None or federated_identity_client_id is not None:
+        original_encryption_identity = params.encryption.encryption_identity if params.encryption else None
         EncryptionIdentity = cmd.get_models('EncryptionIdentity')
+        if not original_encryption_identity:
+            original_encryption_identity = EncryptionIdentity()
         params.encryption.encryption_identity = EncryptionIdentity(
-            encryption_user_assigned_identity=key_vault_user_identity_id)
+            encryption_user_assigned_identity=key_vault_user_identity_id if key_vault_user_identity_id else original_encryption_identity.encryption_user_assigned_identity,
+            encryption_federated_identity_client_id=federated_identity_client_id if federated_identity_client_id else original_encryption_identity.encryption_federated_identity_client_id
+        )
 
     AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
     if enable_files_aadds is not None:
@@ -869,6 +878,19 @@ def update_encryption_scope(cmd, client, resource_group_name, account_name, encr
 
     return client.patch(resource_group_name=resource_group_name, account_name=account_name,
                         encryption_scope_name=encryption_scope_name, encryption_scope=encryption_scope)
+
+
+def list_encryption_scope(client, resource_group_name, account_name,
+                          maxpagesize=None, marker=None, filter=None, include=None):  # pylint: disable=redefined-builtin
+    generator = client.list(resource_group_name, account_name, maxpagesize=maxpagesize, filter=filter, include=include)
+    pages = generator.by_page(continuation_token=marker)
+
+    result = list(next(pages))
+    if pages.continuation_token:
+        next_marker = {"nextMarker": pages.continuation_token}
+        result.append(next_marker)
+
+    return result
 
 
 # pylint: disable=no-member

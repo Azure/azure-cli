@@ -25,6 +25,7 @@ export RPM_BUILD_ROOT=/
 
 pip install pytest --prefix /usr/lib64/az
 pip install pytest-xdist --prefix /usr/lib64/az
+pip install pytest-forked --prefix /usr/lib64/az
 
 find /azure-cli/artifacts/build -name "azure_cli_testsdk*" | xargs pip install --prefix /usr/lib64/az --upgrade --ignore-installed
 find /azure-cli/artifacts/build -name "azure_cli_fulltest*" | xargs pip install --prefix /usr/lib64/az --upgrade --ignore-installed --no-deps

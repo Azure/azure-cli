@@ -640,6 +640,50 @@ class TestAAZArgBaseFmt(unittest.TestCase):
             }
         })
 
+    def test_freeform_dict_fmt(self):
+        from azure.cli.core.aaz import AAZFreeFormDictArgFormat
+        from azure.cli.core.aaz import AAZFreeFormDictArg
+
+        schema = AAZArgumentsSchema()
+        schema.tags = AAZFreeFormDictArg(fmt=AAZFreeFormDictArgFormat(max_properties=3, min_properties=2), nullable=True)
+
+        args = self.format_arg(schema, {
+            "tags": {
+                "flag1": "v1",
+                "flag2": 2,
+            },
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "tags": {
+                "flag1": "v1",
+                "flag2": 2,
+            }
+        })
+
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {
+                "tags": {
+                    "flag1": "v1",
+                },
+            })
+
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {
+                "tags": {
+                    "flag1": "v1",
+                    "flag2": "v2",
+                    "flag3": "v3",
+                    "flag4": "v4",
+                },
+            })
+
+        args = self.format_arg(schema, {
+            "tags": None,
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "tags": None
+        })
+
     def test_list_fmt(self):
         from azure.cli.core.aaz import AAZObjectArgFormat, AAZListArgFormat, AAZStrArgFormat, AAZIntArgFormat
         from azure.cli.core.aaz import AAZObjectArg, AAZListArg, AAZStrArg, AAZIntArg

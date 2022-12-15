@@ -100,10 +100,12 @@ ManagedClusterAddonProfile = TypeVar("ManagedClusterAddonProfile")
 Snapshot = TypeVar("Snapshot")
 KubeletConfig = TypeVar("KubeletConfig")
 LinuxOSConfig = TypeVar("LinuxOSConfig")
+ManagedClusterOIDCIssuerProfile = TypeVar("ManagedClusterOIDCIssuerProfile")
 ManagedClusterSecurityProfileDefender = TypeVar("ManagedClusterSecurityProfileDefender")
 ManagedClusterStorageProfile = TypeVar('ManagedClusterStorageProfile')
 ManagedClusterStorageProfileDiskCSIDriver = TypeVar('ManagedClusterStorageProfileDiskCSIDriver')
 ManagedClusterStorageProfileFileCSIDriver = TypeVar('ManagedClusterStorageProfileFileCSIDriver')
+ManagedClusterStorageProfileBlobCSIDriver = TypeVar('ManagedClusterStorageProfileBlobCSIDriver')
 ManagedClusterStorageProfileSnapshotController = TypeVar('ManagedClusterStorageProfileSnapshotController')
 
 # TODO
@@ -594,6 +596,45 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return profile
 
+    def get_blob_driver(self) -> Optional[ManagedClusterStorageProfileBlobCSIDriver]:
+        """Obtain the value of storage_profile.blob_csi_driver
+        :return: Optional[ManagedClusterStorageProfileBlobCSIDriver]
+        """
+        enable_blob_driver = self.raw_param.get("enable_blob_driver")
+        disable_blob_driver = self.raw_param.get("disable_blob_driver")
+
+        if enable_blob_driver is None and disable_blob_driver is None:
+            return None
+
+        profile = self.models.ManagedClusterStorageProfileBlobCSIDriver()
+
+        if enable_blob_driver and disable_blob_driver:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot specify --enable-blob-driver and "
+                "--disable-blob-driver at the same time."
+            )
+
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if enable_blob_driver:
+                profile.enabled = True
+
+        if self.decorator_mode == DecoratorMode.UPDATE:
+            if enable_blob_driver:
+                msg = "Please make sure there is no open-source Blob CSI driver installed before enabling."
+                if not self.get_yes() and not prompt_y_n(msg, default="n"):
+                    raise DecoratorEarlyExitException()
+                profile.enabled = True
+            elif disable_blob_driver:
+                msg = (
+                    "Please make sure there are no existing PVs and PVCs "
+                    "that are used by Blob CSI driver before disabling."
+                )
+                if not self.get_yes() and not prompt_y_n(msg, default="n"):
+                    raise DecoratorEarlyExitException()
+                profile.enabled = False
+
+        return profile
+
     def get_snapshot_controller(self) -> Optional[ManagedClusterStorageProfileSnapshotController]:
         """Obtain the value of storage_profile.snapshot_controller
 
@@ -642,6 +683,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             profile = self.mc.storage_profile
         profile.disk_csi_driver = self.get_disk_driver()
         profile.file_csi_driver = self.get_file_driver()
+        profile.blob_csi_driver = self.get_blob_driver()
         profile.snapshot_controller = self.get_snapshot_controller()
 
         return profile
@@ -2382,6 +2424,38 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return enable_msi_auth_for_monitoring
 
+    def get_enable_syslog(self) -> Union[bool, None]:
+        """Obtain the value of enable_syslog.
+
+        Note: The arg type of this parameter supports three states (True, False or None), but the corresponding default
+        value in entry function is not None.
+
+        :return: bool or None
+        """
+        # read the original value passed by the command
+        enable_syslog = self.raw_param.get("enable_syslog")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_syslog
+
+    def get_data_collection_settings(self) -> Union[str, None]:
+        """Obtain the value of data_collection_settings.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        data_collection_settings_file_path = self.raw_param.get("data_collection_settings")
+        # validate user input
+        if data_collection_settings_file_path:
+            if not os.path.isfile(data_collection_settings_file_path):
+                raise InvalidArgumentValueError(
+                    "{} is not valid file, or not accessable.".format(
+                        data_collection_settings_file_path
+                    )
+                )
+        return data_collection_settings_file_path
+
     # pylint: disable=no-self-use
     def get_virtual_node_addon_os_type(self) -> str:
         """Helper function to obtain the os_type of virtual node addon.
@@ -3207,6 +3281,24 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: bool
         """
         return self._get_disable_azure_rbac(enable_validation=True)
+
+    def get_oidc_issuer_profile(self) -> ManagedClusterOIDCIssuerProfile:
+        """Obtain the value of oidc_issuer_profile based on the user input.
+
+        :return: ManagedClusterOIDCIssuerProfile
+        """
+        enable_flag_value = bool(self.raw_param.get("enable_oidc_issuer"))
+        if not enable_flag_value:
+            # enable flag not set, return a None profile, server side will backfill the default/existing value
+            return None
+
+        profile = self.models.ManagedClusterOIDCIssuerProfile()
+        if self.decorator_mode == DecoratorMode.UPDATE:
+            if self.mc.oidc_issuer_profile is not None:
+                profile = self.mc.oidc_issuer_profile
+        profile.enabled = True
+
+        return profile
 
     def _get_api_server_authorized_ip_ranges(self, enable_validation: bool = False) -> List[str]:
         """Internal function to obtain the value of api_server_authorized_ip_ranges.
@@ -4795,6 +4887,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             aad_route=self.context.get_enable_msi_auth_for_monitoring(),
             create_dcr=True,
             create_dcra=False,
+            enable_syslog=self.context.get_enable_syslog(),
+            data_collection_settings=self.context.get_data_collection_settings()
         )
         # set intermediate
         self.context.set_intermediate("monitoring_addon_enabled", True, overwrite_exists=True)
@@ -5054,6 +5148,18 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc.aad_profile = aad_profile
         return mc
 
+    def set_up_oidc_issuer_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up OIDC issuer profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+        oidc_issuer_profile = self.context.get_oidc_issuer_profile()
+        if oidc_issuer_profile is not None:
+            mc.oidc_issuer_profile = oidc_issuer_profile
+
+        return mc
+
     def set_up_api_server_access_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up api server access profile and fqdn subdomain for the ManagedCluster object.
 
@@ -5243,6 +5349,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_addon_profiles(mc)
         # set up aad profile
         mc = self.set_up_aad_profile(mc)
+        # set up oidc issuer profile
+        mc = self.set_up_oidc_issuer_profile(mc)
         # set up api server access profile and fqdn subdomain
         mc = self.set_up_api_server_access_profile(mc)
         # set up identity
@@ -5365,6 +5473,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     aad_route=self.context.get_enable_msi_auth_for_monitoring(),
                     create_dcr=False,
                     create_dcra=True,
+                    enable_syslog=self.context.get_enable_syslog(),
                 )
 
         # ingress appgw addon
@@ -5827,6 +5936,18 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.aad_profile.enable_azure_rbac = False
         return mc
 
+    def update_oidc_issuer_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update OIDC issuer profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+        oidc_issuer_profile = self.context.get_oidc_issuer_profile()
+        if oidc_issuer_profile is not None:
+            mc.oidc_issuer_profile = oidc_issuer_profile
+
+        return mc
+
     def update_auto_upgrade_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update auto upgrade profile for the ManagedCluster object.
 
@@ -6181,6 +6302,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_windows_profile(mc)
         # update aad profile
         mc = self.update_aad_profile(mc)
+        # update oidc issuer profile
+        mc = self.update_oidc_issuer_profile(mc)
         # update auto upgrade profile
         mc = self.update_auto_upgrade_profile(mc)
         # update identity
@@ -6271,6 +6394,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     aad_route=self.context.get_enable_msi_auth_for_monitoring(),
                     create_dcr=False,
                     create_dcra=True,
+                    enable_syslog=self.context.get_enable_syslog(),
                 )
 
         # ingress appgw addon

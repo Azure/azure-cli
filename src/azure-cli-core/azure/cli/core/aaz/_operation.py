@@ -13,7 +13,7 @@ from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError
 from ._arg_browser import AAZArgBrowser
 from ._base import AAZUndefined, AAZBaseValue, AAZBaseType
 from ._content_builder import AAZContentBuilder
-from ._field_type import AAZSimpleType, AAZObjectType, AAZDictType, AAZListType
+from ._field_type import AAZSimpleType, AAZObjectType, AAZBaseDictType, AAZListType
 from ._field_value import AAZSimpleValue
 
 try:
@@ -170,7 +170,7 @@ class AAZHttpOperation(AAZOperation):
                             _field_result = processor(_field_schema, {})
                             assert _field_result != AAZUndefined
                             result[_name] = _field_result
-                        elif isinstance(_field_schema, AAZDictType):
+                        elif isinstance(_field_schema, AAZBaseDictType):
                             # use an empty dict for required dict property
                             result[_name] = {}
                         elif isinstance(_field_schema, AAZListType):
@@ -190,7 +190,7 @@ class AAZHttpOperation(AAZOperation):
                     # use an empty dict as data for required object, and process it's properties
                     data = processor(value._schema, {})
                     assert data != AAZUndefined
-                elif isinstance(value._schema, AAZDictType):
+                elif isinstance(value._schema, AAZBaseDictType):
                     # use an empty dict for required dict
                     data = {}
                 elif isinstance(value._schema, AAZListType):
@@ -324,9 +324,7 @@ class AAZHttpOperation(AAZOperation):
         raise HttpResponseError(response=response, error_format=error_format)
 
 
-class AAZJsonInstanceUpdateOperation(AAZOperation):
-    """ Instance Update Operation
-    """
+class AAZJsonInstanceOperationHelper:
 
     def __call__(self, *args, **kwargs):
         raise NotImplementedError()
@@ -352,13 +350,40 @@ class AAZJsonInstanceUpdateOperation(AAZOperation):
                     data=schema.process_data(None)
                 )
         else:
-            assert isinstance(value, AAZBaseValue)
+            assert isinstance(value, AAZBaseValue), f"Unknown value type: {type(value)}"
 
         builder = AAZContentBuilder(
             values=[value],
             args=[AAZArgBrowser(arg_value=arg_value, arg_data=arg_data)]
         )
         return value, builder
+
+
+class AAZJsonInstanceUpdateOperation(AAZJsonInstanceOperationHelper, AAZOperation):
+    """ Instance Update Operation
+    """
+
+    def __call__(self, *args, **kwargs):
+        raise NotImplementedError()
+
+
+class AAZJsonInstanceCreateOperation(AAZJsonInstanceOperationHelper, AAZOperation):
+    """ Json Instance Create Operation
+    """
+
+    def __call__(self, *args, **kwargs):
+        raise NotImplementedError()
+
+
+class AAZJsonInstanceDeleteOperation(AAZJsonInstanceOperationHelper, AAZOperation):
+    """ Json Instance Delete Operation
+    """
+
+    def __call__(self, *args, **kwargs):
+        raise NotImplementedError()
+
+    def _delete_instance(self, *args, **kwargs):  # pylint: disable=unused-argument, no-self-use
+        return AAZUndefined
 
 
 class AAZGenericInstanceUpdateOperation(AAZOperation):

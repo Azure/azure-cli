@@ -201,10 +201,18 @@ examples:
 helps['functionapp config appsettings set'] = """
 type: command
 short-summary: Update a function app's settings.
+parameters:
+  - name: --settings
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
+  - name: --slot-settings
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. Given setting are added to the configuration and marked as Deployment slot setting by default.
 examples:
   - name: Update a function app's settings.
     text: |
         az functionapp config appsettings set --name MyFunctionApp --resource-group MyResourceGroup --settings "AzureWebJobsStorage=$storageConnectionString"
+  - name: Set using both key-value pair and a json file with more settings.
+    text: >
+        az functionapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings mySetting=value @moreSettings.json
 """
 
 helps['functionapp config container'] = """
@@ -956,9 +964,9 @@ helps['functionapp deploy'] = """
     short-summary: Deploys a provided artifact to Azure functionapp.
     examples:
     - name: Deploy a war file asynchronously.
-      text: az functionapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type war --async true
+      text: az functionapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type war --async true
     - name: Deploy a static text file to wwwroot/staticfiles/test.txt
-      text: az functionapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
+      text: az functionapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
 """
 
 helps['webapp'] = """
@@ -1093,6 +1101,11 @@ examples:
 helps['webapp config appsettings set'] = """
 type: command
 short-summary: Set a web app's settings.
+parameters:
+  - name: --settings
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
+  - name: --slot-settings
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. Given setting are added to the configuration and marked as Deployment slot setting by default.
 examples:
   - name: Set the default NodeJS version to 6.9.1 for a web app.
     text: >
@@ -1100,11 +1113,6 @@ examples:
   - name: Set using both key-value pair and a json file with more settings.
     text: >
         az webapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings mySetting=value @moreSettings.json
-parameters:
-  - name: --settings
-    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
-  - name: --slot-settings
-    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. Given setting are added to the configuration and marked as Deployment slot setting by default.
 """
 
 helps['webapp config backup'] = """
@@ -2082,9 +2090,9 @@ examples:
   - name: Add a regional virtual network integration to a webapp
     text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet MyVnetName --subnet MySubnetName -s [slot]
   - name: Add a regional virtual network integration to a webapp using vnet resource id
-    text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet '/subscriptions/[sub id]/resourceGroups/[MyResourceGroup]/providers/Microsoft.Network/virtualNetworks/[MyVnetName]' --subnet MySubnetName -s [slot]
+    text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet /subscriptions/[SubscriptionId]/resourceGroups/[MyResourceGroup]/providers/Microsoft.Network/virtualNetworks/[MyVnetName] --subnet MySubnetName -s [slot]
   - name: Add a regional virtual network integration to a webapp using subnet resource id
-    text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet MyVnetName --subnet '/subscriptions/[sub id]/resourceGroups/[MyResourceGroup]/providers/Microsoft.Network/virtualNetworks/[MyVnetName]/subnets/MySubnetName' -s [slot]
+    text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet MyVnetName --subnet /subscriptions/[SubscriptionId]/resourceGroups/[MyResourceGroup]/providers/Microsoft.Network/virtualNetworks/[MyVnetName]/subnets/MySubnetName -s [slot]
 """
 
 helps['webapp vnet-integration list'] = """
@@ -2609,7 +2617,7 @@ helps['staticwebapp functions link'] = """
     short-summary: Link an Azure Function to a static webapp. Also known as "Bring your own Functions." Only one Azure Functions app is available to a single static web app. Static webapp SKU must be "Standard"
     examples:
     - name: Link a function to a static webapp
-      text: az staticwebapp functions link -n MyStaticAppName -g MyResourceGroup --function-resource-id "/subscriptions/<<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Web/sites/<function-name>"
+      text: az staticwebapp functions link -n MyStaticAppName -g MyResourceGroup --function-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Web/sites/<function-name>"
 """
 
 helps['staticwebapp functions unlink'] = """
@@ -2626,6 +2634,65 @@ helps['staticwebapp functions show'] = """
     examples:
     - name: Show static app functions.
       text: az staticwebapp functions show -n MyStaticAppName -g MyResourceGroup
+"""
+
+helps['staticwebapp backends'] = """
+type: group
+short-summary: Link or unlink a prexisting backend with a static web app. Also known as "Bring your own API."
+"""
+
+helps['staticwebapp backends validate'] = """
+    type: command
+    short-summary: Validate a backend for a static web app
+    long-summary: >
+      Only one backend is available to a single static web app.
+      If a backend was previously linked to another static Web App, the auth configuration must first be removed from the backend before linking to a different Static Web App.
+      Static web app SKU must be "Standard".
+      Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps.
+      Backend region must be provided for backends of type Azure Functions and Azure App Service.
+      See https://learn.microsoft.com/azure/static-web-apps/apis-overview to learn more.
+    examples:
+    - name: Validate a backend for a static web app
+      text: az staticwebapp backends validate -n MyStaticAppName -g MyResourceGroup --backend-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/<resource-type>/<backend-name>" --backend-region MyBackendRegion
+    - name: Validate a backend for a static web app environment
+      text: az staticwebapp backends validate -n MyStaticAppName -g MyResourceGroup --environment-name MyEnvironmentName --backend-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/<resource-type>/<backend-name>" --backend-region MyBackendRegion
+"""
+
+helps['staticwebapp backends link'] = """
+    type: command
+    short-summary: Link a backend to a static web app. Also known as "Bring your own API."
+    long-summary: >
+      Only one backend is available to a single static web app.
+      If a backend was previously linked to another static Web App, the auth configuration must first be removed from the backend before linking to a different Static Web App.
+      Static web app SKU must be "Standard".
+      Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps.
+      Backend region must be provided for backends of type Azure Functions and Azure App Service.
+      See https://learn.microsoft.com/azure/static-web-apps/apis-overview to learn more.
+    examples:
+    - name: Link a backend to a static web app
+      text: az staticwebapp backends link -n MyStaticAppName -g MyResourceGroup --backend-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/<resource-type>/<backend-name>" --backend-region MyBackendRegion
+    - name: Link a backend to a static web app environment
+      text: az staticwebapp backends link -n MyStaticAppName -g MyResourceGroup --environment-name MyEnvironmentName --backend-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/<resource-type>/<backend-name>" --backend-region MyBackendRegion
+"""
+
+helps['staticwebapp backends unlink'] = """
+    type: command
+    short-summary: Unlink backend from a static web app
+    examples:
+    - name: Unlink static app backends.
+      text: az staticwebapp backends unlink -n MyStaticAppName -g MyResourceGroup
+    - name: Unlink backend from static web app environment and remove auth config from backend.
+      text: az staticwebapp backends unlink -n MyStaticAppName -g MyResourceGroup --environment-name MyEnvironmentName --remove-backend-auth
+"""
+
+helps['staticwebapp backends show'] = """
+    type: command
+    short-summary: Show details on the backend linked to a static web app
+    examples:
+    - name: Show static web app backends.
+      text: az staticwebapp backends show -n MyStaticAppName -g MyResourceGroup
+    - name: Show static web app backends for environment.
+      text: az staticwebapp backends show -n MyStaticAppName -g MyResourceGroup --environment-name MyEnvironmentName
 """
 
 helps['staticwebapp enterprise-edge'] = """

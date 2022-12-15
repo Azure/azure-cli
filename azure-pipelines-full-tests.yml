@@ -12,12 +12,15 @@ pr:
     include:
     - '*'
 
+variables:
+- template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
+
 jobs:
 - job: AutomationTest20200901
   displayName: Automation Test (Profile 2020-09-01)
   timeoutInMinutes: 120
   pool:
-    vmImage: 'ubuntu-20.04'
+    name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
       Python39:
@@ -35,7 +38,7 @@ jobs:
   displayName: Automation Test (Profile 2019-03-01)
   timeoutInMinutes: 120
   pool:
-    vmImage: 'ubuntu-20.04'
+    name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
       Python39:
@@ -53,7 +56,7 @@ jobs:
   displayName: Automation Test (Profile 2018-03-01)
   timeoutInMinutes: 120
   pool:
-    vmImage: 'ubuntu-20.04'
+    name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
       Python39:
@@ -90,7 +93,7 @@ jobs:
       instance8:
         Instance_idx: 8
   pool:
-    vmImage: 'ubuntu-20.04'
+    name: ${{ variables.ubuntu_pool }}
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -123,7 +126,7 @@ jobs:
       instance8:
         Instance_idx: 8
   pool:
-    vmImage: 'ubuntu-20.04'
+    name: ${{ variables.ubuntu_pool }}
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:

@@ -134,7 +134,7 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
                               backup_byok_key=None, disable_data_encryption=None, instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
-    list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
+    list_skus_info = get_mysql_list_skus_info(db_context.cmd, location, server_name=instance.name if instance else None)
     sku_info = list_skus_info['sku_info']
     single_az = list_skus_info['single_az']
     geo_paired_regions = list_skus_info['geo_paired_regions']
@@ -276,19 +276,25 @@ def _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_
 
 def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, zone=None,
                            standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
-                           version=None, instance=None):
+                           version=None, geo_redundant_backup=None, byok_identity=None, byok_key=None, instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
-    list_skus_info = get_postgres_list_skus_info(db_context.cmd, location)
+    list_skus_info = get_postgres_list_skus_info(db_context.cmd, location,
+                                                 server_name=instance.name if instance else None)
     sku_info = list_skus_info['sku_info']
     single_az = list_skus_info['single_az']
+    geo_backup_supported = list_skus_info['geo_backup_supported']
     _network_arg_validator(subnet, public_access)
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
         tier = instance.sku.tier
+    if geo_redundant_backup is None and instance is not None:
+        geo_redundant_backup = instance.backup.geo_redundant_backup
+    _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported)
     _pg_storage_validator(storage_gb, sku_info, tier, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
     _pg_version_validator(version, sku_info, tier, instance)
+    pg_byok_validator(byok_identity, byok_key, geo_redundant_backup, instance)
 
 
 def _pg_storage_validator(storage_gb, sku_info, tier, instance):
@@ -352,6 +358,25 @@ def _pg_high_availability_validator(high_availability, standby_availability_zone
         if zone == standby_availability_zone:
             raise ArgumentUsageError("Your server is in availability zone {}. "
                                      "The zone of the server cannot be same as the standby zone.".format(zone))
+
+
+def _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported):
+    if (geo_redundant_backup and geo_redundant_backup.lower() == 'enabled') and not geo_backup_supported:
+        raise ArgumentUsageError("The region of the server does not support geo-restore feature.")
+
+
+def pg_byok_validator(byok_identity, byok_key, geo_redundant_backup=None, instance=None):
+    if bool(byok_identity is None) ^ bool(byok_key is None):
+        raise ArgumentUsageError("User assigned identity and keyvault key need to be provided together. "
+                                 "Please provide --identity and --key together.")
+
+    if byok_key and \
+       not (instance is None or (instance.data_encryption and instance.data_encryption.type == 'AzureKeyVault')):
+        raise ArgumentUsageError("You cannot enable data encryption on a server "
+                                 "that was not created with data encryption.")
+
+    if byok_key and (geo_redundant_backup and geo_redundant_backup.lower() == 'enabled'):
+        raise ArgumentUsageError("Data encryption is not supported for geo-redundant backup.")
 
 
 def _network_arg_validator(subnet, public_access):
@@ -462,21 +487,17 @@ def validate_server_name(db_context, server_name, type_):
 
     if len(server_name) < 3 or len(server_name) > 63:
         raise ValidationError("Server name must be at least 3 characters and at most 63 characters.")
-
-    if db_context.command_group == 'mysql':
-        try:
-            result = client.execute(db_context.location,
-                                    name_availability_request={
-                                        'name': server_name,
-                                        'type': type_})
-        except HttpResponseError as e:
-            if e.status_code == 403 and e.error and e.error.code == 'AuthorizationFailed':
-                client_without_location = db_context.cf_availability_without_location(db_context.cmd.cli_ctx, '_')
-                result = client_without_location.execute(name_availability_request={'name': server_name, 'type': type_})
-            else:
-                raise e
-    else:
-        result = client.execute(name_availability_request={'name': server_name, 'type': type_})
+    try:
+        result = client.execute(db_context.location,
+                                name_availability_request={
+                                    'name': server_name,
+                                    'type': type_})
+    except HttpResponseError as e:
+        if e.status_code == 403 and e.error and e.error.code == 'AuthorizationFailed':
+            client_without_location = db_context.cf_availability_without_location(db_context.cmd.cli_ctx, '_')
+            result = client_without_location.execute(name_availability_request={'name': server_name, 'type': type_})
+        else:
+            raise e
 
     if not result.name_available:
         raise ValidationError(result.message)
@@ -523,6 +544,20 @@ def validate_mysql_replica(cmd, server):
                               "The location of the source server is in a single availability zone region.")
 
 
+def validate_postgres_replica(cmd, server):
+    # Tier validation
+    if server.sku.tier == 'Burstable':
+        raise ValidationError("Read replica is not supported for the Burstable pricing tier. "
+                              "Scale up the source server to General Purpose or Memory Optimized. ")
+
+    # single az validation
+    list_skus_info = get_postgres_list_skus_info(cmd, server.location)
+    single_az = list_skus_info['single_az']
+    if single_az:
+        raise ValidationError("Replica can only be created for multi-availability zone regions. "
+                              "The location of the source server is in a single availability zone region.")
+
+
 def validate_mysql_tier_update(instance, tier):
     if instance.sku.tier in ['GeneralPurpose', 'MemoryOptimized'] and tier == 'Burstable':
         if instance.replication_role == 'Source':
@@ -539,10 +574,10 @@ def validate_georestore_location(db_context, location):
         raise ValidationError("The region is not paired with the region of the source server. ")
 
 
-def validate_georestore_network(source_server_object, public_access, vnet, subnet):
+def validate_georestore_network(source_server_object, public_access, vnet, subnet, db_engine):
     if source_server_object.network.public_network_access == 'Disabled' and not any((public_access, vnet, subnet)):
         raise ValidationError("Please specify network parameters if you are geo-restoring a private access server. "
-                              "Run 'az mysql flexible-server goe-restore --help' command to see examples")
+                              F"Run 'az {db_engine} flexible-server geo-restore --help' command to see examples")
 
 
 def validate_and_format_restore_point_in_time(restore_time):
@@ -588,7 +623,7 @@ def validate_byok_identity(cmd, namespace):
     if namespace.byok_identity:
         namespace.byok_identity = _validate_identity(cmd, namespace, namespace.byok_identity)
 
-    if namespace.backup_byok_identity:
+    if hasattr(namespace, 'backup_byok_identity') and namespace.backup_byok_identity:
         namespace.backup_byok_identity = _validate_identity(cmd, namespace, namespace.backup_byok_identity)
 
 
