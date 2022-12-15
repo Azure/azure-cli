@@ -35,7 +35,7 @@ def load_arguments_eh(self, _):
 
     with self.argument_context('eventhubs namespace', min_api='2021-06-01-preview') as c:
         c.argument('namespace_name', arg_type=name_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='Name of Namespace')
-        c.argument('is_kafka_enabled', options_list=['--enable-kafka'], arg_type=get_three_state_flag(),
+        c.argument('is_kafka_enabled', options_list=['--enable-kafka','--kafka-enabled'], arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Kafka is enabled for eventhub namespace.')
         c.argument('tags', arg_type=tags_type)
         c.argument('sku', options_list=['--sku'], arg_type=get_enum_type(SkuName), help='Namespace SKU.')
@@ -264,6 +264,9 @@ def load_arguments_eh(self, _):
 
     with self.argument_context('eventhubs namespace application-group create') as c:
         c.argument('client_app_group_identifier', options_list=['--client-app-group-identifier', '--client-app-group-id'], help='The Unique identifier for application group.Supports SAS(SASKeyName=KeyName) or AAD(AADAppID=Guid)')
+        c.argument('is_enabled', arg_type=get_three_state_flag(),
+                   help='Determines if Application Group is allowed to create connection with namespace or not. '
+                        'Once the isEnabled is set to false, all the existing connections of application group gets dropped and no new connections will be allowed')
 
     for scope in ['eventhubs namespace application-group policy add', 'eventhubs namespace application-group policy remove', 'eventhubs namespace application-group create']:
         with self.argument_context(scope) as c:

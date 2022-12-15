@@ -42,24 +42,24 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         # Get Cluster
         getresponse = self.cmd('eventhubs cluster show --resource-group {rg} --name {clustername}',
                                checks=[self.check('sku.capacity', self.kwargs['capacity'])]).get_output_in_json()
+        self.assertEqual(getresponse['name'], self.kwargs['clustername'])
+        self.assertEqual(getresponse['sku']['capacity'], 1)
 
         self.kwargs.update({'clusterid': getresponse['id']})
 
         # Create Namespace in cluster
-        self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --cluster-arm-id {clusterid}',
-                 checks=[self.check('sku.name', self.kwargs['sku']),
-                         self.check('clusterArmId', self.kwargs['clusterid'])])
+        self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --cluster-arm-id {clusterid}')
 
         # Get namespaces created in the cluster
-        listnsclusterresult = self.cmd('eventhubs cluster namespace list --resource-group {rg} --name {clustername}').output
-        self.assertGreater(len(listnsclusterresult), 0)
+        listnsclusterresult = self.cmd('eventhubs cluster namespace list --resource-group {rg} --name {clustername}').get_output_in_json()
+        self.assertEqual(len(listnsclusterresult), 1)
 
         # update cluster
         self.cmd('eventhubs cluster update --resource-group {rg} --name {clustername} --tags tag2=value2',
                  checks=[self.check('tags', {'tag2': 'value2'})])
 
         # Get cluster created in the resourcegroup
-        listclusterresult = self.cmd('eventhubs cluster list --resource-group {rg}').output
+        listclusterresult = self.cmd('eventhubs cluster list --resource-group {rg}').get_output_in_json()
         self.assertGreater(len(listclusterresult), 0)
 
         # Delete cluster

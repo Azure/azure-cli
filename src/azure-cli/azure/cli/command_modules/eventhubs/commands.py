@@ -31,6 +31,11 @@ def load_command_table(self, _):
         client_factory=cluster_mgmt_client_factory,
         resource_type=ResourceType.MGMT_EVENTHUB)
 
+    eh_event_hub_util = CliCommandType(
+        operations_tmpl='azure.mgmt.eventhub.operations#EventHubsOperations.{}',
+        client_factory=event_hub_mgmt_client_factory,
+        resource_type=ResourceType.MGMT_EVENTHUB)
+
     eh_consumer_groups_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#ConsumerGroupsOperations.{}',
         client_factory=consumer_groups_mgmt_client_factory,
@@ -118,6 +123,11 @@ def load_command_table(self, _):
                                  custom_func_name='cli_cluster_update', custom_func_type=eventhubs_custom)
 
 # EventHub Region
+    from .operations.event_hub_entity_operations import EventHubEntityCreate, EventHubEntityUpdate
+    self.command_table['eventhubs eventhub create'] = EventHubEntityCreate(loader=self)
+    self.command_table['eventhubs eventhub ' \
+                       ' update'] = EventHubEntityUpdate(loader=self)
+
     with self.command_group('eventhubs eventhub authorization-rule', eh_event_hub_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=event_hub_mgmt_client_factory) as g:
         g.custom_command('create', 'cli_eventhubautho_create')
         g.show_command('show', 'get_authorization_rule')
@@ -166,13 +176,6 @@ def load_command_table(self, _):
     with self.command_group('eventhubs namespace encryption', eh_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('add', 'cli_add_encryption')
         g.custom_command('remove', 'cli_remove_encryption')
-
-# SchemaRegistry Region
-    with self.command_group('eventhubs namespace schema-registry', eh_schema_registry_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=schema_registry_mgmt_client_factory) as g:
-        g.custom_command('create', 'cli_schemaregistry_createupdate')
-        g.command('list', 'list_by_namespace')
-        g.show_command('show', 'get')
-        g.command('delete', 'delete')
 
 # ApplicationGroup Region
     with self.command_group('eventhubs namespace application-group', eh_application_group_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=application_group_mgmt_client_factory) as g:
