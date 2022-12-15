@@ -125,8 +125,7 @@ def load_command_table(self, _):
 # EventHub Region
     from .operations.event_hub_entity_operations import EventHubEntityCreate, EventHubEntityUpdate
     self.command_table['eventhubs eventhub create'] = EventHubEntityCreate(loader=self)
-    self.command_table['eventhubs eventhub ' \
-                       ' update'] = EventHubEntityUpdate(loader=self)
+    self.command_table['eventhubs eventhub update'] = EventHubEntityUpdate(loader=self)
 
     with self.command_group('eventhubs eventhub authorization-rule', eh_event_hub_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=event_hub_mgmt_client_factory) as g:
         g.custom_command('create', 'cli_eventhubautho_create')
