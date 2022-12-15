@@ -59,11 +59,12 @@ class Wait(AAZWaitCommand):
             id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
+            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
         _args_schema.expand = AAZStrArg(
             options=["--expand"],
-            help="The expand expression to apply on the operation.",
+            help="The expand expression to apply on the operation. \"ReplicationStatus\" Default value is None.",
             enum={"ReplicationStatus": "ReplicationStatus"},
         )
         return cls._args_schema
@@ -281,7 +282,7 @@ class Wait(AAZWaitCommand):
 
             _element = cls._schema_on_200.properties.publishing_profile.target_extended_locations.Element
             _element.encryption = AAZObjectType()
-            _build_schema_encryption_images_read(_element.encryption)
+            _WaitHelper._build_schema_encryption_images_read(_element.encryption)
             _element.extended_location = AAZObjectType(
                 serialized_name="extendedLocation",
             )
@@ -302,7 +303,7 @@ class Wait(AAZWaitCommand):
 
             _element = cls._schema_on_200.properties.publishing_profile.target_regions.Element
             _element.encryption = AAZObjectType()
-            _build_schema_encryption_images_read(_element.encryption)
+            _WaitHelper._build_schema_encryption_images_read(_element.encryption)
             _element.name = AAZStrType(
                 flags={"required": True},
             )
@@ -345,55 +346,57 @@ class Wait(AAZWaitCommand):
             return cls._schema_on_200
 
 
-_schema_encryption_images_read = None
+class _WaitHelper:
+    """Helper class for Wait"""
 
+    _schema_encryption_images_read = None
 
-def _build_schema_encryption_images_read(_schema):
-    global _schema_encryption_images_read
-    if _schema_encryption_images_read is not None:
-        _schema.data_disk_images = _schema_encryption_images_read.data_disk_images
-        _schema.os_disk_image = _schema_encryption_images_read.os_disk_image
-        return
+    @classmethod
+    def _build_schema_encryption_images_read(cls, _schema):
+        if cls._schema_encryption_images_read is not None:
+            _schema.data_disk_images = cls._schema_encryption_images_read.data_disk_images
+            _schema.os_disk_image = cls._schema_encryption_images_read.os_disk_image
+            return
 
-    _schema_encryption_images_read = AAZObjectType()
+        cls._schema_encryption_images_read = _schema_encryption_images_read = AAZObjectType()
 
-    encryption_images_read = _schema_encryption_images_read
-    encryption_images_read.data_disk_images = AAZListType(
-        serialized_name="dataDiskImages",
-    )
-    encryption_images_read.os_disk_image = AAZObjectType(
-        serialized_name="osDiskImage",
-    )
+        encryption_images_read = _schema_encryption_images_read
+        encryption_images_read.data_disk_images = AAZListType(
+            serialized_name="dataDiskImages",
+        )
+        encryption_images_read.os_disk_image = AAZObjectType(
+            serialized_name="osDiskImage",
+        )
 
-    data_disk_images = _schema_encryption_images_read.data_disk_images
-    data_disk_images.Element = AAZObjectType()
+        data_disk_images = _schema_encryption_images_read.data_disk_images
+        data_disk_images.Element = AAZObjectType()
 
-    _element = _schema_encryption_images_read.data_disk_images.Element
-    _element.disk_encryption_set_id = AAZStrType(
-        serialized_name="diskEncryptionSetId",
-    )
-    _element.lun = AAZIntType(
-        flags={"required": True},
-    )
+        _element = _schema_encryption_images_read.data_disk_images.Element
+        _element.disk_encryption_set_id = AAZStrType(
+            serialized_name="diskEncryptionSetId",
+        )
+        _element.lun = AAZIntType(
+            flags={"required": True},
+        )
 
-    os_disk_image = _schema_encryption_images_read.os_disk_image
-    os_disk_image.disk_encryption_set_id = AAZStrType(
-        serialized_name="diskEncryptionSetId",
-    )
-    os_disk_image.security_profile = AAZObjectType(
-        serialized_name="securityProfile",
-    )
+        os_disk_image = _schema_encryption_images_read.os_disk_image
+        os_disk_image.disk_encryption_set_id = AAZStrType(
+            serialized_name="diskEncryptionSetId",
+        )
+        os_disk_image.security_profile = AAZObjectType(
+            serialized_name="securityProfile",
+        )
 
-    security_profile = _schema_encryption_images_read.os_disk_image.security_profile
-    security_profile.confidential_vm_encryption_type = AAZStrType(
-        serialized_name="confidentialVMEncryptionType",
-    )
-    security_profile.secure_vm_disk_encryption_set_id = AAZStrType(
-        serialized_name="secureVMDiskEncryptionSetId",
-    )
+        security_profile = _schema_encryption_images_read.os_disk_image.security_profile
+        security_profile.confidential_vm_encryption_type = AAZStrType(
+            serialized_name="confidentialVMEncryptionType",
+        )
+        security_profile.secure_vm_disk_encryption_set_id = AAZStrType(
+            serialized_name="secureVMDiskEncryptionSetId",
+        )
 
-    _schema.data_disk_images = _schema_encryption_images_read.data_disk_images
-    _schema.os_disk_image = _schema_encryption_images_read.os_disk_image
+        _schema.data_disk_images = cls._schema_encryption_images_read.data_disk_images
+        _schema.os_disk_image = cls._schema_encryption_images_read.os_disk_image
 
 
 __all__ = ["Wait"]

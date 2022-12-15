@@ -41,21 +41,20 @@ class Show(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.image_location = AAZResourceLocationArg(
-            options=["-l", "--location", "--image-location"],
-            help="Image location.",
+        _args_schema.location = AAZResourceLocationArg(
+            help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
             required=True,
             id_part="name",
         )
         _args_schema.publisher_name = AAZStrArg(
             options=["-p", "--publisher", "--publisher-name"],
-            help="Image publisher name",
+            help="Image publisher name.",
             required=True,
             id_part="child_name_1",
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name", "--type"],
-            help="Name of the extension",
+            help="Name of the extension.",
             required=True,
             id_part="child_name_3",
         )
@@ -114,7 +113,7 @@ class Show(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "location", self.ctx.args.image_location,
+                    "location", self.ctx.args.location,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -214,6 +213,10 @@ class Show(AAZCommand):
             tags.Element = AAZStrType()
 
             return cls._schema_on_200
+
+
+class _ShowHelper:
+    """Helper class for Show"""
 
 
 __all__ = ["Show"]
