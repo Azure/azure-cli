@@ -28,8 +28,6 @@ class LocalConnectionScenarioTest(ScenarioTest):
             method_name,
             recording_processors=[CredentialReplacer()]
         )
-        for conn in self.cmd('connection list -g {}'.format(resource_group)).get_output_in_json():
-            self.cmd('connection delete --id {} --yes'.format(conn.get('id')))
 
     @record_only()
     def test_local_appconfig_e2e(self):
@@ -75,7 +73,6 @@ class LocalConnectionScenarioTest(ScenarioTest):
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
     @record_only()
-    @unittest.skip('')
     def test_local_cosmoscassandra_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -121,7 +118,6 @@ class LocalConnectionScenarioTest(ScenarioTest):
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
     @record_only()
-    @unittest.skip('')
     def test_local_cosmosgremlin_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -167,8 +163,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    # @record_only()
-    @unittest.skip('')
+    @record_only()
     def test_local_cosmosmongo_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -191,7 +186,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
             'connection list -g {}'.format(resource_group),
             checks=[
                 self.check('length(@)', 1),
-                self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].authInfo.authType', 'userAccount'),
                 self.check('[0].clientType', 'dotnet')
             ]
         ).get_output_in_json()
@@ -214,7 +209,6 @@ class LocalConnectionScenarioTest(ScenarioTest):
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
     @record_only()
-    @unittest.skip('')
     def test_local_cosmossql_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -260,7 +254,6 @@ class LocalConnectionScenarioTest(ScenarioTest):
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
     @record_only()
-    @unittest.skip('')
     def test_local_cosmostable_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),

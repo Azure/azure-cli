@@ -74,7 +74,6 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     @record_only()
-    @unittest.skip('')
     def test_webapp_cosmoscassandra_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -123,7 +122,6 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     @record_only()
-    @unittest.skip('')
     def test_webapp_cosmosgremlin_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -173,7 +171,6 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     @record_only()
-    @unittest.skip('')
     def test_webapp_cosmosmongo_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -220,9 +217,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
-
     @record_only()
-    @unittest.skip('')
     def test_webapp_cosmossql_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -271,7 +266,6 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     @record_only()
-    @unittest.skip('')
     def test_webapp_cosmostable_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
