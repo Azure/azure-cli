@@ -1933,7 +1933,7 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
 
     client = web_client_factory(cmd.cli_ctx)
     if app_service_environment:
-        ase_list = client.app_service_environments.list()
+        ase_list = client.app_service_environments.list() # Method app_service_environments.list can only list ASE form the same subscription.
         ase_found = False
         ase = None
         for ase in ase_list:
@@ -1942,7 +1942,7 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
                 location = ase.location
                 ase_found = True
                 break
-        if not ase_found: # Method app_service_environments.list can only list ASE form the same subscription.
+        if not ase_found:
             if is_valid_resource_id(app_service_environment):
                 ase_def = HostingEnvironmentProfile(id=app_service_environment)
                 if location is None:
