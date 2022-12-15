@@ -3857,11 +3857,6 @@ disks are specified, all disks will be included."
                az restore-point create --exclude-disks "/subscriptions/{subscription-id}/resourceGroups/myResourceGroup/providers/Microsoft.Compute/disks/disk123" \
                --resource-group "myResourceGroup" --collection-name "rpcName" --name "rpName"
 """
-#
-# helps['restore-point delete'] = """
-#     type: command
-#     short-summary: "Delete the restore point."
-# """
 
 helps['restore-point wait'] = """
     type: command
