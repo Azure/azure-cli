@@ -99,8 +99,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         SUPPORTED_AUTH_TYPE.get(RESOURCE.Local).keys())
     supported_target_resources.remove(RESOURCE.ConfluentKafka)
     for target in supported_target_resources:
-        with self.command_group('connection preview-configuration', connection_type,
-                                client_factory=cf_configuration_names) as ig:
+        with self.command_group('connection preview-configuration', client_factory=cf_configuration_names) as ig:
             ig.custom_command(target.value, 'connection_preview_configuration')
         with self.command_group('connection create',
                                 local_connection_type, client_factory=cf_connector) as ig:
@@ -121,3 +120,5 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                             local_connection_type, client_factory=cf_connector) as ig:
         ig.custom_command(
             target.value, 'local_connection_update_kafka', supports_no_wait=True)
+    with self.command_group('connection preview-configuration', client_factory=cf_configuration_names) as ig:
+        ig.custom_command(target.value, 'connection_preview_configuration')

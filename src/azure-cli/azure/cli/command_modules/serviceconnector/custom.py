@@ -199,12 +199,14 @@ def connection_preview_configuration(cmd, client,
 
     cmd_name = cmd.name.split(' ')[-1]
     resource_type = RESOURCE.value_of(cmd_name)
-    target_id = TARGET_RESOURCES[resource_type]
-
-    target_service_items = [i for i in target_id.split(
-        '/') if i and not i.startswith('{')][3:]
-    if target_service_items:
-        param['target_service'] = '/'.join(target_service_items)
+    if resource_type == RESOURCE.ConfluentKafka:
+        param['target_service'] = 'CONFLUENT.CLOUD'
+    else:
+        target_id = TARGET_RESOURCES[resource_type]
+        target_service_items = [i for i in target_id.split(
+            '/') if i and not i.startswith('{')][3:]
+        if target_service_items:
+            param['target_service'] = '/'.join(target_service_items)
 
     all_auth_info = []
     if secret_auth_info is not None:
