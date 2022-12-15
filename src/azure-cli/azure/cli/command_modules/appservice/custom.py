@@ -1949,9 +1949,9 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
                     location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
             else: 
                 err_msg = "App service environment '{}' not found in subscription. If you want to create the app service plan in different \
-subscription than the app service environment please use the resource id for --app-service-environment parameter. If the resource group is in \
-different region than the app service environment please use --location parameter and specify the region where the app service environment \
-has been deployed ".format(app_service_environment)
+subscription than the app service environment please use the resource ID for --app-service-environment parameter. Additionally if the \
+resource group is in different region than the app service environment please use --location parameter and specify the region where the \
+app service environment has been deployed ".format(app_service_environment)
                 raise ResourceNotFoundError(err_msg)
         if hyper_v and ase.kind in ('ASEV1', 'ASEV2'):
             raise ArgumentUsageError('Windows containers are only supported on v3 App Service Environments v3 or newer')
