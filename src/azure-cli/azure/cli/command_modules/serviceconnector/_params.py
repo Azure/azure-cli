@@ -281,7 +281,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         add_local_connection_block(c)
 
     with self.argument_context('connection list-support-types') as c:
-        add_local_connection_block(c)
+        add_target_type_argument(c, source)
 
     with self.argument_context('connection wait') as c:
         add_local_connection_block(c)

@@ -567,7 +567,6 @@ def local_connection_update(cmd, client,  # pylint: disable=too-many-locals
                             resource_group_name=None,
                             id=None,  # pylint: disable=redefined-builtin
                             client_type=None,
-                            target_resource_group=None, target_id=None,
                             secret_auth_info=None, secret_auth_info_auto=None,
                             user_account_auth_info=None,                      # new auth info
                             service_principal_auth_info_secret=None,
