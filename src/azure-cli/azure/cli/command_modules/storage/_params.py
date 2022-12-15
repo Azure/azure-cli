@@ -630,6 +630,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tenant_id', help='The tenant id to add in network rule.', arg_group='Resource Access Rule',
                    min_api='2020-08-01-preview')
 
+    with self.argument_context('storage account network-security-perimeter', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('account_name', help='The storage account name')
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+        c.argument('network_security_perimeter_configuration_name', options_list=['--nsp-name', '--name', '-n'])
+
     with self.argument_context('storage account blob-service-properties show',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', acct_name_type, id_part=None)

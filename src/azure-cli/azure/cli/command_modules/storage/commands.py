@@ -16,7 +16,7 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_or_policy, cf_container_client,
                                                                cf_queue_service, cf_table_service, cf_table_client,
                                                                cf_sa_blob_inventory, cf_blob_service, cf_queue_client,
-                                                               cf_share_client, cf_share_service,
+                                                               cf_share_client, cf_share_service, cf_network_security_perimeter,
                                                                cf_share_file_client, cf_share_directory_client,
                                                                cf_container_lease_client, cf_local_users)
 
@@ -308,6 +308,18 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.show_command('show', 'get')
         g.command('list-keys', 'list_keys')
         g.command('regenerate-password', 'regenerate_password')
+
+    network_security_perimeter_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.storage.operations#'
+                        'NetworkSecurityPerimeterConfigurationsOperations.{}',
+        client_factory= cf_network_security_perimeter,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+    with self.command_group('storage account network-security-perimeter', network_security_perimeter_sdk,
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2022-09-01', is_preview=True) as g:
+        g.command('list', 'list')
+        g.command('show', 'get')
+        g.command('reconcile', 'begin_reconcile')
 
     with self.command_group('storage logging', get_custom_sdk('logging', multi_service_properties_factory)) as g:
         from ._transformers import transform_logging_list_output
