@@ -2439,6 +2439,23 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return enable_syslog
 
+    def get_data_collection_settings(self) -> Union[str, None]:
+        """Obtain the value of data_collection_settings.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        data_collection_settings_file_path = self.raw_param.get("data_collection_settings")
+        # validate user input
+        if data_collection_settings_file_path:
+            if not os.path.isfile(data_collection_settings_file_path):
+                raise InvalidArgumentValueError(
+                    "{} is not valid file, or not accessable.".format(
+                        data_collection_settings_file_path
+                    )
+                )
+        return data_collection_settings_file_path
+
     # pylint: disable=no-self-use
     def get_virtual_node_addon_os_type(self) -> str:
         """Helper function to obtain the os_type of virtual node addon.
@@ -4871,6 +4888,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             create_dcr=True,
             create_dcra=False,
             enable_syslog=self.context.get_enable_syslog(),
+            data_collection_settings=self.context.get_data_collection_settings()
         )
         # set intermediate
         self.context.set_intermediate("monitoring_addon_enabled", True, overwrite_exists=True)

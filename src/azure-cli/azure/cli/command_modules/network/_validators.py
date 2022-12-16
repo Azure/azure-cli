@@ -440,10 +440,9 @@ def validate_inbound_nat_rule_name_or_id(cmd, namespace):
             cmd.cli_ctx, namespace, 'inboundNatRules', rule_name)
 
 
-def validate_ip_tags(cmd, namespace):
-    ''' Extracts multiple space-separated tags in TYPE=VALUE format '''
-    IpTag = cmd.get_models('IpTag')
-    if namespace.ip_tags and IpTag:
+def validate_ip_tags(namespace):
+    """ Extracts multiple space-separated tags in TYPE=VALUE format """
+    if namespace.ip_tags:
         ip_tags = []
         for item in namespace.ip_tags:
             tag_type, tag_value = item.split('=', 1)
@@ -1022,7 +1021,7 @@ def process_nic_create_namespace(cmd, namespace):
 def process_public_ip_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_public_ip_prefix(cmd, namespace)
-    validate_ip_tags(cmd, namespace)
+    validate_ip_tags(namespace)
     validate_tags(namespace)
     _inform_coming_breaking_change_for_public_ip(namespace)
 

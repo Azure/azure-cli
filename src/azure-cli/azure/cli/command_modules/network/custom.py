@@ -25,13 +25,16 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
-from .aaz.latest.network.application_gateway._update import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.application_gateway import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condition import \
+    Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
 from .aaz.latest.network.express_route.gateway.connection import Create as _ExpressRouteConnectionCreate, \
     Update as _ExpressRouteConnectionUpdate
 from .aaz.latest.network.express_route.peering import Create as _ExpressRoutePeeringCreate, \
     Update as _ExpressRoutePeeringUpdate
 from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCreate
+from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
 
 import threading
 import time
@@ -39,6 +42,7 @@ import platform
 import subprocess
 import tempfile
 import requests
+
 
 logger = get_logger(__name__)
 
@@ -114,10 +118,6 @@ def list_custom_ip_prefixes(cmd, resource_group_name=None):
 
 def list_public_ips(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'public_ip_addresses', resource_group_name)
-
-
-def list_public_ip_prefixes(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'public_ip_prefixes', resource_group_name)
 
 
 def list_route_tables(cmd, resource_group_name=None):
@@ -1870,85 +1870,42 @@ def list_waf_policy_setting(cmd, client, resource_group_name, policy_name):
 # endregion
 
 
-# region ApplicationGatewayWAFPolicyRules
-def create_waf_custom_rule(cmd, client, resource_group_name, policy_name, rule_name, priority, rule_type, action):
-    """
-    Initialize custom rule for WAF policy
-    """
-    WebApplicationFirewallCustomRule = cmd.get_models('WebApplicationFirewallCustomRule')
-    waf_policy = client.get(resource_group_name, policy_name)
-    new_custom_rule = WebApplicationFirewallCustomRule(
-        name=rule_name,
-        action=action,
-        match_conditions=[],
-        priority=priority,
-        rule_type=rule_type
-    )
-    upsert_to_collection(waf_policy, 'custom_rules', new_custom_rule, 'name')
-    parent = client.create_or_update(resource_group_name, policy_name, waf_policy)
-    return find_child_item(parent, rule_name, path='custom_rules', key_path='name')
-
-
-# pylint: disable=unused-argument
-def update_waf_custom_rule(instance, parent, cmd, rule_name, priority=None, rule_type=None, action=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('priority', priority)
-        c.set_param('rule_type', rule_type)
-        c.set_param('action', action)
-    return parent
-
-
-def show_waf_custom_rule(cmd, client, resource_group_name, policy_name, rule_name):
-    waf_policy = client.get(resource_group_name, policy_name)
-    return find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
-
-
-def list_waf_custom_rules(cmd, client, resource_group_name, policy_name):
-    return client.get(resource_group_name, policy_name).custom_rules
-
-
-def delete_waf_custom_rule(cmd, client, resource_group_name, policy_name, rule_name, no_wait=None):
-    waf_policy = client.get(resource_group_name, policy_name)
-    rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
-    waf_policy.custom_rules.remove(rule)
-    sdk_no_wait(no_wait, client.create_or_update, resource_group_name, policy_name, waf_policy)
-# endregion
-
-
 # region ApplicationGatewayWAFPolicyRuleMatchConditions
-def add_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name, match_variables, operator,
-                                   match_values=None, negation_condition=None, transforms=None):
-    if operator.lower() == "any" and match_values is not None:
-        raise ArgumentUsageError("Any operator does not require --match-values.")
-    if operator.lower() != "any" and match_values is None:
-        raise ArgumentUsageError("Non-any operator requires --match-values.")
+class WAFCustomRuleMatchConditionAdd(_WAFCustomRuleMatchConditionAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.match_variables = AAZListArg(
+            options=["--match-variables"],
+            help="Space-separated list of variables to use when matching. Variable values: RemoteAddr, RequestMethod, "
+                 "QueryString, PostArgs, RequestUri, RequestHeaders, RequestBody, RequestCookies.",
+            required=True,
+        )
+        args_schema.match_variables.Element = AAZStrArg()
+        # filter arguments
+        args_schema.variables._required = False
+        args_schema.variables._registered = False
+        return args_schema
 
-    MatchCondition = cmd.get_models('MatchCondition')
-    waf_policy = client.get(resource_group_name, policy_name)
-    custom_rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
-    new_cond = MatchCondition(
-        match_variables=match_variables,
-        operator=operator,
-        match_values=match_values,
-        negation_conditon=negation_condition,
-        transforms=transforms
-    )
-    custom_rule.match_conditions.append(new_cond)
-    upsert_to_collection(waf_policy, 'custom_rules', custom_rule, 'name', warn=False)
-    client.create_or_update(resource_group_name, policy_name, waf_policy)
-    return new_cond
-
-
-def list_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name):
-    waf_policy = client.get(resource_group_name, policy_name)
-    return find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name').match_conditions
-
-
-def remove_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name, index):
-    waf_policy = client.get(resource_group_name, policy_name)
-    rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
-    rule.match_conditions.pop(index)
-    client.create_or_update(resource_group_name, policy_name, waf_policy)
+    def pre_operations(self):
+        args = self.ctx.args
+        variables = []
+        for variable in args.match_variables:
+            try:
+                name, selector = str(variable).split(".", 1)
+            except ValueError:
+                name, selector = variable, None
+            variables.append({
+                "variable_name": name,
+                "selector": selector,
+            })
+        args.variables = variables
+        # validate
+        if str(args.operator).lower() == "any" and has_value(args.values):
+            raise ArgumentUsageError("Any operator does not require --match-values.")
+        if str(args.operator).lower() != "any" and not has_value(args.values):
+            raise ArgumentUsageError("Non-any operator requires --match-values.")
 # endregion
 
 
@@ -5318,7 +5275,7 @@ def _create_singular_or_plural_property(kwargs, val, singular_name, plural_name)
 def _handle_asg_property(kwargs, key, asgs):
     prefix = key.split('_', 1)[0] + '_'
     if asgs:
-        kwargs[key] = [{"id": asg} for asg in asgs]
+        kwargs[key] = [{"id": asg.id} for asg in asgs]
         if kwargs[prefix + 'address_prefix']:
             kwargs[prefix + 'address_prefix'] = ''
 
@@ -5359,53 +5316,73 @@ def create_nsg_rule(cmd, resource_group_name, network_security_group_name, secur
 
 
 class NsgRuleUpdate(_NsgRuleUpdate):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArgFormat, AAZResourceIdArg
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
+
+        class EmptyListArgFormat(AAZListArgFormat):  # pylint: disable=too-few-public-methods
+            def __call__(self, ctx, value):
+                data = value._data
+                if has_value(data) and len(data) == 1 and data[0] == "":
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
+        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):  # pylint: disable=too-few-public-methods
+            def __call__(self, ctx, value):
+                if value._data == "":
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.destination_asgs = AAZListArg(
             options=['--destination-asgs'],
             arg_group="Destination",
-            help="Space-separated list of application security group names or supports one application security group name or ID.",
+            nullable=True,
+            help="Space-separated list of application security group names or supports one application security group name or ID. Use null to detach it.",
+            fmt=EmptyListArgFormat()
         )
         args_schema.destination_asgs.Element = AAZResourceIdArg(
             nullable=True,
-            fmt=AAZResourceIdArgFormat(
+            fmt=EmptyResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/applicationSecurityGroups/{}"
             )
         )
         args_schema.source_asgs = AAZListArg(
             options=['--source-asgs'],
             arg_group="Source",
-            help="Space-separated list of application security group names or IDs. Limited by backend server, temporarily this argument only supports one application security group name or ID.")
+            nullable=True,
+            help="Space-separated list of application security group names or IDs. Limited by backend server, temporarily this argument only supports one application security group name or ID. Use null to detach it.",
+            fmt=EmptyListArgFormat()
+        )
         args_schema.source_asgs.Element = AAZResourceIdArg(
             nullable=True,
-            fmt=AAZResourceIdArgFormat(
+            fmt=EmptyResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/applicationSecurityGroups/{}"
-            ))
+            )
+        )
+        args_schema.destination_asgs_id._registered = False
+        args_schema.source_asgs_id._registered = False
 
         return args_schema
 
-    def _cli_arguments_loader(self):
-        args = super()._cli_arguments_loader()
-        args = [(name, arg) for (name, arg) in args if name not in ("destination_asgs_id", "source_asgs_id")]
-        return args
-
     def pre_operations(self):
         args = self.ctx.args
-        if args.destination_asgs:
-            destination_asg = str(args.destination_asgs[0])
-            if destination_asg == 'None' or parse_resource_id(destination_asg)["resource_name"] == '':
-                args.destination_asgs_id = None
-            else:
-                args.destination_asgs_id = [{"id": asg} for asg in args.destination_asgs]
+        if has_value(args.destination_asgs):
+            args.destination_asgs_id = assign_aaz_list_arg(
+                args.destination_asgs_id,
+                args.destination_asgs,
+                element_transformer=lambda _, destination_asgs_id: {"id": destination_asgs_id}
+            )
 
-        if args.source_asgs:
-            source_asg = str(args.source_asgs[0])
-            if source_asg == 'None' or parse_resource_id(source_asg)["resource_name"] == '':
-                args.source_asgs_id = None
-            else:
-                args.source_asgs_id = [{"id": asg} for asg in args.source_asgs]
+        if has_value(args.source_asgs):
+            args.source_asgs_id = assign_aaz_list_arg(
+                args.source_asgs_id,
+                args.source_asgs,
+                element_transformer=lambda _, source_asgs_id: {"id": source_asgs_id}
+            )
 
     def pre_instance_update(self, instance):
         if instance.properties.sourceAddressPrefix:
@@ -6601,11 +6578,12 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         public_ip_args["public_ip_prefix"] = public_ip_prefix
 
         # reuse prefix information
-        pip_client = network_client_factory(cmd.cli_ctx).public_ip_prefixes
-        pip_obj = pip_client.get(resource_group_name, public_ip_prefix_name)
-        version = pip_obj.public_ip_address_version
-        sku, tier = pip_obj.sku.name, pip_obj.sku.tier
-        zone = pip_obj.zones
+        from .aaz.latest.network.public_ip.prefix import Show
+        pip_obj = Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': public_ip_prefix_name})
+        version = pip_obj['publicIPAddressVersion']
+        sku = pip_obj['sku']['name']
+        tier = pip_obj['sku']['tier']
+        zone = pip_obj['zones'] if 'zones' in pip_obj else None
 
     if sku is None:
         logger.warning(
@@ -6643,44 +6621,32 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
     return Create(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
 
 
-def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
-                            version=None, location=None, tags=None, zone=None, edge_zone=None,
-                            custom_ip_prefix_name=None):
-    PublicIPPrefix, PublicIPPrefixSku, SubResource = cmd.get_models('PublicIPPrefix', 'PublicIPPrefixSku', 'SubResource')
-    prefix = PublicIPPrefix(
-        location=location,
-        prefix_length=prefix_length,
-        sku=PublicIPPrefixSku(name='Standard'),
-        tags=tags,
-        zones=zone
-    )
+class PublicIpPrefixCreate(_PublicIpPrefixCreate):
 
-    if cmd.supported_api_version(min_api='2019-08-01'):
-        prefix.public_ip_address_version = version if version is not None else 'ipv4'
-
-    if cmd.supported_api_version(min_api='2020-06-01') and custom_ip_prefix_name:
-        # support cross-subscription
-        if is_valid_resource_id(custom_ip_prefix_name):
-            custom_ip_prefix_id = custom_ip_prefix_name
-        else:
-            custom_ip_prefix_id = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=resource_group_name,
-                namespace='Microsoft.Network',
-                type='customIPPrefixes',
-                name=custom_ip_prefix_name
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.custom_ip_prefix_name = AAZResourceIdArg(
+            options=['--custom-ip-prefix-name'],
+            help="A custom prefix from which the public prefix derived. If you'd like to cross subscription, please use Resource ID instead.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/customIPPrefixes/{}"
             )
-        prefix.custom_ip_prefix = SubResource(id=custom_ip_prefix_id)
+        )
+        args_schema.custom_ip_prefix._registered = False
+        args_schema.type._registered = False
+        args_schema.sku._registered = False
 
-    if edge_zone:
-        prefix.extended_location = _edge_zone_model(cmd, edge_zone)
-    return client.begin_create_or_update(resource_group_name, public_ip_prefix_name, prefix)
+        return args_schema
 
-
-def update_public_ip_prefix(instance, tags=None):
-    if tags is not None:
-        instance.tags = tags
-    return instance
+    def pre_operations(self):
+        args = self.ctx.args
+        args.sku = {'name': 'Standard'}
+        if has_value(args.edge_zone):
+            args.type = 'EdgeZone'
+        if has_value(args.custom_ip_prefix_name):
+            args.custom_ip_prefix = {'id': args.custom_ip_prefix_name}
 # endregion
 
 
@@ -7233,14 +7199,14 @@ def _prep_cert_create(cmd, gateway_name, resource_group_name):
     return config, gateway, ncf
 
 
-def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, public_ip_address,
-                        virtual_network, location=None, tags=None,
+def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name,
+                        virtual_network, public_ip_address=None, location=None, tags=None,
                         no_wait=False, gateway_type=None, sku=None, vpn_type=None, vpn_gateway_generation=None,
                         asn=None, bgp_peering_address=None, peer_weight=None,
                         address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
                         gateway_default_site=None, custom_routes=None, aad_tenant=None, aad_audience=None,
                         aad_issuer=None, root_cert_data=None, root_cert_name=None, vpn_auth_type=None, edge_zone=None,
-                        nat_rule=None):
+                        nat_rule=None, edge_zone_vnet_id=None):
     (VirtualNetworkGateway, BgpSettings, SubResource, VirtualNetworkGatewayIPConfiguration, VirtualNetworkGatewaySku,
      VpnClientConfiguration, AddressSpace, VpnClientRootCertificate, VirtualNetworkGatewayNatRule,
      VpnNatRuleMapping) = cmd.get_models(
@@ -7250,19 +7216,27 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
 
     client = network_client_factory(cmd.cli_ctx).virtual_network_gateways
     subnet = virtual_network + '/subnets/GatewaySubnet'
-    active = len(public_ip_address) == 2
+    active = True
+    if gateway_type != "LocalGateway":
+        active = len(public_ip_address) == 2
+    else:
+        active = False
     vnet_gateway = VirtualNetworkGateway(
-        gateway_type=gateway_type, vpn_type=vpn_type, vpn_gateway_generation=vpn_gateway_generation, location=location,
-        tags=tags, sku=VirtualNetworkGatewaySku(name=sku, tier=sku), active=active, ip_configurations=[],
-        gateway_default_site=SubResource(id=gateway_default_site) if gateway_default_site else None)
-    for i, public_ip in enumerate(public_ip_address):
-        ip_configuration = VirtualNetworkGatewayIPConfiguration(
-            subnet=SubResource(id=subnet),
-            public_ip_address=SubResource(id=public_ip),
-            private_ip_allocation_method='Dynamic',
-            name='vnetGatewayConfig{}'.format(i)
-        )
+        gateway_type=gateway_type, vpn_gateway_generation=vpn_gateway_generation, location=location,
+        tags=tags, active=active, vpn_type=vpn_type, sku=VirtualNetworkGatewaySku(name=sku, tier=sku),
+        ip_configurations=[], gateway_default_site=SubResource(id=gateway_default_site) if gateway_default_site else None)
+    if gateway_type != "LocalGateway":
+        for i, public_ip in enumerate(public_ip_address):
+            ip_configuration = VirtualNetworkGatewayIPConfiguration(
+                subnet=SubResource(id=subnet),
+                public_ip_address=SubResource(id=public_ip),
+                private_ip_allocation_method='Dynamic',
+                name='vnetGatewayConfig{}'.format(i)
+            )
         vnet_gateway.ip_configurations.append(ip_configuration)
+    else:
+        vnet_gateway.vpn_type = None
+        vnet_gateway.sku = None
     if asn or bgp_peering_address or peer_weight:
         vnet_gateway.enable_bgp = True
         vnet_gateway.bgp_settings = BgpSettings(asn=asn, bgp_peering_address=bgp_peering_address,
@@ -7293,6 +7267,8 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
 
     if edge_zone:
         vnet_gateway.extended_location = _edge_zone_model(cmd, edge_zone)
+    if edge_zone_vnet_id:
+        vnet_gateway.v_net_extended_location_resource_id = edge_zone_vnet_id
     if nat_rule:
         vnet_gateway.nat_rules = [
             VirtualNetworkGatewayNatRule(type_properties_type=rule.get('type'), mode=rule.get('mode'), name=rule.get('name'),
