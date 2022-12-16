@@ -18,7 +18,6 @@ RUN dos2unix ./scripts/release/rpm/azure-cli.spec && \
     rpmbuild -v -bb --clean scripts/release/rpm/azure-cli.spec && \
     cp /usr/src/mariner/RPMS/**/azure-cli-${cli_version}-1.*.rpm /azure-cli-dev.rpm && \
     mkdir /out && cp /usr/src/mariner/RPMS/**/azure-cli-${cli_version}-1.*.rpm /out/
-    cp /usr/src/mariner/RPMS/x86_64/azure-cli-${cli_version}-1.cm2.x86_64.rpm /azure-cli-dev.rpm
 
 FROM ${image} AS execution-env
 
