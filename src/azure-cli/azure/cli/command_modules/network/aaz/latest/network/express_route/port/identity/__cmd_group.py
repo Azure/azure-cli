@@ -8,8 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
-from .__cmd_group import *
-from ._list import *
-from ._show import *
-from ._update import *
-from ._wait import *
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "network express-route port identity",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage the managed service identity of an ExpressRoute Port.
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]
