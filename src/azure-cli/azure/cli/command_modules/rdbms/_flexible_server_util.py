@@ -537,3 +537,10 @@ def get_identity_and_data_encryption(server):
         data_encryption = None
 
     return identity, data_encryption
+
+
+def get_tenant_id():
+    from azure.cli.core._profile import Profile
+    profile = Profile()
+    sub = profile.get_subscription()
+    return sub['tenantId']

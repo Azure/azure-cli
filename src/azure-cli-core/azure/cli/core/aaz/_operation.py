@@ -324,9 +324,7 @@ class AAZHttpOperation(AAZOperation):
         raise HttpResponseError(response=response, error_format=error_format)
 
 
-class AAZJsonInstanceUpdateOperation(AAZOperation):
-    """ Instance Update Operation
-    """
+class AAZJsonInstanceOperationHelper:
 
     def __call__(self, *args, **kwargs):
         raise NotImplementedError()
@@ -352,13 +350,40 @@ class AAZJsonInstanceUpdateOperation(AAZOperation):
                     data=schema.process_data(None)
                 )
         else:
-            assert isinstance(value, AAZBaseValue)
+            assert isinstance(value, AAZBaseValue), f"Unknown value type: {type(value)}"
 
         builder = AAZContentBuilder(
             values=[value],
             args=[AAZArgBrowser(arg_value=arg_value, arg_data=arg_data)]
         )
         return value, builder
+
+
+class AAZJsonInstanceUpdateOperation(AAZJsonInstanceOperationHelper, AAZOperation):
+    """ Instance Update Operation
+    """
+
+    def __call__(self, *args, **kwargs):
+        raise NotImplementedError()
+
+
+class AAZJsonInstanceCreateOperation(AAZJsonInstanceOperationHelper, AAZOperation):
+    """ Json Instance Create Operation
+    """
+
+    def __call__(self, *args, **kwargs):
+        raise NotImplementedError()
+
+
+class AAZJsonInstanceDeleteOperation(AAZJsonInstanceOperationHelper, AAZOperation):
+    """ Json Instance Delete Operation
+    """
+
+    def __call__(self, *args, **kwargs):
+        raise NotImplementedError()
+
+    def _delete_instance(self, *args, **kwargs):  # pylint: disable=unused-argument, no-self-use
+        return AAZUndefined
 
 
 class AAZGenericInstanceUpdateOperation(AAZOperation):

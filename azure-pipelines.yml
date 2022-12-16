@@ -944,6 +944,7 @@ jobs:
       ArtifactName: $(deb_system)-$(distro)-$(arch)
 
 - job: TestDebPackages
+  timeoutInMinutes: 120
   displayName: Test Deb Packages
   dependsOn:
   - BuildDebPackages
