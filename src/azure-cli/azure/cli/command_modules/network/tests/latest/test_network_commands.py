@@ -2149,12 +2149,6 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('length(@)', 2)
                  ])
 
-        # test match-condition list
-        self.cmd('network application-gateway waf-policy custom-rule match-condition list -g {rg} --name {custom-rule1} --policy-name {waf}',
-                 checks=[
-                     self.check('length(@)', 0)
-                 ])
-
         # update some policy settings of this waf-policy
         self.cmd('network application-gateway waf-policy policy-setting update -g {rg} --policy-name {waf} '
                  '--state Enabled --file-upload-limit-in-mb 64 --mode Prevention')
@@ -2309,7 +2303,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
                  '--policy-name {waf} -n {rule} '
                  '--match-variables RequestHeaders.value --operator contains '
-                 '--values remove this --transform lowercase')
+                 '--values remove this --transform uppercase')
         self.cmd('network application-gateway waf-policy custom-rule show -g {rg} '
                  '--policy-name {waf} -n {rule}',
                  checks=[
@@ -2317,6 +2311,11 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('ruleType', 'MatchRule'),
                      self.check('action', 'Log'),
                      self.check('matchConditions | length(@)', 2)
+                 ])
+        self.cmd('network application-gateway waf-policy custom-rule match-condition list -n {rule} -g {rg} '
+                 '--policy-name {waf}',
+                 checks=[
+                     self.check('length(@)', 2)
                  ])
 
         # remove one of match condition of custom rule
