@@ -243,11 +243,11 @@ def get_pipeline_result(test_result_fp, pipeline_result):
         for testcase in testsuite:
             # extensiont[2] module[6]
             class_name = testcase.attrib['classname'].split('.')
-            if class_name[0] == 'azure-cli':
-                module = testcase.attrib['classname'].split('.')[6]
-            elif class_name[0] == 'azure-cli-extensions':
-                module = testcase.attrib['classname'].split('.')[2]
-            logger.info(f'module {module}')
+            logger.info(f'class_name {class_name}')
+            if class_name[0] == 'azure-cli-extensions':
+                module = class_name[2]
+            else:
+                module = class_name[6]
             failures = testcase.findall('failure')
             if failures:
                 # logger.info(f"failed testcase attributes: {testcase.attrib}")
