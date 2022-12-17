@@ -206,8 +206,18 @@ def build_pipeline_result():
         -->
         |Type|Test Case|Error Message|Line|\n|---|---|---|---|\n|Failed|test_aks_create_and_update_with_http_proxy_config|azure.cli.core.azclierror.InvalidArgumentValueError: C:Codeazure-clisrcazure-cliazureclicommand_modulesacstestslatestdatahttpproxyconfig.json is not valid file, or not accessable.|azure-cli\\src\\azure-cli\\azure\\cli\\command_modules\\acs\\tests\\latest\\test_aks_commands.py:408|\n
     '''
-    selected_modules = get_path_table()['mod']
-
+    if profile == '2018-03-01-hybrid':
+        selected_modules = ['core', 'keyvault', 'network', 'resource', 'storage', 'telemetry', 'vm']
+    elif profile == '2019-03-01-hybrid':
+        selected_modules = ['core', 'databoxedge', 'iot', 'resource', 'storage', 'telemetry', 'vm']
+    elif profile == '2020-09-01-hybrid':
+        selected_modules = ['acr', 'acs', 'core', 'databoxedge', 'iot', 'keyvault', 'storage', 'telemetry', 'vm']
+    else:
+        selected_modules = get_path_table()['mod']
+        excluded_modules = ['extension', 'interactive']
+        for m in excluded_modules:
+            selected_modules.pop(m)
+        selected_modules = selected_modules.keys()
     pipeline_result = {
         # "Automation Full Test Python310 Profile Latest instance1"
         unique_job_name:
@@ -227,7 +237,7 @@ def build_pipeline_result():
             }
     }
 
-    for k, v in selected_modules.items():
+    for k in selected_modules:
         pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'].append({
             "Module": k,
             "Status": "Running",
@@ -235,12 +245,12 @@ def build_pipeline_result():
         })
     pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'].extend([
         {
-            "Module": 'core',
+            "Module": "core",
             "Status": "Running",
             "Content": ""
         },
         {
-            "Module": 'telemetry',
+            "Module": "telemetry",
             "Status": "Running",
             "Content": ""
         }
@@ -254,11 +264,14 @@ def get_pipeline_result(test_result_fp, pipeline_result):
     for testsuite in root:
         for testcase in testsuite:
             # ['azure', 'cli', 'command_modules', 'network', 'tests', 'latest', 'test_network_commands', 'NetworkNicScenarioTest']
+            # ['src', 'azure-cli', 'azure', 'cli', 'command_modules', 'network', 'tests', 'hybrid_2018_03_01', 'test_dns_commands', 'DnsZoneImportTest']
             # ['src', 'azure-cli-core', 'azure', 'cli', 'core', 'tests', 'test_aaz_arg', 'TestAAZArg']
             # ['src', 'azure-cli-telemetry', 'azure', 'cli', 'telemetry', 'tests', 'test_records_collection', 'TestRecordsCollection']
             class_name = testcase.attrib['classname'].split('.')
-            if class_name[0] == 'azure':
+            if class_name[2] == 'command_modules':
                 module = class_name[3]
+            elif class_name[4] == 'command_modules':
+                moodule = class_name[5]
             elif class_name[1] == 'azure-cli-core':
                 module = class_name[4]
             elif class_name[1] == 'azure-cli-telemetry':
