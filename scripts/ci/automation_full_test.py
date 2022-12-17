@@ -233,6 +233,18 @@ def build_pipeline_result():
             "Status": "Running",
             "Content": ""
         })
+    pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'].extend([
+        {
+            "Module": 'core',
+            "Status": "Running",
+            "Content": ""
+        },
+        {
+            "Module": 'telemetry',
+            "Status": "Running",
+            "Content": ""
+        }
+    ])
     return pipeline_result
 
 
@@ -241,13 +253,19 @@ def get_pipeline_result(test_result_fp, pipeline_result):
     root = tree.getroot()
     for testsuite in root:
         for testcase in testsuite:
-            # extensiont[2] module[6]
+            # ['azure', 'cli', 'command_modules', 'network', 'tests', 'latest', 'test_network_commands', 'NetworkNicScenarioTest']
+            # ['src', 'azure-cli-core', 'azure', 'cli', 'core', 'tests', 'test_aaz_arg', 'TestAAZArg']
+            # ['src', 'azure-cli-telemetry', 'azure', 'cli', 'telemetry', 'tests', 'test_records_collection', 'TestRecordsCollection']
             class_name = testcase.attrib['classname'].split('.')
-            logger.info(f'class_name {class_name}')
-            if class_name[0] == 'azure-cli-extensions':
-                module = class_name[2]
+            if class_name[0] == 'azure':
+                module = class_name[3]
+            elif class_name[1] == 'azure-cli-core':
+                module = class_name[4]
+            elif class_name[1] == 'azure-cli-telemetry':
+                module = class_name[4]
             else:
-                module = class_name[6]
+                logger.info(f'unexpected class name: {class_name}')
+                module = 'unknown'
             failures = testcase.findall('failure')
             if failures:
                 # logger.info(f"failed testcase attributes: {testcase.attrib}")
