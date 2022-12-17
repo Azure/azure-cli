@@ -241,12 +241,13 @@ def get_pipeline_result(test_result_fp, pipeline_result):
     root = tree.getroot()
     for testsuite in root:
         for testcase in testsuite:
-		    # extensiont[2] module[6]
+            # extensiont[2] module[6]
             class_name = testcase.attrib['classname'].split('.')
             if class_name[0] == 'azure-cli':
                 module = testcase.attrib['classname'].split('.')[6]
             elif class_name[0] == 'azure-cli-extensions':
                 module = testcase.attrib['classname'].split('.')[2]
+            logger.info(f'module {module}')
             failures = testcase.findall('failure')
             if failures:
                 # logger.info(f"failed testcase attributes: {testcase.attrib}")
