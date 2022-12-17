@@ -198,14 +198,6 @@ def process_test(cmd, azdev_test_result_fp, live_rerun=False):
 
 
 def build_pipeline_result():
-    '''
-
-        |Type|Test Case|Error Message|Line|
-        |---|---|---|---|
-        |Failed|test_aks_create_and_update_with_http_proxy_config|azure.cli.core.azclierror.InvalidArgumentValueError: C:Codeazure-clisrcazure-cliazureclicommand_modulesacstestslatestdatahttpproxyconfig.json is not valid file, or not accessable.|azure-cli\\src\\azure-cli\\azure\\cli\\command_modules\\acs\\tests\\latest\\test_aks_commands.py:408|
-        -->
-        |Type|Test Case|Error Message|Line|\n|---|---|---|---|\n|Failed|test_aks_create_and_update_with_http_proxy_config|azure.cli.core.azclierror.InvalidArgumentValueError: C:Codeazure-clisrcazure-cliazureclicommand_modulesacstestslatestdatahttpproxyconfig.json is not valid file, or not accessable.|azure-cli\\src\\azure-cli\\azure\\cli\\command_modules\\acs\\tests\\latest\\test_aks_commands.py:408|\n
-    '''
     if profile == '2018-03-01-hybrid':
         selected_modules = ['keyvault', 'network', 'resource', 'storage', 'vm']
     elif profile == '2019-03-01-hybrid':
@@ -218,6 +210,8 @@ def build_pipeline_result():
         for m in excluded_modules:
             selected_modules.pop(m)
         selected_modules = selected_modules.keys()
+    # add azure-cli-core, azure-cli-telemetry to selected_modules
+    selected_modules += ['core', 'telemetry']
     pipeline_result = {
         # "Automation Full Test Python310 Profile Latest instance1"
         unique_job_name:
@@ -243,18 +237,6 @@ def build_pipeline_result():
             "Status": "Running",
             "Content": ""
         })
-    pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'].extend([
-        {
-            "Module": "core",
-            "Status": "Running",
-            "Content": ""
-        },
-        {
-            "Module": "telemetry",
-            "Status": "Running",
-            "Content": ""
-        }
-    ])
     return pipeline_result
 
 
