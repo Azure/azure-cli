@@ -210,23 +210,29 @@ def build_pipeline_result():
 
     pipeline_result = {
         # "Automation Full Test Python310 Profile Latest instance1"
-        unique_job_name: {
-            "Name": job_name,
-            "Details": [{
-                "PythonVersion": python_version,
-                "Profile": profile,
-                "Modules": []
-            }]
-        }
+        unique_job_name:
+            {
+                "Name": job_name,
+                "Details": [
+                    {
+                        "Profile": profile,
+                        "Details": [
+                            {
+                                "PythonVersion": python_version,
+                                "Details": []
+                            }
+                        ]
+                    }
+                ]
+            }
     }
 
     for k, v in selected_modules.items():
-        pipeline_result[unique_job_name]['Details'][0]['Modules'].append({
+        pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'].append({
             "Module": k,
-            "Status": "Success",
+            "Status": "Running",
             "Content": ""
         })
-    print(json.dumps(pipeline_result, indent=4))
     return pipeline_result
 
 
@@ -235,28 +241,33 @@ def get_pipeline_result(test_result_fp, pipeline_result):
     root = tree.getroot()
     for testsuite in root:
         for testcase in testsuite:
-            # Collect failed tests
+		    # extensiont[2] module[6]
+            class_name = testcase.attrib['classname'].split('.')
+            if class_name[0] == 'azure-cli':
+                module = testcase.attrib['classname'].split('.')[6]
+            elif class_name[0] == 'azure-cli-extensions':
+                module = testcase.attrib['classname'].split('.')[2]
             failures = testcase.findall('failure')
             if failures:
                 # logger.info(f"failed testcase attributes: {testcase.attrib}")
                 state = "Failed"
                 test_case = testcase.attrib['name']
-                # extensiont[2] module[6]
-                class_name = testcase.attrib['classname'].split('.')
-                if class_name[0] == 'azure-cli':
-                    module = testcase.attrib['classname'].split('.')[6]
-                elif class_name[0] == 'azure-cli-extensions':
-                    module = testcase.attrib['classname'].split('.')[2]
                 line = testcase.attrib['file'] + ':' + testcase.attrib['line']
                 # only get first failure
                 for failure in failures:
                     message = failure.attrib['message']
                     break
-                for i in pipeline_result[unique_job_name]['Details'][0]['Modules']:
+                for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details']:
                     if i['Module'] == module:
                         i['Status'] = 'Failed'
                         i['Content'] = build_markdown_content(state, test_case, message, line, i['Content'])
                         break
+            else:
+                for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details']:
+                    if i['Module'] == module:
+                        i['Status'] = 'Success' if i['Status'] != 'Failed' else 'Failed'
+                        break
+
     print(json.dumps(pipeline_result, indent=4))
     return pipeline_result
 
@@ -362,13 +373,13 @@ class AutomaticScheduling(object):
         if serial_tests:
             azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{instance_idx}.serial.xml")
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + serial_tests + \
-                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '"--durations=10"']
+                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '"-o junit_family=xunit1 --durations=10"']
             serial_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
             pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result)
         if parallel_tests:
             azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{instance_idx}.parallel.xml")
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + parallel_tests + \
-                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '"--durations=10"']
+                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '"-o junit_family=xunit1 --durations=10"']
             parallel_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
             pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result)
             save_pipeline_result(pipeline_result)
