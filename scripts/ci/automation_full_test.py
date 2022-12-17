@@ -209,7 +209,7 @@ def build_pipeline_result():
         excluded_modules = ['extension', 'interactive']
         for m in excluded_modules:
             selected_modules.pop(m)
-        selected_modules = selected_modules.keys()
+        selected_modules = list(selected_modules.keys())
     # add azure-cli-core, azure-cli-telemetry to selected_modules
     selected_modules += ['core', 'telemetry']
     pipeline_result = {
@@ -253,13 +253,13 @@ def get_pipeline_result(test_result_fp, pipeline_result):
             if class_name[2] == 'command_modules':
                 module = class_name[3]
             elif class_name[4] == 'command_modules':
-                moodule = class_name[5]
+                module = class_name[5]
             elif class_name[1] == 'azure-cli-core':
                 module = class_name[4]
             elif class_name[1] == 'azure-cli-telemetry':
                 module = class_name[4]
             else:
-                logger.info(f'unexpected class name: {class_name}')
+                logger.error(f'unexpected class name: {class_name}')
                 module = 'unknown'
             failures = testcase.findall('failure')
             if failures:
