@@ -288,7 +288,7 @@ class RedisCacheTests(ScenarioTest):
             'location': location,
             'sku': basic_sku,
             'size': basic_size,
-            'userIdentity': "/subscriptions/0ee2a145-4d40-44f4-b764-67b40274f1ac/resourcegroups/prn-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/test",
+            'userIdentity': "/subscriptions/3919658b-68ae-4509-8c17-6a2238340ae7/resourceGroups/tolani-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/test-uami",
         }
         self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size} --mi-system-assigned --mi-user-assigned "{userIdentity}"', checks=[
             self.check('identity.type', 'SystemAssigned, UserAssigned'),
