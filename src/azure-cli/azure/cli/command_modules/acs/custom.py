@@ -439,6 +439,8 @@ def aks_create(
     enable_addons=None,
     workspace_resource_id=None,
     enable_msi_auth_for_monitoring=False,
+    enable_syslog=False,
+    data_collection_settings=None,
     aci_subnet_name=None,
     appgw_name=None,
     appgw_subnet_cidr=None,
@@ -475,13 +477,12 @@ def aks_create(
     enable_fips_image=False,
     kubelet_config=None,
     linux_os_config=None,
-    no_wait=False,
-    yes=False,
-    aks_custom_headers=None,
     host_group_id=None,
     gpu_instance_profile=None,
-    enable_syslog=False,
-    data_collection_settings=None,
+    # misc
+    yes=False,
+    no_wait=False,
+    aks_custom_headers=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -559,6 +560,7 @@ def aks_update(
     azure_keyvault_kms_key_id=None,
     azure_keyvault_kms_key_vault_network_access=None,
     azure_keyvault_kms_key_vault_resource_id=None,
+    http_proxy_config=None,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
@@ -570,9 +572,9 @@ def aks_update(
     min_count=None,
     max_count=None,
     nodepool_labels=None,
-    http_proxy_config=None,
-    no_wait=False,
+    # misc
     yes=False,
+    no_wait=False,
     aks_custom_headers=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
