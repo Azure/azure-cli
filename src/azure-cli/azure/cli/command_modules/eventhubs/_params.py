@@ -264,9 +264,6 @@ def load_arguments_eh(self, _):
 
     with self.argument_context('eventhubs namespace application-group create') as c:
         c.argument('client_app_group_identifier', options_list=['--client-app-group-identifier', '--client-app-group-id'], help='The Unique identifier for application group.Supports SAS(SASKeyName=KeyName) or AAD(AADAppID=Guid)')
-        c.argument('is_enabled', arg_type=get_three_state_flag(),
-                   help='Determines if Application Group is allowed to create connection with namespace or not. '
-                        'Once the isEnabled is set to false, all the existing connections of application group gets dropped and no new connections will be allowed')
 
     for scope in ['eventhubs namespace application-group policy add', 'eventhubs namespace application-group policy remove', 'eventhubs namespace application-group create']:
         with self.argument_context(scope) as c:
