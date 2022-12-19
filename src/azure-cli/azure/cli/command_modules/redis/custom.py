@@ -216,7 +216,7 @@ def cli_redis_identity_assign(client, resource_group_name, cache_name, mi_system
                 mi_user_assigned.append(user_id)
     update_params = RedisUpdateParameters(
         identity=build_identity(mi_system_assigned, mi_user_assigned))
-    redis_resourse = client.update(resource_group_name, cache_name, update_params)
+    redis_resourse = client.begin_update(resource_group_name, cache_name, update_params).result()
     return redis_resourse.identity
 
 
@@ -248,7 +248,7 @@ def cli_redis_identity_remove(client, resource_group_name, cache_name, mi_system
     update_params = RedisUpdateParameters(
         identity=build_identity(system_assigned, user_assigned)
     )
-    updated_resourse = client.update(resource_group_name, cache_name, update_params)
+    updated_resourse = client.begin_update(resource_group_name, cache_name, update_params).result()
     if updated_resourse.identity is None:
         updated_resourse.identity = none_identity
     return updated_resourse.identity
