@@ -21,11 +21,7 @@ class EventHubEntityUpdate(_EventHubEntityUpdate):
         args = self.ctx.args
         from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub._show import Show
 
-        eventhub = Show(cli_ctx=self.cli_ctx)(command_args={
-                      "resource_group": args.resource_group,
-                      "namespace_name": args.namespace_name,
-                      "eventhub_name": args.eventhub_name
-                    })
+        eventhub = Show(cli_ctx=self.cli_ctx)(command_args={ "resource_group": args.resource_group, "namespace_name": args.namespace_name, "eventhub_name": args.eventhub_name })
 
         if bool(args.enable_capture) is True and not args.encoding and 'captureDescription' not in eventhub:
             args.encoding = 'Avro'

@@ -56,12 +56,6 @@ def load_command_table(self, _):
         client_factory=private_link_mgmt_client_factory,
         resource_type=ResourceType.MGMT_EVENTHUB)
 
-    eh_schema_registry_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations#SchemaRegistryOperations.{}',
-        client_factory=schema_registry_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_EVENTHUB
-    )
-
     eh_application_group_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#ApplicationGroupOperations.{}',
         client_factory=schema_registry_mgmt_client_factory,
