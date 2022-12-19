@@ -339,6 +339,9 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         raise RequiredArgumentMissingError(
             'usage error: --upload-size-bytes should be used together with --upload-type')
 
+    log_message = 'Starting Build 2023 event, "az disk create" command will deploy Trusted Launch VM by default.' \
+                  ' To know more about Trusted Launch, please visit' \
+                  ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch'
     if image_reference is not None:
         if not is_valid_resource_id(image_reference):
             # URN or name
@@ -362,16 +365,10 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
         if hasattr(response, 'hyper_v_generation'):
             if response.hyper_v_generation == 'V1':
-                logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS image and '
-                               'Trusted Launch security type. To know more about Trusted Launch, please visit '
-                               'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+                logger.warning(log_message)
             elif response.hyper_v_generation == 'V2':
                 if hyper_v_generation == 'V1':
-                    logger.warning(
-                        'Please consider upgrading security for your VM resources by using Gen 2 OS Disk and '
-                        'Trusted Launch security type. Please use "--hyper-v-generation V2" to set the '
-                        'hypervisor generation as Gen2 for OS disk. To know more about Trusted Launch, '
-                        'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+                    logger.warning(log_message)
                 # will set default value of hyper_v_generation
                 if hasattr(response, 'features') and response.features \
                         and 'SecurityType' in response.features \
@@ -379,10 +376,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         ['TrustedLaunchSupported', 'TrustedLaunchAndConfidentialVmSupported'] \
                         and security_type != 'TrustedLaunch':
                     # will set default value of security_type
-                    logger.warning('Starting Build 2023 event, az disk create command will deploy Trusted Launch VM '
-                                   'by default. Please use "--security-type TrustedLaunch" in your scripts in advance '
-                                   'to avoid the breaking change. To know more about Trusted Launch, please visit '
-                                   'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+                    logger.warning(log_message)
 
         # image_reference is an ID now
         image_reference = {'id': response.id}
@@ -417,16 +411,10 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                                                            gallery_image_name=gallery_image_definition)
         if hasattr(gallery_image_info, 'hyper_v_generation'):
             if gallery_image_info.hyper_v_generation == 'V1':
-                logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS image and '
-                               'Trusted Launch security type. To know more about Trusted Launch, please visit '
-                               'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+                logger.warning(log_message)
             elif gallery_image_info.hyper_v_generation == 'V2':
                 if hyper_v_generation == 'V1':
-                    logger.warning(
-                        'Please consider upgrading security for your VM resources by using Gen 2 OS Disk and '
-                        'Trusted Launch security type. Please use "--hyper-v-generation V2" to set the '
-                        'hypervisor generation as Gen2 for OS disk. To know more about Trusted Launch, '
-                        'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+                    logger.warning(log_message)
                 # will set default value of hyper_v_generation
                 if hasattr(gallery_image_info, 'features') and gallery_image_info.features \
                         and 'SecurityType' in gallery_image_info.features \
@@ -434,10 +422,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         ['TrustedLaunchSupported', 'TrustedLaunch', 'TrustedLaunchAndConfidentialVmSupported'] \
                         and security_type != 'TrustedLaunch':
                     # will set default value of security_type
-                    logger.warning('Starting Build 2023 event, az disk create command will deploy Trusted Launch VM '
-                                   'by default. Please use "--security-type TrustedLaunch" in your scripts in advance '
-                                   'to avoid the breaking change. To know more about Trusted Launch, please visit '
-                                   'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+                    logger.warning(log_message)
 
         key = gallery_image_reference_type if gallery_image_reference_type else 'id'
         gallery_image_reference = {key: gallery_image_reference}
@@ -484,10 +469,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
     if option == DiskCreateOption.empty and os_type:
         # will set default value of hyper_v_generation and security_type
-        logger.warning('Starting Build 2023 event, az disk create command will deploy Trusted Launch VM '
-                       'by default. Please use "--security-type TrustedLaunch" and "--hyper-v-generation V2" '
-                       'in your scripts in advance to avoid the breaking change. To know more about Trusted Launch, '
-                       'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+        logger.warning(log_message)
     if hyper_v_generation:
         disk.hyper_v_generation = hyper_v_generation
 
@@ -4563,26 +4545,35 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                 data_snapshots[i] = resource_id(
                     subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                     namespace='Microsoft.Compute', type='snapshots', name=s)
-    source = GalleryArtifactSource(managed_image=ManagedArtifact(id=managed_image))
+
     profile = ImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest,
                                             end_of_life_date=end_of_life_date,
                                             target_regions=target_regions or [TargetRegion(name=location)],
-                                            source=source, replica_count=replica_count,
-                                            storage_account_type=storage_account_type)
+                                            replica_count=replica_count, storage_account_type=storage_account_type)
     if replication_mode is not None:
         profile.replication_mode = replication_mode
+    if not cmd.supported_api_version(min_api='2022-03-03', operation_group='gallery_image_versions'):
+        source = GalleryArtifactSource(managed_image=ManagedArtifact(id=managed_image))
+        profile.source = source
+
     if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
         if managed_image is None and os_snapshot is None and os_vhd_uri is None:
             raise RequiredArgumentMissingError('usage error: Please provide --managed-image or --os-snapshot or --vhd')
         GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
-        GalleryArtifactVersionSource = cmd.get_models('GalleryArtifactVersionSource')
         GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
         GalleryDataDiskImage = cmd.get_models('GalleryDataDiskImage')
+        if cmd.supported_api_version(min_api='2022-03-03', operation_group='gallery_image_versions'):
+            GalleryArtifactVersionFullSource = cmd.get_models('GalleryArtifactVersionFullSource')
+            GalleryDiskImageSource = cmd.get_models('GalleryDiskImageSource')
+        else:
+            GalleryArtifactVersionFullSource = cmd.get_models('GalleryArtifactVersionSource')
+            GalleryDiskImageSource = cmd.get_models('GalleryArtifactVersionSource')
+
         source = os_disk_image = data_disk_images = None
         if managed_image is not None:
-            source = GalleryArtifactVersionSource(id=managed_image)
+            source = GalleryArtifactVersionFullSource(id=managed_image)
         if os_snapshot is not None:
-            os_disk_image = GalleryOSDiskImage(source=GalleryArtifactVersionSource(id=os_snapshot))
+            os_disk_image = GalleryOSDiskImage(source=GalleryDiskImageSource(id=os_snapshot))
         if data_snapshot_luns and not data_snapshots:
             raise ArgumentUsageError('usage error: --data-snapshot-luns must be used together with --data-snapshots')
         if data_snapshots:
@@ -4593,7 +4584,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                 data_snapshot_luns = list(range(len(data_snapshots)))
             data_disk_images = []
             for i, s in enumerate(data_snapshots):
-                data_disk_images.append(GalleryDataDiskImage(source=GalleryArtifactVersionSource(id=s),
+                data_disk_images.append(GalleryDataDiskImage(source=GalleryDiskImageSource(id=s),
                                                              lun=data_snapshot_luns[i]))
         # from vhd, only support os image now
         if cmd.supported_api_version(min_api='2020-09-30', operation_group='gallery_image_versions'):
@@ -4605,7 +4596,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                     os_vhd_storage_account = resource_id(
                         subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                         namespace='Microsoft.Storage', type='storageAccounts', name=os_vhd_storage_account)
-                os_disk_image = GalleryOSDiskImage(source=GalleryArtifactVersionSource(
+                os_disk_image = GalleryOSDiskImage(source=GalleryDiskImageSource(
                     id=os_vhd_storage_account, uri=os_vhd_uri))
 
             # Data disks
@@ -4636,7 +4627,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                     data_disk_images = []
                 for uri, lun, account in zip(data_vhds_uris, data_vhds_luns, data_vhds_storage_accounts):
                     data_disk_images.append(GalleryDataDiskImage(
-                        source=GalleryArtifactVersionSource(id=account, uri=uri), lun=lun))
+                        source=GalleryDiskImageSource(id=account, uri=uri), lun=lun))
 
         storage_profile = GalleryImageVersionStorageProfile(source=source, os_disk_image=os_disk_image,
                                                             data_disk_images=data_disk_images)
@@ -5390,11 +5381,6 @@ def show_capacity_reservation(client, resource_group_name, capacity_reservation_
     return client.get(resource_group_name=resource_group_name,
                       capacity_reservation_group_name=capacity_reservation_group_name,
                       capacity_reservation_name=capacity_reservation_name, expand=expand)
-
-
-def list_capacity_reservation(client, resource_group_name, capacity_reservation_group_name):
-    return client.list_by_capacity_reservation_group(resource_group_name=resource_group_name,
-                                                     capacity_reservation_group_name=capacity_reservation_group_name)
 
 
 def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):

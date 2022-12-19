@@ -25,7 +25,7 @@ variables:
 jobs:
 - job: LiveTestPython38
   displayName: Live Test Python 3.8
-  timeoutInMinutes: 9999
+  timeoutInMinutes: 0
   strategy:
     maxParallel: 5
     matrix:
@@ -445,6 +445,8 @@ jobs:
   timeoutInMinutes: 180
   dependsOn: LiveTestPython38
   condition: succeededOrFailed()
+  pool:
+    name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
       inputs:

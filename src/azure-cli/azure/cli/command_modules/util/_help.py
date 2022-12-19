@@ -23,28 +23,28 @@ long-summary: >
 
     For passing JSON in PowerShell, see https://github.com/Azure/azure-cli/blob/dev/doc/quoting-issues-with-powershell.md
 examples:
-  - name: Get Audit log through Microsoft Graph
-    text: >
-        az rest --method get --url https://graph.microsoft.com/beta/auditLogs/directoryAudits
-  - name: Update a Azure Active Directory Graph User's display name
-    text: |
-        (Bash or CMD)
-        az rest --method patch --url "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body "{\\"displayName\\": \\"johndoe2\\"}"
+- name: Get Audit log through Microsoft Graph
+  text: >
+      az rest --method get --url https://graph.microsoft.com/beta/auditLogs/directoryAudits
+- name: Update a Azure Active Directory Graph User's display name
+  text: |
+      (Bash or CMD)
+      az rest --method patch --url "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body "{\\"displayName\\": \\"johndoe2\\"}"
 
-        (Bash)
-        az rest --method patch --url "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body '{"displayName": "johndoe2"}'
+      (Bash)
+      az rest --method patch --url "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body '{"displayName": "johndoe2"}'
 
-        (PowerShell)
-        az rest --method patch --url "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body '{\\"displayName\\": \\"johndoe2\\"}'
-  - name: Get a virtual machine
-    text: >
-        az rest --method get --uri /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}?api-version=2019-03-01
-  - name: Create a public IP address from body.json file
-    text: >
-        az rest --method put --url https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{publicIpAddressName}?api-version=2019-09-01 --body @body.json
-  - name: List the top three resources (Bash)
-    text: >
-        az rest --method get --url https://management.azure.com/subscriptions/{subscriptionId}/resources?api-version=2019-07-01 --url-parameters \\$top=3
+      (PowerShell)
+      az rest --method patch --url "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body '{\\"displayName\\": \\"johndoe2\\"}'
+- name: Get a virtual machine
+  text: >
+      az rest --method get --uri /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}?api-version=2019-03-01
+- name: Create a public IP address from body.json file
+  text: >
+      az rest --method put --url https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{publicIpAddressName}?api-version=2019-09-01 --body @body.json
+- name: List the top three resources (Bash)
+  text: >
+      az rest --method get --url https://management.azure.com/subscriptions/{subscriptionId}/resources?api-version=2019-07-01 --url-parameters \\$top=3
 """
 
 helps['version'] = """
@@ -76,11 +76,19 @@ helps['demo secret-store save'] = """
 type: command
 short-summary: Save custom data to secret store.
 examples:
-  - name: Save data to secret store.
-    text: az demo secret-store save "name=Johann Sebastian Bach" job=musician
+- name: Save data to secret store.
+  text: az demo secret-store save "name=Johann Sebastian Bach" job=musician
 """
 
 helps['demo secret-store load'] = """
 type: command
 short-summary: Load custom data from secret store.
+"""
+
+helps['demo byo-access-token'] = """
+type: command
+short-summary: List resource groups by bringing your own access token
+examples:
+- name: List resource groups by bringing your own access token
+  text: az demo byo-access-token --access-token "eyJ0eXAiO..." --subscription-id 00000000-0000-0000-0000-000000000000
 """

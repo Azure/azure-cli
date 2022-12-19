@@ -3,8 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import json
+import os
+import re
 
 from azure.cli.command_modules.acs._client_factory import get_resource_groups_client, get_resources_client
+from azure.cli.core.util import get_file_json
 from azure.cli.command_modules.acs._consts import (
     CONST_INGRESS_APPGW_ADDON_NAME,
     CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
@@ -16,7 +19,7 @@ from azure.cli.command_modules.acs._consts import (
 )
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._roleassignments import add_role_assignment
-from azure.cli.core.azclierror import AzCLIError, ClientRequestError, CLIError
+from azure.cli.core.azclierror import AzCLIError, ClientRequestError, CLIError, InvalidArgumentValueError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import send_raw_request
 from azure.core.exceptions import HttpResponseError
@@ -319,13 +322,16 @@ def ensure_container_insights_for_monitoring(
     aad_route=False,
     create_dcr=False,
     create_dcra=False,
+    enable_syslog=False,
+    data_collection_settings=None
 ):
     """
     Either adds the ContainerInsights solution to a LA Workspace OR sets up a DCR (Data Collection Rule) and DCRA
     (Data Collection Rule Association). Both let the monitoring addon send data to a Log Analytics Workspace.
 
     Set aad_route == True to set up the DCR data route. Otherwise the solution route will be used. Create_dcr and
-    create_dcra have no effect if aad_route == False.
+    create_dcra have no effect if aad_route == False. If syslog data is to be collected set aad_route == True and
+    enable_syslog == True
 
     Set remove_monitoring to True and create_dcra to True to remove the DCRA from a cluster. The association makes
     it very hard to delete either the DCR or cluster. (It is not obvious how to even navigate to the association from
@@ -439,8 +445,14 @@ def ensure_container_insights_for_monitoring(
             # get existing tags on the container insights extension DCR if the customer added any
             existing_tags = get_existing_container_insights_extension_dcr_tags(
                 cmd, dcr_url)
+            # get data collection settings
+            extensionSettings = {}
+            if data_collection_settings is not None:
+                dataCollectionSettings = _get_data_collection_settings(data_collection_settings)
+                validate_data_collection_settings(dataCollectionSettings)
+                extensionSettings["dataCollectionSettings"] = dataCollectionSettings
             # create the DCR
-            dcr_creation_body = json.dumps(
+            dcr_creation_body_without_syslog = json.dumps(
                 {
                     "location": location,
                     "tags": existing_tags,
@@ -453,6 +465,7 @@ def ensure_container_insights_for_monitoring(
                                         "Microsoft-ContainerInsights-Group-Default"
                                     ],
                                     "extensionName": "ContainerInsights",
+                                    "extensionSettings": extensionSettings,
                                 }
                             ]
                         },
@@ -475,11 +488,95 @@ def ensure_container_insights_for_monitoring(
                     },
                 }
             )
+
+            dcr_creation_body_with_syslog = json.dumps(
+                {
+                    "location": location,
+                    "tags": existing_tags,
+                    "properties": {
+                        "dataSources": {
+                            "syslog": [
+                                {
+                                    "streams": [
+                                        "Microsoft-Syslog"
+                                    ],
+                                    "facilityNames": [
+                                        "auth",
+                                        "authpriv",
+                                        "cron",
+                                        "daemon",
+                                        "mark",
+                                        "kern",
+                                        "local0",
+                                        "local1",
+                                        "local2",
+                                        "local3",
+                                        "local4",
+                                        "local5",
+                                        "local6",
+                                        "local7",
+                                        "lpr",
+                                        "mail",
+                                        "news",
+                                        "syslog",
+                                        "user",
+                                        "uucp"
+                                    ],
+                                    "logLevels": [
+                                        "Debug",
+                                        "Info",
+                                        "Notice",
+                                        "Warning",
+                                        "Error",
+                                        "Critical",
+                                        "Alert",
+                                        "Emergency"
+                                    ],
+                                    "name": "sysLogsDataSource"
+                                }
+                            ],
+                            "extensions": [
+                                {
+                                    "name": "ContainerInsightsExtension",
+                                    "streams": [
+                                        "Microsoft-ContainerInsights-Group-Default"
+                                    ],
+                                    "extensionName": "ContainerInsights",
+                                    "extensionSettings": extensionSettings,
+                                }
+                            ]
+                        },
+                        "dataFlows": [
+                            {
+                                "streams": [
+                                    "Microsoft-ContainerInsights-Group-Default",
+                                    "Microsoft-Syslog"
+                                ],
+                                "destinations": ["la-workspace"],
+                            }
+                        ],
+                        "destinations": {
+                            "logAnalytics": [
+                                {
+                                    "workspaceResourceId": workspace_resource_id,
+                                    "name": "la-workspace",
+                                }
+                            ]
+                        },
+                    },
+                }
+            )
+
             for _ in range(3):
                 try:
-                    send_raw_request(
-                        cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body
-                    )
+                    if enable_syslog:
+                        send_raw_request(
+                            cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body_with_syslog
+                        )
+                    else:
+                        send_raw_request(
+                            cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body_without_syslog
+                        )
                     error = None
                     break
                 except AzCLIError as e:
@@ -514,6 +611,24 @@ def ensure_container_insights_for_monitoring(
                     error = e
             else:
                 raise error
+
+
+def validate_data_collection_settings(dataCollectionSettings):
+    if 'interval' in dataCollectionSettings.keys():
+        intervalValue = dataCollectionSettings["interval"]
+    if (bool(re.match(r'^[0-9]+[m]$', intervalValue))) is False:
+        raise InvalidArgumentValueError('interval format must be in <number>m')
+    intervalValue = int(intervalValue.rstrip("m"))
+    if intervalValue <= 0 or intervalValue > 30:
+        raise InvalidArgumentValueError('interval value MUST be in the range from 1m to 30m')
+    if 'namespaceFilteringMode' in dataCollectionSettings.keys():
+        namespaceFilteringModeValue = dataCollectionSettings["namespaceFilteringMode"].lower()
+        if namespaceFilteringModeValue not in ["off", "exclude", "include"]:
+            raise InvalidArgumentValueError('namespaceFilteringMode value MUST be either Off or Exclude or Include')
+    if 'namespaces' in dataCollectionSettings.keys():
+        namspaces = dataCollectionSettings["namespaces"]
+        if isinstance(namspaces, list) is False:
+            raise InvalidArgumentValueError('namespaces must be an array type')
 
 
 def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
@@ -728,3 +843,13 @@ def add_virtual_node_role_assignment(cmd, result, vnet_subnet_id):
             "Could not find service principal or user assigned MSI for role"
             "assignment"
         )
+
+
+def _get_data_collection_settings(file_path):
+    if not os.path.isfile(file_path):
+        raise InvalidArgumentValueError("{} is not valid file, or not accessable.".format(file_path))
+    data_collection_settings = get_file_json(file_path)
+    if not isinstance(data_collection_settings, dict):
+        msg = "Error reading data_collection_settings."
+        raise InvalidArgumentValueError(msg.format(file_path))
+    return data_collection_settings

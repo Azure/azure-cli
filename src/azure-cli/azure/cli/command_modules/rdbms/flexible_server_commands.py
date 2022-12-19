@@ -20,7 +20,9 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_flexible_config,
     cf_postgres_flexible_db,
     cf_postgres_flexible_location_capabilities,
-    cf_postgres_flexible_backups)
+    cf_postgres_flexible_backups,
+    cf_postgres_flexible_replica,
+    cf_postgres_flexible_adadmin)
 
 from ._transformers import (
     table_transform_output,
@@ -113,6 +115,16 @@ def load_flexibleserver_command_table(self, _):
         client_factory=cf_postgres_flexible_backups
     )
 
+    postgres_flexible_replica_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#ReplicasOperations.{}',
+        client_factory=cf_postgres_flexible_replica
+    )
+
+    postgres_flexible_adadmin_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#AdministratorsOperations.{}',
+        client_factory=cf_postgres_flexible_adadmin
+    )
+
     # MERU COMMANDS
     flexible_server_custom_common = CliCommandType(
         operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom_common#{}')
@@ -127,6 +139,7 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_postgres_flexible_servers) as g:
         g.custom_command('create', 'flexible_server_create', table_transformer=table_transform_output)
         g.custom_command('restore', 'flexible_server_restore', supports_no_wait=True)
+        g.custom_command('geo-restore', 'flexible_server_georestore', supports_no_wait=True)
         g.command('start', 'begin_start')
         g.custom_command('stop', 'flexible_server_stop', custom_command_type=flexible_server_custom_common)
         g.custom_command('delete', 'flexible_server_delete')
@@ -137,6 +150,7 @@ def load_flexibleserver_command_table(self, _):
                                  setter_name='flexible_server_update_set', setter_type=flexible_server_custom_common,
                                  setter_arg_name='parameters',
                                  custom_func_name='flexible_server_update_custom_func')
+        g.custom_command('upgrade', 'flexible_server_version_upgrade', custom_command_type=flexible_server_custom_common)
         g.custom_wait_command('wait', 'flexible_server_postgresql_get')
         g.custom_command('restart', 'flexible_server_restart')
 
@@ -195,6 +209,32 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_postgres_flexible_backups) as g:
         g.command('list', 'list_by_server', transform=transform_backups_list)
         g.show_command('show', 'get', transform=transform_backup)
+
+    with self.command_group('postgres flexible-server replica', postgres_flexible_replica_sdk) as g:
+        g.command('list', 'list_by_server')
+
+    with self.command_group('postgres flexible-server replica', postgres_flexible_servers_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_servers) as g:
+        g.custom_command('create', 'flexible_replica_create', supports_no_wait=True)
+        g.custom_command('stop-replication', 'flexible_replica_stop', confirmation=True)
+
+    with self.command_group('postgres flexible-server identity', postgres_flexible_servers_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_servers) as g:
+        g.custom_command('assign', 'flexible_server_identity_assign', supports_no_wait=True)
+        g.custom_command('remove', 'flexible_server_identity_remove', supports_no_wait=True, confirmation=True)
+        g.custom_show_command('show', 'flexible_server_identity_show')
+        g.custom_command('list', 'flexible_server_identity_list')
+
+    with self.command_group('postgres flexible-server ad-admin', postgres_flexible_adadmin_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_adadmin) as g:
+        g.custom_command('create', 'flexible_server_ad_admin_set', supports_no_wait=True)
+        g.custom_command('delete', 'flexible_server_ad_admin_delete', supports_no_wait=True, confirmation=True)
+        g.custom_command('list', 'flexible_server_ad_admin_list')
+        g.custom_show_command('show', 'flexible_server_ad_admin_show')
+        g.custom_wait_command('wait', 'flexible_server_ad_admin_show')
 
     # MySQL commands
     with self.command_group('mysql flexible-server', mysql_flexible_servers_sdk,
@@ -281,7 +321,7 @@ def load_flexibleserver_command_table(self, _):
         g.show_command('show', 'get', transform=transform_backup)
 
     with self.command_group('mysql flexible-server identity', mysql_flexible_servers_sdk,
-                            custom_command_type=flexible_server_custom_common,
+                            custom_command_type=flexible_servers_custom_mysql,
                             client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('assign', 'flexible_server_identity_assign', supports_no_wait=True)
         g.custom_command('remove', 'flexible_server_identity_remove', supports_no_wait=True, confirmation=True)
@@ -289,7 +329,7 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('list', 'flexible_server_identity_list')
 
     with self.command_group('mysql flexible-server ad-admin', mysql_flexible_adadmin_sdk,
-                            custom_command_type=flexible_server_custom_common,
+                            custom_command_type=flexible_servers_custom_mysql,
                             client_factory=cf_mysql_flexible_adadmin) as g:
         g.custom_command('create', 'flexible_server_ad_admin_set', supports_no_wait=True)
         g.custom_command('delete', 'flexible_server_ad_admin_delete', supports_no_wait=True, confirmation=True)

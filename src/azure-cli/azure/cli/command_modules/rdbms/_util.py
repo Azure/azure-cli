@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from datetime import datetime
+from time import sleep
 from knack.arguments import ignore_type
 from knack.log import get_logger
 from azure.cli.core.commands import AzArgumentContext
@@ -84,3 +85,21 @@ def create_firewall_rule(cmd, resource_group_name, server_name, start_ip, end_ip
     firewall = firewall_client.begin_create_or_update(resource_group_name, server_name, firewall_name, parameters)
 
     return firewall.result().name
+
+
+def retryable_method(retries=3, interval_sec=5, exception_type=Exception, condition=None):
+    def decorate(func):
+        def call(*args, **kwargs):
+            current_retry = retries
+            while True:
+                try:
+                    return func(*args, **kwargs)
+                except exception_type as ex:  # pylint: disable=broad-except
+                    if condition and not condition(ex):
+                        raise ex
+                    current_retry -= 1
+                    if current_retry <= 0:
+                        raise ex
+                sleep(interval_sec)
+        return call
+    return decorate

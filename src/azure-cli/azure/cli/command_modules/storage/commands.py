@@ -103,7 +103,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage account', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:
-        from ._validators import validate_key_name
         g.custom_command('check-name', 'check_name_availability')
         g.custom_command('create', 'create_storage_account')
         g.command('delete', 'delete', confirmation=True)
@@ -114,8 +113,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command(
             'show-usage', 'show_storage_account_usage_no_location', max_api='2017-10-01')
         g.custom_command('show-connection-string',
-                         'show_storage_account_connection_string',
-                         validator=validate_key_name)
+                         'show_storage_account_connection_string')
         g.generic_update_command('update', getter_name='get_properties', setter_name='update',
                                  custom_func_name='update_storage_account', min_api='2016-12-01')
         failover_confirmation = """
@@ -133,7 +131,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage account', storage_account_sdk_keys, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:
-        g.custom_command('keys renew', 'regenerate_key', validator=validate_key_name,
+        g.custom_command('keys renew', 'regenerate_key',
                          transform=lambda x: getattr(x, 'keys', x))
         g.command('keys list', 'list_keys',
                   transform=lambda x: getattr(x, 'keys', x))
@@ -186,7 +184,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
         g.custom_command('create', 'create_encryption_scope')
         g.show_command('show', 'get')
-        g.command('list', 'list')
+        g.custom_command('list', 'list_encryption_scope')
         g.custom_command('update', 'update_encryption_scope')
 
     management_policy_sdk = CliCommandType(
