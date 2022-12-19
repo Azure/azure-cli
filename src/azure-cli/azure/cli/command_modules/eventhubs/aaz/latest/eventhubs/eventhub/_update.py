@@ -89,7 +89,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.storage_account_resource_id = AAZStrArg(
-            options=["--storage-account-resource-id"],
+            options=["--storage-account", "--storage-account-resource-id"],
             arg_group="CaptureDescription",
             help="Resource id of the storage account to be used to create the blobs",
             nullable=True,

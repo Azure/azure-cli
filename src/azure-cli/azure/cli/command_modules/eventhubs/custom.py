@@ -186,6 +186,7 @@ def cli_keys_renew(client, resource_group_name, namespace_name, name, key_type, 
         parameters={'key_type': key_type, 'key': key}
     )
 
+
 # Eventhub Authorizationrule
 def cli_eventhubautho_create(client, resource_group_name, namespace_name, event_hub_name, name, rights=None):
     from azure.cli.command_modules.eventhubs._utils import accessrights_converter

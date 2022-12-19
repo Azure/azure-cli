@@ -35,7 +35,7 @@ def load_arguments_eh(self, _):
 
     with self.argument_context('eventhubs namespace', min_api='2021-06-01-preview') as c:
         c.argument('namespace_name', arg_type=name_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='Name of Namespace')
-        c.argument('is_kafka_enabled', options_list=['--enable-kafka','--kafka-enabled'], arg_type=get_three_state_flag(),
+        c.argument('is_kafka_enabled', options_list=['--enable-kafka', '--kafka-enabled'], arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Kafka is enabled for eventhub namespace.')
         c.argument('tags', arg_type=tags_type)
         c.argument('sku', options_list=['--sku'], arg_type=get_enum_type(SkuName), help='Namespace SKU.')
