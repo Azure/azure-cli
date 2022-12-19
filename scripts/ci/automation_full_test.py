@@ -279,7 +279,7 @@ def get_pipeline_result(test_result_fp, pipeline_result):
             else:
                 for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details']:
                     if i['Module'] == module:
-                        i['Status'] = 'Success' if i['Status'] != 'Failed' else 'Failed'
+                        i['Status'] = 'Succeeded' if i['Status'] != 'Failed' else 'Failed'
                         break
 
     print(json.dumps(pipeline_result, indent=4))
