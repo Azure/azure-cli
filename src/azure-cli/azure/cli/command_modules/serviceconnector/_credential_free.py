@@ -13,12 +13,7 @@ from azure.cli.core.azclierror import (
     CLIInternalError
 )
 from azure.cli.core.extension.operations import _install_deps_for_psycopg2, _run_pip
-from azure.cli.core.profiles import ResourceType
 from azure.cli.core._profile import Profile
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.util import random_string
-from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.commands.arm import ArmTemplateBuilder
 from ._utils import run_cli_cmd, generate_random_string, is_packaged_installed
 from ._resource_config import (
     RESOURCE,

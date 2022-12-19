@@ -723,7 +723,6 @@ def local_connection_update_kafka(cmd, client,  # pylint: disable=too-many-local
                                   connection_name,
                                   location=None,
                                   resource_group_name=None,
-                                  id=None,  # pylint: disable=redefined-builtin
                                   bootstrap_server=None,
                                   kafka_key=None,
                                   kafka_secret=None,

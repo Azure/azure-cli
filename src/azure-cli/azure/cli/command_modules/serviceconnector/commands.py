@@ -93,7 +93,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                           transform=transform_validation_result)
         og.custom_command('list-support-types', 'connection_list_support_types',
                           table_transformer=transform_support_types)
-        og.custom_wait_command('wait', 'connection_show')
+        og.custom_wait_command('wait', 'local_connection_show')
 
     supported_target_resources = list(
         SUPPORTED_AUTH_TYPE.get(RESOURCE.Local).keys())

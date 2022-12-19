@@ -405,7 +405,8 @@ for source in SOURCE_RESOURCES:
 
 source = RESOURCE.Local
 connection_id = (
-    '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.ServiceLinker/locations/{location}/connectors/{connectorName}')
+    '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/'
+    'providers/Microsoft.ServiceLinker/locations/{location}/connectors/{connectorName}')
 source_display_name = 'Service Connector'
 helps['connection'] = """
     type: group
@@ -461,15 +462,15 @@ helps['connection generate-configuration'] = """
   type: command
   short-summary: Generate configurations of a {source_display_name} local connection.
   examples:
-    - name: List a connection's local configurations interactively
+    - name: Generate a connection's local configurations interactively
       text: |-
-              az connection list-configuration
-    - name: List a connection's local configurations by connection name
+              az connection generate-configuration
+    - name: Generate a connection's local configurations by connection name
       text: |-
-              az connection list-configuration -g resource_group --connection MyConnection
-    - name: List a connection's local configurations by connection id
+              az connection generate-configuration -g resource_group --connection MyConnection
+    - name: Generate a connection's local configurations by connection id
       text: |-
-              az connection list-configuration --id {connection_id}
+              az connection generate-configuration --id {connection_id}
 """.format(
     connection_id=connection_id,
     source_display_name=source_display_name)
@@ -609,13 +610,13 @@ for target in supported_target_resources:
       examples:
         - name: Create a connection from local to {target} interactively
           text: |-
-                  az connection create {target}
+                  az connection create {target} -g resourceGroup
         - name: Create a connection from local to {target} with resource name
           text: |-
                   az connection create {target} -g resourceGroup {target_params} {auth_params}
         - name: Create a connection from local to {target} with resource id
           text: |-
-                  az connection create {target} --target-id {target_id} {auth_params}
+                  az connection create {target} -g resourceGroup --target-id {target_id} {auth_params}
     """.format(
         target=target.value,
         target_id=target_id,
