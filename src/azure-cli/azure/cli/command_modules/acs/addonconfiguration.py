@@ -24,124 +24,146 @@ from knack.log import get_logger
 from msrestazure.tools import parse_resource_id, resource_id
 
 logger = get_logger(__name__)
+# mapping for azure public cloud
+# log analytics workspaces cannot be created in WCUS region due to capacity limits
+# so mapped to EUS per discussion with log analytics team
+AzureCloudLocationToOmsRegionCodeMap = {
+    "australiasoutheast": "ASE",
+    "australiaeast": "EAU",
+    "australiacentral": "CAU",
+    "australiacentral2": "CBR2",
+    "brazilsouth": "CQ",
+    "brazilsoutheast": "BRSE",
+    "canadacentral": "CCA",
+    "canadaeast": "YQ",
+    "centralindia": "CID",
+    "centralus": "CUS",
+    "eastasia": "EA",
+    "eastus": "EUS",
+    "eastus2": "EUS2",
+    "eastus2euap": "EAP",
+    "francecentral": "PAR",
+    "francesouth": "MRS",
+    "germanywestcentral": "DEWC",
+    "japaneast": "EJP",
+    "japanwest": "OS",
+    "jioindiacentral": "JINC",
+    "jioindiawest": "JINW",
+    "koreacentral": "SE",
+    "koreasouth": "PS",
+    "northcentralus": "NCUS",
+    "northeurope": "NEU",
+    "norwayeast": "NOE",
+    "norwaywest": "NOW",
+    "qatarcentral": "QAC",
+    "southafricanorth": "JNB",
+    "southcentralus": "SCUS",
+    "southindia": "MA",
+    "southeastasia": "SEA",
+    "swedencentral": "SEC",
+    "switzerlandnorth": "CHN",
+    "switzerlandwest": "CHW",
+    "uaecentral": "AUH",
+    "uaenorth": "DXB",
+    "uksouth": "SUK",
+    "ukwest": "WUK",
+    "usgovvirginia": "USGV",
+    "westcentralus": "WCUS",
+    "westeurope": "WEU",
+    "westus": "WUS",
+    "westus2": "WUS2",
+    "westus3": "USW3",
+}
+
+
+AzureCloudRegionToOmsRegionMap = {
+    "australiacentral": "australiacentral",
+    "australiacentral2": "australiacentral2",
+    "australiaeast": "australiaeast",
+    "australiasoutheast": "australiasoutheast",
+    "brazilsouth": "brazilsouth",
+    "brazilsoutheast": "brazilsoutheast",
+    "canadacentral": "canadacentral",
+    "canadaeast": "canadaeast",
+    "centralus": "centralus",
+    "centralindia": "centralindia",
+    "eastasia": "eastasia",
+    "eastus": "eastus",
+    "eastus2": "eastus2",
+    "francecentral": "francecentral",
+    "francesouth": "francesouth",
+    "germanywestcentral": "germanywestcentral",
+    "germanynorth": "germanywestcentral",
+    "japaneast": "japaneast",
+    "japanwest": "japanwest",
+    "jioindiacentral": "jioindiacentral",
+    "jioindiawest": "jioindiawest",
+    "koreacentral": "koreacentral",
+    "koreasouth": "koreasouth",
+    "northcentralus": "northcentralus",
+    "northeurope": "northeurope",
+    "norwayeast": "norwayeast",
+    "norwaywest": "norwaywest",
+    "qatarcentral": "qatarcentral",
+    "southafricanorth": "southafricanorth",
+    "southafricawest": "southafricanorth",
+    "southcentralus": "southcentralus",
+    "southeastasia": "southeastasia",
+    "southindia": "southindia",
+    "swedencentral": "swedencentral",
+    "switzerlandnorth": "switzerlandnorth",
+    "switzerlandwest": "switzerlandwest",
+    "uaecentral": "uaecentral",
+    "uaenorth": "uaenorth",
+    "uksouth": "uksouth",
+    "ukwest": "ukwest",
+    "westcentralus": "westcentralus",
+    "westeurope": "westeurope",
+    "westindia": "centralindia",
+    "westus": "westus",
+    "westus2": "westus2",
+    "westus3": "westus3",
+    "eastus2euap": "eastus2euap",
+    "centraluseuap": "eastus2euap",
+}
+
+
+# mapping for azure china cloud
+# log analytics only support China East2 region
+AzureChinaLocationToOmsRegionCodeMap = {
+    "chinaeast": "EAST2",
+    "chinaeast2": "EAST2",
+    "chinanorth": "EAST2",
+    "chinanorth2": "EAST2",
+}
+
+
+AzureChinaRegionToOmsRegionMap = {
+    "chinaeast": "chinaeast2",
+    "chinaeast2": "chinaeast2",
+    "chinanorth": "chinaeast2",
+    "chinanorth2": "chinaeast2",
+}
+
+
+# mapping for azure us governmner cloud
+AzureFairfaxLocationToOmsRegionCodeMap = {
+    "usgovvirginia": "USGV",
+    "usgovarizona": "PHX",
+}
+
+
+AzureFairfaxRegionToOmsRegionMap = {
+    "usgovvirginia": "usgovvirginia",
+    "usgovtexas": "usgovvirginia",
+    "usgovarizona": "usgovarizona",
+}
 
 
 # pylint: disable=too-many-locals
 def ensure_default_log_analytics_workspace_for_monitoring(
     cmd, subscription_id, resource_group_name
 ):
-    # mapping for azure public cloud
-    # log analytics workspaces cannot be created in WCUS region due to capacity limits
-    # so mapped to EUS per discussion with log analytics team
-    AzureCloudLocationToOmsRegionCodeMap = {
-        "australiasoutheast": "ASE",
-        "australiaeast": "EAU",
-        "australiacentral": "CAU",
-        "canadacentral": "CCA",
-        "centralindia": "CIN",
-        "centralus": "CUS",
-        "eastasia": "EA",
-        "eastus": "EUS",
-        "eastus2": "EUS2",
-        "eastus2euap": "EAP",
-        "francecentral": "PAR",
-        "japaneast": "EJP",
-        "koreacentral": "SE",
-        "northeurope": "NEU",
-        "southcentralus": "SCUS",
-        "southeastasia": "SEA",
-        "uksouth": "SUK",
-        "usgovvirginia": "USGV",
-        "westcentralus": "EUS",
-        "westeurope": "WEU",
-        "westus": "WUS",
-        "westus2": "WUS2",
-        "brazilsouth": "CQ",
-        "brazilsoutheast": "BRSE",
-        "norwayeast": "NOE",
-        "southafricanorth": "JNB",
-        "northcentralus": "NCUS",
-        "uaenorth": "DXB",
-        "germanywestcentral": "DEWC",
-        "ukwest": "WUK",
-        "switzerlandnorth": "CHN",
-        "switzerlandwest": "CHW",
-        "uaecentral": "AUH",
-        "qatarcentral": "QAC",
-    }
-    AzureCloudRegionToOmsRegionMap = {
-        "australiacentral": "australiacentral",
-        "australiacentral2": "australiacentral",
-        "australiaeast": "australiaeast",
-        "australiasoutheast": "australiasoutheast",
-        "brazilsouth": "brazilsouth",
-        "canadacentral": "canadacentral",
-        "canadaeast": "canadacentral",
-        "centralus": "centralus",
-        "centralindia": "centralindia",
-        "eastasia": "eastasia",
-        "eastus": "eastus",
-        "eastus2": "eastus2",
-        "francecentral": "francecentral",
-        "francesouth": "francecentral",
-        "japaneast": "japaneast",
-        "japanwest": "japaneast",
-        "koreacentral": "koreacentral",
-        "koreasouth": "koreacentral",
-        "northcentralus": "northcentralus",
-        "northeurope": "northeurope",
-        "southafricanorth": "southafricanorth",
-        "southafricawest": "southafricanorth",
-        "southcentralus": "southcentralus",
-        "southeastasia": "southeastasia",
-        "southindia": "centralindia",
-        "uksouth": "uksouth",
-        "ukwest": "ukwest",
-        "westcentralus": "eastus",
-        "westeurope": "westeurope",
-        "westindia": "centralindia",
-        "westus": "westus",
-        "westus2": "westus2",
-        "norwayeast": "norwayeast",
-        "norwaywest": "norwayeast",
-        "switzerlandnorth": "switzerlandnorth",
-        "switzerlandwest": "switzerlandwest",
-        "uaenorth": "uaenorth",
-        "germanywestcentral": "germanywestcentral",
-        "germanynorth": "germanywestcentral",
-        "uaecentral": "uaecentral",
-        "eastus2euap": "eastus2euap",
-        "centraluseuap": "eastus2euap",
-        "brazilsoutheast": "brazilsoutheast",
-        "qatarcentral": "qatarcentral",
-    }
-
-    # mapping for azure china cloud
-    # log analytics only support China East2 region
-    AzureChinaLocationToOmsRegionCodeMap = {
-        "chinaeast": "EAST2",
-        "chinaeast2": "EAST2",
-        "chinanorth": "EAST2",
-        "chinanorth2": "EAST2",
-    }
-    AzureChinaRegionToOmsRegionMap = {
-        "chinaeast": "chinaeast2",
-        "chinaeast2": "chinaeast2",
-        "chinanorth": "chinaeast2",
-        "chinanorth2": "chinaeast2",
-    }
-
-    # mapping for azure us governmner cloud
-    AzureFairfaxLocationToOmsRegionCodeMap = {
-        "usgovvirginia": "USGV",
-        "usgovarizona": "PHX",
-    }
-    AzureFairfaxRegionToOmsRegionMap = {
-        "usgovvirginia": "usgovvirginia",
-        "usgovtexas": "usgovvirginia",
-        "usgovarizona": "usgovarizona",
-    }
-
     rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
     cloud_name = cmd.cli_ctx.cloud.name
 
@@ -253,6 +275,38 @@ def get_existing_container_insights_extension_dcr_tags(cmd, dcr_url):
     return tags
 
 
+def getRegionCodeForAzureRegion(cmd, cluster_region):
+    region_code = "EUS"
+    cloud_name = cmd.cli_ctx.cloud.name
+    if cloud_name.lower() == "azurecloud":
+        region_code = AzureCloudLocationToOmsRegionCodeMap.get(
+            cluster_region, "EUS"
+        )
+    elif cloud_name.lower() == "azurechinacloud":
+        region_code = AzureChinaLocationToOmsRegionCodeMap.get(
+            cluster_region, "EAST2"
+        )
+    elif cloud_name.lower() == "azureusgovernment":
+        region_code = AzureFairfaxLocationToOmsRegionCodeMap.get(
+            cluster_region, "USGV"
+        )
+    else:
+        logger.error(
+            "AKS Monitoring addon not supported in cloud : %s", cloud_name
+        )
+    return region_code
+
+
+def sanitize_dcr_name(name):
+    name = name[0:43]
+    lastIndexAlphaNumeric = len(name) - 1
+    while ((name[lastIndexAlphaNumeric].isalnum() is False) and lastIndexAlphaNumeric > -1):
+        lastIndexAlphaNumeric = lastIndexAlphaNumeric - 1
+    if lastIndexAlphaNumeric < 0:
+        return ""
+    return name[0:lastIndexAlphaNumeric + 1]
+
+
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements,line-too-long
 def ensure_container_insights_for_monitoring(
     cmd,
@@ -265,13 +319,15 @@ def ensure_container_insights_for_monitoring(
     aad_route=False,
     create_dcr=False,
     create_dcra=False,
+    enable_syslog=False,
 ):
     """
     Either adds the ContainerInsights solution to a LA Workspace OR sets up a DCR (Data Collection Rule) and DCRA
     (Data Collection Rule Association). Both let the monitoring addon send data to a Log Analytics Workspace.
 
     Set aad_route == True to set up the DCR data route. Otherwise the solution route will be used. Create_dcr and
-    create_dcra have no effect if aad_route == False.
+    create_dcra have no effect if aad_route == False. If syslog data is to be collected set aad_route == True and
+    enable_syslog == True
 
     Set remove_monitoring to True and create_dcra to True to remove the DCRA from a cluster. The association makes
     it very hard to delete either the DCR or cluster. (It is not obvious how to even navigate to the association from
@@ -323,7 +379,8 @@ def ensure_container_insights_for_monitoring(
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.ContainerService/managedClusters/{cluster_name}"
         )
-        dataCollectionRuleName = f"MSCI-{cluster_name}-{cluster_region}"
+        region_code = getRegionCodeForAzureRegion(cmd, cluster_region)
+        dataCollectionRuleName = sanitize_dcr_name(f"MSCI-{region_code}-{cluster_name}")
         dcr_resource_id = (
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
@@ -385,7 +442,7 @@ def ensure_container_insights_for_monitoring(
             existing_tags = get_existing_container_insights_extension_dcr_tags(
                 cmd, dcr_url)
             # create the DCR
-            dcr_creation_body = json.dumps(
+            dcr_creation_body_without_syslog = json.dumps(
                 {
                     "location": location,
                     "tags": existing_tags,
@@ -420,11 +477,94 @@ def ensure_container_insights_for_monitoring(
                     },
                 }
             )
+
+            dcr_creation_body_with_syslog = json.dumps(
+                {
+                    "location": location,
+                    "tags": existing_tags,
+                    "properties": {
+                        "dataSources": {
+                            "syslog": [
+                                {
+                                    "streams": [
+                                        "Microsoft-Syslog"
+                                    ],
+                                    "facilityNames": [
+                                        "auth",
+                                        "authpriv",
+                                        "cron",
+                                        "daemon",
+                                        "mark",
+                                        "kern",
+                                        "local0",
+                                        "local1",
+                                        "local2",
+                                        "local3",
+                                        "local4",
+                                        "local5",
+                                        "local6",
+                                        "local7",
+                                        "lpr",
+                                        "mail",
+                                        "news",
+                                        "syslog",
+                                        "user",
+                                        "uucp"
+                                    ],
+                                    "logLevels": [
+                                        "Debug",
+                                        "Info",
+                                        "Notice",
+                                        "Warning",
+                                        "Error",
+                                        "Critical",
+                                        "Alert",
+                                        "Emergency"
+                                    ],
+                                    "name": "sysLogsDataSource"
+                                }
+                            ],
+                            "extensions": [
+                                {
+                                    "name": "ContainerInsightsExtension",
+                                    "streams": [
+                                        "Microsoft-ContainerInsights-Group-Default"
+                                    ],
+                                    "extensionName": "ContainerInsights",
+                                }
+                            ]
+                        },
+                        "dataFlows": [
+                            {
+                                "streams": [
+                                    "Microsoft-ContainerInsights-Group-Default",
+                                    "Microsoft-Syslog"
+                                ],
+                                "destinations": ["la-workspace"],
+                            }
+                        ],
+                        "destinations": {
+                            "logAnalytics": [
+                                {
+                                    "workspaceResourceId": workspace_resource_id,
+                                    "name": "la-workspace",
+                                }
+                            ]
+                        },
+                    },
+                }
+            )
+
             for _ in range(3):
                 try:
-                    send_raw_request(
-                        cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body
-                    )
+                    if enable_syslog:
+                        send_raw_request(
+                            cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body_with_syslog
+                        )
+                    else:
+                        send_raw_request(
+                            cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body_without_syslog
+                        )
                     error = None
                     break
                 except AzCLIError as e:

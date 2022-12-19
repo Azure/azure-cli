@@ -321,29 +321,6 @@ def validate_user_assigned_identity(cmd, namespace):
         )
 
 
-def validate_express_route_peering(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    circuit = namespace.circuit_name
-    peering = namespace.peering
-
-    if not circuit and not peering:
-        return
-
-    usage_error = CLIError('usage error: --peering ID | --peering NAME --circuit-name CIRCUIT')
-    if not is_valid_resource_id(peering):
-        namespace.peering = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='expressRouteCircuits',
-            name=circuit,
-            child_type_1='peerings',
-            child_name_1=peering
-        )
-    elif circuit:
-        raise usage_error
-
-
 def validate_express_route_port(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     if namespace.express_route_port and not is_valid_resource_id(namespace.express_route_port):
@@ -365,18 +342,6 @@ def validate_virtul_network_gateway(cmd, namespace):
             namespace='Microsoft.Network',
             type='virtualNetworkGateways',
             name=namespace.hosted_gateway
-        )
-
-
-def validate_virtual_hub(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.virtual_hub and not is_valid_resource_id(namespace.virtual_hub):
-        namespace.virtual_hub = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='virtualHubs',
-            name=namespace.virtual_hub
         )
 
 
@@ -482,7 +447,7 @@ def validate_ip_tags(cmd, namespace):
         ip_tags = []
         for item in namespace.ip_tags:
             tag_type, tag_value = item.split('=', 1)
-            ip_tags.append(IpTag(ip_tag_type=tag_type, tag=tag_value))
+            ip_tags.append({"ip_tag_type": tag_type, "tag": tag_value})
         namespace.ip_tags = ip_tags
 
 
@@ -960,11 +925,6 @@ def process_ag_create_namespace(cmd, namespace):
     validate_user_assigned_identity(cmd, namespace)
 
 
-def process_auth_create_namespace(cmd, namespace):
-    ExpressRouteCircuitAuthorization = cmd.get_models('ExpressRouteCircuitAuthorization')
-    namespace.authorization_parameters = ExpressRouteCircuitAuthorization()
-
-
 def process_lb_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_tags(namespace)
@@ -1073,69 +1033,6 @@ def _inform_coming_breaking_change_for_public_ip(namespace):
                        ' when sku is Standard and zone is not provided:'
                        ' For zonal regions, you will get a zone-redundant IP indicated by zones:["1","2","3"];'
                        ' For non-zonal regions, you will get a non zone-redundant IP indicated by zones:null.')
-
-
-def process_tm_endpoint_create_namespace(cmd, namespace):
-    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
-
-    client = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).profiles
-    profile = client.get(namespace.resource_group_name, namespace.profile_name)
-
-    routing_type = profile.traffic_routing_method  # pylint: disable=no-member
-    endpoint_type = namespace.endpoint_type
-    all_options = ['target_resource_id', 'target', 'min_child_endpoints',
-                   'min_child_ipv4', 'min_child_ipv6', 'priority', 'weight', 'endpoint_location']
-    props_to_options = {
-        'target_resource_id': '--target-resource-id',
-        'target': '--target',
-        'min_child_endpoints': '--min-child-endpoints',
-        'min_child_ipv4': '--min-child-ipv4',
-        'min_child_ipv6': '--min-child-ipv6',
-        'priority': '--priority',
-        'weight': '--weight',
-        'endpoint_location': '--endpoint-location',
-        'geo_mapping': '--geo-mapping'
-    }
-    validate_subnet_ranges(namespace)
-    validate_custom_headers(namespace)
-
-    required_options = []
-
-    # determine which options are required based on profile and routing method
-    if endpoint_type.lower() == 'externalendpoints':
-        required_options.append('target')
-    else:
-        required_options.append('target_resource_id')
-
-    if routing_type.lower() == 'weighted':
-        required_options.append('weight')
-    elif routing_type.lower() == 'priority':
-        required_options.append('priority')
-
-    if endpoint_type.lower() == 'nestedendpoints':
-        required_options.append('min_child_endpoints')
-
-    if endpoint_type.lower() in ['nestedendpoints', 'externalendpoints'] and routing_type.lower() == 'performance':
-        required_options.append('endpoint_location')
-
-    if routing_type.lower() == 'geographic':
-        required_options.append('geo_mapping')
-
-    # ensure required options are provided
-    missing_options = [props_to_options[x] for x in required_options if getattr(namespace, x, None) is None]
-    extra_options = [props_to_options[x] for x in all_options if
-                     getattr(namespace, x, None) is not None and x not in required_options]
-
-    if missing_options or extra_options:
-        error_message = "Incorrect options for profile routing method '{}' and endpoint type '{}'.".format(routing_type,
-                                                                                                           endpoint_type)  # pylint: disable=line-too-long
-        if missing_options:
-            error_message = '{}\nSupply the following: {}'.format(error_message, ', '.join(
-                missing_options))
-        if extra_options:
-            error_message = '{}\nOmit the following: {}'.format(error_message, ', '.join(
-                extra_options))
-        raise CLIError(error_message)
 
 
 def process_vnet_create_namespace(cmd, namespace):
@@ -1348,6 +1245,7 @@ def process_nw_cm_v1_create_namespace(cmd, namespace):
 
 
 def process_nw_cm_v2_create_namespace(cmd, namespace):
+    validate_tags(namespace)
     if namespace.location is None:  # location is None only occurs in creating a V2 connection monitor
         endpoint_source_resource_id = namespace.endpoint_source_resource_id
 
@@ -1390,15 +1288,6 @@ def process_nw_cm_v2_create_namespace(cmd, namespace):
             raise CLIError('usage error: --output-type is specified but no other resource id provided')
 
     return get_network_watcher_from_location()(cmd, namespace)
-
-
-def process_nw_cm_create_namespace(cmd, namespace):
-    # V2 parameter set
-    if namespace.source_resource is None:
-        return process_nw_cm_v2_create_namespace(cmd, namespace)
-
-    # V1 parameter set
-    return process_nw_cm_v1_create_namespace(cmd, namespace)
 
 
 def process_nw_cm_v2_endpoint_namespace(cmd, namespace):
@@ -1899,14 +1788,6 @@ def process_lb_outbound_rule_namespace(cmd, namespace):
                 cmd.cli_ctx, namespace, 'backendAddressPools', namespace.backend_address_pool)
 
 
-def process_list_delegations_namespace(cmd, namespace):
-    if not namespace.resource_group_name and not namespace.location:
-        raise CLIError('usage error: --location LOCATION | --resource-group NAME [--location LOCATION]')
-
-    if not namespace.location:
-        get_default_location_from_resource_group(cmd, namespace)
-
-
 def validate_ag_address_pools(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     address_pools = namespace.app_gateway_backend_address_pools
@@ -2013,7 +1894,7 @@ def validate_subnet_ranges(namespace):
         try:
             item_split = item.split(':', 1)
             if len(item_split) == 2:
-                values.append({'first': item_split[0], 'scope': item_split[1]})
+                values.append({'first': item_split[0], 'scope': int(item_split[1])})
                 continue
         except ValueError:
             pass
@@ -2129,16 +2010,3 @@ def process_appgw_waf_policy_update(cmd, namespace):    # pylint: disable=unused
         raise CLIError('--rules and --rule-group-name must be provided at the same time')
     if rules is not None and rule_group_name is None:
         raise CLIError('--rules and --rule-group-name must be provided at the same time')
-
-
-def _is_bastion_connectable_resource(rid):
-    from azure.mgmt.core.tools import is_valid_resource_id
-    from azure.cli.command_modules.vm._vm_utils import is_valid_vm_resource_id, is_valid_vmss_resource_id
-
-    if is_valid_resource_id(rid):
-        if is_valid_vmss_resource_id(rid):
-            return True
-        if is_valid_vm_resource_id(rid):
-            return True
-
-    return False

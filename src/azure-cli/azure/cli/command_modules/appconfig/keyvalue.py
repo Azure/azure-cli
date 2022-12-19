@@ -21,11 +21,13 @@ from azure.core.exceptions import (HttpResponseError,
                                    ResourceNotFoundError,
                                    ResourceModifiedError)
 
+import azure.cli.core.azclierror as CLIErrors
+
 from ._constants import (FeatureFlagConstants, KeyVaultConstants,
                          SearchFilterOptions, StatusCodes, ImportExportProfiles)
 from ._models import (convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting)
-from ._utils import get_appconfig_data_client, prep_label_filter_for_url_encoding
+from ._utils import get_appconfig_data_client, prep_label_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string
 
 from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read_features_from_file,
                           __write_kv_and_features_to_file, __read_kv_from_config_store, __is_json_content_type,
@@ -34,7 +36,8 @@ from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read
                           __serialize_kv_list_to_comparable_json_object, __print_preview,
                           __serialize_features_from_kv_list_to_comparable_json_object, __export_kvset_to_file,
                           __serialize_feature_list_to_comparable_json_object, __print_features_preview,
-                          __import_kvset_from_file, __delete_configuration_setting_from_config_store)
+                          __import_kvset_from_file, __delete_configuration_setting_from_config_store,
+                          __map_to_appservice_config_reference)
 from .feature import list_feature
 
 logger = get_logger(__name__)
@@ -86,7 +89,7 @@ def import_config(cmd,
             # JSON content type is only supported with JSON format.
             # Error out if user has provided JSON content type with any other format.
             if format_ != 'json' and __is_json_content_type(content_type):
-                raise CLIError("Failed to import '{}' file format with '{}' content type. Please provide JSON file format to match your content type.".format(format_, content_type))
+                raise CLIErrors.FileOperationError("Failed to import '{}' file format with '{}' content type. Please provide JSON file format to match your content type.".format(format_, content_type))
 
         if separator:
             # If separator is provided, use max depth by default unless depth is specified.
@@ -110,7 +113,7 @@ def import_config(cmd,
         src_azconfig_client = get_appconfig_data_client(cmd, src_name, src_connection_string, src_auth_mode, src_endpoint)
 
         if label is not None and preserve_labels:
-            raise CLIError("Import failed! Please provide only one of these arguments: '--label' or '--preserve-labels'. See 'az appconfig kv import -h' for examples.")
+            raise CLIErrors.MutuallyExclusiveArgumentError("Import failed! Please provide only one of these arguments: '--label' or '--preserve-labels'. See 'az appconfig kv import -h' for examples.")
         if preserve_labels:
             # We need label to be the same as src_label for preview later.
             # This will have no effect on label while writing to config store
@@ -218,7 +221,8 @@ def export_config(cmd,
                   dest_auth_mode="key",
                   dest_endpoint=None,
                   # to-app-service parameters
-                  appservice_account=None):
+                  appservice_account=None,
+                  export_as_reference=False):
     src_features = []
     dest_features = []
     dest_kvs = []
@@ -231,7 +235,7 @@ def export_config(cmd,
     dest_azconfig_client = None
     if destination == 'appconfig':
         if dest_label is not None and preserve_labels:
-            raise CLIError("Export failed! Please provide only one of these arguments: '--dest-label' or '--preserve-labels'. See 'az appconfig kv export -h' for examples.")
+            raise CLIErrors.MutuallyExclusiveArgumentError("Export failed! Please provide only one of these arguments: '--dest-label' or '--preserve-labels'. See 'az appconfig kv export -h' for examples.")
         if preserve_labels:
             # We need dest_label to be the same as label for preview later.
             # This will have no effect on label while writing to config store
@@ -243,7 +247,7 @@ def export_config(cmd,
     src_kvs = __read_kv_from_config_store(azconfig_client,
                                           key=key,
                                           label=label if label else SearchFilterOptions.EMPTY_LABEL,
-                                          prefix_to_remove=prefix,
+                                          prefix_to_remove=prefix if not export_as_reference else "",
                                           cli_ctx=cmd.cli_ctx if resolve_keyvault else None)
 
     if skip_keyvault:
@@ -257,6 +261,13 @@ def export_config(cmd,
     if profile == ImportExportProfiles.KVSET:
         __export_kvset_to_file(file_path=path, keyvalues=src_kvs, yes=yes)
         return
+
+    if destination == 'appservice' and export_as_reference:
+        if endpoint is None:
+            # Endpoint will not be None as it is already resolved in creating azconfig_client
+            endpoint = get_store_endpoint_from_connection_string(connection_string) or resolve_store_metadata(cmd, name)[1]
+
+        src_kvs = [__map_to_appservice_config_reference(kv, endpoint, prefix) for kv in src_kvs]
 
     if not skip_features:
         # Get all Feature flags with matching label
@@ -358,7 +369,7 @@ def set_key(cmd,
         except ResourceNotFoundError:
             logger.debug("Key '%s' with label '%s' not found. A new key-value will be created.", key, label)
         except HttpResponseError as exception:
-            raise CLIError("Failed to retrieve key-values from config store. " + str(exception))
+            raise CLIErrors.AzureResponseError("Failed to retrieve key-values from config store. " + str(exception))
 
         if retrieved_kv is None:
             if __is_json_content_type(content_type):
@@ -367,7 +378,7 @@ def set_key(cmd,
                     value = 'null' if value is None else value
                     json.loads(value)
                 except ValueError:
-                    raise CLIError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}".'.format(value, content_type))
+                    raise CLIErrors.ValidationError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}".'.format(value, content_type))
 
             set_kv = ConfigurationSetting(key=key,
                                           label=label,
@@ -382,7 +393,7 @@ def set_key(cmd,
                     # Ensure that provided/existing value is valid JSON. Error out if value is invalid JSON.
                     json.loads(value)
                 except (TypeError, ValueError):
-                    raise CLIError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}". Set the value again in valid JSON format.'.format(value, content_type))
+                    raise CLIErrors.ValidationError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}". Set the value again in valid JSON format.'.format(value, content_type))
             set_kv = ConfigurationSetting(key=key,
                                           label=label,
                                           value=value,
@@ -450,7 +461,7 @@ def set_keyvault(cmd,
         except ResourceNotFoundError:
             logger.debug("Key '%s' with label '%s' not found. A new key-vault reference will be created.", key, label)
         except HttpResponseError as exception:
-            raise CLIError("Failed to retrieve key-values from config store. " + str(exception))
+            raise CLIErrors.AzureResponseError("Failed to retrieve key-values from config store. " + str(exception))
 
         if retrieved_kv is None:
             set_kv = ConfigurationSetting(key=key,
@@ -492,7 +503,7 @@ def set_keyvault(cmd,
                 logger.debug('Retrying setting %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
-                raise CLIError("Failed to set the keyvault reference due to an exception: " + str(exception))
+                raise CLIErrors.AzureResponseError("Failed to set the keyvault reference due to an exception: " + str(exception))
         except Exception as exception:
             raise CLIError("Failed to set the keyvault reference due to an exception: " + str(exception))
     raise CLIError("Failed to set the keyvault reference '{}' due to a conflicting operation.".format(key))
@@ -537,7 +548,7 @@ def delete_key(cmd,
             exception_messages.append(exception)
         except HttpResponseError as ex:
             exception_messages.append(str(ex))
-            raise CLIError('Delete operation failed. The following error(s) occurred:\n' + json.dumps(exception_messages, indent=2, ensure_ascii=False))
+            raise CLIErrors.AzureResponseError('Delete operation failed. The following error(s) occurred:\n' + json.dumps(exception_messages, indent=2, ensure_ascii=False))
 
     # Log errors if partially succeeded
     if exception_messages:
@@ -566,9 +577,9 @@ def lock_key(cmd,
         try:
             retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
         except ResourceNotFoundError:
-            raise CLIError("Key '{}' with label '{}' does not exist.".format(key, label))
+            raise CLIErrors.ResourceNotFoundError("Key '{}' with label '{}' does not exist.".format(key, label))
         except HttpResponseError as exception:
-            raise CLIError("Failed to retrieve key-values from config store. " + str(exception))
+            raise CLIErrors.AzureResponseError("Failed to retrieve key-values from config store. " + str(exception))
 
         confirmation_message = "Are you sure you want to lock the key '{}' with label '{}'".format(key, label)
         user_confirmation(confirmation_message, yes)
@@ -581,7 +592,7 @@ def lock_key(cmd,
                 logger.debug('Retrying lock operation %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
-                raise CLIError("Failed to lock the key-value due to an exception: " + str(exception))
+                raise CLIErrors.AzureResponseError("Failed to lock the key-value due to an exception: " + str(exception))
         except Exception as exception:
             raise CLIError("Failed to lock the key-value due to an exception: " + str(exception))
     raise CLIError("Failed to lock the key '{}' with label '{}' due to a conflicting operation.".format(key, label))
@@ -603,9 +614,9 @@ def unlock_key(cmd,
         try:
             retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
         except ResourceNotFoundError:
-            raise CLIError("Key '{}' with label '{}' does not exist.".format(key, label))
+            raise CLIErrors.ResourceNotFoundError("Key '{}' with label '{}' does not exist.".format(key, label))
         except HttpResponseError as exception:
-            raise CLIError("Failed to retrieve key-values from config store. " + str(exception))
+            raise CLIErrors.AzureResponseError("Failed to retrieve key-values from config store. " + str(exception))
 
         confirmation_message = "Are you sure you want to unlock the key '{}' with label '{}'".format(key, label)
         user_confirmation(confirmation_message, yes)
@@ -618,7 +629,7 @@ def unlock_key(cmd,
                 logger.debug('Retrying unlock operation %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
-                raise CLIError("Failed to unlock the key-value due to an exception: " + str(exception))
+                raise CLIErrors.AzureResponseError("Failed to unlock the key-value due to an exception: " + str(exception))
         except Exception as exception:
             raise CLIError("Failed to unlock the key-value due to an exception: " + str(exception))
     raise CLIError("Failed to unlock the key '{}' with label '{}' due to a conflicting operation.".format(key, label))
@@ -636,12 +647,12 @@ def show_key(cmd,
     try:
         key_value = azconfig_client.get_configuration_setting(key=key, label=label, accept_datetime=datetime)
         if key_value is None:
-            raise CLIError("The key-value does not exist.")
+            raise CLIErrors.ResourceNotFoundError("The key-value does not exist.")
         return convert_configurationsetting_to_keyvalue(key_value)
     except ResourceNotFoundError:
-        raise CLIError("Key '{}' with label '{}' does not exist.".format(key, label))
+        raise CLIErrors.ResourceNotFoundError("Key '{}' with label '{}' does not exist.".format(key, label))
     except HttpResponseError as exception:
-        raise CLIError('Failed to retrieve key-values from config store. ' + str(exception))
+        raise CLIErrors.AzureResponseError('Failed to retrieve key-values from config store. ' + str(exception))
 
     raise CLIError("Failed to get the key '{}' with label '{}'.".format(key, label))
 
@@ -659,7 +670,7 @@ def list_key(cmd,
              auth_mode="key",
              endpoint=None):
     if fields and resolve_keyvault:
-        raise CLIError("Please provide only one of these arguments: '--fields' or '--resolve-keyvault'. See 'az appconfig kv list -h' for examples.")
+        raise CLIErrors.MutuallyExclusiveArgumentError("Please provide only one of these arguments: '--fields' or '--resolve-keyvault'. See 'az appconfig kv list -h' for examples.")
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
@@ -794,4 +805,4 @@ def list_revision(cmd,
                 return retrieved_revisions
         return retrieved_revisions
     except HttpResponseError as ex:
-        raise CLIError('List revision operation failed.\n' + str(ex))
+        raise CLIErrors.AzureResponseError('List revision operation failed.\n' + str(ex))

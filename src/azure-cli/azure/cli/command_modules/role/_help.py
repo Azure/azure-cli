@@ -496,9 +496,9 @@ examples:
   - name: Create without role assignment.
     text: az ad sp create-for-rbac
   - name: Create using a custom display name.
-    text: az ad sp create-for-rbac -n "MyApp"
+    text: az ad sp create-for-rbac -n MyApp
   - name: Create with a Contributor role assignments on specified scopes. To retrieve current subscription ID, run `az account show --query id --output tsv`.
-    text: az ad sp create-for-rbac -n "MyApp" --role Contributor --scopes /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup1} /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup2}
+    text: az ad sp create-for-rbac -n MyApp --role Contributor --scopes /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourceGroup1 /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourceGroup2
   - name: Create using a self-signed certificate.
     text: az ad sp create-for-rbac --create-cert
   - name: Create using a self-signed certificate, and store it within KeyVault.
@@ -690,7 +690,7 @@ examples:
     text: az role assignment create --assignee sp_name --role a_role
   - name: Create role assignment for an assignee with description and condition.
     text: >-
-        az role assignment create --role "Owner" --assignee "Jhon.Doe@Contoso.com"
+        az role assignment create --role "Owner" --assignee "John.Doe@Contoso.com"
         --description "Role assignment foo to check on bar"
         --condition "@Resource[Microsoft.Storage/storageAccounts/blobServices/containers:Name] stringEquals 'foo'"
         --condition-version "2.0"
@@ -699,6 +699,8 @@ examples:
     text: |
         az role assignment create --assignee 00000000-0000-0000-0000-000000000000 --role "Storage Account Key Operator Service Role" --scope $id
     crafted: true
+  - name: Create role assignment with your own assignment name.
+    text: az role assignment create --assignee-object-id 00000000-0000-0000-0000-000000000000 --assignee-principal-type ServicePrincipal --role Reader --scope /subscriptions/00000000-0000-0000-0000-000000000000 --name 00000000-0000-0000-0000-000000000000
 """
 
 

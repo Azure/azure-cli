@@ -23,14 +23,19 @@ MSI_LOCAL_ID = '[system]'
 
 
 def get_target_network_api(cli_ctx):
-    """ Since most compute calls don't need advanced network functionality, we can target a supported, but not
-        necessarily latest, network API version is order to avoid having to re-record every test that uses VM create
-        (which there are a lot) whenever NRP bumps their API version (which is often)!
     """
-    from azure.cli.core.profiles import get_api_version, ResourceType, AD_HOC_API_VERSIONS
-    version = get_api_version(cli_ctx, ResourceType.MGMT_NETWORK)
+    The fixed version of network used by ARM template deployment.
+    This is consistent with the version settings of other RP to ensure the stability of core commands "az vm create"
+    and "az vmss create".
+    In addition, it can also reduce the workload of re-recording a large number of vm tests after bumping the
+    network api-version.
+    Since it does not use the Python SDK, so it will not increase the dependence on the Python SDK
+    """
     if cli_ctx.cloud.profile == 'latest':
-        version = AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]['vm_default_target_network']
+        version = '2022-01-01'
+    else:
+        from azure.cli.core.profiles import get_api_version, ResourceType
+        version = get_api_version(cli_ctx, ResourceType.MGMT_NETWORK)
     return version
 
 
@@ -445,6 +450,25 @@ def is_valid_image_version_id(image_version_id):
     return False
 
 
+def parse_gallery_image_id(image_reference):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    if not image_reference:
+        raise InvalidArgumentValueError(
+            'Please pass in the gallery image id through the parameter --image')
+
+    image_info = re.search(r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/'
+                           r'galleries/([^/]*)/images/([^/]*)/versions/.*$', image_reference, re.IGNORECASE)
+    if not image_info or len(image_info.groups()) < 2:
+        raise InvalidArgumentValueError(
+            'The gallery image id is invalid. The valid format should be "/subscriptions/{sub_id}'
+            '/resourceGroups/{rg}/providers/Microsoft.Compute/galleries/{gallery_name}'
+            '/Images/{gallery_image_name}/Versions/{image_version}"')
+
+    # Return the gallery unique name and gallery image name parsed from shared gallery image id
+    return image_info.group(1), image_info.group(2)
+
+
 def parse_shared_gallery_image_id(image_reference):
     from azure.cli.core.azclierror import InvalidArgumentValueError
 
@@ -514,3 +538,28 @@ def raise_unsupported_error_for_flex_vmss(vmss, error_message):
             and vmss.orchestration_mode.lower() == 'flexible':
         from azure.cli.core.azclierror import ArgumentUsageError
         raise ArgumentUsageError(error_message)
+
+
+def is_trusted_launch_supported(supported_features):
+    if not supported_features:
+        return False
+
+    trusted_launch = {'TrustedLaunchSupported', 'TrustedLaunch', 'TrustedLaunchAndConfidentialVmSupported'}
+
+    return bool(trusted_launch.intersection({feature.value for feature in supported_features}))
+
+
+def trusted_launch_warning_log(namespace, generation_version, features):
+    if not generation_version:
+        return
+
+    log_message = 'Starting Build 2023 event, "az vm/vmss create" command will deploy Trusted Launch VM by default.' \
+                  ' To know more about Trusted Launch, please visit' \
+                  ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch'
+
+    if generation_version == 'V1':
+        logger.warning(log_message)
+
+    if generation_version == 'V2':
+        if is_trusted_launch_supported(features) and not namespace.security_type:
+            logger.warning(log_message)

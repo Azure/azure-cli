@@ -20,8 +20,7 @@ from azure.cli.core.azclierror import (ValidationError, ArgumentUsageError, Requ
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
-from azure.cli.command_modules.vm._vm_utils import (
-    check_existence, get_target_network_api, get_storage_blob_uri, list_sku_info)
+from azure.cli.command_modules.vm._vm_utils import (check_existence, get_storage_blob_uri, list_sku_info)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 from azure.cli.core import keys
 from azure.core.exceptions import ResourceNotFoundError
@@ -1315,13 +1314,92 @@ def _validate_trusted_launch(namespace):
     if not namespace.security_type or namespace.security_type.lower() != 'trustedlaunch':
         return
 
-    if not namespace.enable_secure_boot:
-        logger.warning('It is recommended to specify "--enable-secure-boot True" to receive the full suite of security'
-                       ' features that comes with Trusted Launch. Please note that the "--enable-secure-boot" will'
-                       ' be enabled by default in Microsoft Ignite Event (around November)')
-
     if namespace.enable_vtpm is None:
         namespace.enable_vtpm = True
+
+    if namespace.enable_secure_boot is None:
+        namespace.enable_secure_boot = True
+
+
+def _validate_generation_version_and_trusted_launch(cmd, namespace):
+    from azure.cli.core.profiles import ResourceType
+    if not cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE, min_api='2020-12-01'):
+        return
+    from ._vm_utils import trusted_launch_warning_log
+    if namespace.image is not None:
+        from ._vm_utils import parse_shared_gallery_image_id, parse_community_gallery_image_id,\
+            is_valid_image_version_id, parse_gallery_image_id
+        if is_valid_image_version_id(namespace.image):
+            from ._client_factory import cf_gallery_images
+            image_info = parse_gallery_image_id(namespace.image)
+            gallery_image_info = cf_gallery_images(cmd.cli_ctx, '').get(
+                resource_group_name=namespace.resource_group_name, gallery_name=image_info[0],
+                gallery_image_name=image_info[1])
+            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
+                                                                                  'hyper_v_generation') else None
+            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
+            return
+
+        image_type = _parse_image_argument(cmd, namespace)
+
+        if image_type == 'image_id':
+            # managed image does not support trusted launch
+            return
+
+        if image_type == 'uri':
+            # vhd does not support trusted launch
+            return
+
+        if image_type == 'shared_gallery_image_id':
+            from ._client_factory import cf_shared_gallery_image
+            image_info = parse_shared_gallery_image_id(namespace.image)
+            gallery_image_info = cf_shared_gallery_image(cmd.cli_ctx).get(
+                location=namespace.location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
+            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
+                                                                                  'hyper_v_generation') else None
+            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
+            return
+
+        if image_type == 'community_gallery_image_id':
+            from ._client_factory import cf_community_gallery_image
+            image_info = parse_community_gallery_image_id(namespace.image)
+            gallery_image_info = cf_community_gallery_image(cmd.cli_ctx).get(
+                location=namespace.location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
+            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
+                                                                                  'hyper_v_generation') else None
+            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
+            return
+
+        if image_type == 'urn':
+            client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
+            os_version = namespace.os_version
+            if os_version.lower() == 'latest':
+                os_version = _get_latest_image_version(cmd.cli_ctx, namespace.location, namespace.os_publisher,
+                                                       namespace.os_offer, namespace.os_sku)
+            vm_image_info = client.get(namespace.location, namespace.os_publisher, namespace.os_offer,
+                                       namespace.os_sku, os_version)
+            generation_version = vm_image_info.hyper_v_generation if hasattr(vm_image_info,
+                                                                             'hyper_v_generation') else None
+            features = vm_image_info.features if hasattr(vm_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
+            return
+
+    # create vm with os disk
+    if hasattr(namespace, 'attach_os_disk') and namespace.attach_os_disk is not None:
+        from msrestazure.tools import parse_resource_id
+        if urlparse(namespace.attach_os_disk).scheme and "://" in namespace.attach_os_disk:
+            # vhd does not support trusted launch
+            return
+        client = _compute_client_factory(cmd.cli_ctx).disks
+        attach_os_disk_name = parse_resource_id(namespace.attach_os_disk)['name']
+        attach_os_disk_info = client.get(namespace.resource_group_name, attach_os_disk_name)
+        generation_version = attach_os_disk_info.hyper_v_generation if hasattr(attach_os_disk_info,
+                                                                               'hyper_v_generation') else None
+        features = attach_os_disk_info.features if hasattr(attach_os_disk_info, 'features') else None
+        trusted_launch_warning_log(namespace, generation_version, features)
 
 
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
@@ -1397,6 +1475,7 @@ def process_vm_create_namespace(cmd, namespace):
         _validate_secrets(namespace.secrets, namespace.os_type)
     _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
+    _validate_generation_version_and_trusted_launch(cmd, namespace)
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
 
@@ -1517,9 +1596,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
                     if len(lb.inbound_nat_pools) > 1:
                         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' explicitly.".format(  # pylint: disable=line-too-long
                             '--nat-pool-name', ', '.join([n.name for n in lb.inbound_nat_pools])))
-                    if not lb.inbound_nat_pools:  # Associated scaleset will be missing ssh/rdp, so warn here.
-                        logger.warning("No inbound nat pool was configured on '%s'", namespace.load_balancer)
-                    else:
+                    if lb.inbound_nat_pools:
                         namespace.nat_pool_name = lb.inbound_nat_pools[0].name
                 logger.debug("using specified existing load balancer '%s'", namespace.load_balancer)
             else:
@@ -1551,7 +1628,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
 def get_network_client(cli_ctx):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK, api_version=get_target_network_api(cli_ctx))
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
 
 
 def get_network_lb(cli_ctx, resource_group_name, lb_name):
@@ -1572,6 +1649,11 @@ def process_vmss_create_namespace(cmd, namespace):
         if namespace.orchestration_mode.lower() != flexible_str.lower():
             raise InvalidArgumentValueError('usage error: --os-disk-delete-option/--data-disk-delete-option is only'
                                             ' available for VMSS with flexible orchestration mode')
+
+    if namespace.regular_priority_count is not None or namespace.regular_priority_percentage is not None:
+        if namespace.orchestration_mode.lower() != flexible_str.lower():
+            raise InvalidArgumentValueError('usage error: --regular-priority-count/--regular-priority-percentage is'
+                                            ' only available for VMSS with flexible orchestration mode')
 
     if namespace.orchestration_mode.lower() == flexible_str.lower():
 
@@ -1692,6 +1774,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_vmss_create_auth(namespace, cmd)
     _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
+    _validate_generation_version_and_trusted_launch(cmd, namespace)
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vmss_terminate_notification(cmd, namespace)
     _validate_vmss_create_automatic_repairs(cmd, namespace)

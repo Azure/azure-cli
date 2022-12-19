@@ -1392,6 +1392,43 @@ examples:
     text: az sql server firewall-rule update -g mygroup -s myserver -n myrule --start-ip-address 5.4.3.2 --end-ip-address 9.8.7.6
 """
 
+helps['sql server ipv6-firewall-rule'] = """
+type: group
+short-summary: Manage a server's ipv6 firewall rules.
+"""
+
+helps['sql server ipv6-firewall-rule create'] = """
+type: command
+short-summary: Create an ipv6 firewall rule.
+examples:
+  - name: Create an ipv6 firewall rule
+    text: az sql server ipv6-firewall-rule create -g mygroup -s myserver -n myrule --start-ipv6-address 9a41:a145:2a80:6c8d:4628:a1b3:5812:3283 --end-ipv6-address 9a41:a145:2a80:6c8d:4628:a1b3:5812:3283
+"""
+
+helps['sql server ipv6-firewall-rule list'] = """
+type: command
+short-summary: List a server's ipv6 firewall rules.
+examples:
+  - name: List a server's ipv6 firewall rules
+    text: az sql server ipv6-firewall-rule list -g mygroup -s myserver
+"""
+
+helps['sql server ipv6-firewall-rule show'] = """
+type: command
+short-summary: Shows the details for an ipv6 firewall rule.
+examples:
+  - name: Show an ipv6 firewall rule
+    text: az sql server ipv6-firewall-rule show -g mygroup -s myserver -n myrule
+"""
+
+helps['sql server ipv6-firewall-rule update'] = """
+type: command
+short-summary: Update an ipv6 firewall rule.
+examples:
+  - name: Update an ipv6 firewall rule
+    text: az sql server ipv6-firewall-rule update -g mygroup -s myserver -n myrule --start-ipv6-address 0229:e3a4:e0d7:36d3:d228:73fa:12fc:ae30 --end-ipv6-address 0229:e3a4:e0d7:36d3:d228:73fa:12fc:ae30
+"""
+
 helps['sql server outbound-firewall-rule'] = """
 type: group
 short-summary: Manage a server's outbound firewall rules.

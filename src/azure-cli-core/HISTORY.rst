@@ -3,6 +3,30 @@
 Release History
 ===============
 
+2.43.0
+++++++
+* `aaz`: Fix `has_value` function for list, dict and object arg types (#24625)
+* `aaz`: Support argument preview and experimental (#24637)
+* `aaz`: Add registered property for `AAZBaseArg` (#24640)
+* `aaz`: Add aazlist and aazdict args transform help functions (#24690)
+* `aaz`: Support camel case key in `AAZObjectType` (#24771)
+* Disable removing and updating system extension in Cloud Shell (#24361)
+
+2.42.0
+++++++
+* `aaz`: Support `FreeFormDictType` and `FreeFormDictArg` (#24183)
+* `aaz`: Support `configured_default` property in arguments (#24411)
+
+2.41.0
+++++++
+* Support Continuous Access Evaluation (#23635)
+* `aaz`: Support `yaml` file as value for compound arguments (#23817)
+* PREVIEW: Support Web Account Manager (WAM) login on Windows. To opt in, run `az config set core.allow_broker=true` (#23828)
+* `aaz`: Fix recursion depth exceeded for to_serialized_data of AAZObject (#23930)
+* `aaz`: Support customized life cycle callback functions for `AAZCommand` (#23949)
+* `aaz`: Fix two AAZObjects or AAZDicts comparison (#24035)
+* Revert #23514: Rename entry script `az.ps1` to `azps.ps1` (#24015)
+
 2.40.0
 ++++++
 * `aaz`: Support using `cli_ctx` to initiate AAZCommand class (#23459)

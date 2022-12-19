@@ -1,4 +1,4 @@
-#FAQ
+# FAQ
 
 ## What's the relationship of CLI telemetry and ARM telemetry?
 

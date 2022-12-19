@@ -13,7 +13,7 @@ if "%CLI_VERSION%"=="" (
     echo Please set the CLI_VERSION environment variable, e.g. 2.0.13
     goto ERROR
 )
-set PYTHON_VERSION=3.10.5
+set PYTHON_VERSION=3.10.8
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
 set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-embed-win32.zip"
@@ -122,13 +122,13 @@ if %errorlevel% neq 0 goto ERROR
 
 pushd %BUILDING_DIR%
 %BUILDING_DIR%\python.exe %~dp0\patch_models_v2.py
-%BUILDING_DIR%\python.exe %~dp0\remove_unused_api_versions.py
+%BUILDING_DIR%\python.exe %REPO_ROOT%\scripts\trim_sdk.py
 popd
 
 echo Creating the wbin (Windows binaries) folder that will be added to the path...
 mkdir %BUILDING_DIR%\wbin
 copy %REPO_ROOT%\build_scripts\windows\scripts\az.cmd %BUILDING_DIR%\wbin\
-copy %REPO_ROOT%\build_scripts\windows\scripts\az.ps1 %BUILDING_DIR%\wbin\
+copy %REPO_ROOT%\build_scripts\windows\scripts\azps.ps1 %BUILDING_DIR%\wbin\
 copy %REPO_ROOT%\build_scripts\windows\scripts\az %BUILDING_DIR%\wbin\
 if %errorlevel% neq 0 goto ERROR
 copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
@@ -166,12 +166,6 @@ for /d /r %BUILDING_DIR%\Lib\site-packages\pip %%d in (__pycache__) do (
     if exist %%d rmdir /s /q "%%d"
 )
 
-REM Remove aio
-echo remove aio
-for /d /r %BUILDING_DIR%\Lib\site-packages\azure\mgmt %%d in (aio) do (
-    if exist %%d rmdir /s /q "%%d"
-)
-
 REM Remove dist-info
 echo remove dist-info
 pushd %BUILDING_DIR%\Lib\site-packages
@@ -187,7 +181,7 @@ msbuild /t:rebuild /p:Configuration=Release %REPO_ROOT%\build_scripts\windows\az
 
 if %errorlevel% neq 0 goto ERROR
 
-start %OUTPUT_DIR%
+echo %OUTPUT_DIR%
 
 goto END
 

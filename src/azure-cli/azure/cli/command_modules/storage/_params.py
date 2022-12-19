@@ -14,7 +14,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_included_datasets_validator, validate_custom_domain, validate_hns_migration_type,
                           validate_container_public_access,
                           add_progress_callback, process_resource_group,
-                          storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
+                          storage_account_key_options, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
@@ -305,6 +305,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('name', options_list=['--name', '-n'],
                    help='The name of the storage account within the specified resource group')
 
+    with self.argument_context('storage account failover') as c:
+        c.argument('failover_type', options_list=['--failover-type', '--type'], is_preview=True, default=None,
+                   help="The parameter is set to 'Planned' to indicate whether a Planned failover is requested")
+
     with self.argument_context('storage account delete') as c:
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
 
@@ -519,6 +523,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        min_api='2021-01-01',
                        help='Resource identifier of the UserAssigned identity to be associated with server-side '
                             'encryption on the storage account.')
+            c.argument('federated_identity_client_id', options_list=['--key-vault-federated-client-id', '-f'],
+                       min_api='2021-08-01',
+                       help='ClientId of the multi-tenant application to be used '
+                            'in conjunction with the user-assigned identity for '
+                            'cross-tenant customer-managed-keys server-side encryption on the storage account.')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01',
@@ -535,9 +544,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('action', action_type)
 
     with self.argument_context('storage account show-connection-string') as c:
+        from ._validators import validate_key_name
         c.argument('protocol', help='The default endpoint protocol.', arg_type=get_enum_type(['http', 'https']))
         c.argument('sas_token', help='The SAS token to be used in the connection-string.')
-        c.argument('key_name', options_list=['--key'], help='The key to use.',
+        c.argument('key_name', options_list=['--key'], help='The key to use.', validator=validate_key_name,
                    arg_type=get_enum_type(list(storage_account_key_options.keys())))
         for item in ['blob', 'file', 'queue', 'table']:
             c.argument('{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
@@ -573,13 +583,25 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Change the state the encryption scope. When disabled, '
                    'all blob read/write operations using this encryption scope will fail.')
 
+    with self.argument_context('storage account encryption-scope list') as c:
+        t_encryption_scope_include = self.get_models("ListEncryptionScopesInclude",
+                                                     resource_type=ResourceType.MGMT_STORAGE)
+        c.argument('filter', help='When specified, only encryption scope names starting with the filter will be listed')
+        c.argument('include', arg_type=get_enum_type(t_encryption_scope_include),
+                   help='when specified, will list encryption scopes with the specific state')
+        c.argument('maxpagesize', type=int,
+                   help='the maximum number of encryption scopes that will be included in the list response')
+        c.argument('marker', arg_type=marker_type)
+
     with self.argument_context('storage account keys list', resource_type=ResourceType.MGMT_STORAGE) as c:
         t_expand_key_type = self.get_models('ListKeyExpand', resource_type=ResourceType.MGMT_STORAGE)
         c.argument("expand", options_list=['--expand-key-type'], help='Specify the expanded key types to be listed.',
                    arg_type=get_enum_type(t_expand_key_type), min_api='2019-04-01', is_preview=True)
 
     with self.argument_context('storage account keys renew', resource_type=ResourceType.MGMT_STORAGE) as c:
+        from ._validators import validate_key_name
         c.argument('key_name', options_list=['--key'], help='The key options to regenerate.',
+                   validator=validate_key_name,
                    arg_type=get_enum_type(list(storage_account_key_options.keys())))
         c.extra('key_type', help='The key type to regenerate. If --key-type is not specified, one of access keys will '
                 'be regenerated by default.', arg_type=get_enum_type(['kerb']), min_api='2019-04-01')
@@ -1292,6 +1314,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 help='Enforce that the service will not return a response until the copy is complete.')
         c.extra('tier', tier_type)
         c.extra('tags', tags_type)
+        c.extra('destination_blob_type', arg_type=get_enum_type(['Detect', 'BlockBlob', 'PageBlob', 'AppendBlob']),
+                help='Defines the type of blob at the destination. '
+                     'Value of "Detect" determines the type basd on source blob type.')
 
     with self.argument_context('storage blob copy start-batch', arg_group='Copy Source') as c:
         from azure.cli.command_modules.storage._validators import get_source_file_or_blob_service_client_track2
@@ -1928,14 +1953,31 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage file download') as c:
         c.register_path_argument()
-        c.argument('file_path', options_list=('--dest',), type=file_type, required=False,
-                   help='Path of the file to write to. The source filename will be used if not specified.',
-                   validator=process_file_download_namespace, completer=FilesCompleter())
-        c.argument('path', validator=None)  # validator called manually from process_file_download_namespace
-        c.extra('no_progress', progress_type)
-        c.argument('max_connections', type=int)
-        c.argument('start_range', type=int)
-        c.argument('end_range', type=int)
+        c.extra('share_name', share_name_type, required=True)
+        c.extra('destination_path', options_list=('--dest',), type=file_type, required=False,
+                help='Path of the file to write to. The source filename will be used if not specified.',
+                completer=FilesCompleter())
+        c.extra('no_progress', progress_type, validator=add_progress_callback)
+        c.argument('max_connections', type=int, help='Maximum number of parallel connections to use.')
+        c.extra('start_range', type=int, help='Start of byte range to use for downloading a section of the file. '
+                                              'If no --end-range is given, all bytes after the --start-range will be '
+                                              'downloaded. The --start-range and --end-range params are inclusive. Ex: '
+                                              '--start-range=0, --end-range=511 will download first 512 bytes of file.')
+        c.extra('end_range', type=int, help='End of byte range to use for downloading a section of the file. If '
+                                            '--end-range is given, --start-range must be provided. The --start-range '
+                                            'and --end-range params are inclusive. Ex: --start-range=0, '
+                                            '--end-range=511 will download first 512 bytes of file.')
+        c.argument('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+        c.extra('snapshot', help="A string that represents the snapshot version, if applicable.")
+        c.argument('open_mode', help="Mode to use when opening the file. Note that specifying append only "
+                                     "open_mode prevents parallel download. So, --max-connections must be "
+                                     "set to 1 if this --open-mode is used.")
+        c.extra('validate_content', help="If set to true, validates an MD5 hash for each retrieved portion of the file."
+                                         " This is primarily valuable for detecting bitflips on the wire if using "
+                                         "http instead of https as https (the default) will already validate. "
+                                         "As computing the MD5 takes processing time and more requests will "
+                                         "need to be done due to the reduced chunk size there may be some increase "
+                                         "in latency.")
 
     with self.argument_context('storage file exists') as c:
         c.register_path_argument()
@@ -2012,15 +2054,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     with self.argument_context('storage file upload') as c:
-        from ._validators import add_progress_callback_v2
-        t_file_content_settings = self.get_sdk('file.models#ContentSettings')
+        t_file_content_settings = self.get_sdk('_models#ContentSettings',
+                                               resource_type=ResourceType.DATA_STORAGE_FILESHARE)
 
         c.register_path_argument(default_file_param='local_file_path')
         c.register_content_settings_argument(t_file_content_settings, update=False, guess_from_file='local_file_path',
                                              process_md5=True)
         c.argument('local_file_path', options_list='--source', type=file_type, completer=FilesCompleter(),
                    help='Path of the local file to upload as the file content.')
-        c.extra('no_progress', progress_type, validator=add_progress_callback_v2)
+        c.extra('no_progress', progress_type, validator=add_progress_callback)
         c.argument('max_connections', type=int, help='Maximum number of parallel connections to use.')
         c.extra('share_name', share_name_type, required=True)
         c.argument('validate_content', action='store_true', min_api='2016-05-31',
@@ -2035,13 +2077,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
 
     with self.argument_context('storage file upload-batch') as c:
-        from ._validators import process_file_upload_batch_parameters, add_progress_callback_v2
+        t_file_content_settings = self.get_sdk('_models#ContentSettings',
+                                               resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+        from ._validators import process_file_upload_batch_parameters
         c.argument('source', options_list=('--source', '-s'), validator=process_file_upload_batch_parameters)
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('max_connections', arg_group='Download Control', type=int)
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
         c.register_content_settings_argument(t_file_content_settings, update=False, arg_group='Content Settings')
-        c.extra('no_progress', progress_type, validator=add_progress_callback_v2)
+        c.extra('no_progress', progress_type, validator=add_progress_callback)
 
     with self.argument_context('storage file download-batch') as c:
         from ._validators import process_file_download_batch_parameters
@@ -2049,7 +2093,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('max_connections', arg_group='Download Control', type=int)
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
-        c.extra('no_progress', progress_type)
+        c.extra('no_progress', progress_type, validator=add_progress_callback)
+        c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
+                                 'specifies the snapshot.')
 
     with self.argument_context('storage file delete-batch') as c:
         from ._validators import process_file_batch_source_parameters

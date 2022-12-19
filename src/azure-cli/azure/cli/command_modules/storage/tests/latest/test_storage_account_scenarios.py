@@ -1726,7 +1726,8 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.kwargs = {
             'sa1': self.create_random_name(prefix='edge1', length=12),
             'sa2': self.create_random_name(prefix='edge2', length=12),
-            'rg': resource_group
+            'rg': resource_group,
+            'container': self.create_random_name(prefix='container', length=24),
         }
         self.cmd('storage account create -n {sa1} -g {rg} --edge-zone microsoftrrdclab1 -l eastus2euap --sku Premium_LRS',
                  checks=[
@@ -1738,6 +1739,12 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                      JMESPathCheck('extendedLocation.name', 'microsoftlosangeles1'),
                      JMESPathCheck('extendedLocation.type', 'EdgeZone')
                  ])
+
+        endpoint = self.cmd('storage account show -n {sa1} -g {rg}').get_output_in_json()['primaryEndpoints']['blob']
+        self.kwargs['endpoint'] = endpoint
+        self.kwargs['storage_key'] = str(self.cmd('az storage account keys list -n {sa1} -g {rg} --query "[0].value"').output)
+        self.cmd('storage container create -n {container} --account-name {sa1} --blob-endpoint {endpoint} --account-key {storage_key}') \
+            .assert_with_checks(self.check('created', True))
 
 
 class RoleScenarioTest(LiveScenarioTest):
@@ -2223,7 +2230,7 @@ class StorageAccountSkuScenarioTest(ScenarioTest):
 
 
 class StorageAccountFailoverScenarioTest(ScenarioTest):
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2022-09-01')
     @ResourceGroupPreparer(name_prefix='clistorage', location='westus2')
     def test_storage_account_failover(self, resource_group):
         self.kwargs = {
@@ -2247,7 +2254,7 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
         ])
 
         time.sleep(900)
-        self.cmd('storage account failover -n {sa} -g {rg} --no-wait -y')
+        self.cmd('storage account failover -n {sa} -g {rg} --failover-type Planned --no-wait -y')
 
         self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
             self.check('name', '{sa}'),

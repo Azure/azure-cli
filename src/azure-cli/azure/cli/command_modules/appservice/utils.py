@@ -8,7 +8,6 @@ import os
 import urllib
 import urllib3
 import certifi
-import sys
 
 from knack.log import get_logger
 
@@ -142,6 +141,14 @@ def raise_missing_token_suggestion():
                                        "the steps found at the following link:\n{0}".format(pat_documentation))
 
 
+def raise_missing_ado_token_suggestion():
+    pat_documentation = ("https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-"
+                         "tokens-to-authenticate?view=azure-devops&tabs=Windows#create-a-pat")
+    raise RequiredArgumentMissingError("If this repo is an Azure Dev Ops repo, please provide a Personal Access Token."
+                                       "Please run with the '--login-with-ado' flag or follow "
+                                       "the steps found at the following link:\n{0}".format(pat_documentation))
+
+
 def _get_location_from_resource_group(cli_ctx, resource_group_name):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
@@ -267,24 +274,3 @@ def is_webapp(app):
     if app is None or app.kind is None:
         return False
     return not is_logicapp(app) and not is_functionapp(app) and "app" in app.kind
-
-
-class PollingAnimation():
-    def __init__(self, prefix="", suffix=" Running..."):
-        self.tickers = ["/", "|", "\\", "-", "/", "|", "\\", "-"]
-        self.currTicker = 0
-        self.prefix = prefix
-        self.suffix = suffix
-
-    def tick(self):
-        sys.stdout.write('\r')
-        sys.stdout.write(self.prefix + self.tickers[self.currTicker] + self.suffix)
-        sys.stdout.flush()
-        self.currTicker += 1
-        self.currTicker = self.currTicker % len(self.tickers)
-
-    @classmethod
-    def flush(cls):
-        sys.stdout.flush()
-        sys.stdout.write('\r')
-        sys.stdout.write("\033[K")  # \33[K: clears from cursor to end of line.

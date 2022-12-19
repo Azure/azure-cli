@@ -13,7 +13,8 @@ from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPr
 from azure.mgmt.recoveryservicesbackup.activestamp.models import StorageType
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
-from .preparers import VaultPreparer, VMPreparer, ItemPreparer, PolicyPreparer, RPPreparer
+from .preparers import VaultPreparer, VMPreparer, ItemPreparer, PolicyPreparer, RPPreparer, \
+    DESPreparer, KeyPreparer
 
 
 def _get_vm_version(vm_type):
@@ -246,6 +247,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{enhanced}'])", 1)
         ])
 
+        self.cmd('backup policy list -g {rg} -v {vault} --move-to-archive-tier Enabled', checks=[
+            self.check("length(@)", 0)
+        ])
+
         self.cmd('backup policy list-associated-items -g {rg} -v {vault} -n {default}', checks=[
             self.check("length(@)", 2),
             self.check("length([?properties.friendlyName == '{}'])".format(vm1), 1),
@@ -270,6 +275,18 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['policy1_json']['name'] = self.kwargs['policy3']
         if 'instantRpDetails' in self.kwargs['policy1_json']['properties']:
             self.kwargs['policy1_json']['properties']['instantRpDetails'] = {'azureBackupRgNamePrefix': 'RG_prefix', 'azureBackupRgNameSuffix': 'RG_suffix'}
+
+        # set monthly retention policy
+        self.kwargs['policy1_json']['properties']["retentionPolicy"]["monthlySchedule"] = {}
+        self.kwargs['policy1_json']['properties']["retentionPolicy"]["monthlySchedule"]["retentionDuration"] = {"count": 60, "durationType": "Months"}
+        self.kwargs['policy1_json']['properties']["retentionPolicy"]["monthlySchedule"]["retentionScheduleDaily"] = {"daysOfTheMonth": [{"date": 1, "isLast": False}]}
+        self.kwargs['policy1_json']['properties']["retentionPolicy"]["monthlySchedule"]["retentionScheduleFormatType"] = "Daily"
+        self.kwargs['policy1_json']['properties']["retentionPolicy"]["monthlySchedule"]["retentionScheduleWeekly"] = None
+        self.kwargs['policy1_json']['properties']["retentionPolicy"]["monthlySchedule"]["retentionTimes"] = self.kwargs['policy1_json']['properties']["retentionPolicy"]["dailySchedule"]["retentionTimes"]
+
+        # set smart tiering policy
+        self.kwargs['policy1_json']['properties']["tieringPolicy"] = {"ArchivedRP": {"duration": 0, "durationType": "Invalid", "tieringMode": "TierRecommended"}}
+
         self.kwargs['policy1_json'] = json.dumps(self.kwargs['policy1_json'])
 
         self.cmd("backup policy set -g {rg} -v {vault} --policy '{policy1_json}'", checks=[
@@ -281,6 +298,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{default}'])", 1),
             self.check("length([?name == '{policy1}'])", 1),
             self.check("length([?name == '{policy2}'])", 1),
+            self.check("length([?name == '{policy3}'])", 1)
+        ])
+
+        self.cmd('backup policy list -g {rg} -v {vault} --move-to-archive-tier Enabled', checks=[
             self.check("length([?name == '{policy3}'])", 1)
         ])
 
@@ -686,48 +707,97 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('storage blob exists --account-name {sa} -c {container} -n {blob}', checks=self.check("exists", True))
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location="centraluseuap")
+    @ResourceGroupPreparer(parameter_name="target_resource_group", location="centraluseuap")
+    @VaultPreparer(soft_delete=False)
+    @VMPreparer()
+    @ItemPreparer()
+    @RPPreparer()
+    @StorageAccountPreparer(parameter_name="secondary_region_sa", location="eastus2euap")
+    def test_backup_crr(self, resource_group, target_resource_group, vault_name, vm_name, secondary_region_sa):
 
-    #@AllowLargeResponse()
-    #@ResourceGroupPreparer(location="centraluseuap")
-    #@ResourceGroupPreparer(parameter_name="target_resource_group", location="centraluseuap")
-    #@VaultPreparer(soft_delete=False)
-    #@VMPreparer()
-    #@ItemPreparer()
-    #@RPPreparer()
-    #@StorageAccountPreparer(parameter_name="secondary_region_sa", location="eastus2euap")
-    #def test_backup_crr(self, resource_group, target_resource_group, vault_name, vm_name, secondary_region_sa):
+       self.kwargs.update({
+           'vault': vault_name,
+           'vm': vm_name,
+           'target_rg': target_resource_group,
+           'rg': resource_group,
+           'secondary_sa': secondary_region_sa,
+           'vm_id': "VM;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
+           'container_id': "IaasVMContainer;iaasvmcontainerv2;" + resource_group + ";" + vm_name
+       })
+       self.cmd('backup vault backup-properties set -g {rg} -n {vault} --cross-region-restore-flag true', checks=[
+           self.check("properties.crossRegionRestoreFlag", True)
+       ]).get_output_in_json()
+       time.sleep(300)
 
-    #    self.kwargs.update({
-    #        'vault': vault_name,
-    #        'vm': vm_name,
-    #        'target_rg': target_resource_group,
-    #        'rg': resource_group,
-    #        'secondary_sa': secondary_region_sa,
-    #        'vm_id': "VM;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
-    #        'container_id': "IaasVMContainer;iaasvmcontainerv2;" + resource_group + ";" + vm_name
-    #    })
-    #    self.cmd('backup vault backup-properties set -g {rg} -n {vault} --cross-region-restore-flag true', checks=[
-    #        self.check("properties.crossRegionRestoreFlag", True)
-    #    ]).get_output_in_json()
-    #    time.sleep(300)
+       # Trigger Cross Region Restore
+       self.kwargs['crr_rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container_id} -i {vm_id} --use-secondary-region --query [0].name').get_output_in_json()
 
-    #    # Trigger Cross Region Restore
-    #    self.kwargs['crr_rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container_id} -i {vm_id} --use-secondary-region --query [0].name').get_output_in_json()
+       trigger_restore_job3_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {container_id} -i {vm_id} -r {crr_rp} --storage-account {secondary_sa} -t {target_rg} --use-secondary-region', checks=[
+           self.check("properties.entityFriendlyName", vm_name),
+           self.check("properties.operation", "CrossRegionRestore"),
+           self.check("properties.status", "InProgress")
+       ]).get_output_in_json()
+       self.kwargs['job3'] = trigger_restore_job3_json['name']
 
-    #    trigger_restore_job3_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {container_id} -i {vm_id} -r {crr_rp} --storage-account {secondary_sa} -t {target_rg} --use-secondary-region', checks=[
-    #        self.check("properties.entityFriendlyName", vm_name),
-    #        self.check("properties.operation", "CrossRegionRestore"),
-    #        self.check("properties.status", "InProgress")
-    #    ]).get_output_in_json()
-    #    self.kwargs['job3'] = trigger_restore_job3_json['name']
+       self.cmd('backup job wait -g {rg} -v {vault} -n {job3} --use-secondary-region')
 
-    #    self.cmd('backup job wait -g {rg} -v {vault} -n {job3} --use-secondary-region')
+       self.cmd('backup job show -g {rg} -v {vault} -n {job3} --use-secondary-region', checks=[
+           self.check("properties.entityFriendlyName", vm_name),
+           self.check("properties.operation", "CrossRegionRestore"),
+           self.check("properties.status", "Completed")
+       ])
 
-    #    self.cmd('backup job show -g {rg} -v {vault} -n {job3} --use-secondary-region', checks=[
-    #        self.check("properties.entityFriendlyName", vm_name),
-    #        self.check("properties.operation", "CrossRegionRestore"),
-    #        self.check("properties.status", "Completed")
-    #    ])
+    @unittest.skip("Test skipped due to service-side flag being disabled")
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location="centraluseuap")
+    @ResourceGroupPreparer(parameter_name="target_resource_group", location="centraluseuap")
+    @KeyVaultPreparer()
+    @KeyPreparer()
+    @DESPreparer()
+    @VaultPreparer(soft_delete=False)
+    @VMPreparer()
+    @ItemPreparer()
+    @RPPreparer()
+    @StorageAccountPreparer(parameter_name="secondary_region_sa", location="eastus2euap")
+    def test_backup_crr_des(self, resource_group, target_resource_group, vault_name, vm_name, des_name, secondary_region_sa):
+
+        self.kwargs.update({
+            'vault': vault_name,
+            'vm': vm_name,
+            'des_name': des_name,
+            'target_rg': target_resource_group,
+            'rg': resource_group,
+            'secondary_sa': secondary_region_sa,
+            'vm_id': "VM;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
+            'container_id': "IaasVMContainer;iaasvmcontainerv2;" + resource_group + ";" + vm_name
+        })
+
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --cross-region-restore-flag true', checks=[
+            self.check("properties.crossRegionRestoreFlag", True)
+        ]).get_output_in_json()
+        time.sleep(300)
+
+        # Trigger Cross Region Restore
+        self.kwargs['crr_rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container_id} -i {vm_id} --use-secondary-region --query [0].name').get_output_in_json()
+
+        # Get the Disk-Encryption-Set ID from the name
+        self.kwargs['des_id'] = self.cmd('disk-encryption-set show -g {rg} -n {des_name}').get_output_in_json()["id"]
+        trigger_restore_job4_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {container_id} -i {vm_id} -r {crr_rp} --storage-account {secondary_sa} -t {target_rg} --disk-encryption-set-id {des_id} --use-secondary-region', checks=[
+            self.check("properties.entityFriendlyName", vm_name),
+            self.check("properties.operation", "CrossRegionRestore"),
+            self.check("properties.status", "InProgress")
+        ]).get_output_in_json()
+        self.kwargs['job4'] = trigger_restore_job4_json['name']
+
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job4} --use-secondary-region')
+
+        self.cmd('backup job show -g {rg} -v {vault} -n {job4} --use-secondary-region', checks=[
+            self.check("properties.entityFriendlyName", vm_name),
+            self.check("properties.operation", "CrossRegionRestore"),
+            self.check("properties.status", "Completed")
+        ])   
 
     @ResourceGroupPreparer(location="eastasia")
     @VaultPreparer(soft_delete=False)
@@ -749,6 +819,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.entityFriendlyName", '{vm}'),
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
+            self.check("properties.extendedInfo.tasksList[0].endTime", None),
             self.check("resourceGroup", '{rg}')
         ])
 
@@ -766,6 +837,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup job stop -g {rg} -v {vault} -n {job}')
 
+    @unittest.skip('CloudInternalError: Microsoft Azure Backup encountered an internal error. Wait for a few minutes and then try the operation again. If the issue persists, please contact Microsoft support.')
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer()
@@ -1099,7 +1171,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.kwargs['system2_principalid'] = system_v2_json['identity']['principalId']
 
-        self.cmd('keyvault update --name {key_vault} --enable-soft-delete --enable-purge-protection')
+        self.cmd('keyvault update --name {key_vault} --enable-purge-protection')
 
         key1_json = self.cmd('keyvault key create --vault-name {key_vault} -n {key1} --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
             self.check("attributes.enabled", True),
@@ -1263,7 +1335,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-
+    @unittest.skip('ServiceResourceNotEmptyWithBackendMessage: Recovery Services vault cannot be deleted as there are backup items still present in soft delete state. Visit the following link for the steps to permanently delete soft deleted items: https://aka.ms/undeletesoftdeleteditems.  : clitest-vm000003. Please ensure all containers have been unregistered from the vault and all private endpoints associated with the vault have been deleted, and retry operation.')
     @ResourceGroupPreparer(location="centraluseuap")
     @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
