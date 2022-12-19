@@ -292,8 +292,8 @@ def load_arguments(self, _):
         c.argument('disable_azure_rbac', action='store_true')
         c.argument('aad_tenant_id')
         c.argument('aad_admin_group_object_ids')
-        c.argument('windows_admin_password')
         c.argument('enable_oidc_issuer', action='store_true')
+        c.argument('windows_admin_password')
         c.argument('enable_ahub', action='store_true')
         c.argument('disable_ahub', action='store_true')
         c.argument('enable_windows_gmsa', action='store_true')
@@ -333,6 +333,7 @@ def load_arguments(self, _):
         c.argument('max_count', type=int, validator=validate_nodes_count)
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels,
                    help='space-separated labels: key[=value] [key[=value] ...]. See https://aka.ms/node-labels for syntax of labels.')
+        # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
