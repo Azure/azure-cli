@@ -10,7 +10,7 @@ from knack.log import get_logger
 
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument,protected-access,too-few-public-methods
 from azure.cli.core.aaz import has_value
-from azure.cli.core.aaz.utils import assign_aaz_list_arg, assign_aaz_dict_arg
+from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from azure.cli.command_modules.network.aaz.latest.network.nsg.rule import Update as _NsgRuleUpdate
 from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
@@ -288,11 +288,14 @@ class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        args.custom_error_configurations = assign_aaz_dict_arg(
-            args.custom_error_configurations,
-            args.custom_error_pages,
-            element_transformer=lambda code, url: {"status_code": code, "custom_error_page_url": url}
-        )
+        if has_value(args.custom_error_pages):
+            configurations = []
+            for code, url in args.custom_error_pages.items():
+                configurations.append({
+                    "status_code": code,
+                    "custom_error_page_url": url,
+                })
+            args.custom_error_configurations = configurations
         if has_value(args.sku):
             sku = str(args.sku)
             args.sku.tier = sku.split("_", 1)[0] if not _is_v2_sku(sku) else sku
