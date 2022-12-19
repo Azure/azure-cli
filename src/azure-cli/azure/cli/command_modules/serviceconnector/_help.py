@@ -52,7 +52,8 @@ def get_auth_info_params(auth_type):
         AUTH_TYPE.SecretAuto: '--secret',
         AUTH_TYPE.SystemIdentity: '--system-identity',
         AUTH_TYPE.ServicePrincipalSecret: '--service-principal client-id=XX object-id=XX secret=XX',
-        AUTH_TYPE.UserIdentity: '--user-identity client-id=XX subs-id=XX'
+        AUTH_TYPE.UserIdentity: '--user-identity client-id=XX subs-id=XX',
+        AUTH_TYPE.UserAccount: '--user-account',
     }
 
     return auth_params_map.get(auth_type)
@@ -429,9 +430,6 @@ helps['connection list'] = """
   type: command
   short-summary: List local connections of {source_display_name}.
   examples:
-    - name: List {source_display_name} connections interactively
-      text: |-
-              az connection list
     - name: List connections by resource group
       text: |-
               az connection list -g resource_group

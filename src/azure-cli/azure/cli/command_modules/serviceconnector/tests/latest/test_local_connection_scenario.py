@@ -21,6 +21,7 @@ from ._test_utils import CredentialReplacer
 resource_group = 'servicelinker-cli-test-group'
 
 
+@unittest.skip('Test with user account signed in')
 class LocalConnectionScenarioTest(ScenarioTest):
 
     def __init__(self, method_name):
@@ -29,7 +30,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
             recording_processors=[CredentialReplacer()]
         )
 
-    @record_only()
+
     def test_local_appconfig_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -72,7 +73,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_cosmoscassandra_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -88,14 +89,14 @@ class LocalConnectionScenarioTest(ScenarioTest):
 
         # create connection
         self.cmd('connection create cosmos-cassandra -g {} --connection {} --target-id {} '
-                 '--secret --client-type python'.format(resource_group, name, target_id))
+                 '--user-account --client-type python'.format(resource_group, name, target_id))
 
         # list connection
         connections = self.cmd(
             'connection list -g {}'.format(resource_group),
             checks=[
                 self.check('length(@)', 1),
-                self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].authInfo.authType', 'userAccount'),
                 self.check('[0].clientType', 'python')
             ]
         ).get_output_in_json()
@@ -117,7 +118,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_cosmosgremlin_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -163,7 +164,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_cosmosmongo_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -208,7 +209,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_cosmossql_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -253,7 +254,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_cosmostable_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -298,7 +299,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_eventhub_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -342,7 +343,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_servicebus_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -386,7 +387,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_signalr_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -430,7 +431,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_webpubsub_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -474,7 +475,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_keyvault_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -518,7 +519,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_postgresflexible_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -570,7 +571,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_redis_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -614,7 +615,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_redisenterprise_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -659,7 +660,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_mysql_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -710,7 +711,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_mysqlflexible_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -763,7 +764,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_postgres_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -815,7 +816,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_sql_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -866,7 +867,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_storageblob_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -962,7 +963,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         for conn in self.cmd('connection list -g {}'.format(resource_group)).get_output_in_json():
             self.cmd('connection delete --id {} --yes'.format(conn.get('id')))
 
-    @record_only()
+
     def test_local_storagequeue_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -1007,7 +1008,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_storagefile_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -1052,7 +1053,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+
     def test_local_storagetable_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -1097,7 +1098,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()    
+    
     def test_local_confluentkafka_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
