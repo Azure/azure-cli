@@ -319,3 +319,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         add_confluent_kafka_argument(c)
         add_secret_store_argument(c)
         add_local_connection_block(c, show_id=False)
+    with self.argument_context('connection preview-configuration {}'.format(target.value)) as c:
+        add_auth_block(c, source, target)
+        add_client_type_argument(c, source, target)

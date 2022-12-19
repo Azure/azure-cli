@@ -426,88 +426,19 @@ class PostgresFlexHandler(TargetHandler):
     def enable_target_aad_auth(self):
         self.enable_pg_extension()
 
-        rq = 'az rest -u https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}?api-version=2022-03-08-privatepreview'.format(
-            self.subscription, self.resource_group, self.db_server)
-        server_info = run_cli_cmd(rq)
-        if server_info.get("properties").get("authConfig").get("activeDirectoryAuthEnabled"):
-            return
-        logger.warning('Enabling Postgres flexible server AAD authentication')
-        server = self.db_server
-        master_template = ArmTemplateBuilder()
-        master_template.add_resource({
-            'type': "Microsoft.DBforPostgreSQL/flexibleServers",
-            'apiVersion': '2022-03-08-privatepreview',
-            'name': server,
-            'location': "East US",
-            'properties': {
-                'authConfig': {
-                    'activeDirectoryAuthEnabled': True,
-                    'tenantId': self.tenant_id
-                },
-                'createMode': "Update"
-            },
-        })
-
-        template = master_template.build()
-        # parameters = master_template.build_parameters()
-
-        # deploy ARM template
-        cmd = self.cmd
-        deployment_name = 'pg_deploy_' + random_string(32)
-        client = get_mgmt_service_client(
-            cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
-        DeploymentProperties = cmd.get_models(
-            'DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        properties = DeploymentProperties(
-            template=template, parameters={}, mode='incremental')
-        Deployment = cmd.get_models(
-            'Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
-
-        LongRunningOperation(cmd.cli_ctx)(
-            client.begin_create_or_update(self.resource_group, deployment_name, deployment))
+        run_cli_cmd('az postgres flexible-server update -g {} -n {} --subscription {} --active-directory-auth Enabled'.format(
+            self.resource_group, self.db_server, self.subscription))
 
     def set_user_admin(self, user_object_id, **kwargs):
-        rq = 'az rest -u https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/administrators?api-version=2022-03-08-privatepreview'.format(
-            self.subscription, self.resource_group, self.db_server)
-        admins = run_cli_cmd(rq).get("value")
-        is_admin = any(user_object_id in u.get(
-            "properties").get("objectId") for u in admins)
+        admins = run_cli_cmd('az postgres flexible-server ad-admin list -g {} -s {} --subscription {}'.format(
+            self.resource_group, self.db_server, self.subscription))
+
+        is_admin = any(user_object_id in u.get("objectId", "") for u in admins)
         if is_admin:
             return
         logger.warning('Set current user as DB Server AAD Administrators.')
-        cmd = self.cmd
-        master_template = ArmTemplateBuilder()
-        master_template.add_resource({
-            'type': "Microsoft.DBforPostgreSQL/flexibleServers/administrators",
-            'apiVersion': '2022-03-08-privatepreview',
-            'name': self.db_server + "/" + user_object_id,
-            'location': "East US",
-            'properties': {
-                'principalName': self.login_username,
-                'principalType': 'User',
-                'tenantId': self.tenant_id,
-                'createMode': "Update"
-            },
-        })
-
-        template = master_template.build()
-        # parameters = master_template.build_parameters()
-
-        # deploy ARM template
-        deployment_name = 'pg_addAdmins_' + random_string(32)
-        client = get_mgmt_service_client(
-            cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
-        DeploymentProperties = cmd.get_models(
-            'DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        properties = DeploymentProperties(
-            template=template, parameters={}, mode='incremental')
-        Deployment = cmd.get_models(
-            'Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        deployment = Deployment(properties=properties)
-
-        LongRunningOperation(cmd.cli_ctx)(
-            client.begin_create_or_update(self.resource_group, deployment_name, deployment))
+        run_cli_cmd('az postgres flexible-server ad-admin create -u {} -i {} -g {} -s {} --subscription {}'.format(
+            self.login_username, user_object_id, self.resource_group, self.db_server, self.subscription))
 
     def create_aad_user(self, identity_name, client_id):
         # self.aad_user = identity_name or self.aad_user
@@ -583,11 +514,12 @@ class PostgresFlexHandler(TargetHandler):
         logger.warning("Adding new AAD user %s to database...",
                        self.aad_username)
         for execution_query in query_list:
-            try:
-                logger.debug(execution_query)
-                cursor.execute(execution_query)
-            except psycopg2.Error as e:  # role "aad_user" already exists
-                logger.warning(e)
+            if execution_query:
+                try:
+                    logger.debug(execution_query)
+                    cursor.execute(execution_query)
+                except psycopg2.Error as e:  # role "aad_user" already exists
+                    logger.warning(e)
 
         # Clean up
         conn.commit()
@@ -606,8 +538,8 @@ class PostgresFlexHandler(TargetHandler):
     def get_create_query(self, client_id):
         return [
             # 'drop role IF EXISTS "{0}";'.format(self.aad_username),
-            "select * from pgaadauth_create_principal_with_oid('{0}', '{1}', 'ServicePrincipal', false, false);".format(
-                self.aad_username, client_id),
+            "select * from pgaadauth_create_principal_with_oid('{0}', '{1}', 'service', false, false);".format(
+                self.aad_username, client_id) if self.auth_type == PasswordlessIdentity[AUTH_TYPE.SystemIdentity] else '',
             'GRANT ALL PRIVILEGES ON DATABASE "{0}" TO "{1}";'.format(
                 self.dbname, self.aad_username),
             'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "{}";'.format(
@@ -677,7 +609,9 @@ class PostgresSingleHandler(PostgresFlexHandler):
             'SET aad_validate_oids_in_tenant = off;',
             # 'drop role IF EXISTS "{0}";'.format(self.aad_username),
             "CREATE ROLE {0} WITH LOGIN PASSWORD '{1}' IN ROLE azure_ad_user;".format(
-                self.aad_username, client_id),
+                self.aad_username, client_id) if self.auth_type == PasswordlessIdentity[AUTH_TYPE.SystemIdentity] else
+            'CREATE ROLE "{}" WITH LOGIN IN ROLE azure_ad_user;'.format(
+                self.login_username),
             'GRANT ALL PRIVILEGES ON DATABASE "{0}" TO "{1}";'.format(
                 self.dbname, self.aad_username),
             'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "{}";'.format(

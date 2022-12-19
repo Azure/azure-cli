@@ -21,9 +21,9 @@ from ._addon_factory import AddonFactory
 
 def get_source_resource_params(resource):
     if resource == RESOURCE.Local:
-      params = LOCAL_CONNECTION_PARAMS
+        params = LOCAL_CONNECTION_PARAMS
     else:
-      params = SOURCE_RESOURCES_PARAMS.get(resource).values()
+        params = SOURCE_RESOURCES_PARAMS.get(resource).values()
 
     param_str = ''
     for param in params:
@@ -520,7 +520,7 @@ helps['connection show'] = """
 helps['connection create'] = """
   type: group
   short-summary: Create a connection from local to a target resource
-""".format(source_display_name=source_display_name)
+"""
 
 helps['connection update'] = """
   type: group
@@ -648,8 +648,7 @@ for target in supported_target_resources:
         secret_auto_param=secret_auto_param,
         user_account_param=user_account_param,
         service_principal_param=service_principal_param,
-        connection_id=connection_id,
-        source_display_name=source_display_name)
+        connection_id=connection_id)
 
     helps['connection preview-configuration {target}'.format(target=target.value)] = """
       type: command
@@ -665,7 +664,7 @@ server_params = ('--bootstrap-server xxx.eastus.azure.confluent.cloud:9092 '
 registry_params = ('--schema-registry https://xxx.eastus.azure.confluent.cloud '
                    '--schema-key Name --schema-secret Secret')
 
-helps['connection create {target}'.format(source=source.value, target=target.value)] = """
+helps['connection create {target}'.format(target=target.value)] = """
   type: command
   short-summary: Create a local connection to {target}.
   examples:
@@ -674,8 +673,7 @@ helps['connection create {target}'.format(source=source.value, target=target.val
               az connection create {target} -g resourceGroup --connection myConnection {server_params} {registry_params}
 """.format(target=target.value,
            server_params=server_params,
-           registry_params=registry_params,
-           source_display_name=source_display_name)
+           registry_params=registry_params)
 
 helps['connection update {target}'.format(target=target.value)] = """
   type: command
@@ -696,7 +694,7 @@ helps['connection update {target}'.format(target=target.value)] = """
 """.format(target=target.value,
            server_params=server_params,
            registry_params=registry_params,
-           source_display_name=source_display_name)
+           )
 helps['connection preview-configuration {target}'.format(target=target.value)] = """
       type: command
       short-summary: Preview the expected configurations of local connection to {target}.
