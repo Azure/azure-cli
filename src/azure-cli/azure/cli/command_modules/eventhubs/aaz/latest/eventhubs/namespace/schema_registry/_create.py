@@ -77,11 +77,13 @@ class Create(AAZCommand):
         _args_schema.schema_compatibility = AAZStrArg(
             options=["--schema-compatibility"],
             arg_group="Properties",
+            help="Schema Compatibility, takes values \"Forward\", \"Backward\" and \"None\".",
             enum={"Backward": "Backward", "Forward": "Forward", "None": "None"},
         )
         _args_schema.schema_type = AAZStrArg(
             options=["--schema-type"],
             arg_group="Properties",
+            help="Type of schema, takes values \"Avro\" or \"Unknown\"",
             enum={"Avro": "Avro", "Unknown": "Unknown"},
         )
 
