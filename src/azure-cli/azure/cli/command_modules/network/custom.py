@@ -8,7 +8,7 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_
 
 from knack.log import get_logger
 
-# pylint: disable=no-self-use,no-member,too-many-lines,unused-argument,protected-access
+# pylint: disable=no-self-use,no-member,too-many-lines,unused-argument,protected-access,too-few-public-methods
 from azure.cli.core.aaz import has_value
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from azure.cli.command_modules.network.aaz.latest.network.nsg.rule import Update as _NsgRuleUpdate
@@ -272,7 +272,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZDictArg, AAZStrArg
+        from azure.cli.core.aaz import AAZDictArg, AAZStrArg, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.custom_error_pages = AAZDictArg(
             options=["--custom-error-pages"],
@@ -282,12 +282,9 @@ class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
         args_schema.custom_error_pages.Element = AAZStrArg(
             nullable=True,
         )
+        args_schema.http2.enum = AAZArgEnum({"Enabled": True, "Disabled": False})
+        args_schema.custom_error_configurations._registered = False
         return args_schema
-
-    def _cli_arguments_loader(self):
-        args = super()._cli_arguments_loader()
-        args = [(name, arg) for (name, arg) in args if name != "custom_error_configurations"]
-        return args
 
     def pre_operations(self):
         args = self.ctx.args
@@ -299,7 +296,6 @@ class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
                     "custom_error_page_url": url,
                 })
             args.custom_error_configurations = configurations
-
         if has_value(args.sku):
             sku = str(args.sku)
             args.sku.tier = sku.split("_", 1)[0] if not _is_v2_sku(sku) else sku
@@ -5321,7 +5317,7 @@ class NsgRuleUpdate(_NsgRuleUpdate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
 
-        class EmptyListArgFormat(AAZListArgFormat):  # pylint: disable=too-few-public-methods
+        class EmptyListArgFormat(AAZListArgFormat):
             def __call__(self, ctx, value):
                 data = value._data
                 if has_value(data) and len(data) == 1 and data[0] == "":
@@ -5329,7 +5325,7 @@ class NsgRuleUpdate(_NsgRuleUpdate):
                     value._data = None
                 return super().__call__(ctx, value)
 
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):  # pylint: disable=too-few-public-methods
+        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
             def __call__(self, ctx, value):
                 if value._data == "":
                     logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
