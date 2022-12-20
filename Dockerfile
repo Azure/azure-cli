@@ -39,7 +39,7 @@ LABEL maintainer="Microsoft" \
 # Once cryptography is bumped to the latest version, openssl1.1-compat should be removed and openssl1.1-compat-dev
 # should be replaced by openssl-dev.
 RUN apk add --no-cache bash openssh ca-certificates jq curl openssl openssl1.1-compat perl git zip \
- && apk add --no-cache --virtual .build-deps gcc make openssl1.1-compat-dev libffi-dev musl-dev linux-headers \
+ && apk add --no-cache --virtual .build-deps gcc make openssl1.1-compat-dev libffi-dev musl-dev linux-headers build-base unixodbc-dev freetds-dev \
  && apk add --no-cache libintl icu-libs libc6-compat \
  && apk add --no-cache bash-completion \
  && update-ca-certificates
