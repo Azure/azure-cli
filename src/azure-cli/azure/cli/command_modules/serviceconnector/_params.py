@@ -130,7 +130,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             context.ignore('new_addon')
 
     def add_secret_store_argument(context):
-        context.argument('key_vault_id', options_list=['--vault-id'], help='The id of key vault to store secret value')
+        if source == RESOURCE.ContainerApp:
+            context.ignore('key_vault_id')
+        else:
+            context.argument('key_vault_id', options_list=['--vault-id'],
+                             help='The id of key vault to store secret value')
 
     def add_vnet_block(context, target):
         if target not in TARGET_SUPPORT_SERVICE_ENDPOINT:
