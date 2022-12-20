@@ -143,3 +143,39 @@ jobs:
       ArtifactName: 'failure_tests'
       publishLocation: 'Container'
 
+- job: ResultSummary
+  displayName: CLI Extension Regression Test Result Summary
+  dependsOn: CLIExtensionRegressionTest
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+    - task: DownloadPipelineArtifact@2
+      displayName: 'Download Pipeline Artifact'
+    - task: AzureCLI@1
+      displayName: 'Result Summary'
+      inputs:
+        azureSubscription: 'Azure CLI release'
+        scriptLocation: inlineScript
+        inlineScript: |
+          set -ev
+          ls ../error_modules -al
+
+          # git config
+          git clone https://github.com/Azure/azure-cli-extensions.git
+          cd azure-cli-extensions
+
+          # git config
+          GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
+          git config --global user.email "AzPyCLI@microsoft.com"
+          git config --global user.name "Azure CLI Team"
+          git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli-extensions.git
+
+          git fetch azclibot
+          REGRESSION_BRANCHES=$(curl -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/repos/azclibot/azure-cli-extensions/git/matching-refs/heads/regression_test_$(Build.BuildId)_ | jq '.[] | .ref')
+
+          for branch in "${REGRESSION_BRANCHES}"
+          do
+          branch=${branch##*/}
+          branch=${branch%\"*}
+          echo ${branch}
+          done
