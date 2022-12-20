@@ -3828,7 +3828,9 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         uptime_sla = self.raw_param.get("uptime_sla")
         if uptime_sla:
-            logger.warning("Argument '--uptime-sla' has been deprecated and will be removed in a future release. Please use '--tier standard' instead.")
+            logger.warning(
+                "Argument '--uptime-sla' has been deprecated and will be removed in a future release. \
+                Please use '--tier standard' instead.")
 
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
@@ -3852,10 +3854,11 @@ class AKSManagedClusterContext(BaseAKSContext):
         tier = self.raw_param.get("tier")
         if not tier :
             return ""
-        
+
         tierStr = tier.lower()
         if tierStr not in ("free", "standard"):
-            raise InvalidArgumentValueError('Invalid argument value {} for tier. Tier value should be free or standard'.format(tierStr))
+            raise InvalidArgumentValueError(
+                'Invalid argument value {} for tier. Tier value should be free or standard'.format(tierStr))
         return tierStr
 
     def get_uptime_sla(self) -> bool:
@@ -3880,7 +3883,9 @@ class AKSManagedClusterContext(BaseAKSContext):
         no_uptime_sla = self.raw_param.get("no_uptime_sla")
         # We do not support this option in create mode, therefore we do not read the value from `mc`.
         if no_uptime_sla:
-            logger.warning("Argument '--no-uptime-sla' has been deprecated and will be removed in a future release. Please use '--tier free' instead.")
+            logger.warning(
+                "Argument '--no-uptime-sla' has been deprecated and will be removed in a future release. \
+                Please use '--tier free' instead.")
 
         # this parameter does not need dynamic completion
         # validation
