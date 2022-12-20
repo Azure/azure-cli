@@ -16,6 +16,7 @@ class EventHubEntityCreate(_EventHubEntityCreate):
 
 
 # pylint:disable=too-many-locals
+# pylint:disable=line-too-long
 class EventHubEntityUpdate(_EventHubEntityUpdate):
     def pre_operations(self):
         args = self.ctx.args
