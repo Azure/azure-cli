@@ -20,5 +20,5 @@ RUN dos2unix ./scripts/release/rpm/azure-cli.spec && \
 FROM ${image} AS execution-env
 
 COPY --from=build-env /azure-cli-dev.rpm ./
-RUN rpm -i ./azure-cli-dev.rpm && \
+RUN dnf install -y ./azure-cli-dev.rpm && \
     az --version
