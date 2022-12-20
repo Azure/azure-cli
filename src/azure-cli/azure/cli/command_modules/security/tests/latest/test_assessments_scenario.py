@@ -9,7 +9,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 class SecurityCenterAssessmentsTests(ScenarioTest):
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(size_kb=99999)
     def test_security_assessments(self):
 
         assessments = self.cmd('az security assessment list').get_output_in_json()

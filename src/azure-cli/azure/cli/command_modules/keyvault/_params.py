@@ -37,12 +37,13 @@ key_format_values = certificate_format_values = ['PEM', 'DER']
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
-    (JsonWebKeyOperation, JsonWebKeyType, SasTokenType,
+    (JsonWebKeyOperation, SasTokenType,
      SasDefinitionAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes) = self.get_models(
-         'JsonWebKeyOperation', 'JsonWebKeyType', 'SasTokenType',
+         'JsonWebKeyOperation', 'SasTokenType',
          'SasDefinitionAttributes', 'SecretAttributes', 'CertificateAttributes', 'StorageAccountAttributes',
          resource_type=ResourceType.DATA_KEYVAULT)
 
+    JsonWebKeyType = self.get_sdk('KeyType', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_enums')
     KeyCurveName = self.get_sdk('KeyCurveName', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_enums')
     EncryptionAlgorithm = self.get_sdk('EncryptionAlgorithm', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='crypto._enums')
 
@@ -57,16 +58,6 @@ def load_arguments(self, _):
         export = "export"
 
     JsonWebKeyOperation = CLIJsonWebKeyOperation  # TODO: Remove this patch when new SDK is released
-
-    class CLIJsonWebKeyType(str, Enum):
-        ec = "EC"  #: Elliptic Curve.
-        ec_hsm = "EC-HSM"  #: Elliptic Curve with a private key which is not exportable from the HSM.
-        rsa = "RSA"  #: RSA (https://tools.ietf.org/html/rfc3447)
-        rsa_hsm = "RSA-HSM"  #: RSA with a private key which is not exportable from the HSM.
-        oct = "oct"  #: Octet sequence (used to represent symmetric keys)
-        oct_hsm = "oct-HSM"  #: Oct with a private key which is not exportable from the HSM.
-
-    JsonWebKeyType = CLIJsonWebKeyType  # TODO: Remove this patch when new SDK is released
 
     class CLIKeyTypeForBYOKImport(str, Enum):
         ec = "EC"  #: Elliptic Curve.
