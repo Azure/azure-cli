@@ -276,7 +276,7 @@ parameters:
     short-summary: Enable syslog data collection for Monitoring addon
   - name: --uptime-sla
     type: bool
-    short-summary: [Deprecated] : (--uptime-sla will be deprecated) Enable a standard managed cluster service with a financially backed SLA.
+    short-summary: (--uptime-sla will be deprecated) Enable a standard managed cluster service with a financially backed SLA.
   - name: --tier
     type: string
     short-summary: Specify pricing tier (Standadrd tier enables a standard managed cluster service with a financially backed SLA).
@@ -523,10 +523,10 @@ parameters:
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
   - name: --uptime-sla
     type: bool
-    short-summary: [Deprecated] : (--uptime-sla will be deprecated) Enable a standard managed cluster service with a financially backed SLA.
+    short-summary: (--uptime-sla will be deprecated) Enable a standard managed cluster service with a financially backed SLA.
   - name: --no-uptime-sla
     type: bool
-    short-summary: [Deprecated] : (--uptime-sla will be deprecated) Change a standard managed cluster to a free one.
+    short-summary: (--uptime-sla will be deprecated) Change a standard managed cluster to a free one.
   - name: --tier
     type: string
     short-summary: "--tier standard" enables a standard managed cluster service with a financially backed SLA; "--tier free" changes a standard managed cluster to a free one.
