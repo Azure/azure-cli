@@ -49,6 +49,7 @@ class Start(AAZCommand):
             options=["-n", "--name"],
             help="Name of the application gateway.",
             required=True,
+            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -140,6 +141,10 @@ class Start(AAZCommand):
 
         def on_200(self, session):
             pass
+
+
+class _StartHelper:
+    """Helper class for Start"""
 
 
 __all__ = ["Start"]
