@@ -156,9 +156,7 @@ class Wait(AAZWaitCommand):
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.identity = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            _schema_on_200.identity = AAZObjectType()
             _schema_on_200.location = AAZStrType(
                 flags={"required": True},
             )
@@ -173,7 +171,7 @@ class Wait(AAZWaitCommand):
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _build_schema_system_data_read(_schema_on_200.system_data)
+            _WaitHelper._build_schema_system_data_read(_schema_on_200.system_data)
             _schema_on_200.tags = AAZDictType()
             _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
@@ -217,9 +215,7 @@ class Wait(AAZWaitCommand):
             properties.disable_local_auth = AAZBoolType(
                 serialized_name="disableLocalAuth",
             )
-            properties.encryption = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            properties.encryption = AAZObjectType()
             properties.metric_id = AAZStrType(
                 serialized_name="metricId",
                 flags={"read_only": True},
@@ -267,9 +263,7 @@ class Wait(AAZWaitCommand):
             key_vault_properties.Element = AAZObjectType()
 
             _element = cls._schema_on_200.properties.encryption.key_vault_properties.Element
-            _element.identity = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            _element.identity = AAZObjectType()
             _element.key_name = AAZStrType(
                 serialized_name="keyName",
             )
@@ -305,7 +299,7 @@ class Wait(AAZWaitCommand):
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _build_schema_system_data_read(_element.system_data)
+            _WaitHelper._build_schema_system_data_read(_element.system_data)
             _element.type = AAZStrType(
                 flags={"read_only": True},
             )
@@ -341,50 +335,52 @@ class Wait(AAZWaitCommand):
             return cls._schema_on_200
 
 
-_schema_system_data_read = None
+class _WaitHelper:
+    """Helper class for Wait"""
 
+    _schema_system_data_read = None
 
-def _build_schema_system_data_read(_schema):
-    global _schema_system_data_read
-    if _schema_system_data_read is not None:
-        _schema.created_at = _schema_system_data_read.created_at
-        _schema.created_by = _schema_system_data_read.created_by
-        _schema.created_by_type = _schema_system_data_read.created_by_type
-        _schema.last_modified_at = _schema_system_data_read.last_modified_at
-        _schema.last_modified_by = _schema_system_data_read.last_modified_by
-        _schema.last_modified_by_type = _schema_system_data_read.last_modified_by_type
-        return
+    @classmethod
+    def _build_schema_system_data_read(cls, _schema):
+        if cls._schema_system_data_read is not None:
+            _schema.created_at = cls._schema_system_data_read.created_at
+            _schema.created_by = cls._schema_system_data_read.created_by
+            _schema.created_by_type = cls._schema_system_data_read.created_by_type
+            _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
+            _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
+            _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
+            return
 
-    _schema_system_data_read = AAZObjectType(
-        flags={"read_only": True}
-    )
+        cls._schema_system_data_read = _schema_system_data_read = AAZObjectType(
+            flags={"read_only": True}
+        )
 
-    system_data_read = _schema_system_data_read
-    system_data_read.created_at = AAZStrType(
-        serialized_name="createdAt",
-    )
-    system_data_read.created_by = AAZStrType(
-        serialized_name="createdBy",
-    )
-    system_data_read.created_by_type = AAZStrType(
-        serialized_name="createdByType",
-    )
-    system_data_read.last_modified_at = AAZStrType(
-        serialized_name="lastModifiedAt",
-    )
-    system_data_read.last_modified_by = AAZStrType(
-        serialized_name="lastModifiedBy",
-    )
-    system_data_read.last_modified_by_type = AAZStrType(
-        serialized_name="lastModifiedByType",
-    )
+        system_data_read = _schema_system_data_read
+        system_data_read.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data_read.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data_read.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data_read.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data_read.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data_read.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
 
-    _schema.created_at = _schema_system_data_read.created_at
-    _schema.created_by = _schema_system_data_read.created_by
-    _schema.created_by_type = _schema_system_data_read.created_by_type
-    _schema.last_modified_at = _schema_system_data_read.last_modified_at
-    _schema.last_modified_by = _schema_system_data_read.last_modified_by
-    _schema.last_modified_by_type = _schema_system_data_read.last_modified_by_type
+        _schema.created_at = cls._schema_system_data_read.created_at
+        _schema.created_by = cls._schema_system_data_read.created_by
+        _schema.created_by_type = cls._schema_system_data_read.created_by_type
+        _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
+        _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
+        _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
 
 
 __all__ = ["Wait"]

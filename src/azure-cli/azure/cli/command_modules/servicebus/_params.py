@@ -46,7 +46,7 @@ def load_arguments_sb(self, _):
                    help='List of KeyVaultProperties objects.')
         c.argument('minimum_tls_version', options_list=['--minimum-tls-version', '--min-tls'], arg_type=get_enum_type(TlsVersion),
                    help='The minimum TLS version for the cluster to support, e.g. 1.2')
-        #c.argument('type',options_list=['--type'],choices=["None","SystemAssigned","UserAssigned"],arg_type='Identity')
+
     with self.argument_context('servicebus namespace exists') as c:
         c.argument('name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
 

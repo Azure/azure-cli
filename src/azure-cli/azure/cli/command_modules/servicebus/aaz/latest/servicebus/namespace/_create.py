@@ -46,70 +46,19 @@ class Create(AAZCommand):
             options=["-n", "--name", "--namespace-name"],
             help="The namespace name.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
 
-        # define Arg Group "Encryption"
-
-        _args_schema = cls._args_schema
-        _args_schema.key_vault_properties = AAZListArg(
-            options=["--key-vault-properties"],
-            arg_group="Encryption",
-            help="Properties of KeyVault",
-        )
-        _args_schema.require_infrastructure_encryption = AAZBoolArg(
-            options=["--require-infrastructure-encryption"],
-            arg_group="Encryption",
-            help="Enable Infrastructure Encryption (Double Encryption)",
-        )
-
-        key_vault_properties = cls._args_schema.key_vault_properties
-        key_vault_properties.Element = AAZObjectArg()
-
-        _element = cls._args_schema.key_vault_properties.Element
-        _element.user_assigned_identity = AAZStrArg(
-            options=["user-assigned-identity"],
-            help="ARM ID of user Identity selected for encryption",
-        )
-        _element.key_name = AAZStrArg(
-            options=["key-name"],
-            help="Name of the Key from KeyVault",
-        )
-        _element.key_vault_uri = AAZStrArg(
-            options=["key-vault-uri"],
-            help="Uri of KeyVault",
-        )
-        _element.key_version = AAZStrArg(
-            options=["key-version"],
-            help="Version of KeyVault",
-        )
-
-        # define Arg Group "Identity"
-
-        _args_schema = cls._args_schema
-        _args_schema.identity_type = AAZStrArg(
-            options=["--identity-type"],
-            arg_group="Identity",
-            help="Type of managed service identity.",
-            enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned", "UserAssigned": "UserAssigned"},
-        )
-        _args_schema.user_assigned_identity = AAZDictArg(
-            options=["--user-assigned-identity"],
-            arg_group="Identity",
-            help="Properties for User Assigned Identities",
-        )
-
-        user_assigned_identity = cls._args_schema.user_assigned_identity
-        user_assigned_identity.Element = AAZObjectArg(
-            blank={},
-        )
-
         # define Arg Group "Parameters"
 
         _args_schema = cls._args_schema
+        _args_schema.identity = AAZObjectArg(
+            options=["--identity"],
+            arg_group="Parameters",
+            help="Properties of BYOK Identity description",
+        )
         _args_schema.location = AAZResourceLocationArg(
             arg_group="Parameters",
             help="The Geo-location where the resource lives",
@@ -118,10 +67,48 @@ class Create(AAZCommand):
                 resource_group_arg="resource_group",
             ),
         )
+        _args_schema.sku = AAZObjectArg(
+            options=["--sku"],
+            arg_group="Parameters",
+            help="Properties of SKU",
+        )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             arg_group="Parameters",
             help="Resource tags",
+        )
+
+        identity = cls._args_schema.identity
+        identity.type = AAZStrArg(
+            options=["type"],
+            help="Type of managed service identity.",
+            enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned", "UserAssigned": "UserAssigned"},
+        )
+        identity.user_assigned_identities = AAZDictArg(
+            options=["user-assigned-identities"],
+            help="Properties for User Assigned Identities",
+        )
+
+        user_assigned_identities = cls._args_schema.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectArg(
+            blank={},
+        )
+
+        sku = cls._args_schema.sku
+        sku.capacity = AAZIntArg(
+            options=["capacity"],
+            help="The specified messaging units for the tier. For Premium tier, capacity are 1,2 and 4.",
+        )
+        sku.name = AAZStrArg(
+            options=["name"],
+            help="Name of this SKU.",
+            required=True,
+            enum={"Basic": "Basic", "Premium": "Premium", "Standard": "Standard"},
+        )
+        sku.tier = AAZStrArg(
+            options=["tier"],
+            help="The billing tier of this particular SKU.",
+            enum={"Basic": "Basic", "Premium": "Premium", "Standard": "Standard"},
         )
 
         tags = cls._args_schema.tags
@@ -139,6 +126,11 @@ class Create(AAZCommand):
             options=["--disable-local-auth"],
             arg_group="Properties",
             help="This property disables SAS authentication for the Service Bus namespace.",
+        )
+        _args_schema.encryption = AAZObjectArg(
+            options=["--encryption"],
+            arg_group="Properties",
+            help="Properties of BYOK Encryption description",
         )
         _args_schema.minimum_tls_version = AAZStrArg(
             options=["--minimum-tls-version"],
@@ -162,6 +154,48 @@ class Create(AAZCommand):
             options=["--zone-redundant"],
             arg_group="Properties",
             help="Enabling this property creates a Premium Service Bus Namespace in regions supported availability zones.",
+        )
+
+        encryption = cls._args_schema.encryption
+        encryption.key_source = AAZStrArg(
+            options=["key-source"],
+            help="Enumerates the possible value of keySource for Encryption",
+            default="Microsoft.KeyVault",
+            enum={"Microsoft.KeyVault": "Microsoft.KeyVault"},
+        )
+        encryption.key_vault_properties = AAZListArg(
+            options=["key-vault-properties"],
+            help="Properties of KeyVault",
+        )
+        encryption.require_infrastructure_encryption = AAZBoolArg(
+            options=["require-infrastructure-encryption"],
+            help="Enable Infrastructure Encryption (Double Encryption)",
+        )
+
+        key_vault_properties = cls._args_schema.encryption.key_vault_properties
+        key_vault_properties.Element = AAZObjectArg()
+
+        _element = cls._args_schema.encryption.key_vault_properties.Element
+        _element.identity = AAZObjectArg(
+            options=["identity"],
+        )
+        _element.key_name = AAZStrArg(
+            options=["key-name"],
+            help="Name of the Key from KeyVault",
+        )
+        _element.key_vault_uri = AAZStrArg(
+            options=["key-vault-uri"],
+            help="Uri of KeyVault",
+        )
+        _element.key_version = AAZStrArg(
+            options=["key-version"],
+            help="Version of KeyVault",
+        )
+
+        identity = cls._args_schema.encryption.key_vault_properties.Element.identity
+        identity.user_assigned_identity = AAZStrArg(
+            options=["user-assigned-identity"],
+            help="ARM ID of user Identity selected for encryption",
         )
 
         private_endpoint_connections = cls._args_schema.private_endpoint_connections
@@ -197,27 +231,6 @@ class Create(AAZCommand):
             options=["status"],
             help="Status of the connection.",
             enum={"Approved": "Approved", "Disconnected": "Disconnected", "Pending": "Pending", "Rejected": "Rejected"},
-        )
-
-        # define Arg Group "Sku"
-
-        _args_schema = cls._args_schema
-        _args_schema.capacity = AAZIntArg(
-            options=["--capacity"],
-            arg_group="Sku",
-            help="The specified messaging units for the tier. For Premium tier, capacity are 1,2 and 4.",
-        )
-        _args_schema.sku = AAZStrArg(
-            options=["--sku"],
-            arg_group="Sku",
-            help="Name of this SKU.",
-            enum={"Basic": "Basic", "Premium": "Premium", "Standard": "Standard"},
-        )
-        _args_schema.tier = AAZStrArg(
-            options=["--tier"],
-            arg_group="Sku",
-            help="The billing tier of this particular SKU.",
-            enum={"Basic": "Basic", "Premium": "Premium", "Standard": "Standard"},
         )
         return cls._args_schema
 
@@ -327,16 +340,16 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("identity", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+            _builder.set_prop("identity", AAZObjectType, ".identity")
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _builder.set_prop("sku", AAZObjectType)
+            _builder.set_prop("sku", AAZObjectType, ".sku")
             _builder.set_prop("tags", AAZDictType, ".tags")
 
             identity = _builder.get(".identity")
             if identity is not None:
-                identity.set_prop("type", AAZStrType, ".identity_type")
-                identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned_identity")
+                identity.set_prop("type", AAZStrType, ".type")
+                identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned_identities")
 
             user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
             if user_assigned_identities is not None:
@@ -346,7 +359,7 @@ class Create(AAZCommand):
             if properties is not None:
                 properties.set_prop("alternateName", AAZStrType, ".alternate_name")
                 properties.set_prop("disableLocalAuth", AAZBoolType, ".disable_local_auth")
-                properties.set_prop("encryption", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                properties.set_prop("encryption", AAZObjectType, ".encryption")
                 properties.set_prop("minimumTlsVersion", AAZStrType, ".minimum_tls_version")
                 properties.set_prop("privateEndpointConnections", AAZListType, ".private_endpoint_connections")
                 properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
@@ -354,6 +367,7 @@ class Create(AAZCommand):
 
             encryption = _builder.get(".properties.encryption")
             if encryption is not None:
+                encryption.set_prop("keySource", AAZStrType, ".key_source")
                 encryption.set_prop("keyVaultProperties", AAZListType, ".key_vault_properties")
                 encryption.set_prop("requireInfrastructureEncryption", AAZBoolType, ".require_infrastructure_encryption")
 
@@ -363,7 +377,7 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".properties.encryption.keyVaultProperties[]")
             if _elements is not None:
-                _elements.set_prop("identity", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("identity", AAZObjectType, ".identity")
                 _elements.set_prop("keyName", AAZStrType, ".key_name")
                 _elements.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri")
                 _elements.set_prop("keyVersion", AAZStrType, ".key_version")
@@ -398,7 +412,7 @@ class Create(AAZCommand):
             sku = _builder.get(".sku")
             if sku is not None:
                 sku.set_prop("capacity", AAZIntType, ".capacity")
-                sku.set_prop("name", AAZStrType, ".sku", typ_kwargs={"flags": {"required": True}})
+                sku.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
                 sku.set_prop("tier", AAZStrType, ".tier")
 
             tags = _builder.get(".tags")
@@ -428,9 +442,7 @@ class Create(AAZCommand):
             _schema_on_200_201.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200_201.identity = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            _schema_on_200_201.identity = AAZObjectType()
             _schema_on_200_201.location = AAZStrType(
                 flags={"required": True},
             )
@@ -445,7 +457,7 @@ class Create(AAZCommand):
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _build_schema_system_data_read(_schema_on_200_201.system_data)
+            _CreateHelper._build_schema_system_data_read(_schema_on_200_201.system_data)
             _schema_on_200_201.tags = AAZDictType()
             _schema_on_200_201.type = AAZStrType(
                 flags={"read_only": True},
@@ -489,9 +501,7 @@ class Create(AAZCommand):
             properties.disable_local_auth = AAZBoolType(
                 serialized_name="disableLocalAuth",
             )
-            properties.encryption = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            properties.encryption = AAZObjectType()
             properties.metric_id = AAZStrType(
                 serialized_name="metricId",
                 flags={"read_only": True},
@@ -539,9 +549,7 @@ class Create(AAZCommand):
             key_vault_properties.Element = AAZObjectType()
 
             _element = cls._schema_on_200_201.properties.encryption.key_vault_properties.Element
-            _element.identity = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            _element.identity = AAZObjectType()
             _element.key_name = AAZStrType(
                 serialized_name="keyName",
             )
@@ -577,7 +585,7 @@ class Create(AAZCommand):
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _build_schema_system_data_read(_element.system_data)
+            _CreateHelper._build_schema_system_data_read(_element.system_data)
             _element.type = AAZStrType(
                 flags={"read_only": True},
             )
@@ -613,50 +621,52 @@ class Create(AAZCommand):
             return cls._schema_on_200_201
 
 
-_schema_system_data_read = None
+class _CreateHelper:
+    """Helper class for Create"""
 
+    _schema_system_data_read = None
 
-def _build_schema_system_data_read(_schema):
-    global _schema_system_data_read
-    if _schema_system_data_read is not None:
-        _schema.created_at = _schema_system_data_read.created_at
-        _schema.created_by = _schema_system_data_read.created_by
-        _schema.created_by_type = _schema_system_data_read.created_by_type
-        _schema.last_modified_at = _schema_system_data_read.last_modified_at
-        _schema.last_modified_by = _schema_system_data_read.last_modified_by
-        _schema.last_modified_by_type = _schema_system_data_read.last_modified_by_type
-        return
+    @classmethod
+    def _build_schema_system_data_read(cls, _schema):
+        if cls._schema_system_data_read is not None:
+            _schema.created_at = cls._schema_system_data_read.created_at
+            _schema.created_by = cls._schema_system_data_read.created_by
+            _schema.created_by_type = cls._schema_system_data_read.created_by_type
+            _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
+            _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
+            _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
+            return
 
-    _schema_system_data_read = AAZObjectType(
-        flags={"read_only": True}
-    )
+        cls._schema_system_data_read = _schema_system_data_read = AAZObjectType(
+            flags={"read_only": True}
+        )
 
-    system_data_read = _schema_system_data_read
-    system_data_read.created_at = AAZStrType(
-        serialized_name="createdAt",
-    )
-    system_data_read.created_by = AAZStrType(
-        serialized_name="createdBy",
-    )
-    system_data_read.created_by_type = AAZStrType(
-        serialized_name="createdByType",
-    )
-    system_data_read.last_modified_at = AAZStrType(
-        serialized_name="lastModifiedAt",
-    )
-    system_data_read.last_modified_by = AAZStrType(
-        serialized_name="lastModifiedBy",
-    )
-    system_data_read.last_modified_by_type = AAZStrType(
-        serialized_name="lastModifiedByType",
-    )
+        system_data_read = _schema_system_data_read
+        system_data_read.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data_read.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data_read.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data_read.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data_read.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data_read.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
 
-    _schema.created_at = _schema_system_data_read.created_at
-    _schema.created_by = _schema_system_data_read.created_by
-    _schema.created_by_type = _schema_system_data_read.created_by_type
-    _schema.last_modified_at = _schema_system_data_read.last_modified_at
-    _schema.last_modified_by = _schema_system_data_read.last_modified_by
-    _schema.last_modified_by_type = _schema_system_data_read.last_modified_by_type
+        _schema.created_at = cls._schema_system_data_read.created_at
+        _schema.created_by = cls._schema_system_data_read.created_by
+        _schema.created_by_type = cls._schema_system_data_read.created_by_type
+        _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
+        _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
+        _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
 
 
 __all__ = ["Create"]

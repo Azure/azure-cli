@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "servicebus",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Servicebus NamespaceV2
+    """NamespaceV2 cmdlets
     """
     pass
 
