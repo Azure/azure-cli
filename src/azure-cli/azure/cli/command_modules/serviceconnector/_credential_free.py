@@ -411,16 +411,7 @@ class PostgresFlexHandler(TargetHandler):
         self.host = self.db_server + self.endpoint
         self.dbname = target_segments.get('child_name_1')
 
-    def enable_pg_extension(self):
-        try:
-            run_cli_cmd('az postgres flexible-server parameter set -g {} -s {} --subscription {} --name azure.extensions --value uuid-ossp'.format(
-                self.resource_group, self.db_server, self.subscription))
-        except Exception as e:  # pylint: disable=broad-except
-            logger.warning(e)
-
     def enable_target_aad_auth(self):
-        self.enable_pg_extension()
-
         run_cli_cmd('az postgres flexible-server update -g {} -n {} --subscription {} --active-directory-auth Enabled'.format(
             self.resource_group, self.db_server, self.subscription))
 
