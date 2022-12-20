@@ -272,7 +272,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZDictArg, AAZStrArg
+        from azure.cli.core.aaz import AAZDictArg, AAZStrArg, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.custom_error_pages = AAZDictArg(
             options=["--custom-error-pages"],
@@ -282,7 +282,7 @@ class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
         args_schema.custom_error_pages.Element = AAZStrArg(
             nullable=True,
         )
-        args_schema.http2._enum = {"Enable": True, "Disable": False}
+        args_schema.http2.enum = AAZArgEnum({"Enabled": True, "Disabled": False})
         args_schema.custom_error_configurations._registered = False
         return args_schema
 
