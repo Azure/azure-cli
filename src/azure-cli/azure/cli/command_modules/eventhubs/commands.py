@@ -75,7 +75,7 @@ def load_command_table(self, _):
 
 # Namespace Region
     from azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file import create_eventhub_namespace
-    with self.command_group('eventhubs namespace create', custom_command_type=eh_namespace_custom,
+    with self.command_group('eventhubs namespace', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
         g.custom_command('create', 'create_eventhub_namespace', supports_no_wait=True)
 
@@ -179,7 +179,7 @@ def load_command_table(self, _):
 # Identity Region
     from azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file import cli_add_identity
     from azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file import cli_remove_identity
-    with self.command_group('eventhub namespace encryption', custom_command_type=eh_namespace_custom,
+    with self.command_group('eventhub namespace identity', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
         g.custom_command('assign', 'cli_add_identity', supports_no_wait=True)
         g.custom_command('remove', 'cli_remove_identity', supports_no_wait=True)

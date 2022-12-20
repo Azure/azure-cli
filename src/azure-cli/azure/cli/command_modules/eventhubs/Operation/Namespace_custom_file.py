@@ -174,16 +174,16 @@ def cli_remove_encryption(cmd,resource_group_name, namespace_name, encryption_co
             "key_vault_properties": keys
         }
     })
-def cli_add_identity(cmd, resource_group_name, namespace_name, mi_system_assigned=None, mi_user_assigned=None):
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Update
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Show
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Create
+def cli_add_identity(cmd, resource_group_name, namespace_name,system_assigned=None, user_assigned=None):
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhub.namespace import Update
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhub.namespace import Show
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhub.namespace import Create
     eventhubsnm = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "namespace_name": namespace_name
     })
     from azure.cli.core import CLIError
-
+    print("hello")
 
     if eventhubsnm['identity'] is None:
         eventhubsnm['identity'] = {
@@ -191,27 +191,26 @@ def cli_add_identity(cmd, resource_group_name, namespace_name, mi_system_assigne
             "userAssignedIdentities":None
         }
 
-    if mi_system_assigned:
+    if system_assigned:
         if eventhubsnm['identity']['type']=="UserAssigned":
             eventhubsnm['identity']['type']=="UserAssigned, SystemAssigned"
         elif eventhubsnm['identity']['type']=="None":
             eventhubsnm['identity']['type'] == "SystemAssigned"
-    print(eventhubsnm['identity']['userAssignedIdentities'])
-    if mi_user_assigned:
+
+    if user_assigned:
         if eventhubsnm['identity']['type']=="SystemAssigned":
             a="SystemAssigned, UserAssigned"
         else:
             a="UserAssigned"
         eventhubsnm['identity']['type']=a
-        user_assigned={}
-        for col in mi_user_assigned:
-            user_assigned[col]={}
+        user_assign={}
+        for col in user_assigned:
+            user_assign[col]={}
         #identity_id.update(dict.fromkeys(user_assigned, default_user_identity))
-        if eventhubsnm['identity']['userAssignedIdentities'] is None:
-            eventhubsnm['identity']['userAssignedIdentities'].update(user_assigned)
-        else:
-            eventhubsnm['identity']['userAssignedIdentities'].update(user_assigned)
-
+        print(user_assign)
+        print(eventhubsnm)
+        eventhubsnm['identity']['userAssignedIdentities'].update(user_assigned)
+    print(eventhubsnm['identity']['userAssignedIdentities'])
     return Update(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
