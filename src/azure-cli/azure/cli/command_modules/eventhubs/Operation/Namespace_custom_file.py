@@ -190,7 +190,8 @@ def cli_add_identity(cmd, resource_group_name, namespace_name,system_assigned=No
             "type":None,
             "userAssignedIdentities":None
         }
-
+    print(user_assigned)
+    print(type(user_assigned))
     if system_assigned:
         if eventhubsnm['identity']['type']=="UserAssigned":
             eventhubsnm['identity']['type']=="UserAssigned, SystemAssigned"
@@ -205,6 +206,7 @@ def cli_add_identity(cmd, resource_group_name, namespace_name,system_assigned=No
         eventhubsnm['identity']['type']=a
         user_assign={}
         for col in user_assigned:
+            print(col)
             user_assign[col]={}
         #identity_id.update(dict.fromkeys(user_assigned, default_user_identity))
         print(user_assign)
