@@ -1683,7 +1683,8 @@ def process_nw_packet_capture_create_namespace(cmd, namespace):
         file_path = namespace.file_path
         if not file_path.endswith('.cap'):
             raise CLIError("usage error: --file-path PATH must end with the '*.cap' extension")
-        file_path = file_path.replace('/', '\\')
+        if not file_path.startswith('/'):
+            file_path = file_path.replace('/', '\\')
         namespace.file_path = file_path
 
 
