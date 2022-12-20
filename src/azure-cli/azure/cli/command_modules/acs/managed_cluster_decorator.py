@@ -3827,6 +3827,9 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         # read the original value passed by the command
         uptime_sla = self.raw_param.get("uptime_sla")
+        if uptime_sla:
+            logger.warning("Argument '--uptime-sla' has been deprecated and will be removed in a future release. Please use '--tier standard' instead.")
+
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
@@ -3844,6 +3847,12 @@ class AKSManagedClusterContext(BaseAKSContext):
                     'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
                 )
         return uptime_sla
+
+    def get_tier(self) -> str:
+        tier = self.raw_param.get("tier").lower()
+        if tier not in ("free", "standard"):
+            raise InvalidArgumentValueError('Invalid argument value {} for tier. Tier value should be free or standard'.format(tier))
+        return tier
 
     def get_uptime_sla(self) -> bool:
         """Obtain the value of uptime_sla.
@@ -3866,6 +3875,8 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         no_uptime_sla = self.raw_param.get("no_uptime_sla")
         # We do not support this option in create mode, therefore we do not read the value from `mc`.
+        if no_uptime_sla:
+            logger.warning("Argument '--no-uptime-sla' has been deprecated and will be removed in a future release. Please use '--tier free' instead.")
 
         # this parameter does not need dynamic completion
         # validation
@@ -5266,7 +5277,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        if self.context.get_uptime_sla():
+        if self.context.get_uptime_sla() or self.context.get_tier() == "standard":
             mc.sku = self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Paid"
@@ -5746,13 +5757,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        if self.context.get_uptime_sla():
+        if self.context.get_uptime_sla() or self.context.get_tier() == "standard":
             mc.sku = self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Paid"
             )
 
-        if self.context.get_no_uptime_sla():
+        if self.context.get_no_uptime_sla() or self.context.get_tier() == "free":
             mc.sku = self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Free"

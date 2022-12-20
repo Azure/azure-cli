@@ -178,6 +178,7 @@ def load_arguments(self, _):
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"],
                    help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
         c.argument('uptime_sla', action='store_true')
+        c.argument('tier')
         c.argument('fqdn_subdomain')
         c.argument('api_server_authorized_ip_ranges', validator=validate_ip_ranges)
         c.argument('enable_private_cluster', action='store_true')
@@ -278,6 +279,7 @@ def load_arguments(self, _):
                    help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
         c.argument('uptime_sla', action='store_true')
         c.argument('no_uptime_sla', action='store_true')
+        c.argument('tier')
         c.argument('api_server_authorized_ip_ranges', validator=validate_ip_ranges)
         c.argument('enable_public_fqdn', action='store_true')
         c.argument('disable_public_fqdn', action='store_true')

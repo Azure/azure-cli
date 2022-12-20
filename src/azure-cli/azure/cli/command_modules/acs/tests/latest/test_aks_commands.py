@@ -2026,9 +2026,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         })
 
         # create
+        # create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+        #              '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+        #              '--service-principal={service_principal} --client-secret={client_secret} --uptime-sla '
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--service-principal={service_principal} --client-secret={client_secret} --uptime-sla '
+                     '--service-principal={service_principal} --client-secret={client_secret} --tier standard '
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
@@ -4462,9 +4465,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         })
 
         # create
+        # create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+        #              '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+        #              '--uptime-sla'
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--uptime-sla'
+                     '--tier standard'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
@@ -4473,13 +4479,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # update to no uptime sla
-        no_uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --no-uptime-sla'
+        # no_uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --no-uptime-sla'
+        no_uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --tier free'
         self.cmd(no_uptime_sla_cmd, checks=[
             self.check('sku.tier', 'Free')
         ])
 
         # update to uptime sla again
-        uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --uptime-sla --no-wait'
+        # uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --uptime-sla --no-wait'
+        uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --tier standard --no-wait'
         self.cmd(uptime_sla_cmd, checks=[
             self.is_empty()
         ])
