@@ -174,8 +174,6 @@ def cli_add_identity(cmd, resource_group_name, namespace_name, mi_system_assigne
         "namespace_name": namespace_name
     })
     from azure.cli.core import CLIError
-
-
     if servicebusnm['identity'] is None:
         servicebusnm['identity'] = {
             "type":None,
