@@ -3849,10 +3849,14 @@ class AKSManagedClusterContext(BaseAKSContext):
         return uptime_sla
 
     def get_tier(self) -> str:
-        tier = self.raw_param.get("tier").lower()
-        if tier not in ("free", "standard"):
-            raise InvalidArgumentValueError('Invalid argument value {} for tier. Tier value should be free or standard'.format(tier))
-        return tier
+        tier = self.raw_param.get("tier")
+        if not tier :
+            return ""
+        
+        tierStr = tier.lower()
+        if tierStr not in ("free", "standard"):
+            raise InvalidArgumentValueError('Invalid argument value {} for tier. Tier value should be free or standard'.format(tierStr))
+        return tierStr
 
     def get_uptime_sla(self) -> bool:
         """Obtain the value of uptime_sla.
