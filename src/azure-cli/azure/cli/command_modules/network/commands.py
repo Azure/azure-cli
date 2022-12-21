@@ -535,18 +535,22 @@ def load_command_table(self, _):
         g.custom_command('generate-loa', 'download_generated_loa_as_pdf')
 
     with self.command_group('network express-route port identity', min_api='2019-08-01') as g:
-        g.custom_command('assign', 'assign_express_route_port_identity', supports_no_wait=True)
-        g.custom_command('remove', 'remove_express_route_port_identity', supports_no_wait=True)
+        from azure.cli.command_modules.network.custom import ExpressRoutePortIdentityAssign
+        self.command_table['network express-route port identity assign'] = ExpressRoutePortIdentityAssign(loader=self)
+        # g.custom_command('assign', 'assign_express_route_port_identity', supports_no_wait=True)
+        # g.custom_command('remove', 'remove_express_route_port_identity', supports_no_wait=True)
         g.custom_show_command('show', 'show_express_route_port_identity')
 
     with self.command_group('network express-route port link', network_er_ports_sdk) as g:
-        g.generic_update_command('update',
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='update_express_route_port_link',
-                                 supports_no_wait=True,
-                                 child_collection_prop_name='links',
-                                 child_arg_name='link_name',
-                                 min_api='2019-08-01')
+        # g.generic_update_command('update',
+        #                          setter_name='begin_create_or_update',
+        #                          custom_func_name='update_express_route_port_link',
+        #                          supports_no_wait=True,
+        #                          child_collection_prop_name='links',
+        #                          child_arg_name='link_name',
+        #                          min_api='2019-08-01')
+        from azure.cli.command_modules.network.custom import ExpressRoutePortLinkUpdate
+        self.command_table['network express-route port link update'] = ExpressRoutePortLinkUpdate(loader=self)
     # endregion
 
     # region PrivateEndpoint

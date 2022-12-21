@@ -34,6 +34,8 @@ from .aaz.latest.network.express_route.gateway.connection import Create as _Expr
 from .aaz.latest.network.express_route.peering import Create as _ExpressRoutePeeringCreate, \
     Update as _ExpressRoutePeeringUpdate
 from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCreate
+from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRoutePortIdentityAssign
+from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
 from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
 
 import threading
@@ -3435,8 +3437,8 @@ def download_generated_loa_as_pdf(cmd,
 
 def assign_express_route_port_identity(cmd, resource_group_name, express_route_port_name,
                                        user_assigned_identity, no_wait=False):
-    client = network_client_factory(cmd.cli_ctx).express_route_ports
-    ports = client.get(resource_group_name, express_route_port_name)
+    # client = network_client_factory(cmd.cli_ctx).express_route_ports
+    # ports = client.get(resource_group_name, express_route_port_name)
 
     ManagedServiceIdentity, ManagedServiceIdentityUserAssignedIdentitiesValue = \
         cmd.get_models('ManagedServiceIdentity', 'Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
@@ -3444,12 +3446,35 @@ def assign_express_route_port_identity(cmd, resource_group_name, express_route_p
     user_assigned_identity_instance = ManagedServiceIdentityUserAssignedIdentitiesValue()
     user_assigned_identities_instance = dict()
     user_assigned_identities_instance[user_assigned_identity] = user_assigned_identity_instance
-
+    print(user_assigned_identities_instance)
     identity_instance = ManagedServiceIdentity(type="UserAssigned",
                                                user_assigned_identities=user_assigned_identities_instance)
     ports.identity = identity_instance
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, express_route_port_name, ports)
+
+
+class ExpressRoutePortIdentityAssign(_ExpressRoutePortIdentityAssign):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.identity = AAZResourceIdArg(
+            options=['--identity'],
+            help="Name or ID of the ManagedIdentity Resource.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{}"
+            )
+        )
+
+        args_schema.user_assigned_identities._registered = False
+
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        identity = args.identity.to_serialized_data()
+        args.user_assigned_identities = {identity: {}}
 
 
 def remove_express_route_port_identity(cmd, resource_group_name, express_route_port_name, no_wait=False):
@@ -3501,6 +3526,20 @@ def update_express_route_port_link(cmd, instance, parent, express_route_port_nam
         instance.admin_state = admin_state
 
     return parent
+
+
+class ExpressRoutePortLinkUpdate(_ExpressRoutePortLinkUpdate):
+    def pre_operations(self):
+        args = self.ctx.args
+        # TODO https://github.com/Azure/azure-rest-api-specs/issues/7569
+        # need to remove this conversion when the issue is fixed.
+        if has_value(args.macsec_cipher):
+            macsec_cipher = args.macsec_cipher.to_serialized_data()
+            macsec_ciphers_tmp = {'gcm-aes-128': 'GcmAes128', 'gcm-aes-256': 'GcmAes256'}
+            macsec_cipher = macsec_ciphers_tmp.get(macsec_cipher, macsec_cipher)
+            args.macsec_cipher = macsec_cipher
+
+
 # endregion
 
 
