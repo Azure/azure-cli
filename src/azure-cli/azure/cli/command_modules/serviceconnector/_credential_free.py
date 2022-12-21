@@ -26,7 +26,7 @@ from ._validators import (
 
 logger = get_logger(__name__)
 
-PasswordlessIdentity = {
+AUTHTYPES = {
     AUTH_TYPE.SystemIdentity: 'systemAssignedIdentity',
     AUTH_TYPE.UserAccount: 'userAccount'
 }
@@ -37,7 +37,7 @@ PasswordlessIdentity = {
 # For other linker, ignore the steps
 def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, client_type, connection_name):
     # return if connection is not for db mi
-    if auth_info['auth_type'] not in {PasswordlessIdentity[AUTH_TYPE.SystemIdentity], PasswordlessIdentity[AUTH_TYPE.UserAccount]}:
+    if auth_info['auth_type'] not in {AUTHTYPES[AUTH_TYPE.SystemIdentity], AUTHTYPES[AUTH_TYPE.UserAccount]}:
         return
 
     source_type = get_source_resource_name(cmd)
@@ -59,18 +59,15 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, client_type, c
         raise Exception(
             "No object id for user {}".format(target_handler.login_username))
 
-    client_id = None
-    if source_type == RESOURCE.Local:
-        client_id = user_object_id
-        identity_name = target_handler.login_username
-    else:
+    target_handler.user_object_id = user_object_id
+    if source_type != RESOURCE.Local:
         # enable source mi
         source_object_id = source_handler.get_identity_pid()
-
+        target_handler.identity_object_id = source_object_id
         identity_info = run_cli_cmd(
             'az ad sp show --id {}'.format(source_object_id), 15, 10)
-        client_id = identity_info.get('appId')
-        identity_name = identity_info.get('displayName')
+        target_handler.identity_client_id = identity_info.get('appId')
+        target_handler.identity_name = identity_info.get('displayName')
 
     # enable target aad authentication and set login user as db aad admin
     target_handler.enable_target_aad_auth()
@@ -78,7 +75,7 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, client_type, c
         user_object_id, mysql_identity_id=auth_info.get('mysql-identity-id'))
 
     # create an aad user in db
-    target_handler.create_aad_user(identity_name, client_id)
+    target_handler.create_aad_user()
     return target_handler.get_auth_config(user_object_id)
 
 
@@ -106,8 +103,12 @@ class TargetHandler:
     login_username = ""
     endpoint = ""
     aad_username = ""
+    user_object_id = ""
 
     auth_type = ""
+    identity_name = ""
+    identity_client_id = ""
+    identity_object_id = ""
 
     def __init__(self, cmd, target_id, target_type, auth_type, connection_name):
         self.profile = Profile(cli_ctx=cmd.cli_ctx)
@@ -122,10 +123,7 @@ class TargetHandler:
         self.auth_type = auth_type
         self.login_username = run_cli_cmd(
             'az account show').get("user").get("name")
-        if auth_type == PasswordlessIdentity[AUTH_TYPE.UserAccount]:
-            self.aad_username = self.login_username
-        else:
-            self.aad_username = "aad_" + connection_name
+        self.aad_username = "aad_" + connection_name
 
     def enable_target_aad_auth(self):
         return
@@ -136,17 +134,17 @@ class TargetHandler:
     def set_target_firewall(self, add_new_rule, ip_name):
         return
 
-    def create_aad_user(self, identity_name, client_id):
+    def create_aad_user(self):
         return
 
     def get_auth_config(self, user_object_id):
-        if self.auth_type == PasswordlessIdentity[AUTH_TYPE.UserAccount]:
+        if self.auth_type == AUTHTYPES[AUTH_TYPE.UserAccount]:
             return {
                 'auth_type': self.auth_type,
                 'username': self.aad_username,
                 'principal_id': user_object_id
             }
-        if self.auth_type == PasswordlessIdentity[AUTH_TYPE.SystemIdentity]:
+        if self.auth_type == AUTHTYPES[AUTH_TYPE.SystemIdentity]:
             return {
                 'auth_type': self.auth_type,
                 'username': self.aad_username,
@@ -180,7 +178,7 @@ class MysqlFlexibleHandler(TargetHandler):
         if mysql_identity_id is None:
             raise ValidationError(
                 "Provide '{} mysql-identity-id=xx' to set {} as AAD administrator.".format(
-                    '--system-identity' if self.auth_type == PasswordlessIdentity[AUTH_TYPE.SystemIdentity] else '--user-account', self.login_username))
+                    '--system-identity' if self.auth_type == AUTHTYPES[AUTH_TYPE.SystemIdentity] else '--user-account', self.login_username))
         mysql_umi = run_cli_cmd(
             'az mysql flexible-server identity list -g {} -s {} --subscription {}'.format(self.resource_group, self.server, self.subscription))
         if (not mysql_umi) or (not mysql_umi.get("userAssignedIdentities")) or mysql_identity_id not in mysql_umi.get("userAssignedIdentities"):
@@ -189,8 +187,8 @@ class MysqlFlexibleHandler(TargetHandler):
         run_cli_cmd('az mysql flexible-server ad-admin create -g {} -s {} --subscription {} -u {} -i {} --identity {}'.format(
             self.resource_group, self.server, self.subscription, self.login_username, user_object_id, mysql_identity_id))
 
-    def create_aad_user(self, identity_name, client_id):
-        query_list = self.get_create_query(client_id)
+    def create_aad_user(self):
+        query_list = self.get_create_query()
         connection_kwargs = self.get_connection_string()
         ip_name = None
         try:
@@ -273,10 +271,10 @@ class MysqlFlexibleHandler(TargetHandler):
             'autocommit': True
         }
 
-    def get_create_query(self, client_id):
-        # Don't create aad user for user account because it will cause breakdown on mysql
-        if self.auth_type == PasswordlessIdentity[AUTH_TYPE.UserAccount]:
-            return []
+    def get_create_query(self):
+        client_id = self.identity_client_id
+        if self.auth_type == AUTHTYPES[AUTH_TYPE.UserAccount]:
+            client_id = self.user_object_id
         return [
             "SET aad_auth_validate_oids_in_tenant = OFF;",
             "DROP USER IF EXISTS '{}'@'%';".format(self.aad_username),
@@ -299,6 +297,10 @@ class SqlHandler(TargetHandler):
         target_segments = parse_resource_id(target_id)
         self.server = target_segments.get('name')
         self.dbname = target_segments.get('child_name_1')
+        if self.auth_type == AUTHTYPES[AUTH_TYPE.SystemIdentity]:
+            self.aad_username = self.identity_name
+        if self.auth_type == AUTHTYPES[AUTH_TYPE.UserAccount]:
+            self.aad_username = self.login_username
 
     def set_user_admin(self, user_object_id, **kwargs):
         # pylint: disable=not-an-iterable
@@ -311,10 +313,9 @@ class SqlHandler(TargetHandler):
             run_cli_cmd('az sql server ad-admin create -g {} --server-name {} --display-name {} --object-id {} --subscription {}'.format(
                 self.resource_group, self.server, self.login_username, user_object_id, self.subscription)).get('objectId')
 
-    def create_aad_user(self, identity_name, client_id):
-        self.aad_username = identity_name
+    def create_aad_user(self):
 
-        query_list = self.get_create_query(client_id)
+        query_list = self.get_create_query()
         connection_args = self.get_connection_string()
         ip_name = None
         try:
@@ -391,7 +392,7 @@ class SqlHandler(TargetHandler):
             self.server + self.endpoint + ';database=' + self.dbname + ';'
         return {'connection_string': conn_string, 'attrs_before': {SQL_COPT_SS_ACCESS_TOKEN: token_struct}}
 
-    def get_create_query(self, client_id):
+    def get_create_query(self):
         role_q = "CREATE USER \"{}\" FROM EXTERNAL PROVIDER;".format(
             self.aad_username)
         grant_q = "GRANT CONTROL ON DATABASE::{} TO \"{}\";".format(
@@ -430,10 +431,10 @@ class PostgresFlexHandler(TargetHandler):
         run_cli_cmd('az postgres flexible-server ad-admin create -u {} -i {} -g {} -s {} --subscription {}'.format(
             self.login_username, user_object_id, self.resource_group, self.db_server, self.subscription))
 
-    def create_aad_user(self, identity_name, client_id):
+    def create_aad_user(self):
         # self.aad_user = identity_name or self.aad_user
 
-        query_list = self.get_create_query(client_id)
+        query_list = self.get_create_query()
         connection_string = self.get_connection_string()
         ip_name = None
         try:
@@ -525,11 +526,16 @@ class PostgresFlexHandler(TargetHandler):
             self.host, self.login_username, password)
         return conn_string
 
-    def get_create_query(self, client_id):
+    def get_create_query(self):
+        object_type = 'service'
+        object_id = self.identity_object_id
+        if self.auth_type == AUTHTYPES[AUTH_TYPE.UserAccount]:
+            object_id = self.user_object_id
+            object_type = 'user'
         return [
             # 'drop role IF EXISTS "{0}";'.format(self.aad_username),
-            "select * from pgaadauth_create_principal_with_oid('{0}', '{1}', 'service', false, false);".format(
-                self.aad_username, client_id) if self.auth_type == PasswordlessIdentity[AUTH_TYPE.SystemIdentity] else '',
+            "select * from pgaadauth_create_principal_with_oid('{0}', '{1}', '{2}', false, false);".format(
+                self.aad_username, object_id, object_type),
             'GRANT ALL PRIVILEGES ON DATABASE "{0}" TO "{1}";'.format(
                 self.dbname, self.aad_username),
             'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "{}";'.format(
@@ -593,15 +599,15 @@ class PostgresSingleHandler(PostgresFlexHandler):
             self.host, self.login_username + '@' + self.db_server, password)
         return conn_string
 
-    def get_create_query(self, client_id):
-
+    def get_create_query(self):
+        client_id = self.identity_client_id
+        if self.auth_type == AUTHTYPES[AUTH_TYPE.UserAccount]:
+            client_id = self.user_object_id
         return [
             'SET aad_validate_oids_in_tenant = off;',
             # 'drop role IF EXISTS "{0}";'.format(self.aad_username),
             "CREATE ROLE \"{0}\" WITH LOGIN PASSWORD '{1}' IN ROLE azure_ad_user;".format(
-                self.aad_username, client_id) if self.auth_type == PasswordlessIdentity[AUTH_TYPE.SystemIdentity] else
-            'CREATE ROLE "{}" WITH LOGIN IN ROLE azure_ad_user;'.format(
-                self.login_username),
+                self.aad_username, client_id),
             'GRANT ALL PRIVILEGES ON DATABASE "{0}" TO "{1}";'.format(
                 self.dbname, self.aad_username),
             'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "{}";'.format(
