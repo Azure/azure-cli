@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "eventhub namespace show",
+    "eventhubs namespace show",
 )
 class Show(AAZCommand):
     """Get the description of the specified namespace.

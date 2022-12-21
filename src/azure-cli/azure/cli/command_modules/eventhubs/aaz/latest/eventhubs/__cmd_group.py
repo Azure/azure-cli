@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "eventhub namespace",
+    "eventhubs",
 )
 class __CMDGroup(AAZCommandGroup):
-    """eventHubNamespaceV2
+    """NamespaceV2
     """
     pass
 

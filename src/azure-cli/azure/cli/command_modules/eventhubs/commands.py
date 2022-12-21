@@ -83,9 +83,9 @@ def load_command_table(self, _):
     eventhubs_custom = CliCommandType(operations_tmpl=custom_tmpl)
     with self.command_group('eventhubs namespace', eh_namespace_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
         #g.custom_command('create', 'cli_namespace_create')
-        g.show_command('show', 'get')
-        g.custom_command('list', 'cli_namespace_list')
-        g.command('delete', 'begin_delete')
+        #g.show_command('show', 'get')
+        #g.custom_command('list', 'cli_namespace_list')
+        #g.command('delete', 'begin_delete')
         g.custom_command('exists', 'cli_namespace_exists')
         #g.generic_update_command('update', custom_func_name='cli_namespace_update', custom_func_type=eventhubs_custom, setter_name='begin_create_or_update')
 
@@ -179,7 +179,7 @@ def load_command_table(self, _):
 # Identity Region
     from azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file import cli_add_identity
     from azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file import cli_remove_identity
-    with self.command_group('eventhub namespace identity', custom_command_type=eh_namespace_custom,
+    with self.command_group('eventhubs namespace identity', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
         g.custom_command('assign', 'cli_add_identity', supports_no_wait=True)
         g.custom_command('remove', 'cli_remove_identity', supports_no_wait=True)
@@ -190,7 +190,7 @@ def load_command_table(self, _):
 # Encryption Region
     from azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file import cli_add_encryption
     from azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file import cli_remove_encryption
-    with self.command_group('eventhub namespace encryption', custom_command_type=eh_namespace_custom,
+    with self.command_group('eventhubs namespace encryption', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
         g.custom_command('add', 'cli_add_encryption', supports_no_wait=True)
         g.custom_command('remove', 'cli_remove_encryption', supports_no_wait=True)

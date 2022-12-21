@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "eventhub namespace list",
+    "eventhubs namespace list",
 )
 class List(AAZCommand):
     """List the available Namespaces within a resource group.

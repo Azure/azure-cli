@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "eventhub namespace update",
+    "eventhubs namespace update",
 )
 class Update(AAZCommand):
     """Update a namespace. Once created, this namespace's resource manifest is immutable. This operation is idempotent.
@@ -189,12 +189,6 @@ class Update(AAZCommand):
             help="This determines if traffic is allowed over public network. By default it is enabled.",
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled", "SecuredByPerimeter": "SecuredByPerimeter"},
-        )
-        _args_schema.zone_redundant = AAZBoolArg(
-            options=["--zone-redundant"],
-            arg_group="Properties",
-            help="Enabling this property creates a Standard Event Hubs Namespace in regions supported availability zones.",
-            nullable=True,
         )
 
         encryption = cls._args_schema.encryption
@@ -553,7 +547,6 @@ class Update(AAZCommand):
                 properties.set_prop("minimumTlsVersion", AAZStrType, ".minimum_tls_version")
                 properties.set_prop("privateEndpointConnections", AAZListType, ".private_endpoint_connections")
                 properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
-                properties.set_prop("zoneRedundant", AAZBoolType, ".zone_redundant")
 
             encryption = _builder.get(".properties.encryption")
             if encryption is not None:
