@@ -5876,139 +5876,141 @@ class VMGalleryImage(ScenarioTest):
             self.check('safetyProfile.allowDeletionOfReplicatedLocations', False)
         ])
 
-    # @ResourceGroupPreparer(name_prefix='cli_test_target_extended_locations', location='CentralUSEUAP')
-    # @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='CentralUSEUAP',
-    #                   additional_params='--enable-purge-protection true --enable-soft-delete true')
-    # def test_image_version_with_target_extended_locations(self, resource_group, resource_group_location, key_vault):
-    #     self.kwargs.update({
-    #         'vm': 'vm1',
-    #         'gallery': self.create_random_name(prefix='gallery_', length=20),
-    #         'image': 'image1',
-    #         'version': '1.1.1',
-    #         'captured': 'managedImage1',
-    #         'location': resource_group_location,
-    #         'key': self.create_random_name(prefix='key-', length=20),
-    #         'des1': self.create_random_name(prefix='des1-', length=20),
-    #     })
-    #
-    #     self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
-    #     self.cmd('vm create -g {rg} -n {vm} --image debian --data-disk-sizes-gb 10 --admin-username clitest1 --generate-ssh-key --nsg-rule NONE')
-    #     self.cmd('vm deallocate -g {rg} -n {vm}')
-    #     self.cmd('vm generalize -g {rg} -n {vm}')
-    #
-    #     self.cmd('image create -g {rg} -n {captured} --source {vm}')
-    #
-    #     # Create disk encryption set
-    #     kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software').get_output_in_json()['key']['kid']
-    #     self.kwargs.update({
-    #         'kid': kid
-    #     })
-    #
-    #     self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault}')
-    #     des1_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des1}').get_output_in_json()
-    #     des1_sp_id = des1_show_output['identity']['principalId']
-    #     des1_id = des1_show_output['id']
-    #     self.kwargs.update({
-    #         'des1_sp_id': des1_sp_id,
-    #         'des1_id': des1_id
-    #     })
-    #
-    #     self.cmd('keyvault set-policy -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
-    #
-    #     time.sleep(15)
-    #
-    #     self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type windows -p publisher1 -f offer1 -s sku1', checks=[
-    #         self.check('name', self.kwargs['image'])
-    #     ])
-    #     self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location}=1 --target-region-encryption {des1},0,{des1} '
-    #              '--target-edge-zone-encryption microsoftlosangeles1,{des1},0,{des1} --target-edge-zones centraluseuap=microsoftlosangeles1 --replica-count 1', checks=[
-    #         self.check('publishingProfile.targetRegions[0].name', 'Central US EUAP'),
-    #         self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
-    #         self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.diskEncryptionSetId', '{des1_id}'),
-    #         self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].lun', 0),
-    #         self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].diskEncryptionSetId', '{des1_id}')
-    #     ])
-    #
-    #     self.cmd('sig image-version update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}'
-    #              '--target-edge-zone-encryption microsoftlosangeles1,{des1},0,{des1} --target-edge-zones centraluseuap=microsoftlosangeles1', checks=[
-    #         self.check('publishingProfile.targetRegions[0].name', 'Central US EUAP'),
-    #         self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
-    #         self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.diskEncryptionSetId', '{des1_id}'),
-    #         self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].lun', 0),
-    #         self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].diskEncryptionSetId', '{des1_id}')
-    #     ])
-    #
-    #     self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
-    #     time.sleep(60)  # service end latency
-    #     self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
-    #     self.cmd('sig delete -g {rg} --gallery-name {gallery}')
+    @ResourceGroupPreparer(name_prefix='cli_test_target_extended_locations', location='southcentralus')
+    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='southcentralus',
+                      additional_params='--enable-purge-protection true --enable-soft-delete true')
+    def test_image_version_with_target_extended_locations(self, resource_group, resource_group_location, key_vault):
+        self.kwargs.update({
+            'gallery': self.create_random_name(prefix='gallery_', length=20),
+            'image': 'image1',
+            'version': '1.0.0',
+            'key': self.create_random_name(prefix='key-', length=20),
+            'des1': self.create_random_name(prefix='des1-', length=20),
+            'disk': 'disk',
+            'region1': 'southcentralus',
+            'region2': 'westus',
+            'edge_zone1': 'attdallas1',
+            'edge_zone2': 'microsoftlosangeles1',
+        })
 
-    # @ResourceGroupPreparer(name_prefix='cli_test_target_extended_locations', location='CentralUSEUAP')
-    # @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='CentralUSEUAP',
-    #                   additional_params='--enable-purge-protection true --enable-soft-delete true')
-    # def test_image_version_with_target_extended_locations(self, resource_group, resource_group_location, key_vault):
-    #     self.kwargs.update({
-    #         'vm': 'vm1',
-    #         'gallery': self.create_random_name(prefix='gallery_', length=20),
-    #         'image': 'image1',
-    #         'version': '1.1.1',
-    #         'captured': 'managedImage1',
-    #         'location': resource_group_location,
-    #         'key': self.create_random_name(prefix='key-', length=20),
-    #         'des1': self.create_random_name(prefix='des1-', length=20),
-    #     })
-    #
-    #     self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
-    #     self.cmd('vm create -g {rg} -n {vm} --image debian --data-disk-sizes-gb 10 --admin-username clitest1 --generate-ssh-key --nsg-rule NONE')
-    #     self.cmd('vm deallocate -g {rg} -n {vm}')
-    #     self.cmd('vm generalize -g {rg} -n {vm}')
-    #
-    #     self.cmd('image create -g {rg} -n {captured} --source {vm}')
-    #
-    #     # Create disk encryption set
-    #     kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software').get_output_in_json()['key']['kid']
-    #     self.kwargs.update({
-    #         'kid': kid
-    #     })
-    #
-    #     self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault}')
-    #     des1_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des1}').get_output_in_json()
-    #     des1_sp_id = des1_show_output['identity']['principalId']
-    #     des1_id = des1_show_output['id']
-    #     self.kwargs.update({
-    #         'des1_sp_id': des1_sp_id,
-    #         'des1_id': des1_id
-    #     })
-    #
-    #     self.cmd('keyvault set-policy -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
-    #
-    #     time.sleep(15)
-    #
-    #     self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type windows -p publisher1 -f offer1 -s sku1', checks=[
-    #         self.check('name', self.kwargs['image'])
-    #     ])
-    #     self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location}=1 --target-region-encryption {des1},0,{des1} '
-    #              '--target-edge-zone-encryption microsoftlosangeles1,{des1},0,{des1} --target-edge-zones centraluseuap=microsoftlosangeles1 --replica-count 1', checks=[
-    #         self.check('publishingProfile.targetRegions[0].name', 'Central US EUAP'),
-    #         self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
-    #         self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.diskEncryptionSetId', '{des1_id}'),
-    #         self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].lun', 0),
-    #         self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].diskEncryptionSetId', '{des1_id}')
-    #     ])
-    #
-    #     self.cmd('sig image-version update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}'
-    #              '--target-edge-zone-encryption microsoftlosangeles1,{des1},0,{des1} --target-edge-zones centraluseuap=microsoftlosangeles1', checks=[
-    #         self.check('publishingProfile.targetRegions[0].name', 'Central US EUAP'),
-    #         self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
-    #         self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.diskEncryptionSetId', '{des1_id}'),
-    #         self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].lun', 0),
-    #         self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].diskEncryptionSetId', '{des1_id}')
-    #     ])
-    #
-    #     self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
-    #     time.sleep(60)  # service end latency
-    #     self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
-    #     self.cmd('sig delete -g {rg} --gallery-name {gallery}')
+        self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
+
+        time.sleep(15)
+
+        self.cmd(
+            'sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type windows -p publisher1 -f offer1 -s sku1',
+            checks=[
+                self.check('name', self.kwargs['image'])
+            ])
+
+        disk_id = self.cmd('disk create -n {disk} -g {rg} --size-gb 10').get_output_in_json()['id']
+        self.kwargs.update({
+            'disk_id': disk_id
+        })
+
+        # Creates an image version and replicates it to the first edge zone
+        self.cmd(
+            'sig image-version create --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image}'
+            ' --gallery-image-version {version} --os-snapshot {disk_id} --target-edge-zones "{region1}={edge_zone1}=1"',
+            checks=[
+                self.check('length(publishingProfile.targetExtendedLocations)', 1),
+                self.check('publishingProfile.targetExtendedLocations[0].name', 'South Central US'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone1}'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.type', 'EdgeZone'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
+            ])
+
+        # Updates the replica count of the image version in the edge zone
+        # It is necessary to provide the account type in this update
+        self.cmd(
+            'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image}'
+            ' --gallery-image-version {version} --target-edge-zones "{region1}={edge_zone1}=2=standardssd_lrs"',
+            checks=[
+                self.check('length(publishingProfile.targetExtendedLocations)', 1),
+                self.check('publishingProfile.targetExtendedLocations[0].name', 'South Central US'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone1}'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.type', 'EdgeZone'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 2),
+                self.check('publishingProfile.targetExtendedLocations[0].storageAccountType', 'StandardSSD_LRS'),
+            ])
+
+        # Unreplicate the image version
+        self.cmd(
+            'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image}'
+            ' --gallery-image-version {version} --allow-replicated-location-deletion true',
+            checks=[
+                self.check('publishingProfile.targetExtendedLocations', None),
+            ])
+
+        # Replicate to two edge zones with different storage types
+        self.cmd(
+            'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image}'
+            ' --gallery-image-version {version} --target-edge-zones "{region1}={edge_zone1}=1=standardssd_lrs" '
+            '"{region2}={edge_zone2}=1=premium_lrs',
+            checks=[
+                self.check('length(publishingProfile.targetExtendedLocations)', 2),
+                self.check('publishingProfile.targetExtendedLocations[0].name', 'South Central US'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone1}'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
+                self.check('publishingProfile.targetExtendedLocations[0].storageAccountType', 'StandardSSD_LRS'),
+                self.check('publishingProfile.targetExtendedLocations[1].name', 'West US'),
+                self.check('publishingProfile.targetExtendedLocations[1].extendedLocation.name', '{edge_zone2}'),
+                self.check('publishingProfile.targetExtendedLocations[1].extendedLocationReplicaCount', 1),
+                self.check('publishingProfile.targetExtendedLocations[1].storageAccountType', 'Premium_LRS'),
+            ])
+
+        # Unreplicate from an edge zone
+        self.cmd(
+            'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image}'
+            ' --gallery-image-version {version} --target-edge-zones "{region1}={edge_zone1}=1=standardssd_lrs',
+            checks=[
+                self.check('length(publishingProfile.targetExtendedLocations)', 1),
+                self.check('publishingProfile.targetExtendedLocations[0].name', 'South Central US'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone1}'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.type', 'EdgeZone'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
+                self.check('publishingProfile.targetExtendedLocations[0].storageAccountType', 'StandardSSD_LRS'),
+            ])
+
+        # Fully unreplicating the image before performing encryption test
+        self.cmd(
+            'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --allow-replicated-location-deletion true',
+            checks=[
+                self.check('publishingProfile.targetExtendedLocations', None),
+            ])
+
+        # Deleting the image version before performing encryption test
+        self.cmd(
+            'sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
+
+        # Create disk encryption set
+        kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software').get_output_in_json()['key']['kid']
+        self.kwargs.update({
+            'kid': kid
+        })
+
+        self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault} --location {region1}')
+        des1_json = self.cmd('disk-encryption-set show -g {rg} -n {des1}').get_output_in_json()
+        des1_sp_id = des1_json['identity']['principalId']
+        self.kwargs.update({
+            'des1_sp_id': des1_sp_id
+        })
+
+        self.cmd('keyvault set-policy -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
+
+        # Create Image Version using a DES, the DES must have the correct key management permissions and be in the same region as the edge zone
+        self.cmd(
+            'sig image-version create --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image} '
+            '--gallery-image-version {version} --os-snapshot {disk_id} --target-regions "{region1}=1" --target-region-encryption "{des1},0,{des1}" '
+            '--target-edge-zones "{region1}={edge_zone1}=1" --target-edge-zone-encryption "{edge_zone1},{des1},0,{des1}"',
+            checks=[
+                self.check('length(publishingProfile.targetExtendedLocations)', 1),
+                self.check('publishingProfile.targetExtendedLocations[0].name', 'West US'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone2}'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.type', 'EdgeZone'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
+            ])
+
 
     @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
     def test_create_image_version_with_region_cvm_encryption_pmk(self, resource_group, resource_group_location):
