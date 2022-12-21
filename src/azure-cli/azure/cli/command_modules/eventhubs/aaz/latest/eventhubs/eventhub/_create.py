@@ -45,7 +45,6 @@ class Create(AAZCommand):
             options=["-n", "--name", "--eventhub-name"],
             help="The Event Hub name",
             required=True,
-            id_part="child_name_1",
             fmt=AAZStrArgFormat(
                 max_length=256,
                 min_length=1,
@@ -55,7 +54,6 @@ class Create(AAZCommand):
             options=["--namespace-name"],
             help="The Namespace name",
             required=True,
-            id_part="name",
             fmt=AAZStrArgFormat(
                 max_length=50,
                 min_length=6,
@@ -393,6 +391,10 @@ class Create(AAZCommand):
             )
 
             return cls._schema_on_200
+
+
+class _CreateHelper:
+    """Helper class for Create"""
 
 
 __all__ = ["Create"]

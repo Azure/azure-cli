@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "eventhubs namespace schema-registry delete",
-    confirmation="",
 )
 class Delete(AAZCommand):
     """Deletes an EventHub schema group
@@ -145,6 +144,10 @@ class Delete(AAZCommand):
 
         def on_204(self, session):
             pass
+
+
+class _DeleteHelper:
+    """Helper class for Delete"""
 
 
 __all__ = ["Delete"]

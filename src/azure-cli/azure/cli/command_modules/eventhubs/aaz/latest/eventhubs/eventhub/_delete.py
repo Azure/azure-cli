@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "eventhubs eventhub delete",
-    confirmation="",
 )
 class Delete(AAZCommand):
     """Delete an Event Hub from the specified Namespace and resource group.
@@ -145,6 +144,10 @@ class Delete(AAZCommand):
 
         def on_204(self, session):
             pass
+
+
+class _DeleteHelper:
+    """Helper class for Delete"""
 
 
 __all__ = ["Delete"]
