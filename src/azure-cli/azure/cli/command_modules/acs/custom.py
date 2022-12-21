@@ -398,7 +398,7 @@ def aks_create(
     auto_upgrade_channel=None,
     cluster_autoscaler_profile=None,
     uptime_sla=False,
-    tier="free",
+    tier=None,
     fqdn_subdomain=None,
     api_server_authorized_ip_ranges=None,
     enable_private_cluster=False,

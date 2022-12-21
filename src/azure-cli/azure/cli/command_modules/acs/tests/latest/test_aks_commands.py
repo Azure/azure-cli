@@ -2026,15 +2026,20 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         })
 
         # create
-        # create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-        #              '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-        #              '--service-principal={service_principal} --client-secret={client_secret} --uptime-sla '
-        # self.cmd(create_cmd, checks=[
-        #     self.exists('fqdn'),
-        #     self.exists('nodeResourceGroup'),
-        #     self.check('provisioningState', 'Succeeded'),
-        #     self.check('sku.tier', 'Paid')
-        # ])
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} --uptime-sla '
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.tier', 'Paid')
+        ])
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+        # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
                      '--service-principal={service_principal} --client-secret={client_secret} --tier standard '
@@ -2044,7 +2049,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('sku.tier', 'Paid')
         ])
-
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
@@ -4480,39 +4484,44 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('sku.tier', 'Paid')
         ])
-        # create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-        #              '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-        #              '--tier standard'
-        # self.cmd(create_cmd, checks=[
-        #     self.exists('fqdn'),
-        #     self.exists('nodeResourceGroup'),
-        #     self.check('provisioningState', 'Succeeded'),
-        #     self.check('sku.tier', 'Paid')
-        # ])
-
         # update to no uptime sla
         no_uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --no-uptime-sla'
         self.cmd(no_uptime_sla_cmd, checks=[
             self.check('sku.tier', 'Free')
         ])
-        # no_uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --tier free'
-        # self.cmd(no_uptime_sla_cmd, checks=[
-        #     self.check('sku.tier', 'Free')
-        # ])
-
         # update to uptime sla again
         uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --uptime-sla --no-wait'
         self.cmd(uptime_sla_cmd, checks=[
             self.is_empty()
         ])
-        # uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --tier standard --no-wait'
-        # self.cmd(uptime_sla_cmd, checks=[
-        #     self.is_empty()
-        # ])
-
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--tier standard'
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.tier', 'Paid')
+        ])
+        # update to tier free
+        tier_free_cmd = 'aks update --resource-group={resource_group} --name={name} --tier free'
+        self.cmd(tier_free_cmd, checks=[
+            self.check('sku.tier', 'Free')
+        ])
+        # update to tier standard again
+        tier_standard_cmd = 'aks update --resource-group={resource_group} --name={name} --tier standard --no-wait'
+        self.cmd(tier_standard_cmd, checks=[
+            self.is_empty()
+        ])
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')

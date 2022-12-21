@@ -3848,6 +3848,12 @@ class AKSManagedClusterContext(BaseAKSContext):
                 raise MutuallyExclusiveArgumentError(
                     'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
                 )
+
+            if uptime_sla and self.get_tier() == "free":
+                raise MutuallyExclusiveArgumentError(
+                    'Cannot specify "--uptime-sla" and "--tier free" at the same time.'
+                )
+
         return uptime_sla
 
     def get_tier(self) -> str:
@@ -3863,6 +3869,17 @@ class AKSManagedClusterContext(BaseAKSContext):
         if tierStr not in ("free", "standard"):
             raise InvalidArgumentValueError(
                 'Invalid argument value {} for tier. Tier value should be free or standard'.format(tierStr))
+
+        if tierStr == "free" and self._get_uptime_sla(enable_validation=False):
+            raise MutuallyExclusiveArgumentError(
+                'Cannot specify "--uptime-sla" and "--tier free" at the same time.'
+            )
+
+        if tierStr == "standard" and self._get_no_uptime_sla(enable_validation=False):
+            raise MutuallyExclusiveArgumentError(
+                'Cannot specify "--no-uptime-sla" and "--tier standard" at the same time.'
+            )
+
         return tierStr
 
     def get_uptime_sla(self) -> bool:
@@ -3898,6 +3915,12 @@ class AKSManagedClusterContext(BaseAKSContext):
                 raise MutuallyExclusiveArgumentError(
                     'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
                 )
+
+            if no_uptime_sla and self.get_tier() == "standard":
+                raise MutuallyExclusiveArgumentError(
+                    'Cannot specify "--no-uptime-sla" and "--tier standard" at the same time.'
+                )
+
         return no_uptime_sla
 
     def get_no_uptime_sla(self) -> bool:
