@@ -458,11 +458,8 @@ helps['connection delete'] = """
 
 helps['connection generate-configuration'] = """
   type: command
-  short-summary: Generate configurations of a {source_display_name} local connection.
+  short-summary: Generate configurations of a {source_display_name} local connection. The result should be put to application configuration file or set as environment variables.
   examples:
-    - name: Generate a connection's local configurations interactively
-      text: |-
-              az connection generate-configuration
     - name: Generate a connection's local configurations by connection name
       text: |-
               az connection generate-configuration -g resource_group --connection MyConnection
