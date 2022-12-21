@@ -1138,7 +1138,7 @@ parameters:
   - name: --pool-name -p
     short-summary: The name of the ANF pool
   - name: --name --volume-name -n -v
-    short-summary: The name of the ANF pool
+    short-summary: The name of the ANF volume
 examples:
   - name: List the ANF backups of the volume
     text: >
@@ -1285,6 +1285,13 @@ examples:
 helps['netappfiles volume quota-rule list'] = """
 type: command
 short-summary: Get all ANF Volume Quota Rule for specified Volume.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the ANF volume
 examples:
   - name: Get all ANF Volume Quota Rule for specified Volume
     text: >

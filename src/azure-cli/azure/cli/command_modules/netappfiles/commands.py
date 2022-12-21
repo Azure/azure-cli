@@ -395,7 +395,7 @@ def load_volume_groups_command_groups(self, netappfiles_volume_groups_sdk):
 def load_net_app_resource_command_groups(self, netappfiles_resource_sdk):
     with self.command_group('netappfiles resource', netappfiles_resource_sdk) as g:
         g.command('query-region-info', 'query_region_info', supports_no_wait=True)
-
+        g.wait_command('wait')
 
 def load_volume_quota_rules_command_group(self, netappfiles_volume_quota_rules_sdk):
     with self.command_group('netappfiles volume quota-rule', netappfiles_volume_quota_rules_sdk) as g:
