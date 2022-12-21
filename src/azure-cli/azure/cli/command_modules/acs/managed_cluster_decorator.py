@@ -3856,7 +3856,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: str
         """
         tier = self.raw_param.get("tier")
-        if not tier :
+        if not tier:
             return ""
 
         tierStr = tier.lower()
