@@ -3851,6 +3851,10 @@ class AKSManagedClusterContext(BaseAKSContext):
         return uptime_sla
 
     def get_tier(self) -> str:
+        """Obtain the value of tier.
+
+        :return: str
+        """
         tier = self.raw_param.get("tier")
         if not tier :
             return ""

@@ -2035,15 +2035,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('sku.tier', 'Paid')
         ])
-        # create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-        #              '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-        #              '--service-principal={service_principal} --client-secret={client_secret} --tier standard '
-        # self.cmd(create_cmd, checks=[
-        #     self.exists('fqdn'),
-        #     self.exists('nodeResourceGroup'),
-        #     self.check('provisioningState', 'Succeeded'),
-        #     self.check('sku.tier', 'Paid')
-        # ])
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} --tier standard '
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.tier', 'Paid')
+        ])
 
         # delete
         self.cmd(
