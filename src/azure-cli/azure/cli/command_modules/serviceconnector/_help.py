@@ -411,7 +411,7 @@ connection_id = (
 source_display_name = 'Service Connector'
 helps['connection'] = """
     type: group
-    short-summary: Commands to manage {} local connections
+    short-summary: Commands to manage {} local connections which allow local environment to connect Azure Resource. If you want to manage connection for compute service, please run 'az webapp/containerapp/spring connection'
 """.format(source_display_name)
 
 helps['connection list-support-types'] = """

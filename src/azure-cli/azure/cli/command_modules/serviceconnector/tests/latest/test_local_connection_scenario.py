@@ -1141,6 +1141,23 @@ class LocalConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('connection delete --id {} --yes'.format(connection_id))
 
+    def test_local_connection_list_support_types(self):
+        self.cmd(
+            'connection list-support-types'.format(resource_group),
+            checks=[
+                self.check('length(@)', 23),
+            ]
+        ).get_output_in_json()
+
+    def test_local_connection_preview_configuration(self):
+        self.cmd(
+            'connection preview-configuration appconfig --client-type dotnet',
+            checks=[
+                self.check('length(@)', 6),
+            ]
+        ).get_output_in_json()
+
+
     @unittest.skip('Keyvault reference not supported')
     def test_local_confluentkafka_keyvault_ref(self):
         self.kwargs.update({
