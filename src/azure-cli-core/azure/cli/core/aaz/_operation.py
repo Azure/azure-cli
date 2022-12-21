@@ -434,9 +434,9 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
             except (ValueError, InvalidArgumentValueError):
                 pass
 
-        path = self._get_internal_path(instance, flatten, key)
+        path = self._get_internal_path(key)
         name = path.pop()
-        parent = self._find_property(instance, path)
+        parent = self._find_property(instance, path, flatten)
 
         match = index_or_filter_regex.match(name)
         index_value = int(match.group(1)) if match else None
@@ -450,6 +450,10 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
                 parent[index_value] = value
             else:
                 # parent is in AAZObject or AAZDict or dict
+                if isinstance(parent, AAZObject):
+                    parent = self._get_property_parent(parent, name, flatten)
+                    if parent is None:
+                        raise AttributeError()
                 parent[name] = value
         except IndexError:
             raise InvalidArgumentValueError('index {} doesn\'t exist on {}'.format(index_value, name))
@@ -460,8 +464,8 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
         from azure.cli.core.commands.arm import shell_safe_json_parse
         # The first argument indicates the path to the collection to add to.
         argument_values = list(argument_values)
-        list_attribute_path = self._get_internal_path(instance, flatten, argument_values.pop(0))
-        list_to_add_to = self._find_property(instance, list_attribute_path)
+        list_attribute_path = self._get_internal_path(argument_values.pop(0))
+        list_to_add_to = self._find_property(instance, list_attribute_path, flatten)
 
         if not isinstance(list_to_add_to, (AAZList, list)):
             raise ValueError
@@ -496,7 +500,7 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
         # The first argument indicates the path to the collection to remove from.
         argument_values = list(argument_values) if isinstance(argument_values, list) else [argument_values]
 
-        list_attribute_path = self._get_internal_path(instance, flatten, argument_values.pop(0))
+        list_attribute_path = self._get_internal_path(argument_values.pop(0))
         list_index = None
         try:
             list_index = argument_values.pop(0)
@@ -505,9 +509,11 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
 
         if not list_index:
             # parent is in AAZObject or AAZDict or dict
-            property_val = self._find_property(instance, list_attribute_path)
-            parent = self._find_property(instance, list_attribute_path[:-1])
+            property_val = self._find_property(instance, list_attribute_path, flatten)
+            parent = self._find_property(instance, list_attribute_path[:-1], flatten)
             if isinstance(parent, (AAZObject, AAZBaseDictValue)):
+                if isinstance(parent, AAZObject):
+                    parent = self._get_property_parent(parent, list_attribute_path[-1], flatten)
                 if isinstance(property_val, (AAZList, list)):
                     # this is the previous behavior in arm.py
                     parent[list_attribute_path[-1]] = []
@@ -516,7 +522,7 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
             elif isinstance(parent, dict):
                 del parent[list_attribute_path[-1]]
         else:
-            list_to_remove_from = self._find_property(instance, list_attribute_path)
+            list_to_remove_from = self._find_property(instance, list_attribute_path, flatten)
             try:
                 if isinstance(list_to_remove_from, AAZList):
                     del list_to_remove_from[int(list_index)]
@@ -530,7 +536,7 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
             except AttributeError:
                 raise InvalidArgumentValueError('{} doesn\'t exist'.format(list_attribute_path[-1]))
 
-    def _find_property(self, instance, path):
+    def _find_property(self, instance, path, flatten):
         from azure.cli.core.commands.arm import index_or_filter_regex, shell_safe_json_parse
         try:
             for part in path:
@@ -548,8 +554,14 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
                     for x in instance:
                         if isinstance(x, dict) and x.get(key, None) == value:
                             matches.append(x)
-                        elif isinstance(x, (AAZObject, AAZBaseDictValue)) and key in x and x[key].to_serialized_data() == value:
-                            matches.append(x)
+                        elif isinstance(x, (AAZObject, AAZBaseDictValue)):
+                            parent = x
+                            if isinstance(parent, AAZObject):
+                                parent = self._get_property_parent(parent, key, flatten)
+                                if parent is None:
+                                    continue
+                            if parent[key].to_serialized_data() == value:
+                                matches.append(x)  # should append `x` instead of `parent`
 
                     if len(matches) > 1:
                         raise InvalidArgumentValueError(
@@ -572,22 +584,50 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
                     except IndexError:
                         raise InvalidArgumentValueError('index {} doesn\'t exist on {}'.format(index_value, path[-2]))
 
-                elif isinstance(instance, (AAZObject, dict, AAZBaseDictValue)):
+                elif isinstance(instance, (dict, AAZBaseDictValue, AAZObject)):
+                    if isinstance(instance, AAZObject):
+                        instance = self._get_property_parent(instance, part, flatten)
+                        if instance is None:
+                            raise AttributeError()
                     instance = instance[part]
-
                 else:
                     raise AttributeError()
 
         except (AttributeError, KeyError):
             self._throw_and_show_options(instance, part, path)
 
-    def _get_internal_path(self, instance, flatten, path):
+    def _get_internal_path(self, path):
         from azure.cli.core.commands.arm import _get_internal_path
-        paths = _get_internal_path(path)
-        if flatten:
-            # TODO: handle flatten properties in instance
-            pass
-        return paths
+        return _get_internal_path(path)
+
+    @staticmethod
+    def _get_property_parent(instance, prop_name, flatten):
+        if not isinstance(instance, AAZObject):
+            return None
+
+        # prop_name in current instance
+        _, name = instance._get_attr_schema_and_name(prop_name)
+        if name is not None:
+            return instance
+
+        if not flatten:
+            return None
+
+        # find property parent with flatten
+        schemas = [instance._schema]
+        disc_schema = instance._schema.get_discriminator(instance)
+        if disc_schema is not None:
+            schemas.append(disc_schema)
+        for schema in schemas:
+            for key in schema._fields:
+                sub_schema = instance._schema[key]
+                if sub_schema._flags.get('client_flatten', False):
+                    sub_instance = instance[key]
+                    sub_instance = self._get_property_parent(sub_instance, prop_name, flatten)
+                    if sub_instance is not None:
+                        return sub_instance
+
+        return None
 
     @staticmethod
     def _throw_and_show_options(instance, part, path):
