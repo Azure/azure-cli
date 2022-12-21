@@ -44,13 +44,11 @@ class List(AAZCommand):
             options=["--application-name", "--gallery-application-name"],
             help="The name of the gallery Application.",
             required=True,
-            id_part="child_name_1",
         )
         _args_schema.gallery_name = AAZStrArg(
             options=["-r", "--gallery-name"],
             help="Gallery name.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",

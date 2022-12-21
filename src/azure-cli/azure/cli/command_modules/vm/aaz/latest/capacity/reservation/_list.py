@@ -47,7 +47,6 @@ class List(AAZCommand):
             options=["-c", "--capacity-reservation-group", "--capacity-reservation-group-name"],
             help="The name of the capacity reservation group.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
