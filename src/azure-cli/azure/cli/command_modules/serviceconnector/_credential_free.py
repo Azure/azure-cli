@@ -245,12 +245,13 @@ class MysqlFlexibleHandler(TargetHandler):
             connection = pymysql.connect(**connection_kwargs)
             cursor = connection.cursor()
             for q in query_list:
-                try:
-                    logger.debug(q)
-                    cursor.execute(q)
-                except Exception as e:  # pylint: disable=broad-except
-                    logger.warning(
-                        "Query %s, error: %s", q, str(e))
+                if q:
+                    try:
+                        logger.debug(q)
+                        cursor.execute(q)
+                    except Exception as e:  # pylint: disable=broad-except
+                        logger.warning(
+                            "Query %s, error: %s", q, str(e))
         except pymysql.Error as e:
             raise AzureConnectionError("Fail to connect mysql. " + str(e))
         if cursor is not None:
@@ -273,6 +274,9 @@ class MysqlFlexibleHandler(TargetHandler):
         }
 
     def get_create_query(self, client_id):
+        # Don't create aad user for user account because it will cause breakdown on mysql
+        if self.auth_type == PasswordlessIdentity[AUTH_TYPE.UserAccount]:
+            return []
         return [
             "SET aad_auth_validate_oids_in_tenant = OFF;",
             "DROP USER IF EXISTS '{}'@'%';".format(self.aad_username),
@@ -362,7 +366,7 @@ class SqlHandler(TargetHandler):
             'ODBC Driver 17 for SQL Server', 'ODBC Driver 18 for SQL Server']]
         if not drivers:
             raise CLIInternalError(
-                "Please manually install odbc 17/18 for SQL server, reference: https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16")
+                "Please manually install odbc 17/18 for SQL server, reference: https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server/")
         try:
             with pyodbc.connect(connection_args.get("connection_string").format(driver=drivers[0]), attrs_before=connection_args.get("attrs_before")) as conn:
                 with conn.cursor() as cursor:
@@ -594,7 +598,7 @@ class PostgresSingleHandler(PostgresFlexHandler):
         return [
             'SET aad_validate_oids_in_tenant = off;',
             # 'drop role IF EXISTS "{0}";'.format(self.aad_username),
-            "CREATE ROLE {0} WITH LOGIN PASSWORD '{1}' IN ROLE azure_ad_user;".format(
+            "CREATE ROLE \"{0}\" WITH LOGIN PASSWORD '{1}' IN ROLE azure_ad_user;".format(
                 self.aad_username, client_id) if self.auth_type == PasswordlessIdentity[AUTH_TYPE.SystemIdentity] else
             'CREATE ROLE "{}" WITH LOGIN IN ROLE azure_ad_user;'.format(
                 self.login_username),
