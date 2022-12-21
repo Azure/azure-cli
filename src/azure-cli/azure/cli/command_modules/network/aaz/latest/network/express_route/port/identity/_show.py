@@ -46,7 +46,7 @@ class Show(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.name = AAZStrArg(
-            options=["--name"],
+            options=["-n", "--name"],
             help="ExpressRoute port name.",
             required=True,
         )

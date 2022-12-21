@@ -59,61 +59,52 @@ class Update(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.link_index = AAZIntArg(
-            options=["--link-index"],
-            required=True,
-        )
-        _args_schema.link_id = AAZResourceIdArg(
-            options=["--link-id"],
+        _args_schema.ids = AAZResourceIdArg(
+            options=["--ids"],
             help="Resource ID.",
             nullable=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/ExpressRoutePorts/{}/links/{}",
             ),
         )
-        _args_schema.links_name = AAZStrArg(
-            options=["--links-name"],
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
             help="The link name of the ExpressRoute Port.",
-            nullable=True,
+            required=True,
         )
-
-        # define Arg Group "MacSecConfig"
-
-        _args_schema = cls._args_schema
-        _args_schema.macsec_cak_secret_identifier = AAZStrArg(
-            options=["--cak-secret-identifier", "--macsec-cak-secret-identifier"],
-            arg_group="MacSecConfig",
-            help="The connectivity association key (CAK) ID that stored in the KeyVault.",
-            nullable=True,
-        )
-        _args_schema.macsec_cipher = AAZStrArg(
-            options=["--cipher", "--macsec-cipher"],
-            arg_group="MacSecConfig",
-            help="Cipher Method. Allowed values: GcmAes128, GcmAes256, GcmAesXpn128, GcmAesXpn256.",
-            nullable=True,
-            enum={"GcmAes128": "GcmAes128", "GcmAes256": "GcmAes256", "GcmAesXpn128": "GcmAesXpn128", "GcmAesXpn256": "GcmAesXpn256"},
-        )
-        _args_schema.macsec_ckn_secret_identifier = AAZStrArg(
-            options=["--ckn-secret-identifier", "--macsec-ckn-secret-identifier"],
-            arg_group="MacSecConfig",
-            help="The connectivity key name (CKN) that stored in the KeyVault.",
-            nullable=True,
-        )
-        _args_schema.macsec_sci_state = AAZStrArg(
-            options=["--sci-state", "--macsec-sci-state"],
-            arg_group="MacSecConfig",
-            help="Sci mode.  Allowed values: Disabled, Enabled.",
+        _args_schema.admin_state = AAZStrArg(
+            options=["--admin-state"],
+            help="Enable/Disable administrative state of an ExpressRoute Link.",
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
 
-        # define Arg Group "Properties"
+        # define Arg Group "MACsec"
 
         _args_schema = cls._args_schema
-        _args_schema.admin_state = AAZStrArg(
-            options=["--admin-state"],
-            arg_group="Properties",
-            help="Enable/Disable administrative state of an ExpressRoute Link. Allowed values: Disabled, Enabled.",
+        _args_schema.macsec_cak_secret_identifier = AAZStrArg(
+            options=["--macsec-cak-secret-identifier"],
+            arg_group="MACsec",
+            help="The connectivity association key (CAK) ID that stored in the KeyVault.",
+            nullable=True,
+        )
+        _args_schema.macsec_cipher = AAZStrArg(
+            options=["--macsec-cipher"],
+            arg_group="MACsec",
+            help="Cipher Method.",
+            nullable=True,
+            enum={"GcmAes128": "GcmAes128", "GcmAes256": "GcmAes256", "GcmAesXpn128": "GcmAesXpn128", "GcmAesXpn256": "GcmAesXpn256"},
+        )
+        _args_schema.macsec_ckn_secret_identifier = AAZStrArg(
+            options=["--macsec-ckn-secret-identifier"],
+            arg_group="MACsec",
+            help="The connectivity key name (CKN) that stored in the KeyVault.",
+            nullable=True,
+        )
+        _args_schema.macsec_sci_state = AAZStrArg(
+            options=["--macsec-sci-state"],
+            arg_group="MACsec",
+            help="Sci mode.",
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
@@ -156,7 +147,7 @@ class Update(AAZCommand):
             result = result.properties.links
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[0] == self.ctx.args.link_index,
+                lambda e: e[1].name == self.ctx.args.name,
                 filters
             )
             idx = next(filters)[0]
@@ -167,11 +158,10 @@ class Update(AAZCommand):
             result = result.properties.links
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[0] == self.ctx.args.link_index,
+                lambda e: e[1].name == self.ctx.args.name,
                 filters
             )
             idx = next(filters, [len(result)])[0]
-            self.ctx.args.link_index = idx
             result[idx] = value
             return
 
@@ -380,8 +370,8 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("id", AAZStrType, ".link_id")
-            _builder.set_prop("name", AAZStrType, ".links_name")
+            _builder.set_prop("id", AAZStrType, ".ids")
+            _builder.set_prop("name", AAZStrType, ".name")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
             properties = _builder.get(".properties")

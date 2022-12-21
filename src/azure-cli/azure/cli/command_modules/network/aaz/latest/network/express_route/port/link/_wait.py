@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressrouteports/{}", "2022-01-01", "properties.links"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressrouteports/{}", "2022-01-01", "properties.links[]"],
         ]
     }
 
@@ -40,8 +40,8 @@ class Wait(AAZWaitCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.name = AAZStrArg(
-            options=["--name"],
+        _args_schema.port_name = AAZStrArg(
+            options=["--port-name"],
             help="ExpressRoute port name.",
             required=True,
             id_part="name",
@@ -98,7 +98,7 @@ class Wait(AAZWaitCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "expressRoutePortName", self.ctx.args.name,
+                    "expressRoutePortName", self.ctx.args.port_name,
                     required=True,
                 ),
                 **self.serialize_url_param(

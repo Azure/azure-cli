@@ -47,7 +47,7 @@ class Assign(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.name = AAZStrArg(
-            options=["--name"],
+            options=["-n", "--name"],
             help="ExpressRoute port name.",
             required=True,
         )
@@ -62,6 +62,7 @@ class Assign(AAZCommand):
             options=["--type"],
             arg_group="Parameters.identity",
             help="The type of identity used for the resource. The type 'SystemAssigned, UserAssigned' includes both an implicitly created identity and a set of user assigned identities. The type 'None' will remove any identities from the virtual machine.",
+            default="UserAssigned",
             enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned", "UserAssigned": "UserAssigned"},
         )
         _args_schema.user_assigned_identities = AAZDictArg(

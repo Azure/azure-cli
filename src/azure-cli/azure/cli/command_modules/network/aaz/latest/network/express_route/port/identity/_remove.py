@@ -33,7 +33,7 @@ class Remove(AAZCommand):
     def _handler(self, command_args):
         super()._handler(command_args)
         self.SubresourceSelector(ctx=self.ctx, name="subresource")
-        return self.build_lro_poller(self._execute_operations, self._output)
+        return self.build_lro_poller(self._execute_operations, None)
 
     _args_schema = None
 
@@ -47,44 +47,19 @@ class Remove(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.name = AAZStrArg(
-            options=["--name"],
+            options=["-n", "--name"],
             help="ExpressRoute port name.",
             required=True,
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-
-        # define Arg Group "Parameters.identity"
-
-        _args_schema = cls._args_schema
-        _args_schema.type = AAZStrArg(
-            options=["--type"],
-            arg_group="Parameters.identity",
-            help="The type of identity used for the resource. The type 'SystemAssigned, UserAssigned' includes both an implicitly created identity and a set of user assigned identities. The type 'None' will remove any identities from the virtual machine.",
-            nullable=True,
-            enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned", "UserAssigned": "UserAssigned"},
-        )
-        _args_schema.user_assigned_identities = AAZDictArg(
-            options=["--user-assigned-identities"],
-            arg_group="Parameters.identity",
-            help="The list of user identities associated with resource. The user identity dictionary key references will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}'.",
-            nullable=True,
-        )
-
-        user_assigned_identities = cls._args_schema.user_assigned_identities
-        user_assigned_identities.Element = AAZObjectArg(
-            nullable=True,
-            blank={},
-        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.ExpressRoutePortsGet(ctx=self.ctx)()
-        self.pre_instance_update(self.ctx.selectors.subresource.required())
-        self.InstanceUpdateByJson(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.selectors.subresource.required())
+        self.InstanceDeleteByJson(ctx=self.ctx)()
         yield self.ExpressRoutePortsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -95,18 +70,6 @@ class Remove(AAZCommand):
     @register_callback
     def post_operations(self):
         pass
-
-    @register_callback
-    def pre_instance_update(self, instance):
-        pass
-
-    @register_callback
-    def post_instance_update(self, instance):
-        pass
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
-        return result
 
     class SubresourceSelector(AAZJsonSelector):
 
@@ -313,25 +276,10 @@ class Remove(AAZCommand):
 
             return cls._schema_on_200_201
 
-    class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
+    class InstanceDeleteByJson(AAZJsonInstanceDeleteOperation):
 
         def __call__(self, *args, **kwargs):
-            self._update_instance(self.ctx.selectors.subresource.required())
-
-        def _update_instance(self, instance):
-            _instance_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=instance,
-                typ=AAZObjectType
-            )
-            _builder.set_prop("type", AAZStrType, ".type")
-            _builder.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned_identities")
-
-            user_assigned_identities = _builder.get(".userAssignedIdentities")
-            if user_assigned_identities is not None:
-                user_assigned_identities.set_elements(AAZObjectType, ".")
-
-            return _instance_value
+            self.ctx.selectors.subresource.set(self._delete_instance())
 
 
 class _RemoveHelper:

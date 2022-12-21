@@ -3468,6 +3468,7 @@ class ExpressRoutePortIdentityAssign(_ExpressRoutePortIdentityAssign):
         )
 
         args_schema.user_assigned_identities._registered = False
+        args_schema.type._registered = False
 
         return args_schema
 

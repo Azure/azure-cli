@@ -33,7 +33,7 @@ class Remove(AAZCommand):
     def _handler(self, command_args):
         super()._handler(command_args)
         self.SubresourceSelector(ctx=self.ctx, name="subresource")
-        return self.build_lro_poller(self._execute_operations, self._output)
+        return self.build_lro_poller(self._execute_operations, None)
 
     _args_schema = None
 
@@ -52,7 +52,7 @@ class Remove(AAZCommand):
             required=True,
         )
         _args_schema.name = AAZStrArg(
-            options=["--name"],
+            options=["-n", "--name"],
             help="Name of the peering connection.",
             required=True,
         )
@@ -64,24 +64,12 @@ class Remove(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-
-        # define Arg Group "ExpressRouteCircuitConnectionParameters.properties.ipv6CircuitConnectionConfig"
-
-        _args_schema = cls._args_schema
-        _args_schema.address_prefix = AAZStrArg(
-            options=["--address-prefix"],
-            arg_group="ExpressRouteCircuitConnectionParameters.properties.ipv6CircuitConnectionConfig",
-            help="/125 IP address space to carve out customer addresses for global reach.",
-            nullable=True,
-        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.ExpressRouteCircuitConnectionsGet(ctx=self.ctx)()
-        self.pre_instance_update(self.ctx.selectors.subresource.required())
-        self.InstanceUpdateByJson(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.selectors.subresource.required())
+        self.InstanceDeleteByJson(ctx=self.ctx)()
         yield self.ExpressRouteCircuitConnectionsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -92,18 +80,6 @@ class Remove(AAZCommand):
     @register_callback
     def post_operations(self):
         pass
-
-    @register_callback
-    def pre_instance_update(self, instance):
-        pass
-
-    @register_callback
-    def post_instance_update(self, instance):
-        pass
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
-        return result
 
     class SubresourceSelector(AAZJsonSelector):
 
@@ -326,20 +302,10 @@ class Remove(AAZCommand):
 
             return cls._schema_on_200_201
 
-    class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
+    class InstanceDeleteByJson(AAZJsonInstanceDeleteOperation):
 
         def __call__(self, *args, **kwargs):
-            self._update_instance(self.ctx.selectors.subresource.required())
-
-        def _update_instance(self, instance):
-            _instance_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=instance,
-                typ=AAZObjectType
-            )
-            _builder.set_prop("addressPrefix", AAZStrType, ".address_prefix")
-
-            return _instance_value
+            self.ctx.selectors.subresource.set(self._delete_instance())
 
 
 class _RemoveHelper:

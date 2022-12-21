@@ -52,7 +52,7 @@ class Set(AAZCommand):
             required=True,
         )
         _args_schema.name = AAZStrArg(
-            options=["--name"],
+            options=["-n", "--name"],
             help="Name of the peering connection.",
             required=True,
         )
@@ -64,13 +64,8 @@ class Set(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-
-        # define Arg Group "ExpressRouteCircuitConnectionParameters.properties.ipv6CircuitConnectionConfig"
-
-        _args_schema = cls._args_schema
         _args_schema.address_prefix = AAZStrArg(
             options=["--address-prefix"],
-            arg_group="ExpressRouteCircuitConnectionParameters.properties.ipv6CircuitConnectionConfig",
             help="/125 IP address space to carve out customer addresses for global reach.",
         )
         return cls._args_schema

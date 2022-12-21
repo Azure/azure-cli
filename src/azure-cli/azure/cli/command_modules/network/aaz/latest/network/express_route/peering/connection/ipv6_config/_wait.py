@@ -47,7 +47,7 @@ class Wait(AAZWaitCommand):
             id_part="name",
         )
         _args_schema.name = AAZStrArg(
-            options=["--name"],
+            options=["-n", "--name"],
             help="Name of the peering connection.",
             required=True,
             id_part="child_name_2",

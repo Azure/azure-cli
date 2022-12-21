@@ -525,9 +525,9 @@ def load_command_table(self, _):
         self.command_table['network express-route peering create'] = ExpressRoutePeeringCreate(loader=self)
         self.command_table['network express-route peering update'] = ExpressRoutePeeringUpdate(loader=self)
 
-    with self.command_group('network express-route peering connection ipv6-config', network_erconn_sdk) as g:
-        g.custom_command('set', 'set_express_route_peering_connection_config')
-        g.custom_command('remove', 'remove_express_route_peering_connection_config')
+    # with self.command_group('network express-route peering connection ipv6-config', network_erconn_sdk) as g:
+    #     g.custom_command('set', 'set_express_route_peering_connection_config')
+    #     g.custom_command('remove', 'remove_express_route_peering_connection_config')
 
     with self.command_group('network express-route port', network_er_ports_sdk) as g:
         from azure.cli.command_modules.network.custom import ExpressRoutePortCreate
@@ -539,7 +539,7 @@ def load_command_table(self, _):
         self.command_table['network express-route port identity assign'] = ExpressRoutePortIdentityAssign(loader=self)
         # g.custom_command('assign', 'assign_express_route_port_identity', supports_no_wait=True)
         # g.custom_command('remove', 'remove_express_route_port_identity', supports_no_wait=True)
-        g.custom_show_command('show', 'show_express_route_port_identity')
+        # g.custom_show_command('show', 'show_express_route_port_identity')
 
     with self.command_group('network express-route port link', network_er_ports_sdk) as g:
         # g.generic_update_command('update',
