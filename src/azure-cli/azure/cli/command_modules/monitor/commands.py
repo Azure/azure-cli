@@ -208,11 +208,12 @@ def load_command_table(self, _):
     self.command_table['monitor diagnostic-settings categories list'] = DiagnosticSettingsCategoryList(loader=self)
 
     with self.command_group('monitor log-profiles', log_profiles_sdk, custom_command_type=log_profiles_custom) as g:
-        g.custom_command('create', 'create_log_profile_operations')
-        g.command('delete', 'delete')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
+        # g.custom_command('create', 'create_log_profile_operations')
+        # g.command('delete', 'delete')
+        # g.show_command('show', 'get')
+        # g.command('list', 'list')
         g.generic_update_command('update')
+
 
     with self.command_group('monitor metrics') as g:
         from .transformers import metrics_table, metrics_definitions_table, metrics_namespaces_table
