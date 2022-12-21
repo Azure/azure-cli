@@ -2532,6 +2532,16 @@ def clear_traffic_routing(cmd, resource_group_name, name):
     set_traffic_routing(cmd, resource_group_name, name, [])
 
 
+def enable_credentials(cmd, resource_group_name, name, enable, slot=None):
+    from azure.mgmt.web.models import CorsSettings
+    configs = get_site_configs(cmd, resource_group_name, name, slot)
+    if not configs.cors:
+        configs.cors = CorsSettings()
+    configs.cors.support_credentials = enable
+    result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    return result.cors
+
+
 def add_cors(cmd, resource_group_name, name, allowed_origins, slot=None):
     from azure.mgmt.web.models import CorsSettings
     configs = get_site_configs(cmd, resource_group_name, name, slot)
