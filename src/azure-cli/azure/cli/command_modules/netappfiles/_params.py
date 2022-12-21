@@ -100,7 +100,7 @@ def load_volume_arguments(self, account_name_type, pool_name_type, volume_name_t
         c.argument('ldap_enabled', arg_type=get_three_state_flag())
         c.argument('cool_access', arg_type=get_three_state_flag())
         c.argument('is_def_quota_enabled', arg_type=get_three_state_flag())
-        c.argument('has_root_access', arg_type=get_three_state_flag())
+        c.argument('has_root_access', help="Vol Has root access to volume", arg_type=get_three_state_flag())
 
     with self.argument_context('netappfiles volume create') as c:
         c.argument('zones', nargs="+")
@@ -203,6 +203,20 @@ def load_subvolume_arguments(self, account_name_type, pool_name_type, volume_nam
         c.argument('pool_name', id_part=None)
         c.argument('volume_name', id_part=None)
         c.argument('subvolume_name', id_part=None)
+
+
+def load_volume_quota_rules_arguments(self, account_name_type, pool_name_type, volume_name_type):
+    with self.argument_context('netappfiles volume quota-rule') as c:
+        c.argument('account_name', account_name_type)
+        c.argument('pool_name', pool_name_type)
+        c.argument('volume_name', volume_name_type)
+        c.argument('volume_quota_rule_name', options_list=['--quota-rule', '--quota-rule-name', '--volume-quota-rule-name'], help='The name of the quota rule')
+        c.argument('quota_size_in_ki_bs', help='Size of quota', options_list=['--quota-size-in-ki-bs', '--quota-size'])
+
+    with self.argument_context('netappfiles volume quota-rule list') as c:
+        c.argument('account_name', id_part=None)
+        c.argument('pool_name', pool_name_type, id_part=None)
+        c.argument('volume_name', volume_name_type, options_list=['--volume-name', '-v', '--name', '-n'], id_part=None)
 
 
 def load_volume_groups_arguments(self, account_name_type, pool_name_type):
