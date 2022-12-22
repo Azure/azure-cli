@@ -271,8 +271,8 @@ def load_arguments(self, _):
     # endregion
 
     # region Diagnostic
-    with self.argument_context('monitor diagnostic-settings') as c:
-        c.argument('name', options_list=('--name', '-n'))
+    # with self.argument_context('monitor diagnostic-settings') as c:
+    #     c.argument('name', options_list=('--name', '-n'))
 
     # with self.argument_context('monitor diagnostic-settings show') as c:
     #     c.resource_parameter('resource_uri', required=True, arg_group='Target Resource')
@@ -283,8 +283,8 @@ def load_arguments(self, _):
     # with self.argument_context('monitor diagnostic-settings delete') as c:
     #     c.resource_parameter('resource_uri', required=True, arg_group='Target Resource')
 
-    with self.argument_context('monitor diagnostic-settings update') as c:
-        c.resource_parameter('resource_uri', required=True, arg_group='Target Resource')
+    # with self.argument_context('monitor diagnostic-settings update') as c:
+    #     c.resource_parameter('resource_uri', required=True, arg_group='Target Resource')
 
     # with self.argument_context('monitor diagnostic-settings create') as c:
     #     c.resource_parameter('resource_uri', required=True, arg_group='Target Resource', skip_validator=True)
