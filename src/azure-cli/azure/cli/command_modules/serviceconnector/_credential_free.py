@@ -102,7 +102,7 @@ class TargetHandler:
     target_id = ""
     target_type = ""
     endpoint = ""
-    
+
     login_username = ""
     user_object_id = ""
     aad_username = ""
