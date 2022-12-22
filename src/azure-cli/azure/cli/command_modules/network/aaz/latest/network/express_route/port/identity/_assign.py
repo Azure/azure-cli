@@ -55,19 +55,19 @@ class Assign(AAZCommand):
             required=True,
         )
 
-        # define Arg Group "Parameters.identity"
+        # define Arg Group "Identity"
 
         _args_schema = cls._args_schema
         _args_schema.type = AAZStrArg(
             options=["--type"],
-            arg_group="Parameters.identity",
+            arg_group="Identity",
             help="The type of identity used for the resource. The type 'SystemAssigned, UserAssigned' includes both an implicitly created identity and a set of user assigned identities. The type 'None' will remove any identities from the virtual machine.",
             default="UserAssigned",
             enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned", "UserAssigned": "UserAssigned"},
         )
         _args_schema.user_assigned_identities = AAZDictArg(
             options=["--user-assigned-identities"],
-            arg_group="Parameters.identity",
+            arg_group="Identity",
             help="The list of user identities associated with resource. The user identity dictionary key references will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}'.",
         )
 

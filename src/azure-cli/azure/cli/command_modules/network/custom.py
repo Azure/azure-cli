@@ -3455,13 +3455,16 @@ def assign_express_route_port_identity(cmd, resource_group_name, express_route_p
 
 
 class ExpressRoutePortIdentityAssign(_ExpressRoutePortIdentityAssign):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.identity = AAZResourceIdArg(
             options=['--identity'],
+            arg_group="Identity",
             help="Name or ID of the ManagedIdentity Resource.",
+            required=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{}"
             )
@@ -3530,6 +3533,14 @@ def update_express_route_port_link(cmd, instance, parent, express_route_port_nam
 
 
 class ExpressRoutePortLinkUpdate(_ExpressRoutePortLinkUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.admin_state._blank = "Enabled"
+
+        return args_schema
+
     def pre_operations(self):
         args = self.ctx.args
         # TODO https://github.com/Azure/azure-rest-api-specs/issues/7569
