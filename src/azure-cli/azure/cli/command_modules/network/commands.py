@@ -22,8 +22,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_subnets,
     cf_public_ip_addresses, cf_connection_monitor,
     cf_dns_references, cf_private_endpoints,
-    cf_express_route_circuit_connections,
-    cf_express_route_ports, cf_app_gateway_waf_policy,
+    cf_app_gateway_waf_policy,
     cf_private_link_services, cf_private_endpoint_types,
     cf_virtual_router, cf_virtual_router_peering, cf_bastion_hosts, cf_flow_logs,
     cf_private_dns_zone_groups, cf_load_balancer_backend_pools)
@@ -105,18 +104,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#ExpressRouteCircuitsOperations.{}',
         client_factory=cf_express_route_circuits,
         min_api='2016-09-01'
-    )
-
-    network_er_ports_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRoutePortsOperations.{}',
-        client_factory=cf_express_route_ports,
-        min_api='2018-08-01'
-    )
-
-    network_erconn_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRouteCircuitConnectionsOperations.{}',
-        client_factory=cf_express_route_circuit_connections,
-        min_api='2018-07-01'
     )
 
     network_private_endpoint_sdk = CliCommandType(
@@ -525,30 +512,16 @@ def load_command_table(self, _):
         self.command_table['network express-route peering create'] = ExpressRoutePeeringCreate(loader=self)
         self.command_table['network express-route peering update'] = ExpressRoutePeeringUpdate(loader=self)
 
-    # with self.command_group('network express-route peering connection ipv6-config', network_erconn_sdk) as g:
-    #     g.custom_command('set', 'set_express_route_peering_connection_config')
-    #     g.custom_command('remove', 'remove_express_route_peering_connection_config')
-
-    with self.command_group('network express-route port', network_er_ports_sdk) as g:
+    with self.command_group('network express-route port') as g:
         from azure.cli.command_modules.network.custom import ExpressRoutePortCreate
         self.command_table['network express-route port create'] = ExpressRoutePortCreate(loader=self)
         g.custom_command('generate-loa', 'download_generated_loa_as_pdf')
 
-    with self.command_group('network express-route port identity', min_api='2019-08-01') as g:
+    with self.command_group('network express-route port identity'):
         from azure.cli.command_modules.network.custom import ExpressRoutePortIdentityAssign
         self.command_table['network express-route port identity assign'] = ExpressRoutePortIdentityAssign(loader=self)
-        # g.custom_command('assign', 'assign_express_route_port_identity', supports_no_wait=True)
-        # g.custom_command('remove', 'remove_express_route_port_identity', supports_no_wait=True)
-        # g.custom_show_command('show', 'show_express_route_port_identity')
 
-    with self.command_group('network express-route port link', network_er_ports_sdk) as g:
-        # g.generic_update_command('update',
-        #                          setter_name='begin_create_or_update',
-        #                          custom_func_name='update_express_route_port_link',
-        #                          supports_no_wait=True,
-        #                          child_collection_prop_name='links',
-        #                          child_arg_name='link_name',
-        #                          min_api='2019-08-01')
+    with self.command_group('network express-route port link'):
         from azure.cli.command_modules.network.custom import ExpressRoutePortLinkUpdate
         self.command_table['network express-route port link update'] = ExpressRoutePortLinkUpdate(loader=self)
     # endregion
