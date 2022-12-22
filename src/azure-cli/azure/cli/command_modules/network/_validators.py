@@ -420,6 +420,14 @@ def validate_metadata(namespace):
         namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
 
 
+def validate_peering_type(namespace):
+    if namespace.peering_type and namespace.peering_type == 'MicrosoftPeering':
+
+        if not namespace.advertised_public_prefixes:
+            raise CLIError(
+                'missing required MicrosoftPeering parameter --advertised-public-prefixes')
+
+
 def validate_public_ip_prefix(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     if namespace.public_ip_prefix and not is_valid_resource_id(namespace.public_ip_prefix):
