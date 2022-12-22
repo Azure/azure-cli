@@ -373,7 +373,7 @@ def load_arguments(self, _):
     with self.argument_context('monitor action-group test-notifications create') as c:
         c.argument('add_receivers', options_list=['--add-action', '-a'], nargs='+', action=ActionGroupReceiverParameterAction)
         c.argument('alert_type', type=str, help='The name of the supported alert type.')
-        c.argument('action_group_name', options_list=['--action-group'], help='The name of the action group.')
+        c.argument('action_group_name', options_list=['--action-group'], required=True, help='The name of the action group.')
     # endregion
 
     # region ActivityLog Alerts

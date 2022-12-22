@@ -152,8 +152,8 @@ def post_notifications(client, alert_type, resource_group_name=None, action_grou
     if action_group_name:
         return sdk_no_wait(no_wait, client.begin_create_notifications_at_action_group_resource_level,
                            resource_group_name, action_group_name, notification_request)
-    elif resource_group_name:
-        return sdk_no_wait(no_wait, client.begin_create_notifications_at_resource_group_level,
-                           resource_group_name, notification_request)
-    else:
-        return sdk_no_wait(no_wait, client.begin_post_test_notifications, notification_request)
+    # elif resource_group_name:
+    #     return sdk_no_wait(no_wait, client.begin_create_notifications_at_resource_group_level,
+    #                        resource_group_name, notification_request)
+    # else:
+    #     return sdk_no_wait(no_wait, client.begin_post_test_notifications, notification_request)
