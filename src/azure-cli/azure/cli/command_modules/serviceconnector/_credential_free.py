@@ -93,25 +93,25 @@ def getTargetHandler(cmd, target_id, target_type, auth_type, client_type, connec
 
 
 class TargetHandler:
-    target_id = ""
-    target_type = ""
-    profile = None
     cmd = None
+    auth_type = ""
+
     tenant_id = ""
     subscription = ""
     resource_group = ""
-    login_username = ""
+    target_id = ""
+    target_type = ""
     endpoint = ""
-    aad_username = ""
+    
+    login_username = ""
     user_object_id = ""
+    aad_username = ""
 
-    auth_type = ""
     identity_name = ""
     identity_client_id = ""
     identity_object_id = ""
 
     def __init__(self, cmd, target_id, target_type, auth_type, connection_name):
-        self.profile = Profile(cli_ctx=cmd.cli_ctx)
         self.cmd = cmd
         self.target_id = target_id
         self.target_type = target_type
@@ -432,8 +432,6 @@ class PostgresFlexHandler(TargetHandler):
             self.login_username, user_object_id, self.resource_group, self.db_server, self.subscription))
 
     def create_aad_user(self):
-        # self.aad_user = identity_name or self.aad_user
-
         query_list = self.get_create_query()
         connection_string = self.get_connection_string()
         ip_name = None
@@ -595,8 +593,8 @@ class PostgresSingleHandler(PostgresFlexHandler):
             'az account get-access-token --resource-type oss-rdbms').get('accessToken')
 
         # extension functions require the extension to be available, which is the case for postgres (default) database.
-        conn_string = "host={} user={} dbname=postgres password={} sslmode=require".format(
-            self.host, self.login_username + '@' + self.db_server, password)
+        conn_string = "host={} user={} dbname={} password={} sslmode=require".format(
+            self.host, self.login_username + '@' + self.db_server, self.dbname, password)
         return conn_string
 
     def get_create_query(self):
