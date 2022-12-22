@@ -600,8 +600,7 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
         from azure.cli.core.commands.arm import _get_internal_path
         return _get_internal_path(path)
 
-    @staticmethod
-    def _get_property_parent(instance, prop_name, flatten):
+    def _get_property_parent(self, instance, prop_name, flatten):
         if not isinstance(instance, AAZObject):
             return None
 
@@ -613,22 +612,39 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
         if not flatten:
             return None
 
-        # find property parent with flatten
+        for key in self._iter_aaz_object_keys(instance):
+            sub_instance = instance[key]
+            if sub_instance._schema._flags.get('client_flatten', False):
+                sub_instance = self._get_property_parent(sub_instance, prop_name, flatten)
+                if sub_instance is not None:
+                    return sub_instance
+
+        return None
+
+    @staticmethod
+    def _iter_aaz_object_keys(instance):
+        if not isinstance(instance, AAZObject):
+            return
         schemas = [instance._schema]
         disc_schema = instance._schema.get_discriminator(instance)
         if disc_schema is not None:
             schemas.append(disc_schema)
         for schema in schemas:
             for key in schema._fields:
-                sub_schema = instance._schema[key]
-                if sub_schema._flags.get('client_flatten', False):
-                    sub_instance = instance[key]
-                    sub_instance = self._get_property_parent(sub_instance, prop_name, flatten)
-                    if sub_instance is not None:
-                        return sub_instance
+                yield key
 
-        return None
-
-    @staticmethod
-    def _throw_and_show_options(instance, part, path):
-        pass
+    def _throw_and_show_options(self, instance, part, path):
+        parent = '.'.join(path[:-1]).replace('.[', '[')
+        error_message = "Couldn't find '{}' in '{}'.".format(part, parent)
+        if isinstance(instance, AAZObject):
+            options = sorted(self._iter_aaz_object_keys(instance))
+            error_message = '{} Available options: {}'.format(error_message, options)
+        elif isinstance(instance, (AAZBaseDictValue, dict)):
+            options = sorted(instance.keys())
+            error_message = '{} Available options: {}'.format(error_message, options)
+        elif isinstance(instance, (list, AAZList)):
+            options = "index into the collection '{}' with [<index>] or [<key=value>]".format(parent)
+            error_message = '{} Available options: {}'.format(error_message, options)
+        else:
+            error_message = "{} '{}' does not support further indexing.".format(error_message, parent)
+        raise InvalidArgumentValueError(error_message)
