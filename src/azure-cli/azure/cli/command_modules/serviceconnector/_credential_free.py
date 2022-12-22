@@ -373,6 +373,7 @@ class SqlHandler(TargetHandler):
                 with conn.cursor() as cursor:
                     for execution_query in query_list:
                         try:
+                            logger.debug(execution_query)
                             cursor.execute(execution_query)
                         except pyodbc.ProgrammingError as e:
                             logger.warning(e)
