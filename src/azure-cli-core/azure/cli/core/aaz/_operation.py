@@ -9,13 +9,14 @@ import json
 
 from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, ResourceNotFoundError, \
     HttpResponseError
-from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 from ._arg_browser import AAZArgBrowser
-from ._base import AAZUndefined, AAZBaseValue, AAZBaseType
+from ._base import AAZUndefined, AAZBaseValue, AAZBaseType, has_value
 from ._content_builder import AAZContentBuilder
 from ._field_type import AAZSimpleType, AAZObjectType, AAZBaseDictType, AAZListType
-from ._field_value import AAZSimpleValue, AAZList, AAZObject, AAZBaseDictValue
+from ._field_value import AAZList, AAZObject, AAZBaseDictValue
+from .exceptions import AAZInvalidValueError
 
 try:
     from urllib import quote  # type: ignore
@@ -426,7 +427,7 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
         key, value = _split_key_value_pair(expression)
 
         if key is None or key.strip() == '':
-            raise InvalidArgumentValueError('usage error: Empty key in --set. Correct syntax: --set KEY=VALUE [KEY=VALUE ...]')
+            raise InvalidArgumentValueError('Empty key in --set. Correct syntax: --set KEY=VALUE [KEY=VALUE ...]')
 
         if not force_string:
             try:
@@ -436,29 +437,32 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
 
         path = self._get_internal_path(key)
         name = path.pop()
-        parent = self._find_property(instance, path, flatten)
+        instance = self._find_property(instance, path, flatten)  # find the parent instance
 
         match = index_or_filter_regex.match(name)
         index_value = int(match.group(1)) if match else None
         try:
             if index_value is not None:
-                # parent is AAZList or list
-                if not isinstance(parent, (AAZList, list)):
+                # instance is AAZList or list
+                if not isinstance(instance, (AAZList, list)):
                     raise TypeError()
-                if len(parent) <= index_value:
+                if len(instance) <= index_value:
                     raise IndexError()
-                parent[index_value] = value
+                instance[index_value] = value
             else:
-                # parent is in AAZObject or AAZDict or dict
-                if isinstance(parent, AAZObject):
-                    parent = self._get_property_parent(parent, name, flatten)
+                # instance is in AAZObject or AAZDict or dict
+                if isinstance(instance, AAZObject):
+                    parent = self._get_property_parent(instance, name, flatten)
                     if parent is None:
                         raise AttributeError()
-                parent[name] = value
+                    instance = parent
+                instance[name] = value
+        except AAZInvalidValueError as err:
+            raise InvalidArgumentValueError(err)
         except IndexError:
-            raise InvalidArgumentValueError('index {} doesn\'t exist on {}'.format(index_value, name))
+            raise InvalidArgumentValueError('index {} doesn\'t exist on {}'.format(index_value, path[-1]))
         except (AttributeError, KeyError, TypeError):
-            self._throw_and_show_options(parent, name, key.split('.'))
+            self._throw_and_show_options(instance, name, key.split('.'), flatten)
 
     def _add_properties(self, instance, argument_values, force_string, flatten):
         from azure.cli.core.commands.arm import shell_safe_json_parse
@@ -468,33 +472,38 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
         list_to_add_to = self._find_property(instance, list_attribute_path, flatten)
 
         if not isinstance(list_to_add_to, (AAZList, list)):
-            raise ValueError
+            raise ValueError()
 
-        dict_entry = {}
-        for argument in argument_values:
-            if '=' in argument:
-                # consecutive key=value entries get added to the same dictionary
-                split_arg = argument.split('=', 1)
-                dict_entry[split_arg[0]] = split_arg[1]
-            else:
-                if dict_entry:
-                    # if an argument is supplied that is not key=value, append any dictionary entry
-                    # to the list and reset. A subsequent key=value pair will be added to another
-                    # dictionary.
-                    list_to_add_to.append(dict_entry)
-                    dict_entry = {}
+        try:
+            dict_entry = {}
+            for argument in argument_values:
+                if '=' in argument:
+                    # consecutive key=value entries get added to the same dictionary
+                    split_arg = argument.split('=', 1)
+                    argument = split_arg[1]
+                    # Didn't convert argument by shell_safe_json_parse here to keep consist with the behavior in arm.py
+                    dict_entry[split_arg[0]] = argument
+                else:
+                    if dict_entry:
+                        # if an argument is supplied that is not key=value, append any dictionary entry
+                        # to the list and reset. A subsequent key=value pair will be added to another
+                        # dictionary.
+                        list_to_add_to.append(dict_entry)
+                        dict_entry = {}
 
-                if not force_string:
-                    # attempt to convert anything else to JSON and fallback to string if error
-                    try:
-                        argument = shell_safe_json_parse(argument)
-                    except (ValueError, InvalidArgumentValueError):
-                        pass
-                list_to_add_to.append(argument)
+                    if not force_string:
+                        # attempt to convert anything else to JSON and fallback to string if error
+                        try:
+                            argument = shell_safe_json_parse(argument)
+                        except (ValueError, InvalidArgumentValueError):
+                            pass
+                    list_to_add_to.append(argument)
 
-        # if only key=value pairs used, must check at the end to append the dictionary
-        if dict_entry:
-            list_to_add_to.append(dict_entry)
+            # if only key=value pairs used, must check at the end to append the dictionary
+            if dict_entry:
+                list_to_add_to.append(dict_entry)
+        except AAZInvalidValueError as err:
+            raise InvalidArgumentValueError(err)
 
     def _remove_properties(self, instance, argument_values, flatten):
         # The first argument indicates the path to the collection to remove from.
@@ -515,12 +524,16 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
                 if isinstance(parent, AAZObject):
                     parent = self._get_property_parent(parent, list_attribute_path[-1], flatten)
                 if isinstance(property_val, (AAZList, list)):
-                    # this is the previous behavior in arm.py
-                    parent[list_attribute_path[-1]] = []
+                    if has_value(property_val):
+                        # keep consist with the behavior in arm.py
+                        parent[list_attribute_path[-1]] = []
                 else:
                     parent[list_attribute_path[-1]] = AAZUndefined
             elif isinstance(parent, dict):
                 del parent[list_attribute_path[-1]]
+            else:
+                # other types
+                raise ValueError()
         else:
             list_to_remove_from = self._find_property(instance, list_attribute_path, flatten)
             try:
@@ -529,12 +542,10 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
                 elif isinstance(list_to_remove_from, list):
                     list_to_remove_from.pop(int(list_index))
                 else:
-                    raise AttributeError()
+                    raise IndexError()
             except IndexError:
                 raise InvalidArgumentValueError('index {} doesn\'t exist on {}'
                                                 .format(list_index, list_attribute_path[-1]))
-            except AttributeError:
-                raise InvalidArgumentValueError('{} doesn\'t exist'.format(list_attribute_path[-1]))
 
     def _find_property(self, instance, path, flatten):
         from azure.cli.core.commands.arm import index_or_filter_regex, shell_safe_json_parse
@@ -567,7 +578,7 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
                         raise InvalidArgumentValueError(
                             "non-unique key '{}' found multiple matches on {}. Key must be unique."
                             .format(key, path[-2]))
-                    elif len(matches) != 0:
+                    elif len(matches) == 0:
                         raise InvalidArgumentValueError(
                             "item with value '{}' doesn\'t exist for key '{}' on {}".format(value, key, path[-2]))
 
@@ -585,18 +596,22 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
                         raise InvalidArgumentValueError('index {} doesn\'t exist on {}'.format(index_value, path[-2]))
 
                 elif isinstance(instance, (dict, AAZBaseDictValue, AAZObject)):
+                    parent = instance
                     if isinstance(instance, AAZObject):
-                        instance = self._get_property_parent(instance, part, flatten)
-                        if instance is None:
+                        parent = self._get_property_parent(parent, part, flatten)
+                        if parent is None:
                             raise AttributeError()
-                    instance = instance[part]
+                    instance = parent[part]
                 else:
                     raise AttributeError()
 
         except (AttributeError, KeyError):
-            self._throw_and_show_options(instance, part, path)
+            self._throw_and_show_options(instance, part, path, flatten)
 
-    def _get_internal_path(self, path):
+        return instance
+
+    @staticmethod
+    def _get_internal_path(path):
         from azure.cli.core.commands.arm import _get_internal_path
         return _get_internal_path(path)
 
@@ -605,9 +620,11 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
             return None
 
         # prop_name in current instance
-        _, name = instance._get_attr_schema_and_name(prop_name)
-        if name is not None:
-            return instance
+        if hasattr(instance, prop_name):
+            sub_instance = instance[prop_name]
+            if not flatten or not sub_instance._schema._flags.get('client_flatten', False):
+                # flatten property should be ignored
+                return instance
 
         if not flatten:
             return None
@@ -633,11 +650,18 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
             for key in schema._fields:
                 yield key
 
-    def _throw_and_show_options(self, instance, part, path):
+    def _throw_and_show_options(self, instance, part, path, flatten):
         parent = '.'.join(path[:-1]).replace('.[', '[')
         error_message = "Couldn't find '{}' in '{}'.".format(part, parent)
         if isinstance(instance, AAZObject):
-            options = sorted(self._iter_aaz_object_keys(instance))
+            options = []
+            for key in self._iter_aaz_object_keys(instance):
+                sub_instance = instance[key]
+                if flatten and sub_instance._schema._flags.get('client_flatten', False):
+                    options.extend(self._iter_aaz_object_keys(sub_instance))
+                else:
+                    options.append(key)
+            options = sorted(options)
             error_message = '{} Available options: {}'.format(error_message, options)
         elif isinstance(instance, (AAZBaseDictValue, dict)):
             options = sorted(instance.keys())
