@@ -36,6 +36,8 @@ from .aaz.latest.network.express_route.gateway.connection import Create as _Expr
 from .aaz.latest.network.express_route.peering import Create as _ExpressRoutePeeringCreate, \
     Update as _ExpressRoutePeeringUpdate
 from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCreate
+from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRoutePortIdentityAssign
+from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
 from .aaz.latest.network.nsg import Create as _NSGCreate
 from .aaz.latest.network.nsg.rule import Create as _NSGRuleCreate, Update as _NSGRuleUpdate
 from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
@@ -92,10 +94,6 @@ def _generic_list(cli_ctx, operation_name, resource_group_name):
 
 def list_vnet(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'virtual_networks', resource_group_name)
-
-
-def list_express_route_circuits(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'express_route_circuits', resource_group_name)
 
 
 def list_lbs(cmd, resource_group_name=None):
@@ -3101,41 +3099,6 @@ class ExpressRouteUpdate(_ExpressRouteUpdate):
             instance.properties.bandwidthInGbps = None
 
 
-def set_express_route_peering_connection_config(cmd, resource_group_name, circuit_name, peering_name, connection_name,
-                                                address_prefix):
-    client = network_client_factory(cmd.cli_ctx).express_route_circuit_connections
-
-    # Get Conn
-    try:
-        conn = client.get(resource_group_name, circuit_name, peering_name, connection_name)
-    except ResourceNotFoundError:
-        raise ResourceNotFoundError("Peering Connection {} doesn't exist".format(connection_name))
-
-    Ipv6CircuitConnectionConfig = cmd.get_models('Ipv6CircuitConnectionConfig')
-
-    ipv6_config = Ipv6CircuitConnectionConfig(
-        address_prefix=address_prefix
-    )
-    conn.ipv6_circuit_connection_config = ipv6_config
-
-    return client.begin_create_or_update(resource_group_name, circuit_name, peering_name, connection_name, conn)
-
-
-def remove_express_route_peering_connection_config(cmd, resource_group_name, circuit_name, peering_name,
-                                                   connection_name):
-    client = network_client_factory(cmd.cli_ctx).express_route_circuit_connections
-
-    # Get Conn
-    try:
-        conn = client.get(resource_group_name, circuit_name, peering_name, connection_name)
-    except ResourceNotFoundError:
-        raise ResourceNotFoundError("Peering Connection {} doesn't exist".format(connection_name))
-
-    conn.ipv6_circuit_connection_config = None
-
-    return client.begin_create_or_update(resource_group_name, circuit_name, peering_name, connection_name, conn)
-
-
 def _validate_ipv6_address_prefixes(prefixes):
     from ipaddress import ip_network, IPv6Network
     prefixes = prefixes if isinstance(prefixes, list) else [prefixes]
@@ -3352,8 +3315,7 @@ class ExpressRoutePortCreate(_ExpressRoutePortCreate):
         args = self.ctx.args
         if has_value(args.bandwidth):
             converted_bandwidth = _validate_bandwidth(args.bandwidth, mbps=False)
-
-        args.bandwidth_in_gbps = int(converted_bandwidth)
+            args.bandwidth_in_gbps = int(converted_bandwidth)
 
 
 def _validate_bandwidth(bandwidth, mbps=True):
@@ -3423,74 +3385,51 @@ def download_generated_loa_as_pdf(cmd,
     logger.warning("The generated letter of authorization is saved at %s", file_path)
 
 
-def assign_express_route_port_identity(cmd, resource_group_name, express_route_port_name,
-                                       user_assigned_identity, no_wait=False):
-    client = network_client_factory(cmd.cli_ctx).express_route_ports
-    ports = client.get(resource_group_name, express_route_port_name)
+class ExpressRoutePortIdentityAssign(_ExpressRoutePortIdentityAssign):
 
-    ManagedServiceIdentity, ManagedServiceIdentityUserAssignedIdentitiesValue = \
-        cmd.get_models('ManagedServiceIdentity', 'Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.identity = AAZResourceIdArg(
+            options=['--identity'],
+            arg_group="Identity",
+            help="Name or ID of the ManagedIdentity Resource.",
+            required=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{}"
+            )
+        )
 
-    user_assigned_identity_instance = ManagedServiceIdentityUserAssignedIdentitiesValue()
-    user_assigned_identities_instance = dict()
-    user_assigned_identities_instance[user_assigned_identity] = user_assigned_identity_instance
+        args_schema.user_assigned_identities._registered = False
+        args_schema.type._registered = False
 
-    identity_instance = ManagedServiceIdentity(type="UserAssigned",
-                                               user_assigned_identities=user_assigned_identities_instance)
-    ports.identity = identity_instance
+        return args_schema
 
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, express_route_port_name, ports)
-
-
-def remove_express_route_port_identity(cmd, resource_group_name, express_route_port_name, no_wait=False):
-    client = network_client_factory(cmd.cli_ctx).express_route_ports
-    ports = client.get(resource_group_name, express_route_port_name)
-
-    if ports.identity is None:
-        logger.warning("The identity of the ExpressRoute Port doesn't exist.")
-        return ports
-
-    ports.identity = None
-
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, express_route_port_name, ports)
+    def pre_operations(self):
+        args = self.ctx.args
+        identity = args.identity.to_serialized_data()
+        args.user_assigned_identities = {identity: {}}
 
 
-def show_express_route_port_identity(cmd, resource_group_name, express_route_port_name):
-    client = network_client_factory(cmd.cli_ctx).express_route_ports
-    ports = client.get(resource_group_name, express_route_port_name)
-    return ports.identity
+class ExpressRoutePortLinkUpdate(_ExpressRoutePortLinkUpdate):
 
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.admin_state._blank = "Enabled"
 
-def update_express_route_port_link(cmd, instance, parent, express_route_port_name, link_name,
-                                   macsec_cak_secret_identifier=None, macsec_ckn_secret_identifier=None,
-                                   macsec_sci_state=None, macsec_cipher=None, admin_state=None):
-    """
-    :param cmd:
-    :param instance: an instance of ExpressRoutePort
-    :param express_route_port_name:
-    :param link_name:
-    :param macsec_cak_secret_identifier:
-    :param macsec_ckn_secret_identifier:
-    :param macsec_cipher:
-    :param admin_state:
-    :return:
-    """
-    if any([macsec_cak_secret_identifier, macsec_ckn_secret_identifier, macsec_cipher, macsec_sci_state]):
-        instance.mac_sec_config.cak_secret_identifier = macsec_cak_secret_identifier
-        instance.mac_sec_config.ckn_secret_identifier = macsec_ckn_secret_identifier
+        return args_schema
 
+    def pre_operations(self):
+        args = self.ctx.args
         # TODO https://github.com/Azure/azure-rest-api-specs/issues/7569
         # need to remove this conversion when the issue is fixed.
-        if macsec_cipher is not None:
+        if has_value(args.macsec_cipher):
+            macsec_cipher = args.macsec_cipher.to_serialized_data()
             macsec_ciphers_tmp = {'gcm-aes-128': 'GcmAes128', 'gcm-aes-256': 'GcmAes256'}
             macsec_cipher = macsec_ciphers_tmp.get(macsec_cipher, macsec_cipher)
-        instance.mac_sec_config.cipher = macsec_cipher
-        instance.mac_sec_config.sci_state = macsec_sci_state
-
-    if admin_state is not None:
-        instance.admin_state = admin_state
-
-    return parent
+            args.macsec_cipher = macsec_cipher
 # endregion
 
 

@@ -12,19 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network express-route port link list",
+    "network express-route port identity show",
 )
-class List(AAZCommand):
-    """List ExpressRoute links.
+class Show(AAZCommand):
+    """Show the managed service identity of an ExpressRoute Port.
 
-    :example: List ExpressRoute links.
-        az network express-route port link list --port-name MyPort --resource-group MyResourceGroup
+    :example: Show an identity of the ExpressRoute Port
+        az network express-route port identity show -g MyResourceGroup --name MyExpressRoutePort
     """
 
     _aaz_info = {
         "version": "2022-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressrouteports/{}", "2022-01-01", "properties.links"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressrouteports/{}", "2022-01-01", "identity"],
         ]
     }
 
@@ -45,8 +45,8 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.port_name = AAZStrArg(
-            options=["--port-name"],
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
             help="ExpressRoute port name.",
             required=True,
         )
@@ -76,11 +76,11 @@ class List(AAZCommand):
 
         def _get(self):
             result = self.ctx.vars.instance
-            return result.properties.links
+            return result.identity
 
         def _set(self, value):
             result = self.ctx.vars.instance
-            result.properties.links = value
+            result.identity = value
             return
 
     class ExpressRoutePortsGet(AAZHttpOperation):
@@ -113,7 +113,7 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "expressRoutePortName", self.ctx.args.port_name,
+                    "expressRoutePortName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -162,13 +162,13 @@ class List(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _ListHelper._build_schema_express_route_port_read(cls._schema_on_200)
+            _ShowHelper._build_schema_express_route_port_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
 
-class _ListHelper:
-    """Helper class for List"""
+class _ShowHelper:
+    """Helper class for Show"""
 
     _schema_express_route_port_read = None
 
@@ -344,4 +344,4 @@ class _ListHelper:
         _schema.type = cls._schema_express_route_port_read.type
 
 
-__all__ = ["List"]
+__all__ = ["Show"]
