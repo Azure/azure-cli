@@ -65,7 +65,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.log_analytics_destination_type = AAZStrArg(
-            options=["--log-analytics-destination-type"],
+            options=["--log-ana-dtype", "--log-analytics-destination-type"],
             arg_group="Properties",
             help="A string indicating whether the export to Log Analytics should use the default destination type, i.e. AzureDiagnostics, or use a destination type constructed as follows: <normalized service identity>_<normalized category name>. Possible values are: Dedicated and null (null is default.)",
             nullable=True,
