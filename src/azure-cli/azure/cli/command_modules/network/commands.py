@@ -798,16 +798,18 @@ def load_command_table(self, _):
     # endregion
 
     # region NetworkSecurityGroups
-    with self.command_group('network nsg') as g:
-        g.custom_command('create', 'create_nsg', transform=transform_nsg_create_output)
+    with self.command_group("network nsg") as g:
+        from .custom import NSGCreate
+        self.command_table["network nsg create"] = NSGCreate(loader=self)
 
-    with self.command_group('network nsg rule') as g:
-        g.custom_command('list', 'list_nsg_rules', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
-        g.custom_command('create', 'create_nsg_rule')
+    with self.command_group("network nsg rule") as g:
+        from .custom import NSGRuleCreate, NSGRuleUpdate
         from .aaz.latest.network.nsg.rule import Show
-        self.command_table['network nsg rule show'] = Show(loader=self, table_transformer=transform_nsg_rule_table_output)
-        from azure.cli.command_modules.network.custom import NsgRuleUpdate
-        self.command_table['network nsg rule update'] = NsgRuleUpdate(loader=self)
+        self.command_table["network nsg rule create"] = NSGRuleCreate(loader=self)
+        self.command_table["network nsg rule update"] = NSGRuleUpdate(loader=self)
+        self.command_table["network nsg rule show"] = Show(loader=self, table_transformer=transform_nsg_rule_table_output)
+
+        g.custom_command("list", "list_nsg_rules", table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
     # endregion
 
     # region NetworkWatchers
