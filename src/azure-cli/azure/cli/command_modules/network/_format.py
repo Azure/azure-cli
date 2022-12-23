@@ -136,10 +136,6 @@ def transform_nic_create_output(result):
     return None
 
 
-def transform_nsg_create_output(result):
-    return {'NewNSG': result.result()}
-
-
 def transform_nsg_rule_table_output(result):
     item = OrderedDict()
     item['Name'] = result['name']

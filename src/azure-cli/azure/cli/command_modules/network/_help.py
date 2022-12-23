@@ -4384,7 +4384,7 @@ type: command
 short-summary: Create a network security group.
 examples:
   - name: Create an NSG in a resource group within a region with tags.
-    text: az network nsg create -g MyResourceGroup -n MyNsg --tags super_secure no_80 no_22
+    text: az network nsg create -g MyResourceGroup -n MyNsg --tags foo=bar
 """
 
 helps['network nsg rule create'] = """

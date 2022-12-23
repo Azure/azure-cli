@@ -5238,7 +5238,7 @@ def remove_nic_ip_config_inbound_nat_rule(
 
 
 # region NetworkSecurityGroups
-def _handle_singular_or_plural(args, plural_name, singular_name):
+def _handle_plural_or_singular(args, plural_name, singular_name):
     values = getattr(args, plural_name)
     if not has_value(values):
         return
@@ -5294,19 +5294,19 @@ class NSGRuleCreate(_NSGRuleCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        _handle_singular_or_plural(args, "destination_address_prefixes", "destination_address_prefix")
-        _handle_singular_or_plural(args, "destination_port_ranges", "destination_port_range")
-        _handle_singular_or_plural(args, "source_address_prefixes", "source_address_prefix")
-        _handle_singular_or_plural(args, "source_port_ranges", "source_port_range")
+        _handle_plural_or_singular(args, "destination_address_prefixes", "destination_address_prefix")
+        _handle_plural_or_singular(args, "destination_port_ranges", "destination_port_range")
+        _handle_plural_or_singular(args, "source_address_prefixes", "source_address_prefix")
+        _handle_plural_or_singular(args, "source_port_ranges", "source_port_range")
         # handle application security groups
         if has_value(args.destination_asgs):
             args.destination_application_security_groups = [{"id": asg_id} for asg_id in args.destination_asgs]
             if has_value(args.destination_address_prefix):
-                args.destination_address_prefix = ""
+                args.destination_address_prefix = None
         if has_value(args.source_asgs):
             args.source_application_security_groups = [{"id": asg_id} for asg_id in args.source_asgs]
             if has_value(args.source_address_prefix):
-                args.source_address_prefix = ""
+                args.source_address_prefix = None
 
 
 class NSGRuleUpdate(_NSGRuleUpdate):
@@ -5364,10 +5364,10 @@ class NSGRuleUpdate(_NSGRuleUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        _handle_singular_or_plural(args, "destination_address_prefixes", "destination_address_prefix")
-        _handle_singular_or_plural(args, "destination_port_ranges", "destination_port_range")
-        _handle_singular_or_plural(args, "source_address_prefixes", "source_address_prefix")
-        _handle_singular_or_plural(args, "source_port_ranges", "source_port_range")
+        _handle_plural_or_singular(args, "destination_address_prefixes", "destination_address_prefix")
+        _handle_plural_or_singular(args, "destination_port_ranges", "destination_port_range")
+        _handle_plural_or_singular(args, "source_address_prefixes", "source_address_prefix")
+        _handle_plural_or_singular(args, "source_port_ranges", "source_port_range")
         # handle application security groups
         args.destination_application_security_groups = assign_aaz_list_arg(
             args.destination_application_security_groups,
