@@ -8424,14 +8424,15 @@ class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
         ])
 
 
-class VMCreateFromACGToOtherRGScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_from_acg_image_to_other_rg')
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_from_acg_image_to_other_rg',
-                           parameter_name='another_resource_group')
-    def test_vm_create_from_acg_image_to_other_rg(self, resource_group, another_resource_group):
+class VMCreateFromACGToOtherSubScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_from_acg_image_to_other_sub')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_from_acg_image_to_other_sub',
+                           parameter_name='another_resource_group', subscription='6b085460-5f21-477e-ba44-1035046e9101')
+    def test_vm_create_from_acg_image_to_other_sub(self, resource_group, another_resource_group):
         self.kwargs.update({
             'rg': resource_group,
             'rg2': another_resource_group,
+            'sub_id': '6b085460-5f21-477e-ba44-1035046e9101',
             'vm': self.create_random_name('vm', 10),
             'image_name': self.create_random_name('image', 15),
             'sig_name': self.create_random_name('sig', 10),
@@ -8439,13 +8440,13 @@ class VMCreateFromACGToOtherRGScenarioTest(ScenarioTest):
             'version': '0.1.0',
             'vm2': self.create_random_name('vm', 10),
         })
-        self.cmd('vm create -g {rg2} -n {vm} --image ubuntults')
-        self.cmd('vm deallocate -g {rg2} -n {vm}')
-        self.cmd('vm generalize -g {rg2} -n {vm}')
-        self.cmd('image create -g {rg2} -n {image_name} --source {vm}')
-        self.cmd('sig create -g {rg2} --gallery-name {sig_name}')
-        self.cmd('sig image-definition create -g {rg2} --gallery-name {sig_name} --gallery-image-definition {image_def} --os-type linux -p publisher1 -f offer1 -s sku1')
-        res = self.cmd('sig image-version create -g {rg2} --gallery-name {sig_name} --gallery-image-definition {image_def} --gallery-image-version {version} --managed-image {image_name} --replica-count 1').get_output_in_json()
+        self.cmd('vm create -g {rg2} -n {vm} --image ubuntults --subscription {sub_id}')
+        self.cmd('vm deallocate -g {rg2} -n {vm} --subscription {sub_id}')
+        self.cmd('vm generalize -g {rg2} -n {vm} --subscription {sub_id}')
+        self.cmd('image create -g {rg2} -n {image_name} --source {vm} --subscription {sub_id}')
+        self.cmd('sig create -g {rg2} --gallery-name {sig_name} --subscription {sub_id}')
+        self.cmd('sig image-definition create -g {rg2} --gallery-name {sig_name} --gallery-image-definition {image_def} --os-type linux -p publisher1 -f offer1 -s sku1 --subscription {sub_id}')
+        res = self.cmd('sig image-version create -g {rg2} --gallery-name {sig_name} --gallery-image-definition {image_def} --gallery-image-version {version} --managed-image {image_name} --replica-count 1 --subscription {sub_id}').get_output_in_json()
         self.kwargs.update({
             'image_version': res['id']
         })
