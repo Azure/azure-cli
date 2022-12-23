@@ -13,7 +13,6 @@ from azure.cli.core.profiles import get_api_version, ResourceType
 
 from azure.cli.command_modules.network._client_factory import (
     cf_application_gateways,
-    cf_express_route_circuits,
     cf_load_balancers,
     cf_network_interfaces, cf_network_watcher, cf_packet_capture,
     cf_virtual_networks, cf_virtual_network_peerings, cf_virtual_network_gateway_connections,
@@ -98,12 +97,6 @@ def load_command_table(self, _):
         client_factory=cf_dns_references,
         resource_type=ResourceType.MGMT_NETWORK_DNS,
         min_api='2018-05-01'
-    )
-
-    network_er_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRouteCircuitsOperations.{}',
-        client_factory=cf_express_route_circuits,
-        min_api='2016-09-01'
     )
 
     network_private_endpoint_sdk = CliCommandType(
@@ -496,8 +489,7 @@ def load_command_table(self, _):
     # endregion
 
     # region ExpressRoutes
-    with self.command_group('network express-route', network_er_sdk) as g:
-        g.command('list-route-tables-summary', 'begin_list_routes_table_summary', is_preview=True)
+    with self.command_group('network express-route'):
         from azure.cli.command_modules.network.custom import ExpressRouteCreate, ExpressRouteUpdate
         self.command_table['network express-route create'] = ExpressRouteCreate(loader=self)
         self.command_table['network express-route update'] = ExpressRouteUpdate(loader=self)

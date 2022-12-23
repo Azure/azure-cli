@@ -74,9 +74,6 @@ def load_arguments(self, _):
 
     default_existing = 'If only one exists, omit to use as default.'
 
-    # taken from Xplat. No enums in SDK
-    routing_registry_values = ['ARIN', 'APNIC', 'AFRINIC', 'LACNIC', 'RIPENCC', 'RADB', 'ALTDB', 'LEVEL3']
-
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     nic_type = CLIArgumentType(options_list='--nic-name', metavar='NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
     nsg_name_type = CLIArgumentType(options_list='--nsg-name', metavar='NAME', help='Name of the network security group.')
@@ -750,14 +747,7 @@ def load_arguments(self, _):
     # endregion
 
     # region ExpressRoutes
-    device_path_values = ['primary', 'secondary']
     er_port_name_type = CLIArgumentType(options_list='--port-name', metavar='NAME', help='ExpressRoute port name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/expressRoutePorts'))
-    with self.argument_context('network express-route') as c:
-        c.argument('circuit_name', circuit_name_type, options_list=['--name', '-n'])
-        c.argument('peering_name', help='The name of the peering')
-        c.argument('device_path', options_list='--path', arg_type=get_enum_type(device_path_values),
-                   help='The path of the device')
-
     with self.argument_context('network express-route port generate-loa', min_api='2020-06-01') as c:
         c.argument('express_route_port_name', er_port_name_type, options_list=['--name', '-n'])
         c.argument('customer_name', help='The customer name')

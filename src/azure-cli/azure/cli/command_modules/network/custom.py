@@ -92,10 +92,6 @@ def list_vnet(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'virtual_networks', resource_group_name)
 
 
-def list_express_route_circuits(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'express_route_circuits', resource_group_name)
-
-
 def list_lbs(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'load_balancers', resource_group_name)
 
