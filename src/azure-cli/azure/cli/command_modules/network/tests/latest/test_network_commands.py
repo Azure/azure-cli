@@ -3913,7 +3913,7 @@ class NetworkNicScenarioTest(ScenarioTest):
         })
 
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}').get_output_in_json()['newVNet']['subnets'][0]['id']
-        self.cmd('network nsg create -g {rg} -n {nsg1} --tags ""')
+        self.cmd('network nsg create -g {rg} -n {nsg1}')
         self.kwargs['nsg_id'] = self.cmd('network nsg show -g {rg} -n {nsg1}').get_output_in_json()['id']
 
         # test network nsg update
@@ -4338,7 +4338,7 @@ class NetworkSecurityGroupScenarioTest(ScenarioTest):
                          self.check('ends_with(@.destinationApplicationSecurityGroups[0].id, `/{asg2}`)', True)])
         self.cmd('network nsg rule update -g {rg} --nsg-name {nsg2} -n {rule2} --destination-asgs "" --destination-address-prefix {prefix}',
                  checks=[self.check('name', '{rule2}'),
-                         self.check('destinationAddressPrefix', '{prefix}')])
+                         self.check('destinationApplicationSecurityGroups', None)])
 
         self.cmd('network nsg rule delete --resource-group {rg} --nsg-name {nsg} --name {rule}')
         self.cmd('network nsg rule delete --resource-group {rg} --nsg-name {nsg2} --name {rule2}')
