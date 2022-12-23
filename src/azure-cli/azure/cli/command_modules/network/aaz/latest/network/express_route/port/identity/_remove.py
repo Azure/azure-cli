@@ -12,27 +12,28 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network express-route port link list",
+    "network express-route port identity remove",
 )
-class List(AAZCommand):
-    """List ExpressRoute links.
+class Remove(AAZCommand):
+    """Remove the managed service identity of an ExpressRoute Port.
 
-    :example: List ExpressRoute links.
-        az network express-route port link list --port-name MyPort --resource-group MyResourceGroup
+    :example: Remove an identity of the ExpressRoute Port
+        az network express-route port identity remove -g MyResourceGroup --name MyExpressRoutePort
     """
 
     _aaz_info = {
         "version": "2022-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressrouteports/{}", "2022-01-01", "properties.links"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressrouteports/{}", "2022-01-01", "identity"],
         ]
     }
+
+    AZ_SUPPORT_NO_WAIT = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
         self.SubresourceSelector(ctx=self.ctx, name="subresource")
-        self._execute_operations()
-        return self._output()
+        return self.build_lro_poller(self._execute_operations, None)
 
     _args_schema = None
 
@@ -45,8 +46,8 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.port_name = AAZStrArg(
-            options=["--port-name"],
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
             help="ExpressRoute port name.",
             required=True,
         )
@@ -58,6 +59,8 @@ class List(AAZCommand):
     def _execute_operations(self):
         self.pre_operations()
         self.ExpressRoutePortsGet(ctx=self.ctx)()
+        self.InstanceDeleteByJson(ctx=self.ctx)()
+        yield self.ExpressRoutePortsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -68,19 +71,15 @@ class List(AAZCommand):
     def post_operations(self):
         pass
 
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
-        return result
-
     class SubresourceSelector(AAZJsonSelector):
 
         def _get(self):
             result = self.ctx.vars.instance
-            return result.properties.links
+            return result.identity
 
         def _set(self, value):
             result = self.ctx.vars.instance
-            result.properties.links = value
+            result.identity = value
             return
 
     class ExpressRoutePortsGet(AAZHttpOperation):
@@ -113,7 +112,7 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "expressRoutePortName", self.ctx.args.port_name,
+                    "expressRoutePortName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -162,13 +161,129 @@ class List(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _ListHelper._build_schema_express_route_port_read(cls._schema_on_200)
+            _RemoveHelper._build_schema_express_route_port_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
+    class ExpressRoutePortsCreateOrUpdate(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
 
-class _ListHelper:
-    """Helper class for List"""
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+            if session.http_response.status_code in [200, 201]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+
+            return self.on_error(session.http_response)
+
+        @property
+        def url(self):
+            return self.client.format_url(
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ExpressRoutePorts/{expressRoutePortName}",
+                **self.url_parameters
+            )
+
+        @property
+        def method(self):
+            return "PUT"
+
+        @property
+        def error_format(self):
+            return "ODataV4Format"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param(
+                    "expressRoutePortName", self.ctx.args.name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "api-version", "2022-01-01",
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                value=self.ctx.vars.instance,
+            )
+
+            return self.serialize_content(_content_value)
+
+        def on_200_201(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200_201
+            )
+
+        _schema_on_200_201 = None
+
+        @classmethod
+        def _build_schema_on_200_201(cls):
+            if cls._schema_on_200_201 is not None:
+                return cls._schema_on_200_201
+
+            cls._schema_on_200_201 = AAZObjectType()
+            _RemoveHelper._build_schema_express_route_port_read(cls._schema_on_200_201)
+
+            return cls._schema_on_200_201
+
+    class InstanceDeleteByJson(AAZJsonInstanceDeleteOperation):
+
+        def __call__(self, *args, **kwargs):
+            self.ctx.selectors.subresource.set(self._delete_instance())
+
+
+class _RemoveHelper:
+    """Helper class for Remove"""
 
     _schema_express_route_port_read = None
 
@@ -344,4 +459,4 @@ class _ListHelper:
         _schema.type = cls._schema_express_route_port_read.type
 
 
-__all__ = ["List"]
+__all__ = ["Remove"]
