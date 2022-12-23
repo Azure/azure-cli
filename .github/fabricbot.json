@@ -12250,6 +12250,480 @@
           }
         ]
       }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "or",
+          "operands": [
+            {
+              "name": "titleContains",
+              "parameters": {
+                "titlePattern": "az appservice ase"
+              }
+            },
+            {
+              "name": "bodyContains",
+              "parameters": {
+                "bodyPattern": "az appservice ase"
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-ase] auto assign labels and users based on issue description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-ase"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "madsd"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "or",
+          "operands": [
+            {
+              "name": "titleContains",
+              "parameters": {
+                "titlePattern": "az webapp auth"
+              }
+            },
+            {
+              "name": "bodyContains",
+              "parameters": {
+                "bodyPattern": "az webapp auth"
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-authentication] auto assign labels and users based on issue description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-authentication"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "Hamster-Huey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "or",
+          "operands": [
+            {
+              "name": "titleContains",
+              "parameters": {
+                "titlePattern": "(az webapp config backup|az webapp config snapshot)",
+                "isRegex": true
+              }
+            },
+            {
+              "name": "bodyContains",
+              "parameters": {
+                "bodyPattern": "(az webapp config backup|az webapp config snapshot)",
+                "isRegex": true
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-backup-restore] auto assign labels and users based on issue description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-backup-restore"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "gsethgit"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "or",
+          "operands": [
+            {
+              "name": "titleContains",
+              "parameters": {
+                "isRegex": true,
+                "titlePattern": "(az appservice domain|az webapp config ssl)"
+              }
+            },
+            {
+              "operator": "not",
+              "operands": [
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "isRegex": true,
+                    "bodyPattern": "(az appservice domain|az webapp config ssl)"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-certs-domains] auto assign labels and users based on issue description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-certs-domains"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "yutanglin16"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "or",
+          "operands": [
+            {
+              "name": "titleContains",
+              "parameters": {
+                "titlePattern": "az webapp deploy"
+              }
+            },
+            {
+              "name": "bodyContains",
+              "parameters": {
+                "bodyPattern": "az webapp deploy"
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-deployment]",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-deployment"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "btardif"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "or",
+          "operands": [
+            {
+              "name": "titleContains",
+              "parameters": {
+                "isRegex": true,
+                "titlePattern": "(az appservice list-locations|az appservice plan|az webapp browse|az webapp config|az webapp connection|az webapp cors|az webapp create|az webapp delete|az webapp deleted|az webapp identity|az webapp list|az webapp list-instances|az webapp list-runtimes|az webapp restart|az webapp scale|az webapp show|az webapp start|az webapp stop|az webapp up|az webapp update|az webapp webjob)"
+              }
+            },
+            {
+              "name": "bodyContains",
+              "parameters": {
+                "isRegex": true,
+                "bodyPattern": "(az appservice list-locations|az appservice plan|az webapp browse|az webapp config|az webapp connection|az webapp cors|az webapp create|az webapp delete|az webapp deleted|az webapp identity|az webapp list|az webapp list-instances|az webapp list-runtimes|az webapp restart|az webapp scale|az webapp show|az webapp start|az webapp stop|az webapp up|az webapp update|az webapp webjob)"
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-general]",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-general"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "seligj95"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "or",
+          "operands": [
+            {
+              "name": "titleContains",
+              "parameters": {
+                "titlePattern": "az appservice kube"
+              }
+            },
+            {
+              "name": "bodyContains",
+              "parameters": {
+                "bodyPattern": "az appservice kube"
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-kube]",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-kube"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "apwestgarth"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "or",
+          "operands": [
+            {
+              "name": "titleContains",
+              "parameters": {
+                "titlePattern": "(az webapp log|az webapp scan)",
+                "isRegex": true
+              }
+            },
+            {
+              "name": "bodyContains",
+              "parameters": {
+                "bodyPattern": "(az webapp log|az webapp scan)",
+                "isRegex": true
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-logging-monitoring]",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-logging-monitoring"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "yutanglin16"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "or",
+          "operands": [
+            {
+              "name": "titleContains",
+              "parameters": {
+                "titlePattern": "(az appservice hybrid-connection|az appservice vnet-integration|az webapp config access-restriction|az webapp config hostname|az webapp create-remote-connection|az webapp hybrid-connection|az webapp ssh|az webapp traffic-routing|az webapp vnet-integration)",
+                "isRegex": true
+              }
+            },
+            {
+              "name": "bodyContains",
+              "parameters": {
+                "bodyPattern": "(az appservice hybrid-connection|az appservice vnet-integration|az webapp config access-restriction|az webapp config hostname|az webapp create-remote-connection|az webapp hybrid-connection|az webapp ssh|az webapp traffic-routing|az webapp vnet-integration)",
+                "isRegex": true
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-networking]",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-networking"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "madsd"
+            }
+          }
+        ]
+      }
     }
   ],
   "userGroups": [
