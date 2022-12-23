@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=too-few-public-methods, protected-access
+# pylint: disable=too-few-public-methods, protected-access, too-many-nested-blocks, too-many-branches
 
 import json
 
@@ -397,7 +397,6 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
 
     def _update_instance_by_generic(self, instance, generic_update_args, client_flatten=True):  # pylint: disable=unused-argument
         from azure.cli.core.commands.arm import add_usage, remove_usage, set_usage
-        from azure.cli.core.azclierror import InvalidArgumentValueError
         if not generic_update_args or not generic_update_args['actions']:
             return instance
         assert isinstance(instance, AAZBaseValue)
@@ -578,7 +577,7 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
                         raise InvalidArgumentValueError(
                             "non-unique key '{}' found multiple matches on {}. Key must be unique."
                             .format(key, path[-2]))
-                    elif len(matches) == 0:
+                    if len(matches) == 0:
                         raise InvalidArgumentValueError(
                             "item with value '{}' doesn\'t exist for key '{}' on {}".format(value, key, path[-2]))
 
