@@ -191,7 +191,6 @@ class DmsServiceTests(ScenarioTest):
         })
         subnet = self.cmd('az network vnet subnet show -g {vsubnet_rg} -n {vsubnet_sn} --vnet-name {vsubnet_vn}').get_output_in_json()
 
-
         project_name_pg = self.create_random_name('projectpg', 20)
         task_name_pg = self.create_random_name('taskpg', 20)
         source_connection_info_pg = "{ 'userName': 'testuser', 'password': 'testpassword', 'serverName': 'notarealsourceserver', 'databaseName': 'notarealdatabasename', 'encryptConnection': False, 'trustServerCertificate': True }"
@@ -199,10 +198,86 @@ class DmsServiceTests(ScenarioTest):
         database_options_pg = "[ { 'name': 'SourceDatabase1', 'target_database_name': 'TargetDatabase1', 'selectedTables': [ 'public.TestTableSource1', 'public.TestTableSource2'] } ]"
 
         project_name_mysql = self.create_random_name('projectmysql', 20)
-        task_name_mysql = self.create_random_name('taskmysql', 20)
+        task_name_mysql1 = self.create_random_name('taskmysql', 20)
+        task_name_mysql2 = self.create_random_name('taskmysql2', 20)
         source_connection_info_mysql = "{ 'userName': 'testuser', 'password': 'testpassword', 'serverName': 'notarealsourceserver', 'databaseName': 'notarealdatabasename', 'encryptConnection': False }"
         target_connection_info_mysql = "{ 'userName': 'testuser', 'password': 'testpassword', 'serverName': 'notarealtargetserver', 'databaseName': 'notarealdatabasename'}"
         database_options_mysql = "{'make_source_server_read_only': 'true', 'selected_databases':[ { 'name': 'SourceDatabase1', 'target_database_name': 'TargetDatabase1', 'table_map': { 'sourceSchema.tableName': 'targetSchema.tableName'} } ], 'migration_level_settings': { 'DesiredRangesCount': '4', 'QueryTableDataRangeTaskCount':'8'}}"
+
+        database_options_mysql_complete = """{
+            'selectedDatabases': [{
+                    'id': '',
+                    'name': 'employees',
+                    'targetDatabaseName': 'employees',
+                    'tableMap': {
+                        '`employees`.address': '`employees`.address',
+                        '`employees`.datetype': '`employees`.datetype',
+                        '`employees`.departments': '`employees`.departments',
+                        '`employees`.dept_emp': '`employees`.dept_emp',
+                        '`employees`.dept_manager': '`employees`.dept_manager',
+                        '`employees`.employees': '`employees`.employees',
+                        '`employees`.salaries': '`employees`.salaries',
+                        '`employees`.titles': '`employees`.titles'
+                    },
+                    'tablesToMigrateSchema': {
+                        '`employees`.address': '`employees`.address',
+                        '`employees`.departments': '`employees`.departments',
+                    },
+                    'selectedViews': {
+                        'employees.contractors'
+                    }
+                    'selectedTriggers': {
+                        'employees.on_salaries_update'
+                    }
+                    'selectedRoutines': {
+                        'employees.hire',
+                        'employees.transfer',
+                        'employees.fire',
+                    }
+                    'selectedEvents': {
+                        'employees.nightly_maintenance',
+                    }
+                }
+            ],
+            'startedOn': '2022-10-29T04:16:14.161Z',
+            'sourceServerResourceId': '',
+            'targetServerResourceId': '/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/mytest/providers/Microsoft.DBforMySQL/flexibleServers/myserver',
+            'makeSourceServerReadOnly': false,
+            'migrateAllViews': false,
+            'migrateAllTriggers': false,
+            'migrateAllEvents': false,
+            'migrateAllRoutines': false,
+            'migrateUserSystemTables': false,
+            'optionalAgentSettings': {
+                'enableConsistentBackup': true
+            }
+        }"""
+
+        database_options_mysql_replicate_changes = """{
+            'selectedDatabases': [{
+                    'id': '',
+                    'name': 'employees',
+                    'targetDatabaseName': 'employees',
+                    'tableMap': {
+                        '`employees`.address': '`employees`.address',
+                        '`employees`.datetype': '`employees`.datetype',
+                        '`employees`.departments': '`employees`.departments',
+                        '`employees`.dept_emp': '`employees`.dept_emp',
+                        '`employees`.dept_manager': '`employees`.dept_manager',
+                        '`employees`.employees': '`employees`.employees',
+                        '`employees`.salaries': '`employees`.salaries',
+                        '`employees`.titles': '`employees`.titles'
+                    }
+                }
+            ],
+            'startedOn': '2022-10-29T04:16:14.161Z',
+            'sourceServerResourceId': '',
+            'targetServerResourceId': '/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/mytest/providers/Microsoft.DBforMySQL/flexibleServers/myserver',
+            'binLogInfo': {
+                'filename': 'binlog.000127',
+                'position': 5485347
+            }
+        }"""
 
         self.kwargs.update({
             'lname': self.location_name,
@@ -224,21 +299,13 @@ class DmsServiceTests(ScenarioTest):
         })
 
         self.kwargs.update({
-            'lname': self.location_name,
-            'skuname': self.sku_name,
-            'vnetid': subnet['id'],
-            'sname': service_name,
-            'pname': project_name,
             'pnamemysql': project_name_mysql,
-            'tname1': task_name1,
-            'tname2': task_name2,
-            'tnamemysql': task_name_mysql,
-            'dboptions1': database_options1,
-            'dboptions2': database_options2,
+            'tnamemysql1': task_name_mysql1,
+            'tnamemysql2': task_name_mysql2,
             'dboptionsmysql': database_options_mysql,
-            'sconn': source_connection_info,
+            'dboptionsmysql2': database_options_mysql_complete,
+            'dboptionsmysql3': database_options_mysql_replicate_changes,
             'sconnmysql': source_connection_info_mysql,
-            'tconn': target_connection_info,
             'tconnmysql': target_connection_info_mysql
         })
 
@@ -248,10 +315,9 @@ class DmsServiceTests(ScenarioTest):
         self.cmd('az dms project create -g {rg} --service-name {sname} -l {lname} -n {pnamepg} --source-platform PostgreSQL --target-platform AzureDbForPostgreSQL')
         self.cmd('az dms project create -g {rg} --service-name {sname} -l {lname} -n {pnamemysql} --source-platform MySql --target-platform AzureDbForMySQL')
 
-
         self.cmd('az dms project task show -g {rg} --service-name {sname} --project-name {pname} -n {tname1}', expect_failure=True)
         self.cmd('az dms project task show -g {rg} --service-name {sname} --project-name {pnamepg} -n {tnamepg}', expect_failure=True)
-        self.cmd('az dms project task show -g {rg} --service-name {sname} --project-name {pnamemysql} -n {tnamemysql}', expect_failure=True)
+        self.cmd('az dms project task show -g {rg} --service-name {sname} --project-name {pnamemysql} -n {tnamemysql1}', expect_failure=True)
 
         create_checks = [JMESPathCheck('name', task_name1),
                          JMESPathCheck('resourceGroup', resource_group),
@@ -278,7 +344,7 @@ class DmsServiceTests(ScenarioTest):
                             JMESPathCheck('properties.taskType', 'Migrate.PostgreSql.AzureDbForPostgreSql.SyncV2')]
         cancel_checks_pg = [JMESPathCheck('name', task_name_pg),
                             JMESPathPatternCheck('properties.state', 'Cancel(?:ed|ing)')]
-        create_checks_mysql = [JMESPathCheck('name', task_name_mysql),
+        create_checks_mysql = [JMESPathCheck('name', task_name_mysql1),
                                JMESPathCheck('resourceGroup', resource_group),
                                JMESPathCheck('type', 'Microsoft.DataMigration/services/projects/tasks'),
                                JMESPathCheck('length(properties.input.selectedDatabases)', 1),
@@ -293,7 +359,7 @@ class DmsServiceTests(ScenarioTest):
                                              'notarealtargetserver'),
                                JMESPathCheck('properties.input.targetConnectionInfo.encryptConnection', True),
                                JMESPathCheck('properties.taskType', 'Migrate.MySql.AzureDbForMySql')]
-        cancel_checks_mysql = [JMESPathCheck('name', task_name_mysql),
+        cancel_checks_mysql = [JMESPathCheck('name', task_name_mysql1),
                                JMESPathPatternCheck('properties.state', 'Cancel(?:ed|ing)')]
 
         # SQL Tests
@@ -301,27 +367,27 @@ class DmsServiceTests(ScenarioTest):
         self.cmd('az dms project task show -g {rg} --service-name {sname} --project-name {pname} -n {tname1}', checks=create_checks)
         self.cmd('az dms project task cancel -g {rg} --service-name {sname} --project-name {pname} -n {tname1}', checks=cancel_checks)
 
+        self.cmd('az dms project task create --task-type OfflineMigration --database-options-json "{dboptions2}" -n {tname2} --project-name {pname} -g {rg} --service-name {sname} --source-connection-json "{sconn}" --target-connection-json "{tconn}"')
+
+        self.cmd('az dms project task check-name -g {rg} --service-name {sname} --project-name {pname} -n {tname1}', checks=self.name_exists_checks)
+        self.cmd('az dms project task delete -g {rg} --service-name {sname} --project-name {pname} -n {tname1} --delete-running-tasks true -y')
+        self.cmd('az dms project task check-name -g {rg} --service-name {sname} --project-name {pname} -n {tname1}', checks=self.name_available_checks)
+
+        list_checks = [JMESPathCheck('length(@)', 2),
+                       JMESPathCheck("length([?name == '{}'])".format(task_name1), 1)]
+        self.cmd('az dms project task list -g {rg} --service-name {sname} --project-name {pname} --task-type "Migrate.SqlServer.SqlDb"', checks=list_checks)
+
         # PG Tests
         self.cmd('az dms project task create --task-type OnlineMigration --database-options-json "{dboptionspg}" -n {tnamepg} --project-name {pnamepg} -g {rg} --service-name {sname} --source-connection-json "{sconnpg}" --target-connection-json "{tconnpg}"', checks=create_checks_pg)
         self.cmd('az dms project task show -g {rg} --service-name {sname} --project-name {pnamepg} -n {tnamepg}', checks=create_checks_pg)
         self.cmd('az dms project task cancel -g {rg} --service-name {sname} --project-name {pnamepg} -n {tnamepg}', checks=cancel_checks_pg)
 
         # MySQL Tests
-        self.cmd('az dms project task create --task-type OfflineMigration --database-options-json "{dboptionsmysql}" -n {tnamemysql} --project-name {pnamemysql} -g {rg} --service-name {sname} --source-connection-json "{sconnmysql}" --target-connection-json "{tconnmysql}"', checks=create_checks_mysql)
-        self.cmd('az dms project task show -g {rg} --service-name {sname} --project-name {pnamemysql} -n {tnamemysql}', checks=create_checks_mysql)
-        self.cmd('az dms project task cancel -g {rg} --service-name {sname} --project-name {pnamemysql} -n {tnamemysql}', checks=cancel_checks_mysql)
+        self.cmd('az dms project task create --task-type OfflineMigration --database-options-json "{dboptionsmysql}" -n {tnamemysql1} --project-name {pnamemysql} -g {rg} --service-name {sname} --source-connection-json "{sconnmysql}" --target-connection-json "{tconnmysql}"', checks=create_checks_mysql)
+        self.cmd('az dms project task show -g {rg} --service-name {sname} --project-name {pnamemysql} -n {tnamemysql1}', checks=create_checks_mysql)
+        self.cmd('az dms project task cancel -g {rg} --service-name {sname} --project-name {pnamemysql} -n {tnamemysql1}', checks=cancel_checks_mysql)
 
-        self.cmd('az dms project task create --task-type OfflineMigration --database-options-json "{dboptions2}" -n {tname2} --project-name {pname} -g {rg} --service-name {sname} --source-connection-json "{sconn}" --target-connection-json "{tconn}"')
-
-        list_checks = [JMESPathCheck('length(@)', 2),
-                       JMESPathCheck("length([?name == '{}'])".format(task_name1), 1)]
-        self.cmd('az dms project task list -g {rg} --service-name {sname} --project-name {pname} --task-type "Migrate.SqlServer.SqlDb"', checks=list_checks)
-
-        self.cmd('az dms project task check-name -g {rg} --service-name {sname} --project-name {pname} -n {tname1}', checks=self.name_exists_checks)
-
-        self.cmd('az dms project task delete -g {rg} --service-name {sname} --project-name {pname} -n {tname1} --delete-running-tasks true -y')
-
-        self.cmd('az dms project task check-name -g {rg} --service-name {sname} --project-name {pname} -n {tname1}', checks=self.name_available_checks)
+        # self.cmd('az dms project task create --task-type OfflineMigration --database-options-json "{dboptionsmysql2}" -n {tnamemysql2} --project-name {pnamemysql} -g {rg} --service-name {sname} --source-connection-json "{sconnmysql}" --target-connection-json "{tconnmysql}"')
 
         # Clean up service for live runs
         self.cmd('az dms delete -g {rg} -n {sname} --delete-running-tasks true -y')

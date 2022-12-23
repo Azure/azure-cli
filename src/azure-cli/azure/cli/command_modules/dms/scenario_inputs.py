@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+from azure.cli.command_modules.dms.validators import throw_if_not_dictionary, throw_if_not_list
 from azure.mgmt.datamigration.models import (MigrateSqlServerSqlDbTaskInput,
                                              MigrateSqlServerSqlDbDatabaseInput,
                                              MigrationValidationOptions,
@@ -15,6 +15,7 @@ from azure.mgmt.datamigration.models import (MigrateSqlServerSqlDbTaskInput,
                                              MigrateMySqlAzureDbForMySqlSyncTaskInput)
 
 from azure.cli.core.azclierror import ValidationError
+from msrest.serialization import Model
 
 
 def get_migrate_sql_to_sqldb_offline_input(database_options_json,
@@ -111,8 +112,7 @@ def get_migrate_mysql_to_azuredbformysql_input(database_options_json,
     database_options = []
     migration_level_settings = {}
     make_source_server_read_only = False
-    additional_properties = {}
-    selected_databases = []
+    migration_properties = {}
 
     if not isinstance(database_options_json, dict):
         raise ValidationError('Format of the database option file is wrong')
@@ -134,18 +134,26 @@ def get_migrate_mysql_to_azuredbformysql_input(database_options_json,
             raise ValidationError('table_map should be dictionary and non empty, to select all tables remove table_map')
 
         db_input = MigrateMySqlAzureDbForMySqlOfflineDatabaseInput(
-            name=database.get('name', None),
-            target_database_name=database.get('target_database_name', None),
-            table_map=database.get('table_map', None))
+            name=database.get('name'),
+            target_database_name=database.get('target_database_name'),
+            table_map=database.get('table_map'))
 
         if has_schema_migration_options:
-            tables_to_migrate_schema = database.get("tablesToMigrateSchema", {})
-            if not isinstance(tables_to_migrate_schema, dict):
-                raise ValidationError('tables_to_migrate_schema should be a dictionary')
-            db_input.additional_properties = {"tablesToMigrateSchema": tables_to_migrate_schema}
-            db_input.enable_additional_properties_sending()
+            db_properties = {}
+            set_optional(db_properties, 'tablesToMigrateSchema', database, 'tables_to_migrate_schema', throw_if_not_dictionary)
+            set_optional(db_properties, 'selectedViews', database, 'selected_views', throw_if_not_list)
+            set_optional(db_properties, 'selectedTriggers', database, 'selected_triggers', throw_if_not_list)
+            set_optional(db_properties, 'selectedRoutines', database, 'selected_routines', throw_if_not_list)
+            set_optional(db_properties, 'selectedEvents', database, 'selected_events', throw_if_not_list)
+
+            if len(db_properties) > 0:
+                db_input.additional_properties = db_properties
+                db_input.enable_additional_properties_sending()
 
         database_options.append(db_input)
+
+    set_optional(migration_properties, 'sourceServerResourceId', database_options_json, 'source_server_resource_id')
+    set_optional(migration_properties, 'targetServerResourceId', database_options_json, 'target_server_resource_id')
 
     if 'migration_level_settings' in database_options_json:
         migration_level_settings = database_options_json.get('migration_level_settings')
@@ -155,30 +163,19 @@ def get_migrate_mysql_to_azuredbformysql_input(database_options_json,
     if requires_consistent_snapshot:
         migration_level_settings['enableConsistentBackup'] = 'true'
     elif has_consistent_snapshot_options:
-        if 'make_source_server_read_only' in database_options_json:
-            make_source_server_read_only = database_options_json.get('make_source_server_read_only')
-        if 'enable_consistent_backup' in database_options_json:
-            migration_level_settings['enableConsistentBackup'] = database_options_json.get('enable_consistent_backup')
+        make_source_server_read_only = database_options_json.get('make_source_server_read_only', False)
+        set_optional(migration_level_settings, 'enableConsistentBackup', database_options_json, 'enable_consistent_backup')
 
     if has_schema_migration_options:
-        if 'migrate_all_views' in database_options_json:
-            additional_properties['migrateAllViews'] = database_options_json.get('migrate_all_views')
-        if 'migrate_all_triggers' in database_options_json:
-            additional_properties['migrateAllTriggers'] = database_options_json.get('migrate_all_triggers')
-        if 'migrate_all_events' in database_options_json:
-            additional_properties['migrateAllEvents'] = database_options_json.get('migrate_all_events')
-        if 'migrate_all_routines' in database_options_json:
-            additional_properties['migrateAllRoutines'] = database_options_json.get('migrate_all_routines')
-        if 'migrate_all_tables_schema' in database_options_json:
-            additional_properties['migrateAllTablesSchema'] = database_options_json.get('migrate_all_tables_schema')
-        if 'migrate_user_system_tables' in database_options_json:
-            additional_properties['migrateUserSystemTables'] = database_options_json.get('migrate_user_system_tables')
+        set_optional(migration_properties, 'migrateAllViews', database_options_json, 'migrate_all_views')
+        set_optional(migration_properties, 'migrateAllTriggers', database_options_json, 'migrate_all_triggers')
+        set_optional(migration_properties, 'migrateAllEvents', database_options_json, 'migrate_all_events')
+        set_optional(migration_properties, 'migrateAllRoutines', database_options_json, 'migrate_all_routines')
+        set_optional(migration_properties, 'migrateAllTablesSchema', database_options_json, 'migrate_all_tables_schema')
+        set_optional(migration_properties, 'migrateUserSystemTables', database_options_json, 'migrate_user_system_tables')
 
     if has_binlog_position:
-        binlog_info = additional_properties.get('binlog_info', {})
-        if not isinstance(binlog_info, dict) or len(binlog_info) == 0:
-            raise ValidationError("binlog_info should be a non-empty dictionary")
-        additional_properties['binLogInfo'] = binlog_info
+        set_required(migration_properties, 'binLogInfo', database_options_json, 'binlog_info', throw_if_not_dictionary)
 
     task_input = MigrateMySqlAzureDbForMySqlOfflineTaskInput(source_connection_info=source_connection_info,
                                                              target_connection_info=target_connection_info,
@@ -186,15 +183,31 @@ def get_migrate_mysql_to_azuredbformysql_input(database_options_json,
                                                              optional_agent_settings=migration_level_settings,
                                                              make_source_server_read_only=make_source_server_read_only)
 
-    if len(additional_properties) > 0:
-        task_input.additional_properties = additional_properties
+    if len(migration_properties) > 0:
+        task_input.additional_properties = migration_properties
         task_input.enable_additional_properties_sending()
 
     return task_input
 
 
-def validate_keys_and_values_match(table_map: dict):
-    renamed_tables = {s: t for s, t in table_map.items() if s != t}
-    if len(renamed_tables) > 0:
-        raise ValidationError(
-            "All source and target table names should match. The following mismatches were found: " + str(renamed_tables))
+def set_optional(target: dict,
+                 target_property: str,
+                 source: dict,
+                 source_property: str,
+                 validator: callable([any, str]) = None):
+    if source_property in source:
+        value = source[source_property]
+        if validator is not None:
+            validator(value, source_property)
+        target[target_property] = value
+
+
+def set_required(target: dict,
+                 target_property: str,
+                 source: dict,
+                 source_property: str,
+                 validator: callable([any, str]) = None):
+    if source_property in source:
+        set_optional(target, target_property, source, source_property, validator)
+    else:
+        raise ValidationError("'%s' attribute is required but it is not found in the input json" % source_property)
