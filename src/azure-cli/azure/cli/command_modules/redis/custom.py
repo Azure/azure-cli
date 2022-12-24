@@ -75,6 +75,7 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
 
 
 def custom_update_setter(client, resource_group_name, name, parameters):
+    # Custom update setter is used to match behavior from when update was not a LRO
     return client.begin_update(resource_group_name, name, parameters).result(0)
 
 
