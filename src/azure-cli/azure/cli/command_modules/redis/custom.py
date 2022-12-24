@@ -244,8 +244,6 @@ def cli_redis_identity_remove(client, resource_group_name, cache_name, mi_system
     user_assigned = None
     if identity.user_assigned_identities is not None:
         user_assigned = list(identity.user_assigned_identities)
-    print(mi_user_assigned)
-    print(user_assigned)
     if mi_user_assigned is not None and user_assigned is not None:
         for mi_user_id in mi_user_assigned:
             try:
