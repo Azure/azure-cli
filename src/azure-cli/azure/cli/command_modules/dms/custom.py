@@ -315,8 +315,9 @@ def get_file_or_parse_json(value, value_type):
     # Test if provided value is a valid json
     try:
         json_parse = shell_safe_json_parse(value)
-    except:
-        raise CLIError("The supplied input for '" + value_type + "' is not a valid file path or a valid json object.")
+    except Exception as e:
+        raise CLIError("The supplied input for '{type}' is not a valid file path or a valid json object. {ex}'"
+                       .format(type=value_type, ex=e))
     else:
         return json_parse
 

@@ -260,10 +260,34 @@ parameters:
                   "target_database_name": "targetSchema1",
                   // Table mapping from source to target schemas [Optional]
                   // Don't add it if all tables of this database needs to be migrated
-                  "table_map": {"sourceSchema1.table1": "targetSchema1.table1",
-                                "sourceSchema1.table2": "targetSchema1.table2",
-                                "sourceSchema1.table3": "targetSchema1.table3",
-                                ..n}
+                  "table_map": {
+                        "sourceSchema1.table1": "targetSchema1.table1",
+                        "sourceSchema1.table2": "targetSchema1.table2",
+                        "sourceSchema1.table3": "targetSchema1.table3",
+                        ..n
+                    }
+                    // the below items are only necessary for selective schema migration
+                    // optional, migrates schema for the following tables            
+                    'tables_to_migrate_schema': {
+                        "sourceSchema1.table2": "targetSchema1.table2",
+                        "sourceSchema1.table3": "targetSchema1.table3"
+                    },
+                    // optional, migrates the enumerated views            
+                    'selected_views': [
+                        'sourceSchema1.view1'
+                    ],
+                    // optional, migrates the enumerated triggers
+                    'selected_triggers': [
+                        'sourceSchema1.on_table1_updated'
+                    ],
+                    // optional, migrates the enumerated routines
+                    'selected_routines': [
+                        'sourceSchema1.build_report'
+                    ],
+                    // optional, migrates the enumerated events            
+                    'selected_events': [
+                        'sourceSchema1.nightly_maintenance'
+                    ]
                 },
                 ...n
             ],
