@@ -280,10 +280,12 @@ def core_handles_scenario(
         target_platform,
         task_type=""):
     # Add scenarios here after migrating them to the core from the extension.
-    CoreScenarioTypes = [ScenarioType.sql_sqldb_offline,
-                         ScenarioType.postgres_azurepostgres_online,
-                         ScenarioType.mysql_azuremysql_offline]
-    return get_scenario_type(source_platform, target_platform, task_type) in CoreScenarioTypes
+    core_scenario_types = [ScenarioType.sql_sqldb_offline,
+                           ScenarioType.postgres_azurepostgres_online,
+                           ScenarioType.mysql_azuremysql_offline,
+                           ScenarioType.mysql_azuremysql_online,
+                           ScenarioType.mysql_azuremysql_cdc]
+    return get_scenario_type(source_platform, target_platform, task_type) in core_scenario_types
 
 
 def transform_json_inputs(
@@ -454,9 +456,6 @@ def get_migrate_mysql_to_azuredbformysql_cdc_task_properties(**kwargs):
 
 
 def get_scenario_type(source_platform, target_platform, task_type=""):
-    print("v**********************************************v")
-    print(task_type, source_platform, target_platform)
-
     if source_platform == "sql" and target_platform == "sqldb":
         scenario_type = ScenarioType.sql_sqldb_offline if not task_type or "offline" in task_type else \
             ScenarioType.unknown
@@ -472,8 +471,6 @@ def get_scenario_type(source_platform, target_platform, task_type=""):
     else:
         scenario_type = ScenarioType.unknown
 
-    print(scenario_type)
-    print("^**********************************************^")
     return scenario_type
 
 
