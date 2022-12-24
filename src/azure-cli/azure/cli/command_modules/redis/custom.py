@@ -14,15 +14,16 @@ allowed_p_family_sizes = ['p1', 'p2', 'p3', 'p4', 'p5']
 wrong_vmsize_error = CLIError('Invalid VM size. Example for Valid values: '
                               'For Standard Sku : (C0, C1, C2, C3, C4, C5, C6), '
                               'for Premium Sku : (P1, P2, P3, P4, P5)')
-allowed_auth_methods = ['SAS','ManagedIdentity']
+allowed_auth_methods = ['SAS', 'ManagedIdentity']
 # region Custom Commands
 
 
 # pylint: disable=unused-argument
-def cli_redis_export(cmd, client, resource_group_name, name, prefix, container, preferred_data_archive_auth_method=None, file_format=None):
+def cli_redis_export(cmd, client, resource_group_name, name, prefix, container,
+                     preferred_data_archive_auth_method=None, file_format=None):
     from azure.mgmt.redis.models import ExportRDBParameters
     parameters = ExportRDBParameters(prefix=prefix, container=container, format=file_format,
-    preferred_data_archive_auth_method=preferred_data_archive_auth_method)
+                                     preferred_data_archive_auth_method=preferred_data_archive_auth_method)
     return client.begin_export_data(resource_group_name, name, parameters)
 
 
@@ -72,8 +73,10 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
     )
     return update_params
 
-def custom_update_setter(client,resource_group_name,name,parameters):
-    return client.begin_update(resource_group_name,name,parameters).result(0)
+
+def custom_update_setter(client, resource_group_name, name, parameters):
+    return client.begin_update(resource_group_name, name, parameters).result(0)
+
 
 # pylint: disable=unused-argument
 # pylint: disable=too-many-locals
@@ -181,10 +184,11 @@ def cli_redis_regenerate_key(client, resource_group_name, name, key_type):
     return client.regenerate_key(resource_group_name, name, RedisRegenerateKeyParameters(key_type=key_type))
 
 
-def cli_redis_import(client, resource_group_name, name, files, preferred_data_archive_auth_method=None,file_format=None):
+def cli_redis_import(client, resource_group_name, name, files,
+                     preferred_data_archive_auth_method=None, file_format=None):
     from azure.mgmt.redis.models import ImportRDBParameters
     return client.begin_import_data(resource_group_name, name, ImportRDBParameters(files=files, format=file_format,
-    preferred_data_archive_auth_method=preferred_data_archive_auth_method))
+                                    preferred_data_archive_auth_method=preferred_data_archive_auth_method))
 
 
 def cli_redis_force_reboot(client, resource_group_name, name, reboot_type, shard_id=None):
@@ -239,6 +243,8 @@ def cli_redis_identity_remove(client, resource_group_name, cache_name, mi_system
     user_assigned = None
     if identity.user_assigned_identities is not None:
         user_assigned = list(identity.user_assigned_identities)
+    print(mi_user_assigned)
+    print(user_assigned)
     if mi_user_assigned is not None and user_assigned is not None:
         for mi_user_id in mi_user_assigned:
             try:

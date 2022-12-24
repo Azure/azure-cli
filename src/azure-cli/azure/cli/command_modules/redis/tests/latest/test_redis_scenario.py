@@ -14,7 +14,7 @@ basic_sku = 'Basic'
 premium_size = 'P1'
 basic_size = 'C0'
 name_prefix = 'cliredis'
-
+user_identity = '/subscriptions/3919658b-68ae-4509-8c17-6a2238340ae7/resourcegroups/tolani-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/test-uami'
 
 class RedisCacheTests(ScenarioTest):
 
@@ -184,6 +184,7 @@ class RedisCacheTests(ScenarioTest):
             'filesasURL': "https://####",
             'storageName': "str"+randName[:-3],
             'containerName': "testcontainer",
+            'userIdentity': user_identity,
             'startTime': (datetime.datetime.utcnow() - datetime.timedelta(minutes=60)).strftime(f"%Y-%m-%dT%H:%MZ"),
             'expiryTime': (datetime.datetime.utcnow() + datetime.timedelta(minutes=200)).strftime(f"%Y-%m-%dT%H:%MZ")
         }
@@ -196,10 +197,12 @@ class RedisCacheTests(ScenarioTest):
             filesasURL = storage['primaryEndpoints']['blob'] + self.kwargs['containerName'] + "/"+ self.kwargs["prefix"] + "?" + containersasToken[1:-2]
             self.kwargs['containersasURL'] = containersasURL
             self.kwargs['filesasURL'] = filesasURL
-        
-        with self.assertRaises(SystemExit):
-            self.cmd('az redis export -n {name} -g {rg} --prefix {prefix} --container \'{containersasURL}\' --preferred-data-archive-auth-method badAuthMethod',expect_failure=True)
-            self.cmd('az redis import -n {name} -g {rg} --files "{filesasURL}" --preferred-data-archive-auth-method badAuthMethod')
+
+            # self.kwargs['containerLocation'] = self.kwargs['containersasURL'].split('?')[0]
+            # self.kwargs['fileLocation'] = self.kwargs['filesasURL'].split('?')[0]
+        # with self.assertRaises(SystemExit):
+        #     self.cmd('az redis export -n {name} -g {rg} --prefix {prefix} --container \'{containersasURL}\' --preferred-data-archive-auth-method badAuthMethod',expect_failure=True)
+        #     self.cmd('az redis import -n {name} -g {rg} --files "{filesasURL}" --preferred-data-archive-auth-method badAuthMethod')
 
         self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size}')
 
@@ -212,6 +215,32 @@ class RedisCacheTests(ScenarioTest):
         self.cmd('az redis import -n {name} -g {rg} --files "{filesasURL}" --preferred-data-archive-auth-method SAS')
         if self.is_live:
             time.sleep(5 * 60)
+        
+        # Setup storage account and cache with managed identity
+        # self.cmd('az redis identity assign -g {rg} -n {name} --mi-user-assigned {userIdentity}') 
+        # identities = self.cmd('az identity list').get_output_in_json()
+        # identity = list(filter(lambda x:x['id']==user_identity,identities))[0]
+        # identity = identities[0] 
+        # print(self.kwargs['storageName'])
+        # self.kwargs['objectId'] = identity["principalId"]
+        # self.kwargs['storageId'] = self.cmd('az storage account show -g {rg} -n {storageName}').get_output_in_json()['id']
+        # self.cmd('az role assignment create --assignee-object-id "{objectId}" --role "Storage Blob Data Contributor" --scope "{storageId}"')
+        # self.kwargs['containerLocation'] = self.kwargs['containersasURL'].split('?')[0]
+        # self.kwargs['fileLocation'] = self.kwargs['filesasURL'].split('?')[0]
+        # Test import/export with managed identity
+        if self.is_live:
+            self.cmd('az redis identity assign -g {rg} -n {name} --mi-user-assigned {userIdentity}') 
+            identities = self.cmd('az identity list').get_output_in_json()
+            identity = list(filter(lambda x:x['id']==user_identity,identities))[0]
+            principal_id = identity["principalId"]
+            storage_id = self.cmd('az storage account show -g {rg} -n {storageName}').get_output_in_json()['id']
+            self.cmd(f'az role assignment create --assignee-object-id {principal_id} --role "Storage Blob Data Contributor" --scope {storage_id}')
+            self.kwargs['containersasURL'] = self.kwargs['containersasURL'].split('?')[0]
+            self.kwargs['filesasURL'] = self.kwargs['filesasURL'].split('?')[0]
+        self.cmd('az redis export -n {name} -g {rg} --prefix {prefix} --container \'{containersasURL}\' --preferred-data-archive-auth-method ManagedIdentity')
+        self.cmd('az redis import -n {name} -g {rg} --files {filesasURL} --preferred-data-archive-auth-method ManagedIdentity')
+
+
         self.cmd('az redis delete -n {name} -g {rg} -y')
 
     @ResourceGroupPreparer(name_prefix='cli_test_redis')
@@ -288,7 +317,7 @@ class RedisCacheTests(ScenarioTest):
             'location': location,
             'sku': basic_sku,
             'size': basic_size,
-            'userIdentity': "/subscriptions/3919658b-68ae-4509-8c17-6a2238340ae7/resourceGroups/tolani-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/test-uami",
+            'userIdentity': "/subscriptions/3919658b-68ae-4509-8c17-6a2238340ae7/resourcegroups/tolani-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/test-uami",
         }
         self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size} --mi-system-assigned --mi-user-assigned "{userIdentity}"', checks=[
             self.check('identity.type', 'SystemAssigned, UserAssigned'),
@@ -397,6 +426,7 @@ class RedisCacheTests(ScenarioTest):
         self.cmd('az redis create -n {secname} -g {rg} -l {seclocation} --sku {sku} --vm-size {size}')
 
         self.cmd('az redis server-link create -n {name} -g {rg} --replication-role Secondary --server-to-link {secname}',checks=[
+            self.check('provisioningState','Succeeded'),
             self.exists('geoReplicatedPrimaryHostName'),
             self.exists('primaryHostName')
         ])
@@ -407,6 +437,8 @@ class RedisCacheTests(ScenarioTest):
         self.cmd('az redis server-link delete -n {name} -g {rg} --linked-server-name {secname}')
         if self.is_live:
             time.sleep(5 * 60)
+        
+        self.cmd('az redis server-link list -n {name} -g {rg}',checks=[self.is_empty()])
         self.cmd('az redis delete -n {name} -g {rg} -y')
         self.cmd('az redis delete -n {secname} -g {rg} -y')
 
