@@ -294,8 +294,8 @@ def format_server_configuration_management_settings(result):
         order_dict['additionalFeaturesServerConfigurations'] = settings
 
     settings = format_azure_ad_authentication_settings(result.azure_ad_authentication_settings)
-    #if settings:
-    #    order_dict['azureAdAuthenticationSettings'] = settings
+    if settings:
+        order_dict['azureAdAuthenticationSettings'] = settings
 
     return order_dict
 

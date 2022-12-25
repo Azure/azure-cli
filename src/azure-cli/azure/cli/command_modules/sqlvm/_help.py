@@ -185,8 +185,8 @@ examples:
   - name: Enable AzureAD authentication on a SQL virtual machine
     text: >
       Enable AzureAD authentication with system-assigned managed identity:
-        az sql vm update -n sqlvm -g myresourcegroup --enable-azure-ad-authentication
+        az sql vm update -n sqlvm -g myresourcegroup --enable-azure-ad-auth
 
-      Enable AzureAD authentication with user-assigned managed identity: 
-        az sql vm update -n sqlvm -g myresourcegroup --enable-azure-ad-authentication --msi-client_id 12345678
+      Enable AzureAD authentication with user-assigned managed identity:
+        az sql vm update -n sqlvm -g myresourcegroup --enable-azure-ad-auth --msi-client_id 12345678
 """

@@ -366,7 +366,7 @@ def load_arguments(self, _):
                    help='Resource group containing the Log Analytics workspace.')
 
     with self.argument_context('sql vm update', arg_group='AzureAD authentication Settings') as c:
-        c.argument('enable_azure_ad_authentication',
+        c.argument('enable_azure_ad_auth',
                    help='Enable AzureAD authentication.',
                    validator=validate_azure_ad_authentication,
                    action='store_true')
