@@ -182,4 +182,11 @@ examples:
   - name: Update a SQL virtual machine to enable SQL best practices assessment without setting a schedule for running assessment on-demand
     text: >
         az sql vm update -n sqlvm -g myresourcegroup --enable-assessment true
+  - name: Enable AzureAD authentication on a SQL virtual machine
+    text: >
+      Enable AzureAD authentication with system-assigned managed identity:
+        az sql vm update -n sqlvm -g myresourcegroup --enable-azure-ad-authentication
+
+      Enable AzureAD authentication with user-assigned managed identity: 
+        az sql vm update -n sqlvm -g myresourcegroup --enable-azure-ad-authentication --msi-client_id 12345678
 """

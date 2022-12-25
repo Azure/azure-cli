@@ -186,3 +186,12 @@ def validate_assessment_start_time_local(namespace):
             datetime.strptime(assessment_start_time_local, TIME_FORMAT)
         except ValueError:
             raise InvalidArgumentValueError("assessment-start-time-local input '{}' is not valid time. Valid example: 19:30".format(assessment_start_time_local))
+
+# pylint: disable=too-many-statements,line-too-long
+def validate_azure_ad_authentication(namespace):
+    '''
+    Validates AzureAD authentication
+    '''
+    enable_azure_ad_authentication = namespace.enable_azure_ad_authentication
+    if enable_azure_ad_authentication is False:
+        raise InvalidArgumentValueError("Disable AzureAD authentication is not supported")

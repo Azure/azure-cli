@@ -33,7 +33,8 @@ from azure.mgmt.sqlvirtualmachine.models import (
     ServerConfigurationsManagementSettings,
     Schedule,
     AssessmentSettings,
-    SqlVirtualMachine
+    SqlVirtualMachine,
+    AADAuthenticationSettings
 )
 
 from ._util import (
@@ -297,7 +298,7 @@ def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, s
                  service_principal_secret=None, connectivity_type=None, port=None, sql_workload_type=None, enable_r_services=None, tags=None,
                  enable_assessment=None, enable_assessment_schedule=None, assessment_weekly_interval=None,
                  assessment_monthly_occurrence=None, assessment_day_of_week=None, assessment_start_time_local=None,
-                 workspace_name=None, workspace_rg=None):
+                 workspace_name=None, workspace_rg=None, enable_azure_ad_authentication=None, msi_client_id=None):
     '''
     Updates a SQL virtual machine.
     '''
@@ -369,11 +370,15 @@ def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, s
     if enable_r_services is not None:
         instance.server_configurations_management_settings.additional_features_server_configurations = AdditionalFeaturesServerConfigurations(is_r_services_enabled=enable_r_services)
 
+    if enable_azure_ad_authentication is not None:
+        instance.server_configurations_management_settings.azure_ad_authentication_settings = AADAuthenticationSettings(client_id=msi_client_id if msi_client_id else '')
+
     # If none of the settings was modified, reset server_configurations_management_settings to be null
     if (instance.server_configurations_management_settings.sql_connectivity_update_settings is None and
             instance.server_configurations_management_settings.sql_workload_type_update_settings is None and
             instance.server_configurations_management_settings.sql_storage_update_settings is None and
-            instance.server_configurations_management_settings.additional_features_server_configurations is None):
+            instance.server_configurations_management_settings.additional_features_server_configurations is None and
+            instance.server_configurations_management_settings.azure_ad_authentication_settings is None):
         instance.server_configurations_management_settings = None
 
     set_assessment_properties(cmd,

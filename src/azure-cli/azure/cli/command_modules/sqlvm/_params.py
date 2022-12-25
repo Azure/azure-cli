@@ -40,7 +40,8 @@ from ._validators import (
     validate_expand,
     validate_assessment,
     validate_assessment_start_time_local,
-    validate_least_privilege_mode
+    validate_least_privilege_mode,
+    validate_azure_ad_authentication
 )
 
 
@@ -363,3 +364,11 @@ def load_arguments(self, _):
                    help='Name of the Log Analytics workspace to associate with VM.')
         c.argument('workspace_rg',
                    help='Resource group containing the Log Analytics workspace.')
+
+    with self.argument_context('sql vm update', arg_group='AzureAD authentication Settings') as c:
+        c.argument('enable_azure_ad_authentication',
+                   help='Enable AzureAD authentication.',
+                   validator=validate_azure_ad_authentication,
+                   action='store_true')
+        c.argument('msi_client_id',
+                   help='Virutal Machine Managed Identity Client ID.')
