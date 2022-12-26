@@ -5255,8 +5255,7 @@ class NSGRuleUpdate(_NSGRuleUpdate):
 
         class EmptyListArgFormat(AAZListArgFormat):
             def __call__(self, ctx, value):
-                data = value._data
-                if has_value(data) and len(data) == 1 and data[0] == "":
+                if value.to_serialized_data() == [""]:
                     logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
                     value._data = None
                 return super().__call__(ctx, value)
