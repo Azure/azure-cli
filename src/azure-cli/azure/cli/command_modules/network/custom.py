@@ -6836,7 +6836,7 @@ class VNetUpdate(_VNetUpdate):
 
         class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
             def __call__(self, ctx, value):
-                if value._to_serialized_data() == "":
+                if value._data == "":
                     logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
                     value._data = None
                 return super().__call__(ctx, value)
@@ -6949,7 +6949,7 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
 
         class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
             def __call__(self, ctx, value):
-                if value.to_serialized_data() == "":
+                if value._data == "":
                     logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
                     value._data = None
                 return super().__call__(ctx, value)

@@ -4444,7 +4444,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
         ])
 
         # test generic update
-        self.cmd('network vnet update --resource-group {rg} --name {vnet} --set properties.addressSpace.addressPrefixes[0]="20.0.0.0/24"',
+        self.cmd('network vnet update --resource-group {rg} --name {vnet} --set addressSpace.addressPrefixes[0]="20.0.0.0/24"',
                  checks=self.check('addressSpace.addressPrefixes[0]', '20.0.0.0/24'))
 
         self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix 20.0.0.0/24')
@@ -4697,7 +4697,7 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
             self.check('[0].name', 'peering2'),
             self.check('length(@)', 1)
         ])
-        self.cmd('network vnet peering update -g {rg} -n peering1 --vnet-name vnet1 --set properties.useRemoteGateways=false', checks=[
+        self.cmd('network vnet peering update -g {rg} -n peering1 --vnet-name vnet1 --set useRemoteGateways=false', checks=[
             self.check('useRemoteGateways', False),
             self.check('allowForwardedTraffic', True)
         ])
@@ -5062,7 +5062,7 @@ class NetworkVirtualHubRouter(ScenarioTest):
 
         # a cleanup program runs in short peoridically to assign subnets a NSG within that subscription
         # which will block subnet is assigned to the virtual router
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet1} --remove properties.networkSecurityGroup')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet1} --remove networkSecurityGroup')
         vnet = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()
         self.cmd('network public-ip create -g {rg} -n {vhr_ip1} --sku Standard')
 
@@ -5134,7 +5134,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         ])
 
         # test generic update
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --set properties.addressPrefix=123.0.0.0/24',
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --set addressPrefix=123.0.0.0/24',
                  checks=self.check('addressPrefix', '123.0.0.0/24'))
 
         # Test we can get rid of the nsg.
