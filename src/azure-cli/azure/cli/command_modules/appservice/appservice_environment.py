@@ -125,6 +125,43 @@ def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_
     logger.warning('No updates were applied. The version of ASE may not be applicable to this update.')
 
 
+def upgrade_appserviceenvironment(cmd, name, resource_group_name=None, no_wait=False):
+    ase_client = _get_ase_client_factory(cmd.cli_ctx)
+    if resource_group_name is None:
+        resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
+    ase_def = ase_client.get(resource_group_name, name)
+    if ase_def.kind.lower() == 'asev3':
+        if ase_def.upgrade_preference == "Manual":
+            if ase_def.upgrade_availability == "Ready":
+                sdk_no_wait(no_wait, ase_client.begin_upgrade,
+                            resource_group_name=resource_group_name, name=name)
+            else:
+                raise ValidationError('An upgrade is not available for your ASEv3.')
+        else:
+            raise ValidationError('Upgrade preference in ASEv3 must be set to manual, please check \
+https://learn.microsoft.com/azure/app-service/environment/how-to-upgrade-preference for more information.')
+    else:
+        raise ValidationError('No upgrade has been applied. This version of ASE not support upgrade.')
+
+
+def send_test_notification_appserviceenvironment(cmd, name, resource_group_name=None):
+    ase_client = _get_ase_client_factory(cmd.cli_ctx)
+    if resource_group_name is None:
+        resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
+    ase_def = ase_client.get(resource_group_name, name)
+    if ase_def.kind.lower() == 'asev3':
+        if ase_def.upgrade_preference == "Manual":
+            ase_client.test_upgrade_available_notification(resource_group_name=resource_group_name,
+                                                           name=name)
+            logger.info('The test notification is being processed.')
+        else:
+            raise ValidationError('Upgrade preference in ASEv3 must be set to manual, please check \
+https://learn.microsoft.com/azure/app-service/environment/how-to-upgrade-preference for more information.')
+    else:
+        raise ValidationError('The test notification has not been processed. \
+This version of ASE does not support test notification.')
+
+
 def list_appserviceenvironment_addresses(cmd, name, resource_group_name=None):
     ase_client = _get_ase_client_factory(cmd.cli_ctx)
     if resource_group_name is None:

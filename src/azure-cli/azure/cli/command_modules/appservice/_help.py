@@ -2294,6 +2294,23 @@ helps['appservice ase create-inbound-services'] = """
             --vnet-name MyASEVirtualNetwork --subnet MyAseSubnet
 """
 
+helps['appservice ase upgrade'] = """
+    type: command
+    short-summary: Upgrade app service environment v3.
+    examples:
+    - name: Upgrade app service environment v3.
+      text: |
+          az appservice ase upgrade -n MyAseV3Name -g MyResourceGroup
+"""
+
+helps['appservice ase send-test-notification'] = """
+    type: command
+    short-summary: Send a test upgrade notification in app service environment v3.
+    examples:
+    - name: Send a test upgrade notification in app service environment v3.
+      text: |
+          az appservice ase send-test-notification -n MyAseV3Name -g MyResourceGroup
+"""
 
 helps['appservice ase update'] = """
     type: command
