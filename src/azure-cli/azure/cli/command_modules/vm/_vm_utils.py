@@ -465,7 +465,7 @@ def parse_gallery_image_id(image_reference):
             '/resourceGroups/{rg}/providers/Microsoft.Compute/galleries/{gallery_name}'
             '/Images/{gallery_image_name}/Versions/{image_version}"')
 
-    # Return the gallery unique name and gallery image name parsed from shared gallery image id
+    # Return the gallery subscription id, resource group name, gallery name and gallery image name.
     return image_info.group(1), image_info.group(2), image_info.group(3), image_info.group(4)
 
 

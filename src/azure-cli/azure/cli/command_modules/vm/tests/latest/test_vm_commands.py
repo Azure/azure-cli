@@ -21,7 +21,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
     StorageAccountPreparer, JMESPathCheck, StringContainCheck, VirtualNetworkPreparer, KeyVaultPreparer)
-from azure.cli.testsdk.constants import AUX_SUBSCRIPTION, AUX_TENANT
+from azure.cli.testsdk.constants import AUX_SUBSCRIPTION, AUX_TENANT, AUX_TENANT_INFRASTRUCTURE
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 # pylint: disable=line-too-long
@@ -8424,15 +8424,15 @@ class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
         ])
 
 
-class VMCreateFromACGToOtherSubScenarioTest(ScenarioTest):
+class VMCreateFromACGToOtherSubScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_from_acg_image_to_other_sub')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_from_acg_image_to_other_sub',
-                           parameter_name='another_resource_group', subscription='6b085460-5f21-477e-ba44-1035046e9101')
+                           parameter_name='another_resource_group', subscription=AUX_TENANT_INFRASTRUCTURE)
     def test_vm_create_from_acg_image_to_other_sub(self, resource_group, another_resource_group):
         self.kwargs.update({
             'rg': resource_group,
             'rg2': another_resource_group,
-            'sub_id': '6b085460-5f21-477e-ba44-1035046e9101',
+            'sub_id': AUX_TENANT_INFRASTRUCTURE,
             'vm': self.create_random_name('vm', 10),
             'image_name': self.create_random_name('image', 15),
             'sig_name': self.create_random_name('sig', 10),
