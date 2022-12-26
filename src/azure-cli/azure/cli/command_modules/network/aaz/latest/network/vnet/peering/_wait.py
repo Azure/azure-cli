@@ -195,7 +195,7 @@ class Wait(AAZWaitCommand):
             properties.remote_address_space = AAZObjectType(
                 serialized_name="remoteAddressSpace",
             )
-            _build_schema_address_space_read(properties.remote_address_space)
+            _WaitHelper._build_schema_address_space_read(properties.remote_address_space)
             properties.remote_bgp_communities = AAZObjectType(
                 serialized_name="remoteBgpCommunities",
             )
@@ -205,7 +205,7 @@ class Wait(AAZWaitCommand):
             properties.remote_virtual_network_address_space = AAZObjectType(
                 serialized_name="remoteVirtualNetworkAddressSpace",
             )
-            _build_schema_address_space_read(properties.remote_virtual_network_address_space)
+            _WaitHelper._build_schema_address_space_read(properties.remote_virtual_network_address_space)
             properties.remote_virtual_network_encryption = AAZObjectType(
                 serialized_name="remoteVirtualNetworkEncryption",
             )
@@ -239,26 +239,28 @@ class Wait(AAZWaitCommand):
             return cls._schema_on_200
 
 
-_schema_address_space_read = None
+class _WaitHelper:
+    """Helper class for Wait"""
 
+    _schema_address_space_read = None
 
-def _build_schema_address_space_read(_schema):
-    global _schema_address_space_read
-    if _schema_address_space_read is not None:
-        _schema.address_prefixes = _schema_address_space_read.address_prefixes
-        return
+    @classmethod
+    def _build_schema_address_space_read(cls, _schema):
+        if cls._schema_address_space_read is not None:
+            _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+            return
 
-    _schema_address_space_read = AAZObjectType()
+        cls._schema_address_space_read = _schema_address_space_read = AAZObjectType()
 
-    address_space_read = _schema_address_space_read
-    address_space_read.address_prefixes = AAZListType(
-        serialized_name="addressPrefixes",
-    )
+        address_space_read = _schema_address_space_read
+        address_space_read.address_prefixes = AAZListType(
+            serialized_name="addressPrefixes",
+        )
 
-    address_prefixes = _schema_address_space_read.address_prefixes
-    address_prefixes.Element = AAZStrType()
+        address_prefixes = _schema_address_space_read.address_prefixes
+        address_prefixes.Element = AAZStrType()
 
-    _schema.address_prefixes = _schema_address_space_read.address_prefixes
+        _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
 
 
 __all__ = ["Wait"]

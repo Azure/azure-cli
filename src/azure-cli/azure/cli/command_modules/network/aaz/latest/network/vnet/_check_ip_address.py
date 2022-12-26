@@ -175,4 +175,8 @@ class CheckIpAddress(AAZCommand):
             return cls._schema_on_200
 
 
+class _CheckIpAddressHelper:
+    """Helper class for CheckIpAddress"""
+
+
 __all__ = ["CheckIpAddress"]

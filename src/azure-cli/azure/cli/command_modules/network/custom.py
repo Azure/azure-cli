@@ -6761,7 +6761,6 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 
 
 # region VirtualNetworks
-# pylint: disable=protected-access,too-few-public-methods
 class VNetCreate(_VNetCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -6793,8 +6792,6 @@ class VNetCreate(_VNetCreate):
                          "/networkSecurityGroups/{}",
             ),
         )
-        # set default value
-        args_schema.address_prefixes._default = ["10.0.0.0/16"]
         # filter arguments
         args_schema.extended_location._registered = False
         return args_schema
@@ -6832,15 +6829,14 @@ class VNetUpdate(_VNetUpdate):
 
         class EmptyListArgFormat(AAZListArgFormat):
             def __call__(self, ctx, value):
-                data = value._data
-                if has_value(data) and len(data) == 1 and data[0] == "":
+                if value.to_serialized_data() == [""]:
                     logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
                     value._data = None
                 return super().__call__(ctx, value)
 
         class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
             def __call__(self, ctx, value):
-                if value._data == "":
+                if value._to_serialized_data() == "":
                     logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
                     value._data = None
                 return super().__call__(ctx, value)
@@ -6946,15 +6942,14 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
 
         class EmptyListArgFormat(AAZListArgFormat):
             def __call__(self, ctx, value):
-                data = value._data
-                if has_value(data) and len(data) == 1 and data[0] == "":
+                if value.to_serialized_data() == [""]:
                     logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
                     value._data = None
                 return super().__call__(ctx, value)
 
         class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
             def __call__(self, ctx, value):
-                if value._data == "":
+                if value.to_serialized_data() == "":
                     logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
                     value._data = None
                 return super().__call__(ctx, value)

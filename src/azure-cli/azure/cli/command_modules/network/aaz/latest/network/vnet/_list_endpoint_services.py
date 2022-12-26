@@ -165,4 +165,8 @@ class ListEndpointServices(AAZCommand):
             return cls._schema_on_200
 
 
+class _ListEndpointServicesHelper:
+    """Helper class for ListEndpointServices"""
+
+
 __all__ = ["ListEndpointServices"]

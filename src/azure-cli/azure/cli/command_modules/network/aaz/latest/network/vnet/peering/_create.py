@@ -54,13 +54,11 @@ class Create(AAZCommand):
             options=["--vnet-name"],
             help="The virtual network (VNet) name.",
             required=True,
-            id_part="name",
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
             help="The name of the VNet peering.",
             required=True,
-            id_part="child_name_1",
         )
         _args_schema.sync_remote = AAZStrArg(
             options=["--sync-remote"],
@@ -306,7 +304,7 @@ class Create(AAZCommand):
             properties.remote_address_space = AAZObjectType(
                 serialized_name="remoteAddressSpace",
             )
-            _build_schema_address_space_read(properties.remote_address_space)
+            _CreateHelper._build_schema_address_space_read(properties.remote_address_space)
             properties.remote_bgp_communities = AAZObjectType(
                 serialized_name="remoteBgpCommunities",
             )
@@ -316,7 +314,7 @@ class Create(AAZCommand):
             properties.remote_virtual_network_address_space = AAZObjectType(
                 serialized_name="remoteVirtualNetworkAddressSpace",
             )
-            _build_schema_address_space_read(properties.remote_virtual_network_address_space)
+            _CreateHelper._build_schema_address_space_read(properties.remote_virtual_network_address_space)
             properties.remote_virtual_network_encryption = AAZObjectType(
                 serialized_name="remoteVirtualNetworkEncryption",
             )
@@ -350,36 +348,38 @@ class Create(AAZCommand):
             return cls._schema_on_200_201
 
 
-def _build_schema_address_space_create(_builder):
-    if _builder is None:
-        return
-    _builder.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
+class _CreateHelper:
+    """Helper class for Create"""
 
-    address_prefixes = _builder.get(".addressPrefixes")
-    if address_prefixes is not None:
-        address_prefixes.set_elements(AAZStrType, ".")
+    @classmethod
+    def _build_schema_address_space_create(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
 
+        address_prefixes = _builder.get(".addressPrefixes")
+        if address_prefixes is not None:
+            address_prefixes.set_elements(AAZStrType, ".")
 
-_schema_address_space_read = None
+    _schema_address_space_read = None
 
+    @classmethod
+    def _build_schema_address_space_read(cls, _schema):
+        if cls._schema_address_space_read is not None:
+            _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+            return
 
-def _build_schema_address_space_read(_schema):
-    global _schema_address_space_read
-    if _schema_address_space_read is not None:
-        _schema.address_prefixes = _schema_address_space_read.address_prefixes
-        return
+        cls._schema_address_space_read = _schema_address_space_read = AAZObjectType()
 
-    _schema_address_space_read = AAZObjectType()
+        address_space_read = _schema_address_space_read
+        address_space_read.address_prefixes = AAZListType(
+            serialized_name="addressPrefixes",
+        )
 
-    address_space_read = _schema_address_space_read
-    address_space_read.address_prefixes = AAZListType(
-        serialized_name="addressPrefixes",
-    )
+        address_prefixes = _schema_address_space_read.address_prefixes
+        address_prefixes.Element = AAZStrType()
 
-    address_prefixes = _schema_address_space_read.address_prefixes
-    address_prefixes.Element = AAZStrType()
-
-    _schema.address_prefixes = _schema_address_space_read.address_prefixes
+        _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
 
 
 __all__ = ["Create"]

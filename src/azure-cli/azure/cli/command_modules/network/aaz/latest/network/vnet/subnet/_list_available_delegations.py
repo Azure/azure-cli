@@ -284,4 +284,8 @@ class ListAvailableDelegations(AAZCommand):
             return cls._schema_on_200
 
 
+class _ListAvailableDelegationsHelper:
+    """Helper class for ListAvailableDelegations"""
+
+
 __all__ = ["ListAvailableDelegations"]

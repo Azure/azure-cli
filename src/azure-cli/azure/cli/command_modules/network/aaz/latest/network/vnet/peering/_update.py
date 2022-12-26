@@ -216,7 +216,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_virtual_network_peering_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_virtual_network_peering_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -331,7 +331,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _build_schema_virtual_network_peering_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_virtual_network_peering_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -364,136 +364,136 @@ class Update(AAZCommand):
             )
 
 
-def _build_schema_address_space_update(_builder):
-    if _builder is None:
-        return
-    _builder.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
+class _UpdateHelper:
+    """Helper class for Update"""
 
-    address_prefixes = _builder.get(".addressPrefixes")
-    if address_prefixes is not None:
-        address_prefixes.set_elements(AAZStrType, ".")
+    @classmethod
+    def _build_schema_address_space_update(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
 
+        address_prefixes = _builder.get(".addressPrefixes")
+        if address_prefixes is not None:
+            address_prefixes.set_elements(AAZStrType, ".")
 
-_schema_address_space_read = None
+    _schema_address_space_read = None
 
+    @classmethod
+    def _build_schema_address_space_read(cls, _schema):
+        if cls._schema_address_space_read is not None:
+            _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+            return
 
-def _build_schema_address_space_read(_schema):
-    global _schema_address_space_read
-    if _schema_address_space_read is not None:
-        _schema.address_prefixes = _schema_address_space_read.address_prefixes
-        return
+        cls._schema_address_space_read = _schema_address_space_read = AAZObjectType()
 
-    _schema_address_space_read = AAZObjectType()
+        address_space_read = _schema_address_space_read
+        address_space_read.address_prefixes = AAZListType(
+            serialized_name="addressPrefixes",
+        )
 
-    address_space_read = _schema_address_space_read
-    address_space_read.address_prefixes = AAZListType(
-        serialized_name="addressPrefixes",
-    )
+        address_prefixes = _schema_address_space_read.address_prefixes
+        address_prefixes.Element = AAZStrType()
 
-    address_prefixes = _schema_address_space_read.address_prefixes
-    address_prefixes.Element = AAZStrType()
+        _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
 
-    _schema.address_prefixes = _schema_address_space_read.address_prefixes
+    _schema_virtual_network_peering_read = None
 
+    @classmethod
+    def _build_schema_virtual_network_peering_read(cls, _schema):
+        if cls._schema_virtual_network_peering_read is not None:
+            _schema.etag = cls._schema_virtual_network_peering_read.etag
+            _schema.id = cls._schema_virtual_network_peering_read.id
+            _schema.name = cls._schema_virtual_network_peering_read.name
+            _schema.properties = cls._schema_virtual_network_peering_read.properties
+            _schema.type = cls._schema_virtual_network_peering_read.type
+            return
 
-_schema_virtual_network_peering_read = None
+        cls._schema_virtual_network_peering_read = _schema_virtual_network_peering_read = AAZObjectType()
 
+        virtual_network_peering_read = _schema_virtual_network_peering_read
+        virtual_network_peering_read.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        virtual_network_peering_read.id = AAZStrType()
+        virtual_network_peering_read.name = AAZStrType()
+        virtual_network_peering_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        virtual_network_peering_read.type = AAZStrType()
 
-def _build_schema_virtual_network_peering_read(_schema):
-    global _schema_virtual_network_peering_read
-    if _schema_virtual_network_peering_read is not None:
-        _schema.etag = _schema_virtual_network_peering_read.etag
-        _schema.id = _schema_virtual_network_peering_read.id
-        _schema.name = _schema_virtual_network_peering_read.name
-        _schema.properties = _schema_virtual_network_peering_read.properties
-        _schema.type = _schema_virtual_network_peering_read.type
-        return
+        properties = _schema_virtual_network_peering_read.properties
+        properties.allow_forwarded_traffic = AAZBoolType(
+            serialized_name="allowForwardedTraffic",
+        )
+        properties.allow_gateway_transit = AAZBoolType(
+            serialized_name="allowGatewayTransit",
+        )
+        properties.allow_virtual_network_access = AAZBoolType(
+            serialized_name="allowVirtualNetworkAccess",
+        )
+        properties.do_not_verify_remote_gateways = AAZBoolType(
+            serialized_name="doNotVerifyRemoteGateways",
+        )
+        properties.peering_state = AAZStrType(
+            serialized_name="peeringState",
+        )
+        properties.peering_sync_level = AAZStrType(
+            serialized_name="peeringSyncLevel",
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.remote_address_space = AAZObjectType(
+            serialized_name="remoteAddressSpace",
+        )
+        cls._build_schema_address_space_read(properties.remote_address_space)
+        properties.remote_bgp_communities = AAZObjectType(
+            serialized_name="remoteBgpCommunities",
+        )
+        properties.remote_virtual_network = AAZObjectType(
+            serialized_name="remoteVirtualNetwork",
+        )
+        properties.remote_virtual_network_address_space = AAZObjectType(
+            serialized_name="remoteVirtualNetworkAddressSpace",
+        )
+        cls._build_schema_address_space_read(properties.remote_virtual_network_address_space)
+        properties.remote_virtual_network_encryption = AAZObjectType(
+            serialized_name="remoteVirtualNetworkEncryption",
+        )
+        properties.resource_guid = AAZStrType(
+            serialized_name="resourceGuid",
+            flags={"read_only": True},
+        )
+        properties.use_remote_gateways = AAZBoolType(
+            serialized_name="useRemoteGateways",
+        )
 
-    _schema_virtual_network_peering_read = AAZObjectType()
+        remote_bgp_communities = _schema_virtual_network_peering_read.properties.remote_bgp_communities
+        remote_bgp_communities.regional_community = AAZStrType(
+            serialized_name="regionalCommunity",
+            flags={"read_only": True},
+        )
+        remote_bgp_communities.virtual_network_community = AAZStrType(
+            serialized_name="virtualNetworkCommunity",
+            flags={"required": True},
+        )
 
-    virtual_network_peering_read = _schema_virtual_network_peering_read
-    virtual_network_peering_read.etag = AAZStrType(
-        flags={"read_only": True},
-    )
-    virtual_network_peering_read.id = AAZStrType()
-    virtual_network_peering_read.name = AAZStrType()
-    virtual_network_peering_read.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    virtual_network_peering_read.type = AAZStrType()
+        remote_virtual_network = _schema_virtual_network_peering_read.properties.remote_virtual_network
+        remote_virtual_network.id = AAZStrType()
 
-    properties = _schema_virtual_network_peering_read.properties
-    properties.allow_forwarded_traffic = AAZBoolType(
-        serialized_name="allowForwardedTraffic",
-    )
-    properties.allow_gateway_transit = AAZBoolType(
-        serialized_name="allowGatewayTransit",
-    )
-    properties.allow_virtual_network_access = AAZBoolType(
-        serialized_name="allowVirtualNetworkAccess",
-    )
-    properties.do_not_verify_remote_gateways = AAZBoolType(
-        serialized_name="doNotVerifyRemoteGateways",
-    )
-    properties.peering_state = AAZStrType(
-        serialized_name="peeringState",
-    )
-    properties.peering_sync_level = AAZStrType(
-        serialized_name="peeringSyncLevel",
-    )
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
-    properties.remote_address_space = AAZObjectType(
-        serialized_name="remoteAddressSpace",
-    )
-    _build_schema_address_space_read(properties.remote_address_space)
-    properties.remote_bgp_communities = AAZObjectType(
-        serialized_name="remoteBgpCommunities",
-    )
-    properties.remote_virtual_network = AAZObjectType(
-        serialized_name="remoteVirtualNetwork",
-    )
-    properties.remote_virtual_network_address_space = AAZObjectType(
-        serialized_name="remoteVirtualNetworkAddressSpace",
-    )
-    _build_schema_address_space_read(properties.remote_virtual_network_address_space)
-    properties.remote_virtual_network_encryption = AAZObjectType(
-        serialized_name="remoteVirtualNetworkEncryption",
-    )
-    properties.resource_guid = AAZStrType(
-        serialized_name="resourceGuid",
-        flags={"read_only": True},
-    )
-    properties.use_remote_gateways = AAZBoolType(
-        serialized_name="useRemoteGateways",
-    )
+        remote_virtual_network_encryption = _schema_virtual_network_peering_read.properties.remote_virtual_network_encryption
+        remote_virtual_network_encryption.enabled = AAZBoolType(
+            flags={"required": True},
+        )
+        remote_virtual_network_encryption.enforcement = AAZStrType()
 
-    remote_bgp_communities = _schema_virtual_network_peering_read.properties.remote_bgp_communities
-    remote_bgp_communities.regional_community = AAZStrType(
-        serialized_name="regionalCommunity",
-        flags={"read_only": True},
-    )
-    remote_bgp_communities.virtual_network_community = AAZStrType(
-        serialized_name="virtualNetworkCommunity",
-        flags={"required": True},
-    )
-
-    remote_virtual_network = _schema_virtual_network_peering_read.properties.remote_virtual_network
-    remote_virtual_network.id = AAZStrType()
-
-    remote_virtual_network_encryption = _schema_virtual_network_peering_read.properties.remote_virtual_network_encryption
-    remote_virtual_network_encryption.enabled = AAZBoolType(
-        flags={"required": True},
-    )
-    remote_virtual_network_encryption.enforcement = AAZStrType()
-
-    _schema.etag = _schema_virtual_network_peering_read.etag
-    _schema.id = _schema_virtual_network_peering_read.id
-    _schema.name = _schema_virtual_network_peering_read.name
-    _schema.properties = _schema_virtual_network_peering_read.properties
-    _schema.type = _schema_virtual_network_peering_read.type
+        _schema.etag = cls._schema_virtual_network_peering_read.etag
+        _schema.id = cls._schema_virtual_network_peering_read.id
+        _schema.name = cls._schema_virtual_network_peering_read.name
+        _schema.properties = cls._schema_virtual_network_peering_read.properties
+        _schema.type = cls._schema_virtual_network_peering_read.type
 
 
 __all__ = ["Update"]
