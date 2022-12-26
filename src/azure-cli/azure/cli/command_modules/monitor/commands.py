@@ -214,7 +214,6 @@ def load_command_table(self, _):
         # g.command('list', 'list')
         g.generic_update_command('update')
 
-
     with self.command_group('monitor metrics') as g:
         from .transformers import metrics_table, metrics_definitions_table, metrics_namespaces_table
         g.command('list', 'list_metrics', command_type=monitor_custom, table_transformer=metrics_table)
