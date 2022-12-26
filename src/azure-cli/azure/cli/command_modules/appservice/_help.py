@@ -2323,6 +2323,12 @@ helps['appservice ase update'] = """
     - name: Update app service environment v3 to allow new private endpoint connections.
       text: |
           az appservice ase update -n MyAseV3Name -g MyResourceGroup --allow-new-private-endpoint-connections
+    - name: Update app service environment v3 to allow incoming ftp connections.
+      text: |
+          az appservice ase update -n MyAseV3Name -g MyResourceGroup --allow-incoming-ftp-connections
+    - name: Update app service environment v3 to allow remote debugging.
+      text: |
+          az appservice ase update -n MyAseV3Name -g MyResourceGroup --allow-remote-debugging
 """
 
 helps['appservice ase delete'] = """
