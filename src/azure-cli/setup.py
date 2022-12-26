@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.42.0"
+VERSION = "2.43.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -52,14 +52,14 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     "antlr4-python3-runtime~=4.9.3",
     'azure-appconfiguration~=1.1.1',
-    'azure-batch~=12.0.0',
+    'azure-batch~=13.0.0',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-data-tables==12.4.0',
     'azure-datalake-store~=0.0.49',
     'azure-graphrbac~=0.60.0',
     'azure-keyvault-administration==4.0.0b3',
-    'azure-keyvault-keys==4.5.1',
+    'azure-keyvault-keys==4.8.0b2',
     'azure-keyvault~=1.1.0',
     'azure-loganalytics~=0.1.0',
     'azure-mgmt-advisor==9.0.0',
@@ -68,7 +68,7 @@ DEPENDENCIES = [
     'azure-mgmt-applicationinsights~=1.0.0',
     'azure-mgmt-authorization~=0.61.0',
     'azure-mgmt-batchai==7.0.0b1',
-    'azure-mgmt-batch~=16.2.0',
+    'azure-mgmt-batch~=17.0.0',
     'azure-mgmt-billing==6.0.0',
     'azure-mgmt-botservice~=2.0.0b3',
     'azure-mgmt-cdn==12.0.0',
@@ -116,7 +116,7 @@ DEPENDENCIES = [
     'azure-mgmt-relay~=0.1.0',
     'azure-mgmt-resource==21.1.0b1',
     'azure-mgmt-search~=8.0',
-    'azure-mgmt-security==2.0.0b1',
+    'azure-mgmt-security==3.0.0',
     'azure-mgmt-servicebus~=8.1.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
     'azure-mgmt-servicelinker==1.0.0',
@@ -128,7 +128,7 @@ DEPENDENCIES = [
     'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web==7.0.0',
-    'azure-multiapi-storage~=0.10.0',
+    'azure-multiapi-storage~=1.0.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
     'azure-synapse-artifacts~=0.14.0',

@@ -964,9 +964,9 @@ helps['functionapp deploy'] = """
     short-summary: Deploys a provided artifact to Azure functionapp.
     examples:
     - name: Deploy a war file asynchronously.
-      text: az functionapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type war --async true
+      text: az functionapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type war --async true
     - name: Deploy a static text file to wwwroot/staticfiles/test.txt
-      text: az functionapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
+      text: az functionapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
 """
 
 helps['webapp'] = """
@@ -2294,6 +2294,23 @@ helps['appservice ase create-inbound-services'] = """
             --vnet-name MyASEVirtualNetwork --subnet MyAseSubnet
 """
 
+helps['appservice ase upgrade'] = """
+    type: command
+    short-summary: Upgrade app service environment v3.
+    examples:
+    - name: Upgrade app service environment v3.
+      text: |
+          az appservice ase upgrade -n MyAseV3Name -g MyResourceGroup
+"""
+
+helps['appservice ase send-test-notification'] = """
+    type: command
+    short-summary: Send a test upgrade notification in app service environment v3.
+    examples:
+    - name: Send a test upgrade notification in app service environment v3.
+      text: |
+          az appservice ase send-test-notification -n MyAseV3Name -g MyResourceGroup
+"""
 
 helps['appservice ase update'] = """
     type: command
@@ -2306,6 +2323,12 @@ helps['appservice ase update'] = """
     - name: Update app service environment v3 to allow new private endpoint connections.
       text: |
           az appservice ase update -n MyAseV3Name -g MyResourceGroup --allow-new-private-endpoint-connections
+    - name: Update app service environment v3 to allow incoming ftp connections.
+      text: |
+          az appservice ase update -n MyAseV3Name -g MyResourceGroup --allow-incoming-ftp-connections
+    - name: Update app service environment v3 to allow remote debugging.
+      text: |
+          az appservice ase update -n MyAseV3Name -g MyResourceGroup --allow-remote-debugging
 """
 
 helps['appservice ase delete'] = """

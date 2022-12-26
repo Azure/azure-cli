@@ -450,6 +450,18 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             validator=validate_identities
         )
 
+        active_directory_auth_arg_type = CLIArgumentType(
+            options_list=['--active-directory-auth'],
+            arg_type=get_enum_type(['Enabled', 'Disabled']),
+            help='Whether Azure Active Directory authentication is enabled.'
+        )
+
+        password_auth_arg_type = CLIArgumentType(
+            options_list=['--password-auth'],
+            arg_type=get_enum_type(['Enabled', 'Disabled']),
+            help='Whether password authentication is enabled.'
+        )
+
         with self.argument_context('{} flexible-server'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
             c.argument('server_name', arg_type=server_name_arg_type)
@@ -462,6 +474,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('storage_gb', default='128', arg_type=storage_gb_arg_type)
                 c.argument('version', default='13', arg_type=version_arg_type)
                 c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
+                c.argument('active_directory_auth', default='Disabled', arg_type=active_directory_auth_arg_type)
+                c.argument('password_auth', default='Enabled', arg_type=password_auth_arg_type)
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
@@ -552,6 +566,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('disable_data_encryption', arg_type=disable_data_encryption_arg_type)
             elif command_group == 'postgres':
                 c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
+                c.argument('active_directory_auth', arg_type=active_directory_auth_arg_type)
+                c.argument('password_auth', arg_type=password_auth_arg_type)
 
         with self.argument_context('{} flexible-server upgrade'.format(command_group)) as c:
             c.argument('version', arg_type=mysql_version_upgrade_arg_type if command_group == 'mysql' else pg_version_upgrade_arg_type)
@@ -696,28 +712,30 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
 
         # identity
-        if command_group == 'mysql':
-            with self.argument_context('{} flexible-server identity'.format(command_group)) as c:
-                c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+        with self.argument_context('{} flexible-server identity'.format(command_group)) as c:
+            c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
 
-            with self.argument_context('{} flexible-server identity assign'.format(command_group)) as c:
-                c.argument('identities', arg_type=identities_arg_type)
+        with self.argument_context('{} flexible-server identity assign'.format(command_group)) as c:
+            c.argument('identities', arg_type=identities_arg_type)
 
-            with self.argument_context('{} flexible-server identity remove'.format(command_group)) as c:
-                c.argument('identities', arg_type=identities_arg_type)
+        with self.argument_context('{} flexible-server identity remove'.format(command_group)) as c:
+            c.argument('identities', arg_type=identities_arg_type)
 
-            with self.argument_context('{} flexible-server identity show'.format(command_group)) as c:
-                c.argument('identity', options_list=['--identity', '-n'], help='Name or ID of identity to show.', validator=validate_identity)
+        with self.argument_context('{} flexible-server identity show'.format(command_group)) as c:
+            c.argument('identity', options_list=['--identity', '-n'], help='Name or ID of identity to show.', validator=validate_identity)
 
         # ad-admin
-        if command_group == 'mysql':
-            with self.argument_context('{} flexible-server ad-admin'.format(command_group)) as c:
-                c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+        with self.argument_context('{} flexible-server ad-admin'.format(command_group)) as c:
+            c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
 
-            with self.argument_context('{} flexible-server ad-admin create'.format(command_group)) as c:
-                c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Azure AD administrator user or group.')
+        for scope in ['create', 'show', 'delete', 'wait']:
+            with self.argument_context('{} flexible-server ad-admin {}'.format(command_group, scope)) as c:
                 c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Azure AD administrator.')
-                c.argument('identity', help='Name or ID of identity used for AAD Authentication.', validator=validate_identity)
+
+        with self.argument_context('{} flexible-server ad-admin create'.format(command_group)) as c:
+            c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Azure AD administrator user or group.')
+            c.argument('principal_type', options_list=['--type', '-t'], default='User', arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Azure AD administrator.')
+            c.argument('identity', help='Name or ID of identity used for AAD Authentication.', validator=validate_identity)
 
         handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)
 

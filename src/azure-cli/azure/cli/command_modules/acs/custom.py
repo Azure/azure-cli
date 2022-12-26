@@ -439,6 +439,8 @@ def aks_create(
     enable_addons=None,
     workspace_resource_id=None,
     enable_msi_auth_for_monitoring=False,
+    enable_syslog=False,
+    data_collection_settings=None,
     aci_subnet_name=None,
     appgw_name=None,
     appgw_subnet_cidr=None,
@@ -475,12 +477,12 @@ def aks_create(
     enable_fips_image=False,
     kubelet_config=None,
     linux_os_config=None,
-    no_wait=False,
-    yes=False,
-    aks_custom_headers=None,
     host_group_id=None,
     gpu_instance_profile=None,
-    enable_syslog=False,
+    # misc
+    yes=False,
+    no_wait=False,
+    aks_custom_headers=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -558,6 +560,7 @@ def aks_update(
     azure_keyvault_kms_key_id=None,
     azure_keyvault_kms_key_vault_network_access=None,
     azure_keyvault_kms_key_vault_resource_id=None,
+    http_proxy_config=None,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
@@ -569,9 +572,9 @@ def aks_update(
     min_count=None,
     max_count=None,
     nodepool_labels=None,
-    http_proxy_config=None,
-    no_wait=False,
+    # misc
     yes=False,
+    no_wait=False,
     aks_custom_headers=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
@@ -778,6 +781,7 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
                 create_dcr=False,
                 create_dcra=True,
                 enable_syslog=False,
+                data_collection_settings=None,
             )
     except TypeError:
         pass
@@ -811,7 +815,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       rotation_poll_interval=None,
                       no_wait=False,
                       enable_msi_auth_for_monitoring=False,
-                      enable_syslog=False):
+                      enable_syslog=False,
+                      data_collection_settings=None,):
     instance = client.get(resource_group_name, name)
     msi_auth = False
     if instance.service_principal_profile.client_id == "msi":
@@ -831,7 +836,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                               enable_secret_rotation=enable_secret_rotation,
                               rotation_poll_interval=rotation_poll_interval,
                               no_wait=no_wait,
-                              enable_syslog=enable_syslog)
+                              enable_syslog=enable_syslog,
+                              data_collection_settings=data_collection_settings)
 
     enable_monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
         and instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
@@ -860,7 +866,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                         aad_route=True,
                         create_dcr=True,
                         create_dcra=True,
-                        enable_syslog=enable_syslog)
+                        enable_syslog=enable_syslog,
+                        data_collection_settings=data_collection_settings)
                 else:
                     raise ArgumentUsageError(
                         "--enable-msi-auth-for-monitoring can not be used on clusters with service principal auth.")
@@ -869,6 +876,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                 if enable_syslog:
                     raise ArgumentUsageError(
                         "--enable-syslog can not be used without MSI auth.")
+                if data_collection_settings is not None:
+                    raise ArgumentUsageError("--data-collection-settings can not be used without MSI auth.")
                 ensure_container_insights_for_monitoring(
                     cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME], subscription_id, resource_group_name, name, instance.location, aad_route=False)
 
@@ -923,7 +932,8 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                    disable_secret_rotation=False,
                    rotation_poll_interval=None,
                    no_wait=False,
-                   enable_syslog=False):
+                   enable_syslog=False,
+                   data_collection_settings=None,):
     ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
                                                 resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                                 operation_group='managed_clusters')
