@@ -211,14 +211,6 @@ examples:
     text: |
         az monitor action-group test-notifications create --action-group MyActionGroup \\
         --resource-group MyResourceGroup -a email alice alice@example.com usecommonalertsChema --alert-type budget
-  - name: Create an action group test-notifications with resource-group
-    text: |
-        az monitor action-group test-notifications create --resource-group MyResourceGroup \\
-        -a email alice alice@example.com usecommonalertsChema --alert-type budget
-  - name: Create an action group test-notifications
-    text: |
-        az monitor action-group test-notifications create -a email alice alice@example.com usecommonalertsChema \\
-        --alert-type budget
 """
 
 helps['monitor activity-log'] = """
