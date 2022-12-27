@@ -1484,7 +1484,7 @@ def append_install_dir_to_windows_user_path(install_dir, binary_name):
         return
     # keep user path style (with or without semicolon at the end)
     flag = user_path.endswith(";")
-    setxexp = ["setx", "path", "\"{}{}{}{}\"".format(user_path, "" if flag else ";", install_dir, ";" if flag else "")]
+    setxexp = ["setx", "path", "{}{}{}{}".format(user_path, "" if flag else ";", install_dir, ";" if flag else "")]
     try:
         subprocess.run(setxexp, shell=True, check=True, capture_output=True)
         log_windows_successful_installation_warning(install_dir)
