@@ -1233,7 +1233,7 @@ short-summary: Get ANF Volume Quota Rule for Volume.
 examples:
   - name: Get a ANF Volume quote rule
     text: >
-        az netappfiles volume quota-rule show -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --volume-quota-rule-name myrulename
+        az netappfiles volume quota-rule show -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --quota-rule-name myrulename
 """
 
 helps['netappfiles volume quota-rule create'] = """
@@ -1242,9 +1242,9 @@ short-summary: Create a ANF Volume Quota Rule.
 parameters:
   - name: --tags
     short-summary: Resource tags.
-  - name: --volume-quota-rule-name
+  - name: --quota-rule-name
     short-summary: Name of Quota rule.
-  - name: --quota-size-in-ki-bs
+  - name: --quota-size
     short-summary: Size of quota.
   - name: --quota-type
     short-summary: Type of quota. Known values are "DefaultUserQuota", "DefaultGroupQuota", "IndividualUserQuota", and "IndividualGroupQuota".
@@ -1253,7 +1253,7 @@ parameters:
 examples:
   - name: Create an ANF Volume quote rule
     text: >
-        az netappfiles volume quota-rule create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --volume-quota-rule-name myrulename
+        az netappfiles volume quota-rule create -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --quota-rule-name myrulename --quota-type DefaultGroupQuota --quota-size 100006 --quota-target ''
 """
 
 
@@ -1261,7 +1261,7 @@ helps['netappfiles volume quota-rule update'] = """
 type: command
 short-summary: Update a specified ANF Volume Quota Rule.
 parameters:
-  - name: --quota-size-in-ki-bs
+  - name: --quota-size
     short-summary: Size of quota.
   - name: --quota-type
     short-summary: Type of quota. Known values are "DefaultUserQuota", "DefaultGroupQuota", "IndividualUserQuota", and "IndividualGroupQuota".
@@ -1270,7 +1270,7 @@ parameters:
 examples:
   - name: Update a specified ANF Volume quote rule
     text: >
-        az netappfiles volume quota-rule update -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --volume-quota-rule-name myrulename
+        az netappfiles volume quota-rule update -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --quota-rule-name myrulename --quota-size 100006
 """
 
 helps['netappfiles volume quota-rule delete'] = """
@@ -1279,7 +1279,7 @@ short-summary: Delete a specified ANF Volume Quota Rule for Volume.
 examples:
   - name: Delete a specified ANF Volume quote rule
     text: >
-        az netappfiles volume quota-rule delete -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --volume-quota-rule-name myrulename
+        az netappfiles volume quota-rule delete -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --quota-rule-name myrulename
 """
 
 helps['netappfiles volume quota-rule list'] = """
@@ -1295,7 +1295,7 @@ parameters:
 examples:
   - name: Get all ANF Volume Quota Rule for specified Volume
     text: >
-        az netappfiles volume quota-rule list -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
+        az netappfiles volume quota-rule list -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname
 """
 
 helps['netappfiles volume quota-rule wait'] = """

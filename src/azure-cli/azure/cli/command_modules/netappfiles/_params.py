@@ -72,6 +72,7 @@ def load_arguments(self, _):
     load_vault_arguments(self, account_name_type)
     load_subvolume_arguments(self, account_name_type, pool_name_type, volume_name_type)
     load_volume_groups_arguments(self, account_name_type, pool_name_type)
+    load_volume_quota_rules_arguments(self, account_name_type, pool_name_type, volume_name_type)
 
 
 def load_pool_arguments(self, account_name_type, pool_name_type):
@@ -210,8 +211,8 @@ def load_volume_quota_rules_arguments(self, account_name_type, pool_name_type, v
         c.argument('account_name', account_name_type)
         c.argument('pool_name', pool_name_type)
         c.argument('volume_name', volume_name_type)
-        c.argument('volume_quota_rule_name', options_list=['--quota-rule', '--quota-rule-name', '--volume-quota-rule-name'], help='The name of the quota rule')
-        c.argument('quota_size_in_ki_bs', help='Size of quota', options_list=['--quota-size-in-ki-bs', '--quota-size'])
+        c.argument('volume_quota_rule_name', options_list=['--quota-rule-name'], help='The name of the quota rule')
+        c.argument('quota_size', options_list=['--quota-size'], help='Size of quota')
 
     with self.argument_context('netappfiles volume quota-rule list') as c:
         c.argument('account_name', id_part=None)

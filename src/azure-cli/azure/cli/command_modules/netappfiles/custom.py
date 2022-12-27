@@ -574,13 +574,13 @@ def patch_subvolume(instance, path=None, size=None):
 
 # ---- VOLUME QUOTA RULES ----
 def create_volume_quota_rule(cmd, client, resource_group_name, account_name, pool_name, volume_name,
-                             volume_quota_rule_name, location=None, tags=None, quota_size_in_ki_bs=None,
+                             volume_quota_rule_name, location=None, tags=None, quota_size=None,
                              quota_type=None, quota_target=None, no_wait=False):
     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     body = VolumeQuotaRule(
         location=location,
         tags=tags,
-        quota_size_in_ki_bs=quota_size_in_ki_bs,
+        quota_size_in_ki_bs=quota_size,
         quota_type=quota_type,
         quota_target=quota_target
     )
@@ -588,9 +588,9 @@ def create_volume_quota_rule(cmd, client, resource_group_name, account_name, poo
                        volume_quota_rule_name, body)
 
 
-def update_volume_quota_rule(instance, quota_size_in_ki_bs=None, quota_type=None, quota_target=None):
+def update_volume_quota_rule(instance, quota_size=None, quota_type=None, quota_target=None):
     body = VolumeQuotaRulePatch(
-        quota_size_in_ki_bs=quota_size_in_ki_bs,
+        quota_size_in_ki_bs=quota_size,
         quota_type=quota_type,
         quota_target=quota_target
     )

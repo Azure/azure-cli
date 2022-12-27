@@ -45,24 +45,24 @@ class AzureNetAppFilesVolumeQuotaRuleServiceScenarioTest(ScenarioTest):
         ])
 
         # Create quota rule
-        self.cmd("az netappfiles volume quota-rule create -g {rg} -a {acc_name} -p {pool_name} -l {loc} -v {vol_name} --volume-quota-rule-name {qr_name} --quota-size-in-ki-bs {size} --quota-type {type} --quota-target '' " )
+        self.cmd("az netappfiles volume quota-rule create -g {rg} -a {acc_name} -p {pool_name} -l {loc} -v {vol_name} --quota-rule-name {qr_name} --quota-size {size} --quota-type {type} --quota-target '' " )
         # List quota rules
         self.cmd("az netappfiles volume quota-rule list -g {rg} -a {acc_name} -p {pool_name} -v {vol_name}", checks=[
             self.check("length(@)", 1)
         ])
         # Get quota rule
-        self.cmd("az netappfiles volume quota-rule show -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} --volume-quota-rule-name {qr_name}", checks=[            
+        self.cmd("az netappfiles volume quota-rule show -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} --quota-rule-name {qr_name}", checks=[            
             self.check('quotaSizeInKiBs', '{size}')
         ])
         # Update quota rule
-        self.cmd("az netappfiles volume quota-rule update -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} --volume-quota-rule-name {qr_name} --quota-size {size2} --quota-type {type}")
+        self.cmd("az netappfiles volume quota-rule update -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} --quota-rule-name {qr_name} --quota-size {size2} --quota-type {type}")
         # Get quota rule
-        self.cmd("az netappfiles volume quota-rule show -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} --volume-quota-rule-name {qr_name}", checks=[            
+        self.cmd("az netappfiles volume quota-rule show -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} --quota-rule-name {qr_name}", checks=[            
             self.check('quotaSizeInKiBs', '{size2}'),
             self.check('quotaType', '{type}')
         ])
         # Delete quota rule
-        self.cmd("az netappfiles volume quota-rule delete -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} --volume-quota-rule-name {qr_name} -y")
+        self.cmd("az netappfiles volume quota-rule delete -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} --quota-rule-name {qr_name} -y")
 
         # List quota rule - make sure it was deleted
         self.cmd("az netappfiles volume quota-rule list -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} ", checks=[
