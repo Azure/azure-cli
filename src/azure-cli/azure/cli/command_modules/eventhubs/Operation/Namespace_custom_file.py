@@ -9,65 +9,70 @@ def create_eventhub_namespace(cmd, resource_group_name, namespace_name, location
                          require_infrastructure_encryption=None,is_kafka_enabled=None,
                               is_auto_inflate_enabled=None,alternate_name=None, zone_redundant=None):
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Create
-    user_assign = {}
-    dict1={}
-    a= "None"
-
-    dict1={
-        "resource_group": resource_group_name,
-        "namespace_name": namespace_name,
-        "tags": tags,
-        "sku": {
-            "name": sku,
-            "capacity": capacity,
-            "tier": sku
-        },
-        "is_kafka_enabled": is_kafka_enabled,
-        "maximum_throughput_units": maximum_throughput_units,
-        "minimum_tls_version": minimum_tls_version,
-        "enable_auto_inflate": is_auto_inflate_enabled,
-        "location": location,
-        "zone_redundant":zone_redundant,
-        "private_endpoint_connection_name": private_endpoint_connection_name,
-        "disable_local_auth": disable_local_auth,
-        "alternate_name": alternate_name
-    }
+    user_assigned = {}
+    a = "None"
+    tier = sku
     if mi_system_assigned:
-        a="SystemAssigned"
+        a = "SystemAssigned"
     if mi_user_assigned:
         if mi_system_assigned:
-            a="SystemAssigned, UserAssigned"
+            a = "SystemAssigned, UserAssigned"
         else:
-            a="UserAssigned"
-
+            a = "UserAssigned"
         for col in mi_user_assigned:
-            user_assign[col]={}
-        dict2={
+            print(col)
+            user_assigned[col] = {}
+        return Create(cli_ctx=cmd.cli_ctx)(command_args={
+            "resource_group": resource_group_name,
+            "namespace_name": namespace_name,
+            "tags": tags,
+            "sku": {
+                "name": sku,
+                "capacity": capacity,
+                "tier": sku
+            },
+            "minimum_tls_version": minimum_tls_version,
+            "maximum_throughput_units":maximum_throughput_units,
+            "is_kafka_enabled":is_kafka_enabled,
+            "is_auto_inflate_enabled": is_auto_inflate_enabled,
+            "encryption": {
+                "key_source": "Microsoft.KeyVault",
+                "key_vault_properties": encryption_config
+            },
+            "location": location,
             "identity": {
                 "type": a,
-                "user_assigned_identities": user_assign
+                "user_assigned_identities": user_assigned
             },
-        }
-        dict1.update(dict2)
+            "zone_redundant": zone_redundant,
+            "private_endpoint_connection_name": private_endpoint_connection_name,
+            "disable_local_auth": disable_local_auth,
+            "alternate_name": alternate_name
+        })
     else:
-        dict2={
+        return Create(cli_ctx=cmd.cli_ctx)(command_args={
+            "resource_group": resource_group_name,
+            "namespace_name": namespace_name,
+            "tags": tags,
+            "sku": {
+                "name": sku,
+                "capacity": capacity,
+                "tier": sku
+            },
+            "maximum_throughput_units": maximum_throughput_units,
+            "is_kafka_enabled": is_kafka_enabled,
+            "minimum_tls_version": minimum_tls_version,
+            "location": location,
+            "is_auto_inflate_enabled":is_auto_inflate_enabled,
             "identity": {
                 "type": a,
-                "user_assigned_identities": None
+                "user_assigned_identities": mi_user_assigned
             },
-        }
-        dict1.update(dict2)
-    if encryption_config:
-        dict3={
-                "encryption":{
-                "key_vault_properties":encryption_config,
-                "require_infrastructure_encryption":require_infrastructure_encryption,
-                "key_source":"Microsoft.KeyVault"
-                }
-            }
-        dict1.update(dict3)
-    print(dict1)
-    return Create(cli_ctx=cmd.cli_ctx)(command_args=dict1)
+            "zone_redundant": zone_redundant,
+            "private_endpoint_connection_name": private_endpoint_connection_name,
+            "disable_local_auth": disable_local_auth,
+            "alternate_name": alternate_name
+        })
 def cli_add_encryption(cmd, resource_group_name, namespace_name, encryption_config):
     #namespace = client.get(resource_group_name, namespace_name)
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Update
