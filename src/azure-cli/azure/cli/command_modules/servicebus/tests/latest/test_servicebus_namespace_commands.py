@@ -70,9 +70,9 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
                  checks=[self.check('sku.name', '{sku}')])
 
         # Update Namespace
-        self.cmd(
-            'servicebus namespace update --resource-group {rg} --name {namespacename} --tags {tags}',
-            checks=[self.check('sku.name', '{sku}')])
+        '''self.cmd(
+            'servicebus namespace update --resource-group {rg} --name {namespacename} --tags {tag}',
+            checks=[self.check('sku.name', '{sku}')])'''
 
         # Get Created Namespace list by subscription
         listnamespaceresult = self.cmd('servicebus namespace list').output
