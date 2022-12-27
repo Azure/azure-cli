@@ -1453,7 +1453,7 @@ def get_arch_for_cli_binary():
 # get the user path environment variable
 def get_windows_user_path():
     reg_query_exp = "reg query HKCU\\Environment /v path"
-    reg_regex_exp = "REG\w+"
+    reg_regex_exp = r"REG\w+"
     try:
         reg_result = subprocess.run(reg_query_exp.split(" "), shell=True, check=True, capture_output=True, text=True)
     except Exception as e:
@@ -1474,7 +1474,7 @@ def append_install_dir_to_windows_user_path(install_dir, binary_name):
     user_path = ""
     try:
         user_path = get_windows_user_path()
-    except Exception as e :
+    except Exception as e:
         logger.debug("failed to get user path, error: {}".format(e))
         log_windows_post_installation_manual_steps_warning(install_dir, binary_name)
         # unable to get user path, skip appending user path
@@ -1512,6 +1512,7 @@ def log_windows_successful_installation_warning(install_dir):
         "Please re-open the command window.".format(install_dir)
     )
 
+
 def log_windows_post_installation_manual_steps_warning(install_dir, binary_name):
     logger.warning(
         'Please add "{0}" to your search PATH so the `{1}` can be found. 2 options: \n'
@@ -1521,6 +1522,7 @@ def log_windows_post_installation_manual_steps_warning(install_dir, binary_name)
         '"Control Panel->System->Advanced->Environment Variables", and re-open the command window. '
         "You only need to do it once".format(install_dir, binary_name)
     )
+
 
 # install kubectl
 def k8s_install_kubectl(cmd, client_version='latest', install_location=None, source_url=None, arch=None):
