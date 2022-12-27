@@ -8,7 +8,7 @@ from azure.cli.core.commands import CliCommandType
 # pylint: disable=line-too-long, too-many-locals, too-many-statements
 def load_command_table(self, _):
     from ._client_factory import (
-        cf_alert_rules, cf_metric_def, cf_log_profiles, cf_autoscale,
+        cf_alert_rules, cf_metric_def, cf_autoscale,
         cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories,
         cf_metric_alerts, cf_metric_ns, cf_log_analytics_workspace,
         cf_private_link_resources, cf_private_link_scoped_resources,
@@ -63,18 +63,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.cli.command_modules.monitor.operations.autoscale_settings#{}',
         client_factory=cf_autoscale,
         operation_group='autoscale_settings',
-        exception_handler=exception_handler)
-
-    log_profiles_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#LogProfilesOperations.{}',
-        client_factory=cf_log_profiles,
-        operation_group='log_profiles',
-        exception_handler=exception_handler)
-
-    log_profiles_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.monitor.operations.log_profiles#{}',
-        client_factory=cf_log_profiles,
-        operation_group='log_profiles',
         exception_handler=exception_handler)
 
     alert_custom = CliCommandType(
@@ -206,13 +194,6 @@ def load_command_table(self, _):
     from .operations.diagnostics_settings import DiagnosticSettingsCategoryShow, DiagnosticSettingsCategoryList
     self.command_table['monitor diagnostic-settings categories show'] = DiagnosticSettingsCategoryShow(loader=self)
     self.command_table['monitor diagnostic-settings categories list'] = DiagnosticSettingsCategoryList(loader=self)
-
-    with self.command_group('monitor log-profiles', log_profiles_sdk, custom_command_type=log_profiles_custom) as g:
-        g.custom_command('create', 'create_log_profile_operations')
-        g.command('delete', 'delete')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.generic_update_command('update')
 
     with self.command_group('monitor metrics') as g:
         from .transformers import metrics_table, metrics_definitions_table, metrics_namespaces_table
