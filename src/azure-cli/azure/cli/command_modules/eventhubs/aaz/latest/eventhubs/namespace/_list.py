@@ -157,7 +157,9 @@ class List(AAZCommand):
             _element.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.properties = AAZObjectType()
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
             _element.sku = AAZObjectType()
             _element.system_data = AAZObjectType(
                 serialized_name="systemData",
@@ -267,7 +269,9 @@ class List(AAZCommand):
             key_vault_properties.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element.properties.encryption.key_vault_properties.Element
-            _element.identity = AAZObjectType()
+            _element.identity = AAZObjectType(
+                flags={"client_flatten": True},
+            )
             _element.key_name = AAZStrType(
                 serialized_name="keyName",
             )

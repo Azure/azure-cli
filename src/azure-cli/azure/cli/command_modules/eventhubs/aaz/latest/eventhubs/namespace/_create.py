@@ -144,8 +144,8 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="Properties of BYOK Encryption description",
         )
-        _args_schema.is_auto_inflate_enabled = AAZBoolArg(
-            options=["--is-auto-inflate-enabled"],
+        _args_schema.enable_auto_inflate = AAZBoolArg(
+            options=["--enable-auto-inflate"],
             arg_group="Properties",
             help="Value that indicates whether AutoInflate is enabled for eventhub namespace.",
         )
@@ -177,6 +177,11 @@ class Create(AAZCommand):
             default="Enabled",
             enum={"Disabled": "Disabled", "Enabled": "Enabled", "SecuredByPerimeter": "SecuredByPerimeter"},
         )
+        _args_schema.zone_redundant = AAZBoolArg(
+            options=["--zone-redundant"],
+            arg_group="Properties",
+            help="Enabling this property creates a Standard Event Hubs Namespace in regions supported availability zones.",
+        )
 
         encryption = cls._args_schema.encryption
         encryption.key_source = AAZStrArg(
@@ -198,8 +203,9 @@ class Create(AAZCommand):
         key_vault_properties.Element = AAZObjectArg()
 
         _element = cls._args_schema.encryption.key_vault_properties.Element
-        _element.identity = AAZObjectArg(
-            options=["identity"],
+        _element.user_assigned_identity = AAZStrArg(
+            options=["user-assigned-identity"],
+            help="ARM ID of user Identity selected for encryption",
         )
         _element.key_name = AAZStrArg(
             options=["key-name"],
@@ -212,12 +218,6 @@ class Create(AAZCommand):
         _element.key_version = AAZStrArg(
             options=["key-version"],
             help="Key Version",
-        )
-
-        identity = cls._args_schema.encryption.key_vault_properties.Element.identity
-        identity.user_assigned_identity = AAZStrArg(
-            options=["user-assigned-identity"],
-            help="ARM ID of user Identity selected for encryption",
         )
 
         private_endpoint_connections = cls._args_schema.private_endpoint_connections
@@ -364,7 +364,7 @@ class Create(AAZCommand):
             )
             _builder.set_prop("identity", AAZObjectType, ".identity")
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("properties", AAZObjectType)
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType, ".sku")
             _builder.set_prop("tags", AAZDictType, ".tags")
 
@@ -383,12 +383,13 @@ class Create(AAZCommand):
                 properties.set_prop("clusterArmId", AAZStrType, ".cluster_arm_id")
                 properties.set_prop("disableLocalAuth", AAZBoolType, ".disable_local_auth")
                 properties.set_prop("encryption", AAZObjectType, ".encryption")
-                properties.set_prop("isAutoInflateEnabled", AAZBoolType, ".is_auto_inflate_enabled")
+                properties.set_prop("isAutoInflateEnabled", AAZBoolType, ".enable_auto_inflate")
                 properties.set_prop("kafkaEnabled", AAZBoolType, ".kafka_enabled")
                 properties.set_prop("maximumThroughputUnits", AAZIntType, ".maximum_throughput_units")
                 properties.set_prop("minimumTlsVersion", AAZStrType, ".minimum_tls_version")
                 properties.set_prop("privateEndpointConnections", AAZListType, ".private_endpoint_connections")
                 properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
+                properties.set_prop("zoneRedundant", AAZBoolType, ".zone_redundant")
 
             encryption = _builder.get(".properties.encryption")
             if encryption is not None:
@@ -402,7 +403,7 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".properties.encryption.keyVaultProperties[]")
             if _elements is not None:
-                _elements.set_prop("identity", AAZObjectType, ".identity")
+                _elements.set_prop("identity", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
                 _elements.set_prop("keyName", AAZStrType, ".key_name")
                 _elements.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri")
                 _elements.set_prop("keyVersion", AAZStrType, ".key_version")
@@ -472,7 +473,9 @@ class Create(AAZCommand):
             _schema_on_200_201.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200_201.properties = AAZObjectType()
+            _schema_on_200_201.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
             _schema_on_200_201.sku = AAZObjectType()
             _schema_on_200_201.system_data = AAZObjectType(
                 serialized_name="systemData",
@@ -582,7 +585,9 @@ class Create(AAZCommand):
             key_vault_properties.Element = AAZObjectType()
 
             _element = cls._schema_on_200_201.properties.encryption.key_vault_properties.Element
-            _element.identity = AAZObjectType()
+            _element.identity = AAZObjectType(
+                flags={"client_flatten": True},
+            )
             _element.key_name = AAZStrType(
                 serialized_name="keyName",
             )

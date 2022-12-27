@@ -85,13 +85,13 @@ class EHNamespaceMSITesting(ScenarioTest):
         self.cmd('keyvault key create -n {key3} --vault-name {kv_name}')
 
         namespace = self.cmd(
-            'eventhubs namespace create --resource-group {rg} --name {namespacename} --sku {sku} --location {loc} --mi-system-assigned --mi-user-assigned {id1} {id2}' +
+            'eventhubs namespace create --resource-group {rg} --name {namespacename} --sku {sku} --location {loc} --mi-user-assigned {id1} {id2}' +
             ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}' +
             ' --encryption-config key-name={key2} key-vault-uri={key_uri} user-assigned-identity={id1}' +
             ' --encryption-config key-name={key3} key-vault-uri={key_uri} user-assigned-identity={id1}'
         ).get_output_in_json()
-
-        self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
+        print("hello")
+        self.assertEqual(namespace['identity']['type'], self.kwargs['user'])
         n = [i for i in namespace['identity']['userAssignedIdentities']]
         assert len(n) == 2
         n = [i for i in namespace['encryption']['keyVaultProperties']]

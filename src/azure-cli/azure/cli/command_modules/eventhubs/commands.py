@@ -77,12 +77,12 @@ def load_command_table(self, _):
     from azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file import create_eventhub_namespace
     with self.command_group('eventhubs namespace', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
-        g.custom_command('create', 'create_eventhub_namespace', supports_no_wait=True)
+        '''g.custom_command('create', 'create_eventhub_namespace', supports_no_wait=True)'''
 
     custom_tmpl = 'azure.cli.command_modules.eventhubs.custom#{}'
     eventhubs_custom = CliCommandType(operations_tmpl=custom_tmpl)
     with self.command_group('eventhubs namespace', eh_namespace_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
-        #g.custom_command('create', 'cli_namespace_create')
+        g.custom_command('create', 'cli_namespace_create')
         #g.show_command('show', 'get')
         #g.custom_command('list', 'cli_namespace_list')
         #g.command('delete', 'begin_delete')

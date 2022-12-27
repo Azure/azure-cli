@@ -67,12 +67,6 @@ class Update(AAZCommand):
             help="Properties of BYOK Identity description",
             nullable=True,
         )
-        _args_schema.sku = AAZObjectArg(
-            options=["--sku"],
-            arg_group="Parameters",
-            help="Properties of sku resource",
-            nullable=True,
-        )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             arg_group="Parameters",
@@ -97,27 +91,6 @@ class Update(AAZCommand):
         user_assigned_identities.Element = AAZObjectArg(
             nullable=True,
             blank={},
-        )
-
-        sku = cls._args_schema.sku
-        sku.capacity = AAZIntArg(
-            options=["capacity"],
-            help="The Event Hubs throughput units for Basic or Standard tiers, where value should be 0 to 20 throughput units. The Event Hubs premium units for Premium tier, where value should be 0 to 10 premium units.",
-            nullable=True,
-            fmt=AAZIntArgFormat(
-                minimum=0,
-            ),
-        )
-        sku.name = AAZStrArg(
-            options=["name"],
-            help="Name of this SKU.",
-            enum={"Basic": "Basic", "Premium": "Premium", "Standard": "Standard"},
-        )
-        sku.tier = AAZStrArg(
-            options=["tier"],
-            help="The billing tier of this particular SKU.",
-            nullable=True,
-            enum={"Basic": "Basic", "Premium": "Premium", "Standard": "Standard"},
         )
 
         tags = cls._args_schema.tags
@@ -152,8 +125,8 @@ class Update(AAZCommand):
             help="Properties of BYOK Encryption description",
             nullable=True,
         )
-        _args_schema.is_auto_inflate_enabled = AAZBoolArg(
-            options=["--is-auto-inflate-enabled"],
+        _args_schema.enable_auto_inflate = AAZBoolArg(
+            options=["--enable-auto-inflate"],
             arg_group="Properties",
             help="Value that indicates whether AutoInflate is enabled for eventhub namespace.",
             nullable=True,
@@ -190,6 +163,12 @@ class Update(AAZCommand):
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled", "SecuredByPerimeter": "SecuredByPerimeter"},
         )
+        _args_schema.zone_redundant = AAZBoolArg(
+            options=["--zone-redundant"],
+            arg_group="Properties",
+            help="Enabling this property creates a Standard Event Hubs Namespace in regions supported availability zones.",
+            nullable=True,
+        )
 
         encryption = cls._args_schema.encryption
         encryption.key_source = AAZStrArg(
@@ -215,8 +194,9 @@ class Update(AAZCommand):
         )
 
         _element = cls._args_schema.encryption.key_vault_properties.Element
-        _element.identity = AAZObjectArg(
-            options=["identity"],
+        _element.user_assigned_identity = AAZStrArg(
+            options=["user-assigned-identity"],
+            help="ARM ID of user Identity selected for encryption",
             nullable=True,
         )
         _element.key_name = AAZStrArg(
@@ -232,13 +212,6 @@ class Update(AAZCommand):
         _element.key_version = AAZStrArg(
             options=["key-version"],
             help="Key Version",
-            nullable=True,
-        )
-
-        identity = cls._args_schema.encryption.key_vault_properties.Element.identity
-        identity.user_assigned_identity = AAZStrArg(
-            options=["user-assigned-identity"],
-            help="ARM ID of user Identity selected for encryption",
             nullable=True,
         )
 
@@ -283,6 +256,32 @@ class Update(AAZCommand):
             help="Status of the connection.",
             nullable=True,
             enum={"Approved": "Approved", "Disconnected": "Disconnected", "Pending": "Pending", "Rejected": "Rejected"},
+        )
+
+        # define Arg Group "Sku"
+
+        _args_schema = cls._args_schema
+        _args_schema.capacity = AAZIntArg(
+            options=["--capacity"],
+            arg_group="Sku",
+            help="The Event Hubs throughput units for Basic or Standard tiers, where value should be 0 to 20 throughput units. The Event Hubs premium units for Premium tier, where value should be 0 to 10 premium units.",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                minimum=0,
+            ),
+        )
+        _args_schema.sku = AAZStrArg(
+            options=["--sku"],
+            arg_group="Sku",
+            help="Name of this SKU.",
+            enum={"Basic": "Basic", "Premium": "Premium", "Standard": "Standard"},
+        )
+        _args_schema.tier = AAZStrArg(
+            options=["--tier"],
+            arg_group="Sku",
+            help="The billing tier of this particular SKU.",
+            nullable=True,
+            enum={"Basic": "Basic", "Premium": "Premium", "Standard": "Standard"},
         )
         return cls._args_schema
 
@@ -522,8 +521,8 @@ class Update(AAZCommand):
                 typ=AAZObjectType
             )
             _builder.set_prop("identity", AAZObjectType, ".identity")
-            _builder.set_prop("properties", AAZObjectType)
-            _builder.set_prop("sku", AAZObjectType, ".sku")
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+            _builder.set_prop("sku", AAZObjectType)
             _builder.set_prop("tags", AAZDictType, ".tags")
 
             identity = _builder.get(".identity")
@@ -541,12 +540,13 @@ class Update(AAZCommand):
                 properties.set_prop("clusterArmId", AAZStrType, ".cluster_arm_id")
                 properties.set_prop("disableLocalAuth", AAZBoolType, ".disable_local_auth")
                 properties.set_prop("encryption", AAZObjectType, ".encryption")
-                properties.set_prop("isAutoInflateEnabled", AAZBoolType, ".is_auto_inflate_enabled")
+                properties.set_prop("isAutoInflateEnabled", AAZBoolType, ".enable_auto_inflate")
                 properties.set_prop("kafkaEnabled", AAZBoolType, ".kafka_enabled")
                 properties.set_prop("maximumThroughputUnits", AAZIntType, ".maximum_throughput_units")
                 properties.set_prop("minimumTlsVersion", AAZStrType, ".minimum_tls_version")
                 properties.set_prop("privateEndpointConnections", AAZListType, ".private_endpoint_connections")
                 properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
+                properties.set_prop("zoneRedundant", AAZBoolType, ".zone_redundant")
 
             encryption = _builder.get(".properties.encryption")
             if encryption is not None:
@@ -560,7 +560,7 @@ class Update(AAZCommand):
 
             _elements = _builder.get(".properties.encryption.keyVaultProperties[]")
             if _elements is not None:
-                _elements.set_prop("identity", AAZObjectType, ".identity")
+                _elements.set_prop("identity", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
                 _elements.set_prop("keyName", AAZStrType, ".key_name")
                 _elements.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri")
                 _elements.set_prop("keyVersion", AAZStrType, ".key_version")
@@ -595,7 +595,7 @@ class Update(AAZCommand):
             sku = _builder.get(".sku")
             if sku is not None:
                 sku.set_prop("capacity", AAZIntType, ".capacity")
-                sku.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
+                sku.set_prop("name", AAZStrType, ".sku", typ_kwargs={"flags": {"required": True}})
                 sku.set_prop("tier", AAZStrType, ".tier")
 
             tags = _builder.get(".tags")
@@ -643,7 +643,9 @@ class _UpdateHelper:
         eh_namespace_read.name = AAZStrType(
             flags={"read_only": True},
         )
-        eh_namespace_read.properties = AAZObjectType()
+        eh_namespace_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
         eh_namespace_read.sku = AAZObjectType()
         eh_namespace_read.system_data = AAZObjectType(
             serialized_name="systemData",
@@ -753,7 +755,9 @@ class _UpdateHelper:
         key_vault_properties.Element = AAZObjectType()
 
         _element = _schema_eh_namespace_read.properties.encryption.key_vault_properties.Element
-        _element.identity = AAZObjectType()
+        _element.identity = AAZObjectType(
+            flags={"client_flatten": True},
+        )
         _element.key_name = AAZStrType(
             serialized_name="keyName",
         )

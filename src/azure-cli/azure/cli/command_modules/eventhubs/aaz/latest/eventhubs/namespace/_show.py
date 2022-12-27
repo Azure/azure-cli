@@ -162,7 +162,9 @@ class Show(AAZCommand):
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.properties = AAZObjectType()
+            _schema_on_200.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
             _schema_on_200.sku = AAZObjectType()
             _schema_on_200.system_data = AAZObjectType(
                 serialized_name="systemData",
@@ -272,7 +274,9 @@ class Show(AAZCommand):
             key_vault_properties.Element = AAZObjectType()
 
             _element = cls._schema_on_200.properties.encryption.key_vault_properties.Element
-            _element.identity = AAZObjectType()
+            _element.identity = AAZObjectType(
+                flags={"client_flatten": True},
+            )
             _element.key_name = AAZStrType(
                 serialized_name="keyName",
             )

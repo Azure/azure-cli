@@ -53,7 +53,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         # Set auto inflate enabled to false and true using update command
         namespace = self.cmd('eventhubs namespace update --name {namespacename} --resource-group {rg} '
                              '--enable-auto-inflate false --maximum-throughput-units 0').get_output_in_json()
-
+        print(namespace['maximumThroughputUnits'])
         self.assertEqual(10, namespace['sku']['capacity'])
         self.assertEqual('Standard', namespace['sku']['name'])
         self.assertEqual(0, namespace['maximumThroughputUnits'])
