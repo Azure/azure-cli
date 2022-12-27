@@ -1425,9 +1425,9 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
 def k8s_install_cli(cmd, client_version='latest', install_location=None, base_src_url=None,
                     kubelogin_version='latest', kubelogin_install_location=None,
                     kubelogin_base_src_url=None):
-    k8s_install_kubectl(cmd, client_version, install_location, base_src_url)
-    k8s_install_kubelogin(cmd, kubelogin_version,
-                          kubelogin_install_location, kubelogin_base_src_url)
+    arch = get_arch_for_cli_binary()
+    k8s_install_kubectl(cmd, client_version, install_location, base_src_url, arch=arch)
+    k8s_install_kubelogin(cmd, kubelogin_version, kubelogin_install_location, kubelogin_base_src_url, arch=arch)
 
 
 # determine the architecture for the binary based on platform.machine()
@@ -1455,7 +1455,7 @@ def get_windows_user_path():
     reg_query_exp = "reg query HKCU\\Environment /v path"
     reg_regex_exp = "REG\w+"
     try:
-        reg_result = subprocess.run(reg_query_exp.split(" "), capture_output=True, text=True)
+        reg_result = subprocess.run(reg_query_exp.split(" "), shell=True, check=True, capture_output=True, text=True)
     except Exception as e:
         raise CLIInternalError("failed to perfrom reg query, error: {}".format(e))
     raw_user_path = reg_result.stdout.strip()
@@ -1484,9 +1484,9 @@ def append_install_dir_to_windows_user_path(install_dir, binary_name):
         return
     # keep user path style (with or without semicolon at the end)
     flag = user_path.endswith(";")
-    setxexp = "setx path \"{}{}{}{}\"".format(user_path, "" if flag else ";", install_dir, ";" if flag else "")
+    setxexp = ["setx", "path", "\"{}{}{}{}\"".format(user_path, "" if flag else ";", install_dir, ";" if flag else "")]
     try:
-        subprocess.Popen(setxexp, shell=True, stdout=subprocess.DEVNULL).wait()
+        subprocess.run(setxexp, shell=True, check=True, capture_output=True)
         log_windows_successful_installation_warning(install_dir)
     except Exception as e:
         logger.debug("failed to set user path, error: {}".format(e))
@@ -1523,7 +1523,7 @@ def log_windows_post_installation_manual_steps_warning(install_dir, binary_name)
     )
 
 # install kubectl
-def k8s_install_kubectl(cmd, client_version='latest', install_location=None, source_url=None):
+def k8s_install_kubectl(cmd, client_version='latest', install_location=None, source_url=None, arch=None):
     """
     Install kubectl, a command-line interface for Kubernetes clusters.
     """
@@ -1543,7 +1543,8 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
 
     file_url = ''
     system = platform.system()
-    arch = get_arch_for_cli_binary()
+    if arch is None:
+        arch = get_arch_for_cli_binary()
     base_url = source_url + f"/{{}}/bin/{{}}/{arch}/{{}}"
 
     # ensure installation directory exists
@@ -1579,7 +1580,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
 
 
 # install kubelogin
-def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, source_url=None):
+def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, source_url=None, arch=None):
     """
     Install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
     """
@@ -1611,7 +1612,8 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
         os.makedirs(install_dir)
 
     system = platform.system()
-    arch = get_arch_for_cli_binary()
+    if arch is None:
+        arch = get_arch_for_cli_binary()
     if system == 'Windows':
         sub_dir, binary_name = 'windows_amd64', 'kubelogin.exe'
     elif system == 'Linux':
