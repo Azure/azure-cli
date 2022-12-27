@@ -1465,7 +1465,7 @@ def get_windows_user_path():
     if not identifier:
         raise CLIInternalError("failed to parse reg query result")
     start_idx = raw_user_path.find(identifier)
-    user_path = raw_user_path[start_idx+len(identifier):].strip()
+    user_path = raw_user_path[start_idx+len(identifier) :].strip()
     return user_path
 
 
