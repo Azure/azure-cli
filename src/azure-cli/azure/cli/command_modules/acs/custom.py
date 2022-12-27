@@ -73,12 +73,13 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
     AzureInternalError,
+    CLIInternalError,
     FileOperationError,
     InvalidArgumentValueError,
     MutuallyExclusiveArgumentError,
     ResourceNotFoundError,
-    ValidationError,
     UnknownError,
+    ValidationError,
 )
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -1434,12 +1435,15 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None, base_sr
 # Note: the results returned here may be inaccurate if the installed python is translated (e.g. by Rosetta)
 def get_arch_for_cli_binary():
     arch = platform.machine().lower()
+    # default arch
     formatted_arch = "amd64"
+    # set to "arm64" when the detection value contains the word "arm"
     if "arm" in arch:
         formatted_arch = "arm64"
     logger.warning(
-        "The detected arch is '%s', would be treated as '%s', which may not match the actual situation due to translation "
-        "and other reasons. If there is any problem, please download the appropriate binary by yourself.",
+        "The detected architecture is '%s', which will be regarded as '%s' and "
+        "the corresponding binary will be downloaded. "
+        "If there is any problem, please download the appropriate binary by yourself.",
         arch,
         formatted_arch,
     )
@@ -1452,14 +1456,14 @@ def get_windows_user_path():
     reg_regex_exp = "REG\w+"
     try:
         reg_result = subprocess.run(reg_query_exp.split(" "), capture_output=True, text=True)
-    except subprocess.CalledProcessError as e:
-        raise UnknownError("failed to perfrom reg query, error: {}".format(e))
+    except Exception as e:
+        raise CLIInternalError("failed to perfrom reg query, error: {}".format(e))
     raw_user_path = reg_result.stdout.strip()
     # find the identifier where the user's path really starts
     m = re.search(reg_regex_exp, raw_user_path)
     identifier = m.group(0) if m else ""
     if not identifier:
-        raise UnknownError("failed to parse reg query result")
+        raise CLIInternalError("failed to parse reg query result")
     start_idx = raw_user_path.find(identifier)
     user_path = raw_user_path[start_idx+len(identifier):].strip()
     return user_path
@@ -1467,9 +1471,10 @@ def get_windows_user_path():
 
 # append the installation directory to the user path environment variable
 def append_install_dir_to_windows_user_path(install_dir, binary_name):
+    user_path = ""
     try:
         user_path = get_windows_user_path()
-    except UnknownError as e :
+    except Exception as e :
         logger.debug("failed to get user path, error: {}".format(e))
         log_windows_post_installation_manual_steps_warning(install_dir, binary_name)
         # unable to get user path, skip appending user path
@@ -1481,7 +1486,7 @@ def append_install_dir_to_windows_user_path(install_dir, binary_name):
     flag = user_path.endswith(";")
     setxexp = "setx path \"{}{}{}{}\"".format(user_path, "" if flag else ";", install_dir, ";" if flag else "")
     try:
-        subprocess.Popen(setxexp, shell=True).wait()
+        subprocess.Popen(setxexp, shell=True, stdout=subprocess.DEVNULL).wait()
         log_windows_successful_installation_warning(install_dir)
     except Exception as e:
         logger.debug("failed to set user path, error: {}".format(e))
