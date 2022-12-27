@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "monitor log-profiles list",
 )
 class List(AAZCommand):
-    """List the log profiles. :keyword callable cls: A custom type or function that will be passed the direct response:return: An iterator like instance of either LogProfileResource or the result of cls(response) :rtype:  ~azure.core.paging.ItemPaged[~$(python-base-namespace).v2016_03_01.models.LogProfileResource] :raises ~azure.core.exceptions.HttpResponseError:.
+    """List the log profiles.
     """
 
     _aaz_info = {
