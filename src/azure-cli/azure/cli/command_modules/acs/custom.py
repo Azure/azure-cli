@@ -1446,6 +1446,77 @@ def get_arch_for_cli_binary():
     return formatted_arch
 
 
+# get the user path environment variable
+def get_windows_user_path():
+    reg_query_exp = "reg query HKCU\\Environment /v path"
+    reg_regex_exp = "REG\w+"
+    try:
+        reg_result = subprocess.run(reg_query_exp.split(" "), capture_output=True, text=True)
+    except subprocess.CalledProcessError as e:
+        raise UnknownError("failed to perfrom reg query, error: {}".format(e))
+    raw_user_path = reg_result.stdout.strip()
+    # find the identifier where the user's path really starts
+    m = re.search(reg_regex_exp, raw_user_path)
+    identifier = m.group(0) if m else ""
+    if not identifier:
+        raise UnknownError("failed to parse reg query result")
+    start_idx = raw_user_path.find(identifier)
+    user_path = raw_user_path[start_idx+len(identifier):].strip()
+    return user_path
+
+
+# append the installation directory to the user path environment variable
+def append_install_dir_to_windows_user_path(install_dir, binary_name):
+    try:
+        user_path = get_windows_user_path()
+    except UnknownError as e :
+        logger.debug("failed to get user path, error: {}".format(e))
+        log_windows_post_installation_manual_steps_warning(install_dir, binary_name)
+        # unable to get user path, skip appending user path
+        return
+    if install_dir in user_path:
+        logger.debug("installation directory '{}' already exists in user path".format(install_dir))
+        return
+    # keep user path style (with or without semicolon at the end)
+    flag = user_path.endswith(";")
+    setxexp = "setx path \"{}{}{}{}\"".format(user_path, "" if flag else ";", install_dir, ";" if flag else "")
+    try:
+        subprocess.Popen(setxexp, shell=True).wait()
+        log_windows_successful_installation_warning(install_dir)
+    except Exception as e:
+        logger.debug("failed to set user path, error: {}".format(e))
+        log_windows_post_installation_manual_steps_warning(install_dir, binary_name)
+
+
+# handle system path issues after binary installation
+def handle_windows_post_install(install_dir, binary_name):
+    if not check_windows_install_dir(install_dir):
+        append_install_dir_to_windows_user_path(install_dir, binary_name)
+
+
+# check if the installation directory is in the system path
+def check_windows_install_dir(install_dir):
+    env_paths = os.environ['PATH'].split(';')
+    return next((x for x in env_paths if x.lower().rstrip('\\') == install_dir.lower()), None)
+
+
+def log_windows_successful_installation_warning(install_dir):
+    logger.warning(
+        'The installation directory "{}" has been successfully appended to the user path, '
+        "the configuration will only take effect in the new command sessions. "
+        "Please re-open the command window.".format(install_dir)
+    )
+
+def log_windows_post_installation_manual_steps_warning(install_dir, binary_name):
+    logger.warning(
+        'Please add "{0}" to your search PATH so the `{1}` can be found. 2 options: \n'
+        '    1. Run "set PATH=%PATH%;{0}" or "$env:path += \';{0}\'" for PowerShell. '
+        "This is good for the current command session.\n"
+        "    2. Update system PATH environment variable by following "
+        '"Control Panel->System->Advanced->Environment Variables", and re-open the command window. '
+        "You only need to do it once".format(install_dir, binary_name)
+    )
+
 # install kubectl
 def k8s_install_kubectl(cmd, client_version='latest', install_location=None, source_url=None):
     """
@@ -1495,18 +1566,8 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
         raise CLIError(
             'Connection error while attempting to download client ({})'.format(ex))
 
-    if system == 'Windows':  # be verbose, as the install_location likely not in Windows's search PATHs
-        env_paths = os.environ['PATH'].split(';')
-        found = next((x for x in env_paths if x.lower().rstrip(
-            '\\') == install_dir.lower()), None)
-        if not found:
-            # pylint: disable=logging-format-interpolation
-            logger.warning('Please add "{0}" to your search PATH so the `{1}` can be found. 2 options: \n'
-                           '    1. Run "set PATH=%PATH%;{0}" or "$env:path += \';{0}\'" for PowerShell. '
-                           'This is good for the current command session.\n'
-                           '    2. Update system PATH environment variable by following '
-                           '"Control Panel->System->Advanced->Environment Variables", and re-open the command window. '
-                           'You only need to do it once'.format(install_dir, cli))
+    if system == 'Windows':
+        handle_windows_post_install(install_dir, cli)
     else:
         logger.warning('Please ensure that %s is in your search PATH, so the `%s` command can be found.',
                        install_dir, cli)
@@ -1570,18 +1631,8 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
     os.chmod(install_location, os.stat(install_location).st_mode |
              stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
-    if system == 'Windows':  # be verbose, as the install_location likely not in Windows's search PATHs
-        env_paths = os.environ['PATH'].split(';')
-        found = next((x for x in env_paths if x.lower().rstrip(
-            '\\') == install_dir.lower()), None)
-        if not found:
-            # pylint: disable=logging-format-interpolation
-            logger.warning('Please add "{0}" to your search PATH so the `{1}` can be found. 2 options: \n'
-                           '    1. Run "set PATH=%PATH%;{0}" or "$env:path += \';{0}\'" for PowerShell. '
-                           'This is good for the current command session.\n'
-                           '    2. Update system PATH environment variable by following '
-                           '"Control Panel->System->Advanced->Environment Variables", and re-open the command window. '
-                           'You only need to do it once'.format(install_dir, cli))
+    if system == 'Windows':
+        handle_windows_post_install(install_dir, cli)
     else:
         logger.warning('Please ensure that %s is in your search PATH, so the `%s` command can be found.',
                        install_dir, cli)
