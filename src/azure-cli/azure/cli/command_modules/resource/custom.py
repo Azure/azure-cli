@@ -2055,7 +2055,7 @@ def list_template_specs(cmd, resource_group_name=None, name=None):
         return rcf.template_specs.list_by_resource_group(resource_group_name)
     return rcf.template_specs.list_by_subscription()
 
-def create_deployment_stack_at_subscription(cmd, name, location, delete_resources=False, delete_resource_groups=False, delete_all=False, resource_group=None, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_excluded_actions = None, deny_settings_apply_to_child_scopes = False):
+def create_deployment_stack_at_subscription(cmd, name, location, delete_resources=False, delete_resource_groups=False, delete_all=False, resource_group=None, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_apply_to_child_scopes = False, yes=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
     delete_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
@@ -2087,13 +2087,6 @@ def create_deployment_stack_at_subscription(cmd, name, location, delete_resource
             excluded_principals_array.append(str(principal))
     else: 
         excluded_principals_array = None
-    
-    excluded_actions_array = []
-    if deny_settings_excluded_actions:
-        for action in deny_settings_excluded_actions.split(" "):
-            excluded_actions_array.append(str(action))
-    else:
-        excluded_actions_array = None
     
     if [template_file, template_spec, template_uri].count(None) != 2:
         raise InvalidArgumentValueError("Please enter only one of the following: template file, template spec, or template url")
@@ -2145,7 +2138,7 @@ def create_deployment_stack_at_subscription(cmd, name, location, delete_resource
     
     action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesSharedActionOnUnmanage(resources = delete_resources_enum, resource_groups=delete_resource_groups_enum)
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
-    deny_settings_model = rcf.deployment_stacks.models.DenySettings(mode = deny_settings_enum, excluded_principals = excluded_principals_array, excluded_actions = excluded_actions_array, apply_to_child_scopes = apply_to_child_scopes)
+    deny_settings_model = rcf.deployment_stacks.models.DenySettings(mode = deny_settings_enum, excluded_principals = excluded_principals_array, apply_to_child_scopes = apply_to_child_scopes)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, location = location, action_on_unmanage = action_on_unmanage_model, deployment_scope = deployment_scope, deny_settings = deny_settings_model)
     deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
 
@@ -2248,7 +2241,7 @@ def export_template_deployment_stack_at_subscription(cmd, name=None, id=None):
         return rcf.deployment_stacks.export_template_at_subscription(id.split('/')[-1])
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id.")
 
-def create_deployment_stack_at_resource_group(cmd, name, resource_group, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_excluded_actions = None, deny_settings_apply_to_child_scopes = False):
+def create_deployment_stack_at_resource_group(cmd, name, resource_group, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_apply_to_child_scopes = False, yes=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
@@ -2281,13 +2274,6 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, delete_
     else: 
         excluded_principals_array = None
     
-    excluded_actions_array = []
-    if deny_settings_excluded_actions:
-        for action in deny_settings_excluded_actions.split(" "):
-            excluded_actions_array.append(str(action))
-    else:
-        excluded_actions_array = None
-
     if [template_file, template_spec, template_uri].count(None) != 2:
         raise InvalidArgumentValueError("Please enter only one of the following: template file, template spec, or template url")
     try:
@@ -2329,7 +2315,7 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, delete_
     action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesSharedActionOnUnmanage(resources = delete_resources_enum, resource_groups = delete_resource_groups_enum)
     #removed the following code because it is not in service yet, need to add this back eventually
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
-    deny_settings_model = rcf.deployment_stacks.models.DenySettings(mode = deny_settings_enum, excluded_principals = excluded_principals_array, excluded_actions = excluded_actions_array, apply_to_child_scopes = apply_to_child_scopes)
+    deny_settings_model = rcf.deployment_stacks.models.DenySettings(mode = deny_settings_enum, excluded_principals = excluded_principals_array, apply_to_child_scopes = apply_to_child_scopes)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, action_on_unmanage = action_on_unmanage_model, deny_settings = deny_settings_model)
     deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
 
@@ -2443,7 +2429,7 @@ def export_template_deployment_stack_at_resource_group(cmd, name=None, resource_
         return rcf.deployment_stacks.export_template_at_resource_group(stack_arr[4], stack_arr[-1])
     raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
-def create_deployment_stack_at_management_group(cmd, management_group_id, name, location, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_excluded_actions = None, deny_settings_apply_to_child_scopes = False):
+def create_deployment_stack_at_management_group(cmd, management_group_id, name, location, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_apply_to_child_scopes = False, yes=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
@@ -2476,13 +2462,6 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
     else: 
         excluded_principals_array = None
     
-    excluded_actions_array = []
-    if deny_settings_excluded_actions:
-        for action in deny_settings_excluded_actions.split(" "):
-            excluded_actions_array.append(str(action))
-    else:
-        excluded_actions_array = None
-
     if [template_file, template_spec, template_uri].count(None) != 2:
         raise InvalidArgumentValueError("Please enter only one of the following: template file, template spec, or template url")
     try:
@@ -2528,7 +2507,7 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
     
     action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesSharedActionOnUnmanage(resources = delete_resources_enum, resource_groups=delete_resource_groups_enum)
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
-    deny_settings_model = rcf.deployment_stacks.models.DenySettings(mode = deny_settings_enum, excluded_principals = excluded_principals_array, excluded_actions = excluded_actions_array, apply_to_child_scopes = apply_to_child_scopes)
+    deny_settings_model = rcf.deployment_stacks.models.DenySettings(mode = deny_settings_enum, excluded_principals = excluded_principals_array, apply_to_child_scopes = apply_to_child_scopes)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, location = location, action_on_unmanage = action_on_unmanage_model, deployment_scope = deployment_scope, deny_settings = deny_settings_model)
     deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
 

@@ -104,7 +104,7 @@ def load_arguments(self, _):
     stacks_delete_resources_type = CLIArgumentType(options_list=['--delete-resources'], help='Flag to indicate delete rather than detach for the resources.')
     stacks_delete_resource_groups_type = CLIArgumentType(options_list=['--delete-resource-groups'], help='Flag to indicate delete rather than detach for the resource groups.')
     stacks_delete_all_type = CLIArgumentType(options_list=['--delete-all'], help='Flag to indicate delete rather than detach for the resources and resource groups.')
-    stacks_deny_settings_mode = CLIArgumentType(help='Defines how resources deployed by the deployment stack are locked.')
+    stacks_deny_settings_mode = CLIArgumentType(help='Defines which operations are denied on resources managed by the stack: denyWrite or denyWriteAndDelete.')
     stacks_excluded_principals = CLIArgumentType(help='List of AAD principal IDs excluded from the lock. Up to 5 principals are permitted.')
     stacks_excluded_actions = CLIArgumentType(help="List of role-based management operations that are excluded from the denySettings. Up to 200 actions are permitted.")
     stacks_apply_to_child_scopes = CLIArgumentType(help='DenySettings will be applied to child scopes.')
