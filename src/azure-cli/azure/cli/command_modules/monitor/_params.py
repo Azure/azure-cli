@@ -270,18 +270,6 @@ def load_arguments(self, _):
         c.ignore('filter')
     # endregion
 
-    # region LogProfiles
-    with self.argument_context('monitor log-profiles') as c:
-        c.argument('log_profile_name', options_list=['--name', '-n'])
-
-    # with self.argument_context('monitor log-profiles create') as c:
-    #     c.argument('name', options_list=['--name', '-n'])
-    #     c.argument('categories', nargs='+')
-    #     c.argument('locations', nargs='+')
-    #     c.argument('days', type=int, arg_group='Retention Policy')
-    #     c.argument('enabled', arg_type=get_three_state_flag(), arg_group='Retention Policy')
-    # endregion
-
     # region ActivityLog
     with self.argument_context('monitor activity-log list') as c:
         activity_log_props = [x['key'] for x in EventData()._attribute_map.values()]  # pylint: disable=protected-access
