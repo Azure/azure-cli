@@ -78,6 +78,7 @@ from azure.cli.core.azclierror import (
     MutuallyExclusiveArgumentError,
     ResourceNotFoundError,
     ValidationError,
+    UnknownError,
 )
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -1428,15 +1429,16 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None, base_sr
                           kubelogin_install_location, kubelogin_base_src_url)
 
 
-# determine architecture for kubectl based on platform.processor()
-# the results returned here may be inaccurate if the installed python is translated (e.g. by Rosetta)
+# determine the architecture for the binary based on platform.machine()
+# currently only used to distinguish between amd64 and arm64 (386, arm, ppc64le, s390x not supported)
+# Note: the results returned here may be inaccurate if the installed python is translated (e.g. by Rosetta)
 def get_arch_for_cli_binary():
-    arch = platform.processor().lower()
+    arch = platform.machine().lower()
     formatted_arch = "amd64"
     if "arm" in arch:
         formatted_arch = "arm64"
     logger.warning(
-        "The detected arch is %s, would be treated as %s, which may not match the actual situation due to translation "
+        "The detected arch is '%s', would be treated as '%s', which may not match the actual situation due to translation "
         "and other reasons. If there is any problem, please download the appropriate binary by yourself.",
         arch,
         formatted_arch,
@@ -1481,8 +1483,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
     elif system == 'Darwin':
         file_url = base_url.format(client_version, 'darwin', 'kubectl')
     else:
-        raise CLIError(
-            'Proxy server ({}) does not exist on the cluster.'.format(system))
+        raise UnknownError("Unsupported system '{}'.".format(system))
 
     logger.warning('Downloading client to "%s" from "%s"',
                    install_location, file_url)
@@ -1552,8 +1553,7 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
     elif system == 'Darwin':
         sub_dir, binary_name = f'darwin_{arch}', 'kubelogin'
     else:
-        raise CLIError(
-            'Proxy server ({}) does not exist on the cluster.'.format(system))
+        raise UnknownError("Unsupported system '{}'.".format(system))
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         try:
@@ -1577,7 +1577,7 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
         if not found:
             # pylint: disable=logging-format-interpolation
             logger.warning('Please add "{0}" to your search PATH so the `{1}` can be found. 2 options: \n'
-                           '    1. Run "set PATH=%PATH%;{0}" or "$env:path += \'{0}\'" for PowerShell. '
+                           '    1. Run "set PATH=%PATH%;{0}" or "$env:path += \';{0}\'" for PowerShell. '
                            'This is good for the current command session.\n'
                            '    2. Update system PATH environment variable by following '
                            '"Control Panel->System->Advanced->Environment Variables", and re-open the command window. '
