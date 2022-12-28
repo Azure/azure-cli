@@ -16,7 +16,7 @@ from azure.cli.core.aaz import *
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Delete a gallery Application Version.
+    """Delete a gallery application version.
     """
 
     _aaz_info = {
