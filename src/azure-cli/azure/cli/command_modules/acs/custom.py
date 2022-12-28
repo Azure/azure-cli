@@ -1514,6 +1514,7 @@ def log_windows_successful_installation_warning(install_dir):
         "Please re-open the command window.", install_dir
     )
 
+
 # pylint: disable=logging-format-interpolation
 def log_windows_post_installation_manual_steps_warning(install_dir, binary_name):
     logger.warning(
