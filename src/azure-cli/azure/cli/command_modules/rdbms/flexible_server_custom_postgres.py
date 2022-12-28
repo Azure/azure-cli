@@ -108,8 +108,8 @@ def flexible_server_create(cmd, client,
                                                                    byok_identity=byok_identity,
                                                                    byok_key=byok_key)
 
-    auth_config = postgresql_flexibleservers.models.AuthConfig(active_directory_auth_enabled=(active_directory_auth == 'Enabled'),
-                                                               password_auth_enabled=(password_auth == 'Enabled'))
+    auth_config = postgresql_flexibleservers.models.AuthConfig(active_directory_auth=active_directory_auth,
+                                                               password_auth=password_auth)
 
     # Create postgresql
     # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
@@ -305,9 +305,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     auth_config = instance.auth_config
     if active_directory_auth:
-        auth_config.active_directory_auth_enabled = active_directory_auth == 'Enabled'
+        auth_config.active_directory_auth = active_directory_auth
     if password_auth:
-        auth_config.password_auth_enabled = password_auth == 'Enabled'
+        auth_config.password_auth = password_auth
 
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
