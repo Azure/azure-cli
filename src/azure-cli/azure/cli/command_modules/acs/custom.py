@@ -1474,13 +1474,14 @@ def append_install_dir_to_windows_user_path(install_dir, binary_name):
     user_path = ""
     try:
         user_path = get_windows_user_path()
+    # pylint: disable=broad-except
     except Exception as e:
-        logger.debug("failed to get user path, error: {}".format(e))
+        logger.debug("failed to get user path, error: %s", e)
         log_windows_post_installation_manual_steps_warning(install_dir, binary_name)
         # unable to get user path, skip appending user path
         return
     if install_dir in user_path:
-        logger.debug("installation directory '{}' already exists in user path".format(install_dir))
+        logger.debug("installation directory '%s' already exists in user path", install_dir)
         return
     # keep user path style (with or without semicolon at the end)
     flag = user_path.endswith(";")
@@ -1488,8 +1489,9 @@ def append_install_dir_to_windows_user_path(install_dir, binary_name):
     try:
         subprocess.run(setxexp, shell=True, check=True, capture_output=True)
         log_windows_successful_installation_warning(install_dir)
+    # pylint: disable=broad-except
     except Exception as e:
-        logger.debug("failed to set user path, error: {}".format(e))
+        logger.debug("failed to set user path, error: %s", e)
         log_windows_post_installation_manual_steps_warning(install_dir, binary_name)
 
 
@@ -1507,12 +1509,12 @@ def check_windows_install_dir(install_dir):
 
 def log_windows_successful_installation_warning(install_dir):
     logger.warning(
-        'The installation directory "{}" has been successfully appended to the user path, '
+        'The installation directory "%s" has been successfully appended to the user path, '
         "the configuration will only take effect in the new command sessions. "
-        "Please re-open the command window.".format(install_dir)
+        "Please re-open the command window.", install_dir
     )
 
-
+# pylint: disable=logging-format-interpolation
 def log_windows_post_installation_manual_steps_warning(install_dir, binary_name):
     logger.warning(
         'Please add "{0}" to your search PATH so the `{1}` can be found. 2 options: \n'
