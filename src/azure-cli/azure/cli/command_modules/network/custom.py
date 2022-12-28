@@ -37,6 +37,7 @@ from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCr
 from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRoutePortIdentityAssign
 from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
 from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
+from .aaz.latest.network.vnet_gateway import Create as _VnetGatewayCreate, Update as _VnetGatewayUpdate
 
 import threading
 import time
@@ -7134,6 +7135,98 @@ def _prep_cert_create(cmd, gateway_name, resource_group_name):
     return config, gateway, ncf
 
 
+class VnetGatewayCreate(_VnetGatewayCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.public_ip_addresses = AAZListArg(options=['--public-ip-addresses'], help="Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.")
+        args_schema.public_ip_addresses.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIPAddresses/{}"
+            )
+        )
+        args_schema.vnet = AAZResourceIdArg(
+            options=['--vnet'],
+            help="Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
+            )
+        )
+        args_schema.nat_rule.Element.external_mappings = AAZStrArg(
+            options=["external-mappings"],
+            help="Required.The private IP address external mapping for NAT.",
+        )
+        args_schema.nat_rule.Element.internal_mappings = AAZStrArg(
+            options=["internal-mappings"],
+            help="Required.The private IP address internal mapping for NAT.",
+        )
+        args_schema.root_cert_data = AAZStrArg(options=['--root-cert-data'], arg_group="Root Cert Authentication", help="Base64 contents of the root certificate file or file path.")
+        args_schema.root_cert_name = AAZStrArg(options=['--root-cert-name'], arg_group="Root Cert Authentication", help="Root certificate name.")
+        # args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
+        #     template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
+        # )
+        args_schema.ip_configurations._registered = False
+        args_schema.edge_zone_type._registered = False
+        args_schema.active._registered = False
+        args_schema.vpn_client_root_certificates._registered = False
+        args_schema.sku_tier._registered = False
+        args_schema.enable_bgp._registered = False
+        args_schema.nat_rule.Element.external_mappings_ip._registered = False
+        args_schema.nat_rule.Element.internal_mappings_ip._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        subnet = args.vnet.to_serialized_data() + '/subnets/GatewaySubnet'
+        args.sku_tier = args.sku
+        if has_value(args.gateway_type) and args.gateway_type != "LocalGateway":
+            args.active = len(args.public_ip_addresses) == 2
+        else:
+            args.active = False
+
+        if args.gateway_type != "LocalGateway":
+            if has_value(args.public_ip_addresses):
+                public_ip_addresses = args.public_ip_addresses.to_serialized_data()
+                args.ip_configurations = []
+                ip_configuration = {}
+                for i, public_ip in enumerate(public_ip_addresses):
+                    ip_configuration[i] = {'subnet': subnet, 'public_ip_address': public_ip, 'private_ip_allocation_method': 'Dynamic', 'name': 'vnetGatewayConfig{}'.format(i)}
+                    args.ip_configurations.append(ip_configuration[i])
+        else:
+            args.vpn_type = None
+            args.sku = None
+
+        if has_value(args.asn) or has_value(args.bgp_peering_address) or has_value(args.peer_weight):
+            args.enable_bgp = True
+
+        if has_value(args.nat_rule):
+            rule = args.nat_rule.to_serialized_data()
+            external_mappings = []
+            internal_mappings = []
+            for i in rule:
+                # if not value, return None
+                external_mappings.append(i.get('external_mappings'))
+                internal_mappings.append(i.get('internal_mappings'))
+
+            args.nat_rule.external_mappings_ip = assign_aaz_list_arg(
+                args.nat_rule.external_mappings_ip,
+                external_mappings,
+                element_transformer=lambda _, i_map: {"address_space": i_map}
+            )
+            args.nat_rule.internal_mappings_ip = assign_aaz_list_arg(
+                args.nat_rule.internal_mappings_ip,
+                internal_mappings,
+                element_transformer=lambda _, i_map: {"address_space": i_map}
+            )
+
+        if has_value(args.address_prefixes) or has_value(args.client_protocol):
+            import os
+            path = args.root_cert_data.to_serialized_data()
+            path = os.path.expanduser(path)
+            args.vpn_client_root_certificates = [{'name': args.root_cert_name, 'public_cert_data': path}]
+
+
 def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name,
                         virtual_network, public_ip_address=None, location=None, tags=None,
                         no_wait=False, gateway_type=None, sku=None, vpn_type=None, vpn_gateway_generation=None,
@@ -7152,6 +7245,7 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name,
     client = network_client_factory(cmd.cli_ctx).virtual_network_gateways
     subnet = virtual_network + '/subnets/GatewaySubnet'
     active = True
+    print(root_cert_data)
     if gateway_type != "LocalGateway":
         active = len(public_ip_address) == 2
     else:
@@ -7213,6 +7307,96 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name,
 
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name, virtual_network_gateway_name, vnet_gateway)
+
+
+class VnetGatewayUpdate(_VnetGatewayUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.public_ip_addresses = AAZListArg(options=['--public-ip-addresses'],
+                                                     help="Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.")
+        args_schema.public_ip_addresses.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIPAddresses/{}"
+            )
+        )
+        args_schema.vnet = AAZResourceIdArg(
+            options=['--vnet'],
+            help="Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
+            )
+        )
+        args_schema.root_cert_data = AAZStrArg(options=['--root-cert-data'], arg_group="Root Cert Authentication",
+                                               help="Base64 contents of the root certificate file or file path.")
+        args_schema.root_cert_name = AAZStrArg(options=['--root-cert-name'], arg_group="Root Cert Authentication",
+                                               help="Root certificate name.")
+        args_schema.custom_routes = AAZListArg(options=['--custom-routes'],
+                                               help="Space-separated list of CIDR prefixes representing the custom routes address space specified by the customer for VpnClient.")
+        args_schema.custom_routes.Element = AAZStrArg()
+        # args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
+        #     template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
+        # )
+        args_schema.ip_configurations._registered = False
+        args_schema.active._registered = False
+        args_schema.vpn_client_root_certificates._registered = False
+        args_schema.sku_tier._registered = False
+        args_schema.enable_bgp._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.custom_routes):
+            args.custom_routes_resource = assign_aaz_list_arg(
+                args.custom_routes_resource,
+                args.custom_routes,
+                element_transformer=lambda _, custom_route: {"address_prefixes": custom_route}
+            )
+
+        if has_value(args.root_cert_data):
+            import os
+            path = os.path.expanduser(args.root_cert_data.to_serialized_data())
+            args.root_cert_data = path
+
+        if has_value(args.sku):
+            args.sku_tier = args.sku
+
+    def post_instance_update(self, instance):
+        args = self.ctx.args
+        if has_value(args.root_cert_data):
+            collection = instance.properties.vpnClientConfiguration['vpnClientRootCertificates']
+            root_certificate = {'name': args.root_cert_name, 'public_cert_data': args.root_cert_data}
+            value = args.root_cert_name.to_serialized_data()
+            match = next((x for x in collection if getattr(x, 'name', None) == value), None)
+            if match:
+                collection.remove(match)
+            root_certificate.append(root_certificate)
+
+        subnet_id = '{}/subnets/GatewaySubnet'.format(args.vnet) if has_value(args.vnet) else \
+            instance.ipConfigurations[0].properties.subnet.id
+
+        if has_value(args.vnet):
+            for config in instance.ipConfigurations:
+                config.properties.subnet.id = subnet_id
+
+        if has_value(args.public_ip_address):
+            public_ip_addresses = args.public_ip_addresses.to_serialized_data()
+            args.ip_configurations = []
+            ip_configuration = {}
+            for i, public_ip in enumerate(public_ip_addresses):
+                ip_configuration[i] = {'subnet': subnet_id, 'public_ip_address': public_ip,
+                                       'private_ip_allocation_method': 'Dynamic',
+                                       'name': 'vnetGatewayConfig{}'.format(i)}
+                args.ip_configurations.append(ip_configuration[i])
+
+            # Update active-active/active-standby status
+            active = len(args.public_ip_address) == 2
+            if instance.activeActive and not active:
+                logger.info('Placing gateway in active-standby mode.')
+            elif not instance.activeActive and active:
+                logger.info('Placing gateway in active-active mode.')
+            args.active = active
 
 
 def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,

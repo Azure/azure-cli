@@ -4806,7 +4806,6 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
         self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
 
 
-
 class NetworkVpnConnectionNatRule(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='test_network_vpn_connection_nat_rule')

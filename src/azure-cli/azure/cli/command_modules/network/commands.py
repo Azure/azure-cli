@@ -936,6 +936,8 @@ def load_command_table(self, _):
 
     # region VirtualNetworkGateways
     with self.command_group('network vnet-gateway', network_vgw_sdk, min_api='2016-09-01') as g:
+        # from azure.cli.command_modules.network.custom import VnetGatewayCreate
+        # self.command_table['network vnet-gateway create'] = VnetGatewayCreate(loader=self)
         g.custom_command('create', 'create_vnet_gateway', supports_no_wait=True, transform=transform_vnet_gateway_create_output, validator=process_vnet_gateway_create_namespace)
         g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vnet_gateway', supports_no_wait=True, validator=process_vnet_gateway_update_namespace)
         g.wait_command('wait')
