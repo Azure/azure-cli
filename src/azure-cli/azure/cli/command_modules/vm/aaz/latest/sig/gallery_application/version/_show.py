@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sig gallery-application version show",
 )
 class Show(AAZCommand):
-    """Get information about a gallery Application Version.
+    """Get information about a gallery application version.
     """
 
     _aaz_info = {
