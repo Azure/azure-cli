@@ -649,6 +649,12 @@ class ComputeModelType(str, Enum):
     serverless = "Serverless"
 
 
+class AlwaysEncryptedEnclaveType(str, Enum):
+
+    default = "Default"
+    vbs = "VBS"
+
+
 class DatabaseEdition(str, Enum):
 
     web = "Web"
@@ -1542,7 +1548,8 @@ def db_update(
         auto_pause_delay=None,
         compute_model=None,
         requested_backup_storage_redundancy=None,
-        maintenance_configuration_id=None):
+        maintenance_configuration_id=None,
+        preferred_enclave_type=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
@@ -1622,6 +1629,9 @@ def db_update(
 
     if high_availability_replica_count is not None:
         instance.high_availability_replica_count = high_availability_replica_count
+
+    if preferred_enclave_type is not None:
+        instance.preferred_enclave_type = preferred_enclave_type
 
     # Set storage_account_type even if storage_acount_type is None
     # Otherwise, empty value defaults to current storage_account_type
