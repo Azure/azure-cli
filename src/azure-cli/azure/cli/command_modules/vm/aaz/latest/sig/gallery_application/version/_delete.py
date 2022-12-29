@@ -12,20 +12,17 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "capacity reservation delete",
+    "sig gallery-application version delete",
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Delete operation to delete a capacity reservation. This operation is allowed only when all the associated resources are disassociated from the capacity reservation. Please refer to https://aka.ms/CapacityReservation for more details.
-
-    :example: Delete a capacity reservation.
-        az capacity reservation delete -c ReservationGroupName -n ReservationName -g MyResourceGroup --yes
+    """Delete a gallery application version.
     """
 
     _aaz_info = {
-        "version": "2022-08-01",
+        "version": "2022-01-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups/{}/capacityreservations/{}", "2022-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}/applications/{}/versions/{}", "2022-01-03"],
         ]
     }
 
@@ -46,26 +43,33 @@ class Delete(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.capacity_reservation_group_name = AAZStrArg(
-            options=["-c", "--capacity-reservation-group", "--capacity-reservation-group-name"],
-            help="The name of the capacity reservation group.",
-            required=True,
-            id_part="name",
-        )
-        _args_schema.capacity_reservation_name = AAZStrArg(
-            options=["-n", "--capacity-reservation-name"],
-            help="The name of the capacity reservation.",
+        _args_schema.gallery_application_name = AAZStrArg(
+            options=["--application-name", "--gallery-application-name"],
+            help="The name of the gallery Application.",
             required=True,
             id_part="child_name_1",
         )
+        _args_schema.gallery_application_version_name = AAZStrArg(
+            options=["-n", "--name", "--version-name", "--gallery-application-version-name"],
+            help="The name of the gallery Application Version.",
+            required=True,
+            id_part="child_name_2",
+        )
+        _args_schema.gallery_name = AAZStrArg(
+            options=["-r", "--gallery-name"],
+            help="Gallery name.",
+            required=True,
+            id_part="name",
+        )
         _args_schema.resource_group = AAZResourceGroupNameArg(
+            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.CapacityReservationsDelete(ctx=self.ctx)()
+        yield self.GalleryApplicationVersionsDelete(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -76,7 +80,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class CapacityReservationsDelete(AAZHttpOperation):
+    class GalleryApplicationVersionsDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -115,7 +119,7 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/capacityReservationGroups/{capacityReservationGroupName}/capacityReservations/{capacityReservationName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/applications/{galleryApplicationName}/versions/{galleryApplicationVersionName}",
                 **self.url_parameters
             )
 
@@ -131,11 +135,15 @@ class Delete(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "capacityReservationGroupName", self.ctx.args.capacity_reservation_group_name,
+                    "galleryApplicationName", self.ctx.args.gallery_application_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "capacityReservationName", self.ctx.args.capacity_reservation_name,
+                    "galleryApplicationVersionName", self.ctx.args.gallery_application_version_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "galleryName", self.ctx.args.gallery_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -153,7 +161,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-08-01",
+                    "api-version", "2022-01-03",
                     required=True,
                 ),
             }

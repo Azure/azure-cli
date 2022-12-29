@@ -12,27 +12,25 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "capacity reservation group delete",
+    "restore-point delete",
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Delete operation to delete a capacity reservation group. This operation is allowed only if all the associated resources are disassociated from the reservation group and all capacity reservations under the reservation group have also been deleted. Please refer to https://aka.ms/CapacityReservation for more details.
-
-    :example: Delete a capacity reservation group.
-        az capacity reservation group delete -n ReservationGroupName -g MyResourceGroup --yes
+    """Delete the restore point.
     """
 
     _aaz_info = {
         "version": "2022-08-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups/{}", "2022-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/restorepointcollections/{}/restorepoints/{}", "2022-08-01"],
         ]
     }
 
+    AZ_SUPPORT_NO_WAIT = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return None
+        return self.build_lro_poller(self._execute_operations, None)
 
     _args_schema = None
 
@@ -45,20 +43,27 @@ class Delete(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.capacity_reservation_group_name = AAZStrArg(
-            options=["-n", "--capacity-reservation-group", "--capacity-reservation-group-name"],
-            help="The name of the capacity reservation group.",
+        _args_schema.resource_group = AAZResourceGroupNameArg(
+            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
+            required=True,
+        )
+        _args_schema.restore_point_collection_name = AAZStrArg(
+            options=["--collection-name", "--restore-point-collection-name"],
+            help="The name of the restore point collection.",
             required=True,
             id_part="name",
         )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
+        _args_schema.restore_point_name = AAZStrArg(
+            options=["-n", "--name", "--restore-point-name"],
+            help="The name of the restore point.",
             required=True,
+            id_part="child_name_1",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.CapacityReservationGroupsDelete(ctx=self.ctx)()
+        yield self.RestorePointsDelete(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -69,23 +74,46 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class CapacityReservationGroupsDelete(AAZHttpOperation):
+    class RestorePointsDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
             if session.http_response.status_code in [200]:
-                return self.on_200(session)
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
             if session.http_response.status_code in [204]:
-                return self.on_204(session)
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_204,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/capacityReservationGroups/{capacityReservationGroupName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/restorePointCollections/{restorePointCollectionName}/restorePoints/{restorePointName}",
                 **self.url_parameters
             )
 
@@ -101,11 +129,15 @@ class Delete(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "capacityReservationGroupName", self.ctx.args.capacity_reservation_group_name,
+                    "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "restorePointCollectionName", self.ctx.args.restore_point_collection_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "restorePointName", self.ctx.args.restore_point_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
