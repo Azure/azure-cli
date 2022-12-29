@@ -11,6 +11,7 @@ class TestAAZField(unittest.TestCase):
     def test_aaz_model_and_simple_types(self):
         from azure.cli.core.aaz._field_type import AAZObjectType, AAZIntType, AAZStrType, AAZBoolType, AAZFloatType
         from azure.cli.core.aaz._field_value import AAZObject
+        from azure.cli.core.aaz.exceptions import AAZInvalidValueError
         model_schema = AAZObjectType()
         v = AAZObject(model_schema, data={})
 
@@ -34,7 +35,7 @@ class TestAAZField(unittest.TestCase):
         v.properties.count = 0
         assert (not v.properties.count) is True
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(AAZInvalidValueError):
             v.properties.count = "a"
 
         # test string type
@@ -51,7 +52,7 @@ class TestAAZField(unittest.TestCase):
         v.properties.name = ""
         assert (not v.properties.name) is True
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(AAZInvalidValueError):
             v.properties.name = 1
 
         # test bool type

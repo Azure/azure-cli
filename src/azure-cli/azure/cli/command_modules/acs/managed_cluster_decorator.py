@@ -2439,6 +2439,23 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return enable_syslog
 
+    def get_data_collection_settings(self) -> Union[str, None]:
+        """Obtain the value of data_collection_settings.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        data_collection_settings_file_path = self.raw_param.get("data_collection_settings")
+        # validate user input
+        if data_collection_settings_file_path:
+            if not os.path.isfile(data_collection_settings_file_path):
+                raise InvalidArgumentValueError(
+                    "{} is not valid file, or not accessable.".format(
+                        data_collection_settings_file_path
+                    )
+                )
+        return data_collection_settings_file_path
+
     # pylint: disable=no-self-use
     def get_virtual_node_addon_os_type(self) -> str:
         """Helper function to obtain the os_type of virtual node addon.
@@ -4871,6 +4888,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             create_dcr=True,
             create_dcra=False,
             enable_syslog=self.context.get_enable_syslog(),
+            data_collection_settings=self.context.get_data_collection_settings()
         )
         # set intermediate
         self.context.set_intermediate("monitoring_addon_enabled", True, overwrite_exists=True)
@@ -5355,6 +5373,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_storage_profile(mc)
         # set up azure keyvalut kms
         mc = self.set_up_azure_keyvault_kms(mc)
+        # set up http proxy config
         mc = self.set_up_http_proxy_config(mc)
 
         # DO NOT MOVE: keep this at the bottom, restore defaults
@@ -6250,19 +6269,17 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
     def update_mc_profile_default(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
-        Note: To reduce the risk of regression introduced by refactoring, this function is not complete and is being
-        implemented gradually.
-
         The completely updated ManagedCluster object will later be passed as a parameter to the underlying SDK
         (mgmt-containerservice) to send the actual request.
 
         :return: the ManagedCluster object
         """
         # check raw parameters
+        # promt y/n if no options are specified to ask user whether to perform a reconcile operation
         self.check_raw_parameters()
         # fetch the ManagedCluster object
         mc = self.fetch_mc()
-        # update agentpool profile
+        # update agentpool profile by the agentpool decorator
         mc = self.update_agentpool_profile(mc)
         # update auto scaler profile
         mc = self.update_auto_scaler_profile(mc)
@@ -6292,10 +6309,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_identity(mc)
         # update addon profiles
         mc = self.update_addon_profiles(mc)
-        # update stroage profile
-        mc = self.update_storage_profile(mc)
         # update defender
         mc = self.update_defender(mc)
+        # update stroage profile
+        mc = self.update_storage_profile(mc)
         # update azure keyvalut kms
         mc = self.update_azure_keyvault_kms(mc)
         # update identity
@@ -6304,7 +6321,6 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_http_proxy_config(mc)
         return mc
 
-    # pylint: disable=unused-argument
     def check_is_postprocessing_required(self, mc: ManagedCluster) -> bool:
         """Helper function to check if postprocessing is required after sending a PUT request to create the cluster.
 

@@ -2039,6 +2039,227 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('isAzureMonitorTargetEnabled', False)])
 
 
+class SqlServerAdvancedThreatProtectionSettingsScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='westeurope')
+    @SqlServerPreparer(location='westeurope')
+    def test_sql_server_advanced_threat_protection(self, resource_group,
+                                                   resource_group_location, server):
+        state_enabled = 'Enabled'
+        state_disabled = 'Disabled'
+
+        # get advanced threat protection settings
+        self.cmd('sql server advanced-threat-protection-setting show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # update advanced threat protection settings - enable
+        self.cmd('sql server advanced-threat-protection-setting update -g {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, server, state_enabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get advanced threat protection settings after enabling
+        self.cmd('sql server advanced-threat-protection-setting show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # update advanced threat protection settings - disable
+        self.cmd('sql server advanced-threat-protection-setting update -g {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, server, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # get advanced threat protection settings after disabling back
+        self.cmd('sql server advanced-threat-protection-setting show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+
+class SqlDbAdvancedThreatProtectionSettingsScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='westeurope')
+    @SqlServerPreparer(location='westeurope')
+    def test_sql_db_advanced_threat_protection(self, resource_group,
+                                               resource_group_location, server):
+        database_name = "cliautomationdb01"
+        state_enabled = 'Enabled'
+        state_disabled = 'Disabled'
+
+        # create db
+        self.cmd('sql db create -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('status', 'Online')])
+
+        # get advanced threat protection settings
+        self.cmd('sql db advanced-threat-protection-setting show -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # update advanced threat protection settings - enable
+        self.cmd('sql db advanced-threat-protection-setting update -g {} -s {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, server, database_name, state_enabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get advanced threat protection settings after enabling
+        self.cmd('sql db advanced-threat-protection-setting show -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # update advanced threat protection settings - disable
+        self.cmd('sql db advanced-threat-protection-setting update -g {} -s {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, server, database_name, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # get advanced threat protection settings after disabling back
+        self.cmd('sql db advanced-threat-protection-setting show -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+
+class SqlManagedInstanceAdvancedThreatProtectionSettingsScenarioTest(ScenarioTest):
+    @ManagedInstancePreparer()
+    def test_sql_mi_advanced_threat_protection(self, mi, rg):
+        managed_instance_name = mi
+        resource_group = rg
+        edition_updated = 'BusinessCritical'
+        v_core_update = 4
+        state_enabled = 'Enabled'
+        state_disabled = 'Disabled'
+
+        # Managed instance becomes ready before the operation is completed. For that reason, we should wait
+        # for the operation to complete in order to proceed with testing.
+        time.sleep(120)
+
+        # get advanced threat protection settings
+        self.cmd('sql mi advanced-threat-protection-setting show -g {} -n {}'
+                 .format(resource_group, managed_instance_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # update advanced threat protection settings - enable
+        self.cmd('sql mi advanced-threat-protection-setting update -g {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, managed_instance_name, state_enabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get advanced threat protection settings after enabling
+        self.cmd('sql mi advanced-threat-protection-setting show -g {} -n {}'
+                 .format(resource_group, managed_instance_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # update advanced threat protection settings - disable
+        self.cmd('sql mi advanced-threat-protection-setting update -g {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, managed_instance_name, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # get advanced threat protection settings after disabling back
+        self.cmd('sql mi advanced-threat-protection-setting show -g {} -n {}'
+                 .format(resource_group, managed_instance_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+
+class SqlManagedDatabaseAdvancedThreatProtectionSettingsScenarioTest(ScenarioTest):
+    @ManagedInstancePreparer()
+    def test_sql_midb_advanced_threat_protection(self, mi, rg):
+        managed_instance_name = mi
+        dbname = "cliautomationdb01"
+        resource_group = rg
+        edition_updated = 'BusinessCritical'
+        v_core_update = 4
+        state_enabled = 'Enabled'
+        state_disabled = 'Disabled'
+
+        # Managed instance becomes ready before the operation is completed. For that reason, we should wait
+        # for the operation to complete in order to proceed with testing.
+        time.sleep(120)
+
+        self.kwargs.update({
+            'loc': ManagedInstancePreparer.location,
+            'rg': rg,
+            'managed_instance_name': mi,
+            'database_name': dbname,
+            'collation': ManagedInstancePreparer.collation,
+        })
+
+        # create database
+        self.cmd('sql midb create -g {rg} --mi {managed_instance_name} -n {database_name} --collation {collation}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('name', '{database_name}'),
+                     self.check('location', '{loc}'),
+                     self.check('collation', '{collation}'),
+                     self.check('status', 'Online')])
+
+        # get advanced threat protection settings
+        self.cmd('sql midb advanced-threat-protection-setting show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, dbname),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # update advanced threat protection settings - enable
+        self.cmd('sql midb advanced-threat-protection-setting update -g {} --mi {} -n {} --state {}'
+                 .format(resource_group, managed_instance_name, dbname, state_enabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get advanced threat protection settings after enabling
+        self.cmd('sql midb advanced-threat-protection-setting show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, dbname),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # update advanced threat protection settings - disable
+        self.cmd('sql midb advanced-threat-protection-setting update -g {} --mi {} -n {} --state {}'
+                 .format(resource_group, managed_instance_name, dbname, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # get advanced threat protection settings after disabling back
+        self.cmd('sql midb advanced-threat-protection-setting show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, dbname),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+
 class SqlServerMSSupportScenarioTest(ScenarioTest):
     def _get_storage_endpoint(self, storage_account, resource_group):
         return self.cmd('storage account show -g {} -n {}'

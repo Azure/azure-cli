@@ -1574,10 +1574,6 @@ def load_arguments(self, _):
                    deprecate_info=c.deprecate(hide=True))
         c.argument('instance_view', action='store_true', help='Show the instance view of a restore point.')
 
-    with self.argument_context('restore-point delete') as c:
-        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
-                   help='The name of the restore point.')
-
     with self.argument_context('restore-point wait') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
                    help='The name of the restore point.')
