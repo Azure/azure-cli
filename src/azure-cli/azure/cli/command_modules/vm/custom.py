@@ -1355,12 +1355,14 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
 
 # pylint: disable=redefined-builtin
 def list_vm(cmd, resource_group_name=None, show_details=False, vmss=None):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     ccf = _compute_client_factory(cmd.cli_ctx)
     if vmss is not None:
         if is_valid_resource_id(vmss):
             filter = "'virtualMachineScaleSet/id' eq '{}'".format(vmss)
+            if resource_group_name is None:
+                resource_group_name = parse_resource_id(vmss)['resource_group']
         else:
             if resource_group_name is None:
                 raise RequiredArgumentMissingError(
@@ -1368,8 +1370,7 @@ def list_vm(cmd, resource_group_name=None, show_details=False, vmss=None):
             vmss_id = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                                   namespace='Microsoft.Compute', type='virtualMachineScaleSets', name=vmss)
             filter = "'virtualMachineScaleSet/id' eq '{}'".format(vmss_id)
-        vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name, filter=filter) \
-            if resource_group_name else ccf.virtual_machines.list_all()
+        vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name, filter=filter)
     else:
         vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name) \
             if resource_group_name else ccf.virtual_machines.list_all()
