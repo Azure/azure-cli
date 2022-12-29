@@ -21,7 +21,9 @@ from azure.cli.command_modules.appservice.appservice_environment import (show_ap
                                                                          list_appserviceenvironment_addresses,
                                                                          create_appserviceenvironment_arm,
                                                                          update_appserviceenvironment,
-                                                                         delete_appserviceenvironment)
+                                                                         upgrade_appserviceenvironment,
+                                                                         delete_appserviceenvironment,
+                                                                         send_test_notification_appserviceenvironment)
 
 
 class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
@@ -146,6 +148,10 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
 
         update_appserviceenvironment(self.mock_cmd, ase_name, front_end_scale_factor=10)
 
+        # Assert that ValidationError raised when called with not supported parameters
+        with self.assertRaises(ValidationError):
+            update_appserviceenvironment(self.mock_cmd, ase_name, allow_new_private_endpoint_connections=True, allow_remote_debugging=True,allow_incoming_ftp_connections=True)
+
         # Assert create_or_update is called with correct properties
         assert_host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
         assert_host_env.name = ase_name
@@ -171,10 +177,14 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         host_env.kind = 'ASEv3'
         ase_client.get.return_value = host_env
         ase_client.list.return_value = [host_env]
-        ase_networking_conf = AseV3NetworkingConfiguration(allow_new_private_endpoint_connections=False)
+        ase_networking_conf = AseV3NetworkingConfiguration(allow_new_private_endpoint_connections=False, allow_remote_debugging=False, allow_incoming_ftp_connections=False)
         ase_client.get_ase_v3_networking_configuration.return_value = ase_networking_conf
 
-        update_appserviceenvironment(self.mock_cmd, ase_name, allow_new_private_endpoint_connections=True)
+        update_appserviceenvironment(self.mock_cmd, ase_name, allow_new_private_endpoint_connections=True, allow_remote_debugging=True,allow_incoming_ftp_connections=True)
+
+        # assert that ValidationError raised when called with not supported parameters
+        with self.assertRaises(ValidationError):
+            update_appserviceenvironment(self.mock_cmd, ase_name, front_end_scale_factor=10)
 
         # Assert create_or_update is called with correct properties
         ase_client.update_ase_networking_configuration.assert_called_once_with(resource_group_name=rg_name,
@@ -279,6 +289,107 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         self.assertEqual(call_args[0][0], rg_name)
         self.assertEqual(call_args[0][1], deployment_name)
 
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
+    def test_app_service_environment_send_test_notification(self, ase_client_factory_mock, resource_group_mock):
+        ase_name = 'mock_ase_name'
+        rg_name = 'mock_rg_name'
+
+        ase_client = mock.MagicMock()
+        ase_client_factory_mock.return_value = ase_client
+
+        resource_group_mock.return_value = rg_name
+
+        host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
+        host_env.name = ase_name
+        host_env.kind = 'ASEv2'
+        ase_client.get.return_value = host_env
+        ase_client.list.return_value = [host_env]
+
+        # Assert that ValidationError raised when ASEv2
+        with self.assertRaises(ValidationError):
+            send_test_notification_appserviceenvironment(self.mock_cmd, ase_name)
+
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
+    def test_app_service_environment_send_test_notification_asev3(self, ase_client_factory_mock, resource_group_mock):
+        ase_name = 'mock_ase_name'
+        rg_name = 'mock_rg_name'
+
+        ase_client = mock.MagicMock()
+        ase_client_factory_mock.return_value = ase_client
+
+        resource_group_mock.return_value = rg_name
+
+        host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
+        host_env.name = ase_name
+        host_env.kind = 'ASEv3'
+        host_env.upgrade_availability = 'Ready'
+        host_env.upgrade_preference ='Manual'
+        ase_client.get.return_value = host_env
+        ase_client.list.return_value = [host_env]
+
+        send_test_notification_appserviceenvironment(self.mock_cmd, ase_name)
+
+        # Assert upgrade is called with correct properties
+        ase_client.test_upgrade_available_notification.assert_called_once_with(resource_group_name=rg_name, name=ase_name)
+
+        host_env.upgrade_availability = None
+
+        # Assert that ValidationError raised when upgrade_availability None
+        with self.assertRaises(ValidationError):
+            upgrade_appserviceenvironment(self.mock_cmd, ase_name)
+
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
+    def test_app_service_environment_upgrade(self, ase_client_factory_mock, resource_group_mock):
+        ase_name = 'mock_ase_name'
+        rg_name = 'mock_rg_name'
+
+        ase_client = mock.MagicMock()
+        ase_client_factory_mock.return_value = ase_client
+
+        resource_group_mock.return_value = rg_name
+
+        host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
+        host_env.name = ase_name
+        host_env.kind = 'ASEv2'
+        ase_client.get.return_value = host_env
+        ase_client.list.return_value = [host_env]
+
+        # Assert that ValidationError raised when ASEv2
+        with self.assertRaises(ValidationError):
+            upgrade_appserviceenvironment(self.mock_cmd, ase_name)
+
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
+    def test_app_service_environment_upgrade_asev3(self, ase_client_factory_mock, resource_group_mock):
+        ase_name = 'mock_ase_name'
+        rg_name = 'mock_rg_name'
+
+        ase_client = mock.MagicMock()
+        ase_client_factory_mock.return_value = ase_client
+
+        resource_group_mock.return_value = rg_name
+
+        host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
+        host_env.name = ase_name
+        host_env.kind = 'ASEv3'
+        host_env.upgrade_availability = 'Ready'
+        host_env.upgrade_preference ='Manual'
+        ase_client.get.return_value = host_env
+        ase_client.list.return_value = [host_env]
+
+        upgrade_appserviceenvironment(self.mock_cmd, ase_name)
+
+        # Assert upgrade is called with correct properties
+        ase_client.begin_upgrade.assert_called_once_with(resource_group_name=rg_name, name=ase_name)
+
+        host_env.upgrade_availability = None
+
+        # Assert that ValidationError raised when upgrade_availability None
+        with self.assertRaises(ValidationError):
+            upgrade_appserviceenvironment(self.mock_cmd, ase_name)
 
 if __name__ == '__main__':
     unittest.main()

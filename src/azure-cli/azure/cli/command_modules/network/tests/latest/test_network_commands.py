@@ -704,7 +704,8 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n ag1 --priority 1001 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n ag1 --exists')
         self.cmd('network application-gateway update -g {rg} -n ag1 --no-wait')
-        self.cmd('network application-gateway update -g {rg} -n ag1 --no-wait --capacity 3 --sku standard_small --tags foo=doo')
+        self.cmd('network application-gateway update -g {rg} -n ag1 --no-wait '
+                 '--capacity 3 --sku standard_small --tags foo=doo --http2 Disabled')
         self.cmd('network application-gateway wait -g {rg} -n ag1 --updated')
 
         ag_list = self.cmd('network application-gateway list --resource-group {rg}', checks=[
@@ -718,12 +719,13 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check('name', 'ag1'),
             self.check('resourceGroup', resource_group),
             self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
-            self.check("frontendIPConfigurations[0].subnet.contains(id, 'default')", True)
+            self.check("frontendIPConfigurations[0].subnet.contains(id, 'default')", True),
+            self.check("enableHttp2", False),
         ])
         self.cmd('network application-gateway show-backend-health -g {rg} -n ag1')
 
         self.cmd('network application-gateway stop --resource-group {rg} -n ag1')
-        self.cmd('network application-gateway start --resource-group {rg} -n ag1')
+        self.cmd('network application-gateway start --resource-group {rg} -n ag1 --no-wait')
         self.cmd('network application-gateway delete --resource-group {rg} -n ag1')
         self.cmd('network application-gateway list --resource-group {rg}', checks=self.check('length(@)', ag_count - 1))
 
@@ -2149,12 +2151,6 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('length(@)', 2)
                  ])
 
-        # test match-condition list
-        self.cmd('network application-gateway waf-policy custom-rule match-condition list -g {rg} --name {custom-rule1} --policy-name {waf}',
-                 checks=[
-                     self.check('length(@)', 0)
-                 ])
-
         # update some policy settings of this waf-policy
         self.cmd('network application-gateway waf-policy policy-setting update -g {rg} --policy-name {waf} '
                  '--state Enabled --file-upload-limit-in-mb 64 --mode Prevention')
@@ -2309,7 +2305,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
                  '--policy-name {waf} -n {rule} '
                  '--match-variables RequestHeaders.value --operator contains '
-                 '--values remove this --transform lowercase')
+                 '--values remove this --transform uppercase')
         self.cmd('network application-gateway waf-policy custom-rule show -g {rg} '
                  '--policy-name {waf} -n {rule}',
                  checks=[
@@ -2317,6 +2313,11 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('ruleType', 'MatchRule'),
                      self.check('action', 'Log'),
                      self.check('matchConditions | length(@)', 2)
+                 ])
+        self.cmd('network application-gateway waf-policy custom-rule match-condition list -n {rule} -g {rg} '
+                 '--policy-name {waf}',
+                 checks=[
+                     self.check('length(@)', 2)
                  ])
 
         # remove one of match condition of custom rule
@@ -4315,12 +4316,35 @@ class NetworkSecurityGroupScenarioTest(ScenarioTest):
         ])
 
         # test generic update
-        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --set properties.description="cool"',
+        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --set description="cool"',
                  checks=self.check('description', 'cool'))
 
+        self.kwargs.update({
+            'nsg2': 'test-nsg2',
+            'asg': 'test-asg1',
+            'asg2': 'test-asg2',
+            'rule2': 'test-rule2',
+            'prefix': '1234',
+        })
+        # test --destination-asgs in nsg rule
+        self.cmd('network nsg create --name {nsg2} -g {rg}')
+        self.cmd('network asg create --name {asg} -g {rg}')
+        self.cmd('network asg create --name {asg2} -g {rg}')
+        self.cmd('network nsg rule create -g {rg} --nsg-name {nsg2} -n {rule2} --priority 500 --source-address-prefixes Internet --destination-port-ranges 80 8080 --destination-asgs {asg} --access Allow --protocol Tcp',
+                 checks=[self.check('name', '{rule2}'),
+                         self.check('ends_with(@.destinationApplicationSecurityGroups[0].id, `/{asg}`)', True)])
+        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg2} -n {rule2} --destination-asgs {asg2}',
+                 checks=[self.check('name', '{rule2}'),
+                         self.check('ends_with(@.destinationApplicationSecurityGroups[0].id, `/{asg2}`)', True)])
+        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg2} -n {rule2} --destination-asgs "" --destination-address-prefix {prefix}',
+                 checks=[self.check('name', '{rule2}'),
+                         self.check('destinationAddressPrefix', '{prefix}')])
+
         self.cmd('network nsg rule delete --resource-group {rg} --nsg-name {nsg} --name {rule}')
+        self.cmd('network nsg rule delete --resource-group {rg} --nsg-name {nsg2} --name {rule2}')
         # Delete the network security group
         self.cmd('network nsg delete --resource-group {rg} --name {nsg}')
+        self.cmd('network nsg delete --resource-group {rg} --name {nsg2}')
         # Expecting no results as we just deleted the only security group in the resource group
         self.cmd('network nsg list --resource-group {rg}', checks=self.is_empty())
 

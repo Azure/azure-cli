@@ -321,18 +321,6 @@ def validate_user_assigned_identity(cmd, namespace):
         )
 
 
-def validate_express_route_port(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.express_route_port and not is_valid_resource_id(namespace.express_route_port):
-        namespace.express_route_port = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='expressRoutePorts',
-            name=namespace.express_route_port
-        )
-
-
 def validate_virtul_network_gateway(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     if namespace.hosted_gateway and not is_valid_resource_id(namespace.hosted_gateway):
@@ -355,69 +343,6 @@ def validate_waf_policy(cmd, namespace):
             type='ApplicationGatewayWebApplicationFirewallPolicies',
             name=namespace.firewall_policy
         )
-
-
-def bandwidth_validator_factory(mbps=True):
-    def validator(namespace):
-        return validate_circuit_bandwidth(namespace, mbps=mbps)
-
-    return validator
-
-
-def validate_circuit_bandwidth(namespace, mbps=True):
-    # use gbps if mbps is False
-    unit = 'mbps' if mbps else 'gbps'
-    bandwidth = None
-    bandwidth = getattr(namespace, 'bandwidth_in_{}'.format(unit), None)
-    if bandwidth is None:
-        return
-
-    if len(bandwidth) == 1:
-        bandwidth_comps = bandwidth[0].split(' ')
-    else:
-        bandwidth_comps = bandwidth
-
-    usage_error = CLIError('usage error: --bandwidth INT {Mbps,Gbps}')
-    if len(bandwidth_comps) == 1:
-        logger.warning('interpretting --bandwidth as %s. Consider being explicit: Mbps, Gbps', unit)
-        setattr(namespace, 'bandwidth_in_{}'.format(unit), float(bandwidth_comps[0]))
-        return
-    if len(bandwidth_comps) > 2:
-        raise usage_error
-
-    if float(bandwidth_comps[0]) and bandwidth_comps[1].lower() in ['mbps', 'gbps']:
-        input_unit = bandwidth_comps[1].lower()
-        if input_unit == unit:
-            converted_bandwidth = float(bandwidth_comps[0])
-        elif input_unit == 'gbps':
-            converted_bandwidth = float(bandwidth_comps[0]) * 1000
-        else:
-            converted_bandwidth = float(bandwidth_comps[0]) / 1000
-        setattr(namespace, 'bandwidth_in_{}'.format(unit), converted_bandwidth)
-    else:
-        raise usage_error
-
-
-def validate_er_peer_circuit(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
-
-    if not is_valid_resource_id(namespace.peer_circuit):
-        peer_id = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='expressRouteCircuits',
-            name=namespace.peer_circuit,
-            child_type_1='peerings',
-            child_name_1=namespace.peering_name)
-    else:
-        peer_id = namespace.peer_circuit
-
-    # if the circuit ID is provided, we need to append /peerings/{peering_name}
-    if namespace.peering_name not in peer_id:
-        peer_id = '{}/peerings/{}'.format(peer_id, namespace.peering_name)
-
-    namespace.peer_circuit = peer_id
 
 
 def validate_inbound_nat_rule_id_list(cmd, namespace):
@@ -528,18 +453,6 @@ def validate_nat_gateway(cmd, namespace):
 def validate_private_ip_address(namespace):
     if namespace.private_ip_address and hasattr(namespace, 'private_ip_address_allocation'):
         namespace.private_ip_address_allocation = 'static'
-
-
-def validate_route_filter(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.route_filter:
-        if not is_valid_resource_id(namespace.route_filter):
-            namespace.route_filter = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=namespace.resource_group_name,
-                namespace='Microsoft.Network',
-                type='routeFilters',
-                name=namespace.route_filter)
 
 
 def get_public_ip_validator(has_type_field=False, allow_none=False, allow_new=False,
@@ -1683,7 +1596,8 @@ def process_nw_packet_capture_create_namespace(cmd, namespace):
         file_path = namespace.file_path
         if not file_path.endswith('.cap'):
             raise CLIError("usage error: --file-path PATH must end with the '*.cap' extension")
-        file_path = file_path.replace('/', '\\')
+        if not file_path.startswith('/'):
+            file_path = file_path.replace('/', '\\')
         namespace.file_path = file_path
 
 

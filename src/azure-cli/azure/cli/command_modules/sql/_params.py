@@ -640,7 +640,7 @@ def load_arguments(self, _):
 
         c.argument('dest_resource_group_name',
                    options_list=['--dest-resource-group'],
-                   help='Name of the resouce group to create the copy in.'
+                   help='Name of the resource group to create the copy in.'
                    ' If unspecified, defaults to the origin resource group.')
 
         c.argument('dest_server_name',
