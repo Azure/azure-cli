@@ -8831,6 +8831,9 @@ class VMListFilterScenarioTest(ScenarioTest):
         self.cmd('vm list -g {rg} --vmss {vmss_id}', checks=[
             self.check('length(@)', 2)
         ])
+        self.cmd('vm list -g {rg} --vmss {vmss_flex}', checks=[
+            self.check('length(@)', 2)
+        ])
 
 
 class ExtendedLocation(ScenarioTest):

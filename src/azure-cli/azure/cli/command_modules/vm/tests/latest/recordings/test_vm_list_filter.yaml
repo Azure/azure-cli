@@ -768,4 +768,113 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vmss
+      User-Agent:
+      - AZURECLI/2.43.0 azsdk-python-azure-mgmt-compute/29.0.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_list_filter_000001/providers/Microsoft.Compute/virtualMachines?$filter=%27virtualMachineScaleSet%2Fid%27%20eq%20%27%2Fsubscriptions%2F00000000-0000-0000-0000-000000000000%2FresourceGroups%2Fcli_test_vm_list_filter_000001%2Fproviders%2FMicrosoft.Compute%2FvirtualMachineScaleSets%2Fvmss000002%27&api-version=2022-08-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"vmss000002_2fad179b\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_list_filter_000001/providers/Microsoft.Compute/virtualMachines/vmss000002_2fad179b\",\r\n
+        \     \"type\": \"Microsoft.Compute/virtualMachines\",\r\n      \"location\":
+        \"westus\",\r\n      \"tags\": {},\r\n      \"properties\": {\r\n        \"vmId\":
+        \"b1c47c53-ad42-43dd-b271-158dbc74cd10\",\r\n        \"virtualMachineScaleSet\":
+        {\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_list_filter_000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002\"\r\n
+        \       },\r\n        \"hardwareProfile\": {\r\n          \"vmSize\": \"Standard_DS1_v2\"\r\n
+        \       },\r\n        \"storageProfile\": {\r\n          \"imageReference\":
+        {\r\n            \"publisher\": \"Canonical\",\r\n            \"offer\": \"UbuntuServer\",\r\n
+        \           \"sku\": \"18.04-LTS\",\r\n            \"version\": \"latest\",\r\n
+        \           \"exactVersion\": \"18.04.202212010\"\r\n          },\r\n          \"osDisk\":
+        {\r\n            \"osType\": \"Linux\",\r\n            \"name\": \"vmss000002_2fad179b_OsDisk_1_550449fe36354ac3bb713438b4b67b69\",\r\n
+        \           \"createOption\": \"FromImage\",\r\n            \"caching\": \"ReadWrite\",\r\n
+        \           \"managedDisk\": {\r\n              \"storageAccountType\": \"Premium_LRS\",\r\n
+        \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_list_filter_000001/providers/Microsoft.Compute/disks/vmss000002_2fad179b_OsDisk_1_550449fe36354ac3bb713438b4b67b69\"\r\n
+        \           },\r\n            \"deleteOption\": \"Delete\",\r\n            \"diskSizeGB\":
+        30\r\n          },\r\n          \"dataDisks\": []\r\n        },\r\n        \"osProfile\":
+        {\r\n          \"computerName\": \"vmss2waoD881WB\",\r\n          \"adminUsername\":
+        \"vmtest\",\r\n          \"linuxConfiguration\": {\r\n            \"disablePasswordAuthentication\":
+        true,\r\n            \"ssh\": {\r\n              \"publicKeys\": [\r\n                {\r\n
+        \                 \"path\": \"/home/vmtest/.ssh/authorized_keys\",\r\n                  \"keyData\":
+        \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDBfrmPNtStaG3GJyEk6YjCZ57vUFT6RfwPCEtLJpvjTaVFEuD7W+HXCE4kdoe0WUINcWyPmo44k9oJlWwimxHcc/FLhMTHyJopyfSePGySHjjjS/2brJyeZ86xIC4QJMX7xqe4rdg/XOEXlbJisD0Ge8ervZr7dN/B/lsoiQLH+C5ueOed9JRaCeLRXtlBAJrlI3BXm+kDV9qPH4LhxFIS6WIZ+dk3u/RtCCC+yZ6x3wRr9CqVZ/Xr0fs02wOnKUSlZDpuu28Hsb1BtQM/+aq1YgcEsudCepRkSyNf8V38xx4T+iiBBFvVLlMNE6CC7Jk4Uc/tO/fv1xaFpmo4Pmu/\"\r\n
+        \               }\r\n              ]\r\n            },\r\n            \"provisionVMAgent\":
+        true,\r\n            \"patchSettings\": {\r\n              \"patchMode\":
+        \"ImageDefault\",\r\n              \"assessmentMode\": \"ImageDefault\"\r\n
+        \           },\r\n            \"enableVMAgentPlatformUpdates\": false\r\n
+        \         },\r\n          \"secrets\": [],\r\n          \"allowExtensionOperations\":
+        true,\r\n          \"requireGuestProvisionSignal\": true\r\n        },\r\n
+        \       \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_list_filter_000001/providers/Microsoft.Network/networkInterfaces/vmss21bf8Nic-5bb40b65\",\"properties\":{\"primary\":true,\"deleteOption\":\"Delete\"}}]},\r\n
+        \       \"provisioningState\": \"Succeeded\",\r\n        \"timeCreated\":
+        \"2022-12-06T07:04:59.374215+00:00\"\r\n      }\r\n    },\r\n    {\r\n      \"name\":
+        \"vmss000002_80edc322\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_list_filter_000001/providers/Microsoft.Compute/virtualMachines/vmss000002_80edc322\",\r\n
+        \     \"type\": \"Microsoft.Compute/virtualMachines\",\r\n      \"location\":
+        \"westus\",\r\n      \"tags\": {},\r\n      \"properties\": {\r\n        \"vmId\":
+        \"56d5d0ff-b2ea-440d-9e8b-08501b6e7a2d\",\r\n        \"virtualMachineScaleSet\":
+        {\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_list_filter_000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002\"\r\n
+        \       },\r\n        \"hardwareProfile\": {\r\n          \"vmSize\": \"Standard_DS1_v2\"\r\n
+        \       },\r\n        \"storageProfile\": {\r\n          \"imageReference\":
+        {\r\n            \"publisher\": \"Canonical\",\r\n            \"offer\": \"UbuntuServer\",\r\n
+        \           \"sku\": \"18.04-LTS\",\r\n            \"version\": \"latest\",\r\n
+        \           \"exactVersion\": \"18.04.202212010\"\r\n          },\r\n          \"osDisk\":
+        {\r\n            \"osType\": \"Linux\",\r\n            \"name\": \"vmss000002_80edc322_OsDisk_1_2b75288faadc4333ba54782778c7bf9f\",\r\n
+        \           \"createOption\": \"FromImage\",\r\n            \"caching\": \"ReadWrite\",\r\n
+        \           \"managedDisk\": {\r\n              \"storageAccountType\": \"Premium_LRS\",\r\n
+        \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_list_filter_000001/providers/Microsoft.Compute/disks/vmss000002_80edc322_OsDisk_1_2b75288faadc4333ba54782778c7bf9f\"\r\n
+        \           },\r\n            \"deleteOption\": \"Delete\",\r\n            \"diskSizeGB\":
+        30\r\n          },\r\n          \"dataDisks\": []\r\n        },\r\n        \"osProfile\":
+        {\r\n          \"computerName\": \"vmss2waoZ9A1UM\",\r\n          \"adminUsername\":
+        \"vmtest\",\r\n          \"linuxConfiguration\": {\r\n            \"disablePasswordAuthentication\":
+        true,\r\n            \"ssh\": {\r\n              \"publicKeys\": [\r\n                {\r\n
+        \                 \"path\": \"/home/vmtest/.ssh/authorized_keys\",\r\n                  \"keyData\":
+        \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDBfrmPNtStaG3GJyEk6YjCZ57vUFT6RfwPCEtLJpvjTaVFEuD7W+HXCE4kdoe0WUINcWyPmo44k9oJlWwimxHcc/FLhMTHyJopyfSePGySHjjjS/2brJyeZ86xIC4QJMX7xqe4rdg/XOEXlbJisD0Ge8ervZr7dN/B/lsoiQLH+C5ueOed9JRaCeLRXtlBAJrlI3BXm+kDV9qPH4LhxFIS6WIZ+dk3u/RtCCC+yZ6x3wRr9CqVZ/Xr0fs02wOnKUSlZDpuu28Hsb1BtQM/+aq1YgcEsudCepRkSyNf8V38xx4T+iiBBFvVLlMNE6CC7Jk4Uc/tO/fv1xaFpmo4Pmu/\"\r\n
+        \               }\r\n              ]\r\n            },\r\n            \"provisionVMAgent\":
+        true,\r\n            \"patchSettings\": {\r\n              \"patchMode\":
+        \"ImageDefault\",\r\n              \"assessmentMode\": \"ImageDefault\"\r\n
+        \           },\r\n            \"enableVMAgentPlatformUpdates\": false\r\n
+        \         },\r\n          \"secrets\": [],\r\n          \"allowExtensionOperations\":
+        true,\r\n          \"requireGuestProvisionSignal\": true\r\n        },\r\n
+        \       \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_list_filter_000001/providers/Microsoft.Network/networkInterfaces/vmss21bf8Nic-cf1e7d0a\",\"properties\":{\"primary\":true,\"deleteOption\":\"Delete\"}}]},\r\n
+        \       \"provisioningState\": \"Succeeded\",\r\n        \"timeCreated\":
+        \"2022-12-06T07:04:59.3585934+00:00\"\r\n      }\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6431'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 06 Dec 2022 07:26:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/HighCostGet3Min;138,Microsoft.Compute/HighCostGet30Min;698
+    status:
+      code: 200
+      message: OK
 version: 1

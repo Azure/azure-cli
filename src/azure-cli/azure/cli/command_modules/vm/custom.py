@@ -1362,6 +1362,9 @@ def list_vm(cmd, resource_group_name=None, show_details=False, vmss=None):
         if is_valid_resource_id(vmss):
             filter = "'virtualMachineScaleSet/id' eq '{}'".format(vmss)
         else:
+            if resource_group_name is None:
+                raise RequiredArgumentMissingError(
+                    'usage error: --resource-group-name required to list vm with vmss name')
             vmss_id = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                                   namespace='Microsoft.Compute', type='virtualMachineScaleSets', name=vmss)
             filter = "'virtualMachineScaleSet/id' eq '{}'".format(vmss_id)
