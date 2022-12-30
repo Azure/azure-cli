@@ -904,9 +904,9 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
         self.cmd('sql db create -g {} --server {} --name {} --ledger-on --yes'
                  .format(resource_group, server, database_name_two),
                  checks=[
-                     #JMESPathCheck('resourceGroup', resource_group),
-                     #JMESPathCheck('name', database_name_two),
-                     #JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('ledgerOn', True)])
 
         self.cmd('sql db show -g {} -s {} --name {}'
