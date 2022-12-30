@@ -6879,13 +6879,25 @@ class VNetSubnetCreate(_VNetSubnetCreate):
             ),
         )
         # add ple/pls arguments
-        args_schema.disable_private_endpoint_network_policies = AAZBoolArg(
+        args_schema.disable_private_endpoint_network_policies = AAZStrArg(
             options=["--disable-private-endpoint-network-policies"],
             help="Disable private endpoint network policies on the subnet.",
+            nullable=True,
+            enum={
+                "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
+                "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
+            },
+            blank="Disabled",
         )
-        args_schema.disable_private_link_service_network_policies = AAZBoolArg(
+        args_schema.disable_private_link_service_network_policies = AAZStrArg(
             options=["--disable-private-link-service-network-policies"],
             help="Disable private link service network policies on the subnet.",
+            nullable=True,
+            enum={
+                "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
+                "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
+            },
+            blank="Disabled",
         )
         # filter arguments
         args_schema.policies._registered = False
@@ -6902,37 +6914,35 @@ class VNetSubnetCreate(_VNetSubnetCreate):
             args.address_prefix = args.address_prefixes[0]
             args.address_prefixes = None
 
-        if has_value(args.service_endpoints):
-            endpoints = []
-            for service in args.service_endpoints:
-                endpoints.append({"service": service})
-            args.endpoints = endpoints
-        if has_value(args.service_endpoint_policy):
-            policies = []
-            for policy_id in args.service_endpoint_policy:
-                policies.append({"id": policy_id})
-            args.policies = policies
+        def delegation_trans(index, service_name):
+            service_name = str(service_name)
+            # covert name to service name
+            if "/" not in service_name and len(service_name.split(".")) == 3:
+                _, service, resource_type = service_name.split(".")
+                service_name = f"Microsoft.{service}/{resource_type}"
+            return {
+                "name": str(index),
+                "service_name": service_name,
+            }
 
-        if has_value(args.delegations):
-            delegations = []
-            for idx, service_name in enumerate(args.delegations):
-                service_name = str(service_name)
-                # covert name to service name
-                if "/" not in service_name and len(service_name.split(".")) == 3:
-                    _, service, resource_type = service_name.split(".")
-                    service_name = f"Microsoft.{service}/{resource_type}"
-                delegations.append({
-                    "name": str(idx),
-                    "service_name": service_name,
-                })
-            args.delegated_services = delegations
-        # adapt default value
-        if has_value(args.disable_private_endpoint_network_policies) \
-           and bool(args.disable_private_endpoint_network_policies) is False:
-            args.private_endpoint_network_policies = "Enabled"
-        if has_value(args.disable_private_link_service_network_policies) \
-           and bool(args.disable_private_link_service_network_policies) is True:
-            args.private_link_service_network_policies = "Disabled"
+        args.delegated_services = assign_aaz_list_arg(
+            args.delegated_services,
+            args.delegations,
+            element_transformer=delegation_trans
+        )
+        args.endpoints = assign_aaz_list_arg(
+            args.endpoints,
+            args.service_endpoints,
+            element_transformer=lambda _, service_name: {"service": service_name}
+        )
+        args.policies = assign_aaz_list_arg(
+            args.policies,
+            args.service_endpoint_policy,
+            element_transformer=lambda _, policy_id: {"id": policy_id}
+        )
+        # use string instead of bool
+        args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
+        args.private_link_service_network_policies = args.disable_private_link_service_network_policies
 
 
 class VNetSubnetUpdate(_VNetSubnetUpdate):
@@ -7096,7 +7106,7 @@ def list_available_ips(cmd, resource_group_name, virtual_network_name):
         "name": virtual_network_name,
         "resource_group": resource_group_name,
         "ip_address": start_ip,
-    })["availableIPAddresses"]
+    }).get("availableIPAddresses", [])
 
 
 def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, subnet_name):
@@ -7118,7 +7128,7 @@ def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, su
         "name": virtual_network_name,
         "resource_group": resource_group_name,
         "ip_address": start_ip,
-    })["availableIPAddresses"]
+    }).get("availableIPAddresses", [])
 
 
 def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name):
