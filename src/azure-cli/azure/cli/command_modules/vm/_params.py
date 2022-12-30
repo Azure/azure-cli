@@ -459,6 +459,9 @@ def load_arguments(self, _):
         c.argument('port', help="The port or port range (ex: 80-100) to open inbound traffic to. Use '*' to allow traffic to all ports. Use comma separated values to specify more than one port or port range.")
         c.argument('priority', help='Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.', type=int)
 
+    with self.argument_context('vm list') as c:
+        c.argument('vmss', min_api='2021-11-01', help='List VM instances in a specific VMSS. Please specify the VMSS id or VMSS name')
+
     for scope in ['vm show', 'vm list']:
         with self.argument_context(scope) as c:
             c.argument('show_details', action='store_true', options_list=['--show-details', '-d'], help='show public ip address, FQDN, and power states. command will run slow')
