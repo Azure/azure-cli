@@ -12684,14 +12684,14 @@
             {
               "name": "titleContains",
               "parameters": {
-                "titlePattern": "(az appservice hybrid-connection|az appservice vnet-integration|az webapp config access-restriction|az webapp config hostname|az webapp create-remote-connection|az webapp hybrid-connection|az webapp ssh|az webapp traffic-routing|az webapp vnet-integration)",
+                "titlePattern": "(az appservice vnet-integration|az webapp config access-restriction|az webapp vnet-integration)",
                 "isRegex": true
               }
             },
             {
               "name": "bodyContains",
               "parameters": {
-                "bodyPattern": "(az appservice hybrid-connection|az appservice vnet-integration|az webapp config access-restriction|az webapp config hostname|az webapp create-remote-connection|az webapp hybrid-connection|az webapp ssh|az webapp traffic-routing|az webapp vnet-integration)",
+                "bodyPattern": "(az appservice vnet-integration|az webapp config access-restriction|az webapp vnet-integration)",
                 "isRegex": true
               }
             }
@@ -12702,7 +12702,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[appservice-networking]",
+        "taskName": "[appservice-networking (madsd)]",
         "actions": [
           {
             "name": "addLabel",
@@ -12720,6 +12720,59 @@
             "name": "assignToUser",
             "parameters": {
               "user": "madsd"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "or",
+          "operands": [
+            {
+              "name": "titleContains",
+              "parameters": {
+                "titlePattern": "(az appservice hybrid-connection|az webapp config hostname|az webapp create-remote-connection|az webapp hybrid-connection|az webapp ssh|az webapp traffic-routing)",
+                "isRegex": true
+              }
+            },
+            {
+              "name": "bodyContains",
+              "parameters": {
+                "bodyPattern": "(az appservice hybrid-connection|az webapp config hostname|az webapp create-remote-connection|az webapp hybrid-connection|az webapp ssh|az webapp traffic-routing)",
+                "isRegex": true
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-networking (seligj95)]",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-networking"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "seligj95"
             }
           }
         ]
