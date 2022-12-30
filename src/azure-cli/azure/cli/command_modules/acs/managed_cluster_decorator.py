@@ -5246,25 +5246,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
-    def update_workload_auto_scaler_profile(self, mc: ManagedCluster) -> ManagedCluster:
-        """Update workload auto-scaler profile for the ManagedCluster object.
-
-        :return: the ManagedCluster object
-        """
-        self._ensure_mc(mc)
-
-        if self.context.get_enable_keda():
-            if mc.workload_auto_scaler_profile is None:
-                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoscalerProfile()
-            mc.workload_auto_scaler_profile.keda = ManagedClusterWorkloadAutoscalerProfileKeda(enabled=True)
-
-        if self.context.get_disable_keda():
-            if mc.workload_auto_scaler_profile is None:
-                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoscalerProfile()
-            mc.workload_auto_scaler_profile.keda = ManagedClusterWorkloadAutoscalerProfileKeda(enabled=False)
-
-        return mc
-
     def set_up_api_server_access_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up api server access profile and fqdn subdomain for the ManagedCluster object.
 
@@ -6371,6 +6352,25 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 cluster_identity_object_id,
                 assign_kubelet_identity)
             mc.identity_profile = identity_profile
+        return mc
+
+    def update_workload_auto_scaler_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update workload auto-scaler profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if self.context.get_enable_keda():
+            if mc.workload_auto_scaler_profile is None:
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoscalerProfile()
+            mc.workload_auto_scaler_profile.keda = ManagedClusterWorkloadAutoscalerProfileKeda(enabled=True)
+
+        if self.context.get_disable_keda():
+            if mc.workload_auto_scaler_profile is None:
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoscalerProfile()
+            mc.workload_auto_scaler_profile.keda = ManagedClusterWorkloadAutoscalerProfileKeda(enabled=False)
+
         return mc
 
     def update_mc_profile_default(self) -> ManagedCluster:
