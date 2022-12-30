@@ -107,8 +107,6 @@ ManagedClusterStorageProfileDiskCSIDriver = TypeVar('ManagedClusterStorageProfil
 ManagedClusterStorageProfileFileCSIDriver = TypeVar('ManagedClusterStorageProfileFileCSIDriver')
 ManagedClusterStorageProfileBlobCSIDriver = TypeVar('ManagedClusterStorageProfileBlobCSIDriver')
 ManagedClusterStorageProfileSnapshotController = TypeVar('ManagedClusterStorageProfileSnapshotController')
-ManagedClusterWorkloadAutoscalerProfile = TypeVar('ManagedClusterWorkloadAutoscalerProfile')
-ManagedClusterWorkloadAutoscalerProfileKeda = TypeVar('ManagedClusterWorkloadAutoscalerProfileKeda')
 
 # TODO
 # 1. remove enable_rbac related implementation
@@ -5241,8 +5239,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         if self.context.get_enable_keda():
             if mc.workload_auto_scaler_profile is None:
-                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoscalerProfile()
-            mc.workload_auto_scaler_profile.keda = ManagedClusterWorkloadAutoscalerProfileKeda(enabled=True)
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
+            mc.workload_auto_scaler_profile.keda = self.models.ManagedClusterWorkloadAutoScalerProfileKeda(enabled=True)
 
         return mc
 
@@ -6363,13 +6361,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         if self.context.get_enable_keda():
             if mc.workload_auto_scaler_profile is None:
-                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoscalerProfile()
-            mc.workload_auto_scaler_profile.keda = ManagedClusterWorkloadAutoscalerProfileKeda(enabled=True)
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
+            mc.workload_auto_scaler_profile.keda = self.models.ManagedClusterWorkloadAutoScalerProfileKeda(enabled=True)
 
         if self.context.get_disable_keda():
             if mc.workload_auto_scaler_profile is None:
-                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoscalerProfile()
-            mc.workload_auto_scaler_profile.keda = ManagedClusterWorkloadAutoscalerProfileKeda(enabled=False)
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
+            mc.workload_auto_scaler_profile.keda = self.models.ManagedClusterWorkloadAutoScalerProfileKeda(enabled=False)
 
         return mc
 
