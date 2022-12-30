@@ -21,6 +21,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SCALE_SET_PRIORITY_SPOT,
     CONST_SPOT_EVICTION_POLICY_DELETE,
     CONST_VIRTUAL_MACHINE_SCALE_SETS,
+    CONST_OS_SKU_WINDOWS2019,
+    CONST_OS_SKU_WINDOWS2022,
     AgentPoolDecoratorMode,
     DecoratorEarlyExitException,
     DecoratorMode,
@@ -477,7 +479,7 @@ class AKSAgentPoolContext(BaseAKSContext):
             snapshot = self.get_snapshot()
             if snapshot:
                 value_obtained_from_snapshot = snapshot.os_type
-
+        
         # set default value
         if value_obtained_from_agentpool is not None:
             os_type = value_obtained_from_agentpool
@@ -487,7 +489,7 @@ class AKSAgentPoolContext(BaseAKSContext):
             os_type = value_obtained_from_snapshot
         else:
             os_type = CONST_DEFAULT_NODE_OS_TYPE
-
+        
         # validation
         if (
             self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER and
@@ -495,6 +497,18 @@ class AKSAgentPoolContext(BaseAKSContext):
         ):
             if os_type.lower() == "windows":
                 raise InvalidArgumentValueError("System node pool must be linux.")
+        
+        # validation of Windows OS SKU's against OS Type 
+        if (
+            self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE and
+            self.decorator_mode == DecoratorMode.CREATE and
+            os_type == CONST_DEFAULT_NODE_OS_TYPE
+        ):            
+            # read the original value passed by the command
+            raw_os_sku = self.raw_param.get("os_sku")
+            if raw_os_sku == CONST_OS_SKU_WINDOWS2019 or raw_os_sku == CONST_OS_SKU_WINDOWS2022:
+                raise InvalidArgumentValueError("OS SKU is invalid for Linux OS Type. Please specify '--os-type Windows' for Windows SKUs")
+
         return os_type
 
     def get_os_type(self) -> Union[str, None]:
@@ -536,7 +550,7 @@ class AKSAgentPoolContext(BaseAKSContext):
             os_sku = value_obtained_from_snapshot
         else:
             os_sku = raw_value
-
+        
         # this parameter does not need validation
         return os_sku
 
