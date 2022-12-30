@@ -8837,7 +8837,7 @@ class VMListFilterScenarioTest(ScenarioTest):
         self.cmd('vm list -g {rg} --vmss {vmss_flex}', checks=[
             self.check('length(@)', 2)
         ])
-        message = 'usage error: please specify the --resource-group when list VM instances with VMSS name'
+        message = 'usage error: please specify the --resource-group when listing VM instances with VMSS name'
         with self.assertRaisesRegex(RequiredArgumentMissingError, message):
             self.cmd('vm list --vmss {vmss_flex}')
 
