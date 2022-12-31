@@ -1,4 +1,10 @@
-﻿from azure.cli.core.azclierror import ValidationError
+﻿# coding=utf-8
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+from azure.cli.core.azclierror import ValidationError
 
 
 def validate_keys_and_values_match(table_map: dict):
