@@ -267,12 +267,12 @@ parameters:
                         ..n
                     }
                     // the below items are only necessary for selective schema migration
-                    // optional, migrates schema for the following tables            
+                    // optional, migrates schema for the following tables
                     'tables_to_migrate_schema': {
                         "sourceSchema1.table2": "targetSchema1.table2",
                         "sourceSchema1.table3": "targetSchema1.table3"
                     },
-                    // optional, migrates the enumerated views            
+                    // optional, migrates the enumerated views
                     'selected_views': [
                         'sourceSchema1.view1'
                     ],
@@ -284,7 +284,7 @@ parameters:
                     'selected_routines': [
                         'sourceSchema1.build_report'
                     ],
-                    // optional, migrates the enumerated events            
+                    // optional, migrates the enumerated events
                     'selected_events': [
                         'sourceSchema1.nightly_maintenance'
                     ]
@@ -317,7 +317,7 @@ parameters:
                 "ThrottleQueryTableDataRangeTaskAtBatchCount": 36,
                 // Optional setting that configures the delay between updates of result objects in Azure Table Storage.
                 "DelayProgressUpdatesInStorageInterval": "00:00:30",
-                },
+            },
             // Optional setting to set the source server read only.
             "make_source_server_read_only": "true|false",
             // Optional setting to enable consistent backup. True by default for the sync migration, and false otherwise.
@@ -334,6 +334,11 @@ parameters:
             "migrate_all_tables_schema": "true|false",
             // Optional. If true, all users/grants will be migrated.
             "migrate_user_system_tables": "true|false",
+            // Binlog position to start the migration from. Only applicable for the ReplicateChanges migration.
+            "binLogInfo": {
+                "filename": "binlog.0004523",
+                "position": 283287
+            }
         }
 
   - name: --source-connection-json

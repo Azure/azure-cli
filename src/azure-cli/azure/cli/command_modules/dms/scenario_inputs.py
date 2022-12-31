@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.command_modules.dms.validators import throw_if_not_dictionary, throw_if_not_list
+from azure.cli.core.azclierror import ValidationError
 from azure.mgmt.datamigration.models import (MigrateSqlServerSqlDbTaskInput,
                                              MigrateSqlServerSqlDbDatabaseInput,
                                              MigrationValidationOptions,
@@ -10,12 +11,7 @@ from azure.mgmt.datamigration.models import (MigrateSqlServerSqlDbTaskInput,
                                              MigratePostgreSqlAzureDbForPostgreSqlSyncDatabaseInput,
                                              MigratePostgreSqlAzureDbForPostgreSqlSyncDatabaseTableInput,
                                              MigrateMySqlAzureDbForMySqlOfflineTaskInput,
-                                             MigrateMySqlAzureDbForMySqlOfflineDatabaseInput,
-                                             MigrateMySqlAzureDbForMySqlSyncDatabaseInput,
-                                             MigrateMySqlAzureDbForMySqlSyncTaskInput)
-
-from azure.cli.core.azclierror import ValidationError
-from msrest.serialization import Model
+                                             MigrateMySqlAzureDbForMySqlOfflineDatabaseInput)
 
 
 def get_migrate_sql_to_sqldb_offline_input(database_options_json,
@@ -133,23 +129,7 @@ def get_migrate_mysql_to_azuredbformysql_input(database_options_json,
                                         len(database.get('table_map')) == 0):
             raise ValidationError('table_map should be dictionary and non empty, to select all tables remove table_map')
 
-        db_input = MigrateMySqlAzureDbForMySqlOfflineDatabaseInput(
-            name=database.get('name'),
-            target_database_name=database.get('target_database_name'),
-            table_map=database.get('table_map'))
-
-        if has_schema_migration_options:
-            db_properties = {}
-            set_optional(db_properties, 'tablesToMigrateSchema', database, 'tables_to_migrate_schema', throw_if_not_dictionary)
-            set_optional(db_properties, 'selectedViews', database, 'selected_views', throw_if_not_list)
-            set_optional(db_properties, 'selectedTriggers', database, 'selected_triggers', throw_if_not_list)
-            set_optional(db_properties, 'selectedRoutines', database, 'selected_routines', throw_if_not_list)
-            set_optional(db_properties, 'selectedEvents', database, 'selected_events', throw_if_not_list)
-
-            if len(db_properties) > 0:
-                db_input.additional_properties = db_properties
-                db_input.enable_additional_properties_sending()
-
+        db_input = create_db_input(database, has_schema_migration_options)
         database_options.append(db_input)
 
     set_optional(migration_properties, 'sourceServerResourceId', database_options_json, 'source_server_resource_id')
@@ -164,15 +144,11 @@ def get_migrate_mysql_to_azuredbformysql_input(database_options_json,
         migration_level_settings['enableConsistentBackup'] = 'true'
     elif has_consistent_snapshot_options:
         make_source_server_read_only = database_options_json.get('make_source_server_read_only', False)
-        set_optional(migration_level_settings, 'enableConsistentBackup', database_options_json, 'enable_consistent_backup')
+        set_optional(migration_level_settings, 'enableConsistentBackup', database_options_json,
+                     'enable_consistent_backup')
 
     if has_schema_migration_options:
-        set_optional(migration_properties, 'migrateAllViews', database_options_json, 'migrate_all_views')
-        set_optional(migration_properties, 'migrateAllTriggers', database_options_json, 'migrate_all_triggers')
-        set_optional(migration_properties, 'migrateAllEvents', database_options_json, 'migrate_all_events')
-        set_optional(migration_properties, 'migrateAllRoutines', database_options_json, 'migrate_all_routines')
-        set_optional(migration_properties, 'migrateAllTablesSchema', database_options_json, 'migrate_all_tables_schema')
-        set_optional(migration_properties, 'migrateUserSystemTables', database_options_json, 'migrate_user_system_tables')
+        extract_schema_migration_options(migration_properties, database_options_json)
 
     if has_binlog_position:
         set_required(migration_properties, 'binLogInfo', database_options_json, 'binlog_info', throw_if_not_dictionary)
@@ -188,6 +164,37 @@ def get_migrate_mysql_to_azuredbformysql_input(database_options_json,
         task_input.enable_additional_properties_sending()
 
     return task_input
+
+
+def extract_schema_migration_options(migration_properties, database_options_json):
+    set_optional(migration_properties, 'migrateAllViews', database_options_json, 'migrate_all_views')
+    set_optional(migration_properties, 'migrateAllTriggers', database_options_json, 'migrate_all_triggers')
+    set_optional(migration_properties, 'migrateAllEvents', database_options_json, 'migrate_all_events')
+    set_optional(migration_properties, 'migrateAllRoutines', database_options_json, 'migrate_all_routines')
+    set_optional(migration_properties, 'migrateAllTablesSchema', database_options_json, 'migrate_all_tables_schema')
+    set_optional(migration_properties, 'migrateUserSystemTables', database_options_json, 'migrate_user_system_tables')
+
+
+def create_db_input(database, has_schema_migration_options):
+    db_input = MigrateMySqlAzureDbForMySqlOfflineDatabaseInput(
+        name=database.get('name'),
+        target_database_name=database.get('target_database_name'),
+        table_map=database.get('table_map'))
+
+    if has_schema_migration_options:
+        db_properties = {}
+        set_optional(db_properties, 'tablesToMigrateSchema', database, 'tables_to_migrate_schema',
+                     throw_if_not_dictionary)
+        set_optional(db_properties, 'selectedViews', database, 'selected_views', throw_if_not_list)
+        set_optional(db_properties, 'selectedTriggers', database, 'selected_triggers', throw_if_not_list)
+        set_optional(db_properties, 'selectedRoutines', database, 'selected_routines', throw_if_not_list)
+        set_optional(db_properties, 'selectedEvents', database, 'selected_events', throw_if_not_list)
+
+        if len(db_properties) > 0:
+            db_input.additional_properties = db_properties
+            db_input.enable_additional_properties_sending()
+
+    return db_input
 
 
 def set_optional(target: dict,
