@@ -17,7 +17,7 @@ interactions:
       ParameterSetName:
       - --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/checkNameAvailability?api-version=2022-01-01-preview
   response:
@@ -31,16 +31,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:13:30 GMT
+      - Thu, 29 Dec 2022 14:11:49 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -55,10 +55,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus", "tags": {"k1": "v1", "k2": "v2"}, "sku": {"name":
-      "Standard", "tier": "Standard", "capacity": 10}, "properties": {"minimumTlsVersion":
-      "1.1", "isAutoInflateEnabled": true, "publicNetworkAccess": "Enabled", "maximumThroughputUnits":
-      18, "kafkaEnabled": true, "zoneRedundant": true, "disableLocalAuth": true}}'
+    body: '{"identity": {"type": "None"}, "location": "eastus", "properties": {"disableLocalAuth":
+      true, "isAutoInflateEnabled": true, "maximumThroughputUnits": 18, "minimumTlsVersion":
+      "1.1", "zoneRedundant": true}, "sku": {"capacity": 10, "name": "Standard", "tier":
+      "Standard"}, "tags": {"k1": "v1", "k2": "v2"}}'
     headers:
       Accept:
       - application/json
@@ -69,7 +69,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '330'
+      - '304'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -77,13 +77,119 @@ interactions:
         --zone-redundant --tags --enable-auto-inflate --disable-local-auth --enable-kafka
         --minimum-tls-version
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:13:35.35Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:11:52.013Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '820'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Dec 2022 14:11:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '49'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --capacity --maximum-throughput-units --sku --location
+        --zone-redundant --tags --enable-auto-inflate --disable-local-auth --enable-kafka
+        --minimum-tls-version
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:11:52.013Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '820'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Dec 2022 14:12:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --capacity --maximum-throughput-units --sku --location
+        --zone-redundant --tags --enable-auto-inflate --disable-local-auth --enable-kafka
+        --minimum-tls-version
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:12:40.653Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
@@ -92,16 +198,282 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:13:36 GMT
+      - Thu, 29 Dec 2022 14:12:52 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --enable-auto-inflate --maximum-throughput-units
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:12:40.653Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '818'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Dec 2022 14:12:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/DM2
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/DM2
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "East US", "properties": {"disableLocalAuth": true, "isAutoInflateEnabled":
+      false, "kafkaEnabled": true, "maximumThroughputUnits": 0, "minimumTlsVersion":
+      "1.1", "publicNetworkAccess": "Enabled", "zoneRedundant": true}, "sku": {"capacity":
+      10, "name": "Standard", "tier": "Standard"}, "tags": {"k1": "v1", "k2": "v2"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '331'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --resource-group --enable-auto-inflate --maximum-throughput-units
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Updating","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:13:00.263Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '821'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Dec 2022 14:13:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/DM2
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/DM2
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '45'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --enable-auto-inflate --maximum-throughput-units
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:13:02.433Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '818'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Dec 2022 14:13:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --enable-auto-inflate --maximum-throughput-units
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:13:02.433Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '818'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Dec 2022 14:13:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "East US", "properties": {"disableLocalAuth": true, "isAutoInflateEnabled":
+      true, "kafkaEnabled": true, "maximumThroughputUnits": 18, "minimumTlsVersion":
+      "1.1", "publicNetworkAccess": "Enabled", "zoneRedundant": true}, "sku": {"capacity":
+      10, "name": "Standard", "tier": "Standard"}, "tags": {"k1": "v1", "k2": "v2"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '331'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --resource-group --enable-auto-inflate --maximum-throughput-units
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Updating","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:13:38.137Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '821'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Dec 2022 14:13:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -123,21 +495,178 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace create
+      - eventhubs namespace update
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --resource-group --capacity --maximum-throughput-units --sku --location
-        --zone-redundant --tags --enable-auto-inflate --disable-local-auth --enable-kafka
-        --minimum-tls-version
+      - --name --resource-group --enable-auto-inflate --maximum-throughput-units
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:13:35.35Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:13:42.07Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '817'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Dec 2022 14:14:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --capacity
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:13:42.07Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '817'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Dec 2022 14:14:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "East US", "properties": {"disableLocalAuth": true, "isAutoInflateEnabled":
+      true, "kafkaEnabled": true, "maximumThroughputUnits": 18, "minimumTlsVersion":
+      "1.1", "publicNetworkAccess": "Enabled", "zoneRedundant": true}, "sku": {"capacity":
+      12, "name": "Standard", "tier": "Standard"}, "tags": {"k1": "v1", "k2": "v2"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '331'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --resource-group --capacity
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Updating","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:14:17.94Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '820'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Dec 2022 14:14:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '49'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --capacity
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:14:21.217Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
@@ -146,161 +675,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:14:07 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name --resource-group --capacity --maximum-throughput-units --sku --location
-        --zone-redundant --tags --enable-auto-inflate --disable-local-auth --enable-kafka
-        --minimum-tls-version
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:14:26.51Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '816'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Oct 2022 15:14:37 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name --resource-group --capacity --maximum-throughput-units --sku --location
-        --zone-redundant --tags --enable-auto-inflate --disable-local-auth --enable-kafka
-        --minimum-tls-version
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:14:26.51Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '816'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Oct 2022 15:14:38 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name --resource-group --enable-auto-inflate --maximum-throughput-units
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:14:26.51Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '816'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Oct 2022 15:14:40 GMT
+      - Thu, 29 Dec 2022 14:14:49 GMT
       expires:
       - '-1'
       pragma:
@@ -310,433 +685,6 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       server-sb:
       - Service-Bus-Resource-Provider/SN1
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "East US", "tags": {"k1": "v1", "k2": "v2"}, "sku": {"name":
-      "Standard", "tier": "Standard", "capacity": 10}, "properties": {"minimumTlsVersion":
-      "1.1", "isAutoInflateEnabled": false, "publicNetworkAccess": "Enabled", "maximumThroughputUnits":
-      0, "kafkaEnabled": true, "zoneRedundant": true, "disableLocalAuth": true}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '331'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --name --resource-group --enable-auto-inflate --maximum-throughput-units
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Updating","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:14:47.593Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '820'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Oct 2022 15:14:47 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '48'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name --resource-group --enable-auto-inflate --maximum-throughput-units
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:14:49.283Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '817'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Oct 2022 15:15:18 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name --resource-group --enable-auto-inflate --maximum-throughput-units
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:14:49.283Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '817'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Oct 2022 15:15:18 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "East US", "tags": {"k1": "v1", "k2": "v2"}, "sku": {"name":
-      "Standard", "tier": "Standard", "capacity": 10}, "properties": {"minimumTlsVersion":
-      "1.1", "isAutoInflateEnabled": true, "publicNetworkAccess": "Enabled", "maximumThroughputUnits":
-      18, "kafkaEnabled": true, "zoneRedundant": true, "disableLocalAuth": true}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '331'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --name --resource-group --enable-auto-inflate --maximum-throughput-units
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Updating","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:15:25.993Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '820'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Oct 2022 15:15:25 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '49'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name --resource-group --enable-auto-inflate --maximum-throughput-units
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:15:29.013Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '817'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Oct 2022 15:15:56 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name --resource-group --capacity
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":10},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:15:29.013Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '817'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Oct 2022 15:15:57 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "East US", "tags": {"k1": "v1", "k2": "v2"}, "sku": {"name":
-      "Standard", "tier": "Standard", "capacity": 12}, "properties": {"minimumTlsVersion":
-      "1.1", "isAutoInflateEnabled": true, "publicNetworkAccess": "Enabled", "maximumThroughputUnits":
-      18, "kafkaEnabled": true, "zoneRedundant": true, "disableLocalAuth": true}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '331'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --name --resource-group --capacity
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Updating","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:16:04.737Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '820'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Oct 2022 15:16:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '49'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name --resource-group --capacity
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:16:05.757Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '817'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Oct 2022 15:16:37 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -762,31 +710,31 @@ interactions:
       ParameterSetName:
       - --name --resource-group --maximum-throughput-units
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:16:05.757Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":18,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:14:21.217Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '817'
+      - '818'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:16:37 GMT
+      - Thu, 29 Dec 2022 14:14:50 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -799,10 +747,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "East US", "tags": {"k1": "v1", "k2": "v2"}, "sku": {"name":
-      "Standard", "tier": "Standard", "capacity": 12}, "properties": {"minimumTlsVersion":
-      "1.1", "isAutoInflateEnabled": true, "publicNetworkAccess": "Enabled", "maximumThroughputUnits":
-      25, "kafkaEnabled": true, "zoneRedundant": true, "disableLocalAuth": true}}'
+    body: '{"location": "East US", "properties": {"disableLocalAuth": true, "isAutoInflateEnabled":
+      true, "kafkaEnabled": true, "maximumThroughputUnits": 25, "minimumTlsVersion":
+      "1.1", "publicNetworkAccess": "Enabled", "zoneRedundant": true}, "sku": {"capacity":
+      12, "name": "Standard", "tier": "Standard"}, "tags": {"k1": "v1", "k2": "v2"}}'
     headers:
       Accept:
       - application/json
@@ -819,31 +767,31 @@ interactions:
       ParameterSetName:
       - --name --resource-group --maximum-throughput-units
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Updating","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:16:45.943Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Updating","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:14:57.317Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '820'
+      - '821'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:16:45 GMT
+      - Thu, 29 Dec 2022 14:14:57 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -871,13 +819,13 @@ interactions:
       ParameterSetName:
       - --name --resource-group --maximum-throughput-units
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:16:48.537Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:15:02.05Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
@@ -886,16 +834,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:17:17 GMT
+      - Thu, 29 Dec 2022 14:15:27 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -921,13 +869,13 @@ interactions:
       ParameterSetName:
       - --name --resource-group --minimum-tls-version
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:16:48.537Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.1","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:15:02.05Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
@@ -936,16 +884,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:17:18 GMT
+      - Thu, 29 Dec 2022 14:15:28 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -958,10 +906,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "East US", "tags": {"k1": "v1", "k2": "v2"}, "sku": {"name":
-      "Standard", "tier": "Standard", "capacity": 12}, "properties": {"minimumTlsVersion":
-      "1.0", "isAutoInflateEnabled": true, "publicNetworkAccess": "Enabled", "maximumThroughputUnits":
-      25, "kafkaEnabled": true, "zoneRedundant": true, "disableLocalAuth": true}}'
+    body: '{"location": "East US", "properties": {"disableLocalAuth": true, "isAutoInflateEnabled":
+      true, "kafkaEnabled": true, "maximumThroughputUnits": 25, "minimumTlsVersion":
+      "1.0", "publicNetworkAccess": "Enabled", "zoneRedundant": true}, "sku": {"capacity":
+      12, "name": "Standard", "tier": "Standard"}, "tags": {"k1": "v1", "k2": "v2"}}'
     headers:
       Accept:
       - application/json
@@ -978,22 +926,22 @@ interactions:
       ParameterSetName:
       - --name --resource-group --minimum-tls-version
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.0","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Updating","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:17:27.82Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.0","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Updating","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:15:35.81Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '819'
+      - '820'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:17:28 GMT
+      - Thu, 29 Dec 2022 14:15:35 GMT
       expires:
       - '-1'
       pragma:
@@ -1030,22 +978,22 @@ interactions:
       ParameterSetName:
       - --name --resource-group --minimum-tls-version
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.0","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:17:31.613Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.0","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:15:38.273Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '817'
+      - '818'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:17:58 GMT
+      - Thu, 29 Dec 2022 14:16:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1080,31 +1028,31 @@ interactions:
       ParameterSetName:
       - --name --resource-group --minimum-tls-version
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.0","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:17:31.613Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.0","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:15:38.273Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '817'
+      - '818'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:17:58 GMT
+      - Thu, 29 Dec 2022 14:16:07 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1117,10 +1065,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "East US", "tags": {"k1": "v1", "k2": "v2"}, "sku": {"name":
-      "Standard", "tier": "Standard", "capacity": 12}, "properties": {"minimumTlsVersion":
-      "1.2", "isAutoInflateEnabled": true, "publicNetworkAccess": "Enabled", "maximumThroughputUnits":
-      25, "kafkaEnabled": true, "zoneRedundant": true, "disableLocalAuth": true}}'
+    body: '{"location": "East US", "properties": {"disableLocalAuth": true, "isAutoInflateEnabled":
+      true, "kafkaEnabled": true, "maximumThroughputUnits": 25, "minimumTlsVersion":
+      "1.2", "publicNetworkAccess": "Enabled", "zoneRedundant": true}, "sku": {"capacity":
+      12, "name": "Standard", "tier": "Standard"}, "tags": {"k1": "v1", "k2": "v2"}}'
     headers:
       Accept:
       - application/json
@@ -1137,31 +1085,31 @@ interactions:
       ParameterSetName:
       - --name --resource-group --minimum-tls-version
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Updating","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:18:06.99Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Updating","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:16:14.407Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '819'
+      - '821'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:18:07 GMT
+      - Thu, 29 Dec 2022 14:16:14 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1189,31 +1137,31 @@ interactions:
       ParameterSetName:
       - --name --resource-group --minimum-tls-version
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:18:21.87Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:16:17.48Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '816'
+      - '817'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:18:38 GMT
+      - Thu, 29 Dec 2022 14:16:44 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1239,31 +1187,31 @@ interactions:
       ParameterSetName:
       - --name --resource-group --disable-local-auth
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:18:21.87Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:16:17.48Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '816'
+      - '817'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:18:38 GMT
+      - Thu, 29 Dec 2022 14:16:45 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1276,10 +1224,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "East US", "tags": {"k1": "v1", "k2": "v2"}, "sku": {"name":
-      "Standard", "tier": "Standard", "capacity": 12}, "properties": {"minimumTlsVersion":
-      "1.2", "isAutoInflateEnabled": true, "publicNetworkAccess": "Enabled", "maximumThroughputUnits":
-      25, "kafkaEnabled": true, "zoneRedundant": true, "disableLocalAuth": false}}'
+    body: '{"location": "East US", "properties": {"disableLocalAuth": false, "isAutoInflateEnabled":
+      true, "kafkaEnabled": true, "maximumThroughputUnits": 25, "minimumTlsVersion":
+      "1.2", "publicNetworkAccess": "Enabled", "zoneRedundant": true}, "sku": {"capacity":
+      12, "name": "Standard", "tier": "Standard"}, "tags": {"k1": "v1", "k2": "v2"}}'
     headers:
       Accept:
       - application/json
@@ -1296,31 +1244,31 @@ interactions:
       ParameterSetName:
       - --name --resource-group --disable-local-auth
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Updating","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:18:45.823Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Updating","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:16:52.767Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '821'
+      - '822'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:18:45 GMT
+      - Thu, 29 Dec 2022 14:16:52 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1348,13 +1296,13 @@ interactions:
       ParameterSetName:
       - --name --resource-group --disable-local-auth
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:18:48.947Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:16:54.11Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
@@ -1363,16 +1311,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:19:15 GMT
+      - Thu, 29 Dec 2022 14:17:22 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1398,13 +1346,13 @@ interactions:
       ParameterSetName:
       - --name --resource-group --disable-local-auth
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:18:48.947Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:16:54.11Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
@@ -1413,7 +1361,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:19:16 GMT
+      - Thu, 29 Dec 2022 14:17:24 GMT
       expires:
       - '-1'
       pragma:
@@ -1435,10 +1383,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "East US", "tags": {"k1": "v1", "k2": "v2"}, "sku": {"name":
-      "Standard", "tier": "Standard", "capacity": 12}, "properties": {"minimumTlsVersion":
-      "1.2", "isAutoInflateEnabled": true, "publicNetworkAccess": "Enabled", "maximumThroughputUnits":
-      25, "kafkaEnabled": true, "zoneRedundant": true, "disableLocalAuth": true}}'
+    body: '{"location": "East US", "properties": {"disableLocalAuth": true, "isAutoInflateEnabled":
+      true, "kafkaEnabled": true, "maximumThroughputUnits": 25, "minimumTlsVersion":
+      "1.2", "publicNetworkAccess": "Enabled", "zoneRedundant": true}, "sku": {"capacity":
+      12, "name": "Standard", "tier": "Standard"}, "tags": {"k1": "v1", "k2": "v2"}}'
     headers:
       Accept:
       - application/json
@@ -1455,31 +1403,31 @@ interactions:
       ParameterSetName:
       - --name --resource-group --disable-local-auth
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Updating","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:19:24.313Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Updating","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:17:31.597Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '820'
+      - '821'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:19:24 GMT
+      - Thu, 29 Dec 2022 14:17:31 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1507,13 +1455,13 @@ interactions:
       ParameterSetName:
       - --name --resource-group --disable-local-auth
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-10-05T15:13:35.35Z","updatedAt":"2022-10-05T15:19:26.733Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"k1":"v1","k2":"v2"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":true,"zoneRedundant":true,"isAutoInflateEnabled":true,"maximumThroughputUnits":25,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2022-12-29T14:11:52.013Z","updatedAt":"2022-12-29T14:17:34.11Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
@@ -1522,16 +1470,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:19:54 GMT
+      - Thu, 29 Dec 2022 14:18:02 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1544,8 +1492,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus", "sku": {"name": "Standard", "tier": "Standard"},
-      "properties": {"publicNetworkAccess": "Enabled"}}'
+    body: '{"identity": {"type": "None"}, "location": "eastus", "sku": {"name": "Standard",
+      "tier": "Standard"}}'
     headers:
       Accept:
       - application/json
@@ -1556,121 +1504,19 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '121'
+      - '101'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --location --sku
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2022-10-05T15:19:58.863Z","updatedAt":"2022-10-05T15:19:58.863Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Activating"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '802'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Oct 2022 15:19:59 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '48'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --location --sku
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2022-10-05T15:19:58.863Z","updatedAt":"2022-10-05T15:19:58.863Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Activating"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '802'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Oct 2022 15:20:30 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --location --sku
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2022-10-05T15:19:58.863Z","updatedAt":"2022-10-05T15:20:51.263Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2022-12-29T14:18:04.74Z","updatedAt":"2022-12-29T14:18:04.74Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
@@ -1679,121 +1525,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:21:00 GMT
+      - Thu, 29 Dec 2022 14:18:05 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --location --sku
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2022-10-05T15:19:58.863Z","updatedAt":"2022-10-05T15:20:51.263Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '800'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Oct 2022 15:21:01 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "eastus", "sku": {"name": "Premium", "tier": "Premium"}, "properties":
-      {"publicNetworkAccess": "Enabled"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '119'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-group --name --location --sku
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000004","createdAt":"2022-10-05T15:21:06.577Z","updatedAt":"2022-10-05T15:21:06.577Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '799'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Oct 2022 15:21:08 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/DM2
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/DM2
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1821,31 +1562,31 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --sku
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000004","createdAt":"2022-10-05T15:21:06.577Z","updatedAt":"2022-10-05T15:21:06.577Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2022-12-29T14:18:04.74Z","updatedAt":"2022-12-29T14:18:04.74Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '799'
+      - '800'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:21:37 GMT
+      - Thu, 29 Dec 2022 14:18:36 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/DM2
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/DM2
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1871,13 +1612,13 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --sku
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000004","createdAt":"2022-10-05T15:21:06.577Z","updatedAt":"2022-10-05T15:21:06.577Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2022-12-29T14:18:04.74Z","updatedAt":"2022-12-29T14:18:52.323Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
@@ -1886,16 +1627,123 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:22:08 GMT
+      - Thu, 29 Dec 2022 14:19:07 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/DM2
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/DM2
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "None"}, "location": "eastus", "sku": {"name": "Premium",
+      "tier": "Premium"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '99'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --name --location --sku
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000004","createdAt":"2022-12-29T14:19:10.16Z","updatedAt":"2022-12-29T14:19:10.16Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '797'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Dec 2022 14:19:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '49'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --sku
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000004","createdAt":"2022-12-29T14:19:10.16Z","updatedAt":"2022-12-29T14:19:10.16Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '797'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Dec 2022 14:19:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1921,13 +1769,13 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --sku
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000004","createdAt":"2022-10-05T15:21:06.577Z","updatedAt":"2022-10-05T15:22:20.087Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000004","createdAt":"2022-12-29T14:19:10.16Z","updatedAt":"2022-12-29T14:19:10.16Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
@@ -1936,16 +1784,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:22:39 GMT
+      - Thu, 29 Dec 2022 14:20:11 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/DM2
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/DM2
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1961,7 +1809,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1971,13 +1819,13 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --sku
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000004","createdAt":"2022-10-05T15:21:06.577Z","updatedAt":"2022-10-05T15:22:20.087Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000004","createdAt":"2022-12-29T14:19:10.16Z","updatedAt":"2022-12-29T14:19:10.16Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
@@ -1986,16 +1834,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Oct 2022 15:22:39 GMT
+      - Thu, 29 Dec 2022 14:20:41 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/DM2
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/DM2
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -2011,7 +1859,257 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --sku
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000004","createdAt":"2022-12-29T14:19:10.16Z","updatedAt":"2022-12-29T14:19:10.16Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '797'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Dec 2022 14:21:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --sku
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000004","createdAt":"2022-12-29T14:19:10.16Z","updatedAt":"2022-12-29T14:19:10.16Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '797'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Dec 2022 14:21:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --sku
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000004","createdAt":"2022-12-29T14:19:10.16Z","updatedAt":"2022-12-29T14:19:10.16Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '797'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Dec 2022 14:22:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --sku
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000004","createdAt":"2022-12-29T14:19:10.16Z","updatedAt":"2022-12-29T14:19:10.16Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '797'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Dec 2022 14:22:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --sku
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000004","createdAt":"2022-12-29T14:19:10.16Z","updatedAt":"2022-12-29T14:23:09.22Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Active"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '795'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Dec 2022 14:23:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2023,7 +2121,7 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
   response:
@@ -2035,7 +2133,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 05 Oct 2022 15:22:41 GMT
+      - Thu, 29 Dec 2022 14:23:14 GMT
       expires:
       - '-1'
       location:
@@ -2043,16 +2141,16 @@ interactions:
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
+      - '14999'
     status:
       code: 202
       message: Accepted
@@ -2070,7 +2168,7 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/locations/eastus/operationStatus/eventhubs-nscli000002?api-version=2022-01-01-preview&resourceType=Namespace
   response:
@@ -2080,16 +2178,16 @@ interactions:
       cache-control:
       - no-cache
       date:
-      - Wed, 05 Oct 2022 15:23:11 GMT
+      - Thu, 29 Dec 2022 14:23:44 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
@@ -2101,7 +2199,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2113,7 +2211,7 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2022-01-01-preview
   response:
@@ -2125,7 +2223,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 05 Oct 2022 15:23:14 GMT
+      - Thu, 29 Dec 2022 14:23:45 GMT
       expires:
       - '-1'
       location:
@@ -2133,16 +2231,16 @@ interactions:
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
+      - '14999'
     status:
       code: 202
       message: Accepted
@@ -2160,7 +2258,7 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/locations/eastus/operationStatus/eventhubs-nscli000003?api-version=2022-01-01-preview&resourceType=Namespace
   response:
@@ -2170,16 +2268,16 @@ interactions:
       cache-control:
       - no-cache
       date:
-      - Wed, 05 Oct 2022 15:23:45 GMT
+      - Thu, 29 Dec 2022 14:24:16 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
@@ -2191,7 +2289,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2203,7 +2301,7 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.6 (Windows-10-10.0.19044-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2022-01-01-preview
   response:
@@ -2213,16 +2311,16 @@ interactions:
       cache-control:
       - no-cache
       date:
-      - Wed, 05 Oct 2022 15:23:52 GMT
+      - Thu, 29 Dec 2022 14:24:20 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:

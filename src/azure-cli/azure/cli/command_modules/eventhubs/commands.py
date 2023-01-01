@@ -30,7 +30,9 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.eventhub.operations#ClustersOperations.{}',
         client_factory=cluster_mgmt_client_factory,
         resource_type=ResourceType.MGMT_EVENTHUB)
-
+    eh_namespace_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file#{}',
+    )
     eh_event_hub_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#EventHubsOperations.{}',
         client_factory=event_hub_mgmt_client_factory,
@@ -72,15 +74,20 @@ def load_command_table(self, _):
 
 
 # Namespace Region
+    from azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file import create_eventhub_namespace
+    with self.command_group('eventhubs namespace', custom_command_type=eh_namespace_custom,
+                            is_preview=True) as g:
+        g.custom_command('create', 'create_eventhub_namespace', supports_no_wait=True)
+
     custom_tmpl = 'azure.cli.command_modules.eventhubs.custom#{}'
     eventhubs_custom = CliCommandType(operations_tmpl=custom_tmpl)
     with self.command_group('eventhubs namespace', eh_namespace_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
-        g.custom_command('create', 'cli_namespace_create')
-        g.show_command('show', 'get')
-        g.custom_command('list', 'cli_namespace_list')
-        g.command('delete', 'begin_delete')
+        #g.custom_command('create', 'cli_namespace_create')
+        #g.show_command('show', 'get')
+        #g.custom_command('list', 'cli_namespace_list')
+        #g.command('delete', 'begin_delete')
         g.custom_command('exists', 'cli_namespace_exists')
-        g.generic_update_command('update', custom_func_name='cli_namespace_update', custom_func_type=eventhubs_custom, setter_name='begin_create_or_update')
+        #g.generic_update_command('update', custom_func_name='cli_namespace_update', custom_func_type=eventhubs_custom, setter_name='begin_create_or_update')
 
     with self.command_group('eventhubs namespace authorization-rule', eh_namespace_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('create', 'cli_namespaceautho_create')
@@ -170,14 +177,26 @@ def load_command_table(self, _):
         g.custom_command('update', 'cli_networkrule_update')
 
 # Identity Region
-    with self.command_group('eventhubs namespace identity', eh_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
+    from azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file import cli_add_identity
+    from azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file import cli_remove_identity
+    with self.command_group('eventhubs namespace identity', custom_command_type=eh_namespace_custom,
+                            is_preview=True) as g:
+        g.custom_command('assign', 'cli_add_identity', supports_no_wait=True)
+        g.custom_command('remove', 'cli_remove_identity', supports_no_wait=True)
+    '''with self.command_group('eventhubs namespace identity', eh_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('assign', 'cli_add_identity')
-        g.custom_command('remove', 'cli_remove_identity')
+        g.custom_command('remove', 'cli_remove_identity')'''
 
 # Encryption Region
-    with self.command_group('eventhubs namespace encryption', eh_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
+    from azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file import cli_add_encryption
+    from azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file import cli_remove_encryption
+    with self.command_group('eventhubs namespace encryption', custom_command_type=eh_namespace_custom,
+                            is_preview=True) as g:
+        g.custom_command('add', 'cli_add_encryption', supports_no_wait=True)
+        g.custom_command('remove', 'cli_remove_encryption', supports_no_wait=True)
+    '''with self.command_group('eventhubs namespace encryption', eh_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('add', 'cli_add_encryption')
-        g.custom_command('remove', 'cli_remove_encryption')
+        g.custom_command('remove', 'cli_remove_encryption')'''
 
 # SchemaRegistry Region
     with self.command_group('eventhubs namespace schema-registry', eh_schema_registry_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=schema_registry_mgmt_client_factory) as g:
