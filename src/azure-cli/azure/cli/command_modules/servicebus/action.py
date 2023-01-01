@@ -43,6 +43,8 @@ class AlertAddEncryption(argparse._AppendAction):
 
         if "key_version" not in keyVaultObject:
             keyVaultObject["key_version"] = ''
+        if "identity" not in keyVaultObject:
+            keyVaultObject["identity"]["user_assigned_identity"] = None
         #keyVaultObject=dict2obj(keyVaultObject)
         '''keyVaultObject = KeyVaultProperties()
         keyVaultObject2 = MykeyvalultProperties()

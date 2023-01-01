@@ -208,9 +208,9 @@ def load_command_table(self, _):
         g.custom_command('remove', 'cli_remove_identity')'''
 
 # Encryption Region
-    #with self.command_group('servicebus namespace encryption', sb_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_SERVICEBUS, client_factory=namespaces_mgmt_client_factory) as g:
-    #    g.custom_command('add', 'cli_add_encryption')
-    #    g.custom_command('remove', 'cli_remove_encryption')
+    '''with self.command_group('servicebus namespace encryption', sb_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_SERVICEBUS, client_factory=namespaces_mgmt_client_factory) as g:
+        g.custom_command('add', 'cli_add_encryption')
+        g.custom_command('remove', 'cli_remove_encryption')'''
     from azure.cli.command_modules.servicebus.Operation.Namespace_custom_file import cli_add_encryption
     from azure.cli.command_modules.servicebus.Operation.Namespace_custom_file import cli_remove_encryption
     with self.command_group('servicebus namespace encryption', custom_command_type=sb_namespace_custom,
