@@ -7163,9 +7163,9 @@ class VnetGatewayCreate(_VnetGatewayCreate):
         )
         args_schema.root_cert_data = AAZStrArg(options=['--root-cert-data'], arg_group="Root Cert Authentication", help="Base64 contents of the root certificate file or file path.")
         args_schema.root_cert_name = AAZStrArg(options=['--root-cert-name'], arg_group="Root Cert Authentication", help="Root certificate name.")
-        # args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
-        #     template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
-        # )
+        args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
+        )
         args_schema.ip_configurations._registered = False
         args_schema.edge_zone_type._registered = False
         args_schema.active._registered = False
@@ -7222,9 +7222,14 @@ class VnetGatewayCreate(_VnetGatewayCreate):
 
         if has_value(args.address_prefixes) or has_value(args.client_protocol):
             import os
-            path = args.root_cert_data.to_serialized_data()
-            path = os.path.expanduser(path)
-            args.vpn_client_root_certificates = [{'name': args.root_cert_name, 'public_cert_data': path}]
+            if has_value(args.root_cert_data):
+                path = os.path.expanduser(args.root_cert_data.to_serialized_data())
+            else:
+                path = None
+            if has_value(args.root_cert_name):
+                args.vpn_client_root_certificates = [{'name': args.root_cert_name, 'public_cert_data': path}]
+            else:
+                args.vpn_client_root_certificates = []
 
 
 def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name,
