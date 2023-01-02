@@ -31,7 +31,6 @@ class AlertAddEncryption(argparse._AppendAction):
             elif k == 'key-version':
                 keyVaultObject["key_version"] = v
             elif k == 'user-assigned-identity':
-                print("hello")
                 keyVaultObject["user_assigned_identity"] = {}
                 keyVaultObject["user_assigned_identity"] = v
                 if keyVaultObject["user_assigned_identity"].endswith('/'):

@@ -83,7 +83,7 @@ class EHNamespaceMSITesting(ScenarioTest):
         self.cmd('keyvault key create -n {key2} --vault-name {kv_name}')
         self.cmd('keyvault key create -n {key3} --vault-name {kv_name}')
 
-        namespace = self.cmd(
+        '''namespace = self.cmd(
             'eventhubs namespace create --resource-group {rg} --name {namespacename} --sku {sku} --location {loc} --mi-system-assigned --mi-user-assigned {id1} {id2}' +
             ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}' +
             ' --encryption-config key-name={key2} key-vault-uri={key_uri} user-assigned-identity={id1}' +
@@ -216,8 +216,25 @@ class EHNamespaceMSITesting(ScenarioTest):
         assert len(n) == 2
         n = [i for i in namespace['encryption']['keyVaultProperties']]
         assert len(n) == 1
-        self.assertEqual(True, namespace['encryption']['requireInfrastructureEncryption'])
+        self.assertEqual(True, namespace['encryption']['requireInfrastructureEncryption'])'''
+
+        namespace = self.cmd(
+            'eventhubs namespace create --resource-group {rg} --name {namespacename4} --sku {sku} --location {loc} --mi-system-assigned'
+        ).get_output_in_json()
+
+        self.kwargs.update({'pId': namespace['identity']['principalId']})
+
+        self.cmd(
+            'keyvault set-policy -n {kv_name} -g {rg} --object-id {pId} --key-permissions  all')
+        namespace = self.cmd(
+            'eventhubs namespace encryption add --resource-group {rg} --namespace-name {namespacename4}' +
+            ' --encryption-config key-name={key1} key-vault-uri={key_uri}'
+            ' --encryption-config key-name={key2} key-vault-uri={key_uri} ').get_output_in_json()
+        self.assertEqual(namespace['identity']['type'], self.kwargs['system'])
+        n = [i for i in namespace['encryption']['keyVaultProperties']]
+        assert len(n) == 2
 
         self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename}')
         self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename2}')
         self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename3}')
+        self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename4}')
