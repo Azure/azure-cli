@@ -23,8 +23,8 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
             'namespacename': self.create_random_name(prefix='sb-nscli', length=20),
             'namespacename1': self.create_random_name(prefix='sb-nscli', length=20),
             'namespacename2': self.create_random_name(prefix='sb-nscli2', length=20),
-            'tags': {'tag1=value1'},
-            'tags2': {'tag2=value2'},
+            'tags': 'tag1=value1',
+            'tags2': 'tag2=value2',
             'sku': 'Standard',
             'skupremium': 'Premium',
             'authoname': self.create_random_name(prefix='cliAutho', length=20),
@@ -55,14 +55,14 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
 
         # Create Namespace
         namespace = self.cmd(
-            'servicebus namespace create --resource-group {rg} --name {namespacename2} --tags {tags} --sku Premium --location eastus2 --zone-redundant',
+            'servicebus namespace create --resource-group {rg} --name {namespacename2} --tags {tags} --sku Premium --location eastus --zone-redundant',
             checks=[self.check('sku.name', 'Premium')]).get_output_in_json()
 
         self.assertEqual(namespace['zoneRedundant'], True)
 
         # Create Namespace
         self.cmd(
-            'servicebus namespace create --resource-group {rg} --name {namespacename} --tags {tags} --sku {sku}',
+            'servicebus namespace create --resource-group {rg} --name {namespacename} --tags {tags} --sku {sku} --location westus',
             checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace
@@ -70,9 +70,9 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
                  checks=[self.check('sku.name', '{sku}')])
 
         # Update Namespace
-        '''self.cmd(
-            'servicebus namespace update --resource-group {rg} --name {namespacename} --tags {tag}',
-            checks=[self.check('sku.name', '{sku}')])'''
+        self.cmd(
+            'servicebus namespace update --resource-group {rg} --name {namespacename} --tags {tags}',
+            checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace list by subscription
         listnamespaceresult = self.cmd('servicebus namespace list').output

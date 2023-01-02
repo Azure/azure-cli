@@ -63,7 +63,6 @@ def create_servicebus_namespace(cmd, resource_group_name, namespace_name, locati
     print(dict1)
     return Create(cli_ctx=cmd.cli_ctx)(command_args=dict1)
 def cli_add_encryption(cmd, resource_group_name, namespace_name, encryption_config,require_infrastructure_encryption=None):
-    #namespace = client.get(resource_group_name, namespace_name)
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Update
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Create
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Show
@@ -71,77 +70,34 @@ def cli_add_encryption(cmd, resource_group_name, namespace_name, encryption_conf
         "resource_group": resource_group_name,
         "namespace_name": namespace_name
     })
-    print(encryption_config)
-    print("hello123")
-    if  'encryption' in servicebusnm:
-        if require_infrastructure_encryption:
-            servicebusnm['encryption']['requireInfrastructureEncryption'] = require_infrastructure_encryption
-        i=0
-        #print("hello")
-        #print(servicebusnm)
-        for col in encryption_config:
-            cmod = {
-                "identity":{
-                'userAssignedIdentity': encryption_config[i]['identity']['user_assigned_identity'],
-                },
-                'keyName': encryption_config[i]['key_name'],
-                'keyVaultUri': encryption_config[i]['key_vault_uri'],
-                'keyVersion': encryption_config[i]['key_version']
-
-            }
-            if servicebusnm['encryption']['keyVaultProperties']:
-                servicebusnm['encryption']['keyVaultProperties'].extend([cmod])
-            else:
-                servicebusnm['encryption']['keyVaultProperties']= [cmod]
-            i+=1
-            #print([cmod])
-        k = []
+    keys = []
+    for col in encryption_config:
+        keys.append(col)
+    if 'encryption' in servicebusnm:
         i = 0
-        print(servicebusnm['encryption']['keyVaultProperties'][0]['identity']["userAssignedIdentity"])
         for col in servicebusnm['encryption']['keyVaultProperties']:
-            user = {
-                "key_name": servicebusnm['encryption']['keyVaultProperties'][i]['keyName'],
-                "key_vault_uri": servicebusnm['encryption']['keyVaultProperties'][i]['keyVaultUri'],
-                "Key_version": servicebusnm['encryption']['keyVaultProperties'][i]['keyVersion'],
-                'identity':{
-                "user_assigned_identity": servicebusnm['encryption']['keyVaultProperties'][i]['identity']['userAssignedIdentity']
+            user = {}
+            if 'userAssignedIdentity' in servicebusnm['encryption']['keyVaultProperties'][i]['identity']:
+                user['identity']={
+                    'user_assigned_identity' : servicebusnm['encryption']['keyVaultProperties'][i]['identity']['userAssignedIdentity']
                 }
-            }
-            #print(user)
-            k.append(user)
-            i += 1
-        print("hi")
-        return Update(cli_ctx=cmd.cli_ctx)(command_args={
-            "resource_group": resource_group_name,
-            "namespace_name": namespace_name,
-            "encryption":{
-                "key_source": "Microsoft.KeyVault",
-                "key_vault_properties": k,
-                "require_infrastructure_encryption":servicebusnm['encryption']['requireInfrastructureEncryption']
-            }
-        })
-    else:
-        print("bhai")
-        '''user1={
-            'identity':{
-            'user_assigned_identity': encryption_config[0]['identity']['user_assigned_identity']
-            },
-            'key_name': encryption_config[0]['key_name'],
-            'key_vault_uri': encryption_config[0]['key_vault_uri'],
-            'key_version': encryption_config[0]['key_version']
+            user["key_name"] = servicebusnm['encryption']['keyVaultProperties'][i]['keyName']
+            user["key_vault_uri"] = servicebusnm['encryption']['keyVaultProperties'][i]['keyVaultUri']
+            user["key_version"] = servicebusnm['encryption']['keyVaultProperties'][i]['keyVersion']
+            i = i + 1
+            if user not in keys:
+                keys.append(user)
+        if require_infrastructure_encryption is None:
+            require_infrastructure_encryption = servicebusnm['encryption']['requireInfrastructureEncryption']
+    return Update(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "namespace_name": namespace_name,
+        "encryption": {
+            "key_source": "Microsoft.KeyVault",
+            "key_vault_properties": keys,
+            "require_infrastructure_encryption": require_infrastructure_encryption
         }
-        po=[]
-        po.append(user1)'''
-        return Update(cli_ctx=cmd.cli_ctx)(command_args={
-            "resource_group": resource_group_name,
-            "namespace_name": namespace_name,
-            "encryption":{
-                "key_source":"Microsoft.KeyVault",
-                "key_vault_properties":encryption_config,
-                "require_infrastructure_encryption":require_infrastructure_encryption
-        }
-        })
-
+    })
 def cli_remove_encryption(cmd,resource_group_name, namespace_name, encryption_config):
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Update
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Show
@@ -150,40 +106,22 @@ def cli_remove_encryption(cmd,resource_group_name, namespace_name, encryption_co
         "resource_group": resource_group_name,
         "namespace_name": namespace_name
     })
-    from azure.cli.core import CLIError
-    if servicebusnm['encryption']['keyVaultProperties']:
-        i=0
-        print(servicebusnm['encryption']['keyVaultProperties'])
-        for encryption_property in encryption_config:
-            cmod = {
-                'identity':{
-                'userAssignedIdentity': encryption_config[i]['identity']['user_assigned_identity']
-                },
-                'keyName': encryption_config[i]['key_name'],
-                'keyVaultUri': encryption_config[i]['key_vault_uri'],
-                'keyVersion': encryption_config[i]['key_version']
-
-            }
-            print(cmod)
-            if cmod in servicebusnm['encryption']['keyVaultProperties']:
-                #print("hello bhai")
-                servicebusnm['encryption']['keyVaultProperties'].remove(cmod)
-            i=i+1
     keys = []
-    i=0
-    print(servicebusnm['encryption']['keyVaultProperties'])
+    k = 0
     for col in servicebusnm['encryption']['keyVaultProperties']:
-        user = {
-            "key_name": servicebusnm['encryption']['keyVaultProperties'][i]['keyName'],
-            "key_vault_uri": servicebusnm['encryption']['keyVaultProperties'][i]['keyVaultUri'],
-            "Key_version": servicebusnm['encryption']['keyVaultProperties'][i]['keyVersion'],
-            "identity":{
-            "user_assigned_identity": servicebusnm['encryption']['keyVaultProperties'][i]['identity']['userAssignedIdentity']
+        user = {}
+        if 'userAssignedIdentity' in servicebusnm['encryption']['keyVaultProperties'][k]['identity']:
+            user['identity']={
+                'user_assigned_identity' :servicebusnm['encryption']['keyVaultProperties'][k]['identity']['userAssignedIdentity']
             }
-        }
+        user["key_name"] = servicebusnm['encryption']['keyVaultProperties'][k]['keyName']
+        user["key_vault_uri"] = servicebusnm['encryption']['keyVaultProperties'][k]['keyVaultUri']
+        user["key_version"] = servicebusnm['encryption']['keyVaultProperties'][k]['keyVersion']
         keys.append(user)
-        i += 1
-    print("hello")
+        k = k + 1
+    for col in encryption_config:
+        if col in keys:
+            keys.remove(col)
     return Update(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
@@ -207,13 +145,11 @@ def cli_add_identity(cmd, resource_group_name, namespace_name, system_assigned=N
             "type": "None",
             "userAssignedIdentities": None
         }
-    print(servicebusnm)
     if system_assigned:
         if servicebusnm['identity']['type'] == "UserAssigned":
             servicebusnm['identity']['type'] = "UserAssigned, SystemAssigned"
         elif servicebusnm['identity']['type'] == "None":
             servicebusnm['identity']['type'] = "SystemAssigned"
-            print("help")
     if user_assigned:
         if servicebusnm['identity']['type'] == "SystemAssigned":
             a = "SystemAssigned, UserAssigned"
@@ -235,7 +171,6 @@ def cli_add_identity(cmd, resource_group_name, namespace_name, system_assigned=N
                 'userAssignedIdentities': user_assign,
                 'type': a
             }
-    # print(servicebusnm['identity'])
     return Update(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
@@ -264,41 +199,27 @@ def cli_remove_identity(cmd, resource_group_name, namespace_name, system_assigne
         if servicebusnm['identity']['type'] == "SystemAssigned, UserAssigned":
             servicebusnm['identity']['type'] = "UserAssigned"
     if user_assigned:
-        if servicebusnm['identity']['type'] == "UserAssigned":
-            if servicebusnm['identity']['userAssignedIdentities']:
-                for x in user_assigned:
-                    servicebusnm['identity']['userAssignedIdentities'].pop(x)
+        if servicebusnm['identity']['userAssignedIdentities']:
+            for x in user_assigned:
+                servicebusnm['identity']['userAssignedIdentities'].pop(x)
+            if servicebusnm['identity']['type'] == "UserAssigned":
                 if len(servicebusnm['identity']['userAssignedIdentities']) == 0:
-                    print("hello21")
                     servicebusnm['identity']['type'] = "None"
                     servicebusnm['identity']['userAssignedIdentities'] = None
-                    print("hello12")
-        if servicebusnm['identity']['type'] == "SystemAssigned, UserAssigned":
-            print("hello")
-            if servicebusnm['identity']['userAssignedIdentities']:
-                for x in user_assigned:
-                    servicebusnm['identity']['userAssignedIdentities'].pop(x)
+            if servicebusnm['identity']['type'] == "SystemAssigned, UserAssigned":
                 if len(servicebusnm['identity']['userAssignedIdentities']) == 0:
                     servicebusnm['identity']['type'] = "SystemAssigned"
                     servicebusnm['identity']['userAssignedIdentities'] = None
+    dict={}
+    dict["resource_group"]=resource_group_name
+    dict["namespace_name"]=namespace_name
     if 'userAssignedIdentities' in servicebusnm['identity']:
-        dict = {
-
-            "resource_group": resource_group_name,
-            "namespace_name": namespace_name,
-            "identity": {
+        dict["identity"]= {
                 "type": servicebusnm['identity']['type'],
                 "user_assigned_identities": servicebusnm['identity']['userAssignedIdentities']
-            }
         }
     else:
-        print("hello")
-        dict = {
-            "resource_group": resource_group_name,
-            "namespace_name": namespace_name,
-            "identity": {
+        dict["identity"]= {
                 "type": servicebusnm['identity']['type']
             }
-        }
-    print(dict)
     return Update(cli_ctx=cmd.cli_ctx)(command_args=dict)

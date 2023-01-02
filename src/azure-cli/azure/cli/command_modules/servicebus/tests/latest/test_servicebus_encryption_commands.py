@@ -85,16 +85,18 @@ class SBNamespaceMSITesting(ScenarioTest):
         self.cmd('keyvault key create -n {key3} --vault-name {kv_name}')
 
         namespace = self.cmd(
-            'servicebus namespace create --resource-group {rg} --name {namespacename1} --sku {sku} --location {loc} --mi-system-assigned --mi-user-assigned {id1}'
+            'servicebus namespace create --resource-group {rg} --name {namespacename1} --sku {sku} --location {loc} --mi-system-assigned'
         ).get_output_in_json()
 
         self.kwargs.update({'pId': namespace['identity']['principalId']})
 
+        self.cmd(
+            'keyvault set-policy -n {kv_name} -g {rg} --object-id {pId} --key-permissions  all')
         namespace = self.cmd(
             'servicebus namespace encryption add --resource-group {rg} --namespace-name {namespacename1}' +
-            ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}'
-            ' --encryption-config key-name={key2} key-vault-uri={key_uri} user-assigned-identity={id1}').get_output_in_json()
-        self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
+            ' --encryption-config key-name={key1} key-vault-uri={key_uri}'
+            ' --encryption-config key-name={key2} key-vault-uri={key_uri} ').get_output_in_json()
+        self.assertEqual(namespace['identity']['type'], self.kwargs['system'])
         n = [i for i in namespace['encryption']['keyVaultProperties']]
         assert len(n) == 2
 
