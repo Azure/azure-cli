@@ -220,7 +220,7 @@ def _validate_ip_address_format(namespace):
         validated_ips = ''
         for ip in input_ips:
             # Use ipaddress library to validate ip network format
-            ip_obj = ipaddress.ip_network(ip)
+            ip_obj = ipaddress.ip_network(ip, False)
             validated_ips += str(ip_obj) + ','
         namespace.ip_address = validated_ips[:-1]
 
