@@ -1545,6 +1545,22 @@ class FunctionappIdentityTest(ScenarioTest):
             resource_group, functionapp_name), checks=self.is_empty())
 
 
+class FunctionappCorsTest(ScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_cors_credentials(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(prefix='functionapp', length=24)
+        plan_name = self.create_random_name(prefix='funcappplan', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node'.format(resource_group, functionapp_name, plan_name, storage_account))
+        self.cmd('functionapp cors credentials -g {} -n {} --enable true'.format(resource_group, functionapp_name))
+        result = self.cmd('functionapp cors show -g {} -n {}'.format(resource_group, functionapp_name)).get_output_in_json()['supportCredentials']
+        self.assertEqual(result, True)
+        self.cmd('functionapp cors credentials -g {} -n {} --enable false'.format(resource_group, functionapp_name))
+        result = self.cmd('functionapp cors show -g {} -n {}'.format(resource_group, functionapp_name)).get_output_in_json()['supportCredentials']
+        self.assertEqual(result, False)
+
+
 class FunctionappNetworkConnectionTests(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)

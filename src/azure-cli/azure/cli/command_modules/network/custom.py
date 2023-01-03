@@ -8,7 +8,7 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_
 
 from knack.log import get_logger
 
-# pylint: disable=no-self-use,no-member,too-many-lines,unused-argument,protected-access
+# pylint: disable=no-self-use,no-member,too-many-lines,unused-argument,protected-access,too-few-public-methods
 from azure.cli.core.aaz import has_value
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from azure.cli.command_modules.network.aaz.latest.network.nsg.rule import Update as _NsgRuleUpdate
@@ -25,14 +25,21 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
-from .aaz.latest.network.application_gateway._update import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.application_gateway import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condition import \
+    Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
 from .aaz.latest.network.express_route.gateway.connection import Create as _ExpressRouteConnectionCreate, \
     Update as _ExpressRouteConnectionUpdate
 from .aaz.latest.network.express_route.peering import Create as _ExpressRoutePeeringCreate, \
     Update as _ExpressRoutePeeringUpdate
 from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCreate
+from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRoutePortIdentityAssign
+from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
 from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
+from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdate
+from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
+from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update as _VNetSubnetUpdate
 
 import threading
 import time
@@ -86,10 +93,6 @@ def _generic_list(cli_ctx, operation_name, resource_group_name):
 
 def list_vnet(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'virtual_networks', resource_group_name)
-
-
-def list_express_route_circuits(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'express_route_circuits', resource_group_name)
 
 
 def list_lbs(cmd, resource_group_name=None):
@@ -270,7 +273,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZDictArg, AAZStrArg
+        from azure.cli.core.aaz import AAZDictArg, AAZStrArg, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.custom_error_pages = AAZDictArg(
             options=["--custom-error-pages"],
@@ -280,12 +283,9 @@ class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
         args_schema.custom_error_pages.Element = AAZStrArg(
             nullable=True,
         )
+        args_schema.http2.enum = AAZArgEnum({"Enabled": True, "Disabled": False})
+        args_schema.custom_error_configurations._registered = False
         return args_schema
-
-    def _cli_arguments_loader(self):
-        args = super()._cli_arguments_loader()
-        args = [(name, arg) for (name, arg) in args if name != "custom_error_configurations"]
-        return args
 
     def pre_operations(self):
         args = self.ctx.args
@@ -297,7 +297,6 @@ class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
                     "custom_error_page_url": url,
                 })
             args.custom_error_configurations = configurations
-
         if has_value(args.sku):
             sku = str(args.sku)
             args.sku.tier = sku.split("_", 1)[0] if not _is_v2_sku(sku) else sku
@@ -1868,85 +1867,42 @@ def list_waf_policy_setting(cmd, client, resource_group_name, policy_name):
 # endregion
 
 
-# region ApplicationGatewayWAFPolicyRules
-def create_waf_custom_rule(cmd, client, resource_group_name, policy_name, rule_name, priority, rule_type, action):
-    """
-    Initialize custom rule for WAF policy
-    """
-    WebApplicationFirewallCustomRule = cmd.get_models('WebApplicationFirewallCustomRule')
-    waf_policy = client.get(resource_group_name, policy_name)
-    new_custom_rule = WebApplicationFirewallCustomRule(
-        name=rule_name,
-        action=action,
-        match_conditions=[],
-        priority=priority,
-        rule_type=rule_type
-    )
-    upsert_to_collection(waf_policy, 'custom_rules', new_custom_rule, 'name')
-    parent = client.create_or_update(resource_group_name, policy_name, waf_policy)
-    return find_child_item(parent, rule_name, path='custom_rules', key_path='name')
-
-
-# pylint: disable=unused-argument
-def update_waf_custom_rule(instance, parent, cmd, rule_name, priority=None, rule_type=None, action=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('priority', priority)
-        c.set_param('rule_type', rule_type)
-        c.set_param('action', action)
-    return parent
-
-
-def show_waf_custom_rule(cmd, client, resource_group_name, policy_name, rule_name):
-    waf_policy = client.get(resource_group_name, policy_name)
-    return find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
-
-
-def list_waf_custom_rules(cmd, client, resource_group_name, policy_name):
-    return client.get(resource_group_name, policy_name).custom_rules
-
-
-def delete_waf_custom_rule(cmd, client, resource_group_name, policy_name, rule_name, no_wait=None):
-    waf_policy = client.get(resource_group_name, policy_name)
-    rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
-    waf_policy.custom_rules.remove(rule)
-    sdk_no_wait(no_wait, client.create_or_update, resource_group_name, policy_name, waf_policy)
-# endregion
-
-
 # region ApplicationGatewayWAFPolicyRuleMatchConditions
-def add_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name, match_variables, operator,
-                                   match_values=None, negation_condition=None, transforms=None):
-    if operator.lower() == "any" and match_values is not None:
-        raise ArgumentUsageError("Any operator does not require --match-values.")
-    if operator.lower() != "any" and match_values is None:
-        raise ArgumentUsageError("Non-any operator requires --match-values.")
+class WAFCustomRuleMatchConditionAdd(_WAFCustomRuleMatchConditionAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.match_variables = AAZListArg(
+            options=["--match-variables"],
+            help="Space-separated list of variables to use when matching. Variable values: RemoteAddr, RequestMethod, "
+                 "QueryString, PostArgs, RequestUri, RequestHeaders, RequestBody, RequestCookies.",
+            required=True,
+        )
+        args_schema.match_variables.Element = AAZStrArg()
+        # filter arguments
+        args_schema.variables._required = False
+        args_schema.variables._registered = False
+        return args_schema
 
-    MatchCondition = cmd.get_models('MatchCondition')
-    waf_policy = client.get(resource_group_name, policy_name)
-    custom_rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
-    new_cond = MatchCondition(
-        match_variables=match_variables,
-        operator=operator,
-        match_values=match_values,
-        negation_conditon=negation_condition,
-        transforms=transforms
-    )
-    custom_rule.match_conditions.append(new_cond)
-    upsert_to_collection(waf_policy, 'custom_rules', custom_rule, 'name', warn=False)
-    client.create_or_update(resource_group_name, policy_name, waf_policy)
-    return new_cond
-
-
-def list_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name):
-    waf_policy = client.get(resource_group_name, policy_name)
-    return find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name').match_conditions
-
-
-def remove_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name, index):
-    waf_policy = client.get(resource_group_name, policy_name)
-    rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
-    rule.match_conditions.pop(index)
-    client.create_or_update(resource_group_name, policy_name, waf_policy)
+    def pre_operations(self):
+        args = self.ctx.args
+        variables = []
+        for variable in args.match_variables:
+            try:
+                name, selector = str(variable).split(".", 1)
+            except ValueError:
+                name, selector = variable, None
+            variables.append({
+                "variable_name": name,
+                "selector": selector,
+            })
+        args.variables = variables
+        # validate
+        if str(args.operator).lower() == "any" and has_value(args.values):
+            raise ArgumentUsageError("Any operator does not require --match-values.")
+        if str(args.operator).lower() != "any" and not has_value(args.values):
+            raise ArgumentUsageError("Non-any operator requires --match-values.")
 # endregion
 
 
@@ -3152,41 +3108,6 @@ class ExpressRouteUpdate(_ExpressRouteUpdate):
             instance.properties.bandwidthInGbps = None
 
 
-def set_express_route_peering_connection_config(cmd, resource_group_name, circuit_name, peering_name, connection_name,
-                                                address_prefix):
-    client = network_client_factory(cmd.cli_ctx).express_route_circuit_connections
-
-    # Get Conn
-    try:
-        conn = client.get(resource_group_name, circuit_name, peering_name, connection_name)
-    except ResourceNotFoundError:
-        raise ResourceNotFoundError("Peering Connection {} doesn't exist".format(connection_name))
-
-    Ipv6CircuitConnectionConfig = cmd.get_models('Ipv6CircuitConnectionConfig')
-
-    ipv6_config = Ipv6CircuitConnectionConfig(
-        address_prefix=address_prefix
-    )
-    conn.ipv6_circuit_connection_config = ipv6_config
-
-    return client.begin_create_or_update(resource_group_name, circuit_name, peering_name, connection_name, conn)
-
-
-def remove_express_route_peering_connection_config(cmd, resource_group_name, circuit_name, peering_name,
-                                                   connection_name):
-    client = network_client_factory(cmd.cli_ctx).express_route_circuit_connections
-
-    # Get Conn
-    try:
-        conn = client.get(resource_group_name, circuit_name, peering_name, connection_name)
-    except ResourceNotFoundError:
-        raise ResourceNotFoundError("Peering Connection {} doesn't exist".format(connection_name))
-
-    conn.ipv6_circuit_connection_config = None
-
-    return client.begin_create_or_update(resource_group_name, circuit_name, peering_name, connection_name, conn)
-
-
 def _validate_ipv6_address_prefixes(prefixes):
     from ipaddress import ip_network, IPv6Network
     prefixes = prefixes if isinstance(prefixes, list) else [prefixes]
@@ -3403,8 +3324,7 @@ class ExpressRoutePortCreate(_ExpressRoutePortCreate):
         args = self.ctx.args
         if has_value(args.bandwidth):
             converted_bandwidth = _validate_bandwidth(args.bandwidth, mbps=False)
-
-        args.bandwidth_in_gbps = int(converted_bandwidth)
+            args.bandwidth_in_gbps = int(converted_bandwidth)
 
 
 def _validate_bandwidth(bandwidth, mbps=True):
@@ -3474,74 +3394,51 @@ def download_generated_loa_as_pdf(cmd,
     logger.warning("The generated letter of authorization is saved at %s", file_path)
 
 
-def assign_express_route_port_identity(cmd, resource_group_name, express_route_port_name,
-                                       user_assigned_identity, no_wait=False):
-    client = network_client_factory(cmd.cli_ctx).express_route_ports
-    ports = client.get(resource_group_name, express_route_port_name)
+class ExpressRoutePortIdentityAssign(_ExpressRoutePortIdentityAssign):
 
-    ManagedServiceIdentity, ManagedServiceIdentityUserAssignedIdentitiesValue = \
-        cmd.get_models('ManagedServiceIdentity', 'Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.identity = AAZResourceIdArg(
+            options=['--identity'],
+            arg_group="Identity",
+            help="Name or ID of the ManagedIdentity Resource.",
+            required=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{}"
+            )
+        )
 
-    user_assigned_identity_instance = ManagedServiceIdentityUserAssignedIdentitiesValue()
-    user_assigned_identities_instance = dict()
-    user_assigned_identities_instance[user_assigned_identity] = user_assigned_identity_instance
+        args_schema.user_assigned_identities._registered = False
+        args_schema.type._registered = False
 
-    identity_instance = ManagedServiceIdentity(type="UserAssigned",
-                                               user_assigned_identities=user_assigned_identities_instance)
-    ports.identity = identity_instance
+        return args_schema
 
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, express_route_port_name, ports)
-
-
-def remove_express_route_port_identity(cmd, resource_group_name, express_route_port_name, no_wait=False):
-    client = network_client_factory(cmd.cli_ctx).express_route_ports
-    ports = client.get(resource_group_name, express_route_port_name)
-
-    if ports.identity is None:
-        logger.warning("The identity of the ExpressRoute Port doesn't exist.")
-        return ports
-
-    ports.identity = None
-
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, express_route_port_name, ports)
+    def pre_operations(self):
+        args = self.ctx.args
+        identity = args.identity.to_serialized_data()
+        args.user_assigned_identities = {identity: {}}
 
 
-def show_express_route_port_identity(cmd, resource_group_name, express_route_port_name):
-    client = network_client_factory(cmd.cli_ctx).express_route_ports
-    ports = client.get(resource_group_name, express_route_port_name)
-    return ports.identity
+class ExpressRoutePortLinkUpdate(_ExpressRoutePortLinkUpdate):
 
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.admin_state._blank = "Enabled"
 
-def update_express_route_port_link(cmd, instance, parent, express_route_port_name, link_name,
-                                   macsec_cak_secret_identifier=None, macsec_ckn_secret_identifier=None,
-                                   macsec_sci_state=None, macsec_cipher=None, admin_state=None):
-    """
-    :param cmd:
-    :param instance: an instance of ExpressRoutePort
-    :param express_route_port_name:
-    :param link_name:
-    :param macsec_cak_secret_identifier:
-    :param macsec_ckn_secret_identifier:
-    :param macsec_cipher:
-    :param admin_state:
-    :return:
-    """
-    if any([macsec_cak_secret_identifier, macsec_ckn_secret_identifier, macsec_cipher, macsec_sci_state]):
-        instance.mac_sec_config.cak_secret_identifier = macsec_cak_secret_identifier
-        instance.mac_sec_config.ckn_secret_identifier = macsec_ckn_secret_identifier
+        return args_schema
 
+    def pre_operations(self):
+        args = self.ctx.args
         # TODO https://github.com/Azure/azure-rest-api-specs/issues/7569
         # need to remove this conversion when the issue is fixed.
-        if macsec_cipher is not None:
+        if has_value(args.macsec_cipher):
+            macsec_cipher = args.macsec_cipher.to_serialized_data()
             macsec_ciphers_tmp = {'gcm-aes-128': 'GcmAes128', 'gcm-aes-256': 'GcmAes256'}
             macsec_cipher = macsec_ciphers_tmp.get(macsec_cipher, macsec_cipher)
-        instance.mac_sec_config.cipher = macsec_cipher
-        instance.mac_sec_config.sci_state = macsec_sci_state
-
-    if admin_state is not None:
-        instance.admin_state = admin_state
-
-    return parent
+            args.macsec_cipher = macsec_cipher
 # endregion
 
 
@@ -5362,7 +5259,7 @@ class NsgRuleUpdate(_NsgRuleUpdate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
 
-        class EmptyListArgFormat(AAZListArgFormat):  # pylint: disable=too-few-public-methods
+        class EmptyListArgFormat(AAZListArgFormat):
             def __call__(self, ctx, value):
                 data = value._data
                 if has_value(data) and len(data) == 1 and data[0] == "":
@@ -5370,7 +5267,7 @@ class NsgRuleUpdate(_NsgRuleUpdate):
                     value._data = None
                 return super().__call__(ctx, value)
 
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):  # pylint: disable=too-few-public-methods
+        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
             def __call__(self, ctx, value):
                 if value._data == "":
                     logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
@@ -6864,304 +6761,400 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 
 
 # region VirtualNetworks
-# pylint: disable=too-many-locals
-def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
-                subnet_name=None, subnet_prefix=None, dns_servers=None,
-                location=None, tags=None, vm_protection=None, ddos_protection=None, bgp_community=None,
-                ddos_protection_plan=None, network_security_group=None, edge_zone=None, flowtimeout=None,
-                enable_encryption=None, encryption_enforcement_policy=None):
-    AddressSpace, DhcpOptions, Subnet, VirtualNetwork, SubResource, NetworkSecurityGroup = \
-        cmd.get_models('AddressSpace', 'DhcpOptions', 'Subnet', 'VirtualNetwork',
-                       'SubResource', 'NetworkSecurityGroup')
-    client = network_client_factory(cmd.cli_ctx).virtual_networks
-    tags = tags or {}
-
-    vnet = VirtualNetwork(
-        location=location, tags=tags,
-        dhcp_options=DhcpOptions(dns_servers=dns_servers),
-        address_space=AddressSpace(address_prefixes=(vnet_prefixes if isinstance(vnet_prefixes, list) else [vnet_prefixes])))  # pylint: disable=line-too-long
-    if subnet_name:
-        if cmd.supported_api_version(min_api='2018-08-01'):
-            vnet.subnets = [Subnet(name=subnet_name,
-                                   address_prefix=subnet_prefix[0] if len(subnet_prefix) == 1 else None,
-                                   address_prefixes=subnet_prefix if len(subnet_prefix) > 1 else None,
-                                   private_endpoint_network_policies='Disabled',
-                                   network_security_group=NetworkSecurityGroup(id=network_security_group)
-                                   if network_security_group else None)]
-        else:
-            vnet.subnets = [Subnet(name=subnet_name, address_prefix=subnet_prefix)]
-    if cmd.supported_api_version(min_api='2017-09-01'):
-        vnet.enable_ddos_protection = ddos_protection
-        vnet.enable_vm_protection = vm_protection
-    if cmd.supported_api_version(min_api='2018-02-01'):
-        vnet.ddos_protection_plan = SubResource(id=ddos_protection_plan) if ddos_protection_plan else None
-    if edge_zone:
-        vnet.extended_location = _edge_zone_model(cmd, edge_zone)
-    if flowtimeout is not None:
-        vnet.flow_timeout_in_minutes = flowtimeout
-    if bgp_community is not None and cmd.supported_api_version(min_api='2020-06-01'):
-        VirtualNetworkBgpCommunities = cmd.get_models('VirtualNetworkBgpCommunities')
-        vnet.bgp_communities = VirtualNetworkBgpCommunities(virtual_network_community=bgp_community)
-    if enable_encryption is not None:
-        if not vnet.encryption:
-            vnet.encryption = {}
-        vnet.encryption["enabled"] = enable_encryption
-    if encryption_enforcement_policy is not None:
-        if not vnet.encryption:
-            raise ArgumentUsageError('usage error: --encryption--enforcement--policy is only configurable when '
-                                     '--enable-encryption is specified.')
-        vnet.encryption["enforcement"] = encryption_enforcement_policy
-    return cached_put(cmd, client.begin_create_or_update, vnet, resource_group_name, vnet_name)
-
-
-def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protection=None, vm_protection=None,
-                ddos_protection_plan=None, flowtimeout=None, bgp_community=None, enable_encryption=None,
-                encryption_enforcement_policy=None):
-    # server side validation reports pretty good error message on invalid CIDR,
-    # so we don't validate at client side
-    AddressSpace, DhcpOptions, SubResource = cmd.get_models('AddressSpace', 'DhcpOptions', 'SubResource')
-    if vnet_prefixes and instance.address_space:
-        instance.address_space.address_prefixes = vnet_prefixes
-    elif vnet_prefixes:
-        instance.address_space = AddressSpace(address_prefixes=vnet_prefixes)
-
-    if dns_servers == ['']:
-        instance.dhcp_options.dns_servers = None
-    elif dns_servers and instance.dhcp_options:
-        instance.dhcp_options.dns_servers = dns_servers
-    elif dns_servers:
-        instance.dhcp_options = DhcpOptions(dns_servers=dns_servers)
-
-    if ddos_protection is not None:
-        instance.enable_ddos_protection = ddos_protection
-    if vm_protection is not None:
-        instance.enable_vm_protection = vm_protection
-    if ddos_protection_plan == '':
-        instance.ddos_protection_plan = None
-    elif ddos_protection_plan is not None:
-        instance.ddos_protection_plan = SubResource(id=ddos_protection_plan)
-    if flowtimeout is not None:
-        instance.flow_timeout_in_minutes = flowtimeout
-    if bgp_community is not None and cmd.supported_api_version(min_api='2020-06-01'):
-        VirtualNetworkBgpCommunities = cmd.get_models('VirtualNetworkBgpCommunities')
-        instance.bgp_communities = VirtualNetworkBgpCommunities(virtual_network_community=bgp_community)
-    if enable_encryption is not None:
-        if not instance.encryption:
-            VirtualNetworkEncryption = cmd.get_models('VirtualNetworkEncryption')
-            instance.encryption = VirtualNetworkEncryption(enabled=enable_encryption)
-        instance.encryption.enabled = enable_encryption
-    if encryption_enforcement_policy is not None:
-        if not instance.encryption:
-            raise ArgumentUsageError('usage error: --encryption--enforcement--policy is only configurable when '
-                                     '--enable-encryption is specified.')
-        instance.encryption.enforcement = encryption_enforcement_policy
-    return instance
-
-
-def _set_route_table(ncf, resource_group_name, route_table, subnet):
-    if route_table:
-        is_id = is_valid_resource_id(route_table)
-        rt = None
-        if is_id:
-            res_id = parse_resource_id(route_table)
-            rt = ncf.route_tables.get(res_id['resource_group'], res_id['name'])
-        else:
-            rt = ncf.route_tables.get(resource_group_name, route_table)
-        subnet.route_table = rt
-    elif route_table == '':
-        subnet.route_table = None
-
-
-def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
-                  address_prefix, network_security_group=None,
-                  route_table=None, service_endpoints=None, service_endpoint_policy=None,
-                  delegations=None, nat_gateway=None,
-                  disable_private_endpoint_network_policies=None,
-                  disable_private_link_service_network_policies=None):
-    NetworkSecurityGroup, ServiceEndpoint, Subnet, SubResource = cmd.get_models(
-        'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'Subnet', 'SubResource')
-    ncf = network_client_factory(cmd.cli_ctx)
-
-    if cmd.supported_api_version(min_api='2018-08-01'):
-        subnet = Subnet(
-            name=subnet_name,
-            address_prefixes=address_prefix if len(address_prefix) > 1 else None,
-            address_prefix=address_prefix[0] if len(address_prefix) == 1 else None
+class VNetCreate(_VNetCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.edge_zone = AAZStrArg(
+            options=["--edge-zone"],
+            help="The name of edge zone.",
         )
-        if cmd.supported_api_version(min_api='2019-02-01') and nat_gateway:
-            subnet.nat_gateway = SubResource(id=nat_gateway)
-    else:
-        subnet = Subnet(name=subnet_name, address_prefix=address_prefix)
-
-    if network_security_group:
-        subnet.network_security_group = NetworkSecurityGroup(id=network_security_group)
-    _set_route_table(ncf, resource_group_name, route_table, subnet)
-    if service_endpoints:
-        subnet.service_endpoints = []
-        for service in service_endpoints:
-            subnet.service_endpoints.append(ServiceEndpoint(service=service))
-    if service_endpoint_policy:
-        subnet.service_endpoint_policies = []
-        for policy in service_endpoint_policy:
-            subnet.service_endpoint_policies.append(SubResource(id=policy))
-    if delegations:
-        subnet.delegations = delegations
-
-    if disable_private_endpoint_network_policies is None or disable_private_endpoint_network_policies is True:
-        subnet.private_endpoint_network_policies = "Disabled"
-    if disable_private_endpoint_network_policies is False:
-        subnet.private_endpoint_network_policies = "Enabled"
-
-    if disable_private_link_service_network_policies is True:
-        subnet.private_link_service_network_policies = "Disabled"
-    if disable_private_link_service_network_policies is False:
-        subnet.private_link_service_network_policies = "Enabled"
-
-    vnet = cached_get(cmd, ncf.virtual_networks.get, resource_group_name, virtual_network_name)
-    upsert_to_collection(vnet, 'subnets', subnet, 'name')
-    vnet = cached_put(
-        cmd, ncf.virtual_networks.begin_create_or_update, vnet, resource_group_name, virtual_network_name).result()
-    return get_property(vnet.subnets, subnet_name)
-
-
-def update_subnet(cmd, instance, resource_group_name, address_prefix=None, network_security_group=None,
-                  route_table=None, service_endpoints=None, delegations=None, nat_gateway=None,
-                  service_endpoint_policy=None, disable_private_endpoint_network_policies=None,
-                  disable_private_link_service_network_policies=None):
-    NetworkSecurityGroup, ServiceEndpoint, SubResource = cmd.get_models(
-        'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'SubResource')
-
-    if address_prefix:
-        if cmd.supported_api_version(min_api='2018-08-01'):
-            instance.address_prefixes = address_prefix if len(address_prefix) > 1 else None
-            instance.address_prefix = address_prefix[0] if len(address_prefix) == 1 else None
-        else:
-            instance.address_prefix = address_prefix
-
-    if cmd.supported_api_version(min_api='2019-02-01') and nat_gateway:
-        instance.nat_gateway = SubResource(id=nat_gateway)
-    elif nat_gateway == '':
-        instance.nat_gateway = None
-
-    if network_security_group:
-        instance.network_security_group = NetworkSecurityGroup(id=network_security_group)
-    elif network_security_group == '':  # clear it
-        instance.network_security_group = None
-
-    _set_route_table(network_client_factory(cmd.cli_ctx), resource_group_name, route_table, instance)
-
-    if service_endpoints == ['']:
-        instance.service_endpoints = None
-    elif service_endpoints:
-        instance.service_endpoints = []
-        for service in service_endpoints:
-            instance.service_endpoints.append(ServiceEndpoint(service=service))
-
-    if service_endpoint_policy == '':
-        instance.service_endpoint_policies = None
-    elif service_endpoint_policy:
-        instance.service_endpoint_policies = []
-        for policy in service_endpoint_policy:
-            instance.service_endpoint_policies.append(SubResource(id=policy))
-
-    if delegations:
-        instance.delegations = delegations
-
-    if disable_private_endpoint_network_policies:
-        instance.private_endpoint_network_policies = "Disabled"
-    elif disable_private_endpoint_network_policies is not None:
-        instance.private_endpoint_network_policies = "Enabled"
-
-    if disable_private_link_service_network_policies:
-        instance.private_link_service_network_policies = "Disabled"
-    elif disable_private_link_service_network_policies is not None:
-        instance.private_link_service_network_policies = "Enabled"
-
-    return instance
-
-
-def list_avail_subnet_delegations(cmd, resource_group_name=None, location=None):
-    client = network_client_factory(cmd.cli_ctx)
-    if resource_group_name:
-        return client.available_resource_group_delegations.list(location, resource_group_name)
-    return client.available_delegations.list(location)
-
-
-def create_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name,
-                        remote_virtual_network, allow_virtual_network_access=False,
-                        allow_forwarded_traffic=False, allow_gateway_transit=False,
-                        use_remote_gateways=False):
-    if not is_valid_resource_id(remote_virtual_network):
-        remote_virtual_network = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=resource_group_name,
-            namespace='Microsoft.Network',
-            type='virtualNetworks',
-            name=remote_virtual_network
+        # add subnet arguments
+        args_schema.subnet_name = AAZStrArg(
+            options=["--subnet-name"],
+            arg_group="Subnet",
+            help="Name of a new subnet to create within the VNet.",
         )
-    SubResource, VirtualNetworkPeering = cmd.get_models('SubResource', 'VirtualNetworkPeering')
-    peering = VirtualNetworkPeering(
-        id=resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=resource_group_name,
-            namespace='Microsoft.Network',
-            type='virtualNetworks',
-            name=virtual_network_name),
-        name=virtual_network_peering_name,
-        remote_virtual_network=SubResource(id=remote_virtual_network),
-        allow_virtual_network_access=allow_virtual_network_access,
-        allow_gateway_transit=allow_gateway_transit,
-        allow_forwarded_traffic=allow_forwarded_traffic,
-        use_remote_gateways=use_remote_gateways)
-    aux_subscription = parse_resource_id(remote_virtual_network)['subscription']
-    ncf = network_client_factory(cmd.cli_ctx, aux_subscriptions=[aux_subscription])
-    return ncf.virtual_network_peerings.begin_create_or_update(
-        resource_group_name, virtual_network_name, virtual_network_peering_name, peering)
+        args_schema.subnet_prefixes = AAZListArg(
+            options=["--subnet-prefixes"],
+            arg_group="Subnet",
+            help="Space-separated list of address prefixes in CIDR format for the new subnet. If omitted, "
+                 "automatically reserves a /24 (or as large as available) block within the VNet address space.",
+        )
+        args_schema.subnet_prefixes.Element = AAZStrArg()
+        args_schema.subnet_nsg = AAZResourceIdArg(
+            options=["--nsg", "--network-security-group"],
+            arg_group="Subnet",
+            help="Name or ID of a network security group (NSG).",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/networkSecurityGroups/{}",
+            ),
+        )
+        # filter arguments
+        args_schema.extended_location._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.edge_zone):
+            args.extended_location.name = args.edge_zone
+            args.extended_location.type = "EdgeZone"
+
+        if has_value(args.subnet_name):
+            subnet = {"name": args.subnet_name}
+            if not has_value(args.subnet_prefixes):
+                # set default value
+                address, bit_mask = str(args.address_prefixes[0]).split("/")
+                subnet_mask = 24 if int(bit_mask) < 24 else bit_mask
+                subnet["address_prefix"] = f"{address}/{subnet_mask}"
+            elif len(args.subnet_prefixes) == 1:
+                subnet["address_prefix"] = args.subnet_prefixes[0]
+            else:
+                subnet["address_prefixes"] = args.subnet_prefixes
+            if has_value(args.subnet_nsg):
+                subnet["network_security_group"] = {"id": args.subnet_nsg}
+            args.subnets = [subnet]
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return {"newVNet": result}
 
 
-def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name):
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    ncf = network_client_factory(cmd.cli_ctx, aux_subscriptions=[subscription_id])
+class VNetUpdate(_VNetUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArgFormat, AAZResourceIdArgFormat
 
-    try:
-        peering = ncf.virtual_network_peerings.get(resource_group_name, virtual_network_name, virtual_network_peering_name)
-    except ResourceNotFoundError:
-        raise ResourceNotFoundError('Virtual network peering {} doesn\'t exist.'.format(virtual_network_peering_name))
+        class EmptyListArgFormat(AAZListArgFormat):
+            def __call__(self, ctx, value):
+                if value.to_serialized_data() == [""]:
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
 
-    return ncf.virtual_network_peerings.begin_create_or_update(
-        resource_group_name, virtual_network_name, virtual_network_peering_name, peering, sync_remote_address_space=True)
+        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
+            def __call__(self, ctx, value):
+                if value._data == "":
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        # handle detach logic
+        args_schema.dns_servers._fmt = EmptyListArgFormat()
+        args_schema.ddos_protection_plan._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/ddosProtectionPlans/{}",
+        )
+        return args_schema
 
 
-def update_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name, **kwargs):
-    peering = kwargs['parameters']
-    aux_subscription = parse_resource_id(peering.remote_virtual_network.id)['subscription']
-    ncf = network_client_factory(cmd.cli_ctx, aux_subscriptions=[aux_subscription])
-    return ncf.virtual_network_peerings.begin_create_or_update(
-        resource_group_name, virtual_network_name, virtual_network_peering_name, peering)
+class VNetSubnetCreate(_VNetSubnetCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.delegations = AAZListArg(
+            options=["--delegations"],
+            help="Space-separated list of services to whom the subnet should be delegated, e.g., Microsoft.Sql/servers."
+        )
+        args_schema.delegations.Element = AAZStrArg()
+        # add endpoint/policy arguments
+        args_schema.service_endpoints = AAZListArg(
+            options=["--service-endpoints"],
+            help="Space-separated list of services allowed private access to this subnet. "
+                 "Values from: az network vnet list-endpoint-services.",
+        )
+        args_schema.service_endpoints.Element = AAZStrArg()
+        args_schema.service_endpoint_policy = AAZListArg(
+            options=["--service-endpoint-policy"],
+            help="Space-separated list of names or IDs of service endpoint policies to apply.",
+        )
+        args_schema.service_endpoint_policy.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/serviceEndpointPolicies/{}",
+            ),
+        )
+        # add ple/pls arguments
+        args_schema.disable_private_endpoint_network_policies = AAZStrArg(
+            options=["--disable-private-endpoint-network-policies"],
+            help="Disable private endpoint network policies on the subnet.",
+            nullable=True,
+            enum={
+                "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
+                "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
+            },
+            blank="Disabled",
+        )
+        args_schema.disable_private_link_service_network_policies = AAZStrArg(
+            options=["--disable-private-link-service-network-policies"],
+            help="Disable private link service network policies on the subnet.",
+            nullable=True,
+            enum={
+                "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
+                "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
+            },
+            blank="Disabled",
+        )
+        # filter arguments
+        args_schema.policies._registered = False
+        args_schema.endpoints._registered = False
+        args_schema.delegated_services._registered = False
+        args_schema.private_endpoint_network_policies._registered = False
+        args_schema.private_link_service_network_policies._registered = False
+        args_schema.address_prefix._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.address_prefixes) and len(args.address_prefixes) == 1:
+            args.address_prefix = args.address_prefixes[0]
+            args.address_prefixes = None
+
+        def delegation_trans(index, service_name):
+            service_name = str(service_name)
+            # covert name to service name
+            if "/" not in service_name and len(service_name.split(".")) == 3:
+                _, service, resource_type = service_name.split(".")
+                service_name = f"Microsoft.{service}/{resource_type}"
+            return {
+                "name": str(index),
+                "service_name": service_name,
+            }
+
+        args.delegated_services = assign_aaz_list_arg(
+            args.delegated_services,
+            args.delegations,
+            element_transformer=delegation_trans
+        )
+        args.endpoints = assign_aaz_list_arg(
+            args.endpoints,
+            args.service_endpoints,
+            element_transformer=lambda _, service_name: {"service": service_name}
+        )
+        args.policies = assign_aaz_list_arg(
+            args.policies,
+            args.service_endpoint_policy,
+            element_transformer=lambda _, policy_id: {"id": policy_id}
+        )
+        # use string instead of bool
+        args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
+        args.private_link_service_network_policies = args.disable_private_link_service_network_policies
+
+
+class VNetSubnetUpdate(_VNetSubnetUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
+
+        class EmptyListArgFormat(AAZListArgFormat):
+            def __call__(self, ctx, value):
+                if value.to_serialized_data() == [""]:
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
+        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
+            def __call__(self, ctx, value):
+                if value._data == "":
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.delegations = AAZListArg(
+            options=["--delegations"],
+            help="Space-separated list of services to whom the subnet should be delegated, e.g., Microsoft.Sql/servers.",
+            nullable=True,
+        )
+        args_schema.delegations.Element = AAZStrArg(
+            nullable=True,
+        )
+        # add endpoint/policy arguments
+        args_schema.service_endpoints = AAZListArg(
+            options=["--service-endpoints"],
+            help="Space-separated list of services allowed private access to this subnet. "
+                 "Values from: az network vnet list-endpoint-services.",
+            nullable=True,
+            fmt=EmptyListArgFormat(),
+        )
+        args_schema.service_endpoints.Element = AAZStrArg(
+            nullable=True,
+        )
+        args_schema.service_endpoint_policy = AAZListArg(
+            options=["--service-endpoint-policy"],
+            help="Space-separated list of names or IDs of service endpoint policies to apply.",
+            nullable=True,
+            fmt=EmptyListArgFormat(),
+        )
+        args_schema.service_endpoint_policy.Element = AAZResourceIdArg(
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/serviceEndpointPolicies/{}",
+            ),
+        )
+        # add ple/pls arguments
+        args_schema.disable_private_endpoint_network_policies = AAZStrArg(
+            options=["--disable-private-endpoint-network-policies"],
+            help="Disable private endpoint network policies on the subnet.",
+            nullable=True,
+            enum={
+                "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
+                "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
+            },
+            blank="Disabled",
+        )
+        args_schema.disable_private_link_service_network_policies = AAZStrArg(
+            options=["--disable-private-link-service-network-policies"],
+            help="Disable private link service network policies on the subnet.",
+            nullable=True,
+            enum={
+                "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
+                "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
+            },
+            blank="Disabled",
+        )
+        # filter arguments
+        args_schema.address_prefix._registered = False
+        args_schema.delegated_services._registered = False
+        args_schema.endpoints._registered = False
+        args_schema.policies._registered = False
+        args_schema.private_endpoint_network_policies._registered = False
+        args_schema.private_link_service_network_policies._registered = False
+        # handle detach logic
+        args_schema.nat_gateway._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/natGateways/{}",
+        )
+        args_schema.network_security_group._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/networkSecurityGroups/{}",
+        )
+        args_schema.route_table._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/routeTables/{}",
+        )
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.address_prefixes):
+            prefixes = args.address_prefixes
+            args.address_prefixes = prefixes if len(prefixes) > 1 else None
+            args.address_prefix = prefixes[0] if len(prefixes) == 1 else None
+
+        def delegation_trans(index, service_name):
+            service_name = str(service_name)
+            # covert name to service name
+            if "/" not in service_name and len(service_name.split(".")) == 3:
+                _, service, resource_type = service_name.split(".")
+                service_name = f"Microsoft.{service}/{resource_type}"
+            return {
+                "name": str(index),
+                "service_name": service_name,
+            }
+
+        args.delegated_services = assign_aaz_list_arg(
+            args.delegated_services,
+            args.delegations,
+            element_transformer=delegation_trans
+        )
+        args.endpoints = assign_aaz_list_arg(
+            args.endpoints,
+            args.service_endpoints,
+            element_transformer=lambda _, service_name: {"service": service_name}
+        )
+        args.policies = assign_aaz_list_arg(
+            args.policies,
+            args.service_endpoint_policy,
+            element_transformer=lambda _, policy_id: {"id": policy_id}
+        )
+        # use string instead of bool
+        args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
+        args.private_link_service_network_policies = args.disable_private_link_service_network_policies
+
+    def post_instance_update(self, instance):
+        if not has_value(instance.properties.network_security_group.id):
+            instance.properties.network_security_group = None
+        if not has_value(instance.properties.route_table.id):
+            instance.properties.route_table = None
+
+
+class VNetPeeringCreate(_VNetPeeringCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.sync_remote._registered = False
+        return args_schema
 
 
 def list_available_ips(cmd, resource_group_name, virtual_network_name):
-    client = network_client_factory(cmd.cli_ctx).virtual_networks
-    vnet = client.get(resource_group_name=resource_group_name,
-                      virtual_network_name=virtual_network_name)
-    start_ip = vnet.address_space.address_prefixes[0].split('/')[0]
-    available_ips = client.check_ip_address_availability(resource_group_name=resource_group_name,
-                                                         virtual_network_name=virtual_network_name,
-                                                         ip_address=start_ip)
-    return available_ips.available_ip_addresses
+    from .aaz.latest.network.vnet import Show
+    vnet = Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": virtual_network_name,
+        "resource_group": resource_group_name,
+    })
+
+    start_ip = vnet["addressSpace"]["addressPrefixes"][0].split("/")[0]
+
+    from .aaz.latest.network.vnet import CheckIpAddress
+    return CheckIpAddress(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": virtual_network_name,
+        "resource_group": resource_group_name,
+        "ip_address": start_ip,
+    }).get("availableIPAddresses", [])
 
 
 def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, subnet_name):
-    client = network_client_factory(cmd.cli_ctx)
-    subnet = client.subnets.get(resource_group_name=resource_group_name,
-                                virtual_network_name=virtual_network_name,
-                                subnet_name=subnet_name)
-    if subnet.address_prefix is not None:
-        start_ip = subnet.address_prefix.split('/')[0]
-    available_ips = client.virtual_networks.check_ip_address_availability(resource_group_name=resource_group_name,
-                                                                          virtual_network_name=virtual_network_name,
-                                                                          ip_address=start_ip)
-    return available_ips.available_ip_addresses
+    from .aaz.latest.network.vnet.subnet import Show
+    subnet = Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": subnet_name,
+        "resource_group": resource_group_name,
+        "vnet_name": virtual_network_name,
+    })
+
+    try:
+        address_prefix = subnet["addressPrefixes"][0]
+    except KeyError:
+        address_prefix = subnet["addressPrefix"]
+    start_ip = address_prefix.split("/")[0]
+
+    from .aaz.latest.network.vnet import CheckIpAddress
+    return CheckIpAddress(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": virtual_network_name,
+        "resource_group": resource_group_name,
+        "ip_address": start_ip,
+    }).get("availableIPAddresses", [])
+
+
+def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name):
+    from .aaz.latest.network.vnet.peering import Show
+    try:
+        peering = Show(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": virtual_network_peering_name,
+            "resource_group": resource_group_name,
+            "vnet_name": virtual_network_name,
+        })
+    except ResourceNotFoundError:
+        err_msg = f"Virtual network peering {virtual_network_name} doesn't exist."
+        raise ResourceNotFoundError(err_msg)
+
+    from .aaz.latest.network.vnet.peering import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": virtual_network_peering_name,
+        "resource_group": resource_group_name,
+        "vnet_name": virtual_network_name,
+        "remote_vnet": peering["remoteVirtualNetwork"].pop("id", None),
+        "allow_vnet_access": peering.pop("allowVirtualNetworkAccess", None),
+        "allow_gateway_transit": peering.pop("allowGatewayTransit", None),
+        "allow_forwarded_traffic": peering.pop("allowForwardedTraffic", None),
+        "use_remote_gateways": peering.pop("useRemoteGateways", None),
+        "sync_remote": "true",
+    })
 # endregion
 
 
