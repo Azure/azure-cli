@@ -6892,9 +6892,7 @@ class VNetSubnetCreate(_VNetSubnetCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.address_prefixes) and len(args.address_prefixes) == 1:
-            args.address_prefix = args.address_prefixes[0]
-            args.address_prefixes = None
+        _handle_plural_or_singular(args, "address_prefixes", "address_prefix")
 
         def delegation_trans(index, service_name):
             service_name = str(service_name)
@@ -7024,10 +7022,7 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.address_prefixes):
-            prefixes = args.address_prefixes
-            args.address_prefixes = prefixes if len(prefixes) > 1 else None
-            args.address_prefix = prefixes[0] if len(prefixes) == 1 else None
+        _handle_plural_or_singular(args, "address_prefixes", "address_prefix")
 
         def delegation_trans(index, service_name):
             service_name = str(service_name)

@@ -212,7 +212,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.cli.command_modules.network.custom#{}',
         client_factory=cf_network_interfaces
     )
-
     # endregion
 
     # region NetworkRoot
@@ -415,7 +414,6 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_ssl_profile')
         g.custom_show_command('show', 'show_ssl_profile')
         g.custom_command('update', 'update_ssl_profile')
-
     # endregion
 
     # region DdosProtectionPlans
@@ -549,7 +547,6 @@ def load_command_table(self, _):
     # with self.command_group('network private-link-service ip-configs', network_private_link_service_sdk) as g:
     #     g.custom_command('add', 'add_private_link_services_ipconfig')
     #     g.custom_command('remove', 'remove_private_link_services_ipconfig')
-
     # endregion
 
     # region LoadBalancers
@@ -745,7 +742,6 @@ def load_command_table(self, _):
     with self.command_group('network nic ip-config inbound-nat-rule') as g:
         g.custom_command('add', 'add_nic_ip_config_inbound_nat_rule')
         g.custom_command('remove', 'remove_nic_ip_config_inbound_nat_rule')
-
     # endregion
 
     # region NetworkSecurityGroups
@@ -759,7 +755,6 @@ def load_command_table(self, _):
         self.command_table["network nsg rule create"] = NSGRuleCreate(loader=self)
         self.command_table["network nsg rule update"] = NSGRuleUpdate(loader=self)
         self.command_table["network nsg rule show"] = Show(loader=self, table_transformer=transform_nsg_rule_table_output)
-
         g.custom_command("list", "list_nsg_rules", table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
     # endregion
 
@@ -950,8 +945,6 @@ def load_command_table(self, _):
         g.show_command('show', 'begin_get_vpnclient_ipsec_parameters')
         g.wait_command('wait')
 
-    # with self.command_group
-
     with self.command_group('network vnet-gateway revoked-cert', network_vgw_sdk) as g:
         g.custom_command('create', 'create_vnet_gateway_revoked_cert')
         g.custom_command('delete', 'delete_vnet_gateway_revoked_cert')
@@ -1004,7 +997,6 @@ def load_command_table(self, _):
         g.custom_command('start', 'start_vpn_conn_package_capture', supports_no_wait=True)
         g.custom_command('stop', 'stop_vpn_conn_package_capture', supports_no_wait=True)
         g.wait_command('wait')
-
     # endregion
 
     # region VirtualRouter
