@@ -660,6 +660,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
+                hasattr(self.mc, "workload_auto_scaler_profile") and  # backward compatibility
                 self.mc.workload_auto_scaler_profile and
                 self.mc.workload_auto_scaler_profile.keda
             ):
