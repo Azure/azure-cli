@@ -12,13 +12,15 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network vnet peering show",
+    "network vnet peering create",
 )
-class Show(AAZCommand):
-    """Show details of a peering.
+class Create(AAZCommand):
+    """Create a virtual network peering connection.
 
-    :example: Show all details of the specified virtual network peering.
-        az network vnet peering show -g MyResourceGroup -n MyVnet1ToMyVnet2 --vnet-name MyVnet1
+    To successfully peer two virtual networks this command must be called twice with the values for --vnet-name and --remote-vnet reversed.
+
+    :example: Create a peering connection between two virtual networks.
+        az network vnet peering create -g MyResourceGroup -n MyVnet1ToMyVnet2 --vnet-name MyVnet1 --remote-vnet MyVnet2Id --allow-vnet-access
     """
 
     _aaz_info = {
@@ -28,10 +30,11 @@ class Show(AAZCommand):
         ]
     }
 
+    AZ_SUPPORT_NO_WAIT = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return self._output()
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -51,19 +54,75 @@ class Show(AAZCommand):
             options=["--vnet-name"],
             help="The virtual network (VNet) name.",
             required=True,
-            id_part="name",
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
             help="The name of the VNet peering.",
             required=True,
-            id_part="child_name_1",
         )
+        _args_schema.sync_remote = AAZStrArg(
+            options=["--sync-remote"],
+            help="Indicate the intention to sync the peering with the current address space on the remote VNet after it's updated.",
+            enum={"true": "true"},
+        )
+        _args_schema.allow_forwarded_traffic = AAZBoolArg(
+            options=["--allow-forwarded-traffic"],
+            help="Whether the forwarded traffic from the VMs in the local virtual network will be allowed/disallowed in remote virtual network.",
+            default=False,
+        )
+        _args_schema.allow_gateway_transit = AAZBoolArg(
+            options=["--allow-gateway-transit"],
+            help="If gateway links can be used in remote virtual networking to link to this virtual network.",
+            default=False,
+        )
+        _args_schema.allow_vnet_access = AAZBoolArg(
+            options=["--allow-vnet-access"],
+            help="Whether the VMs in the local virtual network space would be able to access the VMs in remote virtual network space.",
+            default=False,
+        )
+        _args_schema.remote_vnet = AAZResourceIdArg(
+            options=["--remote-vnet"],
+            help="Name or ID of the remote VNet.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/virtualNetworks/{}",
+            ),
+        )
+        _args_schema.use_remote_gateways = AAZBoolArg(
+            options=["--use-remote-gateways"],
+            help="Allows VNet to use the remote VNet's gateway. Remote VNet gateway must have --allow-gateway-transit enabled for remote peering. Only 1 peering can have this flag enabled. Cannot be set if the VNet already has a gateway.",
+            default=False,
+        )
+
+        # define Arg Group "Properties"
+
+        # define Arg Group "VirtualNetworkPeeringParameters"
         return cls._args_schema
+
+    _args_address_space_create = None
+
+    @classmethod
+    def _build_args_address_space_create(cls, _schema):
+        if cls._args_address_space_create is not None:
+            _schema.address_prefixes = cls._args_address_space_create.address_prefixes
+            return
+
+        cls._args_address_space_create = AAZObjectArg()
+
+        address_space_create = cls._args_address_space_create
+        address_space_create.address_prefixes = AAZListArg(
+            options=["address-prefixes"],
+            help="A list of address blocks reserved for this virtual network in CIDR notation.",
+        )
+
+        address_prefixes = cls._args_address_space_create.address_prefixes
+        address_prefixes.Element = AAZStrArg()
+
+        _schema.address_prefixes = cls._args_address_space_create.address_prefixes
 
     def _execute_operations(self):
         self.pre_operations()
-        self.VirtualNetworkPeeringsGet(ctx=self.ctx)()
+        yield self.VirtualNetworkPeeringsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -78,14 +137,30 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class VirtualNetworkPeeringsGet(AAZHttpOperation):
+    class VirtualNetworkPeeringsCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+            if session.http_response.status_code in [200, 201]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
 
             return self.on_error(session.http_response)
 
@@ -98,7 +173,7 @@ class Show(AAZCommand):
 
         @property
         def method(self):
-            return "GET"
+            return "PUT"
 
         @property
         def error_format(self):
@@ -130,6 +205,9 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
+                    "syncRemoteAddressSpace", self.ctx.args.sync_remote,
+                ),
+                **self.serialize_query_param(
                     "api-version", "2022-01-01",
                     required=True,
                 ),
@@ -140,40 +218,67 @@ class Show(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
 
-        def on_200(self, session):
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("name", AAZStrType, ".name")
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("allowForwardedTraffic", AAZBoolType, ".allow_forwarded_traffic")
+                properties.set_prop("allowGatewayTransit", AAZBoolType, ".allow_gateway_transit")
+                properties.set_prop("allowVirtualNetworkAccess", AAZBoolType, ".allow_vnet_access")
+                properties.set_prop("remoteVirtualNetwork", AAZObjectType)
+                properties.set_prop("useRemoteGateways", AAZBoolType, ".use_remote_gateways")
+
+            remote_virtual_network = _builder.get(".properties.remoteVirtualNetwork")
+            if remote_virtual_network is not None:
+                remote_virtual_network.set_prop("id", AAZStrType, ".remote_vnet")
+
+            return self.serialize_content(_content_value)
+
+        def on_200_201(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200
+                schema_builder=self._build_schema_on_200_201
             )
 
-        _schema_on_200 = None
+        _schema_on_200_201 = None
 
         @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
+        def _build_schema_on_200_201(cls):
+            if cls._schema_on_200_201 is not None:
+                return cls._schema_on_200_201
 
-            cls._schema_on_200 = AAZObjectType()
+            cls._schema_on_200_201 = AAZObjectType()
 
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.etag = AAZStrType(
+            _schema_on_200_201 = cls._schema_on_200_201
+            _schema_on_200_201.etag = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.id = AAZStrType()
-            _schema_on_200.name = AAZStrType()
-            _schema_on_200.properties = AAZObjectType(
+            _schema_on_200_201.id = AAZStrType()
+            _schema_on_200_201.name = AAZStrType()
+            _schema_on_200_201.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _schema_on_200.type = AAZStrType()
+            _schema_on_200_201.type = AAZStrType()
 
-            properties = cls._schema_on_200.properties
+            properties = cls._schema_on_200_201.properties
             properties.allow_forwarded_traffic = AAZBoolType(
                 serialized_name="allowForwardedTraffic",
             )
@@ -199,7 +304,7 @@ class Show(AAZCommand):
             properties.remote_address_space = AAZObjectType(
                 serialized_name="remoteAddressSpace",
             )
-            _ShowHelper._build_schema_address_space_read(properties.remote_address_space)
+            _CreateHelper._build_schema_address_space_read(properties.remote_address_space)
             properties.remote_bgp_communities = AAZObjectType(
                 serialized_name="remoteBgpCommunities",
             )
@@ -209,7 +314,7 @@ class Show(AAZCommand):
             properties.remote_virtual_network_address_space = AAZObjectType(
                 serialized_name="remoteVirtualNetworkAddressSpace",
             )
-            _ShowHelper._build_schema_address_space_read(properties.remote_virtual_network_address_space)
+            _CreateHelper._build_schema_address_space_read(properties.remote_virtual_network_address_space)
             properties.remote_virtual_network_encryption = AAZObjectType(
                 serialized_name="remoteVirtualNetworkEncryption",
             )
@@ -221,7 +326,7 @@ class Show(AAZCommand):
                 serialized_name="useRemoteGateways",
             )
 
-            remote_bgp_communities = cls._schema_on_200.properties.remote_bgp_communities
+            remote_bgp_communities = cls._schema_on_200_201.properties.remote_bgp_communities
             remote_bgp_communities.regional_community = AAZStrType(
                 serialized_name="regionalCommunity",
                 flags={"read_only": True},
@@ -231,20 +336,30 @@ class Show(AAZCommand):
                 flags={"required": True},
             )
 
-            remote_virtual_network = cls._schema_on_200.properties.remote_virtual_network
+            remote_virtual_network = cls._schema_on_200_201.properties.remote_virtual_network
             remote_virtual_network.id = AAZStrType()
 
-            remote_virtual_network_encryption = cls._schema_on_200.properties.remote_virtual_network_encryption
+            remote_virtual_network_encryption = cls._schema_on_200_201.properties.remote_virtual_network_encryption
             remote_virtual_network_encryption.enabled = AAZBoolType(
                 flags={"required": True},
             )
             remote_virtual_network_encryption.enforcement = AAZStrType()
 
-            return cls._schema_on_200
+            return cls._schema_on_200_201
 
 
-class _ShowHelper:
-    """Helper class for Show"""
+class _CreateHelper:
+    """Helper class for Create"""
+
+    @classmethod
+    def _build_schema_address_space_create(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
+
+        address_prefixes = _builder.get(".addressPrefixes")
+        if address_prefixes is not None:
+            address_prefixes.set_elements(AAZStrType, ".")
 
     _schema_address_space_read = None
 
@@ -267,4 +382,4 @@ class _ShowHelper:
         _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
 
 
-__all__ = ["Show"]
+__all__ = ["Create"]

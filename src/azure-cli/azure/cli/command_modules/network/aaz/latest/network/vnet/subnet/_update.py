@@ -12,25 +12,38 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network vnet subnet list",
+    "network vnet subnet update",
 )
-class List(AAZCommand):
-    """List the subnets in a virtual network.
+class Update(AAZCommand):
+    """Update a subnet.
 
-    :example: List the subnets in a virtual network.
-        az network vnet subnet list -g MyResourceGroup --vnet-name MyVNet
+    :example: Associate a network security group to a subnet.
+        az network vnet subnet update -g MyResourceGroup -n MySubnet --vnet-name MyVNet --network-security-group MyNsg
+
+    :example: Update subnet with NAT gateway.
+        az network vnet subnet update -n MySubnet --vnet-name MyVnet -g MyResourceGroup --nat-gateway MyNatGateway --address-prefixes "10.0.0.0/21"
+
+    :example: Disable the private endpoint network policies
+        az network vnet subnet update -n MySubnet --vnet-name MyVnet -g MyResourceGroup --disable-private-endpoint-network-policies
+
+    :example: Detach a network security group in a subnet.
+        az network vnet subnet update -g MyResourceGroup --vnet-name MyVNet -n MySubnet --nsg null
     """
 
     _aaz_info = {
         "version": "2022-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/subnets", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/subnets/{}", "2022-01-01"],
         ]
     }
 
+    AZ_SUPPORT_NO_WAIT = True
+
+    AZ_SUPPORT_GENERIC_UPDATE = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_paging(self._execute_operations, self._output)
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -46,16 +59,309 @@ class List(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
+            help="The subnet name.",
+            required=True,
+            id_part="child_name_1",
+        )
         _args_schema.vnet_name = AAZStrArg(
             options=["--vnet-name"],
             help="The virtual network (VNet) name.",
             required=True,
+            id_part="name",
         )
+        _args_schema.address_prefix = AAZStrArg(
+            options=["--address-prefix"],
+            help="The address prefix for the subnet.",
+            nullable=True,
+        )
+        _args_schema.address_prefixes = AAZListArg(
+            options=["--address-prefixes"],
+            help="Space-separated list of address prefixes in CIDR format.",
+            nullable=True,
+        )
+        _args_schema.delegated_services = AAZListArg(
+            options=["--delegated-services"],
+            help="Space-separated list of services to whom the subnet should be delegated, e.g., `Microsoft.Sql/servers`.",
+            nullable=True,
+        )
+        _args_schema.nat_gateway = AAZResourceIdArg(
+            options=["--nat-gateway"],
+            help="Name or ID of a NAT gateway to attach. Use null to detach it.",
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/natGateways/{}",
+            ),
+        )
+        _args_schema.network_security_group = AAZResourceIdArg(
+            options=["--nsg", "--network-security-group"],
+            help="Name or ID of a network security group (NSG). Use null to detach it.",
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/networkSecurityGroups/{}",
+            ),
+        )
+        _args_schema.private_endpoint_network_policies = AAZStrArg(
+            options=["--private-endpoint-network-policies"],
+            help="Disable private endpoint network policies on the subnet.",
+            nullable=True,
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+        _args_schema.private_link_service_network_policies = AAZStrArg(
+            options=["--private-link-service-network-policies"],
+            help="Disable private link service network policies on the subnet.",
+            nullable=True,
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+        _args_schema.route_table = AAZResourceIdArg(
+            options=["--route-table"],
+            help="Name or ID of a route table to associate with the subnet. Use null to detach it.",
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/routeTables/{}",
+            ),
+        )
+        _args_schema.policies = AAZListArg(
+            options=["--policies"],
+            help="An array of service endpoint policies.",
+            nullable=True,
+        )
+        _args_schema.endpoints = AAZListArg(
+            options=["--endpoints"],
+            help="An array of service endpoints.",
+            nullable=True,
+        )
+
+        address_prefixes = cls._args_schema.address_prefixes
+        address_prefixes.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        delegated_services = cls._args_schema.delegated_services
+        delegated_services.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.delegated_services.Element
+        _element.id = AAZStrArg(
+            options=["id"],
+            help="Resource ID.",
+            nullable=True,
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="The name of the resource that is unique within a subnet. This name can be used to access the resource.",
+            nullable=True,
+        )
+        _element.service_name = AAZStrArg(
+            options=["service-name"],
+            help="The name of the service to whom the subnet should be delegated (e.g. Microsoft.Sql/servers).",
+            nullable=True,
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+            help="Resource type.",
+            nullable=True,
+        )
+
+        policies = cls._args_schema.policies
+        policies.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.policies.Element
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource ID.",
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/serviceEndpointPolicies/{}",
+            ),
+        )
+        _element.location = AAZResourceLocationArg(
+            options=["l", "location"],
+            help="Resource location.",
+            nullable=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        _element.contextual_service_endpoint_policies = AAZListArg(
+            options=["contextual-service-endpoint-policies"],
+            help="A collection of contextual service endpoint policy.",
+            nullable=True,
+        )
+        _element.service_alias = AAZStrArg(
+            options=["service-alias"],
+            help="The alias indicating if the policy belongs to a service",
+            nullable=True,
+        )
+        _element.service_endpoint_policy_definitions = AAZListArg(
+            options=["service-endpoint-policy-definitions"],
+            help="A collection of service endpoint policy definitions of the service endpoint policy.",
+            nullable=True,
+        )
+        _element.tags = AAZDictArg(
+            options=["tags"],
+            help="Resource tags.",
+            nullable=True,
+        )
+
+        contextual_service_endpoint_policies = cls._args_schema.policies.Element.contextual_service_endpoint_policies
+        contextual_service_endpoint_policies.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        service_endpoint_policy_definitions = cls._args_schema.policies.Element.service_endpoint_policy_definitions
+        service_endpoint_policy_definitions.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.policies.Element.service_endpoint_policy_definitions.Element
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource ID.",
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/serviceEndpointPolicies/{}/serviceEndpointPolicyDefinitions/{}",
+            ),
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="The name of the resource that is unique within a resource group. This name can be used to access the resource.",
+            nullable=True,
+        )
+        _element.description = AAZStrArg(
+            options=["description"],
+            help="A description for this rule. Restricted to 140 chars.",
+            nullable=True,
+        )
+        _element.service = AAZStrArg(
+            options=["service"],
+            help="Service endpoint name.",
+            nullable=True,
+        )
+        _element.service_resources = AAZListArg(
+            options=["service-resources"],
+            help="A list of service resources.",
+            nullable=True,
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+            help="The type of the resource.",
+            nullable=True,
+        )
+
+        service_resources = cls._args_schema.policies.Element.service_endpoint_policy_definitions.Element.service_resources
+        service_resources.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        tags = cls._args_schema.policies.Element.tags
+        tags.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        endpoints = cls._args_schema.endpoints
+        endpoints.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.endpoints.Element
+        _element.locations = AAZListArg(
+            options=["locations"],
+            help="A list of locations.",
+            nullable=True,
+        )
+        _element.service = AAZStrArg(
+            options=["service"],
+            help="The type of the endpoint service.",
+            nullable=True,
+        )
+
+        locations = cls._args_schema.endpoints.Element.locations
+        locations.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        # define Arg Group "NetworkSecurityGroup"
+
+        # define Arg Group "Properties"
+
+        # define Arg Group "RouteTable"
+
+        # define Arg Group "SubnetParameters"
         return cls._args_schema
+
+    _args_application_security_group_update = None
+
+    @classmethod
+    def _build_args_application_security_group_update(cls, _schema):
+        if cls._args_application_security_group_update is not None:
+            _schema.location = cls._args_application_security_group_update.location
+            _schema.tags = cls._args_application_security_group_update.tags
+            return
+
+        cls._args_application_security_group_update = AAZObjectArg(
+            nullable=True,
+        )
+
+        application_security_group_update = cls._args_application_security_group_update
+        application_security_group_update.location = AAZResourceLocationArg(
+            options=["l", "location"],
+            help="Resource location.",
+            nullable=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        application_security_group_update.tags = AAZDictArg(
+            options=["tags"],
+            help="Resource tags.",
+            nullable=True,
+        )
+
+        tags = cls._args_application_security_group_update.tags
+        tags.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        _schema.location = cls._args_application_security_group_update.location
+        _schema.tags = cls._args_application_security_group_update.tags
+
+    _args_sub_resource_update = None
+
+    @classmethod
+    def _build_args_sub_resource_update(cls, _schema):
+        if cls._args_sub_resource_update is not None:
+            _schema.id = cls._args_sub_resource_update.id
+            return
+
+        cls._args_sub_resource_update = AAZObjectArg(
+            nullable=True,
+        )
+
+        sub_resource_update = cls._args_sub_resource_update
+        sub_resource_update.id = AAZStrArg(
+            options=["id"],
+            help="Resource ID.",
+            nullable=True,
+        )
+
+        _schema.id = cls._args_sub_resource_update.id
 
     def _execute_operations(self):
         self.pre_operations()
-        self.SubnetsList(ctx=self.ctx)()
+        self.SubnetsGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.vars.instance)
+        self.InstanceUpdateByJson(ctx=self.ctx)()
+        self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.vars.instance)
+        yield self.SubnetsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -66,12 +372,19 @@ class List(AAZCommand):
     def post_operations(self):
         pass
 
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
-        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
-        return result, next_link
+    @register_callback
+    def pre_instance_update(self, instance):
+        pass
 
-    class SubnetsList(AAZHttpOperation):
+    @register_callback
+    def post_instance_update(self, instance):
+        pass
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+    class SubnetsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -85,7 +398,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}/subnets",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}/subnets/{subnetName}",
                 **self.url_parameters
             )
 
@@ -102,6 +415,10 @@ class List(AAZCommand):
             parameters = {
                 **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "subnetName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -150,22 +467,274 @@ class List(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.next_link = AAZStrType(
-                serialized_name="nextLink",
-            )
-            _schema_on_200.value = AAZListType()
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-            _ListHelper._build_schema_subnet_read(value.Element)
+            _UpdateHelper._build_schema_subnet_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
+    class SubnetsCreateOrUpdate(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
 
-class _ListHelper:
-    """Helper class for List"""
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+            if session.http_response.status_code in [200, 201]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+
+            return self.on_error(session.http_response)
+
+        @property
+        def url(self):
+            return self.client.format_url(
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}/subnets/{subnetName}",
+                **self.url_parameters
+            )
+
+        @property
+        def method(self):
+            return "PUT"
+
+        @property
+        def error_format(self):
+            return "ODataV4Format"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "subnetName", self.ctx.args.name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "virtualNetworkName", self.ctx.args.vnet_name,
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "api-version", "2022-01-01",
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                value=self.ctx.vars.instance,
+            )
+
+            return self.serialize_content(_content_value)
+
+        def on_200_201(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200_201
+            )
+
+        _schema_on_200_201 = None
+
+        @classmethod
+        def _build_schema_on_200_201(cls):
+            if cls._schema_on_200_201 is not None:
+                return cls._schema_on_200_201
+
+            cls._schema_on_200_201 = AAZObjectType()
+            _UpdateHelper._build_schema_subnet_read(cls._schema_on_200_201)
+
+            return cls._schema_on_200_201
+
+    class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
+
+        def __call__(self, *args, **kwargs):
+            self._update_instance(self.ctx.vars.instance)
+
+        def _update_instance(self, instance):
+            _instance_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                value=instance,
+                typ=AAZObjectType
+            )
+            _builder.set_prop("name", AAZStrType, ".name")
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
+                properties.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
+                properties.set_prop("delegations", AAZListType, ".delegated_services")
+                properties.set_prop("natGateway", AAZObjectType)
+                properties.set_prop("networkSecurityGroup", AAZObjectType)
+                properties.set_prop("privateEndpointNetworkPolicies", AAZStrType, ".private_endpoint_network_policies")
+                properties.set_prop("privateLinkServiceNetworkPolicies", AAZStrType, ".private_link_service_network_policies")
+                properties.set_prop("routeTable", AAZObjectType)
+                properties.set_prop("serviceEndpointPolicies", AAZListType, ".policies")
+                properties.set_prop("serviceEndpoints", AAZListType, ".endpoints")
+
+            address_prefixes = _builder.get(".properties.addressPrefixes")
+            if address_prefixes is not None:
+                address_prefixes.set_elements(AAZStrType, ".")
+
+            delegations = _builder.get(".properties.delegations")
+            if delegations is not None:
+                delegations.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.delegations[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("type", AAZStrType, ".type")
+
+            properties = _builder.get(".properties.delegations[].properties")
+            if properties is not None:
+                properties.set_prop("serviceName", AAZStrType, ".service_name")
+
+            nat_gateway = _builder.get(".properties.natGateway")
+            if nat_gateway is not None:
+                nat_gateway.set_prop("id", AAZStrType, ".nat_gateway")
+
+            network_security_group = _builder.get(".properties.networkSecurityGroup")
+            if network_security_group is not None:
+                network_security_group.set_prop("id", AAZStrType, ".network_security_group")
+                network_security_group.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            route_table = _builder.get(".properties.routeTable")
+            if route_table is not None:
+                route_table.set_prop("id", AAZStrType, ".route_table")
+                route_table.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            service_endpoint_policies = _builder.get(".properties.serviceEndpointPolicies")
+            if service_endpoint_policies is not None:
+                service_endpoint_policies.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.serviceEndpointPolicies[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("location", AAZStrType, ".location")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("tags", AAZDictType, ".tags")
+
+            properties = _builder.get(".properties.serviceEndpointPolicies[].properties")
+            if properties is not None:
+                properties.set_prop("contextualServiceEndpointPolicies", AAZListType, ".contextual_service_endpoint_policies")
+                properties.set_prop("serviceAlias", AAZStrType, ".service_alias")
+                properties.set_prop("serviceEndpointPolicyDefinitions", AAZListType, ".service_endpoint_policy_definitions")
+
+            contextual_service_endpoint_policies = _builder.get(".properties.serviceEndpointPolicies[].properties.contextualServiceEndpointPolicies")
+            if contextual_service_endpoint_policies is not None:
+                contextual_service_endpoint_policies.set_elements(AAZStrType, ".")
+
+            service_endpoint_policy_definitions = _builder.get(".properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions")
+            if service_endpoint_policy_definitions is not None:
+                service_endpoint_policy_definitions.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("type", AAZStrType, ".type")
+
+            properties = _builder.get(".properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions[].properties")
+            if properties is not None:
+                properties.set_prop("description", AAZStrType, ".description")
+                properties.set_prop("service", AAZStrType, ".service")
+                properties.set_prop("serviceResources", AAZListType, ".service_resources")
+
+            service_resources = _builder.get(".properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions[].properties.serviceResources")
+            if service_resources is not None:
+                service_resources.set_elements(AAZStrType, ".")
+
+            tags = _builder.get(".properties.serviceEndpointPolicies[].tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
+
+            service_endpoints = _builder.get(".properties.serviceEndpoints")
+            if service_endpoints is not None:
+                service_endpoints.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.serviceEndpoints[]")
+            if _elements is not None:
+                _elements.set_prop("locations", AAZListType, ".locations")
+                _elements.set_prop("service", AAZStrType, ".service")
+
+            locations = _builder.get(".properties.serviceEndpoints[].locations")
+            if locations is not None:
+                locations.set_elements(AAZStrType, ".")
+
+            return _instance_value
+
+    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
+
+        def __call__(self, *args, **kwargs):
+            self._update_instance_by_generic(
+                self.ctx.vars.instance,
+                self.ctx.generic_update_args
+            )
+
+
+class _UpdateHelper:
+    """Helper class for Update"""
+
+    @classmethod
+    def _build_schema_application_security_group_update(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("location", AAZStrType, ".location")
+        _builder.set_prop("tags", AAZDictType, ".tags")
+
+        tags = _builder.get(".tags")
+        if tags is not None:
+            tags.set_elements(AAZStrType, ".")
+
+    @classmethod
+    def _build_schema_sub_resource_update(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("id", AAZStrType, ".id")
 
     _schema_application_security_group_read = None
 
@@ -2254,4 +2823,4 @@ class _ListHelper:
         _schema.type = cls._schema_virtual_network_tap_read.type
 
 
-__all__ = ["List"]
+__all__ = ["Update"]
