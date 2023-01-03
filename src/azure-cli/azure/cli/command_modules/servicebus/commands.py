@@ -26,6 +26,10 @@ def load_command_table(self, _):
         client_factory=namespaces_mgmt_client_factory,
         resource_type=ResourceType.MGMT_SERVICEBUS)
 
+    sb_namespace_autho = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.servicebus.Operation.Servicebus_Auth_Rule#{}',
+    )
+
     sb_queue_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicebus.operations#QueuesOperations.{}',
         client_factory=queues_mgmt_client_factory,
@@ -79,14 +83,18 @@ def load_command_table(self, _):
         g.custom_command('exists', 'cli_namespace_exists')
         g.generic_update_command('update', custom_func_name='cli_namespace_update', custom_func_type=servicebus_custom, setter_name='begin_create_or_update')
 
+    from azure.cli.command_modules.servicebus.Operation.Servicebus_Auth_Rule import cli_namespaceautho_create
+    with self.command_group('servicebus namespace authorization-rule', custom_command_type=sb_namespace_autho,
+                            is_preview=True) as g:
+        '''g.custom_command('create', 'cli_namespaceautho_create', supports_no_wait=True)'''
     with self.command_group('servicebus namespace authorization-rule', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        g.custom_command('create', 'cli_namespaceautho_create')
-        g.show_command('show', 'get_authorization_rule')
-        g.command('list', 'list_authorization_rules')
-        g.command('keys list', 'list_keys')
-        g.custom_command('keys renew', 'cli_keys_renew')
-        g.command('delete', 'delete_authorization_rule')
-        g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_namespaceautho_update')
+        '''g.custom_command('create', 'cli_namespaceautho_create')'''
+        #g.show_command('show', 'get_authorization_rule')
+        #g.command('list', 'list_authorization_rules')
+        #g.command('keys list', 'list_keys')
+        #g.custom_command('keys renew', 'cli_keys_renew')
+        #g.command('delete', 'delete_authorization_rule')
+        #g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_namespaceautho_update')
 
     with self.command_group('servicebus namespace private-endpoint-connection', sb_private_endpoints_util, resource_type=ResourceType.MGMT_SERVICEBUS,
                             custom_command_type=servicebus_custom, is_preview=True,
