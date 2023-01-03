@@ -302,7 +302,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None,
                         public_network_access=None, accelerated_network=None, architecture=None,
                         data_access_auth_mode=None, gallery_image_reference_type=None, security_data_uri=None,
-                        upload_type=None, secure_vm_disk_encryption_set=None):
+                        upload_type=None, secure_vm_disk_encryption_set=None, performance_plus=None):
 
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -435,7 +435,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                                  storage_account_id=source_storage_account_id,
                                  upload_size_bytes=upload_size_bytes,
                                  logical_sector_size=logical_sector_size,
-                                 security_data_uri=security_data_uri)
+                                 security_data_uri=security_data_uri,
+                                 performance_plus=performance_plus)
 
     if size_gb is None and upload_size_bytes is None:
         if option == DiskCreateOption.empty:
@@ -1353,10 +1354,27 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
     return result
 
 
-def list_vm(cmd, resource_group_name=None, show_details=False):
+# pylint: disable=redefined-builtin
+def list_vm(cmd, resource_group_name=None, show_details=False, vmss=None):
+    from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
     ccf = _compute_client_factory(cmd.cli_ctx)
-    vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name) \
-        if resource_group_name else ccf.virtual_machines.list_all()
+    if vmss is not None:
+        if is_valid_resource_id(vmss):
+            filter = "'virtualMachineScaleSet/id' eq '{}'".format(vmss)
+            if resource_group_name is None:
+                resource_group_name = parse_resource_id(vmss)['resource_group']
+        else:
+            if resource_group_name is None:
+                raise RequiredArgumentMissingError(
+                    'usage error: please specify the --resource-group when listing VM instances with VMSS name')
+            vmss_id = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+                                  namespace='Microsoft.Compute', type='virtualMachineScaleSets', name=vmss)
+            filter = "'virtualMachineScaleSet/id' eq '{}'".format(vmss_id)
+        vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name, filter=filter)
+    else:
+        vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name) \
+            if resource_group_name else ccf.virtual_machines.list_all()
     if show_details:
         return [get_vm_details(cmd, _parse_rg_name(v.id)[0], v.name) for v in vm_list]
 

@@ -3887,11 +3887,6 @@ disks are specified, all disks will be included."
                --resource-group "myResourceGroup" --collection-name "rpcName" --name "rpName"
 """
 
-helps['restore-point delete'] = """
-    type: command
-    short-summary: "Delete the restore point."
-"""
-
 helps['restore-point wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until a condition of the restore-point is met.

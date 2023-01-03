@@ -17,6 +17,23 @@ type: group
 short-summary: Manage databases.
 """
 
+helps['sql db advanced-threat-protection-setting'] = """
+type: group
+short-summary: Manage a database's advanced threat protection setting.
+"""
+
+helps['sql db advanced-threat-protection-setting update'] = """
+type: command
+short-summary: Update a database's advanced threat protection setting.
+parameters:
+  - name: --state
+    type: string
+    short-summary: 'State of the advanced threat protection setting'
+examples:
+  - name: Disable an advanced threat protection setting.
+    text: az sql db advanced-threat-protection-setting update -g mygroup -s myserver -n mydb --state Disabled
+"""
+
 helps['sql db audit-policy'] = """
 type: group
 short-summary: Manage a database's auditing policy.
@@ -819,6 +836,23 @@ examples:
     text: az sql mi failover -g mygroup -n myinstance --replica-type ReadableSecondary
 """
 
+helps['sql mi advanced-threat-protection-setting'] = """
+type: group
+short-summary: Manage a SQL managed instance's advanced threat protection setting.
+"""
+
+helps['sql mi advanced-threat-protection-setting update'] = """
+type: command
+short-summary: Update a SQL managed instance's advanced threat protection setting.
+parameters:
+  - name: --state
+    type: string
+    short-summary: 'State of the advanced threat protection setting'
+examples:
+  - name: Disable an advanced threat protection setting.
+    text: az sql mi advanced-threat-protection-setting update -g mygroup -n myinstance --state Disabled
+"""
+
 helps['sql mi key'] = """
 type: group
 short-summary: Manage a SQL Instance's keys.
@@ -914,6 +948,23 @@ examples:
 helps['sql midb'] = """
 type: group
 short-summary: Manage SQL managed instance databases.
+"""
+
+helps['sql midb advanced-threat-protection-setting'] = """
+type: group
+short-summary: Manage a SQL managed instance database's advanced threat protection setting.
+"""
+
+helps['sql midb advanced-threat-protection-setting update'] = """
+type: command
+short-summary: Update a SQL managed instance database's advanced threat protection setting.
+parameters:
+  - name: --state
+    type: string
+    short-summary: 'State of the advanced threat protection setting'
+examples:
+  - name: Disable an advanced threat protection setting.
+    text: az sql midb advanced-threat-protection-setting update -g mygroup --mi myinstance -n mydb --state Disabled
 """
 
 helps['sql midb create'] = """
@@ -1175,6 +1226,23 @@ short-summary: Get a specific Azure Active Directory only Authentication propert
 examples:
   - name: Get Active Directory only authentication status for a sql server
     text: az sql server ad-only-auth get --resource-group mygroup --name myServer
+"""
+
+helps['sql server advanced-threat-protection-setting'] = """
+type: group
+short-summary: Manage a server's advanced threat protection setting.
+"""
+
+helps['sql server advanced-threat-protection-setting update'] = """
+type: command
+short-summary: Update a server's advanced threat protection setting.
+parameters:
+  - name: --state
+    type: string
+    short-summary: 'State of the advanced threat protection setting'
+examples:
+  - name: Disable an advanced threat protection setting.
+    text: az sql server advanced-threat-protection-setting update -g mygroup -n myserver --state Disabled
 """
 
 helps['sql server audit-policy'] = """

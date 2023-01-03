@@ -112,7 +112,8 @@ def load_arguments(self, _):
                                                                  scopes=['appservice', 'webapp', 'functionapp']))
         c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
         c.argument('app_service_environment', options_list=['--app-service-environment', '-e'],
-                   help="Name or ID of the app service environment",
+                   help="Name or ID of the app service environment. If you want to create the app service plan in different \
+subscription than the app service environment, please use the resource ID for --app-service-environment parameter. ",
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', action='store_true', required=False, help='host web app on Linux worker')
@@ -985,6 +986,10 @@ def load_arguments(self, _):
                    help='Configure App Service Environment as Zone Redundant. Applies to ASEv3 only.')
     with self.argument_context('appservice ase delete') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment')
+    with self.argument_context('appservice ase upgrade') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment')
+    with self.argument_context('appservice ase send-test-notification') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment')
     with self.argument_context('appservice ase update') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
@@ -995,6 +1000,12 @@ def load_arguments(self, _):
         c.argument('allow_new_private_endpoint_connections', arg_type=get_three_state_flag(),
                    options_list=['--allow-new-private-endpoint-connections', '-p'],
                    help='(ASEv3 only) Configure Apps in App Service Environment to allow new private endpoint connections.')
+        c.argument('allow_remote_debugging', arg_type=get_three_state_flag(),
+                   options_list=['--allow-remote-debugging', '-r'],
+                   help='(ASEv3 only) Configure App Service Environment to allow remote debugging. You will still have to configure remote debugging at the individual app level')
+        c.argument('allow_incoming_ftp_connections', arg_type=get_three_state_flag(),
+                   options_list=['--allow-incoming-ftp-connections', '-f'],
+                   help='(ASEv3 only) Configure App Service Environment to allow FTP access. This ftpEnabled setting allows you to allow or deny FTP connections on the App Service Environment level. Individual apps will still need to configure FTP access.')
     with self.argument_context('appservice ase list-addresses') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
