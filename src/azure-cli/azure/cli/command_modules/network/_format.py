@@ -100,10 +100,6 @@ def transform_vpn_connection(result):
     return result
 
 
-def transform_vnet_create_output(result):
-    return {'newVNet': result.result()}
-
-
 def transform_vnet_table_output(result):
 
     def _transform(result):

@@ -6322,7 +6322,7 @@ class VMGalleryApplication(ScenarioTest):
         self.cmd('sig gallery-application list -r {gallery} -g {rg}', checks=self.is_empty())
 
     @ResourceGroupPreparer(location='eastus2')
-    @StorageAccountPreparer(location='eastus2', name_prefix='account', length=15)
+    @StorageAccountPreparer(location='eastus2', name_prefix='account', length=15, allow_blob_public_access=True)
     def test_gallery_application_version(self, resource_group, resource_group_location, storage_account_info):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
@@ -7845,6 +7845,15 @@ class DiskBurstingTest(ScenarioTest):
             self.check('burstingEnabled', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_performance_plus_', location='eastus2euap')
+    def test_performance_plus(self, resource_group):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk', 10)
+        })
+
+        self.cmd('disk create -n {disk} -g {rg} --size-gb 530 --performance-plus', checks=[
+            self.check('creationData.performancePlus', True)
+        ])
 
 class VMSSCreateDiskOptionTest(ScenarioTest):
 
@@ -8424,6 +8433,38 @@ class VMSSCrossTenantUpdateScenarioTest(LiveScenarioTest):
         ])
 
 
+class VMCreateFromACGToOtherSubScenarioTest(LiveScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_from_acg_image_to_other_sub')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_from_acg_image_to_other_sub',
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
+    def test_vm_create_from_acg_image_to_other_sub(self, resource_group, another_resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'rg2': another_resource_group,
+            'sub_id': AUX_SUBSCRIPTION,
+            'vm': self.create_random_name('vm', 10),
+            'image_name': self.create_random_name('image', 15),
+            'sig_name': self.create_random_name('sig', 10),
+            'image_def': self.create_random_name('imgdef', 15),
+            'version': '0.1.0',
+            'vm2': self.create_random_name('vm', 10),
+        })
+        self.cmd('vm create -g {rg2} -n {vm} --image ubuntults --subscription {sub_id}')
+        self.cmd('vm deallocate -g {rg2} -n {vm} --subscription {sub_id}')
+        self.cmd('vm generalize -g {rg2} -n {vm} --subscription {sub_id}')
+        self.cmd('image create -g {rg2} -n {image_name} --source {vm} --subscription {sub_id}')
+        self.cmd('sig create -g {rg2} --gallery-name {sig_name} --subscription {sub_id}')
+        self.cmd('sig image-definition create -g {rg2} --gallery-name {sig_name} --gallery-image-definition {image_def} --os-type linux -p publisher1 -f offer1 -s sku1 --subscription {sub_id}')
+        res = self.cmd('sig image-version create -g {rg2} --gallery-name {sig_name} --gallery-image-definition {image_def} --gallery-image-version {version} --managed-image {image_name} --replica-count 1 --subscription {sub_id}').get_output_in_json()
+        self.kwargs.update({
+            'image_version': res['id']
+        })
+        self.cmd('vm create -g {rg} -n {vm2} --image {image_version}')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('storageProfile.imageReference.id', '{image_version}')
+        ])
+
+
 class VMAutoUpdateScenarioTest(ScenarioTest):
 
     @unittest.skip('The selected VM image is not supported for hotpatching')
@@ -8813,6 +8854,33 @@ class VMCreateCountScenarioTest(ScenarioTest):
         self.cmd('vm list -g {rg}', checks=[
             self.check('length(@)', 6)
         ])
+
+
+class VMListFilterScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_list_filter_')
+    def test_vm_list_filter(self, resource_group):
+        self.kwargs.update({
+            'vmss_flex': self.create_random_name('vmss', 10)
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss_flex} --orchestration-mode Flexible --admin-username vmtest --platform-fault-domain-count 2 --image ubuntults --instance-count 2')
+        vmss_id = self.cmd('vmss show -g {rg} -n {vmss_flex}').get_output_in_json()['id']
+        self.kwargs.update({
+            'vmss_id': vmss_id
+        })
+        time.sleep(600)
+        self.cmd('vm list -g {rg} --vmss {vmss_id}', checks=[
+            self.check('length(@)', 2)
+        ])
+        self.cmd('vm list --vmss {vmss_id}', checks=[
+            self.check('length(@)', 2)
+        ])
+        self.cmd('vm list -g {rg} --vmss {vmss_flex}', checks=[
+            self.check('length(@)', 2)
+        ])
+        message = 'usage error: please specify the --resource-group when listing VM instances with VMSS name'
+        with self.assertRaisesRegex(RequiredArgumentMissingError, message):
+            self.cmd('vm list --vmss {vmss_flex}')
 
 
 class ExtendedLocation(ScenarioTest):
