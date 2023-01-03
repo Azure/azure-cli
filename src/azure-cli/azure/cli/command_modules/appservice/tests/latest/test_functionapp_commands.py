@@ -946,7 +946,7 @@ class FunctionAppServicePlan(ScenarioTest):
         self.cmd('functionapp plan create -g {} -n {} --sku S1' .format(resource_group, plan), checks=[
             JMESPathCheck('sku.name', 'S1')
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node'.format(resource_group, functionapp_name, plan, storage_account), checks=[
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime node'.format(resource_group, functionapp_name, plan, storage_account), checks=[
             JMESPathCheck('name', functionapp_name)
         ])
         self.cmd('functionapp delete -g {} -n {} --keep-empty-plan'.format(resource_group, functionapp_name))
@@ -963,7 +963,7 @@ class FunctionAppServicePlan(ScenarioTest):
             JMESPathCheck('sku.name', 'S1')
         ])
         self.cmd(
-            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node'.format(resource_group, functionapp_name, plan, storage_account), checks=[
+            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime node'.format(resource_group, functionapp_name, plan, storage_account), checks=[
             JMESPathCheck('name', functionapp_name)
         ])
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
