@@ -437,6 +437,7 @@ def aks_create(
     azure_keyvault_kms_key_id=None,
     azure_keyvault_kms_key_vault_network_access=None,
     azure_keyvault_kms_key_vault_resource_id=None,
+    enable_keda=False,
     # addons
     enable_addons=None,
     workspace_resource_id=None,
@@ -563,6 +564,8 @@ def aks_update(
     azure_keyvault_kms_key_vault_network_access=None,
     azure_keyvault_kms_key_vault_resource_id=None,
     http_proxy_config=None,
+    enable_keda=False,
+    disable_keda=False,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
