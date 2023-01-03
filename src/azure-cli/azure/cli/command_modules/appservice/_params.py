@@ -112,7 +112,8 @@ def load_arguments(self, _):
                                                                  scopes=['appservice', 'webapp', 'functionapp']))
         c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
         c.argument('app_service_environment', options_list=['--app-service-environment', '-e'],
-                   help="Name or ID of the app service environment",
+                   help="Name or ID of the app service environment. If you want to create the app service plan in different \
+subscription than the app service environment, please use the resource ID for --app-service-environment parameter. ",
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', action='store_true', required=False, help='host web app on Linux worker')
