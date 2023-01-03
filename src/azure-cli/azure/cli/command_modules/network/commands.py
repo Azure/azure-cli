@@ -369,14 +369,8 @@ def load_command_table(self, _):
     with self.command_group('network application-gateway waf-policy', min_api='2018-12-01') as g:
         g.custom_command('create', 'create_ag_waf_policy')
 
-    with self.command_group('network application-gateway waf-policy policy-setting', network_ag_waf_sdk,
-                            client_factory=cf_app_gateway_waf_policy,
-                            min_api='2019-09-01') as g:
-        g.custom_command('list', 'list_waf_policy_setting')
-        g.generic_update_command('update',
-                                 command_type=network_ag_waf_sdk,
-                                 client_factory=cf_app_gateway_waf_policy,
-                                 custom_func_name='update_waf_policy_setting')
+    with self.command_group("network application-gateway waf-policy policy-setting") as g:
+        g.custom_command("list", "list_waf_policy_setting")
 
     with self.command_group("network application-gateway waf-policy custom-rule match-condition"):
         from .custom import WAFCustomRuleMatchConditionAdd
