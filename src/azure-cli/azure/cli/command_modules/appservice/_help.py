@@ -55,6 +55,12 @@ examples:
   - name: Create an app service plan for app service environment.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan --app-service-environment MyAppServiceEnvironment --sku I1
+  - name: Create an app service plan for app service environment in different subscription.
+    text: >
+        az appservice plan create -g MyResourceGroup -n MyPlan --app-service-environment '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.Web/hostingEnvironments/test-ase' --sku I1V2
+  - name: Create an app service plan for app service environment in different subscription and the resource group in different region than app service environment.
+    text: >
+        az appservice plan create -g MyResourceGroup -n MyPlan --app-service-environment '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.Web/hostingEnvironments/test-ase' --sku I1V2 --location ase-region
 """
 
 helps['appservice plan delete'] = """

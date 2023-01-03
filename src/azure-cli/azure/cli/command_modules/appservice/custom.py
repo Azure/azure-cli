@@ -1931,6 +1931,7 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
 
     client = web_client_factory(cmd.cli_ctx)
     if app_service_environment:
+        # Method app_service_environments.list can only list ASE form the same subscription.
         ase_list = client.app_service_environments.list()
         ase_found = False
         ase = None
@@ -1941,8 +1942,17 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
                 ase_found = True
                 break
         if not ase_found:
-            err_msg = "App service environment '{}' not found in subscription.".format(app_service_environment)
-            raise ResourceNotFoundError(err_msg)
+            if is_valid_resource_id(app_service_environment):
+                ase_def = HostingEnvironmentProfile(id=app_service_environment)
+                if location is None:
+                    location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+            else:
+                err_msg = "App service environment '{}' not found in subscription. If you want to create the \
+app service plan in different subscription than the app service environment, please use the resource ID for \
+--app-service-environment parameter. Additionally if the resource group is in different region than the \
+app service environment, please use --location parameter and specify the region where the app service environment \
+has been deployed ".format(app_service_environment)
+                raise ResourceNotFoundError(err_msg)
         if hyper_v and ase.kind in ('ASEV1', 'ASEV2'):
             raise ArgumentUsageError('Windows containers are only supported on v3 App Service Environments v3 or newer')
     else:  # Non-ASE
