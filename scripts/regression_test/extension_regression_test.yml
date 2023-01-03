@@ -146,11 +146,10 @@ jobs:
 - job: ResultSummary
   displayName: CLI Extension Regression Test Result Summary
   dependsOn: CLIExtensionRegressionTest
+  condition: succeededOrFailed()
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
-    - task: DownloadPipelineArtifact@2
-      displayName: 'Download Pipeline Artifact'
     - task: AzureCLI@1
       displayName: 'Result Summary'
       inputs:
@@ -158,7 +157,6 @@ jobs:
         scriptLocation: inlineScript
         inlineScript: |
           set -ev
-          ls ../error_modules -al
 
           # git config
           git clone https://github.com/Azure/azure-cli-extensions.git
@@ -175,7 +173,19 @@ jobs:
 
           for branch in "${REGRESSION_BRANCHES}"
           do
-          branch=${branch##*/}
-          branch=${branch%\"*}
-          echo ${branch}
+            branch=${branch##*/}
+            branch=${branch%\"*}
+            echo ${branch}
+            module=${branch##*_}
+
+            pr_title="Extension Regression Test for ${module}"
+            pr_body="Triggered by CLI Extension Regression Test Pipeline - ADO_BUILD_ID=$(Build.BuildId)\n\nThere may still exist some failed tests and failed modules, see [details](https://dev.azure.com/azure-sdk/internal/_build/results?buildId=$(Build.BuildId)&view=artifacts&type=publishedArtifacts) in ADO pipeline"
+            pr_head="azclibot:${branch}"
+
+            curl \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            -d "{\"title\": \"${pr_title}\", \"body\": \"${pr_body}\", \"head\": \"${pr_head}\", \"base\": \"main\"}" \
+            https://api.github.com/repos/Azure/azure-cli-extensions/pulls
+
+            sleep 5
           done

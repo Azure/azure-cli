@@ -461,6 +461,7 @@ class AutomaticScheduling(object):
     def run_extension_instance_modules(self, instance_modules):
         global_error_flag = False
         for module, path in instance_modules.items():
+            run_command(["git", "checkout", f"regression_test_{os.getenv('BUILD_BUILDID')}"], check_return_code=True)
             error_flag = install_extension(module)
             if not error_flag:
                 azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{module}.xml")
