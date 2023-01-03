@@ -6367,7 +6367,9 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         if self.context.get_disable_keda():
             if mc.workload_auto_scaler_profile is None:
                 mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
-            mc.workload_auto_scaler_profile.keda = self.models.ManagedClusterWorkloadAutoScalerProfileKeda(enabled=False)
+            mc.workload_auto_scaler_profile.keda = self.models.ManagedClusterWorkloadAutoScalerProfileKeda(
+                enabled=False
+            )
 
         return mc
 
