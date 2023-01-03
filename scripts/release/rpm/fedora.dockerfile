@@ -14,8 +14,8 @@ COPY . .
 RUN dos2unix ./scripts/release/rpm/azure-cli.spec && \
     REPO_PATH=$(pwd) CLI_VERSION=$cli_version PYTHON_PACKAGE=$python_package PYTHON_CMD=python3 \
     rpmbuild -v -bb --clean scripts/release/rpm/azure-cli.spec && \
-    cp /root/rpmbuild/RPMS/**/azure-cli-${cli_version}-1.*.rpm /azure-cli-dev.rpm && \
-    mkdir /out && cp /root/rpmbuild/RPMS/**/azure-cli-${cli_version}-1.*.rpm /out/
+    cp /root/rpmbuild/RPMS/*/azure-cli-${cli_version}-1.*.rpm /azure-cli-dev.rpm && \
+    mkdir /out && cp /root/rpmbuild/RPMS/*/azure-cli-${cli_version}-1.*.rpm /out/
 
 FROM ${image} AS execution-env
 
