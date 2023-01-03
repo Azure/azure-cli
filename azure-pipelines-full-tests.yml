@@ -18,6 +18,7 @@ variables:
 jobs:
 - job: AutomationTest20200901
   displayName: Automation Test (Profile 2020-09-01)
+  condition: and(succeeded(), in(variables['Build.Reason'], 'PullRequest'))
   timeoutInMinutes: 120
   pool:
     name: ${{ variables.ubuntu_pool }}
