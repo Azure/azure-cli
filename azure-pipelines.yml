@@ -19,7 +19,7 @@ jobs:
 - job: CheckPullRequest
   displayName: "Check the Format of Pull Request Title and Content"
 #  condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release'))
-  condition: and(succeeded(), in(variables['Build.Reason'], 'PRautomated'))
+  condition: and(succeeded(), in(variables['Build.Reason'], 'PullRequest'))
 
   pool:
     name: ${{ variables.ubuntu_pool }}
