@@ -411,6 +411,18 @@ examples:
     crafted: true
 """
 
+helps['functionapp cors credentials'] = """
+type: command
+short-summary: Enable or disable access-control-allow-credentials.
+examples:
+  - name: Enable CORS access-control-allow-credentials.
+    text: az functionapp cors credentials --name MyFunctionApp --resource-group MyResourceGroup --enable true
+    crafted: true
+  - name: Disable CORS access-control-allow-credentials.
+    text: az functionapp cors credentials --name MyFunctionApp --resource-group MyResourceGroup --enable false
+    crafted: false
+"""
+
 helps['functionapp create'] = """
 type: command
 short-summary: Create a function app.
