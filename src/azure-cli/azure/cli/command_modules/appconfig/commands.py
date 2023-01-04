@@ -133,6 +133,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_filter')
         g.custom_command('list', 'list_filter')
 
+    # Snapshot Commands
     with self.command_group('appconfig snapshot', configstore_snapshot_util, is_preview=True) as g:
         g.command('create', 'create_snapshot')
         g.command('show', 'show_snapshot')
