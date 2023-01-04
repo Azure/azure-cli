@@ -171,7 +171,7 @@ jobs:
           git fetch azclibot
           REGRESSION_BRANCHES=$(curl -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/repos/azclibot/azure-cli-extensions/git/matching-refs/heads/regression_test_$(Build.BuildId)_ | jq '.[] | .ref')
 
-          for branch in "${REGRESSION_BRANCHES}"
+          for branch in ${REGRESSION_BRANCHES[@]}
           do
             branch=${branch##*/}
             branch=${branch%\"*}
@@ -179,7 +179,7 @@ jobs:
             module=${branch##*_}
 
             pr_title="Extension Regression Test for ${module}"
-            pr_body="Triggered by CLI Extension Regression Test Pipeline - ADO_BUILD_ID=$(Build.BuildId)\n\nThere may still exist some failed tests and failed modules, see [details](https://dev.azure.com/azure-sdk/internal/_build/results?buildId=$(Build.BuildId)&view=artifacts&type=publishedArtifacts) in ADO pipeline"
+            pr_body="Triggered by CLI Extension Regression Test Pipeline - ADO_BUILD_ID=$(Build.BuildId)\n\nThere may still exist some failed tests and failed modules, see [details](https://dev.azure.com/azclitools/internal/_build/results?buildId=$(Build.BuildId)&view=artifacts&type=publishedArtifacts) in ADO pipeline"
             pr_head="azclibot:${branch}"
 
             curl \
