@@ -1121,7 +1121,7 @@ type: command
 short-summary: Set a web app's settings.
 parameters:
   - name: --settings
-    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. See https://go.microsoft.com/fwlink/?linkid=2219923 for more information on file format and editing app settings in bulk.
   - name: --slot-settings
     short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. Given setting are added to the configuration and marked as Deployment slot setting by default.
 examples:
