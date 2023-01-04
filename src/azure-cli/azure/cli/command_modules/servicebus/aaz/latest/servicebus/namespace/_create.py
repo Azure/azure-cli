@@ -176,8 +176,9 @@ class Create(AAZCommand):
         key_vault_properties.Element = AAZObjectArg()
 
         _element = cls._args_schema.encryption.key_vault_properties.Element
-        _element.identity = AAZObjectArg(
-            options=["identity"],
+        _element.user_assigned_identity = AAZStrArg(
+            options=["user-assigned-identity"],
+            help="ARM ID of user Identity selected for encryption",
         )
         _element.key_name = AAZStrArg(
             options=["key-name"],
@@ -190,12 +191,6 @@ class Create(AAZCommand):
         _element.key_version = AAZStrArg(
             options=["key-version"],
             help="Version of KeyVault",
-        )
-
-        identity = cls._args_schema.encryption.key_vault_properties.Element.identity
-        identity.user_assigned_identity = AAZStrArg(
-            options=["user-assigned-identity"],
-            help="ARM ID of user Identity selected for encryption",
         )
 
         private_endpoint_connections = cls._args_schema.private_endpoint_connections
@@ -377,7 +372,7 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".properties.encryption.keyVaultProperties[]")
             if _elements is not None:
-                _elements.set_prop("identity", AAZObjectType, ".identity")
+                _elements.set_prop("identity", AAZObjectType)
                 _elements.set_prop("keyName", AAZStrType, ".key_name")
                 _elements.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri")
                 _elements.set_prop("keyVersion", AAZStrType, ".key_version")

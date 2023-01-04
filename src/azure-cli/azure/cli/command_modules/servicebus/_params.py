@@ -46,7 +46,12 @@ def load_arguments_sb(self, _):
                    help='List of KeyVaultProperties objects.')
         c.argument('minimum_tls_version', options_list=['--minimum-tls-version', '--min-tls'], arg_type=get_enum_type(TlsVersion),
                    help='The minimum TLS version for the cluster to support, e.g. 1.2')
-
+        c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'], is_preview=True,
+                   arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption)')
+        c.argument('public_network_access', options_list=['--public-network-access', '--public-network'],
+                   arg_type=get_enum_type(['Enabled', 'Disabled']),
+                   help='This determines if traffic is allowed over public network. By default it is enabled. If value is SecuredByPerimeter then Inbound and Outbound communication is controlled by the network security perimeter and profile\' access rules.')
     with self.argument_context('servicebus namespace exists') as c:
         c.argument('name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
 

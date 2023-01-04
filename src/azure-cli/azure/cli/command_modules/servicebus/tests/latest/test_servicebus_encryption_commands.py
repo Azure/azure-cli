@@ -90,8 +90,8 @@ class SBNamespaceMSITesting(ScenarioTest):
 
         self.kwargs.update({'pId': namespace['identity']['principalId']})
 
-        self.cmd(
-            'keyvault set-policy -n {kv_name} -g {rg} --object-id {pId} --key-permissions  all')
+        self.cmd('keyvault set-policy -n {kv_name} -g {rg} --object-id {pId} --key-permissions  all')
+
         namespace = self.cmd(
             'servicebus namespace encryption add --resource-group {rg} --namespace-name {namespacename1}' +
             ' --encryption-config key-name={key1} key-vault-uri={key_uri}'
