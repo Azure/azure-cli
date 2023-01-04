@@ -3913,7 +3913,7 @@ class NetworkNicScenarioTest(ScenarioTest):
         })
 
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}').get_output_in_json()['newVNet']['subnets'][0]['id']
-        self.cmd('network nsg create -g {rg} -n {nsg1} --tags ""')
+        self.cmd('network nsg create -g {rg} -n {nsg1}')
         self.kwargs['nsg_id'] = self.cmd('network nsg show -g {rg} -n {nsg1}').get_output_in_json()['id']
 
         # test network nsg update
@@ -4231,21 +4231,21 @@ class NetworkExtendedNSGScenarioTest(ScenarioTest):
             'rule': 'rule1'
         })
         self.cmd('network nsg create --name {nsg} -g {rg}')
-        self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefix * -n {rule} --source-port-range 700-900 1000-1100 --destination-port-range 4444 --priority 1000', checks=[
+        self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefixes * -n {rule} --source-port-ranges 700-900 1000-1100 --priority 1000', checks=[
             self.check('length(destinationAddressPrefixes)', 2),
-            self.check('destinationAddressPrefix', ''),
+            self.check('destinationAddressPrefix', None),
             self.check('length(sourceAddressPrefixes)', 0),
             self.check('sourceAddressPrefix', '*'),
             self.check('length(sourcePortRanges)', 2),
             self.check('sourcePortRange', None),
             self.check('length(destinationPortRanges)', 0),
-            self.check('destinationPortRange', '4444')
+            self.check('destinationPortRange', '80')
         ])
-        self.cmd('network nsg rule update --destination-address-prefixes Internet --nsg-name {nsg} -g {rg} --source-address-prefix 10.0.0.0/24 11.0.0.0/24 -n {rule} --source-port-range * --destination-port-range 500-1000 2000 3000', checks=[
+        self.cmd('network nsg rule update --destination-address-prefixes Internet --nsg-name {nsg} -g {rg} --source-address-prefixes 10.0.0.0/24 11.0.0.0/24 -n {rule} --source-port-ranges * --destination-port-ranges 500-1000 2000 3000', checks=[
             self.check('length(destinationAddressPrefixes)', 0),
             self.check('destinationAddressPrefix', 'Internet'),
             self.check('length(sourceAddressPrefixes)', 2),
-            self.check('sourceAddressPrefix', ''),
+            self.check('sourceAddressPrefix', None),
             self.check('length(sourcePortRanges)', 0),
             self.check('sourcePortRange', '*'),
             self.check('length(destinationPortRanges)', 3),
@@ -4266,7 +4266,7 @@ class NetworkSecurityGroupScenarioTest(ScenarioTest):
         })
 
         self.cmd('network nsg create --name {nsg} -g {rg} --tags foo=doo')
-        self.cmd('network nsg rule create --access allow --destination-address-prefix 1234 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefix 789 -n {rule} --source-port-range * --destination-port-range 4444 --priority 1000')
+        self.cmd('network nsg rule create --access allow --destination-address-prefixes 1234 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefixes 789 -n {rule} --source-port-ranges * --destination-port-ranges 4444 --priority 1000')
 
         self.cmd('network nsg list', checks=[
             self.check('type(@)', 'array'),
@@ -4304,7 +4304,7 @@ class NetworkSecurityGroupScenarioTest(ScenarioTest):
             'desc': 'greatrule',
             'priority': 888
         })
-        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --direction {dir} --access {access} --destination-address-prefix {prefix} --protocol {protocol} --source-address-prefix {prefix} --source-port-range {ports} --destination-port-range {ports} --priority {priority} --description {desc}', checks=[
+        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --direction {dir} --access {access} --destination-address-prefixes {prefix} --protocol {protocol} --source-address-prefixes {prefix} --source-port-ranges {ports} --destination-port-ranges {ports} --priority {priority} --description {desc}', checks=[
             self.check('access', 'Deny'),
             self.check('direction', '{dir}'),
             self.check('destinationAddressPrefix', '{prefix}'),
@@ -4338,7 +4338,7 @@ class NetworkSecurityGroupScenarioTest(ScenarioTest):
                          self.check('ends_with(@.destinationApplicationSecurityGroups[0].id, `/{asg2}`)', True)])
         self.cmd('network nsg rule update -g {rg} --nsg-name {nsg2} -n {rule2} --destination-asgs "" --destination-address-prefix {prefix}',
                  checks=[self.check('name', '{rule2}'),
-                         self.check('destinationAddressPrefix', '{prefix}')])
+                         self.check('destinationApplicationSecurityGroups', None)])
 
         self.cmd('network nsg rule delete --resource-group {rg} --nsg-name {nsg} --name {rule}')
         self.cmd('network nsg rule delete --resource-group {rg} --nsg-name {nsg2} --name {rule2}')
