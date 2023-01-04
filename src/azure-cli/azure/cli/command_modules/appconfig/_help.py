@@ -605,10 +605,10 @@ helps['appconfig snapshot create'] = """
     examples:
         - name: Create a snapshot MySnapshot of all keys starting with 'Test' in configuration store MyAppConfiguration.
           text:
-            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\"key\":\"Test*\"}'
+            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"Test*\\"}'
         - name: Create a snapshot MySnapshot of all keys starting with 'abc' and a retention period of 5 minutes.
           text:
-            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\"key\":\"abc*\"}' --retention-period 300
+            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"abc*\\"}' --retention-period 300
         - name: Create a snapshot of all keys starting with 'app/' and no label as default, then override the key-values with keys with the label 'prod' if they exist.
           text:
             az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"app/*\\"}' '{\\"key\\":\\"app/*\\", \\"label\\":\\"prod\\"}' --composition-type 'group_by_key'
