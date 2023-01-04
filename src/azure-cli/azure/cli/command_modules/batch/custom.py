@@ -102,6 +102,7 @@ def create_account(client,
     encryption = EncryptionProperties(
         key_source=encryption_key_source,
         key_vault_properties=encryption_key_identifier) if encryption_key_source else None
+    
     parameters = BatchAccountCreateParameters(location=location,
                                               tags=tags,
                                               auto_storage=properties,
