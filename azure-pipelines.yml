@@ -21,10 +21,10 @@ parameters:
   default:
   - name: AMD64
     value: amd64
-    pool: pool-ubuntu-2004
+    pool: ${{ variables.ubuntu_pool }}
   - name: ARM64
     value: arm64
-    pool: ubuntu-arm64-2004-pool
+    pool: ${{ variables.ubuntu_arm64_pool }}
 
 jobs:
 - job: CheckPullRequest
