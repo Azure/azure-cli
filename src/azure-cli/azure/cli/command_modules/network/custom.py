@@ -5305,10 +5305,6 @@ class NSGRuleUpdate(_NSGRuleUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        _handle_plural_or_singular(args, "destination_address_prefixes", "destination_address_prefix")
-        _handle_plural_or_singular(args, "destination_port_ranges", "destination_port_range")
-        _handle_plural_or_singular(args, "source_address_prefixes", "source_address_prefix")
-        _handle_plural_or_singular(args, "source_port_ranges", "source_port_range")
         # handle application security groups
         args.destination_application_security_groups = assign_aaz_list_arg(
             args.destination_application_security_groups,
@@ -5320,6 +5316,34 @@ class NSGRuleUpdate(_NSGRuleUpdate):
             args.source_asgs,
             element_transformer=lambda _, asg_id: {"id": asg_id}
         )
+
+    def pre_instance_update(self, instance):
+        if instance.properties.sourceAddressPrefix:
+            instance.properties.sourceAddressPrefixes = [instance.properties.sourceAddressPrefix]
+            instance.properties.sourceAddressPrefix = None
+        if instance.properties.destinationAddressPrefix:
+            instance.properties.destinationAddressPrefixes = [instance.properties.destinationAddressPrefix]
+            instance.properties.destinationAddressPrefix = None
+        if instance.properties.sourcePortRange:
+            instance.properties.sourcePortRanges = [instance.properties.sourcePortRange]
+            instance.properties.sourcePortRange = None
+        if instance.properties.destinationPortRange:
+            instance.properties.destinationPortRanges = [instance.properties.destinationPortRange]
+            instance.properties.destinationPortRange = None
+
+    def post_instance_update(self, instance):
+        if instance.properties.sourceAddressPrefixes and len(instance.properties.sourceAddressPrefixes) == 1:
+            instance.properties.sourceAddressPrefix = instance.properties.sourceAddressPrefixes[0]
+            instance.properties.sourceAddressPrefixes = None
+        if instance.properties.destinationAddressPrefixes and len(instance.properties.destinationAddressPrefixes) == 1:
+            instance.properties.destinationAddressPrefix = instance.properties.destinationAddressPrefixes[0]
+            instance.properties.destinationAddressPrefixes = None
+        if instance.properties.sourcePortRanges and len(instance.properties.sourcePortRanges) == 1:
+            instance.properties.sourcePortRange = instance.properties.sourcePortRanges[0]
+            instance.properties.sourcePortRanges = None
+        if instance.properties.destinationPortRanges and len(instance.properties.destinationPortRanges) == 1:
+            instance.properties.destinationPortRange = instance.properties.destinationPortRanges[0]
+            instance.properties.destinationPortRanges = None
 
 
 def list_nsg_rules(cmd, resource_group_name, network_security_group_name, include_default=False):
