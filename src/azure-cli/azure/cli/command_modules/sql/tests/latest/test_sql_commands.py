@@ -1463,12 +1463,13 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
                  .format(resource_group, server, elastic_pool))
 
         # Create database and wait for first backup to exist
-        _create_db_wait_for_first_backup(self, resource_group, server, database_name)
+        db = _create_db_wait_for_first_backup(self, resource_group, server, database_name)
+        timestamp = _get_earliest_restore_date(db)
 
         # Restore to standalone db
         self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
                  ' --service-objective {} --edition {}'
-                 .format(resource_group, server, database_name, datetime.utcnow().isoformat(),
+                 .format(resource_group, server, database_name, timestamp.isoformat(),
                          restore_standalone_database_name, restore_service_objective,
                          restore_edition),
                  checks=[
@@ -1482,7 +1483,7 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
         # in transform func which only runs after `show`/`list` commands.
         self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
                  ' --elastic-pool {}'
-                 .format(resource_group, server, database_name, datetime.utcnow().isoformat(),
+                 .format(resource_group, server, database_name, timestamp.isoformat(),
                          restore_pool_database_name, elastic_pool),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -1501,7 +1502,7 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
         bsr_database = 'bsr_database'
         backup_storage_redundancy = 'geo'
         self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {} --backup-storage-redundancy {}'
-                 .format(resource_group, server, database_name, datetime.utcnow().isoformat(),
+                 .format(resource_group, server, database_name, timestamp.isoformat(),
                          bsr_database, backup_storage_redundancy),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
