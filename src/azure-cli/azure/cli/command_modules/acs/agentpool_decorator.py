@@ -503,7 +503,9 @@ class AKSAgentPoolContext(BaseAKSContext):
         ):
             # read the original value passed by the command
             raw_os_sku = self.raw_param.get("os_sku")
-            if raw_os_sku == CONST_OS_SKU_WINDOWS2019 or raw_os_sku == CONST_OS_SKU_WINDOWS2022:
+            raw_sku_2019 = CONST_OS_SKU_WINDOWS2019
+            raw_sku_2022 = CONST_OS_SKU_WINDOWS2022
+            if raw_os_sku == raw_sku_2019 or raw_os_sku == raw_sku_2022:
                 raise InvalidArgumentValueError("OS SKU is invalid for Linux OS Type. Please specify '--os-type Windows' for Windows SKUs")
         return os_type
 
