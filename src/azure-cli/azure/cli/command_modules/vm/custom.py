@@ -4696,7 +4696,7 @@ def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_
 
 def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name,
                          target_regions=None, replica_count=None, allow_replicated_location_deletion=None,
-                         target_zone_encryption=None, target_edge_zones=None, no_wait=False, **kwargs):
+                         target_edge_zones=None, no_wait=False, **kwargs):
     image_version = kwargs['gallery_image_version']
 
     if target_regions:
