@@ -639,7 +639,7 @@ def aks_upgrade(cmd,
         return _remove_nulls([mc])[0]
 
     if instance.kubernetes_version == kubernetes_version or kubernetes_version == '':
-        #don't prompt here because there is another prompt below?
+        # don't prompt here because there is another prompt below?
         if instance.provisioning_state == "Succeeded":
             logger.warning("The cluster is already on version %s and is not in a failed state. No operations "
                            "will occur when upgrading to the same version if the cluster is not in a failed state.",
