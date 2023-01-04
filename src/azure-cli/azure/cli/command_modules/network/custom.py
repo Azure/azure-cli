@@ -1828,7 +1828,6 @@ def create_ag_waf_policy(cmd, resource_group_name, policy_name,
     }
 
     from .aaz.latest.network.application_gateway.waf_policy import Create
-
     return Create(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "name": policy_name,
@@ -2051,9 +2050,8 @@ def remove_waf_managed_rule_set(cmd, resource_group_name, policy_name,
     })
 
 
-def list_waf_managed_rule_set(cmd, resource_group_name, policy_name):
+def list_waf_managed_rules(cmd, resource_group_name, policy_name):
     from .aaz.latest.network.application_gateway.waf_policy import Show
-
     return Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "name": policy_name
@@ -2081,11 +2079,6 @@ def remove_waf_managed_rule_exclusion(cmd, client, resource_group_name, policy_n
     waf_policy = client.get(resource_group_name, policy_name)
     waf_policy.managed_rules.exclusions = []
     return client.create_or_update(resource_group_name, policy_name, waf_policy)
-
-
-def list_waf_managed_rule_exclusion(cmd, client, resource_group_name, policy_name):
-    waf_policy = client.get(resource_group_name, policy_name)
-    return waf_policy.managed_rules
 
 
 # pylint: disable=too-many-nested-blocks
@@ -2187,11 +2180,6 @@ def remove_waf_exclusion_rule_set(client, resource_group_name, policy_name,
         waf_policy.managed_rules.exclusions.remove(remove_exclusion)
 
     return client.create_or_update(resource_group_name, policy_name, waf_policy)
-
-
-def list_waf_exclusion_rule_set(cmd, client, resource_group_name, policy_name):
-    waf_policy = client.get(resource_group_name, policy_name)
-    return waf_policy.managed_rules
 # endregion
 
 

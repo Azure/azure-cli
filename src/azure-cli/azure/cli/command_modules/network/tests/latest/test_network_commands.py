@@ -2355,11 +2355,11 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         self.cmd('network application-gateway waf-policy policy-setting update -g {rg} --policy-name {waf} '
                  '--state Enabled --file-upload-limit-in-mb 64 --mode Prevention',
                  checks=[
-                     self.check('policySettings.fileUploadLimitInMb', 64),
-                     self.check('policySettings.maxRequestBodySizeInKb', 128),
-                     self.check('policySettings.mode', 'Prevention'),
-                     self.check('policySettings.requestBodyCheck', False),
-                     self.check('policySettings.state', 'Enabled')
+                     self.check('fileUploadLimitInMb', 64),
+                     self.check('maxRequestBodySizeInKb', 128),
+                     self.check('mode', 'Prevention'),
+                     self.check('requestBodyCheck', False),
+                     self.check('state', 'Enabled')
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_')
