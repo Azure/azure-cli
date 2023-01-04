@@ -992,8 +992,8 @@ examples:
         --gallery-image-version 1.0.0 \\
         --virtual-machine /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
         --target-regions westus=2=standard eastus \\
-        --target-region-encryption WestUSDiskEncryptionSet1,0,WestUSDiskEncryptionSet2,\\
-        0,EastUSDiskEncryptionSet2
+        --target-region-encryption WestUSDiskEncryptionSet1,0,WestUSDiskEncryptionSet2 \\
+        EastUSDiskEncryptionSet1,0,EastUSDiskEncryptionSet2
   - name: Add a new image version and copy it to extended locations.
     text: |
         az sig image-version create --resource-group MyResourceGroup \\
