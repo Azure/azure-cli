@@ -69,7 +69,6 @@ def create_servicebus_namespace(cmd, resource_group_name, namespace_name, locati
             "key_source": "Microsoft.KeyVault",
             "require_infrastructure_encryption": require_infrastructure_encryption
         }})
-    print(command_args_dict)
 
     return Create(cli_ctx=cmd.cli_ctx)(command_args=command_args_dict)
 def cli_add_encryption(cmd, resource_group_name, namespace_name, encryption_config,require_infrastructure_encryption=None):
