@@ -1993,7 +1993,8 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           max_surge=None,
                           no_wait=False,
                           aks_custom_headers=None,
-                          snapshot_id=None):
+                          snapshot_id=None,
+                          yes=False):
     AgentPoolUpgradeSettings = cmd.get_models(
         "AgentPoolUpgradeSettings",
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
@@ -2053,13 +2054,11 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
     instance.orchestrator_version = kubernetes_version
     instance.creation_data = creationData
 
-
     if not instance.upgrade_settings:
         instance.upgrade_settings = AgentPoolUpgradeSettings()
 
     if max_surge:
         instance.upgrade_settings.max_surge = max_surge
-        
 
     # custom headers
     aks_custom_headers = extract_comma_separated_string(
