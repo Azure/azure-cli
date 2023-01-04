@@ -2244,7 +2244,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
             replica_count = None
             storage_account_type = None
 
-            # Region and edge zone specified, but also replica count or storage account type
+            # Both "region" and "edge zone" are specified, but only one of "replica count" and "storage account type" is specified
             if len(parts) == 3:
                 try:
                     replica_count = int(parts[2])
@@ -2256,7 +2256,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                             "The third part is neither an integer replica count or a valid storage account type. "
                             "Storage account types must be one of {}.".format(t, storage_account_types_str))
 
-            # Region and edge zone specified, but also replica count and storage account type
+            # Not only "region" and "edge zone" are specified, but also "replica count" and "storage account type" are specified
             elif len(parts) == 4:
                 try:
                     replica_count = int(parts[2])  # raises ValueError if this is not a replica count, try other order.

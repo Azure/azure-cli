@@ -1008,7 +1008,7 @@ examples:
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.0.0 \\
         --virtual-machine /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
-        --target-edge-zones westus=microsoftlosangeles1 eastus=microsoftlosangeles2=1 \\
+        --target-edge-zones westus=microsoftlosangeles1 \\
         --target-edge-zone-encryption microsoftlosangeles1,WestUSDiskEncryptionSet1,0,WestUSDiskEncryptionSet2
   - name: Add a new image version and don't wait on it. Later you can invoke "az sig image-version wait" command when ready to create a vm from the gallery image version
     text: |
