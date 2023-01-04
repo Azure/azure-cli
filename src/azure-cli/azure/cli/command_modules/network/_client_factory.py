@@ -80,24 +80,12 @@ def cf_public_ip_addresses(cli_ctx, _):
     return network_client_factory(cli_ctx).public_ip_addresses
 
 
-def cf_subnets(cli_ctx, _):
-    return network_client_factory(cli_ctx).subnets
-
-
 def cf_virtual_network_gateway_connections(cli_ctx, _):
     return network_client_factory(cli_ctx).virtual_network_gateway_connections
 
 
 def cf_virtual_network_gateways(cli_ctx, _):
     return network_client_factory(cli_ctx).virtual_network_gateways
-
-
-def cf_virtual_networks(cli_ctx, _):
-    return network_client_factory(cli_ctx).virtual_networks
-
-
-def cf_virtual_network_peerings(cli_ctx, _):
-    return network_client_factory(cli_ctx).virtual_network_peerings
 
 
 def cf_dns_references(cli_ctx, _):

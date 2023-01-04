@@ -7845,6 +7845,15 @@ class DiskBurstingTest(ScenarioTest):
             self.check('burstingEnabled', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_performance_plus_', location='eastus2euap')
+    def test_performance_plus(self, resource_group):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk', 10)
+        })
+
+        self.cmd('disk create -n {disk} -g {rg} --size-gb 530 --performance-plus', checks=[
+            self.check('creationData.performancePlus', True)
+        ])
 
 class VMSSCreateDiskOptionTest(ScenarioTest):
 
@@ -8845,6 +8854,33 @@ class VMCreateCountScenarioTest(ScenarioTest):
         self.cmd('vm list -g {rg}', checks=[
             self.check('length(@)', 6)
         ])
+
+
+class VMListFilterScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_list_filter_')
+    def test_vm_list_filter(self, resource_group):
+        self.kwargs.update({
+            'vmss_flex': self.create_random_name('vmss', 10)
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss_flex} --orchestration-mode Flexible --admin-username vmtest --platform-fault-domain-count 2 --image ubuntults --instance-count 2')
+        vmss_id = self.cmd('vmss show -g {rg} -n {vmss_flex}').get_output_in_json()['id']
+        self.kwargs.update({
+            'vmss_id': vmss_id
+        })
+        time.sleep(600)
+        self.cmd('vm list -g {rg} --vmss {vmss_id}', checks=[
+            self.check('length(@)', 2)
+        ])
+        self.cmd('vm list --vmss {vmss_id}', checks=[
+            self.check('length(@)', 2)
+        ])
+        self.cmd('vm list -g {rg} --vmss {vmss_flex}', checks=[
+            self.check('length(@)', 2)
+        ])
+        message = 'usage error: please specify the --resource-group when listing VM instances with VMSS name'
+        with self.assertRaisesRegex(RequiredArgumentMissingError, message):
+            self.cmd('vm list --vmss {vmss_flex}')
 
 
 class ExtendedLocation(ScenarioTest):

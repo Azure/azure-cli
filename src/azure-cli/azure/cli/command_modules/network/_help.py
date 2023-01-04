@@ -4384,7 +4384,7 @@ type: command
 short-summary: Create a network security group.
 examples:
   - name: Create an NSG in a resource group within a region with tags.
-    text: az network nsg create -g MyResourceGroup -n MyNsg --tags super_secure no_80 no_22
+    text: az network nsg create -g MyResourceGroup -n MyNsg --tags foo=bar
 """
 
 helps['network nsg rule create'] = """
@@ -5044,13 +5044,10 @@ parameters:
     short-summary: Space-separated list of services allowed private access to this subnet.
     populator-commands:
       - az network vnet list-endpoint-services
-  - name: --nat-gateway
-    short-summary: Attach Nat Gateway to subnet
 examples:
   - name: Create new subnet attached to an NSG with a custom route table.
     text: |
-        az network vnet subnet create -g MyResourceGroup --vnet-name MyVnet -n MySubnet \\
-            --address-prefixes 10.0.0.0/24 --network-security-group MyNsg --route-table MyRouteTable
+        az network vnet subnet create -g MyResourceGroup --vnet-name MyVnet -n MySubnet --address-prefixes 10.0.0.0/24 --network-security-group MyNsg --route-table MyRouteTable
   - name: Create new subnet attached to a NAT gateway.
     text: az network vnet subnet create -n MySubnet --vnet-name MyVnet -g MyResourceGroup --nat-gateway MyNatGateway --address-prefixes "10.0.0.0/21"
 """
@@ -5072,8 +5069,6 @@ parameters:
     short-summary: Space-separated list of services allowed private access to this subnet.
     populator-commands:
       - az network vnet list-endpoint-services
-  - name: --nat-gateway
-    short-summary: Attach Nat Gateway to subnet
 examples:
   - name: Associate a network security group to a subnet.
     text: az network vnet subnet update -g MyResourceGroup -n MySubnet --vnet-name MyVNet --network-security-group MyNsg
