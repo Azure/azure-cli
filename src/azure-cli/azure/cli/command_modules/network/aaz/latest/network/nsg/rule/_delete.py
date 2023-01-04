@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network nsg rule delete"
+    "network nsg rule delete",
 )
 class Delete(AAZCommand):
     """Delete a network security group rule.
@@ -163,6 +163,10 @@ class Delete(AAZCommand):
 
         def on_204(self, session):
             pass
+
+
+class _DeleteHelper:
+    """Helper class for Delete"""
 
 
 __all__ = ["Delete"]
