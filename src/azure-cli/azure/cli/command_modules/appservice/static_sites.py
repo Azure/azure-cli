@@ -567,7 +567,7 @@ def link_user_function(
     name,
     resource_group_name,
     function_resource_id,
-    environment_name: str,
+    environment_name=None,
     force=False,
 ):
     from azure.mgmt.web.models import StaticSiteUserProvidedFunctionAppARMResource
