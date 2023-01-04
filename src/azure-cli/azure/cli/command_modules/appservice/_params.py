@@ -755,7 +755,9 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('functionapp show') as c:
         c.argument('name', arg_type=functionapp_name_arg_type)
     with self.argument_context('functionapp delete') as c:
-        c.argument('name', arg_type=functionapp_name_arg_type, local_context_attribute=None)
+        c.argument('name', arg_type=functionapp_name_arg_type, local_context_attribute=None, help='The name of the functionapp')
+        c.argument('keep_empty_plan', action='store_true', help='keep empty app service plan')
+
     with self.argument_context('functionapp config appsettings') as c:
         c.argument('slot_settings', nargs='+', help="space-separated slot app settings in a format of `<name>=<value>`")
 

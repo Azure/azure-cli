@@ -1137,8 +1137,18 @@ def list_function_app_runtimes(cmd, os_type=None):
     return {WINDOWS_OS_NAME: windows_stacks, LINUX_OS_NAME: linux_stacks}
 
 
-def delete_function_app(cmd, resource_group_name, name, slot=None):
+def delete_logic_app(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'delete', slot)
+
+
+def delete_function_app(cmd, resource_group_name, name, keep_empty_plan=None, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        client.web_apps.delete_slot(resource_group_name, name, slot,
+                                    delete_empty_server_farm=False if keep_empty_plan else None)
+    else:
+        client.web_apps.delete(resource_group_name, name,
+                               delete_empty_server_farm=False if keep_empty_plan else None)
 
 
 def delete_webapp(cmd, resource_group_name, name, keep_metrics=None, keep_empty_plan=None,
@@ -4137,6 +4147,14 @@ def add_webapp_vnet_integration(cmd, name, resource_group_name, vnet, subnet, sl
 
 def add_functionapp_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None,
                                      skip_delegation_check=False):
+    client = web_client_factory(cmd.cli_ctx)
+    functionapp = get_functionapp(cmd, resource_group_name, name)
+    parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
+    plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
+    if plan_info is None:
+        raise ResourceNotFoundError('Could not determine the current plan of the functionapp')
+    if is_plan_consumption(cmd, plan_info):
+        raise ValidationError('Virtual network integration is not allowed for consumption plans')
     return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check)
 
 
