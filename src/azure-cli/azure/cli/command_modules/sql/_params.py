@@ -50,6 +50,7 @@ from azure.cli.core.commands.validators import (
 from knack.arguments import CLIArgumentType, ignore_type
 
 from .custom import (
+    AlwaysEncryptedEnclaveType,
     ClientAuthenticationType,
     ClientType,
     ComputeModelType,
@@ -210,6 +211,11 @@ ledger_on_param_type = CLIArgumentType(
          'All tables in the ledger database must be ledger tables. '
          'Note: the value of this property cannot be changed after the database has been created. ',
     arg_type=get_three_state_flag("Enabled", "Disabled", False, False))
+
+preferred_enclave_param_type = CLIArgumentType(
+    options_list=['--preferred-enclave-type'],
+    help='Create a database configured with Default or VBS preferred enclave type. ',
+    arg_type=get_enum_type(AlwaysEncryptedEnclaveType))
 
 managed_instance_param_type = CLIArgumentType(
     options_list=['--managed-instance', '--mi'],
@@ -401,6 +407,9 @@ def _configure_db_dw_params(arg_ctx):
                      arg_type=zone_redundant_param_type)
 
 
+    arg_ctx.argument('preferred_enclave_type',
+                     arg_type=preferred_enclave_param_type)
+
 def _configure_db_dw_create_params(
         arg_ctx,
         engine,
@@ -492,7 +501,8 @@ def _configure_db_dw_create_params(
             'high_availability_replica_count',
             'requested_backup_storage_redundancy',
             'maintenance_configuration_id',
-            'is_ledger_on',
+            'is_ledger_on',            
+            'preferred_enclave_type',
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -524,6 +534,9 @@ def _configure_db_dw_create_params(
 
     arg_ctx.argument('is_ledger_on',
                      arg_type=ledger_on_param_type)
+
+    arg_ctx.argument('preferred_enclave_type',
+                     arg_type=preferred_enclave_param_type)
 
     # *** Step 3: Ignore params that are not applicable (based on engine & create mode) ***
 
@@ -557,6 +570,9 @@ def _configure_db_dw_create_params(
 
         # License types do not yet exist for DataWarehouse
         arg_ctx.ignore('license_type')
+
+        # Preferred enclave types do not yet exist for DataWarehouse
+        arg_ctx.ignore('preferred_enclave_type')
 
         # Family is not applicable to DataWarehouse
         arg_ctx.ignore('family')

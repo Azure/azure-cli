@@ -28,6 +28,7 @@ from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
 from azure.cli.command_modules.sql.custom import (
+    AlwaysEncryptedEnclaveType,
     ClientAuthenticationType,
     ClientType,
     ComputeModelType,
