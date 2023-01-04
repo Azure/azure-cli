@@ -73,7 +73,8 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
         ])
 
         # test network lb update command
-        self.cmd('network lb update -g {rg} -n {lb} --set tags.CostCenter=MyTestGroup')
+        self.cmd('network lb update -g {rg} -n {lb} --set tags.label=1544 --force-string')
+        self.cmd('network lb update -g {rg} -n {lb} --tags CostCenter=MyTestGroup')
         self.cmd('network lb show -g {rg} -n {lb}', checks=[
             self.check('tags.CostCenter', 'MyTestGroup')
         ])
