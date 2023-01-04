@@ -11,7 +11,7 @@ def create_keyvault_object(col):
     vault_object.update({
         "key_name" : col['keyName'],
         "key_vault_uri" : col['keyVaultUri'],
-        "Key_version" : col['keyVersion']
+        "key_version" : col['keyVersion']
     })
 
     return  vault_object
@@ -124,6 +124,7 @@ def cli_remove_encryption(cmd,resource_group_name, namespace_name, encryption_co
     for col in eventhubsnm['encryption']['keyVaultProperties']:
         object = create_keyvault_object(col)
         key_vault_object.append(object)
+    print(key_vault_object)
     for col in encryption_config:
         if col in key_vault_object:
             key_vault_object.remove(col)

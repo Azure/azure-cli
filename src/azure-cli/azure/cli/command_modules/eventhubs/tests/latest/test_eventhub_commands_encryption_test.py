@@ -83,7 +83,7 @@ class EHNamespaceMSITesting(ScenarioTest):
         self.cmd('keyvault key create -n {key2} --vault-name {kv_name}')
         self.cmd('keyvault key create -n {key3} --vault-name {kv_name}')
 
-        '''namespace = self.cmd(
+        namespace = self.cmd(
             'eventhubs namespace create --resource-group {rg} --name {namespacename} --sku {sku} --location {loc} --mi-system-assigned --mi-user-assigned {id1} {id2}' +
             ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}' +
             ' --encryption-config key-name={key2} key-vault-uri={key_uri} user-assigned-identity={id1}' +
@@ -216,7 +216,7 @@ class EHNamespaceMSITesting(ScenarioTest):
         assert len(n) == 2
         n = [i for i in namespace['encryption']['keyVaultProperties']]
         assert len(n) == 1
-        self.assertEqual(True, namespace['encryption']['requireInfrastructureEncryption'])'''
+        self.assertEqual(True, namespace['encryption']['requireInfrastructureEncryption'])
 
         namespace = self.cmd(
             'eventhubs namespace create --resource-group {rg} --name {namespacename4} --sku {sku} --location {loc} --mi-system-assigned'
