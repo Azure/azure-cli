@@ -503,7 +503,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_staticwebapp_enterprise_edge_status')
 
     with self.command_group('logicapp') as g:
-        g.custom_command('delete', 'delete_function_app', confirmation=True)
+        g.custom_command('delete', 'delete_logic_app', confirmation=True)
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
         g.custom_command('restart', 'restart_webapp')
