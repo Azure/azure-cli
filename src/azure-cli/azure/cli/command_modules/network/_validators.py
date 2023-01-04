@@ -321,18 +321,6 @@ def validate_user_assigned_identity(cmd, namespace):
         )
 
 
-def validate_express_route_port(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.express_route_port and not is_valid_resource_id(namespace.express_route_port):
-        namespace.express_route_port = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='expressRoutePorts',
-            name=namespace.express_route_port
-        )
-
-
 def validate_virtul_network_gateway(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     if namespace.hosted_gateway and not is_valid_resource_id(namespace.hosted_gateway):
@@ -357,69 +345,6 @@ def validate_waf_policy(cmd, namespace):
         )
 
 
-def bandwidth_validator_factory(mbps=True):
-    def validator(namespace):
-        return validate_circuit_bandwidth(namespace, mbps=mbps)
-
-    return validator
-
-
-def validate_circuit_bandwidth(namespace, mbps=True):
-    # use gbps if mbps is False
-    unit = 'mbps' if mbps else 'gbps'
-    bandwidth = None
-    bandwidth = getattr(namespace, 'bandwidth_in_{}'.format(unit), None)
-    if bandwidth is None:
-        return
-
-    if len(bandwidth) == 1:
-        bandwidth_comps = bandwidth[0].split(' ')
-    else:
-        bandwidth_comps = bandwidth
-
-    usage_error = CLIError('usage error: --bandwidth INT {Mbps,Gbps}')
-    if len(bandwidth_comps) == 1:
-        logger.warning('interpretting --bandwidth as %s. Consider being explicit: Mbps, Gbps', unit)
-        setattr(namespace, 'bandwidth_in_{}'.format(unit), float(bandwidth_comps[0]))
-        return
-    if len(bandwidth_comps) > 2:
-        raise usage_error
-
-    if float(bandwidth_comps[0]) and bandwidth_comps[1].lower() in ['mbps', 'gbps']:
-        input_unit = bandwidth_comps[1].lower()
-        if input_unit == unit:
-            converted_bandwidth = float(bandwidth_comps[0])
-        elif input_unit == 'gbps':
-            converted_bandwidth = float(bandwidth_comps[0]) * 1000
-        else:
-            converted_bandwidth = float(bandwidth_comps[0]) / 1000
-        setattr(namespace, 'bandwidth_in_{}'.format(unit), converted_bandwidth)
-    else:
-        raise usage_error
-
-
-def validate_er_peer_circuit(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
-
-    if not is_valid_resource_id(namespace.peer_circuit):
-        peer_id = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='expressRouteCircuits',
-            name=namespace.peer_circuit,
-            child_type_1='peerings',
-            child_name_1=namespace.peering_name)
-    else:
-        peer_id = namespace.peer_circuit
-
-    # if the circuit ID is provided, we need to append /peerings/{peering_name}
-    if namespace.peering_name not in peer_id:
-        peer_id = '{}/peerings/{}'.format(peer_id, namespace.peering_name)
-
-    namespace.peer_circuit = peer_id
-
-
 def validate_inbound_nat_rule_id_list(cmd, namespace):
     _generate_lb_id_list_from_names_or_ids(
         cmd.cli_ctx, namespace, 'load_balancer_inbound_nat_rule_ids', 'inboundNatRules')
@@ -440,10 +365,9 @@ def validate_inbound_nat_rule_name_or_id(cmd, namespace):
             cmd.cli_ctx, namespace, 'inboundNatRules', rule_name)
 
 
-def validate_ip_tags(cmd, namespace):
-    ''' Extracts multiple space-separated tags in TYPE=VALUE format '''
-    IpTag = cmd.get_models('IpTag')
-    if namespace.ip_tags and IpTag:
+def validate_ip_tags(namespace):
+    """ Extracts multiple space-separated tags in TYPE=VALUE format """
+    if namespace.ip_tags:
         ip_tags = []
         for item in namespace.ip_tags:
             tag_type, tag_value = item.split('=', 1)
@@ -529,18 +453,6 @@ def validate_nat_gateway(cmd, namespace):
 def validate_private_ip_address(namespace):
     if namespace.private_ip_address and hasattr(namespace, 'private_ip_address_allocation'):
         namespace.private_ip_address_allocation = 'static'
-
-
-def validate_route_filter(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.route_filter:
-        if not is_valid_resource_id(namespace.route_filter):
-            namespace.route_filter = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=namespace.resource_group_name,
-                namespace='Microsoft.Network',
-                type='routeFilters',
-                name=namespace.route_filter)
 
 
 def get_public_ip_validator(has_type_field=False, allow_none=False, allow_new=False,
@@ -1022,7 +934,7 @@ def process_nic_create_namespace(cmd, namespace):
 def process_public_ip_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_public_ip_prefix(cmd, namespace)
-    validate_ip_tags(cmd, namespace)
+    validate_ip_tags(namespace)
     validate_tags(namespace)
     _inform_coming_breaking_change_for_public_ip(namespace)
 
@@ -1033,28 +945,6 @@ def _inform_coming_breaking_change_for_public_ip(namespace):
                        ' when sku is Standard and zone is not provided:'
                        ' For zonal regions, you will get a zone-redundant IP indicated by zones:["1","2","3"];'
                        ' For non-zonal regions, you will get a non zone-redundant IP indicated by zones:null.')
-
-
-def process_vnet_create_namespace(cmd, namespace):
-    get_default_location_from_resource_group(cmd, namespace)
-    validate_ddos_name_or_id(cmd, namespace)
-    validate_tags(namespace)
-    get_nsg_validator()(cmd, namespace)
-
-    if namespace.subnet_prefix and not namespace.subnet_name:
-        if cmd.supported_api_version(min_api='2018-08-01'):
-            raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefixes PREFIXES]')
-        raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefix PREFIX]')
-
-    if namespace.subnet_name and not namespace.subnet_prefix:
-        if isinstance(namespace.vnet_prefixes, str):
-            namespace.vnet_prefixes = [namespace.vnet_prefixes]
-        prefix_components = namespace.vnet_prefixes[0].split('/', 1)
-        address = prefix_components[0]
-        bit_mask = int(prefix_components[1])
-        subnet_mask = 24 if bit_mask < 24 else bit_mask
-        subnet_prefix = '{}/{}'.format(address, subnet_mask)
-        namespace.subnet_prefix = [subnet_prefix] if cmd.supported_api_version(min_api='2018-08-01') else subnet_prefix
 
 
 def _validate_cert(namespace, param_name):
@@ -1684,7 +1574,8 @@ def process_nw_packet_capture_create_namespace(cmd, namespace):
         file_path = namespace.file_path
         if not file_path.endswith('.cap'):
             raise CLIError("usage error: --file-path PATH must end with the '*.cap' extension")
-        file_path = file_path.replace('/', '\\')
+        if not file_path.startswith('/'):
+            file_path = file_path.replace('/', '\\')
         namespace.file_path = file_path
 
 
