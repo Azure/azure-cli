@@ -495,7 +495,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         ):
             if os_type.lower() == "windows":
                 raise InvalidArgumentValueError("System node pool must be linux.")
-        # validation of Windows OS SKU's against OS Type 
+        # validation of Windows OS SKU's against OS Type
         if (
             self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE and
             self.decorator_mode == DecoratorMode.CREATE and
@@ -545,7 +545,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         elif not read_only and value_obtained_from_snapshot is not None:
             os_sku = value_obtained_from_snapshot
         else:
-            os_sku = raw_value        
+            os_sku = raw_value
         # this parameter does not need validation
         return os_sku
 
