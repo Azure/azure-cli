@@ -133,7 +133,8 @@ def ensure_bicep_installation(release_tag=None, target_platform=None, stdout=Tru
             print(f'Successfully installed Bicep CLI to "{installation_path}".')
         else:
             _logger.info(
-                "Successfully installed Bicep CLI to %s", installation_path,
+                "Successfully installed Bicep CLI to %s",
+                installation_path,
             )
     except IOError as err:
         raise ClientRequestError(f"Error while attempting to download Bicep CLI: {err}")
@@ -196,14 +197,20 @@ def _use_binary_from_path(cli_ctx):
     use_binary_from_path = cli_ctx.config.get("bicep", "use_binary_from_path", "if_running_in_ci").lower()
 
     if use_binary_from_path == "if_running_in_ci":
+        # With if_running_in_ci, GitHub Actions and Azure Pipeline users may expect some delay (usually a few days)
+        # in getting the latest version of Bicep CLI, since the az bicep commands will use the pre-installed Bicep CLI
+        # on the build agents, but the build agents has a different release cycle. The benefit is that the az bicep
+        # commands will not download the Bicep CLI on each pipeline run.
         return _is_running_in_ci()
     if use_binary_from_path in ["1", "yes", "true", "on"]:
+        # Setting the config True forces the az bicep commands to use the Bicep executable added to PATH, which
+        # indicates that the user is intended to manage the Bicep CLI, and version checks will be disabled.
         return True
     if use_binary_from_path in ["0", "no", "false", "off"]:
         return False
 
     _logger.warning(
-        'The configuration value of bicep.use_binary_from_path is invalid: "%s". Possible values include "if_running_in_ci" and Booleans.',  # pylint: disable=line-too-long
+        'The configuration value of bicep.use_binary_from_path is invalid: "%s". Possible values include "if_running_in_ci" (default) and Booleans.',  # pylint: disable=line-too-long
         use_binary_from_path,
     )
 

@@ -19,6 +19,7 @@ from azure.cli.core.azclierror import InvalidTemplateError
 from azure.cli.core.mock import DummyCli
 
 cli_ctx = DummyCli()
+cli_ctx.config.set_value("bicep", "use_binary_from_path", "false")
 
 
 class TestBicep(unittest.TestCase):
