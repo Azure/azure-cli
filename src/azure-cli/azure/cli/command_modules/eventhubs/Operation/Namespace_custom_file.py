@@ -20,7 +20,7 @@ def create_eventhub_namespace(cmd, resource_group_name, namespace_name, location
                          capacity=None,  tier='Standard', mi_user_assigned=None, mi_system_assigned=False,
                          encryption_config=None, minimum_tls_version=None,disable_local_auth = None,
                          maximum_throughput_units=None,require_infrastructure_encryption=None,is_kafka_enabled=None,
-                         is_auto_inflate_enabled=None,alternate_name=None, zone_redundant=None):
+                         is_auto_inflate_enabled=None,alternate_name=None, zone_redundant=None,public_network_access=None):
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Create
 
     user_assigned_identity = {}
@@ -43,7 +43,8 @@ def create_eventhub_namespace(cmd, resource_group_name, namespace_name, location
         "is_kafka_enabled":is_kafka_enabled,
         "zone_redundant": zone_redundant,
         "disable_local_auth": disable_local_auth,
-        "alternate_name": alternate_name
+        "alternate_name": alternate_name,
+        "public_network_access": public_network_access
     }
 
     if mi_system_assigned:
