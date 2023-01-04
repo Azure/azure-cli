@@ -246,11 +246,14 @@ class AppConfigSnapshotClient:
         polling_interval = kwargs.pop("polling_interval", 5)
 
         from datetime import datetime
-
+        from knack.log import get_logger
+        
         def _get_elapsed_time(start_time: datetime):
             return (datetime.now() - start_time).total_seconds()
 
-        print("Starting...")
+        logger = get_logger(__name__)
+        
+        logger.warning("Starting...")
         current_state = self.create_snapshot(
             name,
             filters,
@@ -262,7 +265,7 @@ class AppConfigSnapshotClient:
             **kwargs
         )
 
-        print("Provisioning...")
+        logger.warning("Provisioning...")
 
         import time
         start_time = datetime.now()
