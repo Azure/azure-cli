@@ -6,6 +6,8 @@
 import ast
 import threading
 import time
+import re
+from xml.etree import ElementTree
 
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -47,7 +49,7 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclusiveArgumentError, ResourceNotFoundError,
                                        RequiredArgumentMissingError, ValidationError, CLIInternalError,
                                        UnclassifiedUserFault, AzureResponseError, AzureInternalError,
-                                       ArgumentUsageError)
+                                       ArgumentUsageError, FileOperationError)
 
 from .tunnel import TunnelServer
 
@@ -64,17 +66,18 @@ from .utils import (_normalize_sku,
                     _get_location_from_webapp,
                     _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
-                    get_resource_if_exists)
+                    get_resource_if_exists, repo_url_to_name, get_token)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
-                           detect_os_form_src, get_current_stack_from_runtime, generate_default_app_name)
+                           detect_os_from_src, get_current_stack_from_runtime, generate_default_app_name)
 from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX,
                          FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
-                         WINDOWS_OS_NAME)
-from ._github_oauth import (get_github_access_token)
+                         WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
+                         WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
+from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
 logger = get_logger(__name__)
@@ -90,7 +93,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
-                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False):
+                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, public_network_access=None):
     from azure.mgmt.web.models import Site
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -174,9 +177,10 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         https_only = using_webapp_up
 
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
-                      https_only=https_only, virtual_network_subnet_id=subnet_resource_id)
+                      https_only=https_only, virtual_network_subnet_id=subnet_resource_id,
+                      public_network_access=public_network_access)
     if runtime:
-        runtime = helper.remove_delimiters(runtime)
+        runtime = _StackRuntimeHelper.remove_delimiters(runtime)
 
     current_stack = None
     if is_linux:
@@ -191,7 +195,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             match = helper.resolve(runtime, is_linux)
             if not match:
                 raise ValidationError("Linux Runtime '{}' is not supported."
-                                      " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
+                                      "Run 'az webapp list-runtimes --os-type linux' to cross check".format(runtime))
             helper.get_site_config_setter(match, linux=is_linux)(cmd=cmd, stack=match, site_config=site_config)
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
@@ -221,8 +225,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                      "only appliable on linux webapp")
         match = helper.resolve(runtime, linux=is_linux)
         if not match:
-            raise ValidationError("Windows runtime '{}' is not supported. "
-                                  "Please invoke 'az webapp list-runtimes' to cross check".format(runtime))
+            raise ValidationError("Windows runtime '{}' is not supported."
+                                  "Run 'az webapp list-runtimes --os-type windows' to cross check".format(runtime))
         helper.get_site_config_setter(match, linux=is_linux)(cmd=cmd, stack=match, site_config=site_config)
 
         # TODO: Ask Calvin the purpose of this - seems like unneeded set of calls
@@ -270,7 +274,6 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         identity = assign_identity(cmd, resource_group_name, name, assign_identities,
                                    role, None, scope)
         webapp.identity = identity
-
     return webapp
 
 
@@ -507,8 +510,11 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     # We need to retry getting the plan because sometimes if the plan is created as part of function app,
     # it can take a couple of tries before it gets the plan
     for _ in range(5):
-        plan_info = client.app_service_plans.get(parse_plan_id['resource_group'],
-                                                 parse_plan_id['name'])
+        try:
+            plan_info = client.app_service_plans.get(parse_plan_id['resource_group'],
+                                                     parse_plan_id['name'])
+        except:  # pylint: disable=bare-except
+            pass
         if plan_info is not None:
             break
         time.sleep(retry_delay)
@@ -642,8 +648,8 @@ def remove_remote_build_app_settings(cmd, resource_group_name, name, slot):
     app_settings_should_contain = {}
 
     for keyval in settings:
-        value = keyval['value'].lower()
         if keyval['name'] == 'SCM_DO_BUILD_DURING_DEPLOYMENT':
+            value = keyval['value'].lower()
             scm_do_build_during_deployment = value in ('true', '1')
 
     if scm_do_build_during_deployment is not False:
@@ -835,10 +841,15 @@ def validate_plan_switch_compatibility(cmd, client, src_functionapp_instance, de
                                                'plan, please re-run this command with the \'--force\' flag.')
 
 
-def set_functionapp(cmd, resource_group_name, name, **kwargs):
+def set_functionapp(cmd, resource_group_name, name, slot=None, **kwargs):
     instance = kwargs['parameters']
     client = web_client_factory(cmd.cli_ctx)
-    return client.web_apps.begin_create_or_update(resource_group_name, name, site_envelope=instance)
+    updater = client.web_apps.begin_create_or_update_slot if slot else client.web_apps.begin_create_or_update
+    kwargs = dict(resource_group_name=resource_group_name, name=name, site_envelope=instance)
+    if slot:
+        kwargs['slot'] = slot
+
+    return updater(**kwargs)
 
 
 def get_functionapp(cmd, resource_group_name, name, slot=None):
@@ -1755,6 +1766,27 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     return result
 
 
+def _resolve_storage_account_resource_group(cmd, name):
+    from azure.cli.command_modules.storage.operations.account import list_storage_accounts
+    accounts = [a for a in list_storage_accounts(cmd) if a.name == name]
+    if accounts:
+        return parse_resource_id(accounts[0].id).get("resource_group")
+
+
+def _set_site_config_storage_keys(cmd, site_config):
+    from azure.cli.command_modules.storage._client_factory import cf_sa_for_keys
+
+    for _, acct in site_config.azure_storage_accounts.items():
+        if acct.access_key is None:
+            scf = cf_sa_for_keys(cmd.cli_ctx, None)
+            acct_rg = _resolve_storage_account_resource_group(cmd, acct.account_name)
+            keys = scf.list_keys(acct_rg, acct.account_name, logging_enable=False).keys
+            if keys:
+                key = keys[0]
+                logger.info("Retreived key %s", key.key_name)
+                acct.access_key = key.value
+
+
 def update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source=None,
                                           deployment_container_image_name=None, docker_registry_server_password=None,
                                           docker_registry_server_user=None, docker_registry_server_url=None):
@@ -1762,6 +1794,10 @@ def update_slot_configuration_from_source(cmd, client, resource_group_name, weba
     clone_from_prod = configuration_source.lower() == webapp.lower()
     site_config = get_site_configs(cmd, resource_group_name, webapp,
                                    None if clone_from_prod else configuration_source)
+    if site_config.azure_storage_accounts:
+        logger.warning("The configuration source has storage accounts. Looking up their access keys...")
+        _set_site_config_storage_keys(cmd, site_config)
+
     _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
                             'update_configuration', slot, site_config)
 
@@ -1819,7 +1855,6 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
                                              slot, source_control)
             return LongRunningOperation(cmd.cli_ctx)(poller)
         except Exception as ex:  # pylint: disable=broad-except
-            import re
             ex = ex_handler_factory(no_throw=True)(ex)
             # for non server errors(50x), just throw; otherwise retry 4 times
             if i == 4 or not re.findall(r'\(50\d\)', str(ex)):
@@ -1896,8 +1931,6 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
 
     client = web_client_factory(cmd.cli_ctx)
     if app_service_environment:
-        if hyper_v:
-            raise ArgumentUsageError('Windows containers is not yet supported in app service environment')
         ase_list = client.app_service_environments.list()
         ase_found = False
         ase = None
@@ -1910,6 +1943,8 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
         if not ase_found:
             err_msg = "App service environment '{}' not found in subscription.".format(app_service_environment)
             raise ResourceNotFoundError(err_msg)
+        if hyper_v and ase.kind in ('ASEV1', 'ASEV2'):
+            raise ArgumentUsageError('Windows containers are only supported on v3 App Service Environments v3 or newer')
     else:  # Non-ASE
         ase_def = None
         if location is None:
@@ -1955,9 +1990,10 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None, elastic_
     if elastic_scale is not None or max_elastic_worker_count is not None:
         if sku is None:
             sku = instance.sku.name
-        if get_sku_tier(sku) not in ["PREMIUMV2", "PREMIUMV3"]:
-            raise ValidationError("--number-of-workers and --elastic-scale can only be used on premium V2/V3 SKUs. "
-                                  "Use command help to see all available SKUs")
+        if get_sku_tier(sku) not in ["PREMIUMV2", "PREMIUMV3", "WorkflowStandard"]:
+            raise ValidationError("--number-of-workers and --elastic-scale can only "
+                                  "be used on premium V2/V3 or workflow SKUs. "
+                                  "Use command help to see all available SKUs.")
 
     if elastic_scale is not None:
         # TODO use instance.elastic_scale_enabled once the ASP client factories are updated
@@ -2103,9 +2139,9 @@ def restore_backup(cmd, resource_group_name, webapp_name, storage_account_url, b
                                      site_name=target_name, databases=db_setting,
                                      ignore_conflicting_host_names=ignore_hostname_conflict)
     if slot:
-        return client.web_apps.restore_slot(resource_group_name, webapp_name, 0, restore_request, slot)
+        return client.web_apps.begin_restore_slot(resource_group_name, webapp_name, 0, slot, restore_request)
 
-    return client.web_apps.restore(resource_group_name, webapp_name, 0, restore_request)
+    return client.web_apps.begin_restore(resource_group_name, webapp_name, 0, restore_request)
 
 
 def list_snapshots(cmd, resource_group_name, name, slot=None):
@@ -2130,7 +2166,7 @@ def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_co
         request = SnapshotRestoreRequest(overwrite=False, snapshot_time=time, recovery_source=source,
                                          recover_configuration=recover_config)
         if slot:
-            return client.web_apps.begin_restore_snapshot_slot(resource_group_name, name, request, slot)
+            return client.web_apps.begin_restore_snapshot_slot(resource_group_name, name, slot, request)
         return client.web_apps.begin_restore_snapshot(resource_group_name, name, request)
     if any([source_resource_group, source_name]):
         raise ArgumentUsageError('usage error: --source-resource-group and '
@@ -2138,7 +2174,7 @@ def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_co
     # Overwrite app with its own snapshot
     request = SnapshotRestoreRequest(overwrite=True, snapshot_time=time, recover_configuration=recover_config)
     if slot:
-        return client.web_apps.begin_restore_snapshot_slot(resource_group_name, name, request, slot)
+        return client.web_apps.begin_restore_snapshot_slot(resource_group_name, name, slot, request)
     return client.web_apps.begin_restore_snapshot(resource_group_name, name, request)
 
 
@@ -2716,7 +2752,7 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not webapp:
         slot_text = "Deployment slot {} in ".format(slot) if slot else ''
-        raise ResourceNotFoundError("{0}app {1} doesn't exist in resource group {2}".format(slot_text,
+        raise ResourceNotFoundError("{0}app {1} doesn't exist in resource group {2}".format(slot_text,
                                                                                             name,
                                                                                             resource_group_name))
 
@@ -2727,7 +2763,7 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
 
     if not _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot):
         slot_text = " --slot {}".format(slot) if slot else ""
-        raise ValidationError("Hostname (custom domain) '{0}' is not registered with {1}. "
+        raise ValidationError("Hostname (custom domain) '{0}' is not registered with {1}. "
                               "Use 'az webapp config hostname add --resource-group {2} "
                               "--webapp-name {1}{3} --hostname {0}' "
                               "to register the hostname.".format(hostname, name, resource_group_name, slot_text))
@@ -2764,8 +2800,8 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
 
 
 def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name, key_vault_subscription):
-    from azure.cli.command_modules.role._client_factory import _graph_client_factory
-    from azure.graphrbac.models import GraphErrorException
+    from azure.cli.command_modules.role import graph_client_factory, GraphError
+    graph_client = graph_client_factory(cmd.cli_ctx)
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription = get_subscription_id(cmd.cli_ctx)
     # Cannot check if key vault is in another subscription
@@ -2776,15 +2812,14 @@ def _check_service_principal_permissions(cmd, resource_group_name, key_vault_nam
     # Check for Microsoft.Azure.WebSites app registration
     AZURE_PUBLIC_WEBSITES_APP_ID = 'abfa0a7c-a6b6-4736-8310-5855508787cd'
     AZURE_GOV_WEBSITES_APP_ID = '6a02c803-dafd-4136-b4c3-5a6f318b4714'
-    graph_sp_client = _graph_client_factory(cmd.cli_ctx).service_principals
     for policy in vault.properties.access_policies:
         try:
-            sp = graph_sp_client.get(policy.object_id)
-            if sp.app_id == AZURE_PUBLIC_WEBSITES_APP_ID or sp.app_id == AZURE_GOV_WEBSITES_APP_ID:
+            sp = graph_client.service_principal_get(policy.object_id)
+            if sp['appId'] == AZURE_PUBLIC_WEBSITES_APP_ID or sp['appId'] == AZURE_GOV_WEBSITES_APP_ID:
                 for perm in policy.permissions.secrets:
                     if perm == "Get":
                         return True
-        except GraphErrorException:
+        except GraphError:
             pass  # Lookup will fail for non service principals (users, groups, etc.)
     return False
 
@@ -2867,7 +2902,7 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
 class _AbstractStackRuntimeHelper:
     def __init__(self, cmd, linux=False, windows=False):
         self._cmd = cmd
-        self._client = web_client_factory(cmd.cli_ctx, api_version="2021-01-01")
+        self._client = web_client_factory(cmd.cli_ctx)
         self._linux = linux
         self._windows = windows
         self._stacks = []
@@ -2893,6 +2928,9 @@ class _AbstractStackRuntimeHelper:
 
 # WebApps stack class
 class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
+    DEFAULT_DELIMETER = "|"  # character that separates runtime name from version
+    ALLOWED_DELIMETERS = "|:"  # delimiters allowed: '|', ':'
+
     # pylint: disable=too-few-public-methods
     class Runtime:
         def __init__(self, display_name=None, configs=None, github_actions_properties=None, linux=False):
@@ -2911,16 +2949,14 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
             'dotnet': 'net_framework_version',
             'dotnetcore': None
         }
-        self.default_delimeter = "|"  # character that separates runtime name from version
-        self.allowed_delimeters = "|:"  # delimiters allowed: '|', ':'
         super().__init__(cmd, linux=linux, windows=windows)
 
     def get_stack_names_only(self, delimiter=None):
         windows_stacks = [s.display_name for s in self.stacks if not s.linux]
         linux_stacks = [s.display_name for s in self.stacks if s.linux]
         if delimiter is not None:
-            windows_stacks = [n.replace(self.default_delimeter, delimiter) for n in windows_stacks]
-            linux_stacks = [n.replace(self.default_delimeter, delimiter) for n in linux_stacks]
+            windows_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in windows_stacks]
+            linux_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in linux_stacks]
         if self._linux and not self._windows:
             return linux_stacks
         if self._windows and not self._linux:
@@ -2940,10 +2976,12 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 if self._windows:
                     self._parse_major_version_windows(major_version, self._stacks, self.windows_config_mappings)
 
-    def remove_delimiters(self, runtime):
-        import re
-        runtime = re.split("[{}]".format(self.allowed_delimeters), runtime)
-        return self.default_delimeter.join(filter(None, runtime))
+    @classmethod
+    def remove_delimiters(cls, runtime):
+        if not runtime:
+            return runtime
+        runtime = re.split("[{}]".format(cls.ALLOWED_DELIMETERS), runtime)
+        return cls.DEFAULT_DELIMETER.join(filter(None, runtime))
 
     def resolve(self, display_name, linux=False):
         display_name = display_name.lower()
@@ -3024,7 +3062,6 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
     # TODO get API to return more CLI-friendly display text for windows stacks
     @classmethod
     def _format_windows_display_text(cls, display_text):
-        import re
         t = display_text.upper()
         t = t.replace(".NET CORE", NETCORE_RUNTIME_NAME.upper())
         t = t.replace("ASP.NET", ASPDOTNET_RUNTIME_NAME.upper())
@@ -3058,7 +3095,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         if default_java_version:
             container_settings = default_java_version.stack_settings.windows_container_settings
             # TODO get the API to return java versions in a more parseable way
-            for java_version in ["1.8", "11"]:
+            for java_version in ["1.8", "11", "17"]:
                 java_container = container_settings.java_container
                 container_version = container_settings.java_container_version
                 if container_version.upper() == "SE":
@@ -3066,7 +3103,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                     if java_version == "1.8":
                         container_version = "8"
                     else:
-                        container_version = "11"
+                        container_version = java_version
                 runtime_name = "{}|{}|{}|{}".format("java",
                                                     java_version,
                                                     java_container,
@@ -3110,7 +3147,9 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         default_java_version_linux = next(iter(minor_java_versions), None)
         if default_java_version_linux:
             linux_container_settings = default_java_version_linux.stack_settings.linux_container_settings
-            runtimes = [(linux_container_settings.java11_runtime, "11"), (linux_container_settings.java8_runtime, "8")]
+            runtimes = [(linux_container_settings.additional_properties.get("java17Runtime"), "17"),
+                        (linux_container_settings.java11_runtime, "11"),
+                        (linux_container_settings.java8_runtime, "8")]
             for runtime_name, version in [(r, v) for (r, v) in runtimes if r is not None]:
                 runtime = self.Runtime(display_name=runtime_name,
                                        configs={"linux_fx_version": runtime_name},
@@ -3160,7 +3199,8 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
     # pylint: disable=too-few-public-methods,too-many-instance-attributes
     class Runtime:
         def __init__(self, name=None, version=None, is_preview=False, supported_func_versions=None, linux=False,
-                     app_settings_dict=None, site_config_dict=None, app_insights=False, default=False):
+                     app_settings_dict=None, site_config_dict=None, app_insights=False, default=False,
+                     github_actions_properties=None):
             self.name = name
             self.version = version
             self.is_preview = is_preview
@@ -3170,21 +3210,25 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             self.site_config_dict = dict() if not site_config_dict else site_config_dict
             self.app_insights = app_insights
             self.default = default
+            self.github_actions_properties = github_actions_properties
 
             self.display_name = "{}|{}".format(name, version) if version else name
 
         # used for displaying stacks
         def to_dict(self):
-            return {"runtime": self.name,
-                    "version": self.version,
-                    "supported_functions_versions": self.supported_func_versions}
+            d = {"runtime": self.name,
+                 "version": self.version,
+                 "supported_functions_versions": self.supported_func_versions}
+            if self.linux:
+                d["linux_fx_version"] = self.site_config_dict.linux_fx_version
+            return d
 
     def __init__(self, cmd, linux=False, windows=False):
         self.disallowed_functions_versions = {"~1", "~2"}
         self.KEYS = FUNCTIONS_STACKS_API_KEYS()
         super().__init__(cmd, linux=linux, windows=windows)
 
-    def resolve(self, runtime, version=None, functions_version=None, linux=False):
+    def resolve(self, runtime, version=None, functions_version=None, linux=False, disable_version_error=False):
         stacks = self.stacks
         runtimes = [r for r in stacks if r.linux == linux and runtime == r.name]
         os = LINUX_OS_NAME if linux else WINDOWS_OS_NAME
@@ -3200,12 +3244,17 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             # help convert previously acceptable versions into correct ones if match not found
             old_to_new_version = {
                 "11": "11.0",
-                "8": "8.0"
+                "8": "8.0",
+                "7": "7.0",
+                "6.0": "6",
+                "1.8": "8.0"
             }
             new_version = old_to_new_version.get(version)
             matched_runtime_version = next((r for r in runtimes if r.version == new_version), None)
         if not matched_runtime_version:
             versions = [r.version for r in runtimes]
+            if disable_version_error:
+                return None
             raise ValidationError("Invalid version: {0} for runtime {1} and os {2}. Supported versions for runtime "
                                   "{1} and os {2} are: {3}. "
                                   "Run 'az functionapp list-runtimes' for more details on supported runtimes. "
@@ -3233,7 +3282,6 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
     # remove non-digit or non-"." chars
     @classmethod
     def _format_version_name(cls, name):
-        import re
         return re.sub(r"[^\d\.]", "", name)
 
     # format version names while maintaining uniqueness
@@ -3271,6 +3319,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                     self.KEYS.APPLICATION_INSIGHTS: runtime_settings.app_insights_settings.is_supported,
                     self.KEYS.SITE_CONFIG_DICT: runtime_settings.site_config_properties_dictionary,
                     self.KEYS.IS_DEFAULT: bool(runtime_settings.is_default),
+                    self.KEYS.GIT_HUB_ACTION_SETTINGS: runtime_settings.git_hub_action_settings
                 }
 
                 runtime_name = (runtime_settings.app_settings_dictionary.get(self.KEYS.FUNCTIONS_WORKER_RUNTIME) or
@@ -3289,6 +3338,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                             app_settings_dict=version_properties[self.KEYS.APP_SETTINGS_DICT],
                             app_insights=version_properties[self.KEYS.APPLICATION_INSIGHTS],
                             default=version_properties[self.KEYS.IS_DEFAULT],
+                            github_actions_properties=version_properties[self.KEYS.GIT_HUB_ACTION_SETTINGS]
                             )
 
     def _parse_raw_stacks(self, stacks):
@@ -3346,6 +3396,8 @@ def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux
     client = web_client_factory(cmd.cli_ctx)
     if location is None:
         location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+    if number_of_workers is not None:
+        number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
     sku_def = SkuDescription(tier=tier, name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), maximum_elastic_worker_count=max_burst,
@@ -3380,7 +3432,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        deployment_source_branch='master', deployment_local_git=None,
                        docker_registry_server_password=None, docker_registry_server_user=None,
                        deployment_container_image_name=None, tags=None, assign_identities=None,
-                       role='Contributor', scope=None, vnet=None, subnet=None):
+                       role='Contributor', scope=None, vnet=None, subnet=None, https_only=False):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -3389,7 +3441,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
-        raise MutuallyExclusiveArgumentError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
+        raise MutuallyExclusiveArgumentError("usage error: You must specify one of these parameter "
+                                             "--plan NAME_OR_ID | --consumption-plan-location LOCATION")
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
@@ -3427,7 +3480,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         subnet_resource_id = None
 
     functionapp_def = Site(location=None, site_config=site_config, tags=tags,
-                           virtual_network_subnet_id=subnet_resource_id)
+                           virtual_network_subnet_id=subnet_resource_id, https_only=https_only)
 
     plan_info = None
     if runtime is not None:
@@ -3594,7 +3647,6 @@ def _convert_camel_to_snake_case(text):
 
 
 def _get_runtime_version_functionapp(version_string, is_linux):
-    import re
     windows_match = re.fullmatch(FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, version_string)
     if windows_match:
         return float(windows_match.group(1))
@@ -3706,14 +3758,13 @@ def _validate_and_get_connection_string(cli_ctx, resource_group_name, storage_ac
 
 
 def list_consumption_locations(cmd):
-    # Temporary fix due to regression in this specific API with 2021-03-01, should be removed with the next SDK update
-    client = web_client_factory(cmd.cli_ctx, api_version='2020-09-01')
+    client = web_client_factory(cmd.cli_ctx)
     regions = client.list_geo_regions(sku='Dynamic')
     return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None):
-    web_client = web_client_factory(cmd.cli_ctx, api_version="2020-09-01")
+    web_client = web_client_factory(cmd.cli_ctx)
     full_sku = get_sku_tier(sku)
     # Temporary fix due to regression in this specific API with 2021-03-01, should be removed with the next SDK update
     web_client_geo_regions = web_client.list_geo_regions(sku=full_sku, linux_workers_enabled=linux_workers_enabled)
@@ -4074,7 +4125,7 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
                                    resource_group_name=resource_group_name,
                                    subnet=subnet,
                                    vnet=vnet)
-    client = web_client_factory(cmd.cli_ctx, api_version="2021-01-01")
+    client = web_client_factory(cmd.cli_ctx)
 
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot, client=client)
 
@@ -4223,12 +4274,12 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     _create_new_rg = False
     _site_availability = get_site_availability(cmd, name)
     _create_new_app = _site_availability.name_available
-    os_name = os_type if os_type else detect_os_form_src(src_dir, html)
+    runtime = _StackRuntimeHelper.remove_delimiters(runtime)
+    os_name = os_type if os_type else detect_os_from_src(src_dir, html, runtime)
     _is_linux = os_name.lower() == LINUX_OS_NAME
     helper = _StackRuntimeHelper(cmd, linux=_is_linux, windows=not _is_linux)
 
     if runtime:
-        runtime = helper.remove_delimiters(runtime)
         match = helper.resolve(runtime, _is_linux)
         if not match:
             raise ValidationError("{0} runtime '{1}' is not supported. Please check supported runtimes with: "
@@ -5224,8 +5275,304 @@ def remove_github_actions(cmd, resource_group, name, repo, token=None, slot=None
     return "Disconnected successfully."
 
 
+def add_functionapp_github_actions(cmd, resource_group, name, repo, runtime=None, runtime_version=None, token=None,  # pylint: disable=too-many-statements,too-many-branches
+                                   slot=None, branch='master', build_path=".", login_with_github=False, force=False):
+    if login_with_github:
+        token = get_github_access_token(cmd, ["admin:repo_hook", "repo", "workflow"], token)
+    repo = repo_url_to_name(repo)
+    token = get_token(cmd, repo, token)
+
+    # Verify resource group, app
+    site_availability = get_site_availability(cmd, name)
+    if site_availability.name_available or (not site_availability.name_available and
+                                            site_availability.reason == 'Invalid'):
+        raise ResourceNotFoundError(
+            "The Resource 'Microsoft.Web/sites/%s' under resource group '%s' "
+            "was not found." % (name, resource_group))
+    app_details = get_app_details(cmd, name)
+    if app_details is None:
+        raise ResourceNotFoundError(
+            "Unable to retrieve details of the existing app %s. Please check that the app is a part of "
+            "the current subscription" % name)
+    current_rg = app_details.resource_group
+    if resource_group is not None and (resource_group.lower() != current_rg.lower()):
+        raise ResourceNotFoundError("The webapp %s exists in ResourceGroup %s and does not match the "
+                                    "value entered %s. Please re-run command with the correct "
+                                    "parameters." % (name, current_rg, resource_group))
+
+    app = show_app(cmd, resource_group, name, slot)
+    is_linux = app.reserved
+
+    # Verify github repo
+    from github import Github, GithubException
+    from github.GithubException import BadCredentialsException, UnknownObjectException
+
+    if repo.strip()[-1] == '/':
+        repo = repo.strip()[:-1]
+
+    g = Github(token)
+    github_repo = None
+    try:
+        github_repo = g.get_repo(repo)
+        try:
+            github_repo.get_branch(branch=branch)
+        except GithubException as e:
+            error_msg = "Encountered GitHub error when accessing {} branch in {} repo.".format(branch, repo)
+            if e.data and e.data['message']:
+                error_msg += " Error: {}".format(e.data['message'])
+            raise ValidationError(error_msg)
+        logger.warning('Verified GitHub repo and branch')
+    except BadCredentialsException:
+        raise ValidationError("Could not authenticate to the repository. Please create a Personal Access Token and use "
+                              "the --token argument. Run 'az functionapp deployment github-actions add --help' "
+                              "for more information.")
+    except GithubException as e:
+        error_msg = "Encountered GitHub error when accessing {} repo".format(repo)
+        if e.data and e.data['message']:
+            error_msg += " Error: {}".format(e.data['message'])
+        raise ValidationError(error_msg)
+
+    # Get runtime info
+    app_runtime_info = _get_functionapp_runtime_info(
+        cmd=cmd, resource_group=resource_group, name=name, slot=slot, is_linux=is_linux)
+
+    app_runtime_string = app_runtime_info['app_runtime']
+    github_actions_version = app_runtime_info['app_runtime_version']
+
+    if runtime:
+        if app_runtime_string and app_runtime_string.lower() != runtime.lower():
+            logger.warning('The app runtime: %s does not match the runtime specified: '
+                           '%s. Using the specified runtime %s.', app_runtime_string, runtime, runtime)
+        app_runtime_string = runtime
+
+    if runtime_version:
+        if github_actions_version and github_actions_version.lower() != runtime_version.lower():
+            logger.warning('The app runtime version: %s does not match the runtime version specified: '
+                           '%s. Using the specified runtime %s.', github_actions_version, runtime_version,
+                           runtime_version)
+        github_actions_version = runtime_version
+
+    if not app_runtime_string and not github_actions_version:
+        raise ValidationError('Could not detect runtime or runtime version. Please specify'
+                              'using the --runtime and --runtime-version flags.')
+    if not app_runtime_string:
+        raise ValidationError('Could not detect runtime. Please specify using the --runtime flag.')
+    if not github_actions_version:
+        raise ValidationError('Could not detect runtime version. Please specify using the --runtime-version flag.')
+
+    # Verify runtime + gh actions support
+    functionapp_version = app_runtime_info['functionapp_version']
+    github_actions_version = _get_functionapp_runtime_version(cmd=cmd, runtime_string=app_runtime_string,
+                                                              runtime_version=github_actions_version,
+                                                              functionapp_version=functionapp_version,
+                                                              is_linux=is_linux)
+    if not github_actions_version:
+        runtime_version = runtime_version if runtime_version else app_runtime_info['app_runtime_version']
+        raise ValidationError("Runtime %s version %s is not supported for GitHub Actions deployments "
+                              "on os %s." % (app_runtime_string, runtime_version,
+                                             "linux" if is_linux else "windows"))
+
+    # Get workflow template
+    logger.warning('Getting workflow template using runtime: %s', app_runtime_string)
+    workflow_template = _get_functionapp_workflow_template(github=g, runtime_string=app_runtime_string,
+                                                           is_linux=is_linux)
+
+    # Fill workflow template
+    guid = str(uuid.uuid4()).replace('-', '')
+    publish_profile_name = "AZURE_FUNCTIONAPP_PUBLISH_PROFILE_{}".format(guid)
+    logger.warning(
+        'Filling workflow template with name: %s, branch: %s, version: %s, slot: %s, build_path: %s',
+        name, branch, github_actions_version, slot if slot else 'production', build_path)
+    completed_workflow_file = _fill_functionapp_workflow_template(content=workflow_template.decoded_content.decode(),
+                                                                  name=name, build_path=build_path,
+                                                                  version=github_actions_version,
+                                                                  publish_profile=publish_profile_name,
+                                                                  repo=repo, branch=branch, token=token)
+    completed_workflow_file = completed_workflow_file.encode()
+
+    def add_publish_profile(cmd, resource_group, name, repo, token, publish_profile_name, slot):
+        logger.warning('Adding publish profile to GitHub')
+        _add_publish_profile_to_github(cmd=cmd, resource_group=resource_group, name=name, repo=repo,
+                                       token=token, github_actions_secret_name=publish_profile_name,
+                                       slot=slot)
+
+    def update_file(cmd,
+                    resource_group,
+                    name,
+                    repo,
+                    token,
+                    publish_profile_name,
+                    slot,
+                    logger_message,
+                    github_repo,
+                    github_message,
+                    file_path,
+                    completed_workflow_file,
+                    existing_workflow_file,
+                    branch):
+        add_publish_profile(cmd, resource_group, name, repo, token, publish_profile_name, slot)
+        logger.warning(logger_message)
+        github_repo.update_file(path=file_path, message=github_message,
+                                content=completed_workflow_file, sha=existing_workflow_file.sha,
+                                branch=branch)
+
+    # Check if workflow exists in repo, otherwise push
+    if slot:
+        file_name = "{}_{}({}).yml".format(branch.replace('/', '-'), name.lower(), slot)
+    else:
+        file_name = "{}_{}.yml".format(branch.replace('/', '-'), name.lower())
+    dir_path = "{}/{}".format('.github', 'workflows')
+    file_path = "{}/{}".format(dir_path, file_name)
+    try:
+        existing_workflow_file = github_repo.get_contents(path=file_path, ref=branch)
+        existing_publish_profile_name = _get_publish_profile_from_workflow_file(
+            workflow_file=str(existing_workflow_file.decoded_content))
+        if existing_publish_profile_name:
+            completed_workflow_file = completed_workflow_file.decode()
+            completed_workflow_file = completed_workflow_file.replace(
+                publish_profile_name, existing_publish_profile_name)
+            completed_workflow_file = completed_workflow_file.encode()
+            publish_profile_name = existing_publish_profile_name
+        logger.warning("Existing workflow file found")
+        if force:
+            update_file(cmd,
+                        resource_group,
+                        name,
+                        repo,
+                        token,
+                        publish_profile_name,
+                        slot,
+                        "Replacing the existing workflow file",
+                        github_repo,
+                        "Update workflow using Azure CLI",
+                        file_path,
+                        completed_workflow_file,
+                        existing_workflow_file,
+                        branch)
+        else:
+            option = prompt_y_n('Replace existing workflow file?')
+            if option:
+                update_file(cmd,
+                            resource_group,
+                            name,
+                            repo,
+                            token,
+                            publish_profile_name,
+                            slot,
+                            "Replacing the existing workflow file",
+                            github_repo,
+                            "Update workflow using Azure CLI",
+                            file_path,
+                            completed_workflow_file,
+                            existing_workflow_file,
+                            branch)
+            else:
+                logger.warning("Use the existing workflow file")
+                if existing_publish_profile_name:
+                    publish_profile_name = existing_publish_profile_name
+                add_publish_profile(cmd, resource_group, name, repo, token, publish_profile_name, slot)
+    except UnknownObjectException:
+        add_publish_profile(cmd, resource_group, name, repo, token, publish_profile_name, slot)
+        logger.warning("Creating new workflow file: %s", file_path)
+        github_repo.create_file(path=file_path, message="Create workflow using Azure CLI",
+                                content=completed_workflow_file, branch=branch)
+
+    # Set site source control properties
+    _update_site_source_control_properties_for_gh_action(
+        cmd=cmd, resource_group=resource_group, name=name, token=token, repo=repo, branch=branch, slot=slot)
+
+    cache_github_token(cmd, token, repo)
+    github_actions_url = "https://github.com/{}/actions".format(repo)
+    return github_actions_url
+
+
+def remove_functionapp_github_actions(cmd, resource_group, name, repo, token=None, slot=None,  # pylint: disable=too-many-statements
+                                      branch='master', login_with_github=False):
+    if login_with_github:
+        token = get_github_access_token(cmd, ["admin:repo_hook", "repo", "workflow"], token)
+    repo = repo_url_to_name(repo)
+    token = get_token(cmd, repo, token)
+    # Verify resource group, app
+    site_availability = get_site_availability(cmd, name)
+    if site_availability.name_available or (not site_availability.name_available and
+                                            site_availability.reason == 'Invalid'):
+        raise ResourceNotFoundError("The Resource 'Microsoft.Web/sites/%s' under resource group '%s' was not found." %
+                                    (name, resource_group))
+    app_details = get_app_details(cmd, name)
+    if app_details is None:
+        raise ResourceNotFoundError("Unable to retrieve details of the existing app %s. "
+                                    "Please check that the app is a part of the current subscription" % name)
+    current_rg = app_details.resource_group
+    if resource_group is not None and (resource_group.lower() != current_rg.lower()):
+        raise ValidationError("The functionapp %s exists in ResourceGroup %s and does not match "
+                              "the value entered %s. Please re-run command with the correct "
+                              "parameters." % (name, current_rg, resource_group))
+
+    # Verify github repo
+    from github import Github, GithubException
+    from github.GithubException import BadCredentialsException, UnknownObjectException
+
+    if repo.strip()[-1] == '/':
+        repo = repo.strip()[:-1]
+
+    g = Github(token)
+    github_repo = None
+    try:
+        github_repo = g.get_repo(repo)
+        try:
+            github_repo.get_branch(branch=branch)
+        except GithubException as e:
+            error_msg = "Encountered GitHub error when accessing {} branch in {} repo.".format(branch, repo)
+            if e.data and e.data['message']:
+                error_msg += " Error: {}".format(e.data['message'])
+            raise ValidationError(error_msg)
+        logger.warning('Verified GitHub repo and branch')
+    except BadCredentialsException:
+        raise ValidationError("Could not authenticate to the repository. Please create a Personal Access Token and use "
+                              "the --token argument. Run 'az functionapp deployment github-actions remove --help' "
+                              "for more information.")
+    except GithubException as e:
+        error_msg = "Encountered GitHub error when accessing {} repo".format(repo)
+        if e.data and e.data['message']:
+            error_msg += " Error: {}".format(e.data['message'])
+        raise ValidationError(error_msg)
+
+    # Check if workflow exists in repo and remove
+    file_name = "{}_{}({}).yml".format(
+        branch.replace('/', '-'), name.lower(), slot) if slot else "{}_{}.yml".format(
+            branch.replace('/', '-'), name.lower())
+    dir_path = "{}/{}".format('.github', 'workflows')
+    file_path = "{}/{}".format(dir_path, file_name)
+    existing_publish_profile_name = None
+    try:
+        existing_workflow_file = github_repo.get_contents(path=file_path, ref=branch)
+        existing_publish_profile_name = _get_publish_profile_from_workflow_file(
+            workflow_file=str(existing_workflow_file.decoded_content))
+        logger.warning("Removing the existing workflow file")
+        github_repo.delete_file(path=file_path, message="Removing workflow file, disconnecting github actions",
+                                sha=existing_workflow_file.sha, branch=branch)
+    except UnknownObjectException as e:
+        error_msg = "Error when removing workflow file."
+        if e.data and e.data['message']:
+            error_msg += " Error: {}".format(e.data['message'])
+        raise FileOperationError(error_msg)
+
+    # Remove publish profile from GitHub
+    if existing_publish_profile_name:
+        logger.warning('Removing publish profile from GitHub')
+        _remove_publish_profile_from_github(cmd=cmd, resource_group=resource_group, name=name, repo=repo, token=token,
+                                            github_actions_secret_name=existing_publish_profile_name, slot=slot)
+
+    # Remove site source control properties
+    delete_source_control(cmd=cmd,
+                          resource_group_name=resource_group,
+                          name=name,
+                          slot=slot)
+
+    return "Disconnected successfully."
+
+
 def _get_publish_profile_from_workflow_file(workflow_file):
-    import re
     publish_profile = None
     regex = re.search(r'publish-profile: \$\{\{ secrets\..*?\}\}', workflow_file)
     if regex:
@@ -5291,6 +5638,27 @@ def _get_workflow_template(github, runtime_string, is_linux):
     return file_contents
 
 
+def _get_functionapp_workflow_template(github, runtime_string, is_linux):
+    from github import GithubException
+
+    file_contents = None
+    template_repo_path = 'Azure/actions-workflow-samples'
+    template_path_map = (LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH if is_linux else
+                         WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
+    template_file_path = _get_functionapp_template_file_path(runtime_string=runtime_string,
+                                                             template_path_map=template_path_map)
+
+    try:
+        template_repo = github.get_repo(template_repo_path)
+        file_contents = template_repo.get_contents(template_file_path)
+    except GithubException as e:
+        error_msg = "Encountered GitHub error when retrieving workflow template"
+        if e.data and e.data['message']:
+            error_msg += ": {}".format(e.data['message'])
+        raise CLIError(error_msg)
+    return file_contents
+
+
 def _fill_workflow_template(content, name, branch, slot, publish_profile, version):
     if not slot:
         slot = 'production'
@@ -5304,6 +5672,58 @@ def _fill_workflow_template(content, name, branch, slot, publish_profile, versio
     content = content.replace('${java-version}', version)
     content = content.replace('${node-version}', version)
     content = content.replace('${python-version}', version)
+    return content
+
+
+def _get_pom_xml_content(repo, branch, token, pom_path="."):
+    from github import Github
+    import requests
+
+    g = Github(token)
+    try:
+        r = g.get_repo(repo)
+        if not branch:
+            branch = r.default_branch
+    except Exception as e:
+        raise ValidationError(f"Could not find repo {repo}") from e
+    try:
+        files = r.get_contents(pom_path, ref=branch)
+    except Exception as e:
+        raise ValidationError(f"Could not find path {pom_path} in branch {branch}") from e
+    for f in files:
+        if f.path == "pom.xml" or f.path.endswith("/pom.xml"):
+            resp = requests.get(f.download_url)
+            if resp.ok and resp.content:
+                return resp.content.decode("utf-8")
+    raise ValidationError("Could not find pom.xml in Github repo/branch. Please ensure it is named 'pom.xml'. "
+                          "Set the path with --build-path if not in the root directory.")
+
+
+def _get_pom_functionapp_name(pom_content: str):
+    root = ElementTree.fromstring(pom_content)
+    m = re.match(r'\{.*\}', root.tag)
+    namespace = m.group(0) if m else ''
+    pom_properties = root.find(f"{namespace}properties")
+    if pom_properties:
+        return pom_properties.find(f"{namespace}functionAppName").text
+
+
+def _fill_functionapp_workflow_template(content, name, build_path, version, publish_profile, repo, branch, token):
+    content = content.replace("AZURE_FUNCTIONAPP_PUBLISH_PROFILE", f"{publish_profile}")
+    content = content.replace("AZURE_FUNCTIONAPP_NAME: your-app-name", f"AZURE_FUNCTIONAPP_NAME: '{name}'")
+    if "POM_FUNCTIONAPP_NAME" in content:
+        pom_app_name = _get_pom_functionapp_name(_get_pom_xml_content(repo, branch, token, build_path))
+        content = content.replace("POM_FUNCTIONAPP_NAME: your-app-name", f"POM_FUNCTIONAPP_NAME: '{pom_app_name}'")
+    if "AZURE_FUNCTIONAPP_PACKAGE_PATH" not in content and "POM_XML_DIRECTORY" not in content:
+        logger.warning("Runtime does not support --build-path, ignoring value.")
+    content = content.replace("AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'", f"AZURE_FUNCTIONAPP_PACKAGE_PATH: '{build_path}'")
+    content = content.replace("POM_XML_DIRECTORY: '.'", f"POM_XML_DIRECTORY: '{build_path}'")
+    content = content.replace("runs-on: ubuntu-18.04", "")  # repair linux python yaml
+    if version:
+        content = content.replace("DOTNET_VERSION: '2.2.402'", f"DOTNET_VERSION: '{version}'")
+        content = content.replace("JAVA_VERSION: '1.8.x'", f"JAVA_VERSION: '{version}'")
+        content = content.replace("NODE_VERSION: '10.x'", f"NODE_VERSION: '{version}'")
+        content = content.replace("PYTHON_VERSION: '3.7'", f"PYTHON_VERSION: '{version}'")
     return content
 
 
@@ -5327,6 +5747,21 @@ def _get_template_file_path(runtime_string, is_linux):
                 elif java_container_split[2] == 'java se':
                     runtime_stack = 'java'
         template_file_path = WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH.get(runtime_stack, None)
+
+    if not template_file_path:
+        raise ResourceNotFoundError('Unable to retrieve workflow template.')
+    return template_file_path
+
+
+def _get_functionapp_template_file_path(runtime_string, template_path_map):
+    if not runtime_string:
+        raise ResourceNotFoundError('Unable to retrieve workflow template')
+
+    runtime_string = runtime_string.lower()
+    runtime_stack = runtime_string.split('|')[0]
+    template_file_path = None
+
+    template_file_path = template_path_map.get(runtime_stack)
 
     if not template_file_path:
         raise ResourceNotFoundError('Unable to retrieve workflow template.')
@@ -5391,6 +5826,29 @@ def _runtime_supports_github_actions(cmd, runtime_string, is_linux):
     return False
 
 
+def _get_functionapp_runtime_version(cmd, runtime_string, runtime_version, functionapp_version, is_linux):
+    runtime_version = re.sub(r"[^\d\.]", "", runtime_version).rstrip('.')
+    matched_runtime = None
+    helper = _FunctionAppStackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
+    try:
+        matched_runtime = helper.resolve(runtime_string, runtime_version, functionapp_version, is_linux)
+    except ValidationError as e:
+        if "Invalid version" in e.error_msg:
+            index = e.error_msg.index("Run 'az functionapp list-runtimes' for more details on supported runtimes.")
+            error_message = e.error_msg[0:index]
+            error_message += "Try passing --runtime-version with a supported version, or "
+            error_message += e.error_msg[index:].lower()
+            raise ValidationError(error_message)
+        raise e
+    if not matched_runtime:
+        return None
+    if matched_runtime.github_actions_properties:
+        gh_props = matched_runtime.github_actions_properties
+        if gh_props.is_supported:
+            return gh_props.supported_version if gh_props.supported_version else runtime_version
+    return None
+
+
 def _get_app_runtime_info(cmd, resource_group, name, slot, is_linux):
     app_settings = None
     app_runtime = None
@@ -5431,6 +5889,60 @@ def _get_app_runtime_info(cmd, resource_group, name, slot, is_linux):
         return _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux)
 
 
+def _get_functionapp_runtime_info(cmd, resource_group, name, slot, is_linux):  # pylint: disable=too-many-return-statements
+    app_settings = None
+    app_runtime = None
+    functionapp_version = None
+    app_runtime_version = None
+
+    app_settings = get_app_settings(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
+    for app_setting in app_settings:
+        if 'name' in app_setting and app_setting['name'] == 'FUNCTIONS_EXTENSION_VERSION':
+            functionapp_version = app_setting["value"]
+            break
+
+    if is_linux:
+        app_metadata = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
+        app_runtime = getattr(app_metadata, 'linux_fx_version', None)
+        return _get_functionapp_runtime_info_helper(cmd, app_runtime, None, functionapp_version, is_linux)
+
+    app_settings = get_app_settings(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
+    for app_setting in app_settings:
+        if 'name' in app_setting and app_setting['name'] == 'FUNCTIONS_WORKER_RUNTIME':
+            app_runtime = app_setting["value"]
+            break
+
+    if app_runtime and app_runtime.lower() == 'node':
+        app_settings = get_app_settings(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
+        for app_setting in app_settings:
+            if 'name' in app_setting and app_setting['name'] == 'WEBSITE_NODE_DEFAULT_VERSION':
+                app_runtime_version = app_setting['value'] if 'value' in app_setting else None
+                if app_runtime_version:
+                    return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version,
+                                                                functionapp_version, is_linux)
+    elif app_runtime and app_runtime.lower() == 'python':
+        app_settings = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
+        app_runtime_version = getattr(app_settings, 'python_version', '')
+        return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version,
+                                                    is_linux)
+    elif app_runtime and app_runtime.lower() == 'dotnet':
+        app_settings = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
+        app_runtime_version = getattr(app_settings, 'net_framework_version', '')
+        return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version,
+                                                    is_linux)
+    elif app_runtime and app_runtime.lower() == 'java':
+        app_settings = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
+        app_runtime_version = getattr(app_settings, 'java_version', '').lower()
+        return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version,
+                                                    is_linux)
+    elif app_runtime and app_runtime.lower() == 'powershell':
+        app_settings = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
+        app_runtime_version = getattr(app_settings, 'power_shell_version', '').lower()
+        return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version,
+                                                    is_linux)
+    return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version, is_linux)
+
+
 def _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux):
     helper = _StackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
     if not is_linux:
@@ -5451,6 +5963,26 @@ def _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux
                     "github_actions_version": gh_props["github_actions_version"]
                 }
     return None
+
+
+def _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, functionapp_version, is_linux):
+    if is_linux:
+        if len(app_runtime.split('|')) < 2:
+            raise ValidationError(f"Runtime {app_runtime} is not supported.")
+        app_runtime_version = app_runtime.split('|')[1]
+        app_runtime = app_runtime.split('|')[0].lower()
+
+    # Normalize versions
+    functionapp_version = functionapp_version if functionapp_version else ""
+    app_runtime_version = app_runtime_version if app_runtime_version else ""
+    functionapp_version = re.sub(r"[^\d\.]", "", functionapp_version)
+    app_runtime_version = re.sub(r"[^\d\.]", "", app_runtime_version)
+
+    return {
+        "app_runtime": app_runtime,
+        "app_runtime_version": app_runtime_version,
+        "functionapp_version": functionapp_version
+    }
 
 
 def _encrypt_github_actions_secret(public_key, secret_value):

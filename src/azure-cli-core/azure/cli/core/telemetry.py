@@ -16,11 +16,11 @@ from collections import defaultdict
 from functools import wraps
 from knack.util import CLIError
 from azure.cli.core import decorators
+from azure.cli.telemetry import DEFAULT_INSTRUMENTATION_KEY
 
 PRODUCT_NAME = 'azurecli'
 TELEMETRY_VERSION = '0.0.1.4'
 AZURE_CLI_PREFIX = 'Context.Default.AzureCLI.'
-DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
 CORRELATION_ID_PROP_NAME = 'Reserved.DataModel.CorrelationId'
 # Put a config section or key (section.name) in the allowed set to allow recording the config
 # values in the section or for the key with 'az config set'
@@ -30,6 +30,7 @@ ALLOWED_CONFIG_SECTIONS_OR_KEYS = {'auto-upgrade', 'extension', 'core', 'logging
 
 class TelemetrySession:  # pylint: disable=too-many-instance-attributes
     def __init__(self, correlation_id=None, application=None):
+        self.instrumentation_key = {DEFAULT_INSTRUMENTATION_KEY}
         self.start_time = None
         self.end_time = None
         self.application = application
@@ -49,6 +50,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.feedback = None
         self.extension_management_detail = None
         self.raw_command = None
+        self.show_survey_message = False
         self.mode = 'default'
         # The AzCLIError sub-class name
         self.error_type = 'None'
@@ -65,6 +67,14 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.suppress_new_event = False
         self.poll_start_time = None
         self.poll_end_time = None
+        self.allow_broker = None
+
+    def add_event(self, name, properties):
+        for key in self.instrumentation_key:
+            self.events[key].append({
+                'name': name,
+                'properties': properties
+            })
 
     def add_exception(self, exception, fault_type, description=None, message=''):
         # Move the exception info into userTask record, in order to make one Telemetry record for one command
@@ -97,20 +107,14 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
             user_task.update(base)
             user_task.update(cli)
 
-            self.events[DEFAULT_INSTRUMENTATION_KEY].append({
-                'name': '{}/command'.format(PRODUCT_NAME),
-                'properties': user_task
-            })
+            self.add_event('{}/command'.format(PRODUCT_NAME), user_task)
 
             for name, props in self.exceptions:
                 props.update(base)
                 props.update(cli)
                 props.update({CORRELATION_ID_PROP_NAME: str(uuid.uuid4()),
                               'Reserved.EventId': self.event_id})
-                self.events[DEFAULT_INSTRUMENTATION_KEY].append({
-                    'name': name,
-                    'properties': props
-                })
+                self.add_event(name, props)
 
         payload = json.dumps(self.events, separators=(',', ':'))
         return _remove_symbols(payload)
@@ -201,6 +205,9 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'debug_info', ','.join(self.debug_info))
         set_custom_properties(result, 'PollStartTime', str(self.poll_start_time))
         set_custom_properties(result, 'PollEndTime', str(self.poll_end_time))
+        set_custom_properties(result, 'CloudName', _get_cloud_name())
+        set_custom_properties(result, 'ShowSurveyMessage', str(self.show_survey_message))
+        set_custom_properties(result, 'AllowBroker', str(self.allow_broker))
 
         return result
 
@@ -415,6 +422,30 @@ def set_raw_command_name(command):
 
 
 @decorators.suppress_all_exceptions()
+def set_survey_info(show_survey_message):
+    # whether showed the intercept survey message or not
+    _session.show_survey_message = show_survey_message
+
+
+@decorators.suppress_all_exceptions()
+def set_broker_info(allow_broker):
+    # whether customer has configured `allow_broker` to enable WAM(Web Account Manager) login for authentication
+    _session.allow_broker = allow_broker
+
+
+@decorators.suppress_all_exceptions()
+def add_dedicated_instrumentation_key(dedicated_instrumentation_key):
+    if not dedicated_instrumentation_key:
+        return
+
+    from collections.abc import Iterable
+    if isinstance(dedicated_instrumentation_key, str):
+        _session.instrumentation_key.add(dedicated_instrumentation_key)
+    elif isinstance(dedicated_instrumentation_key, Iterable):
+        _session.instrumentation_key.update(dedicated_instrumentation_key)
+
+
+@decorators.suppress_all_exceptions()
 def add_extension_event(extension_name, properties, instrumentation_key=DEFAULT_INSTRUMENTATION_KEY):
     set_custom_properties(properties, 'ExtensionName', extension_name)
     _add_event('extension', properties, instrumentation_key=instrumentation_key)
@@ -545,6 +576,14 @@ def _get_azure_subscription_id():
         return _get_profile().get_subscription_id()
     except CLIError:
         return None
+
+
+@decorators.suppress_all_exceptions(fallback_return=None)
+def _get_cloud_name():
+    try:
+        return _session.application.cloud.name
+    except AttributeError:
+        return 'unknown'
 
 
 def _get_shell_type():

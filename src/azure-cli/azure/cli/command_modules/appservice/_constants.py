@@ -30,6 +30,8 @@ GITHUB_OAUTH_SCOPES = [
     "repo",
     "workflow"
 ]
+LOGICAPP_KIND = "workflowapp"
+FUNCTIONAPP_KIND = "functionapp"
 
 
 class FUNCTIONS_STACKS_API_KEYS():
@@ -53,6 +55,7 @@ class FUNCTIONS_STACKS_API_KEYS():
         self.SUPPORTED_EXTENSION_VERSIONS = 'supportedFunctionsExtensionVersions'
         self.USE_32_BIT_WORKER_PROC = 'use32BitWorkerProcess'
         self.FUNCTIONS_WORKER_RUNTIME = 'FUNCTIONS_WORKER_RUNTIME'
+        self.GIT_HUB_ACTION_SETTINGS = 'git_hub_action_settings'
 
 
 GENERATE_RANDOM_APP_NAMES = os.path.abspath(os.path.join(os.path.abspath(__file__),
@@ -74,4 +77,19 @@ WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
     'dotnetcore': 'AppService/windows/aspnet-core-webapp-on-azure.yml',
     'java': 'AppService/windows/java-jar-webapp-on-azure.yml',
     'tomcat': 'AppService/windows/java-war-webapp-on-azure.yml'
+}
+
+LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
+    'node': 'FunctionApp/linux-node.js-functionapp-on-azure.yml',
+    'python': 'FunctionApp/linux-python-functionapp-on-azure.yml',
+    'dotnet': 'FunctionApp/linux-dotnet-functionapp-on-azure.yml',
+    'java': 'FunctionApp/linux-java-functionapp-on-azure.yml',
+    'powershell': 'FunctionApp/linux-powershell-functionapp-on-azure.yml',
+}
+
+WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
+    'node': 'FunctionApp/windows-node.js-functionapp-on-azure.yml',
+    'dotnet': 'FunctionApp/windows-dotnet-functionapp-on-azure.yml',
+    'java': 'FunctionApp/windows-java-functionapp-on-azure.yml',
+    'powershell': 'FunctionApp/windows-powershell-functionapp-on-azure.yml',
 }

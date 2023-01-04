@@ -6,9 +6,9 @@
 
 def cf_connection_cl(cli_ctx, *_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.servicelinker import MicrosoftServiceLinker
+    from azure.mgmt.servicelinker import ServiceLinkerManagementClient
 
-    return get_mgmt_service_client(cli_ctx, MicrosoftServiceLinker, subscription_bound=False)
+    return get_mgmt_service_client(cli_ctx, ServiceLinkerManagementClient, subscription_bound=False)
 
 
 def cf_linker(cli_ctx, *_):

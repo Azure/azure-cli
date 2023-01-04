@@ -13,21 +13,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --address-prefix --subnet-name --subnet-prefix
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_subnet_set_test000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001","name":"cli_subnet_set_test000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-11-03T05:42:13Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001","name":"cli_subnet_set_test000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-11-04T06:13:56Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '328'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:42:17 GMT
+      - Fri, 04 Nov 2022 06:14:01 GMT
       expires:
       - '-1'
       pragma:
@@ -44,7 +44,7 @@ interactions:
 - request:
     body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
       ["123.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name": "default", "properties":
-      {"addressPrefix": "123.0.0.0/24", "privateEndpointNetworkPolicies": "Enabled",
+      {"addressPrefix": "123.0.0.0/24", "privateEndpointNetworkPolicies": "Disabled",
       "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
     headers:
       Accept:
@@ -56,30 +56,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '300'
+      - '301'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --address-prefix --subnet-name --subnet-prefix
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"03ab9749-4907-48df-9983-53e5d39d7fb6\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"cf6896fa-e002-472b-892a-b18a735a6ced\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"1028f973-be97-4036-974a-2f8d56245910\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"71a9707e-ebc2-4acf-97c3-cd25d92c6503\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"123.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"default\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default\",\r\n
-        \       \"etag\": \"W/\\\"03ab9749-4907-48df-9983-53e5d39d7fb6\\\"\",\r\n
+        \       \"etag\": \"W/\\\"cf6896fa-e002-472b-892a-b18a735a6ced\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"123.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
@@ -87,15 +87,15 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c71e05c6-78d5-49f2-a72d-069026b90b66?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d62f255e-2c5c-432a-81b9-e1e16355c229?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '1405'
+      - '1306'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:42:24 GMT
+      - Fri, 04 Nov 2022 06:14:06 GMT
       expires:
       - '-1'
       pragma:
@@ -108,9 +108,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a027dd4c-cf19-4667-88b4-56ad259c245a
+      - 9381927e-b916-454a-8700-8dbbfbfde198
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1185'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -128,9 +128,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --address-prefix --subnet-name --subnet-prefix
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c71e05c6-78d5-49f2-a72d-069026b90b66?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d62f255e-2c5c-432a-81b9-e1e16355c229?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -142,7 +142,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:42:27 GMT
+      - Fri, 04 Nov 2022 06:14:09 GMT
       expires:
       - '-1'
       pragma:
@@ -159,7 +159,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a1233ee4-1774-4a0b-8034-f73041164e7a
+      - d57443dc-0e5a-410d-88d7-36d063ae4ee2
     status:
       code: 200
       message: OK
@@ -177,24 +177,24 @@ interactions:
       ParameterSetName:
       - --resource-group --name --address-prefix --subnet-name --subnet-prefix
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"9ac3f2ab-3e33-4473-9d8b-226d71307990\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"b736669d-c8db-4ca1-930d-d460cc2d1e52\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"1028f973-be97-4036-974a-2f8d56245910\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"71a9707e-ebc2-4acf-97c3-cd25d92c6503\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"123.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"default\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default\",\r\n
-        \       \"etag\": \"W/\\\"9ac3f2ab-3e33-4473-9d8b-226d71307990\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b736669d-c8db-4ca1-930d-d460cc2d1e52\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"123.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
@@ -202,13 +202,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1407'
+      - '1308'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:42:28 GMT
+      - Fri, 04 Nov 2022 06:14:10 GMT
       etag:
-      - W/"9ac3f2ab-3e33-4473-9d8b-226d71307990"
+      - W/"b736669d-c8db-4ca1-930d-d460cc2d1e52"
       expires:
       - '-1'
       pragma:
@@ -225,7 +225,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 20c60f0c-9ccd-492c-8132-ed6c5b317818
+      - 6cb8aa88-32ab-410a-bd2d-8492c9191e97
     status:
       code: 200
       message: OK
@@ -243,21 +243,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_subnet_set_test000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001","name":"cli_subnet_set_test000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-11-03T05:42:13Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001","name":"cli_subnet_set_test000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-11-04T06:13:56Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '328'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:42:29 GMT
+      - Fri, 04 Nov 2022 06:14:11 GMT
       expires:
       - '-1'
       pragma:
@@ -289,19 +289,19 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"test-vnet-nsg\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg\",\r\n
-        \ \"etag\": \"W/\\\"d66d43e4-c871-48e4-8c7a-a496ac00d1db\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"b5687de3-19c3-40a7-9d85-6fe19edef408\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"5617ed01-aa01-4edf-8454-b3c3d0c87dfb\",\r\n    \"securityRules\": [],\r\n
+        \"b3ef3353-eca4-4f47-b064-7d1a21b0953e\",\r\n    \"securityRules\": [],\r\n
         \   \"defaultSecurityRules\": [\r\n      {\r\n        \"name\": \"AllowVnetInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \       \"etag\": \"W/\\\"d66d43e4-c871-48e4-8c7a-a496ac00d1db\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b5687de3-19c3-40a7-9d85-6fe19edef408\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -313,7 +313,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \       \"etag\": \"W/\\\"d66d43e4-c871-48e4-8c7a-a496ac00d1db\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b5687de3-19c3-40a7-9d85-6fe19edef408\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -325,7 +325,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg/defaultSecurityRules/DenyAllInBound\",\r\n
-        \       \"etag\": \"W/\\\"d66d43e4-c871-48e4-8c7a-a496ac00d1db\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b5687de3-19c3-40a7-9d85-6fe19edef408\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
@@ -336,7 +336,7 @@ interactions:
         \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
         \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"d66d43e4-c871-48e4-8c7a-a496ac00d1db\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b5687de3-19c3-40a7-9d85-6fe19edef408\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to all VMs
@@ -348,7 +348,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"d66d43e4-c871-48e4-8c7a-a496ac00d1db\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b5687de3-19c3-40a7-9d85-6fe19edef408\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -360,7 +360,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \       \"etag\": \"W/\\\"d66d43e4-c871-48e4-8c7a-a496ac00d1db\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b5687de3-19c3-40a7-9d85-6fe19edef408\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
@@ -375,15 +375,15 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/31533768-50fc-438b-8217-8ef8544b14b6?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/63753584-a40a-4514-9830-d81b7cc4775c?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '6997'
+      - '6647'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:42:38 GMT
+      - Fri, 04 Nov 2022 06:14:14 GMT
       expires:
       - '-1'
       pragma:
@@ -396,9 +396,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d2a46db1-e424-4041-a2a0-7a53d163fded
+      - 65b7479a-f596-40e9-b7cf-975768471649
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1189'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -416,9 +416,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/31533768-50fc-438b-8217-8ef8544b14b6?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/63753584-a40a-4514-9830-d81b7cc4775c?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -430,7 +430,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:42:41 GMT
+      - Fri, 04 Nov 2022 06:14:17 GMT
       expires:
       - '-1'
       pragma:
@@ -447,7 +447,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a14fd7fc-b07f-474b-a43c-1cc147277cb1
+      - 60ff4af4-e92c-4da3-84eb-a5094064c331
     status:
       code: 200
       message: OK
@@ -465,19 +465,19 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"test-vnet-nsg\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg\",\r\n
-        \ \"etag\": \"W/\\\"be295e84-878f-4eb8-bbd9-5ea30e3b36c0\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"f224dc38-10e7-4a0e-99d6-a711c591097a\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"5617ed01-aa01-4edf-8454-b3c3d0c87dfb\",\r\n    \"securityRules\": [],\r\n
+        \"b3ef3353-eca4-4f47-b064-7d1a21b0953e\",\r\n    \"securityRules\": [],\r\n
         \   \"defaultSecurityRules\": [\r\n      {\r\n        \"name\": \"AllowVnetInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \       \"etag\": \"W/\\\"be295e84-878f-4eb8-bbd9-5ea30e3b36c0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"f224dc38-10e7-4a0e-99d6-a711c591097a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -489,7 +489,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \       \"etag\": \"W/\\\"be295e84-878f-4eb8-bbd9-5ea30e3b36c0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"f224dc38-10e7-4a0e-99d6-a711c591097a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -501,7 +501,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg/defaultSecurityRules/DenyAllInBound\",\r\n
-        \       \"etag\": \"W/\\\"be295e84-878f-4eb8-bbd9-5ea30e3b36c0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"f224dc38-10e7-4a0e-99d6-a711c591097a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
@@ -512,7 +512,7 @@ interactions:
         \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
         \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"be295e84-878f-4eb8-bbd9-5ea30e3b36c0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"f224dc38-10e7-4a0e-99d6-a711c591097a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to all VMs
@@ -524,7 +524,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"be295e84-878f-4eb8-bbd9-5ea30e3b36c0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"f224dc38-10e7-4a0e-99d6-a711c591097a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -536,7 +536,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \       \"etag\": \"W/\\\"be295e84-878f-4eb8-bbd9-5ea30e3b36c0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"f224dc38-10e7-4a0e-99d6-a711c591097a\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
@@ -551,13 +551,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '7004'
+      - '6654'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:42:42 GMT
+      - Fri, 04 Nov 2022 06:14:18 GMT
       etag:
-      - W/"be295e84-878f-4eb8-bbd9-5ea30e3b36c0"
+      - W/"f224dc38-10e7-4a0e-99d6-a711c591097a"
       expires:
       - '-1'
       pragma:
@@ -574,7 +574,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 018c9b3d-608f-4f29-8dbc-4f67d39c1a0b
+      - 782acdb2-29f0-462d-b323-c125d4e341e4
     status:
       code: 200
       message: OK
@@ -592,28 +592,28 @@ interactions:
       ParameterSetName:
       - --resource-group --vnet-name --name --address-prefix --network-security-group
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default\",\r\n
-        \ \"etag\": \"W/\\\"9ac3f2ab-3e33-4473-9d8b-226d71307990\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"b736669d-c8db-4ca1-930d-d460cc2d1e52\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"123.0.0.0/24\",\r\n
-        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '587'
+      - '538'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:42:43 GMT
+      - Fri, 04 Nov 2022 06:14:20 GMT
       etag:
-      - W/"9ac3f2ab-3e33-4473-9d8b-226d71307990"
+      - W/"b736669d-c8db-4ca1-930d-d460cc2d1e52"
       expires:
       - '-1'
       pragma:
@@ -630,7 +630,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d26abf4b-010a-4eef-ba1b-efbab49a4287
+      - ccf5f5bf-32f3-478b-8dbc-63fccf0f2d01
     status:
       code: 200
       message: OK
@@ -638,7 +638,7 @@ interactions:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default",
       "name": "default", "type": "Microsoft.Network/virtualNetworks/subnets", "properties":
       {"addressPrefix": "123.0.5.0/24", "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg"},
-      "delegations": [], "privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "delegations": [], "privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
       "Enabled"}}'
     headers:
       Accept:
@@ -650,35 +650,37 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '693'
+      - '594'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --vnet-name --name --address-prefix --network-security-group
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default\",\r\n
-        \ \"etag\": \"W/\\\"1c671241-a214-4063-8411-af8625cd7ea8\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"9747020e-7df0-4d0f-94a1-bc2df3762396\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"123.0.5.0/24\",\r\n
         \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg\"\r\n
         \   },\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
-        \"Enabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
         \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/176dec31-92f5-4f9c-9e53-e5ca2aeefc3b?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e1bb1da0-8cfc-4eb8-a1dc-8b4a9d7afecc?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '847'
+      - '748'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:42:46 GMT
+      - Fri, 04 Nov 2022 06:14:21 GMT
       expires:
       - '-1'
       pragma:
@@ -695,9 +697,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6237f8a9-4c04-4fad-af76-f5fcd92a4572
+      - bc9be347-03d2-4cc3-a7c1-8c2db4ebc392
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1184'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -715,9 +717,9 @@ interactions:
       ParameterSetName:
       - --resource-group --vnet-name --name --address-prefix --network-security-group
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/176dec31-92f5-4f9c-9e53-e5ca2aeefc3b?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e1bb1da0-8cfc-4eb8-a1dc-8b4a9d7afecc?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -729,7 +731,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:42:49 GMT
+      - Fri, 04 Nov 2022 06:14:24 GMT
       expires:
       - '-1'
       pragma:
@@ -746,7 +748,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 34087f7e-fd10-4f9c-aa3b-c256bbe41c0e
+      - 84613c27-8713-4977-b519-0c9b6c7fd696
     status:
       code: 200
       message: OK
@@ -764,29 +766,29 @@ interactions:
       ParameterSetName:
       - --resource-group --vnet-name --name --address-prefix --network-security-group
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default\",\r\n
-        \ \"etag\": \"W/\\\"64005245-2997-4dea-a581-7b4c69f703af\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"658ec99f-eb70-4475-bf40-24db36ce8f7e\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"123.0.5.0/24\",\r\n
         \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg\"\r\n
         \   },\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
-        \"Enabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
         \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '848'
+      - '749'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:42:50 GMT
+      - Fri, 04 Nov 2022 06:14:24 GMT
       etag:
-      - W/"64005245-2997-4dea-a581-7b4c69f703af"
+      - W/"658ec99f-eb70-4475-bf40-24db36ce8f7e"
       expires:
       - '-1'
       pragma:
@@ -803,7 +805,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d0ea9527-b217-409d-a3d4-de4470fd4d01
+      - ff35d291-5a9a-48ee-ba15-0b3e5ed0141f
     status:
       code: 200
       message: OK
@@ -821,29 +823,29 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --set
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default\",\r\n
-        \ \"etag\": \"W/\\\"64005245-2997-4dea-a581-7b4c69f703af\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"658ec99f-eb70-4475-bf40-24db36ce8f7e\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"123.0.5.0/24\",\r\n
         \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg\"\r\n
         \   },\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
-        \"Enabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
         \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '848'
+      - '749'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:42:52 GMT
+      - Fri, 04 Nov 2022 06:14:26 GMT
       etag:
-      - W/"64005245-2997-4dea-a581-7b4c69f703af"
+      - W/"658ec99f-eb70-4475-bf40-24db36ce8f7e"
       expires:
       - '-1'
       pragma:
@@ -860,7 +862,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6282164a-3f0f-4c33-9372-d88f07123700
+      - 10862159-cbbd-4f11-90dd-ede710f8154d
     status:
       code: 200
       message: OK
@@ -868,7 +870,7 @@ interactions:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default",
       "name": "default", "type": "Microsoft.Network/virtualNetworks/subnets", "properties":
       {"addressPrefix": "123.0.0.0/24", "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg"},
-      "delegations": [], "privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "delegations": [], "privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
       "Enabled"}}'
     headers:
       Accept:
@@ -880,35 +882,37 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '693'
+      - '594'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g --vnet-name -n --set
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default\",\r\n
-        \ \"etag\": \"W/\\\"9ed73a33-2ad6-4421-b67b-11e57ea83ae2\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"ad69e274-598d-4a62-a4b9-eaf82a9c0269\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"123.0.0.0/24\",\r\n
         \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg\"\r\n
         \   },\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
-        \"Enabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
         \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/70c2a564-509a-4559-af57-e8b7fdddaac2?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6acb6944-deb7-44ca-8dbf-9b27c79f7044?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '847'
+      - '748'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:42:57 GMT
+      - Fri, 04 Nov 2022 06:14:27 GMT
       expires:
       - '-1'
       pragma:
@@ -925,9 +929,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5d4f60ac-d5da-458f-aa63-2d48175a7b08
+      - 9a1f3188-0110-42f3-8bdb-33a8a9074278
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1187'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -945,9 +949,9 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --set
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/70c2a564-509a-4559-af57-e8b7fdddaac2?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6acb6944-deb7-44ca-8dbf-9b27c79f7044?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -959,7 +963,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:43:00 GMT
+      - Fri, 04 Nov 2022 06:14:31 GMT
       expires:
       - '-1'
       pragma:
@@ -976,7 +980,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7c3dae5f-0737-4229-b134-7fb86fbf119f
+      - ce5aac56-585e-404e-bb55-66f1782f542b
     status:
       code: 200
       message: OK
@@ -994,29 +998,29 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --set
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default\",\r\n
-        \ \"etag\": \"W/\\\"a3c56e9a-aa76-4b08-9703-7ac8cca1c232\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"ad22c8ca-986e-4f2c-a411-63cb1bc8a6c9\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"123.0.0.0/24\",\r\n
         \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg\"\r\n
         \   },\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
-        \"Enabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
         \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '848'
+      - '749'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:43:01 GMT
+      - Fri, 04 Nov 2022 06:14:31 GMT
       etag:
-      - W/"a3c56e9a-aa76-4b08-9703-7ac8cca1c232"
+      - W/"ad22c8ca-986e-4f2c-a411-63cb1bc8a6c9"
       expires:
       - '-1'
       pragma:
@@ -1033,7 +1037,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0eb0a194-4581-4880-b551-829dc1847e55
+      - 7712b7f1-cc09-4499-8c0b-05474dcbac6e
     status:
       code: 200
       message: OK
@@ -1051,29 +1055,29 @@ interactions:
       ParameterSetName:
       - --resource-group --vnet-name --name --address-prefix --network-security-group
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default\",\r\n
-        \ \"etag\": \"W/\\\"a3c56e9a-aa76-4b08-9703-7ac8cca1c232\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"ad22c8ca-986e-4f2c-a411-63cb1bc8a6c9\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"123.0.0.0/24\",\r\n
         \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg\"\r\n
         \   },\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
-        \"Enabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
         \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '848'
+      - '749'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:43:03 GMT
+      - Fri, 04 Nov 2022 06:14:32 GMT
       etag:
-      - W/"a3c56e9a-aa76-4b08-9703-7ac8cca1c232"
+      - W/"ad22c8ca-986e-4f2c-a411-63cb1bc8a6c9"
       expires:
       - '-1'
       pragma:
@@ -1090,7 +1094,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d0e92c2e-934e-46a2-9d30-088876a30cde
+      - e312e8d4-8a68-4d87-bd8b-0b0971503838
     status:
       code: 200
       message: OK
@@ -1098,7 +1102,7 @@ interactions:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default",
       "name": "default", "type": "Microsoft.Network/virtualNetworks/subnets", "properties":
       {"addressPrefix": "123.0.5.0/24", "delegations": [], "privateEndpointNetworkPolicies":
-      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}'
+      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -1109,34 +1113,36 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '451'
+      - '402'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --vnet-name --name --address-prefix --network-security-group
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default\",\r\n
-        \ \"etag\": \"W/\\\"cb525998-49db-40ea-8b54-aa6d4f9e0000\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"7c0e0ae1-c757-45b4-9a40-751ee5720a81\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"123.0.5.0/24\",\r\n
-        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/638a957e-8210-4792-abce-42b1fc86da41?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ea37bdb0-8e97-4d5a-aeb0-cf6a4471d66d?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '586'
+      - '537'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:43:06 GMT
+      - Fri, 04 Nov 2022 06:14:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1153,9 +1159,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - baa4dcc7-b7de-47f2-84a0-460b9229e81f
+      - f913fee9-88df-4a21-b827-5fe3a29d2a0e
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1185'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -1173,9 +1179,9 @@ interactions:
       ParameterSetName:
       - --resource-group --vnet-name --name --address-prefix --network-security-group
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/638a957e-8210-4792-abce-42b1fc86da41?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ea37bdb0-8e97-4d5a-aeb0-cf6a4471d66d?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1187,7 +1193,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:43:09 GMT
+      - Fri, 04 Nov 2022 06:14:37 GMT
       expires:
       - '-1'
       pragma:
@@ -1204,7 +1210,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 437dacf5-806c-4cd2-a7ad-66a97f7316ce
+      - e41ea5d3-608d-460e-abb5-111d2860ca1d
     status:
       code: 200
       message: OK
@@ -1222,28 +1228,28 @@ interactions:
       ParameterSetName:
       - --resource-group --vnet-name --name --address-prefix --network-security-group
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/default\",\r\n
-        \ \"etag\": \"W/\\\"6338dbae-bb2f-4597-8997-ea2c2202ef8b\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"5ea0af4e-b923-460a-8958-456b3bedb274\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"123.0.5.0/24\",\r\n
-        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '587'
+      - '538'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:43:10 GMT
+      - Fri, 04 Nov 2022 06:14:38 GMT
       etag:
-      - W/"6338dbae-bb2f-4597-8997-ea2c2202ef8b"
+      - W/"5ea0af4e-b923-460a-8958-456b3bedb274"
       expires:
       - '-1'
       pragma:
@@ -1260,7 +1266,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7ef2c31e-6cfd-4dde-bfd0-e7683059747e
+      - afe4d9d2-7920-4a49-a1c0-6fcab2cb0f36
     status:
       code: 200
       message: OK
@@ -1268,7 +1274,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1280,9 +1286,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2022-01-01
   response:
     body:
       string: ''
@@ -1290,17 +1296,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/fc114ea6-c5c3-4ddc-b280-df4af6ce4c6a?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/7b8f5145-e91a-4b01-a0cd-e1cfdf65873e?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Wed, 03 Nov 2021 05:43:12 GMT
+      - Fri, 04 Nov 2022 06:14:40 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/fc114ea6-c5c3-4ddc-b280-df4af6ce4c6a?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/7b8f5145-e91a-4b01-a0cd-e1cfdf65873e?api-version=2022-01-01
       pragma:
       - no-cache
       server:
@@ -1311,9 +1317,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - cde4e5ed-4131-48c9-83c6-4ed200747e5e
+      - dc0c3513-5c6b-49d7-85bb-bfc60339ed64
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
+      - '14999'
     status:
       code: 202
       message: Accepted
@@ -1331,9 +1337,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/fc114ea6-c5c3-4ddc-b280-df4af6ce4c6a?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/7b8f5145-e91a-4b01-a0cd-e1cfdf65873e?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1345,7 +1351,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:43:23 GMT
+      - Fri, 04 Nov 2022 06:14:50 GMT
       expires:
       - '-1'
       pragma:
@@ -1362,7 +1368,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - abb18f5d-7fef-417e-b77d-63203a3446a6
+      - 58451f11-25c8-4650-a056-5e493b175006
     status:
       code: 200
       message: OK
@@ -1370,7 +1376,56 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/7b8f5145-e91a-4b01-a0cd-e1cfdf65873e?api-version=2022-01-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/7b8f5145-e91a-4b01-a0cd-e1cfdf65873e?api-version=2022-01-01
+      cache-control:
+      - no-cache
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Nov 2022 06:14:51 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/7b8f5145-e91a-4b01-a0cd-e1cfdf65873e?api-version=2022-01-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - dc0c3513-5c6b-49d7-85bb-bfc60339ed64
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1382,9 +1437,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_set_test000001/providers/Microsoft.Network/networkSecurityGroups/test-vnet-nsg?api-version=2022-01-01
   response:
     body:
       string: ''
@@ -1392,17 +1447,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2e7c3add-291e-4268-84bc-3f5b74162b19?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c22e053c-6276-442b-b735-198d2c997ae2?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Wed, 03 Nov 2021 05:43:25 GMT
+      - Fri, 04 Nov 2022 06:14:53 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/2e7c3add-291e-4268-84bc-3f5b74162b19?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/c22e053c-6276-442b-b735-198d2c997ae2?api-version=2022-01-01
       pragma:
       - no-cache
       server:
@@ -1413,9 +1468,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - bdc4b677-ad60-4e3a-b900-7968c5ec343d
+      - bb19368e-4c4b-4bea-96b0-a1220bae710f
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14994'
+      - '14999'
     status:
       code: 202
       message: Accepted
@@ -1433,9 +1488,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2e7c3add-291e-4268-84bc-3f5b74162b19?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c22e053c-6276-442b-b735-198d2c997ae2?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1447,7 +1502,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 05:43:36 GMT
+      - Fri, 04 Nov 2022 06:15:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1464,8 +1519,57 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b50ac5ec-59e4-482e-ba37-7cc1c9bf07c6
+      - 0abf4527-2a6e-45ee-89f7-645dd263afe9
     status:
       code: 200
       message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nsg delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/c22e053c-6276-442b-b735-198d2c997ae2?api-version=2022-01-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c22e053c-6276-442b-b735-198d2c997ae2?api-version=2022-01-01
+      cache-control:
+      - no-cache
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Nov 2022 06:15:03 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/c22e053c-6276-442b-b735-198d2c997ae2?api-version=2022-01-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - bb19368e-4c4b-4bea-96b0-a1220bae710f
+    status:
+      code: 204
+      message: No Content
 version: 1

@@ -13,37 +13,36 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001","name":"test_appgw_private_endpoint_with_overwrite_default000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-11-03T09:07:50Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001","name":"test_appgw_private_endpoint_with_overwrite_default000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-11-04T07:10:28Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '390'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:07:57 GMT
+      - Fri, 04 Nov 2022 07:10:31 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "sku": {"name": "Standard"}, "properties": {"publicIPAllocationMethod":
-      "Static", "publicIPAddressVersion": "IPv4", "idleTimeoutInMinutes": 4}}'
+    body: '{"location": "westus", "properties": {"idleTimeoutInMinutes": 4, "publicIPAddressVersion":
+      "IPv4", "publicIPAllocationMethod": "Static"}, "sku": {"name": "Standard"}}'
     headers:
       Accept:
       - application/json
@@ -60,32 +59,33 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/publicIPAddresses/appgw_ip?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/publicIPAddresses/appgw_ip?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"appgw_ip\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/publicIPAddresses/appgw_ip\",\r\n
-        \ \"etag\": \"W/\\\"48f2e9e4-df34-48cf-b69b-0134f5cf92e8\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"385bfe10-b279-4ec1-95ba-210ba1519824\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"46e95f52-2ea4-4924-a527-f9d9e04cd2ae\",\r\n    \"publicIPAddressVersion\":
+        \   \"resourceGuid\": \"34a1b533-b94c-4433-bc8f-ad7d812873e4\",\r\n    \"publicIPAddressVersion\":
         \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Static\",\r\n    \"idleTimeoutInMinutes\":
-        4,\r\n    \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        4,\r\n    \"ipTags\": [],\r\n    \"ddosSettings\": {\r\n      \"protectionMode\":
+        \"VirtualNetworkInherited\"\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
         \ \"sku\": {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n
         \ }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b2808579-2b8c-4cf6-a29e-82aa2183b046?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/326eaf31-eee1-4101-82a6-5fc82a31ed49?api-version=2022-05-01
       cache-control:
       - no-cache
       content-length:
-      - '691'
+      - '754'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:08:04 GMT
+      - Fri, 04 Nov 2022 07:10:35 GMT
       expires:
       - '-1'
       pragma:
@@ -98,9 +98,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d5baf3bf-9edb-4390-8fab-4144823d1d54
+      - 39d2208d-cc9a-44ea-8b9a-988de74819a6
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1189'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -118,9 +118,9 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b2808579-2b8c-4cf6-a29e-82aa2183b046?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/326eaf31-eee1-4101-82a6-5fc82a31ed49?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -132,7 +132,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:08:06 GMT
+      - Fri, 04 Nov 2022 07:10:37 GMT
       expires:
       - '-1'
       pragma:
@@ -142,14 +142,10 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2c4249c8-fc00-47c5-b236-708a2e13c30b
+      - c514c721-8ff9-4330-b997-545ec6f279dd
     status:
       code: 200
       message: OK
@@ -167,30 +163,32 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/publicIPAddresses/appgw_ip?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/publicIPAddresses/appgw_ip?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"appgw_ip\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/publicIPAddresses/appgw_ip\",\r\n
-        \ \"etag\": \"W/\\\"5785daba-3736-4c3a-863a-c70bbfa26322\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"0876ee77-3707-4f18-90d4-425deb48d0ef\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"46e95f52-2ea4-4924-a527-f9d9e04cd2ae\",\r\n    \"ipAddress\":
-        \"13.64.18.215\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
-        \"Static\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": []\r\n
-        \ },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n  \"sku\":
-        {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
+        \   \"resourceGuid\": \"34a1b533-b94c-4433-bc8f-ad7d812873e4\",\r\n    \"ipAddress\":
+        \"20.245.83.35\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
+        \"Static\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": [],\r\n
+        \   \"ddosSettings\": {\r\n      \"protectionMode\": \"VirtualNetworkInherited\"\r\n
+        \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        \ \"sku\": {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '726'
+      - '789'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:08:06 GMT
+      - Fri, 04 Nov 2022 07:10:37 GMT
       etag:
-      - W/"5785daba-3736-4c3a-863a-c70bbfa26322"
+      - W/"0876ee77-3707-4f18-90d4-425deb48d0ef"
       expires:
       - '-1'
       pragma:
@@ -200,14 +198,10 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7af8e76b-1e5a-41e6-8c96-d2b62a1ed20d
+      - d73766c8-fb3f-4d61-80ee-ab2531c8d89d
     status:
       code: 200
       message: OK
@@ -225,21 +219,22 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001","name":"test_appgw_private_endpoint_with_overwrite_default000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-11-03T09:07:50Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001","name":"test_appgw_private_endpoint_with_overwrite_default000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-11-04T07:10:28Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '390'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:08:07 GMT
+      - Fri, 04 Nov 2022 07:10:37 GMT
       expires:
       - '-1'
       pragma:
@@ -257,7 +252,7 @@ interactions:
     body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
       ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name": "appgw_private_endpoint_subnet",
       "properties": {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies":
-      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
+      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
     headers:
       Accept:
       - application/json
@@ -268,30 +263,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '320'
+      - '321'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"appgw_private_endpoint_vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet\",\r\n
-        \ \"etag\": \"W/\\\"13110f8a-d528-4384-af87-4bb3d8b732fd\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"6a6776d1-5c12-4eb2-944b-cf0a1126c54d\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"1f8b3fcc-94dc-4800-b243-b029a532e951\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"cb6ec430-9eba-47a4-8b8d-ece7fdab6704\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"appgw_private_endpoint_subnet\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet/subnets/appgw_private_endpoint_subnet\",\r\n
-        \       \"etag\": \"W/\\\"13110f8a-d528-4384-af87-4bb3d8b732fd\\\"\",\r\n
+        \       \"etag\": \"W/\\\"6a6776d1-5c12-4eb2-944b-cf0a1126c54d\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
@@ -299,15 +295,15 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d54e6e03-34e6-47e2-9c80-5483d7fe86fd?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2a7f3098-f467-4c71-8e5c-ccc297d63f75?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '1513'
+      - '1476'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:08:14 GMT
+      - Fri, 04 Nov 2022 07:10:42 GMT
       expires:
       - '-1'
       pragma:
@@ -320,9 +316,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9613de7e-9ea8-461f-88ca-dcab7a437843
+      - 277816e7-b830-41f3-80fa-93162724bf08
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -340,9 +336,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d54e6e03-34e6-47e2-9c80-5483d7fe86fd?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2a7f3098-f467-4c71-8e5c-ccc297d63f75?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -354,7 +351,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:08:18 GMT
+      - Fri, 04 Nov 2022 07:10:46 GMT
       expires:
       - '-1'
       pragma:
@@ -371,7 +368,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 625302c8-d1f2-4966-8212-c520ab8d6f09
+      - 4a9441c0-81b2-414b-8c7a-928b2e0432e8
     status:
       code: 200
       message: OK
@@ -389,24 +386,25 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"appgw_private_endpoint_vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet\",\r\n
-        \ \"etag\": \"W/\\\"e4a0c067-c80b-4bc4-9a56-deb8c9526041\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"5334f6b0-dccf-4552-95b3-4a09100c1d19\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"1f8b3fcc-94dc-4800-b243-b029a532e951\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"cb6ec430-9eba-47a4-8b8d-ece7fdab6704\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"appgw_private_endpoint_subnet\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet/subnets/appgw_private_endpoint_subnet\",\r\n
-        \       \"etag\": \"W/\\\"e4a0c067-c80b-4bc4-9a56-deb8c9526041\\\"\",\r\n
+        \       \"etag\": \"W/\\\"5334f6b0-dccf-4552-95b3-4a09100c1d19\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
@@ -414,13 +412,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1515'
+      - '1478'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:08:18 GMT
+      - Fri, 04 Nov 2022 07:10:46 GMT
       etag:
-      - W/"e4a0c067-c80b-4bc4-9a56-deb8c9526041"
+      - W/"5334f6b0-dccf-4552-95b3-4a09100c1d19"
       expires:
       - '-1'
       pragma:
@@ -437,7 +435,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a4349923-72c3-4a89-8f07-be11a4dfb760
+      - 94d99069-811c-497e-b541-f0ede77afc73
     status:
       code: 200
       message: OK
@@ -455,28 +453,29 @@ interactions:
       ParameterSetName:
       - -g -n --vnet-name --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet/subnets/appgw_private_endpoint_subnet?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet/subnets/appgw_private_endpoint_subnet?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"appgw_private_endpoint_subnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet/subnets/appgw_private_endpoint_subnet\",\r\n
-        \ \"etag\": \"W/\\\"e4a0c067-c80b-4bc4-9a56-deb8c9526041\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"5334f6b0-dccf-4552-95b3-4a09100c1d19\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
-        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '652'
+      - '634'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:08:21 GMT
+      - Fri, 04 Nov 2022 07:10:47 GMT
       etag:
-      - W/"e4a0c067-c80b-4bc4-9a56-deb8c9526041"
+      - W/"5334f6b0-dccf-4552-95b3-4a09100c1d19"
       expires:
       - '-1'
       pragma:
@@ -493,7 +492,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9194ec81-273e-4c48-b1d1-a4e483eda4a6
+      - 04df4d3d-5375-4e25-bcb0-ee37549fb56e
     status:
       code: 200
       message: OK
@@ -512,34 +511,37 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '517'
+      - '498'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --vnet-name --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet/subnets/appgw_private_endpoint_subnet?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet/subnets/appgw_private_endpoint_subnet?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"appgw_private_endpoint_subnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet/subnets/appgw_private_endpoint_subnet\",\r\n
-        \ \"etag\": \"W/\\\"eff2df2d-d227-4199-810d-578efb2f46d8\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \ \"etag\": \"W/\\\"4fd66c34-4546-4292-b2df-ae47700e692c\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/7e8f79f7-81ef-4f71-b59b-f34a03b337ce?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/09e705ea-0d09-43c9-9001-d9ed7ff4acc3?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '652'
+      - '634'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:08:26 GMT
+      - Fri, 04 Nov 2022 07:10:48 GMT
       expires:
       - '-1'
       pragma:
@@ -556,9 +558,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 3ef624ba-fbf4-4e7e-a1f3-3b5f0ec8c348
+      - 1d88fd3f-d798-4d55-ab1b-3f452ce738b4
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1197'
     status:
       code: 200
       message: OK
@@ -576,9 +578,10 @@ interactions:
       ParameterSetName:
       - -g -n --vnet-name --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/7e8f79f7-81ef-4f71-b59b-f34a03b337ce?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/09e705ea-0d09-43c9-9001-d9ed7ff4acc3?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -590,7 +593,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:08:29 GMT
+      - Fri, 04 Nov 2022 07:11:19 GMT
       expires:
       - '-1'
       pragma:
@@ -607,7 +610,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - acd2ff7c-2509-4b3e-8a46-90308dc88619
+      - 2f083acb-674b-4f0b-98a9-d2aacece0edc
     status:
       code: 200
       message: OK
@@ -625,13 +628,14 @@ interactions:
       ParameterSetName:
       - -g -n --vnet-name --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet/subnets/appgw_private_endpoint_subnet?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet/subnets/appgw_private_endpoint_subnet?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"appgw_private_endpoint_subnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet/subnets/appgw_private_endpoint_subnet\",\r\n
-        \ \"etag\": \"W/\\\"897ee5eb-9092-4dac-9c6f-d3407861e856\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"4fd66c34-4546-4292-b2df-ae47700e692c\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -640,13 +644,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '653'
+      - '634'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:08:30 GMT
+      - Fri, 04 Nov 2022 07:11:19 GMT
       etag:
-      - W/"897ee5eb-9092-4dac-9c6f-d3407861e856"
+      - W/"4fd66c34-4546-4292-b2df-ae47700e692c"
       expires:
       - '-1'
       pragma:
@@ -663,7 +667,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f94d6104-476b-498b-8c93-39d10e017610
+      - 06422ae8-2276-4738-9795-a14135f891d3
     status:
       code: 200
       message: OK
@@ -680,23 +684,24 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --sku --public-ip-address --enable-private-link --private-link-subnet
-        --private-link-primary --private-link-subnet-prefix
+        --private-link-primary --private-link-subnet-prefix --priority
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001","name":"test_appgw_private_endpoint_with_overwrite_default000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-11-03T09:07:50Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001","name":"test_appgw_private_endpoint_with_overwrite_default000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-11-04T07:10:28Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '390'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:08:31 GMT
+      - Fri, 04 Nov 2022 07:11:20 GMT
       expires:
       - '-1'
       pragma:
@@ -723,11 +728,56 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --sku --public-ip-address --enable-private-link --private-link-subnet
-        --private-link-primary --private-link-subnet-prefix
+        --private-link-primary --private-link-subnet-prefix --priority
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27test_appgw_private_endpoint_with_overwrite_default000001%27%20and%20name%20eq%20%27None%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FvirtualNetworks%27&api-version=2021-04-01
+  response:
+    body:
+      string: '{"value":[],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceGroup+eq+%27test_appgw_private_endpoint_with_overwrite_default000001%27+and+name+eq+%27None%27+and+resourceType+eq+%27Microsoft.Network%2fvirtualNetworks%27&api-version=2021-04-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9FTTVOa1UtIiwibmV4dFJvd0tleSI6IjEhMjEyIU1FSXhSalkwTnpFeFFrWXdORVJFUVVGRlF6TkRRamt5TnpKR01EazFPVEJmUjFKTUxWUkZVMVE2TlVaQldsVlNSVG8xUmtaSlVrVlhRVXhNT2pWR1RVRk9RVWRGVFVWT1ZEbzFSa2xRT2pWR1EwOU9mRGszUmpKQlJrTkRNRGhETWpRek5qY3RUVWxEVWs5VFQwWlVPakpGVGtWVVYwOVNTem95UmxCVlFreEpRMGxRUVVSRVVrVlRVMFZUT2pKR1VGVkNTVkEwTFZkRlUxUlZVdy0tIn0%3d"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '689'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Nov 2022 07:11:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku --public-ip-address --enable-private-link --private-link-subnet
+        --private-link-primary --private-link-subnet-prefix --priority
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?api-version=2021-04-01&%24filter=resourceGroup+eq+%27test_appgw_private_endpoint_with_overwrite_default000001%27+and+name+eq+%27None%27+and+resourceType+eq+%27Microsoft.Network%2FvirtualNetworks%27&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9FTTVOa1UtIiwibmV4dFJvd0tleSI6IjEhMjEyIU1FSXhSalkwTnpFeFFrWXdORVJFUVVGRlF6TkRRamt5TnpKR01EazFPVEJmUjFKTUxWUkZVMVE2TlVaQldsVlNSVG8xUmtaSlVrVlhRVXhNT2pWR1RVRk9RVWRGVFVWT1ZEbzFSa2xRT2pWR1EwOU9mRGszUmpKQlJrTkRNRGhETWpRek5qY3RUVWxEVWs5VFQwWlVPakpGVGtWVVYwOVNTem95UmxCVlFreEpRMGxRUVVSRVVrVlRVMFZUT2pKR1VGVkNTVkEwTFZkRlUxUlZVdy0tIn0%3D
   response:
     body:
       string: '{"value":[]}'
@@ -739,7 +789,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:08:33 GMT
+      - Fri, 04 Nov 2022 07:11:22 GMT
       expires:
       - '-1'
       pragma:
@@ -766,23 +816,68 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --sku --public-ip-address --enable-private-link --private-link-subnet
-        --private-link-primary --private-link-subnet-prefix
+        --private-link-primary --private-link-subnet-prefix --priority
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27test_appgw_private_endpoint_with_overwrite_default000001%27%20and%20name%20eq%20%27appgw_ip%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FpublicIPAddresses%27&api-version=2021-04-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/publicIPAddresses/appgw_ip","name":"appgw_ip","type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Standard","tier":"Regional"},"location":"westus"}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/publicIPAddresses/appgw_ip","name":"appgw_ip","type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Standard"},"location":"westus"}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceGroup+eq+%27test_appgw_private_endpoint_with_overwrite_default000001%27+and+name+eq+%27appgw_ip%27+and+resourceType+eq+%27Microsoft.Network%2fpublicIPAddresses%27&api-version=2021-04-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9FTTVOa1UtIiwibmV4dFJvd0tleSI6IjEhMjEyIU1FSXhSalkwTnpFeFFrWXdORVJFUVVGRlF6TkRRamt5TnpKR01EazFPVEJmUjFKTUxWUkZVMVE2TlVaQldsVlNSVG8xUmtaSlVrVlhRVXhNT2pWR1RVRk9RVWRGVFVWT1ZEbzFSa2xRT2pWR1EwOU9mRGszUmpKQlJrTkRNRGhETWpRek5qY3RUVWxEVWs5VFQwWlVPakpGVGtWVVYwOVNTem95UmxCVlFreEpRMGxRUVVSRVVrVlRVMFZUT2pKR1VGVkNTVkEwTFZkRlUxUlZVdy0tIn0%3d"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '345'
+      - '991'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:08:35 GMT
+      - Fri, 04 Nov 2022 07:11:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku --public-ip-address --enable-private-link --private-link-subnet
+        --private-link-primary --private-link-subnet-prefix --priority
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?api-version=2021-04-01&%24filter=resourceGroup+eq+%27test_appgw_private_endpoint_with_overwrite_default000001%27+and+name+eq+%27appgw_ip%27+and+resourceType+eq+%27Microsoft.Network%2FpublicIPAddresses%27&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9FTTVOa1UtIiwibmV4dFJvd0tleSI6IjEhMjEyIU1FSXhSalkwTnpFeFFrWXdORVJFUVVGRlF6TkRRamt5TnpKR01EazFPVEJmUjFKTUxWUkZVMVE2TlVaQldsVlNSVG8xUmtaSlVrVlhRVXhNT2pWR1RVRk9RVWRGVFVWT1ZEbzFSa2xRT2pWR1EwOU9mRGszUmpKQlJrTkRNRGhETWpRek5qY3RUVWxEVWs5VFQwWlVPakpGVGtWVVYwOVNTem95UmxCVlFreEpRMGxRUVVSRVVrVlRVMFZUT2pKR1VGVkNTVkEwTFZkRlUxUlZVdy0tIn0%3D
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Nov 2022 07:11:24 GMT
       expires:
       - '-1'
       pragma:
@@ -805,7 +900,7 @@ interactions:
       [{"name": "default", "properties": {"addressPrefix": "10.0.0.0/24"}}, {"name":
       "YetAnotherSubnetName", "properties": {"addressPrefix": "10.0.2.0/24", "privateLinkServiceNetworkPolicies":
       "Disabled"}}]}}, {"type": "Microsoft.Network/applicationGateways", "name": "appgw",
-      "location": "westus", "tags": {}, "apiVersion": "2021-05-01", "dependsOn": ["Microsoft.Network/virtualNetworks/appgwVnet"],
+      "location": "westus", "tags": {}, "apiVersion": "2022-01-01", "dependsOn": ["Microsoft.Network/virtualNetworks/appgwVnet"],
       "properties": {"backendAddressPools": [{"name": "appGatewayBackendPool"}], "backendHttpSettingsCollection":
       [{"name": "appGatewayBackendHttpSettings", "properties": {"Port": 80, "Protocol":
       "Http", "CookieBasedAffinity": "disabled", "connectionDraining": {"enabled":
@@ -823,11 +918,11 @@ interactions:
       "properties": {"RuleType": "Basic", "httpListener": {"id": "[concat(variables(''appGwID''),
       ''/httpListeners/appGatewayHttpListener'')]"}, "backendAddressPool": {"id":
       "[concat(variables(''appGwID''), ''/backendAddressPools/appGatewayBackendPool'')]"},
-      "backendHttpSettings": {"id": "[concat(variables(''appGwID''), ''/backendHttpSettingsCollection/appGatewayBackendHttpSettings'')]"}}}],
-      "privateLinkConfigurations": [{"name": "PrivateLinkDefaultConfiguration", "properties":
-      {"ipConfigurations": [{"name": "PrivateLinkDefaultIPConfiguration", "properties":
-      {"privateIPAddress": null, "privateIPAllocationMethod": "Dynamic", "primary":
-      true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgwVnet/subnets/YetAnotherSubnetName"}}}]}}]},
+      "backendHttpSettings": {"id": "[concat(variables(''appGwID''), ''/backendHttpSettingsCollection/appGatewayBackendHttpSettings'')]"},
+      "priority": 1001}}], "privateLinkConfigurations": [{"name": "PrivateLinkDefaultConfiguration",
+      "properties": {"ipConfigurations": [{"name": "PrivateLinkDefaultIPConfiguration",
+      "properties": {"privateIPAddress": null, "privateIPAllocationMethod": "Dynamic",
+      "primary": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgwVnet/subnets/YetAnotherSubnetName"}}}]}}]},
       "zones": null}], "outputs": {"applicationGateway": {"type": "object", "value":
       "[reference(''appgw'')]"}}}, "parameters": {}, "mode": "incremental"}}'
     headers:
@@ -840,30 +935,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '3512'
+      - '3473'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --sku --public-ip-address --enable-private-link --private-link-subnet
-        --private-link-primary --private-link-subnet-prefix
+        --private-link-primary --private-link-subnet-prefix --priority
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/ag_deploy_NLMm7acAI6LsHKxHuAo4Dh2UvlwIRo0q","name":"ag_deploy_NLMm7acAI6LsHKxHuAo4Dh2UvlwIRo0q","type":"Microsoft.Resources/deployments","properties":{"templateHash":"11542706205016077179","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-11-03T09:08:40.0100534Z","duration":"PT2.0534846S","correlationId":"97663e61-5561-47c5-b9d5-fd4b97568507","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"applicationGateways","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgwVnet","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"appgwVnet"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw","resourceType":"Microsoft.Network/applicationGateways","resourceName":"appgw"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/ag_deploy_GV9T7QTvhdHzF8wSNb3g9NSCGtJYOa1P","name":"ag_deploy_GV9T7QTvhdHzF8wSNb3g9NSCGtJYOa1P","type":"Microsoft.Resources/deployments","properties":{"templateHash":"8147434131859447451","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-11-04T07:11:31.8627832Z","duration":"PT0.0006759S","correlationId":"316a4c4f-6d52-40fc-b9bb-f32b984e0916","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"applicationGateways","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgwVnet","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"appgwVnet"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw","resourceType":"Microsoft.Network/applicationGateways","resourceName":"appgw"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/ag_deploy_NLMm7acAI6LsHKxHuAo4Dh2UvlwIRo0q/operationStatuses/08585656763675210692?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/ag_deploy_GV9T7QTvhdHzF8wSNb3g9NSCGtJYOa1P/operationStatuses/08585340609968355830?api-version=2021-04-01
       cache-control:
       - no-cache
       content-length:
-      - '1359'
+      - '1301'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:08:39 GMT
+      - Fri, 04 Nov 2022 07:11:33 GMT
       expires:
       - '-1'
       pragma:
@@ -873,7 +969,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1191'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -890,11 +986,12 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --sku --public-ip-address --enable-private-link --private-link-subnet
-        --private-link-primary --private-link-subnet-prefix
+        --private-link-primary --private-link-subnet-prefix --priority
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585656763675210692?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585340609968355830?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -906,7 +1003,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:09:11 GMT
+      - Fri, 04 Nov 2022 07:12:03 GMT
       expires:
       - '-1'
       pragma:
@@ -933,11 +1030,12 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --sku --public-ip-address --enable-private-link --private-link-subnet
-        --private-link-primary --private-link-subnet-prefix
+        --private-link-primary --private-link-subnet-prefix --priority
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585656763675210692?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585340609968355830?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -949,7 +1047,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:09:41 GMT
+      - Fri, 04 Nov 2022 07:12:33 GMT
       expires:
       - '-1'
       pragma:
@@ -976,11 +1074,12 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --sku --public-ip-address --enable-private-link --private-link-subnet
-        --private-link-primary --private-link-subnet-prefix
+        --private-link-primary --private-link-subnet-prefix --priority
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585656763675210692?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585340609968355830?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -992,7 +1091,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:10:11 GMT
+      - Fri, 04 Nov 2022 07:13:04 GMT
       expires:
       - '-1'
       pragma:
@@ -1019,11 +1118,12 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --sku --public-ip-address --enable-private-link --private-link-subnet
-        --private-link-primary --private-link-subnet-prefix
+        --private-link-primary --private-link-subnet-prefix --priority
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585656763675210692?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585340609968355830?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1035,7 +1135,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:10:42 GMT
+      - Fri, 04 Nov 2022 07:13:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1062,11 +1162,12 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --sku --public-ip-address --enable-private-link --private-link-subnet
-        --private-link-primary --private-link-subnet-prefix
+        --private-link-primary --private-link-subnet-prefix --priority
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585656763675210692?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585340609968355830?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1078,7 +1179,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:11:13 GMT
+      - Fri, 04 Nov 2022 07:14:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1105,11 +1206,12 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --sku --public-ip-address --enable-private-link --private-link-subnet
-        --private-link-primary --private-link-subnet-prefix
+        --private-link-primary --private-link-subnet-prefix --priority
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585656763675210692?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585340609968355830?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1121,7 +1223,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:11:43 GMT
+      - Fri, 04 Nov 2022 07:14:35 GMT
       expires:
       - '-1'
       pragma:
@@ -1148,11 +1250,12 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --sku --public-ip-address --enable-private-link --private-link-subnet
-        --private-link-primary --private-link-subnet-prefix
+        --private-link-primary --private-link-subnet-prefix --priority
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585656763675210692?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585340609968355830?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1164,7 +1267,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:12:13 GMT
+      - Fri, 04 Nov 2022 07:15:06 GMT
       expires:
       - '-1'
       pragma:
@@ -1191,11 +1294,100 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --sku --public-ip-address --enable-private-link --private-link-subnet
-        --private-link-primary --private-link-subnet-prefix
+        --private-link-primary --private-link-subnet-prefix --priority
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585656763675210692?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585340609968355830?api-version=2021-04-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Nov 2022 07:15:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku --public-ip-address --enable-private-link --private-link-subnet
+        --private-link-primary --private-link-subnet-prefix --priority
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585340609968355830?api-version=2021-04-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Nov 2022 07:16:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku --public-ip-address --enable-private-link --private-link-subnet
+        --private-link-primary --private-link-subnet-prefix --priority
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585340609968355830?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -1207,7 +1399,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:12:43 GMT
+      - Fri, 04 Nov 2022 07:16:37 GMT
       expires:
       - '-1'
       pragma:
@@ -1234,23 +1426,24 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --sku --public-ip-address --enable-private-link --private-link-subnet
-        --private-link-primary --private-link-subnet-prefix
+        --private-link-primary --private-link-subnet-prefix --priority
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/ag_deploy_NLMm7acAI6LsHKxHuAo4Dh2UvlwIRo0q","name":"ag_deploy_NLMm7acAI6LsHKxHuAo4Dh2UvlwIRo0q","type":"Microsoft.Resources/deployments","properties":{"templateHash":"11542706205016077179","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-11-03T09:12:43.6948497Z","duration":"PT4M5.7382809S","correlationId":"97663e61-5561-47c5-b9d5-fd4b97568507","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"applicationGateways","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgwVnet","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"appgwVnet"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw","resourceType":"Microsoft.Network/applicationGateways","resourceName":"appgw"}],"outputs":{"applicationGateway":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"5d8c4812-c150-42d5-ab24-4672f80e1910","sku":{"name":"Standard_v2","tier":"Standard_v2","capacity":2},"operationalState":"Running","gatewayIPConfigurations":[{"name":"appGatewayFrontendIP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/gatewayIPConfigurations/appGatewayFrontendIP","etag":"W/\"0d360b83-8c8c-4b70-85b0-41ac019850d0\"","properties":{"provisioningState":"Succeeded","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgwVnet/subnets/default"}},"type":"Microsoft.Network/applicationGateways/gatewayIPConfigurations"}],"sslCertificates":[],"trustedRootCertificates":[],"trustedClientCertificates":[],"sslProfiles":[],"frontendIPConfigurations":[{"name":"appGatewayFrontendIP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/frontendIPConfigurations/appGatewayFrontendIP","etag":"W/\"0d360b83-8c8c-4b70-85b0-41ac019850d0\"","type":"Microsoft.Network/applicationGateways/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/publicIPAddresses/appgw_ip"},"httpListeners":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener"}],"privateLinkConfiguration":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateLinkConfigurations/PrivateLinkDefaultConfiguration"}}}],"frontendPorts":[{"name":"appGatewayFrontendPort","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/frontendPorts/appGatewayFrontendPort","etag":"W/\"0d360b83-8c8c-4b70-85b0-41ac019850d0\"","properties":{"provisioningState":"Succeeded","port":80,"httpListeners":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener"}]},"type":"Microsoft.Network/applicationGateways/frontendPorts"}],"backendAddressPools":[{"name":"appGatewayBackendPool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/backendAddressPools/appGatewayBackendPool","etag":"W/\"0d360b83-8c8c-4b70-85b0-41ac019850d0\"","properties":{"provisioningState":"Succeeded","backendAddresses":[],"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1"}]},"type":"Microsoft.Network/applicationGateways/backendAddressPools"}],"loadDistributionPolicies":[],"backendHttpSettingsCollection":[{"name":"appGatewayBackendHttpSettings","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/backendHttpSettingsCollection/appGatewayBackendHttpSettings","etag":"W/\"0d360b83-8c8c-4b70-85b0-41ac019850d0\"","properties":{"provisioningState":"Succeeded","port":80,"protocol":"Http","cookieBasedAffinity":"Disabled","connectionDraining":{"enabled":false,"drainTimeoutInSec":1},"pickHostNameFromBackendAddress":false,"requestTimeout":30,"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1"}]},"type":"Microsoft.Network/applicationGateways/backendHttpSettingsCollection"}],"httpListeners":[{"name":"appGatewayHttpListener","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener","etag":"W/\"0d360b83-8c8c-4b70-85b0-41ac019850d0\"","properties":{"provisioningState":"Succeeded","frontendIPConfiguration":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/frontendIPConfigurations/appGatewayFrontendIP"},"frontendPort":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/frontendPorts/appGatewayFrontendPort"},"protocol":"Http","hostNames":[],"requireServerNameIndication":false,"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1"}]},"type":"Microsoft.Network/applicationGateways/httpListeners"}],"urlPathMaps":[],"requestRoutingRules":[{"name":"rule1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1","etag":"W/\"0d360b83-8c8c-4b70-85b0-41ac019850d0\"","properties":{"provisioningState":"Succeeded","ruleType":"Basic","httpListener":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener"},"backendAddressPool":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/backendAddressPools/appGatewayBackendPool"},"backendHttpSettings":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/backendHttpSettingsCollection/appGatewayBackendHttpSettings"}},"type":"Microsoft.Network/applicationGateways/requestRoutingRules"}],"probes":[],"rewriteRuleSets":[],"redirectConfigurations":[],"privateLinkConfigurations":[{"name":"PrivateLinkDefaultConfiguration","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateLinkConfigurations/PrivateLinkDefaultConfiguration","etag":"W/\"0d360b83-8c8c-4b70-85b0-41ac019850d0\"","type":"Microsoft.Network/applicationGateways/privateLinkConfigurations","properties":{"provisioningState":"Succeeded","ipConfigurations":[{"name":"PrivateLinkDefaultIPConfiguration","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateLinkConfigurations/PrivateLinkDefaultConfiguration/ipConfigurations/PrivateLinkDefaultIPConfiguration","etag":"W/\"0d360b83-8c8c-4b70-85b0-41ac019850d0\"","type":"Microsoft.Network/applicationGateways/privateLinkConfigurations/ipConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","primary":true,"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgwVnet/subnets/YetAnotherSubnetName"}}}],"frontendIpConfigurations":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/frontendIPConfigurations/appGatewayFrontendIP"}]}}],"privateEndpointConnections":[]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgwVnet"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Resources/deployments/ag_deploy_GV9T7QTvhdHzF8wSNb3g9NSCGtJYOa1P","name":"ag_deploy_GV9T7QTvhdHzF8wSNb3g9NSCGtJYOa1P","type":"Microsoft.Resources/deployments","properties":{"templateHash":"8147434131859447451","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-11-04T07:16:18.3748825Z","duration":"PT4M46.5127752S","correlationId":"316a4c4f-6d52-40fc-b9bb-f32b984e0916","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"applicationGateways","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgwVnet","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"appgwVnet"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw","resourceType":"Microsoft.Network/applicationGateways","resourceName":"appgw"}],"outputs":{"applicationGateway":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"4005d6ef-461a-4067-8064-710d909cdfd1","sku":{"name":"Standard_v2","tier":"Standard_v2","capacity":2},"operationalState":"Running","gatewayIPConfigurations":[{"name":"appGatewayFrontendIP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/gatewayIPConfigurations/appGatewayFrontendIP","etag":"W/\"eb5307be-e489-4dbd-af31-2928dc211f67\"","properties":{"provisioningState":"Succeeded","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgwVnet/subnets/default"}},"type":"Microsoft.Network/applicationGateways/gatewayIPConfigurations"}],"sslCertificates":[],"trustedRootCertificates":[],"trustedClientCertificates":[],"sslProfiles":[],"frontendIPConfigurations":[{"name":"appGatewayFrontendIP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/frontendIPConfigurations/appGatewayFrontendIP","etag":"W/\"eb5307be-e489-4dbd-af31-2928dc211f67\"","type":"Microsoft.Network/applicationGateways/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/publicIPAddresses/appgw_ip"},"httpListeners":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener"}],"privateLinkConfiguration":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateLinkConfigurations/PrivateLinkDefaultConfiguration"}}}],"frontendPorts":[{"name":"appGatewayFrontendPort","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/frontendPorts/appGatewayFrontendPort","etag":"W/\"eb5307be-e489-4dbd-af31-2928dc211f67\"","properties":{"provisioningState":"Succeeded","port":80,"httpListeners":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener"}]},"type":"Microsoft.Network/applicationGateways/frontendPorts"}],"backendAddressPools":[{"name":"appGatewayBackendPool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/backendAddressPools/appGatewayBackendPool","etag":"W/\"eb5307be-e489-4dbd-af31-2928dc211f67\"","properties":{"provisioningState":"Succeeded","backendAddresses":[],"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1"}]},"type":"Microsoft.Network/applicationGateways/backendAddressPools"}],"loadDistributionPolicies":[],"backendHttpSettingsCollection":[{"name":"appGatewayBackendHttpSettings","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/backendHttpSettingsCollection/appGatewayBackendHttpSettings","etag":"W/\"eb5307be-e489-4dbd-af31-2928dc211f67\"","properties":{"provisioningState":"Succeeded","port":80,"protocol":"Http","cookieBasedAffinity":"Disabled","connectionDraining":{"enabled":false,"drainTimeoutInSec":1},"pickHostNameFromBackendAddress":false,"requestTimeout":30,"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1"}]},"type":"Microsoft.Network/applicationGateways/backendHttpSettingsCollection"}],"backendSettingsCollection":[],"httpListeners":[{"name":"appGatewayHttpListener","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener","etag":"W/\"eb5307be-e489-4dbd-af31-2928dc211f67\"","properties":{"provisioningState":"Succeeded","frontendIPConfiguration":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/frontendIPConfigurations/appGatewayFrontendIP"},"frontendPort":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/frontendPorts/appGatewayFrontendPort"},"protocol":"Http","hostNames":[],"requireServerNameIndication":false,"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1"}]},"type":"Microsoft.Network/applicationGateways/httpListeners"}],"listeners":[],"urlPathMaps":[],"requestRoutingRules":[{"name":"rule1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1","etag":"W/\"eb5307be-e489-4dbd-af31-2928dc211f67\"","properties":{"provisioningState":"Succeeded","ruleType":"Basic","priority":1001,"httpListener":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener"},"backendAddressPool":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/backendAddressPools/appGatewayBackendPool"},"backendHttpSettings":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/backendHttpSettingsCollection/appGatewayBackendHttpSettings"}},"type":"Microsoft.Network/applicationGateways/requestRoutingRules"}],"routingRules":[],"probes":[],"rewriteRuleSets":[],"redirectConfigurations":[],"privateLinkConfigurations":[{"name":"PrivateLinkDefaultConfiguration","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateLinkConfigurations/PrivateLinkDefaultConfiguration","etag":"W/\"eb5307be-e489-4dbd-af31-2928dc211f67\"","type":"Microsoft.Network/applicationGateways/privateLinkConfigurations","properties":{"provisioningState":"Succeeded","ipConfigurations":[{"name":"PrivateLinkDefaultIPConfiguration","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateLinkConfigurations/PrivateLinkDefaultConfiguration/ipConfigurations/PrivateLinkDefaultIPConfiguration","etag":"W/\"eb5307be-e489-4dbd-af31-2928dc211f67\"","type":"Microsoft.Network/applicationGateways/privateLinkConfigurations/ipConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","primary":true,"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgwVnet/subnets/YetAnotherSubnetName"}}}],"frontendIpConfigurations":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/frontendIPConfigurations/appGatewayFrontendIP"}]}}],"privateEndpointConnections":[]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgwVnet"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '10939'
+      - '10468'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:12:46 GMT
+      - Fri, 04 Nov 2022 07:16:38 GMT
       expires:
       - '-1'
       pragma:
@@ -1278,21 +1471,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"appgw\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw\",\r\n
-        \ \"etag\": \"W/\\\"0d360b83-8c8c-4b70-85b0-41ac019850d0\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"eb5307be-e489-4dbd-af31-2928dc211f67\\\"\",\r\n  \"type\":
         \"Microsoft.Network/applicationGateways\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"5d8c4812-c150-42d5-ab24-4672f80e1910\",\r\n    \"sku\":
+        \   \"resourceGuid\": \"4005d6ef-461a-4067-8064-710d909cdfd1\",\r\n    \"sku\":
         {\r\n      \"name\": \"Standard_v2\",\r\n      \"tier\": \"Standard_v2\",\r\n
         \     \"capacity\": 2\r\n    },\r\n    \"operationalState\": \"Running\",\r\n
         \   \"gatewayIPConfigurations\": [\r\n      {\r\n        \"name\": \"appGatewayFrontendIP\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/gatewayIPConfigurations/appGatewayFrontendIP\",\r\n
-        \       \"etag\": \"W/\\\"0d360b83-8c8c-4b70-85b0-41ac019850d0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"eb5307be-e489-4dbd-af31-2928dc211f67\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgwVnet/subnets/default\"\r\n
         \         }\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/gatewayIPConfigurations\"\r\n
@@ -1300,7 +1493,7 @@ interactions:
         [],\r\n    \"trustedClientCertificates\": [],\r\n    \"sslProfiles\": [],\r\n
         \   \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\": \"appGatewayFrontendIP\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/frontendIPConfigurations/appGatewayFrontendIP\",\r\n
-        \       \"etag\": \"W/\\\"0d360b83-8c8c-4b70-85b0-41ac019850d0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"eb5307be-e489-4dbd-af31-2928dc211f67\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/applicationGateways/frontendIPConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"publicIPAddress\":
@@ -1312,14 +1505,14 @@ interactions:
         \         }\r\n        }\r\n      }\r\n    ],\r\n    \"frontendPorts\": [\r\n
         \     {\r\n        \"name\": \"appGatewayFrontendPort\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/frontendPorts/appGatewayFrontendPort\",\r\n
-        \       \"etag\": \"W/\\\"0d360b83-8c8c-4b70-85b0-41ac019850d0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"eb5307be-e489-4dbd-af31-2928dc211f67\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"port\": 80,\r\n          \"httpListeners\": [\r\n            {\r\n
         \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener\"\r\n
         \           }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\r\n
         \     }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\n        \"name\":
         \"appGatewayBackendPool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/backendAddressPools/appGatewayBackendPool\",\r\n
-        \       \"etag\": \"W/\\\"0d360b83-8c8c-4b70-85b0-41ac019850d0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"eb5307be-e489-4dbd-af31-2928dc211f67\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"backendAddresses\": [],\r\n          \"requestRoutingRules\":
         [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1\"\r\n
@@ -1327,7 +1520,7 @@ interactions:
         \     }\r\n    ],\r\n    \"loadDistributionPolicies\": [],\r\n    \"backendHttpSettingsCollection\":
         [\r\n      {\r\n        \"name\": \"appGatewayBackendHttpSettings\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/backendHttpSettingsCollection/appGatewayBackendHttpSettings\",\r\n
-        \       \"etag\": \"W/\\\"0d360b83-8c8c-4b70-85b0-41ac019850d0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"eb5307be-e489-4dbd-af31-2928dc211f67\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"port\": 80,\r\n          \"protocol\": \"Http\",\r\n          \"cookieBasedAffinity\":
         \"Disabled\",\r\n          \"connectionDraining\": {\r\n            \"enabled\":
@@ -1335,9 +1528,10 @@ interactions:
         false,\r\n          \"requestTimeout\": 30,\r\n          \"requestRoutingRules\":
         [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1\"\r\n
         \           }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/backendHttpSettingsCollection\"\r\n
-        \     }\r\n    ],\r\n    \"httpListeners\": [\r\n      {\r\n        \"name\":
-        \"appGatewayHttpListener\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener\",\r\n
-        \       \"etag\": \"W/\\\"0d360b83-8c8c-4b70-85b0-41ac019850d0\\\"\",\r\n
+        \     }\r\n    ],\r\n    \"backendSettingsCollection\": [],\r\n    \"httpListeners\":
+        [\r\n      {\r\n        \"name\": \"appGatewayHttpListener\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener\",\r\n
+        \       \"etag\": \"W/\\\"eb5307be-e489-4dbd-af31-2928dc211f67\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"frontendIPConfiguration\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/frontendIPConfigurations/appGatewayFrontendIP\"\r\n
         \         },\r\n          \"frontendPort\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/frontendPorts/appGatewayFrontendPort\"\r\n
@@ -1345,27 +1539,28 @@ interactions:
         [],\r\n          \"requireServerNameIndication\": false,\r\n          \"requestRoutingRules\":
         [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1\"\r\n
         \           }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/httpListeners\"\r\n
-        \     }\r\n    ],\r\n    \"urlPathMaps\": [],\r\n    \"requestRoutingRules\":
-        [\r\n      {\r\n        \"name\": \"rule1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1\",\r\n
-        \       \"etag\": \"W/\\\"0d360b83-8c8c-4b70-85b0-41ac019850d0\\\"\",\r\n
+        \     }\r\n    ],\r\n    \"listeners\": [],\r\n    \"urlPathMaps\": [],\r\n
+        \   \"requestRoutingRules\": [\r\n      {\r\n        \"name\": \"rule1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/requestRoutingRules/rule1\",\r\n
+        \       \"etag\": \"W/\\\"eb5307be-e489-4dbd-af31-2928dc211f67\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"ruleType\": \"Basic\",\r\n          \"httpListener\": {\r\n            \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener\"\r\n
+        \         \"ruleType\": \"Basic\",\r\n          \"priority\": 1001,\r\n          \"httpListener\":
+        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/httpListeners/appGatewayHttpListener\"\r\n
         \         },\r\n          \"backendAddressPool\": {\r\n            \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/backendAddressPools/appGatewayBackendPool\"\r\n
         \         },\r\n          \"backendHttpSettings\": {\r\n            \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/backendHttpSettingsCollection/appGatewayBackendHttpSettings\"\r\n
         \         }\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/requestRoutingRules\"\r\n
-        \     }\r\n    ],\r\n    \"probes\": [],\r\n    \"rewriteRuleSets\": [],\r\n
-        \   \"redirectConfigurations\": [],\r\n    \"privateLinkConfigurations\":
+        \     }\r\n    ],\r\n    \"routingRules\": [],\r\n    \"probes\": [],\r\n
+        \   \"rewriteRuleSets\": [],\r\n    \"redirectConfigurations\": [],\r\n    \"privateLinkConfigurations\":
         [\r\n      {\r\n        \"name\": \"PrivateLinkDefaultConfiguration\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateLinkConfigurations/PrivateLinkDefaultConfiguration\",\r\n
-        \       \"etag\": \"W/\\\"0d360b83-8c8c-4b70-85b0-41ac019850d0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"eb5307be-e489-4dbd-af31-2928dc211f67\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/applicationGateways/privateLinkConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"ipConfigurations\": [\r\n            {\r\n              \"name\":
         \"PrivateLinkDefaultIPConfiguration\",\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateLinkConfigurations/PrivateLinkDefaultConfiguration/ipConfigurations/PrivateLinkDefaultIPConfiguration\",\r\n
-        \             \"etag\": \"W/\\\"0d360b83-8c8c-4b70-85b0-41ac019850d0\\\"\",\r\n
+        \             \"etag\": \"W/\\\"eb5307be-e489-4dbd-af31-2928dc211f67\\\"\",\r\n
         \             \"type\": \"Microsoft.Network/applicationGateways/privateLinkConfigurations/ipConfigurations\",\r\n
         \             \"properties\": {\r\n                \"provisioningState\":
         \"Succeeded\",\r\n                \"privateIPAllocationMethod\": \"Dynamic\",\r\n
@@ -1380,13 +1575,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '11696'
+      - '11335'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:12:48 GMT
+      - Fri, 04 Nov 2022 07:16:40 GMT
       etag:
-      - W/"0d360b83-8c8c-4b70-85b0-41ac019850d0"
+      - W/"eb5307be-e489-4dbd-af31-2928dc211f67"
       expires:
       - '-1'
       pragma:
@@ -1403,7 +1598,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 07565c6a-57c5-4c30-b92e-0e07e5c581f4
+      - 3896513c-6497-48bc-ad8b-d6b129a91205
     status:
       code: 200
       message: OK
@@ -1421,34 +1616,34 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgwVnet?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgwVnet?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"appgwVnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgwVnet\",\r\n
-        \ \"etag\": \"W/\\\"1c83af87-66c6-4bdc-b0a4-223df283ed06\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"9d8c1054-7685-4431-b1dc-af66e51b1fcb\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"ea6ba10f-77dc-49b3-b1c7-1cc6520c93e6\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"9f610467-09ea-4887-9a46-f3446a6f3a33\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"default\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgwVnet/subnets/default\",\r\n
-        \       \"etag\": \"W/\\\"1c83af87-66c6-4bdc-b0a4-223df283ed06\\\"\",\r\n
+        \       \"etag\": \"W/\\\"9d8c1054-7685-4431-b1dc-af66e51b1fcb\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"applicationGatewayIPConfigurations\":
         [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/gatewayIPConfigurations/appGatewayFrontendIP\"\r\n
         \           }\r\n          ],\r\n          \"delegations\": [],\r\n          \"privateEndpointNetworkPolicies\":
-        \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
         \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"YetAnotherSubnetName\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgwVnet/subnets/YetAnotherSubnetName\",\r\n
-        \       \"etag\": \"W/\\\"1c83af87-66c6-4bdc-b0a4-223df283ed06\\\"\",\r\n
+        \       \"etag\": \"W/\\\"9d8c1054-7685-4431-b1dc-af66e51b1fcb\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.2.0/24\",\r\n          \"privateLinkIpConfigurations\":
         [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateLinkConfigurations/PrivateLinkDefaultConfiguration/ipConfigurations/PrivateLinkDefaultIPConfiguration\"\r\n
         \           }\r\n          ],\r\n          \"delegations\": [],\r\n          \"privateEndpointNetworkPolicies\":
-        \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Disabled\"\r\n
+        \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Disabled\"\r\n
         \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
@@ -1456,13 +1651,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2838'
+      - '2745'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:12:50 GMT
+      - Fri, 04 Nov 2022 07:16:43 GMT
       etag:
-      - W/"1c83af87-66c6-4bdc-b0a4-223df283ed06"
+      - W/"9d8c1054-7685-4431-b1dc-af66e51b1fcb"
       expires:
       - '-1'
       pragma:
@@ -1479,7 +1674,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8e9fdae1-e6c5-4f6d-851b-34e231bd04fd
+      - ac0334a7-56d7-4dfd-a11b-8c17ff0833b4
     status:
       code: 200
       message: OK
@@ -1497,7 +1692,7 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.42.0 (PIP)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateLinkResources?api-version=2020-05-01
   response:
@@ -1512,11 +1707,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '593'
+      - '574'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:12:52 GMT
+      - Fri, 04 Nov 2022 07:16:45 GMT
       expires:
       - '-1'
       pragma:
@@ -1533,7 +1728,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - bf8f2e9f-e669-413d-8e90-8cf02686c233
+      - 6f63a414-517c-4148-b20b-192d00b5cfda
     status:
       code: 200
       message: OK
@@ -1552,21 +1747,22 @@ interactions:
       - -g -n --connection-name --vnet-name --subnet --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_appgw_private_endpoint_with_overwrite_default000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001","name":"test_appgw_private_endpoint_with_overwrite_default000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-11-03T09:07:50Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001","name":"test_appgw_private_endpoint_with_overwrite_default000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-11-04T07:10:28Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '390'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:12:54 GMT
+      - Fri, 04 Nov 2022 07:16:45 GMT
       expires:
       - '-1'
       pragma:
@@ -1582,7 +1778,7 @@ interactions:
       message: OK
 - request:
     body: '{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet/subnets/appgw_private_endpoint_subnet",
-      "properties": {"privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "properties": {"privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
       "Enabled"}}, "privateLinkServiceConnections": [{"name": "appgw_private_endpoint_connection",
       "properties": {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw",
       "groupIds": ["appGatewayFrontendIP"]}}]}}'
@@ -1596,26 +1792,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '781'
+      - '744'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --connection-name --vnet-name --subnet --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/privateEndpoints/appgw_private_endpoint?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/privateEndpoints/appgw_private_endpoint?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"appgw_private_endpoint\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/privateEndpoints/appgw_private_endpoint\",\r\n
-        \ \"etag\": \"W/\\\"fe448330-5904-4417-8693-e5844b1c66ff\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"09ceb514-7fb8-40fa-a6a3-89eaa99faf33\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"785ff3b7-7c69-469f-ac7b-13ef3edaf37b\",\r\n    \"privateLinkServiceConnections\":
+        \"0f2d2f04-12e8-41cc-9499-00fd0b5244b4\",\r\n    \"privateLinkServiceConnections\":
         [\r\n      {\r\n        \"name\": \"appgw_private_endpoint_connection\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/privateEndpoints/appgw_private_endpoint/privateLinkServiceConnections/appgw_private_endpoint_connection\",\r\n
-        \       \"etag\": \"W/\\\"fe448330-5904-4417-8693-e5844b1c66ff\\\"\",\r\n
+        \       \"etag\": \"W/\\\"09ceb514-7fb8-40fa-a6a3-89eaa99faf33\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw\",\r\n
         \         \"resolvedPrivateLinkServiceLocation\": \"westus\",\r\n          \"groupIds\":
@@ -1627,21 +1824,21 @@ interactions:
         \   \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\": {\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet/subnets/appgw_private_endpoint_subnet\"\r\n
         \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
-        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/networkInterfaces/appgw_private_endpoint.nic.e4a7611e-c414-453e-8087-f6e4cdad826e\"\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/networkInterfaces/appgw_private_endpoint.nic.317e7c67-6589-430c-9308-0d7956cd9a01\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ca9f784a-a9b0-446a-bdcd-fd6ba233ee84?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/bde995a0-815b-4ee8-86e2-c99b044ac97d?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '2472'
+      - '2377'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:13:00 GMT
+      - Fri, 04 Nov 2022 07:16:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1654,9 +1851,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - dad354da-0e64-4d7f-8a29-19484fc4503a
+      - 7e06f47c-8f3a-40fc-8b42-51873a856411
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1189'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -1675,9 +1872,10 @@ interactions:
       - -g -n --connection-name --vnet-name --subnet --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ca9f784a-a9b0-446a-bdcd-fd6ba233ee84?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/bde995a0-815b-4ee8-86e2-c99b044ac97d?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1689,7 +1887,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:13:10 GMT
+      - Fri, 04 Nov 2022 07:17:02 GMT
       expires:
       - '-1'
       pragma:
@@ -1706,7 +1904,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 25aefa87-7060-46fe-98bd-bc99d7c5f154
+      - b6d6f915-12b0-4e72-a2b4-ca994ce0028a
     status:
       code: 200
       message: OK
@@ -1725,9 +1923,10 @@ interactions:
       - -g -n --connection-name --vnet-name --subnet --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ca9f784a-a9b0-446a-bdcd-fd6ba233ee84?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/bde995a0-815b-4ee8-86e2-c99b044ac97d?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1739,7 +1938,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:13:20 GMT
+      - Fri, 04 Nov 2022 07:17:12 GMT
       expires:
       - '-1'
       pragma:
@@ -1756,7 +1955,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 87584fc9-a04f-4e36-ac01-d04912259ffc
+      - cf358181-2b45-4c47-9539-c8d0fc36035a
     status:
       code: 200
       message: OK
@@ -1775,9 +1974,10 @@ interactions:
       - -g -n --connection-name --vnet-name --subnet --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ca9f784a-a9b0-446a-bdcd-fd6ba233ee84?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/bde995a0-815b-4ee8-86e2-c99b044ac97d?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1789,7 +1989,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:13:41 GMT
+      - Fri, 04 Nov 2022 07:17:32 GMT
       expires:
       - '-1'
       pragma:
@@ -1806,7 +2006,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a2a72a9d-d2b2-432f-b74c-adef99b84cd3
+      - f702dd6f-f84a-4e64-ad54-2c83451b50c5
     status:
       code: 200
       message: OK
@@ -1825,19 +2025,20 @@ interactions:
       - -g -n --connection-name --vnet-name --subnet --private-connection-resource-id
         --group-id
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/privateEndpoints/appgw_private_endpoint?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/privateEndpoints/appgw_private_endpoint?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"appgw_private_endpoint\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/privateEndpoints/appgw_private_endpoint\",\r\n
-        \ \"etag\": \"W/\\\"835fa823-3273-4778-9113-2dc6480eac53\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"16bd8f49-0b81-4b23-ad88-175021fed236\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"785ff3b7-7c69-469f-ac7b-13ef3edaf37b\",\r\n    \"privateLinkServiceConnections\":
+        \"0f2d2f04-12e8-41cc-9499-00fd0b5244b4\",\r\n    \"privateLinkServiceConnections\":
         [\r\n      {\r\n        \"name\": \"appgw_private_endpoint_connection\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/privateEndpoints/appgw_private_endpoint/privateLinkServiceConnections/appgw_private_endpoint_connection\",\r\n
-        \       \"etag\": \"W/\\\"835fa823-3273-4778-9113-2dc6480eac53\\\"\",\r\n
+        \       \"etag\": \"W/\\\"16bd8f49-0b81-4b23-ad88-175021fed236\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw\",\r\n
         \         \"resolvedPrivateLinkServiceLocation\": \"westus\",\r\n          \"groupIds\":
@@ -1849,19 +2050,19 @@ interactions:
         \   \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\": {\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/virtualNetworks/appgw_private_endpoint_vnet/subnets/appgw_private_endpoint_subnet\"\r\n
         \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
-        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/networkInterfaces/appgw_private_endpoint.nic.e4a7611e-c414-453e-8087-f6e4cdad826e\"\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/networkInterfaces/appgw_private_endpoint.nic.317e7c67-6589-430c-9308-0d7956cd9a01\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2473'
+      - '2378'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:13:41 GMT
+      - Fri, 04 Nov 2022 07:17:32 GMT
       etag:
-      - W/"835fa823-3273-4778-9113-2dc6480eac53"
+      - W/"16bd8f49-0b81-4b23-ad88-175021fed236"
       expires:
       - '-1'
       pragma:
@@ -1878,7 +2079,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 083b4598-83da-462b-8246-f6eb1ea923c1
+      - 140697d4-2fd1-4b8e-80e5-780b702b341b
     status:
       code: 200
       message: OK
@@ -1896,29 +2097,29 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.42.0 (PIP)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections?api-version=2020-05-01
   response:
     body:
-      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"appgw_private_endpoint.785ff3b7-7c69-469f-ac7b-13ef3edaf37b\",\r\n
-        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.785ff3b7-7c69-469f-ac7b-13ef3edaf37b\",\r\n
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"appgw_private_endpoint.0f2d2f04-12e8-41cc-9499-00fd0b5244b4\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.0f2d2f04-12e8-41cc-9499-00fd0b5244b4\",\r\n
         \     \"properties\": {\r\n        \"provisioningState\": \"Succeeded\",\r\n
         \       \"privateEndpoint\": {\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/privateEndpoints/appgw_private_endpoint\"\r\n
         \       },\r\n        \"privateLinkServiceConnectionState\": {\r\n          \"status\":
         \"Approved\",\r\n          \"description\": \"Auto Approved\",\r\n          \"actionsRequired\":
-        \"None\"\r\n        },\r\n        \"linkIdentifier\": \"620802039\"\r\n      },\r\n
+        \"None\"\r\n        },\r\n        \"linkIdentifier\": \"620816030\"\r\n      },\r\n
         \     \"type\": \"Microsoft.Network/applicationGateways/privateEndpointConnections\"\r\n
         \   }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1057'
+      - '1019'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:13:43 GMT
+      - Fri, 04 Nov 2022 07:17:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1935,7 +2136,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 00f894aa-b2d6-40ec-b906-d93ca1ac14e2
+      - fc88ee7f-a17c-44a8-87df-9ca1209b6f0e
     status:
       code: 200
       message: OK
@@ -1953,28 +2154,28 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.42.0 (PIP)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.785ff3b7-7c69-469f-ac7b-13ef3edaf37b?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.0f2d2f04-12e8-41cc-9499-00fd0b5244b4?api-version=2020-05-01
   response:
     body:
-      string: "{\r\n  \"name\": \"appgw_private_endpoint.785ff3b7-7c69-469f-ac7b-13ef3edaf37b\",\r\n
-        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.785ff3b7-7c69-469f-ac7b-13ef3edaf37b\",\r\n
+      string: "{\r\n  \"name\": \"appgw_private_endpoint.0f2d2f04-12e8-41cc-9499-00fd0b5244b4\",\r\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.0f2d2f04-12e8-41cc-9499-00fd0b5244b4\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"privateEndpoint\":
         {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/privateEndpoints/appgw_private_endpoint\"\r\n
         \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
         \"Approved\",\r\n      \"description\": \"Auto Approved\",\r\n      \"actionsRequired\":
-        \"None\"\r\n    },\r\n    \"linkIdentifier\": \"620802039\"\r\n  },\r\n  \"type\":
+        \"None\"\r\n    },\r\n    \"linkIdentifier\": \"620816030\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/applicationGateways/privateEndpointConnections\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '964'
+      - '926'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:13:46 GMT
+      - Fri, 04 Nov 2022 07:17:35 GMT
       expires:
       - '-1'
       pragma:
@@ -1991,16 +2192,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f46c5ed7-6c76-4d42-b00b-1730ac780f04
+      - 85c87c16-ce92-46db-aa23-f464d62c93da
     status:
       code: 200
       message: OK
 - request:
-    body: '{"name": "appgw_private_endpoint.785ff3b7-7c69-469f-ac7b-13ef3edaf37b",
-      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.785ff3b7-7c69-469f-ac7b-13ef3edaf37b",
+    body: '{"name": "appgw_private_endpoint.0f2d2f04-12e8-41cc-9499-00fd0b5244b4",
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.0f2d2f04-12e8-41cc-9499-00fd0b5244b4",
       "properties": {"provisioningState": "Succeeded", "privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/privateEndpoints/appgw_private_endpoint"},
       "privateLinkServiceConnectionState": {"status": "Rejected", "description": null,
-      "actionsRequired": "None"}, "linkIdentifier": "620802039"}, "type": "Microsoft.Network/applicationGateways/privateEndpointConnections"}'
+      "actionsRequired": "None"}, "linkIdentifier": "620816030"}, "type": "Microsoft.Network/applicationGateways/privateEndpointConnections"}'
     headers:
       Accept:
       - '*/*'
@@ -2011,36 +2212,38 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '871'
+      - '833'
       Content-Type:
       - application/json
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.42.0 (PIP)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.785ff3b7-7c69-469f-ac7b-13ef3edaf37b?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.0f2d2f04-12e8-41cc-9499-00fd0b5244b4?api-version=2020-05-01
   response:
     body:
-      string: "{\r\n  \"name\": \"appgw_private_endpoint.785ff3b7-7c69-469f-ac7b-13ef3edaf37b\",\r\n
-        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.785ff3b7-7c69-469f-ac7b-13ef3edaf37b\",\r\n
+      string: "{\r\n  \"name\": \"appgw_private_endpoint.0f2d2f04-12e8-41cc-9499-00fd0b5244b4\",\r\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.0f2d2f04-12e8-41cc-9499-00fd0b5244b4\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"privateEndpoint\":
         {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/privateEndpoints/appgw_private_endpoint\"\r\n
         \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
         \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
-        \"None\"\r\n    },\r\n    \"linkIdentifier\": \"620802039\"\r\n  },\r\n  \"type\":
+        \"None\"\r\n    },\r\n    \"linkIdentifier\": \"620816030\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/applicationGateways/privateEndpointConnections\"\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c4f69cc6-bb9a-4ab3-9d00-b86669aaa3ad?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/4070df04-eb7b-40c2-b990-f0ebc67fc5f4?api-version=2020-05-01
       cache-control:
       - no-cache
       content-length:
-      - '950'
+      - '912'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:13:47 GMT
+      - Fri, 04 Nov 2022 07:17:48 GMT
       expires:
       - '-1'
       pragma:
@@ -2050,16 +2253,12 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ce235859-ba71-4b0d-86f6-4e0fb34813be
+      - b11f77e8-64f0-4a49-b1ce-59f25375cbf5
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -2077,28 +2276,28 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.42.0 (PIP)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.785ff3b7-7c69-469f-ac7b-13ef3edaf37b?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.0f2d2f04-12e8-41cc-9499-00fd0b5244b4?api-version=2020-05-01
   response:
     body:
-      string: "{\r\n  \"name\": \"appgw_private_endpoint.785ff3b7-7c69-469f-ac7b-13ef3edaf37b\",\r\n
-        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.785ff3b7-7c69-469f-ac7b-13ef3edaf37b\",\r\n
+      string: "{\r\n  \"name\": \"appgw_private_endpoint.0f2d2f04-12e8-41cc-9499-00fd0b5244b4\",\r\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.0f2d2f04-12e8-41cc-9499-00fd0b5244b4\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"privateEndpoint\":
         {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/privateEndpoints/appgw_private_endpoint\"\r\n
         \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
         \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
-        \"None\"\r\n    },\r\n    \"linkIdentifier\": \"620802039\"\r\n  },\r\n  \"type\":
+        \"None\"\r\n    },\r\n    \"linkIdentifier\": \"620816030\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/applicationGateways/privateEndpointConnections\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '951'
+      - '913'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:14:00 GMT
+      - Fri, 04 Nov 2022 07:17:59 GMT
       expires:
       - '-1'
       pragma:
@@ -2115,7 +2314,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8641432e-2495-469c-a78a-a5e59706db3e
+      - 378977a8-41ff-47bb-af01-30b7c2f4ce0f
     status:
       code: 200
       message: OK
@@ -2133,28 +2332,28 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.42.0 (PIP)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.785ff3b7-7c69-469f-ac7b-13ef3edaf37b?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.0f2d2f04-12e8-41cc-9499-00fd0b5244b4?api-version=2020-05-01
   response:
     body:
-      string: "{\r\n  \"name\": \"appgw_private_endpoint.785ff3b7-7c69-469f-ac7b-13ef3edaf37b\",\r\n
-        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.785ff3b7-7c69-469f-ac7b-13ef3edaf37b\",\r\n
+      string: "{\r\n  \"name\": \"appgw_private_endpoint.0f2d2f04-12e8-41cc-9499-00fd0b5244b4\",\r\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/applicationGateways/appgw/privateEndpointConnections/appgw_private_endpoint.0f2d2f04-12e8-41cc-9499-00fd0b5244b4\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"privateEndpoint\":
         {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/privateEndpoints/appgw_private_endpoint\"\r\n
         \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
         \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
-        \"None\"\r\n    },\r\n    \"linkIdentifier\": \"620802039\"\r\n  },\r\n  \"type\":
+        \"None\"\r\n    },\r\n    \"linkIdentifier\": \"620816030\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/applicationGateways/privateEndpointConnections\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '951'
+      - '913'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:14:01 GMT
+      - Fri, 04 Nov 2022 07:17:59 GMT
       expires:
       - '-1'
       pragma:
@@ -2171,7 +2370,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5d4c0fa2-f31b-48db-b631-e6e45c5d7c9c
+      - 275c9f09-1768-40b2-8f77-6e2c0a4581b2
     status:
       code: 200
       message: OK
@@ -2191,9 +2390,10 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/privateEndpoints/appgw_private_endpoint?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_appgw_private_endpoint_with_overwrite_default000001/providers/Microsoft.Network/privateEndpoints/appgw_private_endpoint?api-version=2022-01-01
   response:
     body:
       string: ''
@@ -2201,17 +2401,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ea004a6b-dfa8-4329-b5f9-da9883d42245?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/acd6f39e-f785-4207-a1a6-d227c6aacf44?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Wed, 03 Nov 2021 09:14:05 GMT
+      - Fri, 04 Nov 2022 07:18:02 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/ea004a6b-dfa8-4329-b5f9-da9883d42245?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/acd6f39e-f785-4207-a1a6-d227c6aacf44?api-version=2022-01-01
       pragma:
       - no-cache
       server:
@@ -2222,7 +2422,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 173fa884-2749-4ecb-a121-d2d2c5a2d798
+      - cf3b8262-bd22-4629-82d7-86944abeaf2c
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14998'
     status:
@@ -2242,9 +2442,10 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ea004a6b-dfa8-4329-b5f9-da9883d42245?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/acd6f39e-f785-4207-a1a6-d227c6aacf44?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -2256,7 +2457,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 03 Nov 2021 09:14:16 GMT
+      - Fri, 04 Nov 2022 07:18:12 GMT
       expires:
       - '-1'
       pragma:
@@ -2266,15 +2467,61 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 06675754-fa51-44e3-b18d-6be66c978890
+      - 98413be5-8ebf-432a-b2b6-123ae93e83ca
     status:
       code: 200
       message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/acd6f39e-f785-4207-a1a6-d227c6aacf44?api-version=2022-01-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/acd6f39e-f785-4207-a1a6-d227c6aacf44?api-version=2022-01-01
+      cache-control:
+      - no-cache
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Nov 2022 07:18:12 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/acd6f39e-f785-4207-a1a6-d227c6aacf44?api-version=2022-01-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - cf3b8262-bd22-4629-82d7-86944abeaf2c
+    status:
+      code: 204
+      message: No Content
 version: 1

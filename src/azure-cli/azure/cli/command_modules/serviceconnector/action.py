@@ -28,12 +28,26 @@ class AddSecretAuthInfo(argparse.Action):
             if kl == 'name':
                 d['name'] = v[0]
             elif kl == 'secret':
-                d['secret'] = v[0]
+                d['secret_info'] = {
+                    'secret_type': 'rawValue',
+                    'value': v[0]
+                }
+            elif kl == 'secret-uri':
+                d['secret_info'] = {
+                    'secret_type': 'keyVaultSecretUri',
+                    'value': v[0]
+                }
+            elif kl == 'secret-name':
+                d['secret_info'] = {
+                    'secret_type': 'keyVaultSecretReference',
+                    'name': v[0]
+                }
             else:
-                raise ValidationError('Unsupported Key {} is provided for parameter secret_auth_info. '
-                                      'All possible keys are: name, secret'.format(k))
+                raise ValidationError('Unsupported Key {} is provided for parameter secret_auth_info. All possible '
+                                      'keys are: name, secret/secret-uri/secret-name'.format(k))
         if len(d) != 2:
-            raise ValidationError('Required keys missing for parameter --secret. All possible keys are: name, secret')
+            raise ValidationError('Required keys missing for parameter --secret.'
+                                  ' All possible keys are: name, secret/secret-uri/secret-name')
         d['auth_type'] = 'secret'
         return d
 
@@ -104,7 +118,11 @@ class AddSystemAssignedIdentityAuthInfo(argparse.Action):
             raise ValidationError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
         d = {}
         for k in properties:
-            raise ValidationError('Unsupported Key {} is provided for parameter --system-identity')
+            v = properties[k]
+            if k.lower() == 'mysql-identity-id':
+                d['mysql-identity-id'] = v[0]
+            else:
+                raise ValidationError('Unsupported Key {} is provided for parameter --system-identity')
         d['auth_type'] = 'systemAssignedIdentity'
         return d
 
@@ -142,7 +160,7 @@ class AddServicePrincipalAuthInfo(argparse.Action):
             from ._utils import run_cli_cmd
             output = run_cli_cmd('az ad sp show --id {}'.format(d['client_id']))
             if output:
-                d['principal_id'] = output.get('objectId')
+                d['principal_id'] = output.get('id')
             else:
                 raise ValidationError('Could not resolve object-id from the given client-id: {}. Please '
                                       'confirm the client-id and provide the object-id (Enterprise Application) '

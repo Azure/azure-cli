@@ -225,7 +225,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
                            '--continue-on-failure false'.format(item['name'], filesystem, removal_acl, storage_account))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(kind="StorageV2", hns=True)
+    @StorageAccountPreparer(kind="StorageV2", allow_blob_public_access=True, hns=True)
     def test_adls_filesystem_scenarios(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         connection_str = self.cmd('storage account show-connection-string -n {} -g {} -otsv'
@@ -500,6 +500,36 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
+    def test_adls_file_set_expiry_scenarios(self, resource_group, storage_account):
+        from datetime import datetime, timedelta
+        account_info = self.get_account_info(resource_group, storage_account)
+        filesystem = self.create_file_system(account_info)
+        file = self.create_random_name(prefix="file", length=12)
+
+        self.storage_cmd('storage fs file create -p {} -f {} --content-type "application/json"',
+                         account_info, file, filesystem)
+        expiry = (datetime.utcnow() + timedelta(seconds=5)).strftime('%Y-%m-%dT%H:%M:%SZ')
+        self.storage_cmd("storage fs file set-expiry --expiry-options Absolute --expires-on {} -p {} -f {}",
+                         account_info, expiry, file, filesystem)
+        self.storage_cmd("storage fs file exists -p {} -f {}", account_info, file, filesystem)\
+            .assert_with_checks(JMESPathCheck('exists', True))
+        time.sleep(7)
+        self.storage_cmd("storage fs file exists -p {} -f {}", account_info, file, filesystem)\
+            .assert_with_checks(JMESPathCheck('exists', False))
+
+        self.storage_cmd('storage fs file create -p {} -f {} --content-type "application/json"',
+                         account_info, file, filesystem)
+        expiry = 5000
+        self.storage_cmd("storage fs file set-expiry --expiry-options RelativeToCreation --expires-on {} -p {} -f {}",
+                         account_info, expiry, file, filesystem)
+        self.storage_cmd("storage fs file exists -p {} -f {}", account_info, file, filesystem) \
+            .assert_with_checks(JMESPathCheck('exists', True))
+        time.sleep(7)
+        self.storage_cmd("storage fs file exists -p {} -f {}", account_info, file, filesystem) \
+            .assert_with_checks(JMESPathCheck('exists', False))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True)
     def test_adls_metadata_scenarios(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         filesystem = self.create_file_system(account_info)
@@ -560,6 +590,51 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('sks=', fs_sas)
         self.assertIn('skv=', fs_sas)
 
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True)
+    def test_storage_fs_directory_generate_sas_full_uri(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        filesystem = self.create_file_system(account_info)
+        directory = 'testdir/subdir'
+
+        self.storage_cmd('storage fs directory create -n {} -f {}',
+                         account_info, directory, filesystem)
+
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        fs_uri = self.storage_cmd('storage fs directory generate-sas -n {} -f {} --expiry {} --permissions '
+                                  'r --https-only --full-uri', account_info, directory, filesystem, expiry).output
+        self.assertTrue(fs_uri)
+        self.assertIn('&sig=', fs_uri)
+        self.assertTrue(fs_uri.startswith('"https://{}.dfs.core.windows.net/{}/{}?s'.format(storage_account,
+                                                                                            filesystem, directory)))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True)
+    def test_storage_fs_directory_generate_sas_as_user(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        filesystem = self.create_file_system(account_info)
+        directory = 'testdir/subdir'
+
+        self.storage_cmd('storage fs directory create -n {} -f {}', account_info, directory, filesystem)
+
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        with self.assertRaisesRegex(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
+            self.cmd('storage fs directory generate-sas --account-name {} -n {} -f {} --expiry {} --permissions r '
+                     '--https-only --auth-mode login'.format(storage_account, directory, filesystem, expiry))
+
+        fs_sas = self.cmd('storage fs directory generate-sas --account-name {} -n {} -f {} --expiry {} --permissions '
+                          'dlrwop --https-only --as-user --auth-mode login'.format(storage_account, directory,
+                                                                                   filesystem, expiry)).output
+        self.assertIn('&sig=', fs_sas)
+        self.assertIn('skoid=', fs_sas)
+        self.assertIn('sktid=', fs_sas)
+        self.assertIn('skt=', fs_sas)
+        self.assertIn('ske=', fs_sas)
+        self.assertIn('sks=', fs_sas)
+        self.assertIn('skv=', fs_sas)
+        self.assertIn('sr=d', fs_sas)
+        self.assertIn('sdd=2', fs_sas)
 
 class StorageADLSGen2LiveTests(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()

@@ -185,8 +185,12 @@ def format_styled_text(styled_text, theme=None):
             try:
                 escape_seq = theme[style]
             except KeyError:
-                from azure.cli.core.azclierror import CLIInternalError
-                raise CLIInternalError("Invalid style. Only use pre-defined style in Style enum.")
+                if style.startswith('\x1b['):
+                    escape_seq = style
+                else:
+                    from azure.cli.core.azclierror import CLIInternalError
+                    raise CLIInternalError("Invalid style. Please use pre-defined style in Style enum "
+                                           "or give a valid ANSI code.")
             # Replace blue in powershell.exe
             if is_legacy_powershell and escape_seq in POWERSHELL_COLOR_REPLACEMENT:
                 escape_seq = POWERSHELL_COLOR_REPLACEMENT[escape_seq]

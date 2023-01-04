@@ -5,6 +5,7 @@
 
 import azure.cli.command_modules.identity._help  # pylint: disable=unused-import
 from azure.cli.core import AzCommandsLoader
+from azure.cli.core.profiles import ResourceType
 
 
 class IdentityCommandsLoader(AzCommandsLoader):
@@ -13,6 +14,7 @@ class IdentityCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         identity_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.identity.custom#{}')
         super(IdentityCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+                                                     resource_type=ResourceType.MGMT_MSI,
                                                      custom_command_type=identity_custom)
 
     def load_command_table(self, args):

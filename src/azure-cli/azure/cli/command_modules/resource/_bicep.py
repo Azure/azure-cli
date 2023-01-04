@@ -28,6 +28,7 @@ from azure.cli.core.azclierror import (
     ClientRequestError,
     InvalidTemplateError,
 )
+from azure.cli.core.util import should_disable_connection_verify
 
 # See: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 _semver_pattern = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"  # pylint: disable=line-too-long
@@ -44,6 +45,8 @@ _bicep_version_check_cache_ttl = timedelta(minutes=10)
 _bicep_version_check_time_format = "%Y-%m-%dT%H:%M:%S.%f"
 
 _logger = get_logger(__name__)
+
+_requests_verify = not should_disable_connection_verify()
 
 
 def validate_bicep_target_scope(template_schema, deployment_scope):
@@ -144,7 +147,7 @@ def is_bicep_file(file_path):
 def get_bicep_available_release_tags():
     try:
         os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
-        response = requests.get("https://aka.ms/BicepReleases")
+        response = requests.get("https://aka.ms/BicepReleases", verify=_requests_verify)
         return [release["tag_name"] for release in response.json()]
     except IOError as err:
         raise ClientRequestError(f"Error while attempting to retrieve available Bicep versions: {err}.")
@@ -153,11 +156,18 @@ def get_bicep_available_release_tags():
 def get_bicep_latest_release_tag():
     try:
         os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
-        response = requests.get("https://aka.ms/BicepLatestRelease")
+        response = requests.get("https://aka.ms/BicepLatestRelease", verify=_requests_verify)
         response.raise_for_status()
         return response.json()["tag_name"]
     except IOError as err:
         raise ClientRequestError(f"Error while attempting to retrieve the latest Bicep version: {err}.")
+
+
+def bicep_version_greater_than_or_equal_to(version):
+    system = platform.system()
+    installation_path = _get_bicep_installation_path(system)
+    installed_version = _get_bicep_installed_version(installation_path)
+    return semver.compare(installed_version, version) >= 0
 
 
 def supports_bicep_publish():
@@ -195,7 +205,7 @@ def _get_bicep_installed_version(bicep_executable_path):
 
 
 def _get_bicep_download_url(system, release_tag, target_platform=None):
-    download_url = f"https://github.com/Azure/bicep/releases/download/{release_tag}/{{}}"
+    download_url = f"https://downloads.bicep.azure.com/{release_tag}/{{}}"
 
     if target_platform:
         executable_name = "bicep-win-x64.exe" if target_platform == "win-x64" else f"bicep-{target_platform}"
@@ -204,7 +214,7 @@ def _get_bicep_download_url(system, release_tag, target_platform=None):
     if system == "Windows":
         return download_url.format("bicep-win-x64.exe")
     if system == "Linux":
-        if os.path.exists("/lib/ld-musl-x86_64.so.1"):
+        if os.path.exists("/lib/ld-musl-x86_64.so.1") and not os.path.exists("/lib/x86_64-linux-gnu/libc.so.6"):
             return download_url.format("bicep-linux-musl-x64")
         return download_url.format("bicep-linux-x64")
     if system == "Darwin":

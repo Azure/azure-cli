@@ -40,6 +40,8 @@ parameters:
     short-summary: NetBIOS name of the SMB server. This name will be registered as a computer account in the AD and used to mount volumes. Must be 10 characters or less
   - name: --organizational-unit
     short-summary: The Organizational Unit (OU) within the Windows Active Directory
+  - name: --site
+    short-summary: The Active Directory site the service will limit Domain Controller discovery to
   - name: --kdc-ip
     short-summary: kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume
   - name: --ad-name
@@ -94,6 +96,8 @@ parameters:
     short-summary: NetBIOS name of the SMB server. This name will be registered as a computer account in the AD and used to mount volumes. Must be 10 characters or less
   - name: --organizational-unit
     short-summary: The Organizational Unit (OU) within the Windows Active Directory
+  - name: --site
+    short-summary: The Active Directory site the service will limit Domain Controller discovery to.
   - name: --kdc-ip
     short-summary: kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume
   - name: --ad-name
@@ -154,6 +158,11 @@ examples:
         az netappfiles account ad remove -g mygroup --name myname --active-directory 13641da9-c0e9-4b97-84fc-4f8014a93848
 """
 
+helps['netappfiles account ad wait'] = """
+type: command
+short-summary: Wait for a account ad operation.
+"""
+
 helps['netappfiles account create'] = """
 type: command
 short-summary: Create a new Azure NetApp Files (ANF) account. Note that active directories are added using the subgroup commands.
@@ -162,8 +171,6 @@ parameters:
     short-summary: The name of the ANF account
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
-  - name: --encryption
-    short-summary: Encryption settings
 examples:
   - name: Create an ANF account
     text: >
@@ -219,6 +226,11 @@ examples:
         az netappfiles account update -g mygroup --name myname --tags testtag2=mytagb
 """
 
+helps['netappfiles account wait'] = """
+type: command
+short-summary: Wait for a account operation.
+"""
+
 helps['netappfiles account backup'] = """
 type: group
 short-summary: Manage Azure NetApp Files (ANF) Account Backup Resources.
@@ -262,6 +274,11 @@ examples:
   - name: Get a list of all ANF account backup
     text: >
         az netappfiles account backup delete -g mygroup --account-name myaccountname --backup-name mybackupname
+"""
+
+helps['netappfiles account backup wait'] = """
+type: command
+short-summary: Wait for a account backup operation.
 """
 
 
@@ -358,6 +375,19 @@ examples:
         az netappfiles account backup-policy update -g mygroup --account-name myaccountname --backup-policy-name mybackuppolicyname -l westus2 --daily-backups 1 --enabled false
 """
 
+helps['netappfiles account backup-policy wait'] = """
+type: command
+short-summary: Wait for a account backup-policy operation.
+"""
+
+helps['netappfiles account renew-credentials'] = """
+type: command
+short-summary: Renew identity credentials that are used to authenticate to key vault, for customer-managed key encryption. If encryption.identity.principalId does not match identity.principalId, running this operation will fix it.
+examples:
+  - name: Renew identity credentials for account
+    text: >
+        az netappfiles account renew-credentials -g mygroup --account-name myaccname
+"""
 
 helps['netappfiles pool'] = """
 type: group
@@ -444,11 +474,19 @@ parameters:
     short-summary: The qos type of the ANF pool
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
+  - name: --cool-access
+    short-summary: If enabled (true) the pool can contain cool Access enabled volumes
 examples:
   - name: Update specific values for an ANF pool
     text: >
         az netappfiles pool update -g mygroup --account-name myaccname --name mypoolname --tags mytag1=abcd mytag2=efgh
 """
+
+helps['netappfiles pool wait'] = """
+type: command
+short-summary: Wait for a pool operation.
+"""
+
 
 helps['netappfiles snapshot'] = """
 type: group
@@ -547,6 +585,12 @@ examples:
         az netappfiles snapshot restore-files -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --name mysnapname --file-paths myfilepaths
 """
 
+helps['netappfiles snapshot wait'] = """
+type: command
+short-summary: Wait for a snapshot operation.
+"""
+
+
 helps['netappfiles volume'] = """
 type: group
 short-summary: Manage Azure NetApp Files (ANF) Volume Resources.
@@ -569,9 +613,9 @@ parameters:
   - name: --file-path
     short-summary: A 1-80 character long alphanumeric string value that identifies a unique file share or mount point in the target delegate subnet
   - name: --vnet
-    short-summary: The ARM Id or name of the vnet for the volume
+    short-summary: Name or Resource ID of the vnet. If you want to use a vnet in other resource group or subscription, please provide the Resource ID instead of the name of the vnet.
   - name: --subnet
-    short-summary: The ARM Id or name of the delegated subnet for the vnet. If omitted 'default' will be used
+    short-summary: The name of the subnet for the volume.
   - name: --protocol-types
     short-summary: Space separated list of protocols that the volume can use, available protocols are "NFSv4.1", "NFSv3", "CIFS"
   - name: --volume-type
@@ -619,7 +663,7 @@ parameters:
   - name: --kerberos5p-rw
     short-summary: Kerberos5p Read and write access
   - name: --has-root-access
-    short-summary: Has root access to volume
+    short-summary: Has root access to volume. Possible values are True or False
   - name: --smb-encryption
     short-summary: Enables encryption for in-flight smb3 data. Only applicable for SMB/DualProtocol volume. To be used with swagger version 2020-08-01 or later. Default value is False
   - name: --smb-continuously-avl
@@ -657,11 +701,22 @@ parameters:
   - name: --network-features
     short-summary: Basic network, or Standard features available to the volume. Possible values are Basic and Standard. Default value is Basic.
   - name: --enable-subvolumes
-    short-summary:  Flag indicating whether subvolume operations are enabled on the volume. Possible values are Enabled and Disabled. Default value is Disabled
+    short-summary: Flag indicating whether subvolume operations are enabled on the volume. Possible values are Enabled and Disabled. Default value is Disabled
+  - name: --zones
+    short-summary: Availability Zone
+  - name: --kv-private-endpoint-id
+    short-summary: The resource ID of private endpoint for KeyVault. It must reside in the same VNET as the volume. Only applicable if encryptionKeySource = 'Microsoft.KeyVault'.
+  - name: --kerberos-enabled
+    short-summary: Describe if a volume is KerberosEnabled
+
 examples:
   - name: Create an ANF volume
     text: >
         az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --file-path "unique-file-path" --vnet myvnet --subnet mysubnet --protocol-types NFSv3 NFSv4.1
+
+  - name: Create an ANF volume with zones (Availability Zone) specified
+    text: >
+        az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --file-path "unique-file-path" --vnet myvnet --subnet mysubnet --protocol-types NFSv3 --zones zone1
 """
 
 helps['netappfiles volume delete'] = """
@@ -700,6 +755,12 @@ examples:
     text: >
         az netappfiles volume revert -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --snapshot-id 9760acf5-4638-11e7-9bdb-020073ca3333
 """
+
+helps['netappfiles volume wait'] = """
+type: command
+short-summary: Wait for a volume operation.
+"""
+
 
 helps['netappfiles volume replication'] = """
 type: group
@@ -806,6 +867,21 @@ examples:
         az netappfiles volume replication status -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
 """
 
+helps['netappfiles volume replication list'] = """
+type: command
+short-summary: List replication for ANF volume
+examples:
+  - name: List all replications for a specified volume
+    text: >
+        az netappfiles volume replication list -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
+"""
+
+helps['netappfiles volume replication wait'] = """
+type: command
+short-summary: Wait for a volume replication operation.
+"""
+
+
 helps['netappfiles volume export-policy'] = """
 type: group
 short-summary: Manage Azure NetApp Files (ANF) Volume export policies.
@@ -848,7 +924,7 @@ parameters:
   - name: --kerberos5p-rw
     short-summary: Kerberos5p Read and write access
   - name: --has-root-access
-    short-summary: Has root access to volume
+    short-summary: Has root access to volume. Possible values are True or False
   - name: --chown-mode
     short-summary: This parameter specifies who is authorized to change the ownership of a file. restricted - Only root user can change the ownership of the file. unrestricted - Non-root users can change ownership of files that they own. Possible values include- Restricted, Unrestricted. Default value- Restricted.
 examples:
@@ -890,6 +966,12 @@ examples:
     text: >
         az netappfiles volume export-policy remove -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --rule-index 4
 """
+
+helps['netappfiles volume export-policy wait'] = """
+type: command
+short-summary: Wait for a volume export-policy operation.
+"""
+
 
 helps['netappfiles volume list'] = """
 type: command
@@ -957,6 +1039,10 @@ parameters:
     short-summary: Maximum throughput in Mibps that can be achieved by this volume and this will be accepted as input only for manual qosType volume
   - name: --unix-permissions
     short-summary: UNIX permissions for NFS volume accepted in octal 4 digit format. First digit selects the set user ID(4), set group ID (2) and sticky (1) attributes. Second digit selects permission for the owner of the file- read (4), write (2) and execute (1). Third selects permissions for other users in the same group. the fourth for other users not in the group. 0755 - gives read/write/execute permissions to owner and read/execute to group and other users.
+  - name: --cool-access
+    short-summary: If enabled (true) the pool can contain cool Access enabled volumes
+  - name: --coolness-period
+    short-summary: Specifies the number of days after which data that is not accessed by clients will be tiered.
 examples:
   - name: Update an ANF volume
     text: >
@@ -980,6 +1066,43 @@ examples:
     text: >
         az netappfiles volume pool-change -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --new-pool-resource-id mynewresourceid
 """
+
+helps['netappfiles volume reset-cifs-pw'] = """
+type: command
+short-summary: Reset CIFS password from an Azure NetApp Files (ANF) volume
+examples:
+  - name: Reset the CIFS password from volume
+    text: >
+        az netappfiles volume reset-cifs-pw -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
+"""
+
+helps['netappfiles volume relocate'] = """
+type: command
+short-summary: Relocates an Azure NetApp Files (ANF) volume to a new stamp
+examples:
+  - name: Relocates volume to a new stamp
+    text: >
+        az netappfiles volume relocate -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
+"""
+
+helps['netappfiles volume finalize-relocation'] = """
+type: command
+short-summary: Finalizes the relocation of the Azure NetApp Files (ANF) volume and cleans up the old volume
+examples:
+  - name: Finalizes the relocation of the volume and cleans up the old volume
+    text: >
+        az netappfiles volume finalize-relocation -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
+"""
+
+helps['netappfiles volume revert-relocation'] = """
+type: command
+short-summary: Reverts the Azure NetApp Files (ANF) volume relocation process, cleans up the new volume and starts using the former-existing volume
+examples:
+  - name: Reverts the volume relocation process, cleans up the new volume and starts using the former-existing volume
+    text: >
+        az netappfiles volume revert-relocation -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
+"""
+
 
 helps['netappfiles volume backup'] = """
 type: group
@@ -1092,6 +1215,11 @@ examples:
   - name: Update an ANF backup
     text: >
         az netappfiles volume backup update -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --backup-name mybackupname
+"""
+
+helps['netappfiles volume backup wait'] = """
+type: command
+short-summary: Wait for a volume backup operation.
 """
 
 
@@ -1240,6 +1368,12 @@ examples:
         az netappfiles snapshot policy update -g mygroup --account-name myaccountname --snapshot-policy-name mysnapshotpolicyname -l westus2 --daily-snapshots 1 --enabled false
 """
 
+helps['netappfiles snapshot policy wait'] = """
+type: command
+short-summary: Wait for a snapshot policy operation.
+"""
+
+
 helps['netappfiles vault'] = """
 type: group
 short-summary: Manage Azure NetApp Files (ANF) Vault Resources.
@@ -1360,6 +1494,11 @@ examples:
         az netappfiles subvolume delete -g mygroup --account-name myaccountname  --pool-name mypoolname --volume-name myvolumename --subvolume-name mysubvolumename
 """
 
+helps['netappfiles subvolume wait'] = """
+type: command
+short-summary: Wait for a subvolume operation.
+"""
+
 helps['netappfiles subvolume metadata'] = """
 type: group
 short-summary: Manage Azure NetApp Files (ANF) Subvolume Metadata Resources.
@@ -1382,6 +1521,7 @@ examples:
     text: >
         az netappfiles subvolume metadata show -g mygroup --account-name myaccountname  --pool-name mypoolname --volume-name myvolumename --subvolume-name mysubvolumename
 """
+
 
 helps['netappfiles volume-group'] = """
 type: group
@@ -1444,6 +1584,8 @@ parameters:
     short-summary: Replication Schedule for log backup volume
   - name: --log-backup-src-id
     short-summary: ResourceId of the log backup source volume
+  - name: --kv-private-endpoint-id
+    short-summary: The resource ID of private endpoint for KeyVault. It must reside in the same VNET as the volume. Only applicable if encryptionKeySource = 'Microsoft.KeyVault'.
 examples:
   - name: Create ANF volume group
     text: >
@@ -1453,4 +1595,21 @@ examples:
 helps['netappfiles volume-group wait'] = """
 type: command
 short-summary: Wait for a volume group to be created.
+"""
+
+helps['netappfiles resource'] = """
+type: group
+short-summary: Provides operations for Azure NetApp Files (ANF) Account Resources.
+"""
+
+helps['netappfiles resource query-region-info'] = """
+type: command
+short-summary: Provides storage to network proximity and logical zone mapping information.
+parameters:
+  - name: --location -l
+    short-summary: The location
+examples:
+  - name: Describes region specific information.
+    text: >
+        az netappfiles resource query-region-info -l location
 """

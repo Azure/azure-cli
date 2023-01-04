@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from knack.log import get_logger
 from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.azclierror import UnrecognizedArgumentError
 
 logger = get_logger(__name__)
 
@@ -18,7 +19,7 @@ def _get_resource_group_location(cli_ctx, resource_group_name):
 
 def create_search_service(cmd, resource_group_name, search_service_name, sku, location=None, partition_count=0,
                           replica_count=0, public_network_access="enabled", ip_rules=None, identity_type=None,
-                          no_wait=False):
+                          hosting_mode="default", no_wait=False):
     """
     Creates a Search service in the given resource group.
 
@@ -33,6 +34,8 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
     :param ip_rules: Public IP(v4) addresses or CIDR ranges to the search service, seperated by comma or semicolon;
                      these IP rules are applicable only when --public-network-access is "enabled".
     :param identity_type: The identity type; possible values include: "None", "SystemAssigned".
+    :param hosting_mode: The hosting mode; possible values include: "default", "highDensity";
+                     Note that "highDensity" is only applicable to the standard3 SKU.
     """
     from azure.mgmt.search.models import SearchService, Sku, NetworkRuleSet, IpRule, Identity
     from azure.cli.command_modules.search._client_factory import cf_search_services
@@ -51,8 +54,16 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
     if partition_count > 0:
         _search.partition_count = partition_count
     if (public_network_access.lower() not in ["enabled", "disabled"]):
-        raise ValueError("SearchService.PublicNetworkAccess: only [""enabled"", ""disabled""] are allowed")
+        raise UnrecognizedArgumentError(
+            "SearchService.PublicNetworkAccess: only [""enabled"", ""disabled""] are allowed")
+    if (hosting_mode not in ["default", "highDensity"]):
+        raise UnrecognizedArgumentError(
+            "SearchService.HostingMode: only [""default"", ""highDensity""] are allowed")
+    if (hosting_mode == "highDensity" and sku.lower() != "standard3"):
+        raise UnrecognizedArgumentError(
+            "SearchService.HostingMode: ""highDensity"" is only allowed when sku is ""standard3""")
     _search.public_network_access = public_network_access
+    _search.hosting_mode = hosting_mode
 
     if ip_rules:
         _ip_rules = []
@@ -94,7 +105,8 @@ def update_search_service(instance, partition_count=0, replica_count=0, public_n
         instance.partition_count = partition_count
     if public_network_access:
         if (public_network_access.lower() not in ["enabled", "disabled"]):
-            raise ValueError("SearchService.PublicNetworkAccess: only [""enabled"", ""disabled""] are allowed")
+            raise UnrecognizedArgumentError(
+                "SearchService.PublicNetworkAccess: only [""enabled"", ""disabled""] are allowed")
         instance.public_network_access = public_network_access
     if ip_rules:
         _ip_rules = []

@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"kind": "FormRecognizer", "sku": {"name": "S0"}, "location": "centraluseuap",
+    body: '{"kind": "FormRecognizer", "sku": {"name": "S0"}, "location": "SOUTHCENTRALUS",
       "properties": {"customSubDomainName": "csclitest000003"}}'
     headers:
       Accept:
@@ -12,31 +12,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '136'
+      - '137'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --kind --sku -l --custom-domain
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"03004aa1-0000-3300-0000-624244d20000\"","location":"centraluseuap","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://csclitest000003.cognitiveservices.azure.com/","internalId":"c9ce3b976ae7409ab55ad4568c69a939","dateCreated":"2022-03-28T23:29:22.2179756Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"backupUpperLimit":20,"isMigrated":false,"customSubDomainName":"csclitest000003","privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedStorage"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://csclitest000003.cognitiveservices.azure.com/"},"provisioningState":"Creating"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-03-28T23:29:21.6214515Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-28T23:29:21.6214515Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"17008b72-0000-0500-0000-6358ad730000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://csclitest000003.cognitiveservices.azure.com/","internalId":"e20f61a68d0e43baa0cfb215b6cc4881","dateCreated":"2022-10-26T03:45:54.8294634Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"customSubDomainName":"csclitest000003","privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://csclitest000003.cognitiveservices.azure.com/"},"provisioningState":"Creating"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:45:53.7849374Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:45:53.7849374Z"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/centraluseuap/operationResults/4bff48b0-9d85-42ec-86bb-e9e42f1d6423?api-version=2017-04-18
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/847f0f9f-afe2-4d48-88ea-549a39fd5b17?api-version=2017-04-18
       cache-control:
       - no-cache
       content-length:
-      - '2424'
+      - '2395'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:29:23 GMT
+      - Wed, 26 Oct 2022 03:45:56 GMT
       etag:
-      - '"03004aa1-0000-3300-0000-624244d20000"'
+      - '"17008b72-0000-0500-0000-6358ad730000"'
       expires:
       - '-1'
       pragma:
@@ -48,9 +48,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '1499'
+      - '1843'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -68,21 +68,21 @@ interactions:
       ParameterSetName:
       - -n -g --kind --sku -l --custom-domain
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/centraluseuap/operationResults/4bff48b0-9d85-42ec-86bb-e9e42f1d6423?api-version=2017-04-18
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/847f0f9f-afe2-4d48-88ea-549a39fd5b17?api-version=2017-04-18
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/centraluseuap/operationResults/4bff48b0-9d85-42ec-86bb-e9e42f1d6423","name":"4bff48b0-9d85-42ec-86bb-e9e42f1d6423","status":"Succeeded","startTime":"2022-03-28T23:29:23Z","endTime":"2022-03-28T23:29:24Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/847f0f9f-afe2-4d48-88ea-549a39fd5b17","name":"847f0f9f-afe2-4d48-88ea-549a39fd5b17","status":"Succeeded","startTime":"2022-10-26T03:45:55Z","endTime":"2022-10-26T03:45:56Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '311'
+      - '312'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:29:53 GMT
+      - Wed, 26 Oct 2022 03:46:26 GMT
       expires:
       - '-1'
       pragma:
@@ -98,7 +98,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '77'
+      - '6'
     status:
       code: 200
       message: OK
@@ -116,23 +116,23 @@ interactions:
       ParameterSetName:
       - -n -g --kind --sku -l --custom-domain
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"03004ba1-0000-3300-0000-624244d40000\"","location":"centraluseuap","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://csclitest000003.cognitiveservices.azure.com/","internalId":"c9ce3b976ae7409ab55ad4568c69a939","dateCreated":"2022-03-28T23:29:22.2179756Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"backupUpperLimit":20,"isMigrated":false,"customSubDomainName":"csclitest000003","privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedStorage"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://csclitest000003.cognitiveservices.azure.com/"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-03-28T23:29:21.6214515Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-28T23:29:21.6214515Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"17008d72-0000-0500-0000-6358ad740000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://csclitest000003.cognitiveservices.azure.com/","internalId":"e20f61a68d0e43baa0cfb215b6cc4881","dateCreated":"2022-10-26T03:45:54.8294634Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"customSubDomainName":"csclitest000003","privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://csclitest000003.cognitiveservices.azure.com/"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:45:53.7849374Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:45:53.7849374Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2425'
+      - '2396'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:29:53 GMT
+      - Wed, 26 Oct 2022 03:46:26 GMT
       etag:
-      - '"03004ba1-0000-3300-0000-624244d40000"'
+      - '"17008d72-0000-0500-0000-6358ad740000"'
       expires:
       - '-1'
       pragma:
@@ -166,7 +166,7 @@ interactions:
       ParameterSetName:
       - -g -n --type
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.22000-SP0) AZURECLI/2.34.1
+      - python/3.9.13 (Windows-10-10.0.22621-SP0) AZURECLI/2.41.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateLinkResources?api-version=2022-03-01
   response:
@@ -180,7 +180,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:29:53 GMT
+      - Wed, 26 Oct 2022 03:46:27 GMT
       expires:
       - '-1'
       pragma:
@@ -201,7 +201,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "centraluseuap", "tags": {}, "properties": {"addressSpace":
+    body: '{"location": "SOUTHCENTRALUS", "tags": {}, "properties": {"addressSpace":
       {"addressPrefixes": ["10.0.0.0/16"]}, "dhcpOptions": {}}}'
     headers:
       Accept:
@@ -213,22 +213,22 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '130'
+      - '131'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name -l
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"cs_cli_test_000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002\",\r\n
-        \ \"etag\": \"W/\\\"9f6e040b-f1a1-4b81-a548-82d1d2894aea\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
+        \ \"etag\": \"W/\\\"cd34431a-b6c3-43f1-9f0c-a4b48f1cbf0c\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"southcentralus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"a2d39a76-2d62-4d40-9814-a54cb1cfeee2\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"53a8b18d-241e-48ee-920b-6d086ae12e25\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
@@ -237,15 +237,15 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/ba22a2ce-4214-447a-a2f6-d2f36cfddf57?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operations/75db7b4e-b6d8-4791-baf3-6beec1ae27a7?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '706'
+      - '707'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:29:56 GMT
+      - Wed, 26 Oct 2022 03:46:30 GMT
       expires:
       - '-1'
       pragma:
@@ -258,12 +258,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e0888a15-0c9e-4dfe-9dc3-9cbb9bb71863
+      - a05925be-1a58-4f9f-bad4-cbd9c5f3e33f
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
       code: 201
-      message: ''
+      message: Created
 - request:
     body: null
     headers:
@@ -278,58 +278,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name -l
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/ba22a2ce-4214-447a-a2f6-d2f36cfddf57?api-version=2021-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 28 Mar 2022 23:29:59 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 038f568b-4c6b-4c0b-a204-072be83fc47c
-    status:
-      code: 200
-      message: ''
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name -l
-      User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/ba22a2ce-4214-447a-a2f6-d2f36cfddf57?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operations/75db7b4e-b6d8-4791-baf3-6beec1ae27a7?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -341,7 +292,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:30:10 GMT
+      - Wed, 26 Oct 2022 03:46:33 GMT
       expires:
       - '-1'
       pragma:
@@ -358,10 +309,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 482dc887-c713-45be-9948-24a3ffc51a36
+      - 47c70735-deba-4606-9fc4-d031808ea66f
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -376,16 +327,16 @@ interactions:
       ParameterSetName:
       - --resource-group --name -l
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"cs_cli_test_000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002\",\r\n
-        \ \"etag\": \"W/\\\"55571276-9ca2-47e9-b4cc-6963443ffb2d\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
+        \ \"etag\": \"W/\\\"bfc9906d-9609-4a8d-ae44-ad3647819162\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"southcentralus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"a2d39a76-2d62-4d40-9814-a54cb1cfeee2\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"53a8b18d-241e-48ee-920b-6d086ae12e25\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
@@ -394,13 +345,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '707'
+      - '708'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:30:10 GMT
+      - Wed, 26 Oct 2022 03:46:33 GMT
       etag:
-      - W/"55571276-9ca2-47e9-b4cc-6963443ffb2d"
+      - W/"bfc9906d-9609-4a8d-ae44-ad3647819162"
       expires:
       - '-1'
       pragma:
@@ -417,10 +368,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 93d7ab95-65de-4146-a977-15d6225e1496
+      - 173d0f2a-250c-4968-858f-0c2b05370b14
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -435,16 +386,16 @@ interactions:
       ParameterSetName:
       - --resource-group --name --vnet-name --address-prefixes
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"cs_cli_test_000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002\",\r\n
-        \ \"etag\": \"W/\\\"55571276-9ca2-47e9-b4cc-6963443ffb2d\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
+        \ \"etag\": \"W/\\\"bfc9906d-9609-4a8d-ae44-ad3647819162\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"southcentralus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"a2d39a76-2d62-4d40-9814-a54cb1cfeee2\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"53a8b18d-241e-48ee-920b-6d086ae12e25\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
@@ -453,13 +404,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '707'
+      - '708'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:30:10 GMT
+      - Wed, 26 Oct 2022 03:46:33 GMT
       etag:
-      - W/"55571276-9ca2-47e9-b4cc-6963443ffb2d"
+      - W/"bfc9906d-9609-4a8d-ae44-ad3647819162"
       expires:
       - '-1'
       pragma:
@@ -476,16 +427,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5f0c2316-63a5-40db-b980-ad2756836d82
+      - c1993687-5a7f-4d51-9718-3e60181ce984
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002",
-      "location": "centraluseuap", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      "location": "southcentralus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
       ["10.0.0.0/16"]}, "dhcpOptions": {"dnsServers": []}, "subnets": [{"name": "default",
       "properties": {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies":
-      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}], "virtualNetworkPeerings":
+      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}], "virtualNetworkPeerings":
       [], "enableDdosProtection": false}}'
     headers:
       Accept:
@@ -497,30 +448,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '538'
+      - '540'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --vnet-name --address-prefixes
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"cs_cli_test_000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002\",\r\n
-        \ \"etag\": \"W/\\\"83b0021c-2733-4ef8-91d9-5ad90f1dd937\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
+        \ \"etag\": \"W/\\\"b0fda9f3-d361-4867-a3e4-b42b21f18889\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"southcentralus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"a2d39a76-2d62-4d40-9814-a54cb1cfeee2\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"53a8b18d-241e-48ee-920b-6d086ae12e25\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"default\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002/subnets/default\",\r\n
-        \       \"etag\": \"W/\\\"83b0021c-2733-4ef8-91d9-5ad90f1dd937\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b0fda9f3-d361-4867-a3e4-b42b21f18889\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
@@ -528,15 +479,15 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/0e9476cf-e9fb-4579-a1e3-39503f6ef58b?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operations/3a2566c9-ad57-425f-988f-167c5d3ea70a?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '1331'
+      - '1333'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:30:12 GMT
+      - Wed, 26 Oct 2022 03:46:36 GMT
       expires:
       - '-1'
       pragma:
@@ -553,12 +504,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b032f6d7-e5b9-401f-a12c-77d8a7d098be
+      - 44d931ac-beb2-46ed-b584-ca0aaaf3c406
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -573,9 +524,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --vnet-name --address-prefixes
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/0e9476cf-e9fb-4579-a1e3-39503f6ef58b?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operations/3a2566c9-ad57-425f-988f-167c5d3ea70a?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -587,7 +538,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:30:15 GMT
+      - Wed, 26 Oct 2022 03:46:39 GMT
       expires:
       - '-1'
       pragma:
@@ -604,10 +555,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0954c71b-404c-4d95-aa41-330efbc9192c
+      - 84de0e5f-98b0-42b3-9da5-092a17fa44a4
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -622,24 +573,24 @@ interactions:
       ParameterSetName:
       - --resource-group --name --vnet-name --address-prefixes
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"cs_cli_test_000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002\",\r\n
-        \ \"etag\": \"W/\\\"87b729c7-78b4-48fb-add2-1088e3c0e72f\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
+        \ \"etag\": \"W/\\\"41e8141b-116e-43a0-862c-2c2f04860142\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"southcentralus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"a2d39a76-2d62-4d40-9814-a54cb1cfeee2\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"53a8b18d-241e-48ee-920b-6d086ae12e25\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"default\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002/subnets/default\",\r\n
-        \       \"etag\": \"W/\\\"87b729c7-78b4-48fb-add2-1088e3c0e72f\\\"\",\r\n
+        \       \"etag\": \"W/\\\"41e8141b-116e-43a0-862c-2c2f04860142\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
@@ -647,13 +598,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1333'
+      - '1335'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:30:15 GMT
+      - Wed, 26 Oct 2022 03:46:40 GMT
       etag:
-      - W/"87b729c7-78b4-48fb-add2-1088e3c0e72f"
+      - W/"41e8141b-116e-43a0-862c-2c2f04860142"
       expires:
       - '-1'
       pragma:
@@ -670,10 +621,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - aa3aad7f-4171-4759-8f20-1db27835fa47
+      - 39b5d5a4-1b06-4712-9f5c-ff2ef39a9467
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -688,23 +639,23 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"03004ba1-0000-3300-0000-624244d40000\"","location":"centraluseuap","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://csclitest000003.cognitiveservices.azure.com/","internalId":"c9ce3b976ae7409ab55ad4568c69a939","dateCreated":"2022-03-28T23:29:22.2179756Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"backupUpperLimit":20,"isMigrated":false,"customSubDomainName":"csclitest000003","privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedStorage"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://csclitest000003.cognitiveservices.azure.com/"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-03-28T23:29:21.6214515Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-28T23:29:21.6214515Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"17008d72-0000-0500-0000-6358ad740000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://csclitest000003.cognitiveservices.azure.com/","internalId":"e20f61a68d0e43baa0cfb215b6cc4881","dateCreated":"2022-10-26T03:45:54.8294634Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"customSubDomainName":"csclitest000003","privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://csclitest000003.cognitiveservices.azure.com/"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:45:53.7849374Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:45:53.7849374Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2425'
+      - '2396'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:30:15 GMT
+      - Wed, 26 Oct 2022 03:46:40 GMT
       etag:
-      - '"03004ba1-0000-3300-0000-624244d40000"'
+      - '"17008d72-0000-0500-0000-6358ad740000"'
       expires:
       - '-1'
       pragma:
@@ -720,7 +671,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '11'
+      - '9'
     status:
       code: 200
       message: OK
@@ -738,28 +689,28 @@ interactions:
       ParameterSetName:
       - --name --resource-group --vnet-name --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002/subnets/default?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002/subnets/default?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002/subnets/default\",\r\n
-        \ \"etag\": \"W/\\\"87b729c7-78b4-48fb-add2-1088e3c0e72f\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"41e8141b-116e-43a0-862c-2c2f04860142\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
-        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '540'
+      - '541'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:30:16 GMT
+      - Wed, 26 Oct 2022 03:46:41 GMT
       etag:
-      - W/"87b729c7-78b4-48fb-add2-1088e3c0e72f"
+      - W/"41e8141b-116e-43a0-862c-2c2f04860142"
       expires:
       - '-1'
       pragma:
@@ -776,10 +727,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7b8d6134-b5b4-45f1-b99b-e057bbbcee49
+      - 794cec47-e600-413f-b865-319754555495
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002/subnets/default",
       "name": "default", "type": "Microsoft.Network/virtualNetworks/subnets", "properties":
@@ -801,28 +752,30 @@ interactions:
       ParameterSetName:
       - --name --resource-group --vnet-name --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002/subnets/default?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002/subnets/default?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002/subnets/default\",\r\n
-        \ \"etag\": \"W/\\\"f16e3c34-0a7e-4bb8-999b-c000cec212a0\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \ \"etag\": \"W/\\\"a2393f17-612f-4a3d-914a-a8ee3042bb15\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f213ed87-a676-4fb6-9de2-0058b9a89edd?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operations/2f8c0e57-8a68-46cb-956e-a2330f963cec?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '540'
+      - '541'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:30:18 GMT
+      - Wed, 26 Oct 2022 03:46:42 GMT
       expires:
       - '-1'
       pragma:
@@ -839,12 +792,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e2305eb2-a408-4393-bb48-6e76a65842e6
+      - 07cbb33a-ac65-4aea-96f4-6010400b091e
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -859,9 +812,9 @@ interactions:
       ParameterSetName:
       - --name --resource-group --vnet-name --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f213ed87-a676-4fb6-9de2-0058b9a89edd?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operations/2f8c0e57-8a68-46cb-956e-a2330f963cec?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -873,7 +826,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:30:21 GMT
+      - Wed, 26 Oct 2022 03:47:12 GMT
       expires:
       - '-1'
       pragma:
@@ -890,10 +843,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 022a872d-c0ea-4fc2-a683-3b415d5344ce
+      - e88a188c-c082-42d8-8c3e-52dd330fe1e9
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -908,13 +861,13 @@ interactions:
       ParameterSetName:
       - --name --resource-group --vnet-name --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002/subnets/default?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002/subnets/default?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002/subnets/default\",\r\n
-        \ \"etag\": \"W/\\\"abc5ac6e-bda4-4687-b79c-3281d12de073\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"a2393f17-612f-4a3d-914a-a8ee3042bb15\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -927,9 +880,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:30:21 GMT
+      - Wed, 26 Oct 2022 03:47:12 GMT
       etag:
-      - W/"abc5ac6e-bda4-4687-b79c-3281d12de073"
+      - W/"a2393f17-612f-4a3d-914a-a8ee3042bb15"
       expires:
       - '-1'
       pragma:
@@ -946,13 +899,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 78d4b964-8786-4a67-b56d-2c8e7ed36963
+      - e65a0e68-ae12-4637-8301-e3c6cca67e27
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
-    body: '{"location": "centraluseuap", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002/subnets/default",
-      "properties": {"privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+    body: '{"location": "SOUTHCENTRALUS", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002/subnets/default",
+      "properties": {"privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
       "Enabled"}}, "privateLinkServiceConnections": [{"name": "pecs_cli_test_000002",
       "properties": {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002",
       "groupIds": ["account"]}}]}}'
@@ -966,26 +919,26 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '625'
+      - '627'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --vnet-name --subnet --private-connection-resource-id --group-id --connection-name
         -l
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"pecs_cli_test_000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002\",\r\n
-        \ \"etag\": \"W/\\\"566fc9ba-1090-42ce-967a-66e716e4616a\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"centraluseuap\",\r\n
+        \ \"etag\": \"W/\\\"6a48cf67-11e8-47b3-9b08-cc55cf229b2d\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"southcentralus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"bc84c3dd-9132-4178-abda-18de84ca8fda\",\r\n    \"privateLinkServiceConnections\":
+        \"d9c7b62b-6e36-4f1a-b048-18dda43a2d50\",\r\n    \"privateLinkServiceConnections\":
         [\r\n      {\r\n        \"name\": \"pecs_cli_test_000002\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002/privateLinkServiceConnections/pecs_cli_test_000002\",\r\n
-        \       \"etag\": \"W/\\\"566fc9ba-1090-42ce-967a-66e716e4616a\\\"\",\r\n
+        \       \"etag\": \"W/\\\"6a48cf67-11e8-47b3-9b08-cc55cf229b2d\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002\",\r\n
         \         \"groupIds\": [\r\n            \"account\"\r\n          ],\r\n          \"privateLinkServiceConnectionState\":
@@ -996,21 +949,21 @@ interactions:
         \   \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\": {\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002/subnets/default\"\r\n
         \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
-        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/pecs_cli_test_000002.nic.db646746-8574-4dcf-829d-39ad9feda2be\"\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/pecs_cli_test_000002.nic.45742a36-ab5f-4f54-aa09-da17f144d038\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/314fa15a-8a06-41bd-b551-b34a30c73b6b?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operations/64e8bd3f-bd75-4f88-80e6-595da5898a60?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '2059'
+      - '2060'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:30:23 GMT
+      - Wed, 26 Oct 2022 03:47:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1023,12 +976,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 41b9df3c-0ab9-48ec-ac29-e8f7aedd8e6a
+      - 9a016e0d-17a4-4a12-b581-1f4ba00b419e
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 201
-      message: ''
+      message: Created
 - request:
     body: null
     headers:
@@ -1044,9 +997,9 @@ interactions:
       - -g -n --vnet-name --subnet --private-connection-resource-id --group-id --connection-name
         -l
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/314fa15a-8a06-41bd-b551-b34a30c73b6b?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operations/64e8bd3f-bd75-4f88-80e6-595da5898a60?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1058,7 +1011,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:30:34 GMT
+      - Wed, 26 Oct 2022 03:47:24 GMT
       expires:
       - '-1'
       pragma:
@@ -1075,10 +1028,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 12b8aa86-153d-4225-b23b-268441bbb49c
+      - 1c4a2e26-75ee-4432-bfc6-a3c440efa6e4
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -1094,9 +1047,9 @@ interactions:
       - -g -n --vnet-name --subnet --private-connection-resource-id --group-id --connection-name
         -l
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/314fa15a-8a06-41bd-b551-b34a30c73b6b?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operations/64e8bd3f-bd75-4f88-80e6-595da5898a60?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1108,7 +1061,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:30:44 GMT
+      - Wed, 26 Oct 2022 03:47:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1125,10 +1078,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - bf53fcc6-6b40-4144-82f8-dd154b6fde1a
+      - f052b6c4-0dd2-439a-b2e1-e0c213ebe506
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -1144,59 +1097,9 @@ interactions:
       - -g -n --vnet-name --subnet --private-connection-resource-id --group-id --connection-name
         -l
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/314fa15a-8a06-41bd-b551-b34a30c73b6b?api-version=2021-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 28 Mar 2022 23:31:04 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - d6f99196-c992-4402-b419-478ffe8e29b2
-    status:
-      code: 200
-      message: ''
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --vnet-name --subnet --private-connection-resource-id --group-id --connection-name
-        -l
-      User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/314fa15a-8a06-41bd-b551-b34a30c73b6b?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operations/64e8bd3f-bd75-4f88-80e6-595da5898a60?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1208,7 +1111,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:31:24 GMT
+      - Wed, 26 Oct 2022 03:47:54 GMT
       expires:
       - '-1'
       pragma:
@@ -1225,10 +1128,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 010601ce-babc-4083-b5ba-843cbe1b3552
+      - 4fc9b794-4f9a-438b-821c-0bc935ef6e4d
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -1244,19 +1147,19 @@ interactions:
       - -g -n --vnet-name --subnet --private-connection-resource-id --group-id --connection-name
         -l
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"pecs_cli_test_000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002\",\r\n
-        \ \"etag\": \"W/\\\"68f92900-b84f-462d-9b5e-8e573dcac414\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"centraluseuap\",\r\n
+        \ \"etag\": \"W/\\\"1161fbe0-4ac6-437c-933a-1f8187998eb3\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"southcentralus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"bc84c3dd-9132-4178-abda-18de84ca8fda\",\r\n    \"privateLinkServiceConnections\":
+        \"d9c7b62b-6e36-4f1a-b048-18dda43a2d50\",\r\n    \"privateLinkServiceConnections\":
         [\r\n      {\r\n        \"name\": \"pecs_cli_test_000002\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002/privateLinkServiceConnections/pecs_cli_test_000002\",\r\n
-        \       \"etag\": \"W/\\\"68f92900-b84f-462d-9b5e-8e573dcac414\\\"\",\r\n
+        \       \"etag\": \"W/\\\"1161fbe0-4ac6-437c-933a-1f8187998eb3\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002\",\r\n
         \         \"groupIds\": [\r\n            \"account\"\r\n          ],\r\n          \"privateLinkServiceConnectionState\":
@@ -1267,7 +1170,7 @@ interactions:
         \   \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\": {\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cs_cli_test_000002/subnets/default\"\r\n
         \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
-        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/pecs_cli_test_000002.nic.db646746-8574-4dcf-829d-39ad9feda2be\"\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/pecs_cli_test_000002.nic.45742a36-ab5f-4f54-aa09-da17f144d038\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": [\r\n      {\r\n        \"fqdn\":
         \"csclitest000003.cognitiveservices.azure.com\",\r\n        \"ipAddresses\":
         [\r\n          \"10.0.0.4\"\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}"
@@ -1275,13 +1178,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2202'
+      - '2203'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:31:24 GMT
+      - Wed, 26 Oct 2022 03:47:55 GMT
       etag:
-      - W/"68f92900-b84f-462d-9b5e-8e573dcac414"
+      - W/"1161fbe0-4ac6-437c-933a-1f8187998eb3"
       expires:
       - '-1'
       pragma:
@@ -1298,10 +1201,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 14c5ede6-a33e-462a-bb7b-907a770fddc1
+      - ccdca13d-12ca-430e-b900-55b3ceff8e50
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -1316,23 +1219,23 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"030057a1-0000-3300-0000-624245330000\"","location":"centraluseuap","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://csclitest000003.cognitiveservices.azure.com/","internalId":"c9ce3b976ae7409ab55ad4568c69a939","dateCreated":"2022-03-28T23:29:22.2179756Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"backupUpperLimit":20,"isMigrated":false,"customSubDomainName":"csclitest000003","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda","name":"cs_cli_test_000002/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda","type":"Microsoft.CognitiveServices/accounts/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},"groupIds":["account"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved","actionsRequired":"None"}}}],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedStorage"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://csclitest000003.cognitiveservices.azure.com/"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-03-28T23:29:21.6214515Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-28T23:29:21.6214515Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"1700d272-0000-0500-0000-6358adcf0000\"","location":"SOUTHCENTRALUS","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://csclitest000003.cognitiveservices.azure.com/","internalId":"e20f61a68d0e43baa0cfb215b6cc4881","dateCreated":"2022-10-26T03:45:54.8294634Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"customSubDomainName":"csclitest000003","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50","name":"cs_cli_test_000002/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50","type":"Microsoft.CognitiveServices/accounts/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},"groupIds":["account"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved","actionsRequired":"None"}}}],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://csclitest000003.cognitiveservices.azure.com/"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:45:53.7849374Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:45:53.7849374Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3150'
+      - '3121'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:31:25 GMT
+      - Wed, 26 Oct 2022 03:47:55 GMT
       etag:
-      - '"030057a1-0000-3300-0000-624245330000"'
+      - '"1700d272-0000-0500-0000-6358adcf0000"'
       expires:
       - '-1'
       pragma:
@@ -1348,7 +1251,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '38'
+      - '21'
     status:
       code: 200
       message: OK
@@ -1366,23 +1269,23 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.22000-SP0) AZURECLI/2.34.1
+      - python/3.9.13 (Windows-10-10.0.22621-SP0) AZURECLI/2.41.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50?api-version=2022-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda","name":"cs_cli_test_000002/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda","type":"Microsoft.CognitiveServices/accounts/privateEndpointConnections","etag":"\"30019548-0000-3300-0000-624245340000\"","location":"centraluseuap","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},"groupIds":["account"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50","name":"cs_cli_test_000002/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50","type":"Microsoft.CognitiveServices/accounts/privateEndpointConnections","etag":"\"88006b04-0000-0500-0000-6358add10000\"","location":"SOUTHCENTRALUS","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},"groupIds":["account"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '834'
+      - '835'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:31:25 GMT
+      - Wed, 26 Oct 2022 03:47:56 GMT
       etag:
-      - '"30019548-0000-3300-0000-624245340000"'
+      - '"88006b04-0000-0500-0000-6358add10000"'
       expires:
       - '-1'
       pragma:
@@ -1398,7 +1301,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '56'
+      - '11'
     status:
       code: 200
       message: OK
@@ -1416,23 +1319,23 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.22000-SP0) AZURECLI/2.34.1
+      - python/3.9.13 (Windows-10-10.0.22621-SP0) AZURECLI/2.41.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50?api-version=2022-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda","name":"cs_cli_test_000002/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda","type":"Microsoft.CognitiveServices/accounts/privateEndpointConnections","etag":"\"30019548-0000-3300-0000-624245340000\"","location":"centraluseuap","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},"groupIds":["account"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50","name":"cs_cli_test_000002/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50","type":"Microsoft.CognitiveServices/accounts/privateEndpointConnections","etag":"\"88006b04-0000-0500-0000-6358add10000\"","location":"SOUTHCENTRALUS","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},"groupIds":["account"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '834'
+      - '835'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:31:26 GMT
+      - Wed, 26 Oct 2022 03:47:56 GMT
       etag:
-      - '"30019548-0000-3300-0000-624245340000"'
+      - '"88006b04-0000-0500-0000-6358add10000"'
       expires:
       - '-1'
       pragma:
@@ -1448,15 +1351,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '47'
+      - '10'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda",
-      "name": "cs_cli_test_000002/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50",
+      "name": "cs_cli_test_000002/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50",
       "type": "Microsoft.CognitiveServices/accounts/privateEndpointConnections", "etag":
-      "\"30019548-0000-3300-0000-624245340000\"", "location": "centraluseuap", "properties":
+      "\"88006b04-0000-0500-0000-6358add10000\"", "location": "SOUTHCENTRALUS", "properties":
       {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},
       "groupIds": ["account"], "privateLinkServiceConnectionState": {"status": "Approved",
       "description": null, "actionsRequired": "None"}, "provisioningState": "Succeeded"}}'
@@ -1470,29 +1373,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '852'
+      - '853'
       Content-Type:
       - application/json
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.22000-SP0) AZURECLI/2.34.1
+      - python/3.9.13 (Windows-10-10.0.22621-SP0) AZURECLI/2.41.0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50?api-version=2022-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda","name":"cs_cli_test_000002/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda","type":"Microsoft.CognitiveServices/accounts/privateEndpointConnections","etag":"\"3001ed4a-0000-3300-0000-6242454f0000\"","location":"centraluseuap","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},"groupIds":["account"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50","name":"cs_cli_test_000002/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50","type":"Microsoft.CognitiveServices/accounts/privateEndpointConnections","etag":"\"88006705-0000-0500-0000-6358adee0000\"","location":"SOUTHCENTRALUS","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},"groupIds":["account"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '834'
+      - '835'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:31:27 GMT
+      - Wed, 26 Oct 2022 03:47:57 GMT
       etag:
-      - '"3001ed4a-0000-3300-0000-6242454f0000"'
+      - '"88006705-0000-0500-0000-6358adee0000"'
       expires:
       - '-1'
       pragma:
@@ -1508,7 +1411,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '58'
+      - '43'
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -1528,23 +1431,23 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.22000-SP0) AZURECLI/2.34.1
+      - python/3.9.13 (Windows-10-10.0.22621-SP0) AZURECLI/2.41.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50?api-version=2022-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda","name":"cs_cli_test_000002/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda","type":"Microsoft.CognitiveServices/accounts/privateEndpointConnections","etag":"\"3001ed4a-0000-3300-0000-6242454f0000\"","location":"centraluseuap","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},"groupIds":["account"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50","name":"cs_cli_test_000002/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50","type":"Microsoft.CognitiveServices/accounts/privateEndpointConnections","etag":"\"88006705-0000-0500-0000-6358adee0000\"","location":"SOUTHCENTRALUS","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},"groupIds":["account"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '834'
+      - '835'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:31:37 GMT
+      - Wed, 26 Oct 2022 03:48:07 GMT
       etag:
-      - '"3001ed4a-0000-3300-0000-6242454f0000"'
+      - '"88006705-0000-0500-0000-6358adee0000"'
       expires:
       - '-1'
       pragma:
@@ -1560,7 +1463,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '12'
+      - '10'
     status:
       code: 200
       message: OK
@@ -1578,23 +1481,23 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.22000-SP0) AZURECLI/2.34.1
+      - python/3.9.13 (Windows-10-10.0.22621-SP0) AZURECLI/2.41.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50?api-version=2022-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda","name":"cs_cli_test_000002/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda","type":"Microsoft.CognitiveServices/accounts/privateEndpointConnections","etag":"\"3001ed4a-0000-3300-0000-6242454f0000\"","location":"centraluseuap","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},"groupIds":["account"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50","name":"cs_cli_test_000002/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50","type":"Microsoft.CognitiveServices/accounts/privateEndpointConnections","etag":"\"88006705-0000-0500-0000-6358adee0000\"","location":"SOUTHCENTRALUS","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},"groupIds":["account"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '834'
+      - '835'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:31:38 GMT
+      - Wed, 26 Oct 2022 03:48:08 GMT
       etag:
-      - '"3001ed4a-0000-3300-0000-6242454f0000"'
+      - '"88006705-0000-0500-0000-6358adee0000"'
       expires:
       - '-1'
       pragma:
@@ -1610,15 +1513,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '12'
+      - '10'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda",
-      "name": "cs_cli_test_000002/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50",
+      "name": "cs_cli_test_000002/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50",
       "type": "Microsoft.CognitiveServices/accounts/privateEndpointConnections", "etag":
-      "\"3001ed4a-0000-3300-0000-6242454f0000\"", "location": "centraluseuap", "properties":
+      "\"88006705-0000-0500-0000-6358adee0000\"", "location": "SOUTHCENTRALUS", "properties":
       {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},
       "groupIds": ["account"], "privateLinkServiceConnectionState": {"status": "Rejected",
       "description": null, "actionsRequired": "None"}, "provisioningState": "Succeeded"}}'
@@ -1632,29 +1535,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '852'
+      - '853'
       Content-Type:
       - application/json
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.22000-SP0) AZURECLI/2.34.1
+      - python/3.9.13 (Windows-10-10.0.22621-SP0) AZURECLI/2.41.0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50?api-version=2022-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda","name":"cs_cli_test_000002/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda","type":"Microsoft.CognitiveServices/accounts/privateEndpointConnections","etag":"\"3001b44d-0000-3300-0000-624245730000\"","location":"centraluseuap","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},"groupIds":["account"],"privateLinkServiceConnectionState":{"status":"Rejected","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50","name":"cs_cli_test_000002/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50","type":"Microsoft.CognitiveServices/accounts/privateEndpointConnections","etag":"\"8800bb06-0000-0500-0000-6358ae1a0000\"","location":"SOUTHCENTRALUS","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},"groupIds":["account"],"privateLinkServiceConnectionState":{"status":"Rejected","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '809'
+      - '810'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:32:03 GMT
+      - Wed, 26 Oct 2022 03:48:42 GMT
       etag:
-      - '"3001b44d-0000-3300-0000-624245730000"'
+      - '"8800bb06-0000-0500-0000-6358ae1a0000"'
       expires:
       - '-1'
       pragma:
@@ -1670,9 +1573,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '23895'
+      - '32317'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -1690,23 +1593,23 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.22000-SP0) AZURECLI/2.34.1
+      - python/3.9.13 (Windows-10-10.0.22621-SP0) AZURECLI/2.41.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50?api-version=2022-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda","name":"cs_cli_test_000002/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda","type":"Microsoft.CognitiveServices/accounts/privateEndpointConnections","etag":"\"3001b44d-0000-3300-0000-624245730000\"","location":"centraluseuap","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},"groupIds":["account"],"privateLinkServiceConnectionState":{"status":"Rejected","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50","name":"cs_cli_test_000002/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50","type":"Microsoft.CognitiveServices/accounts/privateEndpointConnections","etag":"\"8800bb06-0000-0500-0000-6358ae1a0000\"","location":"SOUTHCENTRALUS","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},"groupIds":["account"],"privateLinkServiceConnectionState":{"status":"Rejected","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '809'
+      - '810'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:32:13 GMT
+      - Wed, 26 Oct 2022 03:48:52 GMT
       etag:
-      - '"3001b44d-0000-3300-0000-624245730000"'
+      - '"8800bb06-0000-0500-0000-6358ae1a0000"'
       expires:
       - '-1'
       pragma:
@@ -1740,21 +1643,21 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.22000-SP0) AZURECLI/2.34.1
+      - python/3.9.13 (Windows-10-10.0.22621-SP0) AZURECLI/2.41.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections?api-version=2022-03-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda","name":"cs_cli_test_000002/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda","type":"Microsoft.CognitiveServices/accounts/privateEndpointConnections","etag":"\"3001b44d-0000-3300-0000-624245730000\"","location":"centraluseuap","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},"groupIds":["account"],"privateLinkServiceConnectionState":{"status":"Rejected","actionsRequired":"None"},"provisioningState":"Succeeded"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50","name":"cs_cli_test_000002/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50","type":"Microsoft.CognitiveServices/accounts/privateEndpointConnections","etag":"\"8800bb06-0000-0500-0000-6358ae1a0000\"","location":"SOUTHCENTRALUS","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002"},"groupIds":["account"],"privateLinkServiceConnectionState":{"status":"Rejected","actionsRequired":"None"},"provisioningState":"Succeeded"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '821'
+      - '822'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:32:14 GMT
+      - Wed, 26 Oct 2022 03:48:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1770,7 +1673,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '18'
+      - '103'
     status:
       code: 200
       message: OK
@@ -1790,9 +1693,9 @@ interactions:
       ParameterSetName:
       - --id --yes
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.22000-SP0) AZURECLI/2.34.1
+      - python/3.9.13 (Windows-10-10.0.22621-SP0) AZURECLI/2.41.0
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.bc84c3dd-9132-4178-abda-18de84ca8fda?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections/pecs_cli_test_000002.d9c7b62b-6e36-4f1a-b048-18dda43a2d50?api-version=2022-03-01
   response:
     body:
       string: ''
@@ -1802,7 +1705,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 28 Mar 2022 23:32:26 GMT
+      - Wed, 26 Oct 2022 03:49:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1814,7 +1717,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '11225'
+      - '11583'
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
     status:
@@ -1834,7 +1737,7 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.22000-SP0) AZURECLI/2.34.1
+      - python/3.9.13 (Windows-10-10.0.22621-SP0) AZURECLI/2.41.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/privateEndpointConnections?api-version=2022-03-01
   response:
@@ -1848,7 +1751,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:32:26 GMT
+      - Wed, 26 Oct 2022 03:49:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1864,7 +1767,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '16'
+      - '13'
     status:
       code: 200
       message: OK
@@ -1884,9 +1787,9 @@ interactions:
       ParameterSetName:
       - --name --resource-group
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/pecs_cli_test_000002?api-version=2022-01-01
   response:
     body:
       string: ''
@@ -1894,17 +1797,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/7cead27c-ff02-452d-b1b4-e8e27369f3d6?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operations/23ace9f2-e152-4182-88eb-4692937aab37?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Mon, 28 Mar 2022 23:32:28 GMT
+      - Wed, 26 Oct 2022 03:49:06 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/7cead27c-ff02-452d-b1b4-e8e27369f3d6?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operationResults/23ace9f2-e152-4182-88eb-4692937aab37?api-version=2022-01-01
       pragma:
       - no-cache
       server:
@@ -1915,12 +1818,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 63974237-7e48-44a9-b7cb-0c78993f1c30
+      - e27e3675-01fe-4232-bb22-b6a246fa50b2
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
     status:
       code: 202
-      message: ''
+      message: Accepted
 - request:
     body: null
     headers:
@@ -1935,58 +1838,9 @@ interactions:
       ParameterSetName:
       - --name --resource-group
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/7cead27c-ff02-452d-b1b4-e8e27369f3d6?api-version=2021-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 28 Mar 2022 23:32:38 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 36ab2612-abc0-45e1-b34f-574a957fd4b0
-    status:
-      code: 200
-      message: ''
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name --resource-group
-      User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-azure-mgmt-network/19.3.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/7cead27c-ff02-452d-b1b4-e8e27369f3d6?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operations/23ace9f2-e152-4182-88eb-4692937aab37?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1998,7 +1852,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 23:32:48 GMT
+      - Wed, 26 Oct 2022 03:49:16 GMT
       expires:
       - '-1'
       pragma:
@@ -2015,10 +1869,59 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c78854c5-41a3-443f-9b34-09082993b62f
+      - f11e01b0-2c32-4191-a275-e2797f3e8dc8
     status:
       code: 200
-      message: ''
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group
+      User-Agent:
+      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operationResults/23ace9f2-e152-4182-88eb-4692937aab37?api-version=2022-01-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operations/23ace9f2-e152-4182-88eb-4692937aab37?api-version=2022-01-01
+      cache-control:
+      - no-cache
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 26 Oct 2022 03:49:17 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/southcentralus/operationResults/23ace9f2-e152-4182-88eb-4692937aab37?api-version=2022-01-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e27e3675-01fe-4232-bb22-b6a246fa50b2
+    status:
+      code: 204
+      message: No Content
 - request:
     body: null
     headers:
@@ -2035,9 +1938,9 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
   response:
     body:
       string: ''
@@ -2047,7 +1950,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 28 Mar 2022 23:32:51 GMT
+      - Wed, 26 Oct 2022 03:49:21 GMT
       expires:
       - '-1'
       pragma:
@@ -2059,7 +1962,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '114'
+      - '79'
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
     status:

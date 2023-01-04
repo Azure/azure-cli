@@ -26,7 +26,8 @@ from azure.cli.command_modules.cosmosdb._client_factory import (
     cf_restorable_mongodb_resources,
     cf_db_locations,
     cf_cassandra_cluster,
-    cf_cassandra_data_center
+    cf_cassandra_data_center,
+    cf_service
 )
 
 from azure.cli.command_modules.cosmosdb._format import (
@@ -126,6 +127,10 @@ def load_command_table(self, _):
     cosmosdb_managed_cassandra_datacenter_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cosmosdb.operations#CassandraDataCentersOperations.{}',
         client_factory=cf_cassandra_data_center)
+
+    cosmosdb_service_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations#ServiceOperations.{}',
+        client_factory=cf_service)
 
     with self.command_group('cosmosdb', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.show_command('show', 'get', transform=transform_db_account_json_output)
@@ -337,6 +342,24 @@ def load_command_table(self, _):
         g.cosmosdb_custom('delete', 'cli_cosmosdb_collection_delete', confirmation=True)
         g.cosmosdb_custom('update', 'cli_cosmosdb_collection_update')
 
+    # Mongo role definition operations
+    with self.command_group('cosmosdb mongodb role definition', cosmosdb_mongo_sdk, client_factory=cf_mongo_db_resources) as g:
+        g.custom_command('create', 'cli_cosmosdb_mongo_role_definition_create')
+        g.custom_command('update', 'cli_cosmosdb_mongo_role_definition_update')
+        g.custom_command('exists', 'cli_cosmosdb_mongo_role_definition_exists')
+        g.command('list', 'list_mongo_role_definitions')
+        g.show_command('show', 'get_mongo_role_definition')
+        g.command('delete', 'begin_delete_mongo_role_definition', confirmation=True)
+
+    # Mongo user definition operations
+    with self.command_group('cosmosdb mongodb user definition', cosmosdb_mongo_sdk, client_factory=cf_mongo_db_resources) as g:
+        g.custom_command('create', 'cli_cosmosdb_mongo_user_definition_create')
+        g.custom_command('update', 'cli_cosmosdb_mongo_user_definition_update')
+        g.custom_command('exists', 'cli_cosmosdb_mongo_user_definition_exists')
+        g.command('list', 'list_mongo_user_definitions')
+        g.show_command('show', 'get_mongo_user_definition')
+        g.command('delete', 'begin_delete_mongo_user_definition', confirmation=True)
+
     # SQL role definition operations
     with self.command_group('cosmosdb sql role definition', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_sql_role_definition_create', supports_no_wait=True)
@@ -408,6 +431,14 @@ def load_command_table(self, _):
     with self.command_group('managed-cassandra datacenter', cosmosdb_managed_cassandra_datacenter_sdk, client_factory=cf_cassandra_data_center) as g:
         g.custom_command('create', 'cli_cosmosdb_managed_cassandra_datacenter_create', supports_no_wait=True)
         g.custom_command('update', 'cli_cosmosdb_managed_cassandra_datacenter_update', supports_no_wait=True)
+        g.command('list', 'list')
+        g.show_command('show', 'get')
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
+
+    # ComputeV2 services
+    with self.command_group('cosmosdb service', cosmosdb_service_sdk, client_factory=cf_service) as g:
+        g.custom_command('create', 'cli_cosmosdb_service_create', supports_no_wait=True)
+        g.custom_command('update', 'cli_cosmosdb_service_update', supports_no_wait=True)
         g.command('list', 'list')
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)

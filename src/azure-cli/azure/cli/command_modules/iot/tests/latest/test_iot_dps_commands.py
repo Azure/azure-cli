@@ -6,7 +6,10 @@
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
-from azure.cli.command_modules.iot.tests.latest._test_utils import _create_test_cert, _delete_test_cert, _create_verification_cert
+from azure.cli.command_modules.iot.tests.latest._test_utils import (
+    _create_test_cert, _delete_test_cert, _create_verification_cert, _create_fake_chain_cert
+)
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.iot.tests.latest.recording_processors import KeyReplacer
 from azure.core.exceptions import HttpResponseError
 import random
@@ -124,13 +127,17 @@ class IoTDpsTest(ScenarioTest):
         # Test DPS Certificate Lifecycle
         cert_name = self.create_random_name('certificate', 20)
         cert_name_verified = self.create_random_name(prefix='verified-certificate-', length=48)
+        chain_name = self.create_random_name(prefix='certificate-', length=48)
 
         # Set up cert file for test
-        verification_file = "verify.cer"
-        cert_file = "testcert.cer"
-        key_file = "testkey.pvk"
+        random_suffix = self.create_random_name(prefix='_', length=6)
+        verification_file = f"verify{random_suffix}.cer"
+        cert_file = f"testcert{random_suffix}.cer"
+        key_file = f"testkey{random_suffix}.pvk"
+        chain_file = f"testcert-chain{random_suffix}.pem"
         max_int = 9223372036854775807
         _create_test_cert(cert_file, key_file, self.create_random_name(prefix='TESTCERT', length=24), 3, random.randint(0, max_int))
+        _create_fake_chain_cert(cert_file, chain_file)
 
         # Create certificates
         self.cmd('az iot dps certificate create --dps-name {} -g {} --name {} -p {}'.format(dps_name, group_name, cert_name, cert_file),
@@ -188,16 +195,24 @@ class IoTDpsTest(ScenarioTest):
                             self.check('properties.isVerified', True)
         ]).get_output_in_json()['etag']
 
+        # Create certificate from a chain - test how certificate is encoded in the service call
+        self.cmd('az iot dps certificate create --dps-name {} -g {} --name {} -p {}'.format(dps_name, group_name, chain_name, chain_file),
+                 checks=[
+                     self.check('name', chain_name),
+                     self.check('properties.isVerified', False)
+        ])
+
         # Delete certificates
         self.cmd('az iot dps certificate delete --dps-name {} -g {} --name {} --etag {}'.format(dps_name, group_name, cert_name, etag))
         self.cmd('az iot dps certificate delete --dps-name {} -g {} --name {} --etag {}'.format(dps_name, group_name, cert_name_verified, etag_verified))
+        self.cmd('az iot dps certificate delete --dps-name {} -g {} --name {} --etag *'.format(dps_name, group_name, chain_name))
 
-        _delete_test_cert(cert_file, key_file, verification_file)
+        _delete_test_cert([cert_file, key_file, verification_file, chain_file])
 
         # Delete DPS
         self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dps_name))
 
-
+    @AllowLargeResponse(size_kb=4096)
     @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
     def test_dps_linked_hub_lifecycle(self, group_name, group_location):
         dps_name = self.create_random_name('dps', 20)
@@ -243,11 +258,6 @@ class IoTDpsTest(ScenarioTest):
         connection_string = self._show_hub_connection_string(hub_name, group_name)
         self.cmd('az iot dps linked-hub create --dps-name {} -g {} --connection-string {}'
                  .format(dps_name, group_name, connection_string))
-        self.cmd('az iot dps linked-hub delete --dps-name {} -g {} --linked-hub {}'.format(dps_name, group_name, hub_name))
-
-        # Create linked-hub using only connection string in lower case
-        self.cmd('az iot dps linked-hub create --dps-name {} -g {} --connection-string {}'
-                 .format(dps_name, group_name, connection_string.lower()))
         self.cmd('az iot dps linked-hub delete --dps-name {} -g {} --linked-hub {}'.format(dps_name, group_name, hub_name))
 
         # Create linked-hub using connection string and location

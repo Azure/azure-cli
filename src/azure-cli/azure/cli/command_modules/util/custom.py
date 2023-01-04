@@ -11,6 +11,7 @@ from knack.util import CLIError
 logger = get_logger(__name__)
 
 UPGRADE_MSG = 'Not able to upgrade automatically. Instructions can be found at https://aka.ms/doc/InstallAzureCli'
+SECRET_STORE_DEMO = "secret_store_demo"
 
 
 def rest_call(cmd, url, method=None, headers=None, uri_parameters=None,
@@ -321,3 +322,40 @@ def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
     logger.warning("This is a warning log entry.")
     logger.error("This is a error log entry.")
     logger.critical("This is a critical log entry.")
+
+
+def secret_store_save(cmd, key_value):
+    data = dict(kv.split('=', 1) for kv in key_value)
+    from azure.cli.core.util import get_secret_store
+    store = get_secret_store(cmd.cli_ctx, SECRET_STORE_DEMO)
+    store.save(data)
+    logger.warning("Data written to %s: %s",
+                   store._persistence.get_location(), data)  # pylint: disable=protected-access
+
+
+def secret_store_load(cmd):
+    from azure.cli.core.util import get_secret_store
+    store = get_secret_store(cmd.cli_ctx, SECRET_STORE_DEMO)
+    return store.load()
+
+
+def byo_access_token(cmd, access_token, subscription_id):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    credential = AccessTokenCredential(access_token)
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                     subscription_id=subscription_id, credential=credential)
+    return client.resource_groups.list()
+
+
+class AccessTokenCredential:  # pylint: disable=too-few-public-methods
+    """Simple access token authentication. Return the access token as-is.
+    """
+    def __init__(self, access_token):
+        self.access_token = access_token
+
+    def get_token(self, *scopes, **kwargs):  # pylint: disable=unused-argument
+        import time
+        from azure.cli.core.auth.util import AccessToken
+        # Assume the access token expires in 1 year / 31536000 seconds
+        return AccessToken(self.access_token, int(time.time()) + 31536000)

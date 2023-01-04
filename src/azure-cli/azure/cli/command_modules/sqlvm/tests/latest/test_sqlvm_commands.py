@@ -3,31 +3,25 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import time
-import os
-import unittest
-
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-
-from azure.cli.core.util import CLIError
+import string
+from azure.cli.core.azclierror import (
+    RequiredArgumentMissingError
+)
 from azure.cli.core.mock import DummyCli
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.exceptions import CliTestError
 from azure.cli.testsdk import (
     JMESPathCheck,
     JMESPathCheckExists,
-    JMESPathCheckGreaterThan,
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest,
     StorageAccountPreparer,
-    LiveScenarioTest,
-    record_only)
+    LogAnalyticsWorkspacePreparer)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
-from datetime import datetime, timedelta
-from time import sleep
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 # Constants
@@ -35,7 +29,6 @@ sqlvm_name_prefix = 'clisqlvm'
 sqlvm_domain_prefix = 'domainvm'
 sqlvm_group_prefix = 'sqlgroup'
 sqlvm_max_length = 15
-
 
 class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=sqlvm_name_prefix, location='westus',
@@ -51,7 +44,7 @@ class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
-        template = ('az vm create -l {} -g {} -n {} --admin-username {} --admin-password {} --image MicrosoftSQLServer:SQL2017-WS2016:Enterprise:latest'
+        template = ('az vm create -l {} -g {} -n {} --admin-username {} --admin-password {} --image microsoftsqlserver:sql2019-ws2022:enterprise:latest'
                     ' --size Standard_DS2_v2 --nsg-rule NONE')
         execute(DummyCli(), template.format(self.location, group, name, self.vm_user, self.vm_password))
         return {self.parameter_name: name}
@@ -70,10 +63,7 @@ class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
 
-
 class DomainPreparer(AbstractPreparer, SingleValueReplacer):
-    import string
-
     def __init__(self, name_prefix=sqlvm_domain_prefix, location='westus',
                  vm_user='admin123', vm_password='SecretPassword123', parameter_name='domainvm',
                  resource_group_parameter_name='resource_group', skip_delete=True):
@@ -86,8 +76,11 @@ class DomainPreparer(AbstractPreparer, SingleValueReplacer):
         self.skip_delete = skip_delete
 
     def id_generator(self, size=6, chars=string.ascii_lowercase + string.digits):
+        '''
+        dns name must conform to the following regular expression: ^[a-z][a-z0-9-]{1,61}[a-z0-9]$.'}
+        '''
         import random
-        return ''.join(random.choice(chars) for _ in range(size))
+        return random.choice(string.ascii_lowercase) + ''.join(random.choice(chars) for _ in range(size))
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
@@ -116,10 +109,76 @@ class DomainPreparer(AbstractPreparer, SingleValueReplacer):
 
 
 class SqlVmScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    @ResourceGroupPreparer()
+    @SqlVirtualMachinePreparer()
+    @LogAnalyticsWorkspacePreparer(location="westus")
+    def test_sqlvm_mgmt_assessment(self, resource_group, resource_group_location, sqlvm, laworkspace):
+        
+        # create sqlvm1 with minimal required parameters
+        self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type {}'
+                 .format(sqlvm, resource_group, resource_group_location, 'PAYG', 'Full'),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded"),
+                     JMESPathCheck('sqlServerLicenseType', 'PAYG')
+                 ])
+
+        # test assessment schedule enabling succeeds
+        with self.assertRaisesRegex(RequiredArgumentMissingError, "Assessment requires a Log Analytics workspace and Log Analytics extension on VM"):
+            self.cmd('sql vm update -n {} -g {} --assessment-weekly-interval {} --assessment-day-of-week {} --assessment-start-time-local {} '
+                 .format(sqlvm, resource_group, 1, 'Monday', '20:30'))
+
+        # test assessment schedule enabling succeeds
+        self.cmd('sql vm update -n {} -g {} --assessment-weekly-interval {} --assessment-day-of-week {} --assessment-start-time-local {} '
+                 '--workspace-rg {} --workspace-name {}'
+                 .format(sqlvm, resource_group, 1, 'Monday', '20:30', resource_group, laworkspace),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded")
+                 ])
+
+        # verify assessment settings were processed
+        expand_all = self.cmd('sql vm show -n {} -g {} --expand {}'
+                              .format(sqlvm, resource_group, 'AssessmentSettings')
+                              ).get_output_in_json()
+        assessment_settings = expand_all['assessmentSettings']
+        self.assertTrue(assessment_settings['enable'])
+        self.assertTrue(assessment_settings['schedule']['enable'])
+        self.assertEqual(1, assessment_settings['schedule']['weeklyInterval'])
+        self.assertEqual("Monday", assessment_settings['schedule']['dayOfWeek'])
+        self.assertEqual("20:30", assessment_settings['schedule']['startTimeLocal'])
+
+        # test start-assessment succeeds
+        self.cmd('sql vm start-assessment -n {} -g {}'
+                 .format(sqlvm, resource_group))
+
+        # verify start-assessment succeeded
+        self.cmd('sql vm show -n {} -g {}'
+                 .format(sqlvm, resource_group),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded")
+                 ])
+
+        # test assessment disabling succeeds
+        self.cmd('sql vm update -n {} -g {} --enable-assessment {}'
+                 .format(sqlvm, resource_group, False),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded")
+                 ])
+
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @SqlVirtualMachinePreparer()
     @StorageAccountPreparer()
-    def test_sqlvm_mgmt(self, resource_group, resource_group_location, sqlvm, storage_account):
+    def test_sqlvm_mgmt(self, resource_group, sqlvm, storage_account):
 
         loc = 'westus'
         self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account, resource_group))
@@ -131,9 +190,14 @@ class SqlVmScenarioTest(ScenarioTest):
                        .format(storage_account, resource_group)).get_output_in_json()
 
         # Assert customer cannot create a SQL vm with no agent and do not provide offer and sku
-        with self.assertRaisesRegex(CLIError, "usage error: --sql-mgmt-type NoAgent --image-sku NAME --image-offer NAME"):
+        with self.assertRaisesRegex(RequiredArgumentMissingError, "usage error: --sql-mgmt-type NoAgent --image-sku NAME --image-offer NAME"):
             self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type {}'
                      .format(sqlvm, resource_group, loc, 'PAYG', 'NoAgent'))
+
+        # Assert customer cannot create a SQL vm with least privilege and LightWeight mode
+        with self.assertRaisesRegex(RequiredArgumentMissingError, "usage error: --least-privilege-mode Enabled --sql-mgmt-type Full"):
+            self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --least-privilege-mode {}'
+                     .format(sqlvm, resource_group, loc, 'PAYG', 'Enabled'))
 
         # test create sqlvm with minimal required parameters
         sqlvm_1 = self.cmd('sql vm create -n {} -g {} -l {} --license-type {}'
@@ -167,7 +231,7 @@ class SqlVmScenarioTest(ScenarioTest):
                  ])
 
         # test update sqlvm with management mode to make sure it updates to full.
-        self.cmd('sql vm update -n {} -g {} --sql-mgmt-type {} --yes'
+        self.cmd('sql vm update -n {} -g {} --sql-mgmt-type {}'
                  .format(sqlvm, resource_group, 'Full'),
                  checks=[
                      JMESPathCheck('name', sqlvm),
@@ -175,10 +239,29 @@ class SqlVmScenarioTest(ScenarioTest):
                      JMESPathCheck('sqlManagement', 'Full')
                  ]).get_output_in_json()
 
+        # test least privilege mode - Note LPM won't change result
+        self.cmd('sql vm update -n {} -g {} --sql-mgmt-type {} --least-privilege-mode {}'
+                 .format(sqlvm, resource_group, 'Full', 'Enabled'),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('location', loc),
+                     JMESPathCheck('sqlManagement', 'Full')
+                 ]).get_output_in_json()
+
+        # test show of vm after enabling Least privilege mode
+        self.cmd('sql vm show -n {} -g {}'
+                 .format(sqlvm, resource_group),
+                 checks=[
+                     JMESPathCheck('name', sqlvm),
+                     JMESPathCheck('sqlManagement', 'Full'),
+                     JMESPathCheck('leastPrivilegeMode', "Enabled")
+                 ])
+
         # test expand parameter: * - all settings exist
         expand_all = self.cmd('sql vm show -n {} -g {} --expand {}'
                               .format(sqlvm, resource_group, '*')
                               ).get_output_in_json()
+        assert 'assessmentSettings' in expand_all
         assert 'autoBackupSettings' in expand_all
         assert 'autoPatchingSettings' in expand_all
         assert 'keyVaultCredentialSettings' in expand_all
@@ -188,6 +271,7 @@ class SqlVmScenarioTest(ScenarioTest):
         expand_one = self.cmd('sql vm show -n {} -g {} --expand {}'
                               .format(sqlvm, resource_group, 'AutoBackupSettings')
                               ).get_output_in_json()
+        assert 'assessmentSettings' not in expand_one
         assert 'autoBackupSettings' in expand_one
         assert 'autoPatchingSettings' not in expand_one
         assert 'keyVaultCredentialSettings' not in expand_one
@@ -197,6 +281,7 @@ class SqlVmScenarioTest(ScenarioTest):
         expand_comma = self.cmd('sql vm show -n {} -g {} --expand {}'
                                 .format(sqlvm, resource_group, 'AutoPatchingSettings AutoBackupSettings')
                                 ).get_output_in_json()
+        assert 'assessmentSettings' not in expand_comma
         assert 'autoBackupSettings' in expand_comma
         assert 'autoPatchingSettings' in expand_comma
         assert 'keyVaultCredentialSettings' not in expand_comma
@@ -206,6 +291,7 @@ class SqlVmScenarioTest(ScenarioTest):
         expand_comma_all = self.cmd('sql vm show -n {} -g {} --expand {}'
                                     .format(sqlvm, resource_group, 'AutoPatchingSettings * AutoBackupSettings')
                                     ).get_output_in_json()
+        assert 'assessmentSettings' in expand_comma_all
         assert 'autoBackupSettings' in expand_comma_all
         assert 'autoPatchingSettings' in expand_comma_all
         assert 'keyVaultCredentialSettings' in expand_comma_all
@@ -271,6 +357,8 @@ class SqlVmScenarioTest(ScenarioTest):
         # test list sql vm should be empty
         self.cmd('sql vm list -g {}'.format(resource_group), checks=[NoneCheck()])
 
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='sqlvm_cli_test_create')
     @SqlVirtualMachinePreparer(parameter_name='sqlvm1')
     @SqlVirtualMachinePreparer(parameter_name='sqlvm2')
@@ -288,14 +376,15 @@ class SqlVmScenarioTest(ScenarioTest):
                      JMESPathCheck('sqlServerLicenseType', 'PAYG')
                  ])
 
-        # test create sqlvm2 with AHUB changes inmediately
-        self.cmd('sql vm create -n {} -g {} -l {} --license-type {}'
-                 .format(sqlvm2, resource_group, resource_group_location, 'AHUB'),
+        # test create sqlvm2 with AHUB changes inmediately and least privilege mode
+        self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --least-privilege-mode {} --sql-mgmt-type {}'
+                 .format(sqlvm2, resource_group, resource_group_location, 'AHUB', 'Enabled', 'Full'),
                  checks=[
                      JMESPathCheck('name', sqlvm2),
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('provisioningState', "Succeeded"),
-                     JMESPathCheck('sqlServerLicenseType', 'AHUB')
+                     JMESPathCheck('sqlServerLicenseType', 'AHUB'),
+                     JMESPathCheck('leastPrivilegeMode', 'Enabled'),
                  ])
 
         # test create sqlvm with sql connectivity settings
@@ -367,6 +456,8 @@ class SqlVmScenarioTest(ScenarioTest):
                      JMESPathCheck('sqlManagement', 'Full')
                  ])
 
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='sqlvm_cli_test_license')
     @SqlVirtualMachinePreparer(parameter_name='sqlvm1')
     def test_sqlvm_update_license_and_sku(self, resource_group, resource_group_location, sqlvm1):
@@ -465,6 +556,7 @@ class SqlVmGroupScenarioTest(ScenarioTest):
     def test_sqlvm_group_mgmt(self, resource_group, resource_group_location, storage_account1, storage_account2):
 
         name = 'sqlvmgroup'
+        name_two = 'sqlvmgrouptwo'
         image_offer = 'SQL2017-WS2016'
         image_sku = 'Enterprise'
         domain = 'domain.com'
@@ -493,8 +585,18 @@ class SqlVmGroupScenarioTest(ScenarioTest):
                                   JMESPathCheck('provisioningState', "Succeeded")
                               ]).get_output_in_json()
 
+        # create sql vm group with multi subnet
+        sqlvmgrouptwo = self.cmd('sql vm group create -n {} -g {} -l {} -i {} -s {} -f {} -p {} -k {} -e {} -u {} --cluster-subnet-type MultiSubnet'
+                              .format(name_two, resource_group, resource_group_location, image_offer, image_sku,
+                                      domain, operator_acc, key_1[0]['value'], sql_service_acc, sa_1['primaryEndpoints']['blob']),
+                              checks=[
+                                  JMESPathCheck('name', name_two),
+                                  JMESPathCheck('location', resource_group_location),
+                                  JMESPathCheck('provisioningState', "Succeeded")
+                              ]).get_output_in_json()
+
         # test list sqlvm should be 1
-        self.cmd('sql vm group list -g {}'.format(resource_group), checks=[JMESPathCheck('length(@)', 1)])
+        self.cmd('sql vm group list -g {}'.format(resource_group), checks=[JMESPathCheck('length(@)', 2)])
 
         # test show of the group
         self.cmd('sql vm group show -n {} -g {}'
@@ -535,9 +637,14 @@ class SqlVmGroupScenarioTest(ScenarioTest):
                      JMESPathCheck('wsfcDomainProfile.clusterOperatorAccount', 'my' + operator_acc)
                  ])
 
-        # test delete vm
+        # test delete group
         self.cmd('sql vm group delete -n {} -g {} --yes'
                  .format(name, resource_group),
+                 checks=NoneCheck())
+
+        # test delete group
+        self.cmd('sql vm group delete -n {} -g {} --yes'
+                 .format(name_two, resource_group),
                  checks=NoneCheck())
 
         # test list sql vm should be empty
@@ -546,8 +653,9 @@ class SqlVmGroupScenarioTest(ScenarioTest):
 
 class SqlVmAndGroupScenarioTest(ScenarioTest):
     """
-    This is a very lengthy test, it may take more than 45 minutes to run.
+    This is a very lengthy test, it may take more than 45 minutes to run. For now this test is failing, leaving it commented to prevent failures
     """
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @DomainPreparer()
     @SqlVirtualMachinePreparer(parameter_name='sqlvm1')
@@ -578,7 +686,7 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
                        .format(storage_account, resource_group)).get_output_in_json()
 
         sqlvmgroup = self.cmd('sql vm group create -n {} -g {} -l {} -i {} -s {} -f {} -p {} -k {} -e {} -u {} --bootstrap-acc {}'
-                              .format('cligroup', resource_group, resource_group_location, 'SQL2017-WS2016', 'Enterprise',
+                              .format('cligroup', resource_group, resource_group_location, 'sql2019-ws2022', 'enterprise',
                                       'domain.com', 'admin123', key[0]['value'], 'admin123', sa['primaryEndpoints']['blob'], 'admin123')).get_output_in_json()
 
         # test create sqlvm1

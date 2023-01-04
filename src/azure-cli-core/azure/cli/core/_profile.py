@@ -5,7 +5,6 @@
 
 import os
 import os.path
-import sys
 from copy import deepcopy
 from enum import Enum
 
@@ -676,8 +675,19 @@ class Profile:
     def get_installation_id(self):
         installation_id = self._storage.get(_INSTALLATION_ID)
         if not installation_id:
-            import uuid
-            installation_id = str(uuid.uuid1())
+            try:
+                # We share the same installationId with Azure Powershell. So try to load installationId from PSH file
+                # Contact: DEV@Nanxiang Liu, PM@Damien Caro
+                shared_installation_id_file = os.path.join(self.cli_ctx.config.config_dir,
+                                                           'AzureRmContextSettings.json')
+                with open(shared_installation_id_file, 'r', encoding='utf-8-sig') as f:
+                    import json
+                    content = json.load(f)
+                    installation_id = content['Settings']['InstallationId']
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.debug('Failed to load installationId from AzureRmSurvey.json. %s', str(ex))
+                import uuid
+                installation_id = str(uuid.uuid1())
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
 
@@ -756,7 +766,7 @@ class SubscriptionFinder:
                     # The tenant requires MFA and can't be accessed with home tenant's refresh token
                     mfa_tenants.append(t)
                 else:
-                    logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
+                    logger.warning("Failed to authenticate %s due to error '%s'", t.tenant_id_name, ex)
                 continue
 
             if not subscriptions:
@@ -840,15 +850,16 @@ def _transform_subscription_for_multiapi(s, s_dict):
 def _create_identity_instance(cli_ctx, *args, **kwargs):
     """Lazily import and create Identity instance to avoid unnecessary imports."""
     from .auth.identity import Identity
-
-    # Only enable encryption for Windows (for now).
-    fallback = sys.platform.startswith('win32')
-
-    # EXPERIMENTAL: Use core.encrypt_token_cache=False to turn off token cache encryption.
-    # encrypt_token_cache affects both MSAL token cache and service principal entries.
-    encrypt = cli_ctx.config.getboolean('core', 'encrypt_token_cache', fallback=fallback)
+    from .util import should_encrypt_token_cache
+    encrypt = should_encrypt_token_cache(cli_ctx)
 
     # EXPERIMENTAL: Use core.use_msal_http_cache=False to turn off MSAL HTTP cache.
     use_msal_http_cache = cli_ctx.config.getboolean('core', 'use_msal_http_cache', fallback=True)
 
-    return Identity(*args, encrypt=encrypt, use_msal_http_cache=use_msal_http_cache, **kwargs)
+    # PREVIEW: On Windows, use core.allow_broker=true to use broker (WAM) for authentication.
+    allow_broker = cli_ctx.config.getboolean('core', 'allow_broker', fallback=False)
+    from .telemetry import set_broker_info
+    set_broker_info(allow_broker=allow_broker)
+
+    return Identity(*args, encrypt=encrypt, use_msal_http_cache=use_msal_http_cache, allow_broker=allow_broker,
+                    **kwargs)

@@ -11,7 +11,6 @@ import math
 import os
 import re
 import struct
-import sys
 import time
 import uuid
 from ipaddress import ip_network
@@ -28,15 +27,12 @@ from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumen
     MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
 from azure.cli.core.util import sdk_no_wait
-from azure.graphrbac.models import GraphErrorException
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa, ec
 from cryptography.hazmat.primitives.serialization import load_pem_private_key, Encoding, PublicFormat
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.x509 import load_pem_x509_certificate
-
-from msrestazure.azure_exceptions import CloudError
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -307,18 +303,13 @@ def list_vault(client, resource_group_name=None):
     return list(vault_list)
 
 
-# pylint: disable=inconsistent-return-statements
 def _get_current_user_object_id(graph_client):
-    try:
-        current_user = graph_client.signed_in_user.get()
-        if current_user and current_user.object_id:  # pylint:disable=no-member
-            return current_user.object_id  # pylint:disable=no-member
-    except CloudError:
-        pass
+    current_user = graph_client.signed_in_user_get()
+    return current_user['id']
 
 
 def _get_object_id_by_spn(graph_client, spn):
-    accounts = list(graph_client.service_principals.list(
+    accounts = list(graph_client.service_principal_list(
         filter="servicePrincipalNames/any(c:c eq '{}')".format(spn)))
     if not accounts:
         logger.warning("Unable to find user with spn '%s'", spn)
@@ -327,11 +318,11 @@ def _get_object_id_by_spn(graph_client, spn):
         logger.warning("Multiple service principals found with spn '%s'. "
                        "You can avoid this by specifying object id.", spn)
         return None
-    return accounts[0].object_id
+    return accounts[0]['id']
 
 
 def _get_object_id_by_upn(graph_client, upn):
-    accounts = list(graph_client.users.list(filter="userPrincipalName eq '{}'".format(upn)))
+    accounts = list(graph_client.user_list(filter="userPrincipalName eq '{}'".format(upn)))
     if not accounts:
         logger.warning("Unable to find user with upn '%s'", upn)
         return None
@@ -339,7 +330,7 @@ def _get_object_id_by_upn(graph_client, upn):
         logger.warning("Multiple users principals found with upn '%s'. "
                        "You can avoid this by specifying object id.", upn)
         return None
-    return accounts[0].object_id
+    return accounts[0]['id']
 
 
 def _get_object_id_from_subscription(graph_client, subscription):
@@ -526,7 +517,6 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                         enabled_for_disk_encryption=None,
                         enabled_for_template_deployment=None,
                         enable_rbac_authorization=None,
-                        enable_soft_delete=None,
                         enable_purge_protection=None,
                         retention_days=None,
                         network_acls=None,
@@ -550,7 +540,6 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                             enabled_for_disk_encryption=enabled_for_disk_encryption,
                             enabled_for_template_deployment=enabled_for_template_deployment,
                             enable_rbac_authorization=enable_rbac_authorization,
-                            enable_soft_delete=enable_soft_delete,
                             enable_purge_protection=enable_purge_protection,
                             retention_days=retention_days,
                             network_acls=network_acls,
@@ -643,7 +632,6 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                  enabled_for_disk_encryption=None,
                  enabled_for_template_deployment=None,
                  enable_rbac_authorization=None,
-                 enable_soft_delete=None,
                  enable_purge_protection=None,
                  retention_days=None,
                  network_acls=None,
@@ -665,7 +653,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
         # just continue the normal creation process
         pass
     from azure.cli.core._profile import Profile
-    from azure.graphrbac import GraphRbacManagementClient
+    from azure.cli.command_modules.role import graph_client_factory, GraphError
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
@@ -679,13 +667,10 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
     VaultProperties = cmd.get_models('VaultProperties', resource_type=ResourceType.MGMT_KEYVAULT)
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    cred, _, tenant_id = profile.get_login_credentials(
+    _, _, tenant_id = profile.get_login_credentials(
         resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
 
-    graph_client = GraphRbacManagementClient(
-        cred,
-        tenant_id,
-        base_url=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+    graph_client = graph_client_factory(cmd.cli_ctx)
     subscription = profile.get_subscription()
 
     # if bypass or default_action was specified create a NetworkRuleSet
@@ -751,7 +736,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
 
         try:
             object_id = _get_current_user_object_id(graph_client)
-        except GraphErrorException:
+        except GraphError:
             object_id = _get_object_id(graph_client, subscription=subscription)
         if not object_id:
             raise CLIError('Cannot create vault.\nUnable to query active directory for information '
@@ -764,11 +749,6 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
     if not sku:
         sku = 'standard'
 
-    if enable_soft_delete is False:  # ignore '--enable-soft-delete false'
-        enable_soft_delete = True
-        print('"--enable-soft-delete false" has been deprecated, you cannot disable Soft Delete via CLI. '
-              'The value will be changed to true.', file=sys.stderr)
-
     properties = VaultProperties(tenant_id=tenant_id,
                                  sku=Sku(name=sku, family='A'),
                                  access_policies=access_policies,
@@ -777,7 +757,6 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                                  enabled_for_disk_encryption=enabled_for_disk_encryption,
                                  enabled_for_template_deployment=enabled_for_template_deployment,
                                  enable_rbac_authorization=enable_rbac_authorization,
-                                 enable_soft_delete=enable_soft_delete,
                                  enable_purge_protection=enable_purge_protection,
                                  soft_delete_retention_in_days=int(retention_days),
                                  public_network_access=public_network_access)
@@ -828,7 +807,6 @@ def update_vault(cmd, instance,
                  enabled_for_disk_encryption=None,
                  enabled_for_template_deployment=None,
                  enable_rbac_authorization=None,
-                 enable_soft_delete=None,
                  enable_purge_protection=None,
                  retention_days=None,
                  bypass=None,
@@ -845,13 +823,6 @@ def update_vault(cmd, instance,
 
     if enable_rbac_authorization is not None:
         instance.properties.enable_rbac_authorization = enable_rbac_authorization
-
-    if enable_soft_delete is not None:
-        if enable_soft_delete is False:  # ignore '--enable-soft-delete false'
-            enable_soft_delete = True
-            print('"--enable-soft-delete false" has been deprecated, you cannot disable Soft Delete via CLI. '
-                  'The value will be changed to true.', file=sys.stderr)
-        instance.properties.enable_soft_delete = enable_soft_delete
 
     if enable_purge_protection is not None:
         instance.properties.enable_purge_protection = enable_purge_protection
@@ -899,15 +870,9 @@ def update_hsm(cmd, instance,
 
 def _object_id_args_helper(cli_ctx, object_id, spn, upn):
     if not object_id:
-        from azure.cli.core._profile import Profile
-        from azure.graphrbac import GraphRbacManagementClient
+        from azure.cli.command_modules.role import graph_client_factory
 
-        profile = Profile(cli_ctx=cli_ctx)
-        cred, _, tenant_id = profile.get_login_credentials(
-            resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-        graph_client = GraphRbacManagementClient(cred,
-                                                 tenant_id,
-                                                 base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+        graph_client = graph_client_factory(cli_ctx)
         object_id = _get_object_id(graph_client, spn=spn, upn=upn)
         if not object_id:
             raise CLIError('Unable to get object id from principal name.')
@@ -1998,15 +1963,22 @@ def _get_role_dics(role_defs):
 def _get_principal_dics(cli_ctx, role_assignments):
     principal_ids = {i.principal_id for i in role_assignments if getattr(i, 'principal_id', None)}
     if principal_ids:
+        from azure.cli.command_modules.role import graph_client_factory, GraphError
         try:
-            from azure.cli.command_modules.role._client_factory import _graph_client_factory
-            from azure.cli.command_modules.role.custom import _get_displayable_name, _get_object_stubs
+            from azure.cli.command_modules.role.custom import (_get_displayable_name, _get_object_stubs,
+                                                               _odata_type_to_arm_principal_type)
 
-            graph_client = _graph_client_factory(cli_ctx)
+            graph_client = graph_client_factory(cli_ctx)
             principals = _get_object_stubs(graph_client, principal_ids)
-            return {i.object_id: (_get_displayable_name(i), i.object_type) for i in principals}
 
-        except (CloudError, GraphErrorException) as ex:
+            results = {}
+            for i in principals:
+                object_id = i['id']
+                display_name = _get_displayable_name(i)
+                principal_type = _odata_type_to_arm_principal_type(i['@odata.type'])
+                results[object_id] = (display_name, principal_type)
+            return results
+        except GraphError as ex:
             # failure on resolving principal due to graph permission should not fail the whole thing
             logger.info("Failed to resolve graph object information per error '%s'", ex)
 
@@ -2040,6 +2012,11 @@ def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
     return ret
 
 
+# for injecting test seems to produce predictable role assignment id for playback
+def _gen_guid():
+    return uuid.uuid4()
+
+
 # pylint: disable=unused-argument
 def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
                            role_assignment_name=None, assignee=None,
@@ -2062,7 +2039,7 @@ def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
                        'to check whether the role is existing.'.format(role))
 
     if role_assignment_name is None:
-        role_assignment_name = str(uuid.uuid4())
+        role_assignment_name = str(_gen_guid())
 
     if scope is None:
         scope = ''
@@ -2426,6 +2403,8 @@ def _security_domain_gen_share_arrays(sd_wrapping_keys, passwords, shared_keys, 
         with open(private_key_path, 'rb') as f:
             pem_data = f.read()
             password = passwords[private_key_index] if private_key_index < len(passwords) else None
+            if password and not isinstance(password, bytes):
+                password = password.encode(encoding="utf-8")
             private_key = load_pem_private_key(pem_data, password=password, backend=default_backend())
 
         with open(cert_path, 'rb') as f:
@@ -2612,4 +2591,10 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
         return polling_ret
 
     _save_to_local_file(security_domain_file, ret)
+
+
+def check_name_availability(cmd, client, name, resource_type='hsm'):
+    CheckNameAvailabilityParameters = cmd.get_models('CheckMhsmNameAvailabilityParameters')
+    check_name = CheckNameAvailabilityParameters(name=name)
+    return client.check_mhsm_name_availability(check_name)
 # endregion

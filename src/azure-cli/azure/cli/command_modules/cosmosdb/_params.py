@@ -23,7 +23,12 @@ from azure.cli.command_modules.cosmosdb._validators import (
     validate_gossip_certificates,
     validate_client_certificates,
     validate_seednodes,
-    validate_node_count)
+    validate_node_count,
+    validate_client_encryption_policy,
+    validate_mongo_role_definition_body,
+    validate_mongo_role_definition_id,
+    validate_mongo_user_definition_body,
+    validate_mongo_user_definition_id)
 
 from azure.cli.command_modules.cosmosdb.actions import (
     CreateLocation, CreateDatabaseRestoreResource, UtcDatetimeAction, InvokeCommandArgumentsAddAction)
@@ -37,6 +42,9 @@ SQL_GREMLIN_INDEXING_POLICY_EXAMPLE = """--idx "{\\"indexingMode\\": \\"consiste
 SQL_UNIQUE_KEY_POLICY_EXAMPLE = """--unique-key-policy "{\\"uniqueKeys\\": [{\\"paths\\": [\\"/path/to/key1\\"]}, {\\"paths\\": [\\"/path/to/key2\\"]}]}"
 """
 
+SQL_CLIENT_ENCRYPTION_POLICY_EXAMPLE = """--cep "{\\"includedPaths\\": [{\\"path\\": \\"/path1\\",\\"clientEncryptionKeyId\\": \\"key1\\",\\"encryptionAlgorithm\\": \\"AEAD_AES_256_CBC_HMAC_SHA256\\",\\"encryptionType\\": \\"Deterministic\\"}],\\"policyFormatVersion\\": 2}"
+"""
+
 SQL_GREMLIN_CONFLICT_RESOLUTION_POLICY_EXAMPLE = """--conflict-resolution-policy "{\\"mode\\": \\"lastWriterWins\\", \\"conflictResolutionPath\\": \\"/path\\"}"
 """
 
@@ -47,6 +55,12 @@ CASSANDRA_SCHEMA_EXAMPLE = """--schema "{\\"columns\\": [{\\"name\\": \\"columnA
 """
 
 SQL_ROLE_DEFINITION_EXAMPLE = """--body "{ \\"Id\\": \\"be79875a-2cc4-40d5-8958-566017875b39\\", \\"RoleName\\": \\"My Read Write Role\\", \\"Type\\": \\"CustomRole\\", \\"AssignableScopes\\": [ \\"/\\" ], \\"DataActions\\": [ \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/create\\", \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/read\\" ]}"
+"""
+
+MONGO_ROLE_DEFINITION_EXAMPLE = """--body "{\\"Id\\": \\"be79875a-2cc4-40d5-8958-566017875b39\\",\\"RoleName\\": \\"MyRWRole\\",\\"Type\\": \\"CustomRole\\"\\"DatabaseName\\": \\"MyDb\\",\\"Privileges\\": [ {\\"Resource\\": {\\"Db\\": \\"MyDB\\",\\"Collection\\": \\"MyCol\\"},\\"Actions\\": [\\"insert\\",\\"find\\"]}],\\"Roles\\": [ {\\"Role\\": \\"myInheritedRole\\",\\"Db\\": \\"MyTestDb\\"}]}"
+"""
+
+MONGO_USER_DEFINITION_EXAMPLE = """--body "{\\"Id\\": \\"be79875a-2cc4-40d5-8958-566017875b39\\",\\"UserName\\": \\"MyUserName\\",\\"Password\\": \\"MyPass\\",\\"CustomData\\": \\"MyCustomData\\",\\"Mechanisms\\": \\"SCRAM-SHA-256\\"\\"DatabaseName\\": \\"MyDb\\",\\"Roles\\": [ {\\"Role\\": \\"myReadRole\\",\\"Db\\": \\"MyDb\\"}]}"
 """
 
 
@@ -96,8 +110,8 @@ def load_arguments(self, _):
             c.argument('backup_interval', type=int, help="the frequency(in minutes) with which backups are taken (only for accounts with periodic mode backups)", arg_group='Backup Policy')
             c.argument('backup_retention', type=int, help="the time(in hours) for which each backup is retained (only for accounts with periodic mode backups)", arg_group='Backup Policy')
             c.argument('backup_redundancy', arg_type=get_enum_type(BackupStorageRedundancy), help="The redundancy type of the backup Storage account", arg_group='Backup Policy')
-            c.argument('server_version', arg_type=get_enum_type(ServerVersion), help="Valid only for MongoDB accounts.", is_preview=True)
-            c.argument('default_identity', help="The primary identity to access key vault in CMK related features. e.g. 'FirstPartyIdentity', 'SystemAssignedIdentity' and more.", is_preview=True)
+            c.argument('server_version', arg_type=get_enum_type(ServerVersion), help="Valid only for MongoDB accounts.")
+            c.argument('default_identity', help="The primary identity to access key vault in CMK related features. e.g. 'FirstPartyIdentity', 'SystemAssignedIdentity' and more. User-assigned identities are specified in format 'UserAssignedIdentity=<resource ID of the user-assigned identity>'.", is_preview=True)
             c.argument('analytical_storage_schema_type', options_list=['--analytical-storage-schema-type', '--as-schema'], arg_type=get_enum_type(AnalyticalStorageSchemaType), help="Schema type for analytical storage.", arg_group='Analytical Storage Configuration')
             c.argument('backup_policy_type', arg_type=get_enum_type(BackupPolicyType), help="The type of backup policy of the account to create", arg_group='Backup Policy')
 
@@ -129,6 +143,7 @@ def load_arguments(self, _):
         c.argument('collection_id', options_list=['--collection-name', '-c'], help='Collection Name')
         c.argument('throughput', type=int, help='Offer Throughput (RU/s)')
         c.argument('partition_key_path', help='Partition Key Path, e.g., \'/properties/name\'')
+        c.argument('client_encryption_policy', options_list=['--cep'], type=shell_safe_json_parse, completer=FilesCompleter(), validator=validate_client_encryption_policy, help='Client Encryption Policy, you can enter it as a string or as a file, e.g., --cep @policy-file.json or ' + SQL_CLIENT_ENCRYPTION_POLICY_EXAMPLE)
         c.argument('indexing_policy', type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --indexing-policy @policy-file.json)')
         c.argument('default_ttl', type=int, help='Default TTL. Provide 0 to disable.')
 
@@ -182,6 +197,7 @@ def load_arguments(self, _):
         c.argument('partition_key_version', type=int, options_list=['--partition-key-version'], help='The version of partition key.')
         c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL. If the value is missing or set to "-1", items don’t expire. If the value is set to "n", items will expire "n" seconds after last modified time.')
         c.argument('indexing_policy', options_list=['--idx'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --idx @policy-file.json or ' + SQL_GREMLIN_INDEXING_POLICY_EXAMPLE)
+        c.argument('client_encryption_policy', options_list=['--cep'], type=shell_safe_json_parse, completer=FilesCompleter(), validator=validate_client_encryption_policy, help='Client Encryption Policy, you can enter it as a string or as a file, e.g., --cep @policy-file.json or ' + SQL_CLIENT_ENCRYPTION_POLICY_EXAMPLE)
         c.argument('unique_key_policy', options_list=['--unique-key-policy', '-u'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Unique Key Policy, you can enter it as a string or as a file, e.g., --unique-key-policy @policy-file.json or ' + SQL_UNIQUE_KEY_POLICY_EXAMPLE)
         c.argument('conflict_resolution_policy', options_list=['--conflict-resolution-policy', '-c'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Conflict Resolution Policy, you can enter it as a string or as a file, e.g., --conflict-resolution-policy @policy-file.json or ' + SQL_GREMLIN_CONFLICT_RESOLUTION_POLICY_EXAMPLE)
         c.argument('max_throughput', max_throughput_type)
@@ -265,6 +281,7 @@ def load_arguments(self, _):
         c.argument('conflict_resolution_policy', options_list=['--conflict-resolution-policy', '-c'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Conflict Resolution Policy, you can enter it as a string or as a file, e.g., --conflict-resolution-policy @policy-file.json or ' + SQL_GREMLIN_CONFLICT_RESOLUTION_POLICY_EXAMPLE)
         c.argument('max_throughput', max_throughput_type)
         c.argument('throughput', help='The throughput of Gremlin graph (RU/s). Default value is 400. Omit this parameter if the database has shared throughput unless the graph should have dedicated throughput.')
+        c.argument('analytical_storage_ttl', type=int, help='Analytical TTL, when analytical storage is enabled.')
 
 # Table
     with self.argument_context('cosmosdb table') as c:
@@ -363,6 +380,18 @@ def load_arguments(self, _):
         c.argument('restore_timestamp', options_list=['--restore-timestamp', '-t'], action=UtcDatetimeAction, help="The timestamp to which the account has to be restored to.")
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help="The location of the source account from which restore is triggered. This will also be the write region of the restored account")
         c.argument('databases_to_restore', nargs='+', action=CreateDatabaseRestoreResource)
+
+    # Mongo role definition
+    with self.argument_context('cosmosdb mongodb role definition') as c:
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('mongo_role_definition_id', options_list=['--id', '-i'], validator=validate_mongo_role_definition_id, help="Unique ID for the Mongo Role Definition.")
+        c.argument('mongo_role_definition_body', options_list=['--body', '-b'], validator=validate_mongo_role_definition_body, completer=FilesCompleter(), help="Role Definition body with Id (Optional for create), Type (Default is CustomRole), DatabaseName, Privileges, Roles.  You can enter it as a string or as a file, e.g., --body @mongo-role_definition-body-file.json or " + MONGO_ROLE_DEFINITION_EXAMPLE)
+
+    # Mongo user definition
+    with self.argument_context('cosmosdb mongodb user definition') as c:
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('mongo_user_definition_id', options_list=['--id', '-i'], validator=validate_mongo_user_definition_id, help="Unique ID for the Mongo User Definition.")
+        c.argument('mongo_user_definition_body', options_list=['--body', '-b'], validator=validate_mongo_user_definition_body, completer=FilesCompleter(), help="User Definition body with Id (Optional for create), UserName, Password, DatabaseName, CustomData, Mechanisms, Roles.  You can enter it as a string or as a file, e.g., --body @mongo-user_definition-body-file.json or " + MONGO_USER_DEFINITION_EXAMPLE)
 
     # Retrive Sql Container Backup Info
     with self.argument_context('cosmosdb sql retrieve-latest-backup-time') as c:
@@ -508,3 +537,11 @@ def load_arguments(self, _):
     # Managed Cassandra Datacenter
     with self.argument_context('managed-cassandra datacenter list') as c:
         c.argument('cluster_name', options_list=['--cluster-name', '-c'], help="Cluster Name", required=True)
+
+    # ComputeV2 Services
+    with self.argument_context('cosmosdb service') as c:
+        c.argument('account_name', completer=None, options_list=['--account-name', '-a'], help='Name of the Cosmos DB database account.', id_part=None)
+        c.argument('resource_group_name', completer=None, options_list=['--resource-group-name', '-g'], help='Name of the resource group of the database account.', id_part=None)
+        c.argument('service_name', options_list=['--name', '-n'], help="Service Name.")
+        c.argument('instance_count', options_list=['--count', '-c'], help="Instance Count.")
+        c.argument('instance_size', options_list=['--size'], help="Instance Size. Possible values are: Cosmos.D4s, Cosmos.D8s, Cosmos.D16s etc")

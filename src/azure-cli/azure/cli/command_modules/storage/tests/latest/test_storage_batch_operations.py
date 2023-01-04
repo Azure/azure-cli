@@ -33,6 +33,12 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd(cmd, storage_account_info)
         self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
 
+        # test --overwrite
+        self.storage_cmd_negative(cmd, storage_account_info)
+        cmd = 'storage blob download-batch -s {} -d "{}" --overwrite'.format(src_container, local_folder)
+        self.storage_cmd(cmd, storage_account_info)
+        self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
+
         # download recursively with wild card *, and use URL as source
         local_folder = self.create_temp_dir()
         src_url = self.storage_cmd('storage blob url -c {} -n readme -otsv', storage_account_info, src_container).output
@@ -217,7 +223,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(10, sum(len(f) for r, d, f in os.walk(local_folder)))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location='EastUS2')
     @StorageTestFilesPreparer()
     def test_storage_file_batch_upload_scenarios(self, test_dir, storage_account_info):
         # upload without pattern

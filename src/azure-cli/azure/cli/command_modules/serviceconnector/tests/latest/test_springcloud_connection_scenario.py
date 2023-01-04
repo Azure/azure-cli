@@ -5,69 +5,17 @@
 # --------------------------------------------------------------------------
 
 import unittest
-
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.testsdk import (
     ScenarioTest,
     record_only
 )
-from azure.cli.testsdk.scenario_tests import RecordingProcessor
-from azure.cli.testsdk.scenario_tests.utilities import is_text_payload
 from azure.cli.command_modules.serviceconnector._resource_config import (
     RESOURCE,
     SOURCE_RESOURCES,
     TARGET_RESOURCES
 )
-
-
-class CredentialReplacer(RecordingProcessor):
-
-    def recursive_hide(self, props):
-        # hide sensitive data recursively
-        fake_content = 'hidden'
-        sensitive_data = ['password=', 'key=']
-
-        if isinstance(props, dict):
-            for key, val in props.items():
-                props[key] = self.recursive_hide(val)
-        elif isinstance(props, list):
-            for index, val in enumerate(props):
-                props[index] = self.recursive_hide(val)
-        elif isinstance(props, str):
-            for data in sensitive_data:
-                if data in props.lower():
-                    props = fake_content
-
-        return props
-
-    def process_request(self, request):
-        import json
-
-        # hide secrets in request body
-        if is_text_payload(request) and request.body and json.loads(request.body):
-            body = self.recursive_hide(json.loads(request.body))
-            request.body = json.dumps(body)
-
-        # hide token in header
-        if 'x-ms-cupertino-test-token' in request.headers:
-            request.headers['x-ms-cupertino-test-token'] = 'hidden'
-        if 'x-ms-serviceconnector-user-token' in request.headers:
-            request.headers['x-ms-serviceconnector-user-token'] = 'hidden'
-
-        return request
-
-    def process_response(self, response):
-        import json
-
-        if is_text_payload(response) and response['body']['string']:
-            try:
-                body = json.loads(response['body']['string'])
-                body = self.recursive_hide(body)
-                response['body']['string'] = json.dumps(body)
-            except Exception:
-                pass
-
-        return response
+from ._test_utils import CredentialReplacer
 
 
 @unittest.skip('Need spring-cloud extension installed')
@@ -92,7 +40,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.AppConfig).format(**self.kwargs)
 
@@ -138,7 +86,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.CosmosCassandra).format(**self.kwargs)
 
@@ -185,7 +133,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.CosmosGremlin).format(**self.kwargs)
 
@@ -231,7 +179,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.CosmosMongo).format(**self.kwargs)
 
@@ -277,7 +225,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.CosmosSql).format(**self.kwargs)
 
@@ -323,7 +271,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.CosmosTable).format(**self.kwargs)
 
@@ -368,7 +316,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.EventHub).format(**self.kwargs)
 
@@ -413,7 +361,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.ServiceBus).format(**self.kwargs)
 
@@ -464,7 +412,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             .get_output_in_json().get('value')
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.PostgresFlexible).format(**self.kwargs)
 
@@ -509,7 +457,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(**self.kwargs)
 
@@ -650,9 +598,9 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         user = 'servicelinker'
         password = self.cmd('keyvault secret show --vault-name cupertino-kv-test -n TestDbPassword')\
             .get_output_in_json().get('value')
-
+        
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.Mysql).format(**self.kwargs)
 
@@ -685,6 +633,47 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only
+    def test_springcloud_mysql_e2e_kvsecret(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'spring': 'servicelinker-springcloud',
+            'app': 'mysql',
+            'deployment': 'default',
+            'server': 'servicelinker-mysql',
+            'database': 'mysqlDB'
+        })
+
+        # prepare password
+        user = 'servicelinker'
+        keyvaultUri = "https://cupertino-kv-test.vault.azure.net/secrets/TestDbPassword"
+        
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.Mysql).format(**self.kwargs)
+
+        # create connection
+        self.cmd('spring-cloud connection create mysql --connection {} --source-id {} --target-id {} '
+                 '--secret name={} secret-uri={} --client-type java'.format(name, source_id, target_id, user, keyvaultUri))
+
+        # list connection
+        connections = self.cmd(
+            'spring-cloud connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].clientType', 'java')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # delete connection
+        self.cmd('spring-cloud connection delete --id {} --yes'.format(connection_id))
+
+
+    # @record_only
     def test_springcloud_mysqlflexible_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -703,7 +692,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             .get_output_in_json().get('value')
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.MysqlFlexible).format(**self.kwargs)
 
@@ -754,7 +743,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             .get_output_in_json().get('value')
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.Postgres).format(**self.kwargs)
 
@@ -805,7 +794,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             .get_output_in_json().get('value')
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.Sql).format(**self.kwargs)
 
@@ -850,7 +839,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
 
@@ -896,7 +885,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
         keyvault_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(**self.kwargs)
@@ -945,7 +934,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.StorageQueue).format(**self.kwargs)
 
@@ -990,7 +979,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.StorageFile).format(**self.kwargs)
 
@@ -1035,7 +1024,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.StorageTable).format(**self.kwargs)
 
@@ -1079,7 +1068,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn2'
+        name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
 
         # create connection

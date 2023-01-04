@@ -284,7 +284,7 @@ def process_action_group_detail_for_creation(namespace):
     name = ns['action_group_name']
     receivers = ns.pop('receivers') or []
     action_group_resource_properties = {
-        'location': 'global',  # as of now, 'global' is the only available location for action group
+        'location': ns.pop('location') or 'Global',  # both inputed or 'global' location are available for action group
         'group_short_name': ns.pop('short_name') or name[:12],  # '12' is the short name length limitation
         'email_receivers': [r for r in receivers if isinstance(r, EmailReceiver)],
         'sms_receivers': [r for r in receivers if isinstance(r, SmsReceiver)],
@@ -415,28 +415,3 @@ def validate_storage_accounts_name_or_id(cmd, namespace):
 def process_subscription_id(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     namespace.subscription_id = get_subscription_id(cmd.cli_ctx)
-
-
-def process_workspace_data_export_destination(namespace):
-    if namespace.destination:
-        from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
-        if not is_valid_resource_id(namespace.destination):
-            raise CLIError('usage error: --destination should be a storage account, '
-                           'an evenhug namespace or an event hub resource id.')
-        result = parse_resource_id(namespace.destination)
-        if result['namespace'].lower() == 'microsoft.storage' and result['type'].lower() == 'storageaccounts':
-            namespace.data_export_type = 'StorageAccount'
-        elif result['namespace'].lower() == 'microsoft.eventhub' and result['type'].lower() == 'namespaces':
-            namespace.data_export_type = 'EventHub'
-            namespace.destination = resource_id(
-                subscription=result['subscription'],
-                resource_group=result['resource_group'],
-                namespace=result['namespace'],
-                type=result['type'],
-                name=result['name']
-            )
-            if 'child_type_1' in result and result['child_type_1'].lower() == 'eventhubs':
-                namespace.event_hub_name = result['child_name_1']
-        else:
-            raise CLIError('usage error: --destination should be a storage account, '
-                           'an evenhug namespace or an event hub resource id.')

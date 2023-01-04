@@ -18,6 +18,10 @@ from azure.cli.command_modules.acs.tests.latest.recording_processors import MOCK
 
 
 class AKSCustomResourceGroupPreparer(ResourceGroupPreparer):
+    """
+    Override to support overriding the default location in test cases using this custom preparer with specific
+    environment variables, and a flag (preserve_default_location) to avoid being overridden by environment variables.
+    """
     def __init__(
         self,
         name_prefix="clitest.rg",
@@ -50,6 +54,11 @@ class AKSCustomResourceGroupPreparer(ResourceGroupPreparer):
 
 
 class AKSCustomVirtualNetworkPreparer(VirtualNetworkPreparer):
+    """
+    Override to specify custom address_prefixes to avoid conflict with aks cluster/service cidr.
+
+    TODO: remove this.
+    """
     def __init__(
         self,
         name_prefix="clitest.vn",
@@ -143,6 +152,10 @@ class AKSCustomVirtualNetworkPreparer(VirtualNetworkPreparer):
 class AKSCustomRoleBasedServicePrincipalPreparer(
     RoleBasedServicePrincipalPreparer
 ):
+    """
+    Override to keep the recording consistent with the count in the mock request in scenarios such as the
+    check-in pipeline where the SP is pre-configured for testing and imported via environment variables.
+    """
     def __init__(
         self,
         name_prefix="clitest",
@@ -177,7 +190,7 @@ class AKSCustomRoleBasedServicePrincipalPreparer(
                 pass
 
             if self.live_test or self.test_class_instance.in_recording:
-                sp_name = name
+                sp_name = self.result['appId']
                 sp_password = self.result.get("password") or GraphClientPasswordReplacer.PWD_REPLACEMENT
             else:
                 sp_name = MOCK_GUID

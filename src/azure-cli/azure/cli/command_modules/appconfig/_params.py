@@ -25,7 +25,7 @@ from ._validators import (validate_appservice_name_or_id,
                           validate_key, validate_feature, validate_feature_key,
                           validate_identity, validate_auth_mode,
                           validate_resolve_keyvault, validate_export_profile, validate_import_profile,
-                          validate_strict_import)
+                          validate_strict_import, validate_export_as_reference)
 
 
 def load_arguments(self, _):
@@ -66,6 +66,18 @@ def load_arguments(self, _):
         nargs='*',
         validator=validate_identity
     )
+    store_name_arg_type = CLIArgumentType(
+        options_list=['--store-name', '-s'],
+        type=str,
+        help='Name of the App Configuration. You can configure the default name using `az configure --defaults app_configuration_store=<name>`.',
+        configured_default='app_configuration_store'
+    )
+    replica_name_arg_type = CLIArgumentType(
+        options_list=['--name', '-n'],
+        type=str,
+        help='Name of the replica of the App Configuration.',
+        configured_default=None
+    )
 
     with self.argument_context('appconfig') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
@@ -91,18 +103,18 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_type, help="Space-separated tags: key[=value] [key[=value] ...].")
         c.argument('assign_identity', arg_type=identities_arg_type,
                    help='Space-separated list of managed identities to be assigned. Use "[system]" to refer to system-assigned managed identity or a resource ID to refer to user-assigned managed identity. If this argument is provided without any value, system-assigned managed identity will be assigned by default. If this argument is not provided, no managed identities will be assigned to this App Configuration store.')
-        c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(), is_preview=True,
+        c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(),
                    help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
-        c.argument('disable_local_auth', arg_type=get_three_state_flag(), is_preview=True, help='Disable all authentication methods other than AAD authentication.')
-        c.argument('retention_days', arg_type=retention_days_arg_type, is_preview=True)
-        c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), is_preview=True, help='Property specifying whether protection against purge is enabled for this App Configuration. Setting this property to true activates protection against purge for this App Configuration and its contents. Enabling this functionality is irreversible.')
+        c.argument('disable_local_auth', arg_type=get_three_state_flag(), help='Disable all authentication methods other than AAD authentication.')
+        c.argument('retention_days', arg_type=retention_days_arg_type)
+        c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration. Setting this property to true activates protection against purge for this App Configuration and its contents. Enabling this functionality is irreversible.')
 
     with self.argument_context('appconfig update') as c:
         c.argument('tags', arg_type=tags_type)
-        c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(), is_preview=True,
+        c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(),
                    help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
-        c.argument('disable_local_auth', arg_type=get_three_state_flag(), is_preview=True, help='Disable all authentication methods other than AAD authentication.')
-        c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), is_preview=True, help='Property specifying whether protection against purge is enabled for this App Configuration. Setting this property to true activates protection against purge for this App Configuration and its contents. Enabling this functionality is irreversible.')
+        c.argument('disable_local_auth', arg_type=get_three_state_flag(), help='Disable all authentication methods other than AAD authentication.')
+        c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration. Setting this property to true activates protection against purge for this App Configuration and its contents. Enabling this functionality is irreversible.')
 
     with self.argument_context('appconfig recover') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help='Location of the deleted App Configuration. Can be viewed using command `az appconfig show-deleted`.')
@@ -144,7 +156,7 @@ def load_arguments(self, _):
         # bypass cli allowed values limitation
         c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
         c.argument('profile', validator=validate_import_profile, arg_type=get_enum_type([ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET]), help="Import profile to be used for importing the key-values. Options 'depth', 'separator', 'content-type', 'label', 'skip-features' and, 'prefix' are not supported when using '{}' profile.".format(ImportExportProfiles.KVSET))
-        c.argument('strict', validator=validate_strict_import, arg_type=get_three_state_flag(), help="Delete all other key-values in the store with specified prefix and label", is_preview=True)
+        c.argument('strict', validator=validate_strict_import, arg_type=get_three_state_flag(), help="Delete all other key-values in the store with specified prefix and label")
 
     with self.argument_context('appconfig kv import', arg_group='AppConfig') as c:
         c.argument('src_name', help='The name of the source App Configuration.')
@@ -189,6 +201,8 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig kv export', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
+        c.argument('export_as_reference', options_list=['--export-as-reference', '-r'], is_preview=True, arg_type=get_three_state_flag(), validator=validate_export_as_reference,
+                   help="Export key-values as App Configuration references. For more information, see https://docs.microsoft.com/en-us/azure/app-service/app-service-configuration-references")
 
     with self.argument_context('appconfig kv set') as c:
         c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")
@@ -281,6 +295,13 @@ def load_arguments(self, _):
         c.argument('filter_parameters', arg_type=filter_parameters_arg_type)
         c.argument('index', type=int, help='Zero-based index in the list of filters where you want to insert the new filter. If no index is specified or index is invalid, filter will be added to the end of the list.')
 
+    with self.argument_context('appconfig feature filter update') as c:
+        c.argument('feature', help='Name of the feature whose filter you want to update. If the feature flag key is different from the default key, provide the `--key` argument instead.')
+        c.argument('label', help="If no label specified, update the feature flag with null label by default.")
+        c.argument('filter_name', help='Name of the filter to be updated.')
+        c.argument('filter_parameters', arg_type=filter_parameters_arg_type)
+        c.argument('index', type=int, help='Zero-based index of the filter to be updated in case there are multiple instances with same filter name.')
+
     with self.argument_context('appconfig feature filter delete') as c:
         c.argument('feature', help='Name of the feature from which you want to delete the filter. If the feature flag key is different from the default key, provide the `--key` argument instead.')
         c.argument('label', help="If no label specified, delete from the feature flag with null label by default.")
@@ -298,3 +319,10 @@ def load_arguments(self, _):
         c.argument('feature', help='Name of the feature whose filters you want to be displayed. If the feature flag key is different from the default key, provide the `--key` argument instead.')
         c.argument('label', help="If no label specified, display filters from the feature flag with null label by default.")
         c.argument('all_', help="List all filters associated with a feature flag.")
+
+    with self.argument_context('appconfig replica') as c:
+        c.argument('store_name', arg_type=store_name_arg_type)
+        c.argument('name', arg_type=replica_name_arg_type)
+
+    with self.argument_context('appconfig replica create') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), help='Location at which to create the replica.')

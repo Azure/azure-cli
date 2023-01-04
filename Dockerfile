@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-ARG PYTHON_VERSION="3.10.4"
+ARG PYTHON_VERSION="3.10"
 
-FROM python:${PYTHON_VERSION}-alpine3.15
+FROM python:${PYTHON_VERSION}-alpine
 
 ARG CLI_VERSION
 
@@ -34,8 +34,8 @@ LABEL maintainer="Microsoft" \
 # pip wheel - required for CLI packaging
 # jmespath-terminal - we include jpterm as a useful tool
 # libintl and icu-libs - required by azure devops artifact (az extension add --name azure-devops)
-RUN apk add --no-cache bash openssh ca-certificates jq curl openssl perl git zip \
- && apk add --no-cache --virtual .build-deps gcc make openssl-dev libffi-dev musl-dev linux-headers \
+RUN apk add --no-cache bash openssh ca-certificates jq curl openssl1.1-compat perl git zip \
+ && apk add --no-cache --virtual .build-deps gcc make openssl1.1-compat-dev libffi-dev musl-dev linux-headers \
  && apk add --no-cache libintl icu-libs libc6-compat \
  && apk add --no-cache bash-completion \
  && update-ca-certificates

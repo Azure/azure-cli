@@ -16,6 +16,7 @@ from ._format import (
     elastic_pool_edition_table_format,
     firewall_rule_table_format,
     instance_pool_table_format,
+    ipv6_firewall_rule_table_format,
     outbound_firewall_rule_table_format,
     server_table_format,
     usage_table_format,
@@ -42,6 +43,7 @@ from ._util import (
     get_sql_encryption_protectors_operations,
     get_sql_failover_groups_operations,
     get_sql_firewall_rules_operations,
+    get_sql_ipv6_firewall_rules_operations,
     get_sql_outbound_firewall_rules_operations,
     get_sql_instance_pools_operations,
     get_sql_managed_databases_operations,
@@ -147,8 +149,8 @@ def load_command_table(self, _):
                                  transform=database_lro_transform,
                                  table_transformer=db_table_format)
 
-        g.custom_command('export', 'db_export')
-        g.custom_command('import', 'db_import')
+        g.custom_command('export', 'db_export', supports_no_wait=True)
+        g.custom_command('import', 'db_import', supports_no_wait=True)
 
     capabilities_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#CapabilitiesOperations.{}',
@@ -544,6 +546,24 @@ def load_command_table(self, _):
         g.command('list', 'list_by_server',
                   table_transformer=firewall_rule_table_format)
 
+    ipv6_firewall_rules_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#IPv6FirewallRulesOperations.{}',
+        client_factory=get_sql_ipv6_firewall_rules_operations)
+
+    with self.command_group('sql server ipv6-firewall-rule',
+                            ipv6_firewall_rules_operations,
+                            client_factory=get_sql_ipv6_firewall_rules_operations) as g:
+
+        g.custom_command('create', 'ipv6_firewall_rule_create',
+                         table_transformer=ipv6_firewall_rule_table_format)
+        g.custom_command('update', 'ipv6_firewall_rule_update',
+                         table_transformer=ipv6_firewall_rule_table_format)
+        g.command('delete', 'delete')
+        g.show_command('show', 'get',
+                       table_transformer=ipv6_firewall_rule_table_format)
+        g.command('list', 'list_by_server',
+                  table_transformer=ipv6_firewall_rule_table_format)
+
     outbound_firewall_rules_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#OutboundFirewallRulesOperations.{}',
         client_factory=get_sql_outbound_firewall_rules_operations)
@@ -765,6 +785,10 @@ def load_command_table(self, _):
                             client_factory=get_sql_managed_databases_operations) as g:
 
         g.custom_command('create', 'managed_db_create', supports_no_wait=True)
+        g.generic_update_command('update',
+                                 setter_name='begin_create_or_update',
+                                 custom_func_name='managed_db_update',
+                                 supports_no_wait=True)
         g.custom_command('restore', 'managed_db_restore', supports_no_wait=True)
         g.show_command('show', 'get')
         g.command('list', 'list_by_instance')
@@ -823,7 +847,7 @@ def load_command_table(self, _):
                             managed_databases_operations,
                             client_factory=get_sql_managed_databases_operations) as g:
         g.custom_command('start', 'managed_db_log_replay_start', supports_no_wait=True)
-        g.command('stop', 'begin_delete', confirmation=True, supports_no_wait=True)
+        g.custom_command('stop', 'managed_db_log_replay_stop', confirmation=True, supports_no_wait=True)
         g.custom_command('complete', 'managed_db_log_replay_complete_restore')
         g.wait_command('wait')
 

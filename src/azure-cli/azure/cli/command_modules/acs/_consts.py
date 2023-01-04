@@ -32,6 +32,9 @@ CONST_DEFAULT_NODE_OS_TYPE = "Linux"
 # os sku
 CONST_OS_SKU_UBUNTU = "Ubuntu"
 CONST_OS_SKU_CBLMARINER = "CBLMariner"
+CONST_OS_SKU_MARINER = "Mariner"
+CONST_OS_SKU_WINDOWS2019 = "Windows2019"
+CONST_OS_SKU_WINDOWS2022 = "Windows2022"
 
 # vm set type
 CONST_VIRTUAL_MACHINE_SCALE_SETS = "VirtualMachineScaleSets"
@@ -41,7 +44,18 @@ CONST_AVAILABILITY_SET = "AvailabilitySet"
 CONST_DEFAULT_NODE_VM_SIZE = "Standard_DS2_v2"
 CONST_DEFAULT_WINDOWS_NODE_VM_SIZE = "Standard_D2s_v3"
 
+# gpu instance
+CONST_GPU_INSTANCE_PROFILE_MIG1_G = "MIG1g"
+CONST_GPU_INSTANCE_PROFILE_MIG2_G = "MIG2g"
+CONST_GPU_INSTANCE_PROFILE_MIG3_G = "MIG3g"
+CONST_GPU_INSTANCE_PROFILE_MIG4_G = "MIG4g"
+CONST_GPU_INSTANCE_PROFILE_MIG7_G = "MIG7g"
+
 # consts for ManagedCluster
+# load balancer sku
+CONST_LOAD_BALANCER_SKU_BASIC = "basic"
+CONST_LOAD_BALANCER_SKU_STANDARD = "standard"
+
 # outbound type
 CONST_OUTBOUND_TYPE_LOAD_BALANCER = "loadBalancer"
 CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING = "userDefinedRouting"
@@ -52,9 +66,12 @@ CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY = "userAssignedNATGateway"
 CONST_PRIVATE_DNS_ZONE_SYSTEM = "system"
 CONST_PRIVATE_DNS_ZONE_NONE = "none"
 
-# used to set identity profile (for kubelet)
+# role assignment for kubelet
 CONST_MANAGED_IDENTITY_OPERATOR_ROLE = 'Managed Identity Operator'
 CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID = 'f1a07417-d97a-45cb-824c-7a7467783830'
+
+# role assignment for vnet subnet
+CONST_NETWORK_CONTRIBUTOR_ROLE_ID = "4d97b98b-1d4f-4787-a291-c67834d212e7"
 
 # upgrade channel
 CONST_RAPID_UPGRADE_CHANNEL = "rapid"
@@ -66,6 +83,7 @@ CONST_NONE_UPGRADE_CHANNEL = "none"
 # network plugin
 CONST_NETWORK_PLUGIN_KUBENET = "kubenet"
 CONST_NETWORK_PLUGIN_AZURE = "azure"
+CONST_NETWORK_PLUGIN_NONE = "none"
 
 # consts for addons
 # http application routing
@@ -106,6 +124,10 @@ CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME = "azureKeyvaultSecretsProvider
 CONST_SECRET_ROTATION_ENABLED = "enableSecretRotation"
 CONST_ROTATION_POLL_INTERVAL = "rotationPollInterval"
 
+# azure keyvault kms
+CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC = "Public"
+CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE = "Private"
+
 # all supported addons
 ADDONS = {
     'http_application_routing': CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
@@ -120,7 +142,7 @@ ADDONS = {
 }
 
 # consts for check-acr command
-CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.4-alpha"
+CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:v0.1.0"
 
 
 # consts for decorator pattern

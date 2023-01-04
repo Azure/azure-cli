@@ -3,7 +3,7 @@ interactions:
     body: '{"location": "centraluseuap", "tags": {}, "properties": {"addressSpace":
       {"addressPrefixes": ["10.0.0.0/24"]}, "dhcpOptions": {}, "subnets": [{"name":
       "RouteServerSubnet", "properties": {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies":
-      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
+      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
     headers:
       Accept:
       - application/json
@@ -14,30 +14,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '315'
+      - '316'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --location --subnet-name --address-prefix
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2\",\r\n
-        \ \"etag\": \"W/\\\"1a7367e6-c638-435f-9706-4876cafda486\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"90610d24-4cf6-454b-98bf-83a86685c4ec\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"eb082751-7eb5-4b40-aad9-c4644f94be15\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"2c777907-d29c-4adb-a346-e503443ef7e0\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/24\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"RouteServerSubnet\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet\",\r\n
-        \       \"etag\": \"W/\\\"1a7367e6-c638-435f-9706-4876cafda486\\\"\",\r\n
+        \       \"etag\": \"W/\\\"90610d24-4cf6-454b-98bf-83a86685c4ec\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
@@ -45,15 +46,15 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/841c799b-9345-43e8-a760-ce205bde8768?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/d615cb69-4639-4ae9-b770-c6659ea46321?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '1430'
+      - '1347'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:27:25 GMT
+      - Mon, 21 Nov 2022 15:10:40 GMT
       expires:
       - '-1'
       pragma:
@@ -66,7 +67,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ff405685-12f2-454c-b075-966328d8e71f
+      - c3515ef7-8fee-47f7-9856-f416f8a9451a
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -86,58 +87,10 @@ interactions:
       ParameterSetName:
       - -g -n --location --subnet-name --address-prefix
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/841c799b-9345-43e8-a760-ce205bde8768?api-version=2021-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 01 Jul 2021 03:27:28 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 1a067fed-8068-4ac0-9d82-c20fab897c40
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --location --subnet-name --address-prefix
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/841c799b-9345-43e8-a760-ce205bde8768?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/d615cb69-4639-4ae9-b770-c6659ea46321?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -149,7 +102,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:27:39 GMT
+      - Mon, 21 Nov 2022 15:10:43 GMT
       expires:
       - '-1'
       pragma:
@@ -166,7 +119,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 976ae976-07bf-42e4-a2f8-3fedebaa3f87
+      - 14344a76-5a51-47c6-ab1a-e9cb4e9cdfea
     status:
       code: 200
       message: OK
@@ -184,24 +137,25 @@ interactions:
       ParameterSetName:
       - -g -n --location --subnet-name --address-prefix
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2\",\r\n
-        \ \"etag\": \"W/\\\"fb50231c-1866-4dcd-b3ad-e5582a41df69\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"3e9c4ff2-2ae7-4408-bac2-ff7fa396cd2a\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"eb082751-7eb5-4b40-aad9-c4644f94be15\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"2c777907-d29c-4adb-a346-e503443ef7e0\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/24\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"RouteServerSubnet\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet\",\r\n
-        \       \"etag\": \"W/\\\"fb50231c-1866-4dcd-b3ad-e5582a41df69\\\"\",\r\n
+        \       \"etag\": \"W/\\\"3e9c4ff2-2ae7-4408-bac2-ff7fa396cd2a\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
@@ -209,13 +163,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1432'
+      - '1349'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:27:39 GMT
+      - Mon, 21 Nov 2022 15:10:44 GMT
       etag:
-      - W/"fb50231c-1866-4dcd-b3ad-e5582a41df69"
+      - W/"3e9c4ff2-2ae7-4408-bac2-ff7fa396cd2a"
       expires:
       - '-1'
       pragma:
@@ -232,7 +186,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4056bb92-bd8a-4d4d-a797-2dd1df15bec7
+      - cc4000c8-32c0-4e78-b846-e1a7fef56fe0
     status:
       code: 200
       message: OK
@@ -250,28 +204,29 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --remove
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"RouteServerSubnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet\",\r\n
-        \ \"etag\": \"W/\\\"fb50231c-1866-4dcd-b3ad-e5582a41df69\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"3e9c4ff2-2ae7-4408-bac2-ff7fa396cd2a\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
-        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '606'
+      - '565'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:27:41 GMT
+      - Mon, 21 Nov 2022 15:10:46 GMT
       etag:
-      - W/"fb50231c-1866-4dcd-b3ad-e5582a41df69"
+      - W/"3e9c4ff2-2ae7-4408-bac2-ff7fa396cd2a"
       expires:
       - '-1'
       pragma:
@@ -288,15 +243,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 67ae5da9-1213-4c15-af45-64798eb6d100
+      - a0b9234d-0283-4337-a3a1-aff182b89035
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet",
       "name": "RouteServerSubnet", "type": "Microsoft.Network/virtualNetworks/subnets",
       "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [], "privateEndpointNetworkPolicies":
-      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}'
+      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -307,34 +262,37 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '470'
+      - '429'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g --vnet-name -n --remove
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"RouteServerSubnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet\",\r\n
-        \ \"etag\": \"W/\\\"7052e1bf-d0cf-40dd-a021-0f3fc2dbed86\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"5f12150a-4ffd-464a-8f59-c7ff7764b964\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
-        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b9e48f25-fa42-4c72-b5ef-9df361a97984?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f6df4984-74f2-46f1-a7a5-c8dcbb5c267b?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '606'
+      - '565'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:27:42 GMT
+      - Mon, 21 Nov 2022 15:10:48 GMT
       expires:
       - '-1'
       pragma:
@@ -351,12 +309,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 68160f65-b3df-4e66-b124-2a47891f2f36
+      - dbee6f77-b80b-498f-bfcf-2aac209b5683
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -371,9 +329,10 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --remove
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b9e48f25-fa42-4c72-b5ef-9df361a97984?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f6df4984-74f2-46f1-a7a5-c8dcbb5c267b?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -385,7 +344,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:28:13 GMT
+      - Mon, 21 Nov 2022 15:11:19 GMT
       expires:
       - '-1'
       pragma:
@@ -402,10 +361,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 42e93973-f1c9-43cc-8820-7297d2ef0402
+      - 26f82211-40e7-4680-b2c1-97de4219e32d
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -420,28 +379,29 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --remove
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"RouteServerSubnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet\",\r\n
-        \ \"etag\": \"W/\\\"7052e1bf-d0cf-40dd-a021-0f3fc2dbed86\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"5f12150a-4ffd-464a-8f59-c7ff7764b964\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
-        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '606'
+      - '565'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:28:13 GMT
+      - Mon, 21 Nov 2022 15:11:20 GMT
       etag:
-      - W/"7052e1bf-d0cf-40dd-a021-0f3fc2dbed86"
+      - W/"5f12150a-4ffd-464a-8f59-c7ff7764b964"
       expires:
       - '-1'
       pragma:
@@ -458,10 +418,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - bd11067c-50f5-4dfb-9dfa-c36043760bb9
+      - 3e57a186-7108-44c6-b217-9530d79f1d35
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -476,24 +436,24 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2\",\r\n
-        \ \"etag\": \"W/\\\"7052e1bf-d0cf-40dd-a021-0f3fc2dbed86\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"5f12150a-4ffd-464a-8f59-c7ff7764b964\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"eb082751-7eb5-4b40-aad9-c4644f94be15\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"2c777907-d29c-4adb-a346-e503443ef7e0\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/24\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"RouteServerSubnet\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet\",\r\n
-        \       \"etag\": \"W/\\\"7052e1bf-d0cf-40dd-a021-0f3fc2dbed86\\\"\",\r\n
+        \       \"etag\": \"W/\\\"5f12150a-4ffd-464a-8f59-c7ff7764b964\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
@@ -501,13 +461,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1432'
+      - '1349'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:28:14 GMT
+      - Mon, 21 Nov 2022 15:11:22 GMT
       etag:
-      - W/"7052e1bf-d0cf-40dd-a021-0f3fc2dbed86"
+      - W/"5f12150a-4ffd-464a-8f59-c7ff7764b964"
       expires:
       - '-1'
       pragma:
@@ -524,10 +484,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e210fe14-54e6-4472-bda6-1f6b9fe0b19f
+      - 6939fb95-b024-41c3-84db-08d59e34d296
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -540,23 +500,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n
+      - -g -n --sku
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_virtual_hub_router000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001","name":"cli_test_virtual_hub_router000001","type":"Microsoft.Resources/resourceGroups","location":"centraluseuap","tags":{"product":"azurecli","cause":"automation","date":"2021-07-01T03:27:05Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001","name":"cli_test_virtual_hub_router000001","type":"Microsoft.Resources/resourceGroups","location":"centraluseuap","tags":{"product":"azurecli","cause":"automation","date":"2022-11-21T15:10:24Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '435'
+      - '351'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:28:15 GMT
+      - Mon, 21 Nov 2022 15:11:22 GMT
       expires:
       - '-1'
       pragma:
@@ -571,8 +532,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "centraluseuap", "properties": {"publicIPAllocationMethod":
-      "Dynamic", "publicIPAddressVersion": "IPv4", "idleTimeoutInMinutes": 4}}'
+    body: '{"location": "centraluseuap", "properties": {"idleTimeoutInMinutes": 4,
+      "publicIPAddressVersion": "IPv4", "publicIPAllocationMethod": "Static"}, "sku":
+      {"name": "Standard"}}'
     headers:
       Accept:
       - application/json
@@ -583,38 +545,39 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '145'
+      - '173'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g -n
+      - -g -n --sku
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/publicIPAddresses/vhrip1?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/publicIPAddresses/vhrip1?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"vhrip1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/publicIPAddresses/vhrip1\",\r\n
-        \ \"etag\": \"W/\\\"13b46b0e-6aed-4750-9a20-55f4a4664e8f\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"e885f401-7a80-4a67-b9d6-6963fa66e8a1\\\"\",\r\n  \"location\":
         \"centraluseuap\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"41337782-02ee-448e-9bf4-659602390fa5\",\r\n    \"publicIPAddressVersion\":
-        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
-        4,\r\n    \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
+        \   \"resourceGuid\": \"a8acb39b-8394-45dd-9021-9539cb61f760\",\r\n    \"publicIPAddressVersion\":
+        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Static\",\r\n    \"idleTimeoutInMinutes\":
+        4,\r\n    \"ipTags\": [],\r\n    \"ddosSettings\": {\r\n      \"protectionMode\":
+        \"VirtualNetworkInherited\"\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        \ \"sku\": {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n
         \ }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/ca83f59f-30b6-4d51-8bc4-145b15a6b5b7?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e911b367-2b2e-41c2-82be-ab70867c5fe2?api-version=2022-05-01
       cache-control:
       - no-cache
       content-length:
-      - '692'
+      - '734'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:28:24 GMT
+      - Mon, 21 Nov 2022 15:11:28 GMT
       expires:
       - '-1'
       pragma:
@@ -627,12 +590,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 3b8ceb4c-4337-4d3e-85df-c2ec91d935c9
+      - e97a9ee0-3559-43b1-a12a-9c8e4c7b2e4f
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
-      message: Created
+      message: ''
 - request:
     body: null
     headers:
@@ -645,11 +608,11 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n
+      - -g -n --sku
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/ca83f59f-30b6-4d51-8bc4-145b15a6b5b7?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/e911b367-2b2e-41c2-82be-ab70867c5fe2?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -661,7 +624,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:28:25 GMT
+      - Mon, 21 Nov 2022 15:11:30 GMT
       expires:
       - '-1'
       pragma:
@@ -678,10 +641,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ce608c19-543e-432b-b2d8-ab44b1310d70
+      - 33a7a9b9-0d11-4ae9-8dfc-7f1d6e8bf267
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -694,32 +657,34 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n
+      - -g -n --sku
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/publicIPAddresses/vhrip1?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/publicIPAddresses/vhrip1?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"vhrip1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/publicIPAddresses/vhrip1\",\r\n
-        \ \"etag\": \"W/\\\"c5a919b2-750a-4c71-92b6-287112a7e293\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"83f531c0-5ca4-4af9-82fe-3c001b08b603\\\"\",\r\n  \"location\":
         \"centraluseuap\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"41337782-02ee-448e-9bf4-659602390fa5\",\r\n    \"publicIPAddressVersion\":
-        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
-        4,\r\n    \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
+        \   \"resourceGuid\": \"a8acb39b-8394-45dd-9021-9539cb61f760\",\r\n    \"ipAddress\":
+        \"20.112.138.4\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
+        \"Static\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": [],\r\n
+        \   \"ddosSettings\": {\r\n      \"protectionMode\": \"VirtualNetworkInherited\"\r\n
+        \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        \ \"sku\": {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '693'
+      - '769'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:28:25 GMT
+      - Mon, 21 Nov 2022 15:11:30 GMT
       etag:
-      - W/"c5a919b2-750a-4c71-92b6-287112a7e293"
+      - W/"83f531c0-5ca4-4af9-82fe-3c001b08b603"
       expires:
       - '-1'
       pragma:
@@ -736,10 +701,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f8a8be46-e2f6-4f43-b9c6-fae14dd2a0bc
+      - 99bd629c-2da1-42d9-85a1-dc3096a30d8f
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -754,36 +719,34 @@ interactions:
       ParameterSetName:
       - -g -l -n --hosted-subnet --public-ip-address
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs?api-version=2022-01-01
   response:
     body:
-      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Network/virtualHubs/vrouter2''
-        under resource group ''cli_test_virtual_hub_router000001'' was not found.
-        For more details please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+      string: '{"value":[]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '285'
+      - '12'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:28:26 GMT
+      - Mon, 21 Nov 2022 15:11:31 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
     status:
-      code: 404
-      message: Not Found
+      code: 200
+      message: OK
 - request:
     body: '{"location": "centraluseuap", "properties": {"sku": "Standard"}}'
     headers:
@@ -802,32 +765,33 @@ interactions:
       ParameterSetName:
       - -g -l -n --hosted-subnet --public-ip-address
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vrouter2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2\",\r\n
-        \ \"etag\": \"W/\\\"75ce19cc-b940-4323-8297-0af1658c43f4\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"40ea2ddb-50af-4905-af5a-0c0fdebbaf75\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"virtualHubRouteTableV2s\":
-        [],\r\n    \"virtualRouterAsn\": 0,\r\n    \"virtualRouterIps\": [],\r\n    \"routeTable\":
-        {\r\n      \"routes\": []\r\n    },\r\n    \"sku\": \"Standard\",\r\n    \"routingState\":
-        \"None\",\r\n    \"allowBranchToBranchTraffic\": false,\r\n    \"preferredRoutingGateway\":
-        \"ExpressRoute\"\r\n  }\r\n}"
+        [],\r\n    \"virtualRouterAsn\": 65515,\r\n    \"virtualRouterIps\": [],\r\n
+        \   \"routeTable\": {\r\n      \"routes\": []\r\n    },\r\n    \"virtualRouterAutoScaleConfiguration\":
+        {\r\n      \"minCapacity\": 2\r\n    },\r\n    \"networkVirtualAppliances\":
+        [],\r\n    \"sku\": \"Standard\",\r\n    \"routingState\": \"None\",\r\n    \"allowBranchToBranchTraffic\":
+        false\r\n  },\r\n  \"kind\": \"RouteServer\"\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8282dc30-035f-452f-8f0c-a29ed03d2842?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/901bbaa9-31b2-465a-ab97-c0c336e7ba83?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '711'
+      - '766'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:28:34 GMT
+      - Mon, 21 Nov 2022 15:11:37 GMT
       expires:
       - '-1'
       pragma:
@@ -840,12 +804,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5dc6f221-8e42-4eec-936f-e5f670ef9a41
+      - 34ab0455-6277-4579-a7e3-a224619749c5
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
       code: 201
-      message: Created
+      message: ''
 - request:
     body: null
     headers:
@@ -860,9 +824,9 @@ interactions:
       ParameterSetName:
       - -g -l -n --hosted-subnet --public-ip-address
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/8282dc30-035f-452f-8f0c-a29ed03d2842?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/901bbaa9-31b2-465a-ab97-c0c336e7ba83?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -874,7 +838,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:29:06 GMT
+      - Mon, 21 Nov 2022 15:12:09 GMT
       expires:
       - '-1'
       pragma:
@@ -891,10 +855,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 50c00db1-c210-4cfc-a1f3-c42561c10c8a
+      - f437243f-7d24-4b8f-b8a3-dfaa5b8d5cd8
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -909,28 +873,29 @@ interactions:
       ParameterSetName:
       - -g -l -n --hosted-subnet --public-ip-address
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vrouter2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2\",\r\n
-        \ \"etag\": \"W/\\\"75ce19cc-b940-4323-8297-0af1658c43f4\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"40ea2ddb-50af-4905-af5a-0c0fdebbaf75\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"virtualHubRouteTableV2s\":
-        [],\r\n    \"virtualRouterAsn\": 0,\r\n    \"virtualRouterIps\": [],\r\n    \"routeTable\":
-        {\r\n      \"routes\": []\r\n    },\r\n    \"sku\": \"Standard\",\r\n    \"routingState\":
-        \"None\",\r\n    \"allowBranchToBranchTraffic\": false,\r\n    \"preferredRoutingGateway\":
-        \"ExpressRoute\"\r\n  }\r\n}"
+        [],\r\n    \"virtualRouterAsn\": 65515,\r\n    \"virtualRouterIps\": [],\r\n
+        \   \"routeTable\": {\r\n      \"routes\": []\r\n    },\r\n    \"virtualRouterAutoScaleConfiguration\":
+        {\r\n      \"minCapacity\": 2\r\n    },\r\n    \"networkVirtualAppliances\":
+        [],\r\n    \"sku\": \"Standard\",\r\n    \"routingState\": \"None\",\r\n    \"allowBranchToBranchTraffic\":
+        false\r\n  },\r\n  \"kind\": \"RouteServer\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '711'
+      - '766'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:29:06 GMT
+      - Mon, 21 Nov 2022 15:12:09 GMT
       expires:
       - '-1'
       pragma:
@@ -947,10 +912,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 11054bc5-287b-47f1-96ef-f7bc4ab3be05
+      - 2815e209-70ec-4acc-a96e-0023bea0c1fc
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: '{"properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet"},
       "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/publicIPAddresses/vhrip1"}}}'
@@ -964,35 +929,38 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '482'
+      - '398'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -l -n --hosted-subnet --public-ip-address
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations/Default?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations/Default?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"Default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations/Default\",\r\n
-        \ \"etag\": \"W/\\\"2fd09c1f-866c-4b74-a57b-e065e76a6269\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"61ca917f-42c8-4c8d-864b-5c98095275c2\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs/ipConfigurations\",\r\n  \"properties\": {\r\n
         \   \"provisioningState\": \"Updating\",\r\n    \"privateIPAllocationMethod\":
         \"Dynamic\",\r\n    \"publicIPAddress\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/publicIPAddresses/vhrip1\"\r\n
         \   },\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/RouteServerSubnet\"\r\n
         \   }\r\n  }\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bf0870cf-2266-4d61-8893-c2ae79818f58?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b686a06f-a720-467b-ba9e-71f2987de0df?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '983'
+      - '857'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:29:07 GMT
+      - Mon, 21 Nov 2022 15:12:11 GMT
       expires:
       - '-1'
       pragma:
@@ -1005,12 +973,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 907d2dbd-4313-4cbd-8a68-f33c2c7fe639
+      - 14b3a56f-775c-41df-a49f-66f1e6adb08e
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
       code: 201
-      message: Created
+      message: ''
 - request:
     body: null
     headers:
@@ -1025,9 +993,10 @@ interactions:
       ParameterSetName:
       - -g -l -n --hosted-subnet --public-ip-address
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bf0870cf-2266-4d61-8893-c2ae79818f58?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b686a06f-a720-467b-ba9e-71f2987de0df?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1039,7 +1008,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:29:17 GMT
+      - Mon, 21 Nov 2022 15:12:22 GMT
       expires:
       - '-1'
       pragma:
@@ -1056,7 +1025,457 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d58103ea-c2b2-4ea1-bd3e-d2ce2d5f2f06
+      - 08ec8920-9abf-42bc-97b2-d933d0425a2b
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -l -n --hosted-subnet --public-ip-address
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b686a06f-a720-467b-ba9e-71f2987de0df?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:12:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - a6486c3c-76f7-4352-af57-3b3916b08b14
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -l -n --hosted-subnet --public-ip-address
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b686a06f-a720-467b-ba9e-71f2987de0df?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:12:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 17108aa1-d582-4a4d-b8dd-645ca6fae211
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -l -n --hosted-subnet --public-ip-address
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b686a06f-a720-467b-ba9e-71f2987de0df?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:13:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 92091c1a-a98f-4700-b557-677d4bffe256
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -l -n --hosted-subnet --public-ip-address
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b686a06f-a720-467b-ba9e-71f2987de0df?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:14:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c0cdaeed-0a33-4892-9a34-5d6c523aca50
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -l -n --hosted-subnet --public-ip-address
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b686a06f-a720-467b-ba9e-71f2987de0df?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:15:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 09054df5-84cb-47f2-9ded-0b67bc284cad
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -l -n --hosted-subnet --public-ip-address
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b686a06f-a720-467b-ba9e-71f2987de0df?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:18:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 2699b941-7880-4793-be5a-22a8aed02f8b
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -l -n --hosted-subnet --public-ip-address
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b686a06f-a720-467b-ba9e-71f2987de0df?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:19:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 91adcc27-4cf9-4ec8-8db2-d4cc2299f1ba
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -l -n --hosted-subnet --public-ip-address
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b686a06f-a720-467b-ba9e-71f2987de0df?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:21:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 23b6c220-2ae4-42ef-ae55-696c16d4819b
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -l -n --hosted-subnet --public-ip-address
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b686a06f-a720-467b-ba9e-71f2987de0df?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:23:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 1710f968-71de-4e89-bfce-0a7328339bd1
     status:
       code: 200
       message: OK
@@ -1074,9 +1493,10 @@ interactions:
       ParameterSetName:
       - -g -l -n --hosted-subnet --public-ip-address
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bf0870cf-2266-4d61-8893-c2ae79818f58?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b686a06f-a720-467b-ba9e-71f2987de0df?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1088,7 +1508,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:29:28 GMT
+      - Mon, 21 Nov 2022 15:24:59 GMT
       expires:
       - '-1'
       pragma:
@@ -1105,7 +1525,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ab40bbbb-955e-4e6a-8ba1-c873675e15bb
+      - 9ff24fa5-8a3e-4681-b5ac-787d2aa90a59
     status:
       code: 200
       message: OK
@@ -1123,9 +1543,10 @@ interactions:
       ParameterSetName:
       - -g -l -n --hosted-subnet --public-ip-address
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bf0870cf-2266-4d61-8893-c2ae79818f58?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b686a06f-a720-467b-ba9e-71f2987de0df?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1137,7 +1558,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:29:48 GMT
+      - Mon, 21 Nov 2022 15:26:41 GMT
       expires:
       - '-1'
       pragma:
@@ -1154,10 +1575,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d8aed662-9243-4ec3-8429-b40a01bfeb50
+      - 4f10af4f-5439-4d51-8e00-96d792e838a5
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -1172,9 +1593,10 @@ interactions:
       ParameterSetName:
       - -g -l -n --hosted-subnet --public-ip-address
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bf0870cf-2266-4d61-8893-c2ae79818f58?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b686a06f-a720-467b-ba9e-71f2987de0df?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1186,7 +1608,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:30:28 GMT
+      - Mon, 21 Nov 2022 15:28:20 GMT
       expires:
       - '-1'
       pragma:
@@ -1203,10 +1625,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4058f88a-475b-4888-b48d-704217be4f8a
+      - 3431fb7c-49b1-4a6a-bad9-b13061a13cf4
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -1221,401 +1643,10 @@ interactions:
       ParameterSetName:
       - -g -l -n --hosted-subnet --public-ip-address
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bf0870cf-2266-4d61-8893-c2ae79818f58?api-version=2021-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 01 Jul 2021 03:31:49 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - b2e17558-e2ac-4f24-b456-bbc2d5ece084
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network routeserver create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -l -n --hosted-subnet --public-ip-address
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bf0870cf-2266-4d61-8893-c2ae79818f58?api-version=2021-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 01 Jul 2021 03:34:30 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - a5b06110-b1d9-4cb6-a79f-d720578ee9b5
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network routeserver create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -l -n --hosted-subnet --public-ip-address
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bf0870cf-2266-4d61-8893-c2ae79818f58?api-version=2021-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 01 Jul 2021 03:36:11 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 0e20082a-6d5a-4b25-b5e5-f37dabae5a71
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network routeserver create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -l -n --hosted-subnet --public-ip-address
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bf0870cf-2266-4d61-8893-c2ae79818f58?api-version=2021-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 01 Jul 2021 03:37:52 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - efae2e23-f5ac-41b4-b74e-bb70beacf210
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network routeserver create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -l -n --hosted-subnet --public-ip-address
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bf0870cf-2266-4d61-8893-c2ae79818f58?api-version=2021-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 01 Jul 2021 03:39:33 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - e1732941-33f8-4c44-bd5c-aad8ff5af164
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network routeserver create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -l -n --hosted-subnet --public-ip-address
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bf0870cf-2266-4d61-8893-c2ae79818f58?api-version=2021-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 01 Jul 2021 03:41:13 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 9e7b1218-a3f5-4cb8-b549-9e963ed84f32
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network routeserver create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -l -n --hosted-subnet --public-ip-address
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bf0870cf-2266-4d61-8893-c2ae79818f58?api-version=2021-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 01 Jul 2021 03:42:54 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 8c9e2e49-7382-4d87-bee8-ea4263afc798
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network routeserver create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -l -n --hosted-subnet --public-ip-address
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bf0870cf-2266-4d61-8893-c2ae79818f58?api-version=2021-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 01 Jul 2021 03:44:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - ac7aee1e-44a3-4eaa-bd91-43f98f17fd44
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network routeserver create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -l -n --hosted-subnet --public-ip-address
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bf0870cf-2266-4d61-8893-c2ae79818f58?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/b686a06f-a720-467b-ba9e-71f2987de0df?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1627,7 +1658,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:46:14 GMT
+      - Mon, 21 Nov 2022 15:30:01 GMT
       expires:
       - '-1'
       pragma:
@@ -1644,10 +1675,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 632d4e9d-5b21-49f1-a487-a74888facb0a
+      - 008ed701-97ee-4f19-a900-cc538c3734ae
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -1662,13 +1693,14 @@ interactions:
       ParameterSetName:
       - -g -l -n --hosted-subnet --public-ip-address
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations/Default?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations/Default?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"Default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations/Default\",\r\n
-        \ \"etag\": \"W/\\\"52f8b659-7a24-4684-a06e-a2fe7e7fc95c\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"87fbf7e5-4ed7-4dd3-adf2-73d9fdb6ed8c\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs/ipConfigurations\",\r\n  \"properties\": {\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"privateIPAllocationMethod\":
         \"Dynamic\",\r\n    \"publicIPAddress\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/publicIPAddresses/vhrip1\"\r\n
@@ -1678,13 +1710,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '984'
+      - '858'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:46:15 GMT
+      - Mon, 21 Nov 2022 15:30:02 GMT
       etag:
-      - W/"52f8b659-7a24-4684-a06e-a2fe7e7fc95c"
+      - W/"87fbf7e5-4ed7-4dd3-adf2-73d9fdb6ed8c"
       expires:
       - '-1'
       pragma:
@@ -1701,10 +1733,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5ad0d83c-81ac-4719-bcf3-09076e780993
+      - b3ce1573-6066-4f40-b851-5960bd7f99f9
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -1719,29 +1751,30 @@ interactions:
       ParameterSetName:
       - -g -l -n --hosted-subnet --public-ip-address
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vrouter2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2\",\r\n
-        \ \"etag\": \"W/\\\"52f8b659-7a24-4684-a06e-a2fe7e7fc95c\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"87fbf7e5-4ed7-4dd3-adf2-73d9fdb6ed8c\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"virtualHubRouteTableV2s\":
         [],\r\n    \"virtualRouterAsn\": 65515,\r\n    \"virtualRouterIps\": [\r\n
-        \     \"10.0.0.4\",\r\n      \"10.0.0.5\"\r\n    ],\r\n    \"routeTable\":
-        {\r\n      \"routes\": []\r\n    },\r\n    \"sku\": \"Standard\",\r\n    \"routingState\":
-        \"Provisioned\",\r\n    \"allowBranchToBranchTraffic\": false,\r\n    \"preferredRoutingGateway\":
-        \"ExpressRoute\"\r\n  }\r\n}"
+        \     \"10.0.0.5\",\r\n      \"10.0.0.4\"\r\n    ],\r\n    \"routeTable\":
+        {\r\n      \"routes\": []\r\n    },\r\n    \"virtualRouterAutoScaleConfiguration\":
+        {\r\n      \"minCapacity\": 2\r\n    },\r\n    \"networkVirtualAppliances\":
+        [],\r\n    \"sku\": \"Standard\",\r\n    \"routingState\": \"Provisioned\",\r\n
+        \   \"allowBranchToBranchTraffic\": false\r\n  },\r\n  \"kind\": \"RouteServer\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '765'
+      - '816'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:46:17 GMT
+      - Mon, 21 Nov 2022 15:30:04 GMT
       expires:
       - '-1'
       pragma:
@@ -1758,10 +1791,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c9b6eddf-05fc-4f80-aa29-58ce92cfe1b3
+      - e899e178-ad38-4d25-84a5-4daf86fa9068
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -1776,29 +1809,30 @@ interactions:
       ParameterSetName:
       - -g --name --allow-b2b-traffic
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vrouter2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2\",\r\n
-        \ \"etag\": \"W/\\\"52f8b659-7a24-4684-a06e-a2fe7e7fc95c\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"87fbf7e5-4ed7-4dd3-adf2-73d9fdb6ed8c\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"virtualHubRouteTableV2s\":
         [],\r\n    \"virtualRouterAsn\": 65515,\r\n    \"virtualRouterIps\": [\r\n
-        \     \"10.0.0.4\",\r\n      \"10.0.0.5\"\r\n    ],\r\n    \"routeTable\":
-        {\r\n      \"routes\": []\r\n    },\r\n    \"sku\": \"Standard\",\r\n    \"routingState\":
-        \"Provisioned\",\r\n    \"allowBranchToBranchTraffic\": false,\r\n    \"preferredRoutingGateway\":
-        \"ExpressRoute\"\r\n  }\r\n}"
+        \     \"10.0.0.5\",\r\n      \"10.0.0.4\"\r\n    ],\r\n    \"routeTable\":
+        {\r\n      \"routes\": []\r\n    },\r\n    \"virtualRouterAutoScaleConfiguration\":
+        {\r\n      \"minCapacity\": 2\r\n    },\r\n    \"networkVirtualAppliances\":
+        [],\r\n    \"sku\": \"Standard\",\r\n    \"routingState\": \"Provisioned\",\r\n
+        \   \"allowBranchToBranchTraffic\": false\r\n  },\r\n  \"kind\": \"RouteServer\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '765'
+      - '816'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:46:19 GMT
+      - Mon, 21 Nov 2022 15:30:07 GMT
       expires:
       - '-1'
       pragma:
@@ -1815,16 +1849,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 22ba2d75-36a6-427f-8be2-15574436e4aa
+      - 2c932075-b2a0-408a-80bf-06de66c929a0
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2",
-      "location": "centraluseuap", "properties": {"routeTable": {"routes": []}, "virtualHubRouteTableV2s":
-      [], "sku": "Standard", "virtualRouterAsn": 65515, "virtualRouterIps": ["10.0.0.4",
-      "10.0.0.5"], "allowBranchToBranchTraffic": true, "preferredRoutingGateway":
-      "ExpressRoute"}}'
+      "location": "centraluseuap", "properties": {"allowBranchToBranchTraffic": true,
+      "routeTable": {"routes": []}, "sku": "Standard", "virtualHubRouteTableV2s":
+      [], "virtualRouterAsn": 65515, "virtualRouterAutoScaleConfiguration": {"minCapacity":
+      2}, "virtualRouterIps": ["10.0.0.5", "10.0.0.4"]}}'
     headers:
       Accept:
       - application/json
@@ -1835,37 +1869,40 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '478'
+      - '452'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g --name --allow-b2b-traffic
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vrouter2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2\",\r\n
-        \ \"etag\": \"W/\\\"ed57cf48-356c-49c5-b0f1-2df6f93eb7e2\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"6cfe5183-3a00-4474-97c2-68d36531b86c\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"virtualHubRouteTableV2s\":
         [],\r\n    \"virtualRouterAsn\": 65515,\r\n    \"virtualRouterIps\": [\r\n
-        \     \"10.0.0.4\",\r\n      \"10.0.0.5\"\r\n    ],\r\n    \"routeTable\":
-        {\r\n      \"routes\": []\r\n    },\r\n    \"sku\": \"Standard\",\r\n    \"routingState\":
-        \"Provisioned\",\r\n    \"allowBranchToBranchTraffic\": true,\r\n    \"preferredRoutingGateway\":
-        \"ExpressRoute\"\r\n  }\r\n}"
+        \     \"10.0.0.5\",\r\n      \"10.0.0.4\"\r\n    ],\r\n    \"routeTable\":
+        {\r\n      \"routes\": []\r\n    },\r\n    \"virtualRouterAutoScaleConfiguration\":
+        {\r\n      \"minCapacity\": 2\r\n    },\r\n    \"networkVirtualAppliances\":
+        [],\r\n    \"sku\": \"Standard\",\r\n    \"routingState\": \"Provisioned\",\r\n
+        \   \"allowBranchToBranchTraffic\": true\r\n  },\r\n  \"kind\": \"RouteServer\"\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/092749d5-7e58-4955-acd6-d1a5d9246de5?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/ec5135e1-e7e0-4feb-8211-612d39888e38?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '763'
+      - '814'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:46:20 GMT
+      - Mon, 21 Nov 2022 15:30:08 GMT
       expires:
       - '-1'
       pragma:
@@ -1882,12 +1919,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c5ac187d-a8fc-4e06-bc28-70920bc019bf
+      - 9bd1e200-35f0-45f2-9b25-afe9984e44ec
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -1902,9 +1939,9 @@ interactions:
       ParameterSetName:
       - -g --name --allow-b2b-traffic
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/092749d5-7e58-4955-acd6-d1a5d9246de5?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/ec5135e1-e7e0-4feb-8211-612d39888e38?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1916,7 +1953,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:46:31 GMT
+      - Mon, 21 Nov 2022 15:30:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1933,10 +1970,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 743e7b93-de9c-4653-a038-1ceca553d470
+      - a88759a2-70cd-494c-a803-2552e4bf933e
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -1951,9 +1988,9 @@ interactions:
       ParameterSetName:
       - -g --name --allow-b2b-traffic
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/092749d5-7e58-4955-acd6-d1a5d9246de5?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/ec5135e1-e7e0-4feb-8211-612d39888e38?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1965,7 +2002,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:46:41 GMT
+      - Mon, 21 Nov 2022 15:30:28 GMT
       expires:
       - '-1'
       pragma:
@@ -1982,10 +2019,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a05c18af-93ff-41fb-8dc2-1d02707e61bc
+      - d0456130-3968-4ca5-bb45-34e79a37a181
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -2000,9 +2037,9 @@ interactions:
       ParameterSetName:
       - -g --name --allow-b2b-traffic
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/092749d5-7e58-4955-acd6-d1a5d9246de5?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/ec5135e1-e7e0-4feb-8211-612d39888e38?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2014,7 +2051,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:47:01 GMT
+      - Mon, 21 Nov 2022 15:30:48 GMT
       expires:
       - '-1'
       pragma:
@@ -2031,10 +2068,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f5aeb82b-8507-478b-9ec8-76eabb5fd20e
+      - a21e265d-8018-4a55-b4db-d75388125833
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -2049,9 +2086,9 @@ interactions:
       ParameterSetName:
       - -g --name --allow-b2b-traffic
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/092749d5-7e58-4955-acd6-d1a5d9246de5?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/ec5135e1-e7e0-4feb-8211-612d39888e38?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2063,7 +2100,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:47:42 GMT
+      - Mon, 21 Nov 2022 15:31:08 GMT
       expires:
       - '-1'
       pragma:
@@ -2080,10 +2117,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5e98b9a5-cfd5-4aad-a6a1-9b14ce58e863
+      - 687f429d-ddd4-4f37-a9ec-2eafe2b8ef33
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -2098,9 +2135,58 @@ interactions:
       ParameterSetName:
       - -g --name --allow-b2b-traffic
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/092749d5-7e58-4955-acd6-d1a5d9246de5?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/ec5135e1-e7e0-4feb-8211-612d39888e38?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:31:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - bdc24ec0-e977-40a1-9fc7-3c41981b60d2
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --allow-b2b-traffic
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/ec5135e1-e7e0-4feb-8211-612d39888e38?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -2112,7 +2198,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:49:03 GMT
+      - Mon, 21 Nov 2022 15:32:31 GMT
       expires:
       - '-1'
       pragma:
@@ -2129,10 +2215,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2051b386-0a6a-4ab2-8866-94f331cfc933
+      - 9203f077-5533-4168-bc37-bb3cfc63cbc1
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -2147,29 +2233,30 @@ interactions:
       ParameterSetName:
       - -g --name --allow-b2b-traffic
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vrouter2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2\",\r\n
-        \ \"etag\": \"W/\\\"1cae4918-c217-4bf7-8ab1-d3bc1b79c7c3\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"6357374b-bdfe-44cd-bd4b-362bb764e47c\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"virtualHubRouteTableV2s\":
         [],\r\n    \"virtualRouterAsn\": 65515,\r\n    \"virtualRouterIps\": [\r\n
-        \     \"10.0.0.4\",\r\n      \"10.0.0.5\"\r\n    ],\r\n    \"routeTable\":
-        {\r\n      \"routes\": []\r\n    },\r\n    \"sku\": \"Standard\",\r\n    \"routingState\":
-        \"Provisioned\",\r\n    \"allowBranchToBranchTraffic\": true,\r\n    \"preferredRoutingGateway\":
-        \"ExpressRoute\"\r\n  }\r\n}"
+        \     \"10.0.0.5\",\r\n      \"10.0.0.4\"\r\n    ],\r\n    \"routeTable\":
+        {\r\n      \"routes\": []\r\n    },\r\n    \"virtualRouterAutoScaleConfiguration\":
+        {\r\n      \"minCapacity\": 2\r\n    },\r\n    \"networkVirtualAppliances\":
+        [],\r\n    \"sku\": \"Standard\",\r\n    \"routingState\": \"Provisioned\",\r\n
+        \   \"allowBranchToBranchTraffic\": true\r\n  },\r\n  \"kind\": \"RouteServer\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '764'
+      - '815'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:49:03 GMT
+      - Mon, 21 Nov 2022 15:32:32 GMT
       expires:
       - '-1'
       pragma:
@@ -2186,10 +2273,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4f61af3a-8ca2-4ada-a248-d9953f9d1d4d
+      - e51d6e1a-d50b-4d8d-b2ed-61dfb6f4e419
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -2204,31 +2291,32 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"vrouter2\",\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2\",\r\n
-        \     \"etag\": \"W/\\\"1cae4918-c217-4bf7-8ab1-d3bc1b79c7c3\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"6357374b-bdfe-44cd-bd4b-362bb764e47c\\\"\",\r\n      \"type\":
         \"Microsoft.Network/virtualHubs\",\r\n      \"location\": \"centraluseuap\",\r\n
         \     \"properties\": {\r\n        \"provisioningState\": \"Succeeded\",\r\n
         \       \"virtualHubRouteTableV2s\": [],\r\n        \"virtualRouterAsn\":
-        65515,\r\n        \"virtualRouterIps\": [\r\n          \"10.0.0.4\",\r\n          \"10.0.0.5\"\r\n
+        65515,\r\n        \"virtualRouterIps\": [\r\n          \"10.0.0.5\",\r\n          \"10.0.0.4\"\r\n
         \       ],\r\n        \"routeTable\": {\r\n          \"routes\": []\r\n        },\r\n
-        \       \"sku\": \"Standard\",\r\n        \"routingState\": \"Provisioned\",\r\n
-        \       \"allowBranchToBranchTraffic\": true,\r\n        \"preferredRoutingGateway\":
-        \"ExpressRoute\"\r\n      }\r\n    }\r\n  ]\r\n}"
+        \       \"virtualRouterAutoScaleConfiguration\": {\r\n          \"minCapacity\":
+        2\r\n        },\r\n        \"networkVirtualAppliances\": [],\r\n        \"sku\":
+        \"Standard\",\r\n        \"routingState\": \"Provisioned\",\r\n        \"allowBranchToBranchTraffic\":
+        true\r\n      },\r\n      \"kind\": \"RouteServer\"\r\n    }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '881'
+      - '948'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:49:04 GMT
+      - Mon, 21 Nov 2022 15:32:34 GMT
       expires:
       - '-1'
       pragma:
@@ -2245,10 +2333,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d74c4aee-5496-49c7-bbfe-8e3b88b2ee06
+      - 0d0bafb4-dc65-4c8f-a1f7-f3dc99c4fe64
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -2263,29 +2351,30 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vrouter2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2\",\r\n
-        \ \"etag\": \"W/\\\"1cae4918-c217-4bf7-8ab1-d3bc1b79c7c3\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"6357374b-bdfe-44cd-bd4b-362bb764e47c\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"virtualHubRouteTableV2s\":
         [],\r\n    \"virtualRouterAsn\": 65515,\r\n    \"virtualRouterIps\": [\r\n
-        \     \"10.0.0.4\",\r\n      \"10.0.0.5\"\r\n    ],\r\n    \"routeTable\":
-        {\r\n      \"routes\": []\r\n    },\r\n    \"sku\": \"Standard\",\r\n    \"routingState\":
-        \"Provisioned\",\r\n    \"allowBranchToBranchTraffic\": true,\r\n    \"preferredRoutingGateway\":
-        \"ExpressRoute\"\r\n  }\r\n}"
+        \     \"10.0.0.5\",\r\n      \"10.0.0.4\"\r\n    ],\r\n    \"routeTable\":
+        {\r\n      \"routes\": []\r\n    },\r\n    \"virtualRouterAutoScaleConfiguration\":
+        {\r\n      \"minCapacity\": 2\r\n    },\r\n    \"networkVirtualAppliances\":
+        [],\r\n    \"sku\": \"Standard\",\r\n    \"routingState\": \"Provisioned\",\r\n
+        \   \"allowBranchToBranchTraffic\": true\r\n  },\r\n  \"kind\": \"RouteServer\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '764'
+      - '815'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:49:06 GMT
+      - Mon, 21 Nov 2022 15:32:36 GMT
       expires:
       - '-1'
       pragma:
@@ -2302,10 +2391,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2db419b1-1f63-4034-8509-df590c9bf447
+      - 2da573c3-c378-4a83-aad8-d56974a9c799
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: '{"name": "peer1", "properties": {"peerAsn": 11000, "peerIp": "10.0.0.120"}}'
     headers:
@@ -2324,27 +2413,29 @@ interactions:
       ParameterSetName:
       - -g --routeserver -n --peer-asn --peer-ip
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"peer1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1\",\r\n
-        \ \"etag\": \"W/\\\"31e96d2f-c4ac-4a4e-a694-51f6943c0e71\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"f0245579-4b5f-47b0-aabc-20f36e918f93\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs/bgpConnections\",\r\n  \"properties\": {\r\n
         \   \"provisioningState\": \"Updating\",\r\n    \"peerIp\": \"10.0.0.120\",\r\n
         \   \"peerAsn\": 11000\r\n  }\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bbeb5fac-2713-4219-9dab-d36ba1220379?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/d81d0fc6-520e-453e-a3e1-1b81ec9fb7bb?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '478'
+      - '436'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:49:07 GMT
+      - Mon, 21 Nov 2022 15:32:38 GMT
       expires:
       - '-1'
       pragma:
@@ -2357,12 +2448,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 34d5f2a4-7b0e-43f4-a5bf-2aab6d3b99f1
+      - c1b5aff3-c9e0-4b0e-941c-0b8cd94101b6
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
-      message: Created
+      message: ''
 - request:
     body: null
     headers:
@@ -2377,9 +2468,9 @@ interactions:
       ParameterSetName:
       - -g --routeserver -n --peer-asn --peer-ip
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bbeb5fac-2713-4219-9dab-d36ba1220379?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/d81d0fc6-520e-453e-a3e1-1b81ec9fb7bb?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2391,7 +2482,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:49:17 GMT
+      - Mon, 21 Nov 2022 15:32:48 GMT
       expires:
       - '-1'
       pragma:
@@ -2408,10 +2499,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b71274ba-634e-410a-843b-c63a43f8a334
+      - 16e66487-e3f8-4f47-92f6-a828e61c19ad
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -2426,9 +2517,9 @@ interactions:
       ParameterSetName:
       - -g --routeserver -n --peer-asn --peer-ip
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bbeb5fac-2713-4219-9dab-d36ba1220379?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/d81d0fc6-520e-453e-a3e1-1b81ec9fb7bb?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2440,7 +2531,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:49:27 GMT
+      - Mon, 21 Nov 2022 15:32:59 GMT
       expires:
       - '-1'
       pragma:
@@ -2457,10 +2548,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8464528f-a89e-4c1f-a0c5-4d2ad3be6b7c
+      - 8f839ee5-92a9-44f7-89ec-96ef124b7acd
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -2475,9 +2566,9 @@ interactions:
       ParameterSetName:
       - -g --routeserver -n --peer-asn --peer-ip
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bbeb5fac-2713-4219-9dab-d36ba1220379?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/d81d0fc6-520e-453e-a3e1-1b81ec9fb7bb?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2489,7 +2580,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:49:49 GMT
+      - Mon, 21 Nov 2022 15:33:19 GMT
       expires:
       - '-1'
       pragma:
@@ -2506,10 +2597,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8a680a50-00dc-4ab7-827a-1db0abceb66e
+      - 4b223d00-1e68-4f21-9829-9453ae4e437c
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -2524,9 +2615,58 @@ interactions:
       ParameterSetName:
       - -g --routeserver -n --peer-asn --peer-ip
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/bbeb5fac-2713-4219-9dab-d36ba1220379?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/d81d0fc6-520e-453e-a3e1-1b81ec9fb7bb?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:34:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 67940b6a-3a15-4a87-8814-e4fed1f1e368
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver peering create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --routeserver -n --peer-asn --peer-ip
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/d81d0fc6-520e-453e-a3e1-1b81ec9fb7bb?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -2538,7 +2678,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:50:29 GMT
+      - Mon, 21 Nov 2022 15:34:40 GMT
       expires:
       - '-1'
       pragma:
@@ -2555,10 +2695,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e322573d-00ed-4546-aecf-69263dfcbc84
+      - 45c4921a-7dcb-42c4-9516-cad5bb76c1e5
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -2573,13 +2713,13 @@ interactions:
       ParameterSetName:
       - -g --routeserver -n --peer-asn --peer-ip
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"peer1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1\",\r\n
-        \ \"etag\": \"W/\\\"03368935-a8de-4c13-806c-496568d4a05f\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"ab852a97-028c-462f-b786-248e1edfb480\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs/bgpConnections\",\r\n  \"properties\": {\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"peerIp\": \"10.0.0.120\",\r\n
         \   \"peerAsn\": 11000\r\n  }\r\n}"
@@ -2587,13 +2727,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '479'
+      - '437'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:50:29 GMT
+      - Mon, 21 Nov 2022 15:34:41 GMT
       etag:
-      - W/"03368935-a8de-4c13-806c-496568d4a05f"
+      - W/"ab852a97-028c-462f-b786-248e1edfb480"
       expires:
       - '-1'
       pragma:
@@ -2610,10 +2750,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4bd889dc-7ce2-491e-bfb0-ca657313fbf4
+      - 00870ec8-d1ac-45fd-a926-8cac52bbb20e
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -2628,14 +2768,14 @@ interactions:
       ParameterSetName:
       - -g --routeserver
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"peer1\",\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1\",\r\n
-        \     \"etag\": \"W/\\\"03368935-a8de-4c13-806c-496568d4a05f\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"ab852a97-028c-462f-b786-248e1edfb480\\\"\",\r\n      \"type\":
         \"Microsoft.Network/virtualHubs/bgpConnections\",\r\n      \"properties\":
         {\r\n        \"provisioningState\": \"Succeeded\",\r\n        \"peerIp\":
         \"10.0.0.120\",\r\n        \"peerAsn\": 11000\r\n      }\r\n    }\r\n  ]\r\n}"
@@ -2643,11 +2783,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '548'
+      - '506'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:50:31 GMT
+      - Mon, 21 Nov 2022 15:34:44 GMT
       expires:
       - '-1'
       pragma:
@@ -2664,10 +2804,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 73515f4f-1421-4d80-974a-84c4f22191cd
+      - 0938bf52-3450-4245-9d6d-41a44b3a45d7
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -2682,13 +2822,13 @@ interactions:
       ParameterSetName:
       - -g --routeserver -n
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"peer1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1\",\r\n
-        \ \"etag\": \"W/\\\"03368935-a8de-4c13-806c-496568d4a05f\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"ab852a97-028c-462f-b786-248e1edfb480\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualHubs/bgpConnections\",\r\n  \"properties\": {\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"peerIp\": \"10.0.0.120\",\r\n
         \   \"peerAsn\": 11000\r\n  }\r\n}"
@@ -2696,13 +2836,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '479'
+      - '437'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:50:32 GMT
+      - Mon, 21 Nov 2022 15:34:46 GMT
       etag:
-      - W/"03368935-a8de-4c13-806c-496568d4a05f"
+      - W/"ab852a97-028c-462f-b786-248e1edfb480"
       expires:
       - '-1'
       pragma:
@@ -2719,10 +2859,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2bdc77fc-17ae-4782-8bf1-98b386e5af6d
+      - bc84600f-10a4-4a26-87ac-37397374fe0a
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -2739,13 +2879,15 @@ interactions:
       ParameterSetName:
       - -g --routeserver -n
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1/advertisedRoutes?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1/advertisedRoutes?api-version=2022-01-01
   response:
     body:
       string: 'null'
     headers:
+      azure-asyncnotification:
+      - Enabled
       cache-control:
       - no-cache
       content-length:
@@ -2753,11 +2895,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:50:32 GMT
+      - Mon, 21 Nov 2022 15:34:50 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/02b25b08-c20e-4c7a-b6f1-9f1a1d61b156?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/6d507edc-bd96-473d-b7fe-b5125cf0dc24?api-version=2022-01-01
       pragma:
       - no-cache
       server:
@@ -2768,12 +2910,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 94b7dc57-938b-42ab-a296-8694a68b4695
+      - 34cb77d2-9fa5-4a3a-ae44-ed55a74831a2
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
       code: 202
-      message: Accepted
+      message: ''
 - request:
     body: null
     headers:
@@ -2788,14 +2930,16 @@ interactions:
       ParameterSetName:
       - -g --routeserver -n
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/02b25b08-c20e-4c7a-b6f1-9f1a1d61b156?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/6d507edc-bd96-473d-b7fe-b5125cf0dc24?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"RouteServiceRole_IN_0\": [],\r\n  \"RouteServiceRole_IN_1\":
         []\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       cache-control:
       - no-cache
       content-length:
@@ -2803,11 +2947,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:50:43 GMT
+      - Mon, 21 Nov 2022 15:35:00 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/02b25b08-c20e-4c7a-b6f1-9f1a1d61b156?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/6d507edc-bd96-473d-b7fe-b5125cf0dc24?api-version=2022-01-01
       pragma:
       - no-cache
       server:
@@ -2822,10 +2966,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 94b7dc57-938b-42ab-a296-8694a68b4695
+      - 34cb77d2-9fa5-4a3a-ae44-ed55a74831a2
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -2842,13 +2986,15 @@ interactions:
       ParameterSetName:
       - -g --routeserver -n
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1/learnedRoutes?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1/learnedRoutes?api-version=2022-01-01
   response:
     body:
       string: 'null'
     headers:
+      azure-asyncnotification:
+      - Enabled
       cache-control:
       - no-cache
       content-length:
@@ -2856,11 +3002,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:50:44 GMT
+      - Mon, 21 Nov 2022 15:35:03 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/51453fc6-1f55-4b63-861d-a774a069479c?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/89156679-9844-4463-b8d2-906fc56043a8?api-version=2022-01-01
       pragma:
       - no-cache
       server:
@@ -2871,12 +3017,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1e7854d4-7499-4893-a044-ffd1e01733f6
+      - 81eaf5a9-fe09-4573-9863-411b7bffd3ab
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 202
-      message: Accepted
+      message: ''
 - request:
     body: null
     headers:
@@ -2891,14 +3037,16 @@ interactions:
       ParameterSetName:
       - -g --routeserver -n
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/51453fc6-1f55-4b63-861d-a774a069479c?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/89156679-9844-4463-b8d2-906fc56043a8?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"RouteServiceRole_IN_0\": [],\r\n  \"RouteServiceRole_IN_1\":
         []\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       cache-control:
       - no-cache
       content-length:
@@ -2906,11 +3054,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:50:54 GMT
+      - Mon, 21 Nov 2022 15:35:13 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/51453fc6-1f55-4b63-861d-a774a069479c?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/89156679-9844-4463-b8d2-906fc56043a8?api-version=2022-01-01
       pragma:
       - no-cache
       server:
@@ -2925,15 +3073,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1e7854d4-7499-4893-a044-ffd1e01733f6
+      - 81eaf5a9-fe09-4573-9863-411b7bffd3ab
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2945,25 +3093,27 @@ interactions:
       ParameterSetName:
       - -g --routeserver -n -y
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/bgpConnections/peer1?api-version=2022-01-01
   response:
     body:
       string: ''
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/84dd5021-ddd0-4fe0-ba4d-2f2c9c4915cc?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/6ee3616c-3bf0-47fa-bb6d-6a3bef193eb1?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 01 Jul 2021 03:50:57 GMT
+      - Mon, 21 Nov 2022 15:35:16 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/84dd5021-ddd0-4fe0-ba4d-2f2c9c4915cc?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/6ee3616c-3bf0-47fa-bb6d-6a3bef193eb1?api-version=2022-01-01
       pragma:
       - no-cache
       server:
@@ -2974,7 +3124,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c8296ae3-1cf0-4832-882a-d494ad1e58e6
+      - aeb44bcf-f22f-490f-9751-819b84115594
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
     status:
@@ -2994,9 +3144,9 @@ interactions:
       ParameterSetName:
       - -g --routeserver -n -y
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/84dd5021-ddd0-4fe0-ba4d-2f2c9c4915cc?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/6ee3616c-3bf0-47fa-bb6d-6a3bef193eb1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -3008,7 +3158,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:51:07 GMT
+      - Mon, 21 Nov 2022 15:35:26 GMT
       expires:
       - '-1'
       pragma:
@@ -3025,7 +3175,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 40e1f291-820d-49d1-b7a5-a31db8de176c
+      - 54f71c7c-542e-46e5-838c-7d456e8e7cf8
     status:
       code: 200
       message: OK
@@ -3043,9 +3193,9 @@ interactions:
       ParameterSetName:
       - -g --routeserver -n -y
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/84dd5021-ddd0-4fe0-ba4d-2f2c9c4915cc?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/6ee3616c-3bf0-47fa-bb6d-6a3bef193eb1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -3057,7 +3207,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:51:17 GMT
+      - Mon, 21 Nov 2022 15:35:37 GMT
       expires:
       - '-1'
       pragma:
@@ -3074,7 +3224,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b4c9edf0-bb58-4eb6-8c60-c7ac3dc2c023
+      - 7ad4686f-afc1-49ad-8419-e45c35531ee7
     status:
       code: 200
       message: OK
@@ -3092,9 +3242,9 @@ interactions:
       ParameterSetName:
       - -g --routeserver -n -y
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/84dd5021-ddd0-4fe0-ba4d-2f2c9c4915cc?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/6ee3616c-3bf0-47fa-bb6d-6a3bef193eb1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -3106,7 +3256,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:51:37 GMT
+      - Mon, 21 Nov 2022 15:35:57 GMT
       expires:
       - '-1'
       pragma:
@@ -3123,7 +3273,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9468c412-a59e-42fb-9b51-4d8b92aed1c3
+      - 6426ed4c-cc82-469c-ba55-d1ae61104433
     status:
       code: 200
       message: OK
@@ -3141,9 +3291,9 @@ interactions:
       ParameterSetName:
       - -g --routeserver -n -y
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/84dd5021-ddd0-4fe0-ba4d-2f2c9c4915cc?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/6ee3616c-3bf0-47fa-bb6d-6a3bef193eb1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -3155,7 +3305,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:52:18 GMT
+      - Mon, 21 Nov 2022 15:36:38 GMT
       expires:
       - '-1'
       pragma:
@@ -3172,10 +3322,59 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 261b4cb7-1af5-492d-a029-61a97d7739ea
+      - c14c4903-68af-487a-8992-a64688665d46
     status:
       code: 200
       message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver peering delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --routeserver -n -y
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/6ee3616c-3bf0-47fa-bb6d-6a3bef193eb1?api-version=2022-01-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/6ee3616c-3bf0-47fa-bb6d-6a3bef193eb1?api-version=2022-01-01
+      cache-control:
+      - no-cache
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:36:38 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/6ee3616c-3bf0-47fa-bb6d-6a3bef193eb1?api-version=2022-01-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - aeb44bcf-f22f-490f-9751-819b84115594
+    status:
+      code: 204
+      message: No Content
 - request:
     body: null
     headers:
@@ -3190,14 +3389,15 @@ interactions:
       ParameterSetName:
       - -g -n -y
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"Default\",\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations/Default\",\r\n
-        \     \"etag\": \"W/\\\"0e73d090-2634-4da4-99c8-39b5a4f37686\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"bb8b5460-7258-4d2c-a894-77be7606c7b4\\\"\",\r\n      \"type\":
         \"Microsoft.Network/virtualHubs/ipConfigurations\",\r\n      \"properties\":
         {\r\n        \"provisioningState\": \"Succeeded\",\r\n        \"privateIPAllocationMethod\":
         \"Dynamic\",\r\n        \"publicIPAddress\": {\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/publicIPAddresses/vhrip1\"\r\n
@@ -3207,11 +3407,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1073'
+      - '947'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:52:19 GMT
+      - Mon, 21 Nov 2022 15:36:41 GMT
       expires:
       - '-1'
       pragma:
@@ -3228,10 +3428,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ba88f9d0-e161-40c2-8a0a-e913eac7de11
+      - fd1c1626-625f-4354-bd8f-5fb3ee2611f1
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -3248,354 +3448,10 @@ interactions:
       ParameterSetName:
       - -g -n -y
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations/Default?api-version=2021-05-01
-  response:
-    body:
-      string: ''
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/51f3d70c-0444-40b9-8093-64ab84d8952b?api-version=2021-05-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Thu, 01 Jul 2021 03:52:20 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/51f3d70c-0444-40b9-8093-64ab84d8952b?api-version=2021-05-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 54862677-5d10-4118-bc1e-c796da795f1f
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network routeserver delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -y
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/51f3d70c-0444-40b9-8093-64ab84d8952b?api-version=2021-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 01 Jul 2021 03:52:31 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - bb70bc78-cfa3-49e4-bc5f-1ece8273139a
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network routeserver delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -y
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/51f3d70c-0444-40b9-8093-64ab84d8952b?api-version=2021-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 01 Jul 2021 03:52:41 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 48db056f-13ce-4b38-b94d-5a46add8ae08
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network routeserver delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -y
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/51f3d70c-0444-40b9-8093-64ab84d8952b?api-version=2021-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 01 Jul 2021 03:53:01 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 26be7b11-4b01-4d9c-830f-d9221028dd55
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network routeserver delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -y
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/51f3d70c-0444-40b9-8093-64ab84d8952b?api-version=2021-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 01 Jul 2021 03:53:41 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 77817353-8b5f-481b-943d-0867b8316c00
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network routeserver delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -y
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/51f3d70c-0444-40b9-8093-64ab84d8952b?api-version=2021-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 01 Jul 2021 03:55:03 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 23b007c8-c1a0-4244-902c-81eb8996d8c1
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network routeserver delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -y
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/51f3d70c-0444-40b9-8093-64ab84d8952b?api-version=2021-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '29'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 01 Jul 2021 03:57:45 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 3a7a999a-9408-4462-b865-e29bc73c1324
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network routeserver delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -g -n -y
-      User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2/ipConfigurations/Default?api-version=2022-01-01
   response:
     body:
       string: ''
@@ -3603,17 +3459,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/2ee5d8aa-431e-4ec0-bbed-be22aaa86204?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f8d7273c-f1c4-485d-b7d6-8caeca5f34e3?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 01 Jul 2021 03:57:47 GMT
+      - Mon, 21 Nov 2022 15:36:42 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/2ee5d8aa-431e-4ec0-bbed-be22aaa86204?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/f8d7273c-f1c4-485d-b7d6-8caeca5f34e3?api-version=2022-01-01
       pragma:
       - no-cache
       server:
@@ -3624,7 +3480,460 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1ec05607-a897-466b-9459-ab8e926b5f0f
+      - 23399c6e-2f2d-4d4c-a874-f36e7c36d9d1
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f8d7273c-f1c4-485d-b7d6-8caeca5f34e3?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:36:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 12f60a14-c5da-4d02-86ff-74b4b6aa38d6
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f8d7273c-f1c4-485d-b7d6-8caeca5f34e3?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:37:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - f83be34b-d381-44bd-9c96-db7615a6a8d8
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f8d7273c-f1c4-485d-b7d6-8caeca5f34e3?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:37:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c35b38f0-561e-44e2-860b-2b2f7101a173
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f8d7273c-f1c4-485d-b7d6-8caeca5f34e3?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:38:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c50f023e-4783-4086-8029-f606b8cfa413
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f8d7273c-f1c4-485d-b7d6-8caeca5f34e3?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:38:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 675d4d0c-8730-4a46-9a68-9f3330619e3f
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f8d7273c-f1c4-485d-b7d6-8caeca5f34e3?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:40:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 699fbbc8-1933-480d-abeb-12df6335344a
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f8d7273c-f1c4-485d-b7d6-8caeca5f34e3?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:42:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 580224cd-e63b-4fe0-9978-4705d40581d6
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/f8d7273c-f1c4-485d-b7d6-8caeca5f34e3?api-version=2022-01-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f8d7273c-f1c4-485d-b7d6-8caeca5f34e3?api-version=2022-01-01
+      cache-control:
+      - no-cache
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:42:46 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/f8d7273c-f1c4-485d-b7d6-8caeca5f34e3?api-version=2022-01-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 23399c6e-2f2d-4d4c-a874-f36e7c36d9d1
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_virtual_hub_router000001/providers/Microsoft.Network/virtualHubs/vrouter2?api-version=2022-01-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/fa1e30f9-ead9-40a4-9b7a-2b36e97110fa?api-version=2022-01-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 21 Nov 2022 15:42:48 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/fa1e30f9-ead9-40a4-9b7a-2b36e97110fa?api-version=2022-01-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 0e296215-fa28-4195-bc3b-c8d690a781e2
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
     status:
@@ -3644,9 +3953,9 @@ interactions:
       ParameterSetName:
       - -g -n -y
       User-Agent:
-      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-network/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/2ee5d8aa-431e-4ec0-bbed-be22aaa86204?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/fa1e30f9-ead9-40a4-9b7a-2b36e97110fa?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -3658,7 +3967,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 01 Jul 2021 03:57:58 GMT
+      - Mon, 21 Nov 2022 15:42:59 GMT
       expires:
       - '-1'
       pragma:
@@ -3675,8 +3984,57 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 3bee6800-daf8-4c20-82fd-65f6f1e4bb49
+      - 7aad8d40-546e-4c3e-bcb6-6510627eae92
     status:
       code: 200
       message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - AZURECLI/2.42.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/fa1e30f9-ead9-40a4-9b7a-2b36e97110fa?api-version=2022-01-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/fa1e30f9-ead9-40a4-9b7a-2b36e97110fa?api-version=2022-01-01
+      cache-control:
+      - no-cache
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Nov 2022 15:42:59 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operationResults/fa1e30f9-ead9-40a4-9b7a-2b36e97110fa?api-version=2022-01-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 0e296215-fa28-4195-bc3b-c8d690a781e2
+    status:
+      code: 204
+      message: No Content
 version: 1

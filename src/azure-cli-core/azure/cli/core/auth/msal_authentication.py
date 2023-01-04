@@ -6,15 +6,21 @@
 """
 Credentials defined in this module are alternative implementations of credentials provided by Azure Identity.
 
-These credentials implements azure.core.credentials.TokenCredential by exposing get_token method for Track 2
+These credentials implement azure.core.credentials.TokenCredential by exposing `get_token` method for Track 2
 SDK invocation.
+
+If you want to implement your own credential, the credential must also expose `get_token` method.
+
+`get_token` method takes `scopes` as positional arguments and other optional `kwargs`, such as `claims`, `data`.
+The return value should be a named tuple containing two elements: token (str), expires_on (int). You may simply use
+azure.cli.core.auth.util.AccessToken to build the return value. See below credentials as examples.
 """
 
 from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
 
-from .util import check_result, AccessToken
+from .util import check_result, build_sdk_access_token
 
 # OAuth 2.0 client credentials flow parameter
 # https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow
@@ -53,16 +59,19 @@ class UserCredential(PublicClientApplication):
 
         self._account = accounts[0]
 
-    def get_token(self, *scopes, **kwargs):
+    def get_token(self, *scopes, claims=None, **kwargs):
         # scopes = ['https://pas.windows.net/CheckMyAccess/Linux/.default']
-        logger.debug("UserCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
+        logger.debug("UserCredential.get_token: scopes=%r, claims=%r, kwargs=%r", scopes, claims, kwargs)
 
-        result = self.acquire_token_silent_with_error(list(scopes), self._account, **kwargs)
+        if claims:
+            logger.warning('Acquiring new access token silently for tenant %s with claims challenge: %s',
+                           self.authority.tenant, claims)
+        result = self.acquire_token_silent_with_error(list(scopes), self._account, claims_challenge=claims, **kwargs)
 
         from azure.cli.core.azclierror import AuthenticationError
         try:
             # Check if an access token is returned.
-            check_result(result, scopes=scopes)
+            check_result(result, scopes=scopes, claims=claims)
         except AuthenticationError as ex:
             # For VM SSH ('data' is passed), if getting access token fails because
             # Conditional Access MFA step-up or compliance check is required, re-launch
@@ -87,7 +96,7 @@ class UserCredential(PublicClientApplication):
             # launch browser, but show the error message and `az login` command instead.
             else:
                 raise
-        return _build_sdk_access_token(result)
+        return build_sdk_access_token(result)
 
 
 class ServicePrincipalCredential(ConfidentialClientApplication):
@@ -130,21 +139,4 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
         if not result:
             result = self.acquire_token_for_client(scopes, **kwargs)
         check_result(result)
-        return _build_sdk_access_token(result)
-
-
-def _build_sdk_access_token(token_entry):
-    import time
-    request_time = int(time.time())
-
-    # MSAL token entry sample:
-    # {
-    #     'access_token': 'eyJ0eXAiOiJKV...',
-    #     'token_type': 'Bearer',
-    #     'expires_in': 1618
-    # }
-
-    # Importing azure.core.credentials.AccessToken is expensive.
-    # This can slow down commands that doesn't need azure.core, like `az account get-access-token`.
-    # So We define our own AccessToken.
-    return AccessToken(token_entry["access_token"], request_time + token_entry["expires_in"])
+        return build_sdk_access_token(result)

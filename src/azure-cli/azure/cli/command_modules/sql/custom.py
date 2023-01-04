@@ -33,6 +33,7 @@ from azure.mgmt.sql.models import (
     InstanceFailoverGroup,
     InstanceFailoverGroupReadOnlyEndpoint,
     InstanceFailoverGroupReadWriteEndpoint,
+    IPv6FirewallRule,
     LedgerDigestUploadsName,
     LongTermRetentionPolicyName,
     ManagedInstanceAzureADOnlyAuthentication,
@@ -83,6 +84,7 @@ from ._util import (
     get_sql_servers_operations,
     get_sql_managed_instances_operations,
     get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations,
+    get_sql_managed_database_restore_details_operations,
 )
 
 
@@ -337,12 +339,14 @@ def _find_performance_level_capability(sku, supported_service_level_objectives, 
             raise CLIError(
                 "Could not find sku in tier '{tier}' with family '{family}', capacity {capacity}."
                 " Supported families & capacities for '{tier}' are: {skus}. Please specify one of these"
-                " supported combinations of family and capacity.".format(
+                " supported combinations of family and capacity."
+                " And ensure that the sku supports '{compute_model}' compute model.".format(
                     tier=sku.tier,
                     family=sku.family,
                     capacity=sku.capacity,
                     skus=[(slo.sku.family, slo.sku.capacity)
-                          for slo in supported_service_level_objectives]
+                          for slo in supported_service_level_objectives],
+                    compute_model=compute_model
                 ))
     elif sku.family:
         # Error - cannot find based on family alone.
@@ -494,13 +498,16 @@ def _get_identity_object_from_type(
 
                 identityResult = ResourceIdentity(type=ResourceIdType.user_assigned.value,
                                                   user_assigned_identities=umiDict)
+
+        if resourceIdentityType == ResourceIdType.system_assigned.value:
+            identityResult = ResourceIdentity(type=ResourceIdType.system_assigned.value)
+
     elif assignIdentityIsPresent:
         identityResult = ResourceIdentity(type=ResourceIdType.system_assigned.value)
 
     if assignIdentityIsPresent is False and existingResourceIdentity is not None:
         identityResult = existingResourceIdentity
 
-    print(identityResult)
     return identityResult
 
 
@@ -1420,7 +1427,7 @@ def db_delete_replica_link(
         # No link exists, nothing to be done
         return
 
-    return client.delete(
+    return client.begin_delete(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -1434,6 +1441,7 @@ def db_export(
         resource_group_name,
         storage_key_type,
         storage_key,
+        no_wait=False,
         **kwargs):
     '''
     Exports a database to a bacpac file.
@@ -1444,7 +1452,9 @@ def db_export(
     kwargs['storage_key_type'] = storage_key_type
     kwargs['storage_key'] = storage_key
 
-    return client.begin_export(
+    return sdk_no_wait(
+        no_wait,
+        client.begin_export,
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -1458,6 +1468,7 @@ def db_import(
         resource_group_name,
         storage_key_type,
         storage_key,
+        no_wait=False,
         **kwargs):
     '''
     Imports a bacpac file into an existing database.
@@ -1468,7 +1479,9 @@ def db_import(
     kwargs['storage_key_type'] = storage_key_type
     kwargs['storage_key'] = storage_key
 
-    return client.begin_import_method(
+    return sdk_no_wait(
+        no_wait,
+        client.begin_import_method,
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -1818,7 +1831,7 @@ def _get_diagnostic_settings(
         server_name=server_name, database_name=database_name)
     azure_monitor_client = cf_monitor(cmd.cli_ctx)
 
-    return azure_monitor_client.diagnostic_settings.list(diagnostic_settings_url)
+    return list(azure_monitor_client.diagnostic_settings.list(diagnostic_settings_url))
 
 
 def _fetch_first_audit_diagnostic_setting(diagnostic_settings, category_name):
@@ -1914,8 +1927,8 @@ def _audit_policy_show(
         server_name=server_name, database_name=database_name)
 
     # Sort received diagnostic settings by name and get first element to ensure consistency between command executions
-    diagnostic_settings.value.sort(key=lambda d: d.name)
-    audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings.value, category_name)
+    diagnostic_settings.sort(key=lambda d: d.name)
+    audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings, category_name)
 
     # Initialize azure monitor properties
     if audit_diagnostic_setting is not None:
@@ -2144,7 +2157,7 @@ def _audit_policy_update_diagnostic_settings(
     '''
 
     # Fetch all audit diagnostic settings
-    audit_diagnostic_settings = _fetch_all_audit_diagnostic_settings(diagnostic_settings.value, category_name)
+    audit_diagnostic_settings = _fetch_all_audit_diagnostic_settings(diagnostic_settings, category_name)
     num_of_audit_diagnostic_settings = len(audit_diagnostic_settings)
 
     # If more than 1 audit diagnostic settings found then throw error
@@ -2372,8 +2385,8 @@ def _audit_policy_update_apply_azure_monitor_target_enabled(
     else:
         # Sort received diagnostic settings by name and get first element to ensure consistency
         # between command executions
-        diagnostic_settings.value.sort(key=lambda d: d.name)
-        audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings.value, category_name)
+        diagnostic_settings.sort(key=lambda d: d.name)
+        audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings, category_name)
 
         # Determine value of is_azure_monitor_target_enabled
         if audit_diagnostic_setting is None:
@@ -3327,7 +3340,8 @@ def elastic_pool_update(
         tier=None,
         family=None,
         capacity=None,
-        maintenance_configuration_id=None):
+        maintenance_configuration_id=None,
+        high_availability_replica_count=None):
     '''
     Updates an elastic pool. Custom update function to apply parameters to instance.
     '''
@@ -3365,6 +3379,9 @@ def elastic_pool_update(
     instance.maintenance_configuration_id = _complete_maintenance_configuration_id(
         cmd.cli_ctx,
         maintenance_configuration_id)
+
+    if high_availability_replica_count is not None:
+        instance.high_availability_replica_count = high_availability_replica_count
 
     return instance
 
@@ -3856,6 +3873,55 @@ def firewall_rule_create(
         resource_group_name=resource_group_name,
         parameters=FirewallRule(start_ip_address=start_ip_address,
                                 end_ip_address=end_ip_address))
+
+
+#########################################################
+#            sql server ipv6-firewall-rule              #
+#########################################################
+
+
+def ipv6_firewall_rule_update(
+        client,
+        firewall_rule_name,
+        server_name,
+        resource_group_name,
+        start_ipv6_address=None,
+        end_ipv6_address=None):
+    '''
+    Updates an ipv6 firewall rule.
+    '''
+
+    # Get existing instance
+    instance = client.get(
+        firewall_rule_name=firewall_rule_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name)
+
+    # Send update
+    return client.create_or_update(
+        firewall_rule_name=firewall_rule_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        parameters=IPv6FirewallRule(start_i_pv6_address=start_ipv6_address or instance.start_ipv6_address,
+                                    end_i_pv6_address=end_ipv6_address or instance.end_ipv6_address))
+
+
+def ipv6_firewall_rule_create(
+        client,
+        firewall_rule_name,
+        server_name,
+        resource_group_name,
+        start_ipv6_address=None,
+        end_ipv6_address=None):
+    '''
+    Creates an ipv6 firewall rule.
+    '''
+    return client.create_or_update(
+        firewall_rule_name=firewall_rule_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        parameters=IPv6FirewallRule(start_i_pv6_address=start_ipv6_address,
+                                    end_i_pv6_address=end_ipv6_address))
 
 
 #########################################################
@@ -4688,6 +4754,16 @@ def managed_db_create(
         parameters=kwargs)
 
 
+def managed_db_update(
+        instance,
+        tags=None):
+
+    if tags is not None:
+        instance.tags = tags
+
+    return instance
+
+
 def managed_db_restore(
         cmd,
         client,
@@ -5139,6 +5215,7 @@ def managed_db_log_replay_start(
         last_backup_name,
         storage_container_uri,
         storage_container_sas_token,
+        storage_container_identity,
         **kwargs):
     '''
     Start a log replay restore.
@@ -5160,6 +5237,7 @@ def managed_db_log_replay_start(
 
     kwargs['storageContainerUri'] = storage_container_uri
     kwargs['storageContainerSasToken'] = storage_container_sas_token
+    kwargs['storage_container_identity'] = storage_container_identity
 
     # Create
     return client.begin_create_or_update(
@@ -5167,6 +5245,45 @@ def managed_db_log_replay_start(
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
         parameters=kwargs)
+
+
+def managed_db_log_replay_stop(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name):
+    '''
+    Stop log replay restore.
+    '''
+
+    restore_details_client = get_sql_managed_database_restore_details_operations(cmd.cli_ctx, None)
+    try:
+        # Determine if managed DB was created using log replay service
+        # Raises RestoreDetailsNotAvailableOrExpired exception if there are no restore details
+        restore_details = restore_details_client.get(
+            database_name=database_name,
+            managed_instance_name=managed_instance_name,
+            resource_group_name=resource_group_name,
+            restore_details_name=RestoreDetailsName.DEFAULT)
+
+        # Type must be LRSRestore in order to proceed with stop-log-replay, else raise exception
+        if restore_details.type_properties_type.lower() == 'lrsrestore':
+            return client.begin_delete(
+                database_name=database_name,
+                managed_instance_name=managed_instance_name,
+                resource_group_name=resource_group_name)
+
+        raise CLIError(
+            f'Cannot stop the log replay as database {database_name} on the instance {managed_instance_name} '
+            f'in the resource group {resource_group_name} was not created with log replay service.')
+    except Exception as ex:
+        # Map RestoreDetailsNotAvailableOrExpired to a more descriptive error
+        if (ex and 'RestoreDetailsNotAvailableOrExpired' in str(ex)):
+            raise CLIError(
+                f'Cannot stop the log replay as database {database_name} on the instance {managed_instance_name} '
+                f'in the resource group {resource_group_name} was not created with log replay service.')
+        raise ex
 
 
 def managed_db_log_replay_complete_restore(
