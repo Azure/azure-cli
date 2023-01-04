@@ -4162,14 +4162,10 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
                                subnet_name=subnet_info["subnet_name"])
 
     app.virtual_network_subnet_id = subnet_info["subnet_resource_id"]
+    app.vnet_route_all_enabled = True
 
     _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update', slot,
                             client=client, extra_parameter=app)
-
-    # Enable Route All configuration
-    config = get_site_configs(cmd, resource_group_name, name, slot)
-    if config.vnet_route_all_enabled is not True:
-        config = update_site_configs(cmd, resource_group_name, name, slot=slot, vnet_route_all_enabled='true')
 
     return {
         "id": subnet_info["vnet_resource_id"],
