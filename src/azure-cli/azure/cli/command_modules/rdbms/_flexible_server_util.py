@@ -24,7 +24,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 from azure.cli.command_modules.role.custom import create_service_principal_for_rbac
-from azure.mgmt.rdbms import mysql_flexibleservers
+from azure.mgmt.rdbms import mysql_flexibleservers, postgresql_flexibleservers
 from azure.mgmt.resource.resources.models import ResourceGroup
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
 
@@ -169,15 +169,17 @@ def get_postgres_tiers(sku_info):
     return list(sku_info.keys())
 
 
-def get_postgres_list_skus_info(cmd, location):
+def get_postgres_list_skus_info(cmd, location, server_name=None):
     list_skus_client = cf_postgres_flexible_location_capabilities(cmd.cli_ctx, '_')
-    list_skus_result = list_skus_client.execute(location)
+    params = {'serverName': server_name} if server_name else None
+    list_skus_result = list_skus_client.execute(location, params=params)
     return _postgres_parse_list_skus(list_skus_result)
 
 
-def get_mysql_list_skus_info(cmd, location):
+def get_mysql_list_skus_info(cmd, location, server_name=None):
     list_skus_client = cf_mysql_flexible_location_capabilities(cmd.cli_ctx, '_')
-    list_skus_result = list_skus_client.list(location)
+    params = {'serverName': server_name} if server_name else None
+    list_skus_result = list_skus_client.list(location, params=params)
     return _mysql_parse_list_skus(list_skus_result)
 
 
@@ -186,7 +188,9 @@ def _postgres_parse_list_skus(result):
 
     if not result:
         raise InvalidArgumentValueError("No available SKUs in this location")
+
     single_az = 'ZoneRedundant' not in result[0].supported_ha_mode
+    geo_backup_supported = result[0].geo_backup_supported
 
     tiers = result[0].supported_flexible_server_editions
     tiers_dict = {}
@@ -212,7 +216,8 @@ def _postgres_parse_list_skus(result):
         tiers_dict[tier_name] = tier_dict
 
     return {'sku_info': tiers_dict,
-            'single_az': single_az}
+            'single_az': single_az,
+            'geo_backup_supported': geo_backup_supported}
 
 
 def _mysql_parse_list_skus(result):
@@ -487,7 +492,8 @@ def _is_resource_name(resource):
     return False
 
 
-def build_identity_and_data_encryption(byok_identity, backup_byok_identity, byok_key, backup_byok_key):
+def build_identity_and_data_encryption(db_engine, byok_identity=None, backup_byok_identity=None,
+                                       byok_key=None, backup_byok_key=None):
     identity, data_encryption = None, None
 
     if byok_identity and byok_key:
@@ -496,15 +502,24 @@ def build_identity_and_data_encryption(byok_identity, backup_byok_identity, byok
         if backup_byok_identity:
             identities[backup_byok_identity] = {}
 
-        identity = mysql_flexibleservers.models.Identity(user_assigned_identities=identities,
-                                                         type="UserAssigned")
+        if db_engine == 'mysql':
+            identity = mysql_flexibleservers.models.Identity(user_assigned_identities=identities,
+                                                             type="UserAssigned")
 
-        data_encryption = mysql_flexibleservers.models.DataEncryption(
-            primary_user_assigned_identity_id=byok_identity,
-            primary_key_uri=byok_key,
-            geo_backup_user_assigned_identity_id=backup_byok_identity,
-            geo_backup_key_uri=backup_byok_key,
-            type="AzureKeyVault")
+            data_encryption = mysql_flexibleservers.models.DataEncryption(
+                primary_user_assigned_identity_id=byok_identity,
+                primary_key_uri=byok_key,
+                geo_backup_user_assigned_identity_id=backup_byok_identity,
+                geo_backup_key_uri=backup_byok_key,
+                type="AzureKeyVault")
+        else:
+            identity = postgresql_flexibleservers.models.UserAssignedIdentity(user_assigned_identities=identities,
+                                                                              type="UserAssigned")
+
+            data_encryption = postgresql_flexibleservers.models.DataEncryption(
+                primary_user_assigned_identity_id=byok_identity,
+                primary_key_uri=byok_key,
+                type="AzureKeyVault")
 
     return identity, data_encryption
 
@@ -522,3 +537,10 @@ def get_identity_and_data_encryption(server):
         data_encryption = None
 
     return identity, data_encryption
+
+
+def get_tenant_id():
+    from azure.cli.core._profile import Profile
+    profile = Profile()
+    sub = profile.get_subscription()
+    return sub['tenantId']

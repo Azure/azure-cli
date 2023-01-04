@@ -9,7 +9,7 @@ trigger:
     - '*'
 
 variables:
-- template: .azure-pipelines/templates/variables.yml
+- template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
 
 jobs:
 - job: UpdateVersionFiles
@@ -52,7 +52,7 @@ jobs:
           sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.Darwin.txt
 
           if [[ -n "$(RESOURCE_TYPE)" ]]; then
-            python scripts/bump_version/update_api_profile.py "$(RESOURCE_TYPE)" "$(TARGET_API_VERSION)"
+            python scripts/regression_test/update_api_profile.py "$(RESOURCE_TYPE)" "$(TARGET_API_VERSION)"
           fi
 
           git add .

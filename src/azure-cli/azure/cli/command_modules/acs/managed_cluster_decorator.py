@@ -100,10 +100,12 @@ ManagedClusterAddonProfile = TypeVar("ManagedClusterAddonProfile")
 Snapshot = TypeVar("Snapshot")
 KubeletConfig = TypeVar("KubeletConfig")
 LinuxOSConfig = TypeVar("LinuxOSConfig")
+ManagedClusterOIDCIssuerProfile = TypeVar("ManagedClusterOIDCIssuerProfile")
 ManagedClusterSecurityProfileDefender = TypeVar("ManagedClusterSecurityProfileDefender")
 ManagedClusterStorageProfile = TypeVar('ManagedClusterStorageProfile')
 ManagedClusterStorageProfileDiskCSIDriver = TypeVar('ManagedClusterStorageProfileDiskCSIDriver')
 ManagedClusterStorageProfileFileCSIDriver = TypeVar('ManagedClusterStorageProfileFileCSIDriver')
+ManagedClusterStorageProfileBlobCSIDriver = TypeVar('ManagedClusterStorageProfileBlobCSIDriver')
 ManagedClusterStorageProfileSnapshotController = TypeVar('ManagedClusterStorageProfileSnapshotController')
 
 # TODO
@@ -594,6 +596,116 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return profile
 
+    def get_blob_driver(self) -> Optional[ManagedClusterStorageProfileBlobCSIDriver]:
+        """Obtain the value of storage_profile.blob_csi_driver
+        :return: Optional[ManagedClusterStorageProfileBlobCSIDriver]
+        """
+        enable_blob_driver = self.raw_param.get("enable_blob_driver")
+        disable_blob_driver = self.raw_param.get("disable_blob_driver")
+
+        if enable_blob_driver is None and disable_blob_driver is None:
+            return None
+
+        profile = self.models.ManagedClusterStorageProfileBlobCSIDriver()
+
+        if enable_blob_driver and disable_blob_driver:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot specify --enable-blob-driver and "
+                "--disable-blob-driver at the same time."
+            )
+
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if enable_blob_driver:
+                profile.enabled = True
+
+        if self.decorator_mode == DecoratorMode.UPDATE:
+            if enable_blob_driver:
+                msg = "Please make sure there is no open-source Blob CSI driver installed before enabling."
+                if not self.get_yes() and not prompt_y_n(msg, default="n"):
+                    raise DecoratorEarlyExitException()
+                profile.enabled = True
+            elif disable_blob_driver:
+                msg = (
+                    "Please make sure there are no existing PVs and PVCs "
+                    "that are used by Blob CSI driver before disabling."
+                )
+                if not self.get_yes() and not prompt_y_n(msg, default="n"):
+                    raise DecoratorEarlyExitException()
+                profile.enabled = False
+
+        return profile
+
+    def get_enable_keda(self) -> bool:
+        """Obtain the value of enable_keda.
+
+        This function will verify the parameter by default. If both enable_keda and disable_keda are specified, raise a
+        MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_enable_keda(enable_validation=True)
+
+    def _get_enable_keda(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_keda.
+
+        This function supports the option of enable_validation. When enabled, if both enable_keda and disable_keda are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        # Read the original value passed by the command.
+        enable_keda = self.raw_param.get("enable_keda")
+
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                hasattr(self.mc, "workload_auto_scaler_profile") and  # backward compatibility
+                self.mc.workload_auto_scaler_profile and
+                self.mc.workload_auto_scaler_profile.keda
+            ):
+                enable_keda = self.mc.workload_auto_scaler_profile.keda.enabled
+
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if enable_keda and self._get_disable_keda(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-keda and --disable-keda at the same time."
+                )
+
+        return enable_keda
+
+    def get_disable_keda(self) -> bool:
+        """Obtain the value of disable_keda.
+
+        This function will verify the parameter by default. If both enable_keda and disable_keda are specified, raise a
+        MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_disable_keda(enable_validation=True)
+
+    def _get_disable_keda(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of disable_keda.
+
+        This function supports the option of enable_validation. When enabled, if both enable_keda and disable_keda are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        # Read the original value passed by the command.
+        disable_keda = self.raw_param.get("disable_keda")
+
+        # This option is not supported in create mode, hence we do not read the property value from the `mc` object.
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if disable_keda and self._get_enable_keda(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-keda and --disable-keda at the same time."
+                )
+
+        return disable_keda
+
     def get_snapshot_controller(self) -> Optional[ManagedClusterStorageProfileSnapshotController]:
         """Obtain the value of storage_profile.snapshot_controller
 
@@ -642,6 +754,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             profile = self.mc.storage_profile
         profile.disk_csi_driver = self.get_disk_driver()
         profile.file_csi_driver = self.get_file_driver()
+        profile.blob_csi_driver = self.get_blob_driver()
         profile.snapshot_controller = self.get_snapshot_controller()
 
         return profile
@@ -2382,6 +2495,38 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return enable_msi_auth_for_monitoring
 
+    def get_enable_syslog(self) -> Union[bool, None]:
+        """Obtain the value of enable_syslog.
+
+        Note: The arg type of this parameter supports three states (True, False or None), but the corresponding default
+        value in entry function is not None.
+
+        :return: bool or None
+        """
+        # read the original value passed by the command
+        enable_syslog = self.raw_param.get("enable_syslog")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_syslog
+
+    def get_data_collection_settings(self) -> Union[str, None]:
+        """Obtain the value of data_collection_settings.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        data_collection_settings_file_path = self.raw_param.get("data_collection_settings")
+        # validate user input
+        if data_collection_settings_file_path:
+            if not os.path.isfile(data_collection_settings_file_path):
+                raise InvalidArgumentValueError(
+                    "{} is not valid file, or not accessable.".format(
+                        data_collection_settings_file_path
+                    )
+                )
+        return data_collection_settings_file_path
+
     # pylint: disable=no-self-use
     def get_virtual_node_addon_os_type(self) -> str:
         """Helper function to obtain the os_type of virtual node addon.
@@ -3207,6 +3352,24 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: bool
         """
         return self._get_disable_azure_rbac(enable_validation=True)
+
+    def get_oidc_issuer_profile(self) -> ManagedClusterOIDCIssuerProfile:
+        """Obtain the value of oidc_issuer_profile based on the user input.
+
+        :return: ManagedClusterOIDCIssuerProfile
+        """
+        enable_flag_value = bool(self.raw_param.get("enable_oidc_issuer"))
+        if not enable_flag_value:
+            # enable flag not set, return a None profile, server side will backfill the default/existing value
+            return None
+
+        profile = self.models.ManagedClusterOIDCIssuerProfile()
+        if self.decorator_mode == DecoratorMode.UPDATE:
+            if self.mc.oidc_issuer_profile is not None:
+                profile = self.mc.oidc_issuer_profile
+        profile.enabled = True
+
+        return profile
 
     def _get_api_server_authorized_ip_ranges(self, enable_validation: bool = False) -> List[str]:
         """Internal function to obtain the value of api_server_authorized_ip_ranges.
@@ -4795,6 +4958,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             aad_route=self.context.get_enable_msi_auth_for_monitoring(),
             create_dcr=True,
             create_dcra=False,
+            enable_syslog=self.context.get_enable_syslog(),
+            data_collection_settings=self.context.get_data_collection_settings()
         )
         # set intermediate
         self.context.set_intermediate("monitoring_addon_enabled", True, overwrite_exists=True)
@@ -5054,6 +5219,32 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc.aad_profile = aad_profile
         return mc
 
+    def set_up_oidc_issuer_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up OIDC issuer profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+        oidc_issuer_profile = self.context.get_oidc_issuer_profile()
+        if oidc_issuer_profile is not None:
+            mc.oidc_issuer_profile = oidc_issuer_profile
+
+        return mc
+
+    def set_up_workload_auto_scaler_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up workload auto-scaler profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if self.context.get_enable_keda():
+            if mc.workload_auto_scaler_profile is None:
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
+            mc.workload_auto_scaler_profile.keda = self.models.ManagedClusterWorkloadAutoScalerProfileKeda(enabled=True)
+
+        return mc
+
     def set_up_api_server_access_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up api server access profile and fqdn subdomain for the ManagedCluster object.
 
@@ -5243,6 +5434,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_addon_profiles(mc)
         # set up aad profile
         mc = self.set_up_aad_profile(mc)
+        # set up oidc issuer profile
+        mc = self.set_up_oidc_issuer_profile(mc)
         # set up api server access profile and fqdn subdomain
         mc = self.set_up_api_server_access_profile(mc)
         # set up identity
@@ -5265,7 +5458,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_storage_profile(mc)
         # set up azure keyvalut kms
         mc = self.set_up_azure_keyvault_kms(mc)
+        # set up http proxy config
         mc = self.set_up_http_proxy_config(mc)
+        # set up workload autoscaler profile
+        mc = self.set_up_workload_auto_scaler_profile(mc)
 
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
@@ -5365,6 +5561,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     aad_route=self.context.get_enable_msi_auth_for_monitoring(),
                     create_dcr=False,
                     create_dcra=True,
+                    enable_syslog=self.context.get_enable_syslog(),
                 )
 
         # ingress appgw addon
@@ -5827,6 +6024,18 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.aad_profile.enable_azure_rbac = False
         return mc
 
+    def update_oidc_issuer_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update OIDC issuer profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+        oidc_issuer_profile = self.context.get_oidc_issuer_profile()
+        if oidc_issuer_profile is not None:
+            mc.oidc_issuer_profile = oidc_issuer_profile
+
+        return mc
+
     def update_auto_upgrade_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update auto upgrade profile for the ManagedCluster object.
 
@@ -6144,11 +6353,29 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.identity_profile = identity_profile
         return mc
 
+    def update_workload_auto_scaler_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update workload auto-scaler profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if self.context.get_enable_keda():
+            if mc.workload_auto_scaler_profile is None:
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
+            mc.workload_auto_scaler_profile.keda = self.models.ManagedClusterWorkloadAutoScalerProfileKeda(enabled=True)
+
+        if self.context.get_disable_keda():
+            if mc.workload_auto_scaler_profile is None:
+                mc.workload_auto_scaler_profile = self.models.ManagedClusterWorkloadAutoScalerProfile()
+            mc.workload_auto_scaler_profile.keda = self.models.ManagedClusterWorkloadAutoScalerProfileKeda(
+                enabled=False
+            )
+
+        return mc
+
     def update_mc_profile_default(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
-
-        Note: To reduce the risk of regression introduced by refactoring, this function is not complete and is being
-        implemented gradually.
 
         The completely updated ManagedCluster object will later be passed as a parameter to the underlying SDK
         (mgmt-containerservice) to send the actual request.
@@ -6156,10 +6383,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         :return: the ManagedCluster object
         """
         # check raw parameters
+        # promt y/n if no options are specified to ask user whether to perform a reconcile operation
         self.check_raw_parameters()
         # fetch the ManagedCluster object
         mc = self.fetch_mc()
-        # update agentpool profile
+        # update agentpool profile by the agentpool decorator
         mc = self.update_agentpool_profile(mc)
         # update auto scaler profile
         mc = self.update_auto_scaler_profile(mc)
@@ -6181,25 +6409,28 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_windows_profile(mc)
         # update aad profile
         mc = self.update_aad_profile(mc)
+        # update oidc issuer profile
+        mc = self.update_oidc_issuer_profile(mc)
         # update auto upgrade profile
         mc = self.update_auto_upgrade_profile(mc)
         # update identity
         mc = self.update_identity(mc)
         # update addon profiles
         mc = self.update_addon_profiles(mc)
-        # update stroage profile
-        mc = self.update_storage_profile(mc)
         # update defender
         mc = self.update_defender(mc)
+        # update stroage profile
+        mc = self.update_storage_profile(mc)
         # update azure keyvalut kms
         mc = self.update_azure_keyvault_kms(mc)
         # update identity
         mc = self.update_identity_profile(mc)
         # set up http proxy config
         mc = self.update_http_proxy_config(mc)
+        # update workload autoscaler profile
+        mc = self.update_workload_auto_scaler_profile(mc)
         return mc
 
-    # pylint: disable=unused-argument
     def check_is_postprocessing_required(self, mc: ManagedCluster) -> bool:
         """Helper function to check if postprocessing is required after sending a PUT request to create the cluster.
 
@@ -6271,6 +6502,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     aad_route=self.context.get_enable_msi_auth_for_monitoring(),
                     create_dcr=False,
                     create_dcra=True,
+                    enable_syslog=self.context.get_enable_syslog(),
                 )
 
         # ingress appgw addon

@@ -218,49 +218,49 @@
             "hours": [
               1
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 1,
             "hours": [
               1
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 2,
             "hours": [
               1
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 3,
             "hours": [
               1
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 4,
             "hours": [
               1
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 5,
             "hours": [
               1
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 6,
             "hours": [
               1
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           }
         ],
         "searchTerms": [
@@ -315,7 +315,7 @@
               13,
               19
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 1,
@@ -325,7 +325,7 @@
               13,
               19
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 2,
@@ -335,7 +335,7 @@
               13,
               19
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 3,
@@ -345,7 +345,7 @@
               13,
               19
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 4,
@@ -355,7 +355,7 @@
               13,
               19
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 5,
@@ -365,7 +365,7 @@
               13,
               19
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 6,
@@ -375,7 +375,7 @@
               13,
               19
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           }
         ],
         "searchTerms": [
@@ -732,6 +732,407 @@
           "operator": "and",
           "operands": [
             {
+              "name": "labelAdded",
+              "parameters": {
+                "label": "issue-addressed"
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[Resolve Workflow] Issue Addressed Label Applied",
+        "actions": [
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "Hi @${issueAuthor}.  Thank you for opening this issue and giving us the opportunity to assist.  We believe that this has been addressed.  If you feel that further discussion is needed, please add a comment with the text “`/unresolve`” to remove the “issue-addressed” label and continue the conversation."
+            }
+          },
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "needs-triage"
+            }
+          },
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "needs-team-triage"
+            }
+          },
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "needs-team-attention"
+            }
+          },
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "needs-author-feedback"
+            }
+          },
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "no-recent-activity"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "scheduled",
+      "capabilityId": "ScheduledSearch",
+      "subCapability": "ScheduledSearch",
+      "version": "1.1",
+      "config": {
+        "frequency": [
+          {
+            "weekDay": 0,
+            "hours": [
+              0,
+              6,
+              12,
+              18
+            ],
+            "timezoneOffset": 8
+          },
+          {
+            "weekDay": 1,
+            "hours": [
+              0,
+              6,
+              12,
+              18
+            ],
+            "timezoneOffset": 8
+          },
+          {
+            "weekDay": 2,
+            "hours": [
+              0,
+              6,
+              12,
+              18
+            ],
+            "timezoneOffset": 8
+          },
+          {
+            "weekDay": 3,
+            "hours": [
+              0,
+              6,
+              12,
+              18
+            ],
+            "timezoneOffset": 8
+          },
+          {
+            "weekDay": 4,
+            "hours": [
+              0,
+              6,
+              12,
+              18
+            ],
+            "timezoneOffset": 8
+          },
+          {
+            "weekDay": 5,
+            "hours": [
+              0,
+              6,
+              12,
+              18
+            ],
+            "timezoneOffset": 8
+          },
+          {
+            "weekDay": 6,
+            "hours": [
+              0,
+              6,
+              12,
+              18
+            ],
+            "timezoneOffset": 8
+          }
+        ],
+        "searchTerms": [
+          {
+            "name": "isIssue",
+            "parameters": {}
+          },
+          {
+            "name": "isOpen",
+            "parameters": {}
+          },
+          {
+            "name": "hasLabel",
+            "parameters": {
+              "label": "issue-addressed"
+            }
+          },
+          {
+            "name": "noActivitySince",
+            "parameters": {
+              "days": 7
+            }
+          }
+        ],
+        "taskName": "[Resolve Workflow] Close Addressed Issues",
+        "actions": [
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "Hi @${issueAuthor}, since you haven’t asked that we “`/unresolve`” the issue, we’ll close this out. If you believe further discussion is needed, please add a comment “`/unresolve`” to reopen the issue."
+            }
+          },
+          {
+            "name": "closeIssue",
+            "parameters": {}
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssueCommentResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "hasLabel",
+              "parameters": {
+                "label": "issue-addressed"
+              }
+            },
+            {
+              "name": "commentContains",
+              "parameters": {
+                "commentPattern": "/unresolve"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "isActivitySender",
+                  "parameters": {
+                    "user": {
+                      "type": "author"
+                    }
+                  }
+                },
+                {
+                  "name": "activitySenderHasPermissions",
+                  "parameters": {
+                    "permissions": "admin"
+                  }
+                },
+                {
+                  "name": "activitySenderHasPermissions",
+                  "parameters": {
+                    "permissions": "write"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issue_comment"
+        ],
+        "taskName": "[Resolve Workflow] Unresolve Command by Author",
+        "actions": [
+          {
+            "name": "reopenIssue",
+            "parameters": {}
+          },
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "issue-addressed"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "needs-team-attention"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssueCommentResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "hasLabel",
+              "parameters": {
+                "label": "issue-addressed"
+              }
+            },
+            {
+              "name": "commentContains",
+              "parameters": {
+                "commentPattern": "/unresolve"
+              }
+            },
+            {
+              "operator": "and",
+              "operands": [
+                {
+                  "operator": "not",
+                  "operands": [
+                    {
+                      "name": "isActivitySender",
+                      "parameters": {
+                        "user": {
+                          "type": "author"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "operator": "not",
+                  "operands": [
+                    {
+                      "name": "activitySenderHasPermissions",
+                      "parameters": {
+                        "permissions": "admin"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "operator": "not",
+                  "operands": [
+                    {
+                      "name": "activitySenderHasPermissions",
+                      "parameters": {
+                        "permissions": "write"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issue_comment"
+        ],
+        "taskName": "[Resolve Workflow] Unresolve Command Without Permissions",
+        "actions": [
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "Hi ${contextualAuthor}, only the original author of the issue can ask that it be unresolved.  Please open a new issue with your scenario and details if you would like to discuss this topic with the team."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isOpen",
+              "parameters": {}
+            },
+            {
+              "name": "hasLabel",
+              "parameters": {
+                "label": "issue-addressed"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "labelAdded",
+                  "parameters": {
+                    "label": "needs-team-attention"
+                  }
+                },
+                {
+                  "name": "labelAdded",
+                  "parameters": {
+                    "label": "needs-author-feedback"
+                  }
+                },
+                {
+                  "name": "labelAdded",
+                  "parameters": {
+                    "label": "Service Attention"
+                  }
+                },
+                {
+                  "name": "labelAdded",
+                  "parameters": {
+                    "label": "needs-triage"
+                  }
+                },
+                {
+                  "name": "labelAdded",
+                  "parameters": {
+                    "label": "needs-team-triage"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[Resolve Workflow] Unresolve on WIP Labels",
+        "actions": [
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "issue-addressed"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
               "name": "isOpen",
               "parameters": {}
             },
@@ -784,7 +1185,7 @@
               19,
               22
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 1,
@@ -798,7 +1199,7 @@
               19,
               22
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 2,
@@ -812,7 +1213,7 @@
               19,
               22
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 3,
@@ -826,7 +1227,7 @@
               19,
               22
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 4,
@@ -840,7 +1241,7 @@
               19,
               22
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 5,
@@ -854,7 +1255,7 @@
               19,
               22
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 6,
@@ -868,7 +1269,7 @@
               19,
               22
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           }
         ],
         "searchTerms": [
@@ -923,7 +1324,7 @@
               20,
               23
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 1,
@@ -937,7 +1338,7 @@
               20,
               23
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 2,
@@ -951,7 +1352,7 @@
               20,
               23
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 3,
@@ -965,7 +1366,7 @@
               20,
               23
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 4,
@@ -979,7 +1380,7 @@
               20,
               23
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 5,
@@ -993,7 +1394,7 @@
               20,
               23
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           },
           {
             "weekDay": 6,
@@ -1007,7 +1408,7 @@
               20,
               23
             ],
-            "timezoneOffset": -7
+            "timezoneOffset": 8
           }
         ],
         "searchTerms": [
@@ -3204,7 +3605,6 @@
           {
             "name": "assignToUser",
             "parameters": {
-              "groupId": "61ee1499ed91cf3268d76645",
               "user": "necusjz"
             }
           },
@@ -3378,9 +3778,9 @@
             }
           },
           {
-            "name": "assignToGitHubUserGroup",
+            "name": "assignToUser",
             "parameters": {
-              "groupId": "61ee1769ed91cf3268d7664a"
+              "user": "zhoxing-ms"
             }
           },
           {
@@ -3454,9 +3854,9 @@
             }
           },
           {
-            "name": "assignToGitHubUserGroup",
+            "name": "assignToUser",
             "parameters": {
-              "groupId": "61ee1830ed91cf3268d7664d"
+              "user": "evelyn-ys"
             }
           },
           {
@@ -3537,7 +3937,7 @@
           {
             "name": "requestReviewer",
             "parameters": {
-              "reviewer": "wangzelin007"
+              "reviewer": "AllyW"
             }
           },
           {
@@ -3555,7 +3955,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -3637,7 +4037,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -3719,7 +4119,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -4143,9 +4543,9 @@
             }
           },
           {
-            "name": "assignToGitHubUserGroup",
+            "name": "assignToUser",
             "parameters": {
-              "groupId": "620c4edb6cc2ae3d5c9f321e"
+              "user": "evelyn-ys"
             }
           },
           {
@@ -4218,9 +4618,9 @@
             }
           },
           {
-            "name": "assignToGitHubUserGroup",
+            "name": "assignToUser",
             "parameters": {
-              "groupId": "620c4f9c6cc2ae3d5c9f3221"
+              "user": "AllyW"
             }
           },
           {
@@ -4291,9 +4691,9 @@
             }
           },
           {
-            "name": "assignToGitHubUserGroup",
+            "name": "assignToUser",
             "parameters": {
-              "groupId": "620c50606cc2ae3d5c9f3224"
+              "user": "jiasli"
             }
           },
           {
@@ -4366,9 +4766,9 @@
             }
           },
           {
-            "name": "assignToGitHubUserGroup",
+            "name": "assignToUser",
             "parameters": {
-              "groupId": "620c51246cc2ae3d5c9f3227"
+              "user": "zhoxing-ms"
             }
           },
           {
@@ -4943,9 +5343,9 @@
             }
           },
           {
-            "name": "assignToGitHubUserGroup",
+            "name": "assignToUser",
             "parameters": {
-              "groupId": "620c56276cc2ae3d5c9f3235"
+              "user": "jiasli"
             }
           },
           {
@@ -5726,7 +6126,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -5808,7 +6208,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -5884,7 +6284,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -5942,7 +6342,7 @@
           {
             "name": "requestReviewer",
             "parameters": {
-              "reviewer": "wangzelin007"
+              "reviewer": "yanzhudd"
             }
           },
           {
@@ -5954,7 +6354,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -6042,7 +6442,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -6131,7 +6531,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -6219,7 +6619,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -6370,7 +6770,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -6519,7 +6919,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -6614,7 +7014,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           }
         ]
@@ -6691,7 +7091,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           }
         ]
@@ -6772,6 +7172,12 @@
             }
           },
           {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "bebound"
+            }
+          },
+          {
             "name": "assignToUser",
             "parameters": {
               "user": "wangzelin007"
@@ -6780,7 +7186,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           }
         ]
@@ -6851,7 +7257,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           }
         ]
@@ -6935,7 +7341,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           }
         ]
@@ -7012,7 +7418,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           }
         ]
@@ -7095,7 +7501,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           }
         ]
@@ -7166,7 +7572,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           }
         ]
@@ -7330,7 +7736,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           }
         ]
@@ -7488,7 +7894,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -7658,7 +8064,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           }
         ]
@@ -8000,7 +8406,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -8165,7 +8571,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -8248,7 +8654,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -8363,7 +8769,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -8535,7 +8941,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -8712,7 +9118,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -8877,7 +9283,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -9070,7 +9476,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -9222,7 +9628,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -9393,7 +9799,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -9564,7 +9970,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -9723,7 +10129,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -9888,7 +10294,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -9983,7 +10389,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -10148,7 +10554,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -10321,7 +10727,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -10422,7 +10828,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -10593,7 +10999,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -10828,7 +11234,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -10999,7 +11405,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -11228,7 +11634,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -11317,7 +11723,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -11470,7 +11876,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -11629,7 +12035,7 @@
           {
             "name": "addMilestone",
             "parameters": {
-              "milestoneName": "Oct 2022 (2022-11-01)"
+              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           }
         ]
@@ -11862,89 +12268,6 @@
           "target": "All",
           "lastAssignedIndex": 25
         }
-      ]
-    },
-    {
-      "_id": "61ee1499ed91cf3268d76645",
-      "groupType": "GitHub",
-      "name": "Azure CLI Network",
-      "githubUserNames": [
-        "kairu-ms",
-        "jsntcy"
-      ],
-      "assignmentSchemes": [
-        {
-          "target": "All",
-          "lastAssignedIndex": 48
-        }
-      ]
-    },
-    {
-      "_id": "61ee1769ed91cf3268d7664a",
-      "groupType": "GitHub",
-      "name": "Azure CLI Compute",
-      "githubUserNames": [
-        "zhoxing-ms"
-      ],
-      "assignmentSchemes": [
-        {
-          "target": "All",
-          "lastAssignedIndex": 5
-        }
-      ]
-    },
-    {
-      "_id": "61ee1830ed91cf3268d7664d",
-      "groupType": "GitHub",
-      "name": "Azure CLI Storage",
-      "githubUserNames": [
-        "evelyn-ys"
-      ],
-      "assignmentSchemes": [
-        {
-          "target": "All",
-          "lastAssignedIndex": 19
-        }
-      ]
-    },
-    {
-      "_id": "620c4edb6cc2ae3d5c9f321e",
-      "groupType": "GitHub",
-      "name": "Azure CLI Keyvault",
-      "githubUserNames": [
-        "evelyn-ys"
-      ]
-    },
-    {
-      "_id": "620c4f9c6cc2ae3d5c9f3221",
-      "groupType": "GitHub",
-      "name": "Azure CLI Monitor",
-      "githubUserNames": [
-        "kairu-ms"
-      ]
-    },
-    {
-      "_id": "620c50606cc2ae3d5c9f3224",
-      "groupType": "GitHub",
-      "name": "Azure CLI Role",
-      "githubUserNames": [
-        "jiasli"
-      ]
-    },
-    {
-      "_id": "620c51246cc2ae3d5c9f3227",
-      "groupType": "GitHub",
-      "name": "Azure CLI Arm",
-      "githubUserNames": [
-        "zhoxing-ms"
-      ]
-    },
-    {
-      "_id": "620c56276cc2ae3d5c9f3235",
-      "groupType": "GitHub",
-      "name": "Azure CLI Graph",
-      "githubUserNames": [
-        "jiasli"
       ]
     }
   ]

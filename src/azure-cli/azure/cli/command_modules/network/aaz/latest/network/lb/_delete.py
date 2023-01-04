@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network lb delete"
+    "network lb delete",
 )
 class Delete(AAZCommand):
     """Delete the specified load balancer.
@@ -153,6 +153,10 @@ class Delete(AAZCommand):
 
         def on_204(self, session):
             pass
+
+
+class _DeleteHelper:
+    """Helper class for Delete"""
 
 
 __all__ = ["Delete"]

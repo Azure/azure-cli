@@ -211,6 +211,7 @@ def load_arguments(self, _):
                    help='Create the disk for uploading blobs. Replaced by "--upload-type Upload"')
         c.argument('upload_type', arg_type=get_enum_type(['Upload', 'UploadWithSecurityData']), min_api='2018-09-30',
                    help="Create the disk for upload scenario. 'Upload' is for Standard disk only upload. 'UploadWithSecurityData' is for OS Disk upload along with VM Guest State. Please note the 'UploadWithSecurityData' is not valid for data disk upload, it only to be used for OS Disk upload at present.")
+        c.argument('performance_plus', arg_type=get_three_state_flag(), min_api='2022-07-02', help='Set this flag to true to get a boost on the performance target of the disk deployed. This flag can only be set on disk creation time and cannot be disabled after enabled')
     # endregion
 
     # region Snapshots
@@ -458,6 +459,9 @@ def load_arguments(self, _):
         c.argument('port', help="The port or port range (ex: 80-100) to open inbound traffic to. Use '*' to allow traffic to all ports. Use comma separated values to specify more than one port or port range.")
         c.argument('priority', help='Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.', type=int)
 
+    with self.argument_context('vm list') as c:
+        c.argument('vmss', min_api='2021-11-01', help='List VM instances in a specific VMSS. Please specify the VMSS id or VMSS name')
+
     for scope in ['vm show', 'vm list']:
         with self.argument_context(scope) as c:
             c.argument('show_details', action='store_true', options_list=['--show-details', '-d'], help='show public ip address, FQDN, and power states. command will run slow')
@@ -521,7 +525,7 @@ def load_arguments(self, _):
         c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(expiration='3.0.0', hide=True))
 
     with self.argument_context('vm extension list') as c:
-        c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
+        c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'])
 
     with self.argument_context('vm extension show') as c:
         c.argument('instance_view', action='store_true', help='The instance view of a virtual machine extension.')
@@ -863,7 +867,7 @@ def load_arguments(self, _):
             c.argument('run_as_user', help='By default script process runs under system/root user. Specify custom user to host the process.')
             c.argument('run_as_password', help='Password if needed for using run-as-user parameter. It will be encrypted and not logged. ')
             c.argument('timeout_in_seconds', type=int, help='The timeout in seconds to execute the run command.')
-            c.argument('output_blob_uri', help='Specify the Azure storage blob where script output stream will be uploaded.')
+            c.argument('output_blob_uri', help='Specify the Azure storage blob (SAS URI) where script output stream will be uploaded.')
             c.argument('error_blob_uri', help='Specify the Azure storage blob where script error stream will be uploaded.')
 
     with self.argument_context('vm run-command delete') as c:
@@ -1312,11 +1316,12 @@ def load_arguments(self, _):
                    'Format: <MajorVersion>.<MinorVersion>.<Patch>', id_part='child_name_3')
 
     for scope in ['sig image-version create', 'sig image-version update']:
-        with self.argument_context(scope) as c:
+        with self.argument_context(scope, operation_group='gallery_image_versions') as c:
             c.argument('target_regions', nargs='*',
                        help='Space-separated list of regions and their replica counts. Use `<region>[=<replica count>][=<storage account type>]` to optionally set the replica count and/or storage account type for each region. '
                             'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used')
             c.argument('replica_count', help='The default number of replicas to be created per region. To set regional replication counts, use --target-regions', type=int)
+            c.argument('allow_replicated_location_deletion', arg_type=get_three_state_flag(), min_api='2022-03-03', help='Indicate whether or not removing this gallery image version from replicated regions is allowed.')
 
     with self.argument_context('sig show-community') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
@@ -1571,10 +1576,6 @@ def load_arguments(self, _):
         c.argument('expand', help='The expand expression to apply on the operation.',
                    deprecate_info=c.deprecate(hide=True))
         c.argument('instance_view', action='store_true', help='Show the instance view of a restore point.')
-
-    with self.argument_context('restore-point delete') as c:
-        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
-                   help='The name of the restore point.')
 
     with self.argument_context('restore-point wait') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],

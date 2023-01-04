@@ -28,9 +28,9 @@ class EHNamespaceAppl(ScenarioTest):
             'appgroup2': self.create_random_name(prefix='app-group-nscli2', length=20),
             'appgroup3': self.create_random_name(prefix='app-group-nscli3', length=20),
             'appgroup4': self.create_random_name(prefix='app-group-nscli4', length=20),
-            'identifier1': 'SASKeyName=' + self.create_random_name(prefix='saskey', length=24),
-            'identifier2': 'SASKeyName=' + self.create_random_name(prefix='saskey', length=24),
-            'identifier3': 'SASKeyName=' + self.create_random_name(prefix='saskey', length=24)
+            'identifier1': 'NamespaceSASKeyName=' + self.create_random_name(prefix='saskey', length=24),
+            'identifier2': 'NamespaceSASKeyName=' + self.create_random_name(prefix='saskey', length=24),
+            'identifier3': 'NamespaceSASKeyName=' + self.create_random_name(prefix='saskey', length=24)
         })
         from azure.cli.core import CLIError
 

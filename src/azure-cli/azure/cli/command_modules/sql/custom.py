@@ -17,6 +17,8 @@ from azure.cli.core.util import (
 from azure.mgmt.sql.models import (
     AdministratorName,
     AdministratorType,
+    AdvancedThreatProtectionName,
+    AdvancedThreatProtectionState,
     AuthenticationName,
     BlobAuditingPolicyState,
     CapabilityGroup,
@@ -33,6 +35,7 @@ from azure.mgmt.sql.models import (
     InstanceFailoverGroup,
     InstanceFailoverGroupReadOnlyEndpoint,
     InstanceFailoverGroupReadWriteEndpoint,
+    IPv6FirewallRule,
     LedgerDigestUploadsName,
     LongTermRetentionPolicyName,
     ManagedInstanceAzureADOnlyAuthentication,
@@ -1426,7 +1429,7 @@ def db_delete_replica_link(
         # No link exists, nothing to be done
         return
 
-    return client.delete(
+    return client.begin_delete(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -3054,6 +3057,53 @@ def db_threat_detection_policy_update_setter(
         parameters=parameters)
 
 
+def db_advanced_threat_protection_setting_get(
+        client,
+        resource_group_name,
+        server_name,
+        database_name):
+    '''
+    Gets an advanced threat protection setting.
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name,
+        advanced_threat_protection_name=AdvancedThreatProtectionName.DEFAULT)
+
+
+def db_advanced_threat_protection_setting_update(
+        cmd,
+        instance,
+        state=None):
+    # pylint: disable=unused-argument
+    '''
+    Updates an advanced threat protection setting. Custom update function to apply parameters to instance.
+    '''
+
+    # Apply state
+    if state:
+        instance.state = AdvancedThreatProtectionState[state.lower()]
+
+    return instance
+
+
+def db_advanced_threat_protection_setting_update_setter(
+        client,
+        resource_group_name,
+        server_name,
+        database_name,
+        parameters):
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name,
+        advanced_threat_protection_name=AdvancedThreatProtectionName.DEFAULT,
+        parameters=parameters)
+
+
 def db_sensitivity_label_show(
         client,
         database_name,
@@ -3875,6 +3925,55 @@ def firewall_rule_create(
 
 
 #########################################################
+#            sql server ipv6-firewall-rule              #
+#########################################################
+
+
+def ipv6_firewall_rule_update(
+        client,
+        firewall_rule_name,
+        server_name,
+        resource_group_name,
+        start_ipv6_address=None,
+        end_ipv6_address=None):
+    '''
+    Updates an ipv6 firewall rule.
+    '''
+
+    # Get existing instance
+    instance = client.get(
+        firewall_rule_name=firewall_rule_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name)
+
+    # Send update
+    return client.create_or_update(
+        firewall_rule_name=firewall_rule_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        parameters=IPv6FirewallRule(start_i_pv6_address=start_ipv6_address or instance.start_ipv6_address,
+                                    end_i_pv6_address=end_ipv6_address or instance.end_ipv6_address))
+
+
+def ipv6_firewall_rule_create(
+        client,
+        firewall_rule_name,
+        server_name,
+        resource_group_name,
+        start_ipv6_address=None,
+        end_ipv6_address=None):
+    '''
+    Creates an ipv6 firewall rule.
+    '''
+    return client.create_or_update(
+        firewall_rule_name=firewall_rule_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        parameters=IPv6FirewallRule(start_i_pv6_address=start_ipv6_address,
+                                    end_i_pv6_address=end_ipv6_address))
+
+
+#########################################################
 #           sql server outbound-firewall-rule           #
 #########################################################
 
@@ -4227,6 +4326,54 @@ def server_trust_group_list(
     return client.list_by_location(resource_group_name=resource_group_name, location_name=location)
 
 
+################################################################
+#        sql server advanced-threat-protection-setting         #
+################################################################
+
+
+def server_advanced_threat_protection_setting_get(
+        client,
+        resource_group_name,
+        server_name):
+    '''
+    Gets an advanced threat protection setting.
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        advanced_threat_protection_name=AdvancedThreatProtectionName.DEFAULT)
+
+
+def server_advanced_threat_protection_setting_update(
+        cmd,
+        instance,
+        state=None):
+    # pylint: disable=unused-argument
+    '''
+    Updates an advanced threat protection setting. Custom update function to apply parameters to instance.
+    '''
+
+    # Apply state
+    if state:
+        instance.state = AdvancedThreatProtectionState[state.lower()]
+
+    return instance
+
+
+def server_advanced_threat_protection_setting_update_setter(
+        client,
+        resource_group_name,
+        server_name,
+        parameters):
+
+    return client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        advanced_threat_protection_name=AdvancedThreatProtectionName.DEFAULT,
+        parameters=parameters)
+
+
 ###############################################
 #                sql managed instance         #
 ###############################################
@@ -4474,6 +4621,54 @@ def managed_instance_update(
         instance.subnet_id = virtual_network_subnet_id
 
     return instance
+
+
+#####
+#           sql managed instance advanced-threat-protection-setting
+#####
+
+
+def managed_instance_advanced_threat_protection_setting_get(
+        client,
+        resource_group_name,
+        managed_instance_name):
+    '''
+    Gets an advanced threat protection setting.
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        advanced_threat_protection_name=AdvancedThreatProtectionName.DEFAULT)
+
+
+def managed_instance_advanced_threat_protection_setting_update(
+        cmd,
+        instance,
+        state=None):
+    # pylint: disable=unused-argument
+    '''
+    Updates an advanced threat protection setting. Custom update function to apply parameters to instance.
+    '''
+
+    # Apply state
+    if state:
+        instance.state = AdvancedThreatProtectionState[state.lower()]
+
+    return instance
+
+
+def managed_instance_advanced_threat_protection_setting_update_setter(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        parameters):
+
+    return client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        advanced_threat_protection_name=AdvancedThreatProtectionName.DEFAULT,
+        parameters=parameters)
 
 
 #####
@@ -4763,6 +4958,53 @@ def managed_db_restore(
         managed_instance_name=target_managed_instance_name,
         resource_group_name=target_resource_group_name,
         parameters=kwargs)
+
+
+def midb_advanced_threat_protection_setting_get(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name):
+    '''
+    Gets an advanced threat protection setting.
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        database_name=database_name,
+        advanced_threat_protection_name=AdvancedThreatProtectionName.DEFAULT)
+
+
+def midb_advanced_threat_protection_setting_update(
+        cmd,
+        instance,
+        state=None):
+    # pylint: disable=unused-argument
+    '''
+    Updates an advanced threat protection setting. Custom update function to apply parameters to instance.
+    '''
+
+    # Apply state
+    if state:
+        instance.state = AdvancedThreatProtectionState[state.lower()]
+
+    return instance
+
+
+def midb_advanced_threat_protection_setting_update_setter(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        parameters):
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        database_name=database_name,
+        advanced_threat_protection_name=AdvancedThreatProtectionName.DEFAULT,
+        parameters=parameters)
 
 
 def update_short_term_retention_mi(
@@ -5208,24 +5450,32 @@ def managed_db_log_replay_stop(
     '''
 
     restore_details_client = get_sql_managed_database_restore_details_operations(cmd.cli_ctx, None)
+    try:
+        # Determine if managed DB was created using log replay service
+        # Raises RestoreDetailsNotAvailableOrExpired exception if there are no restore details
+        restore_details = restore_details_client.get(
+            database_name=database_name,
+            managed_instance_name=managed_instance_name,
+            resource_group_name=resource_group_name,
+            restore_details_name=RestoreDetailsName.DEFAULT)
 
-    # Determine if managed DB was created using log replay service, raise exception if not
-    restore_details = restore_details_client.get(
-        database_name=database_name,
-        managed_instance_name=managed_instance_name,
-        resource_group_name=resource_group_name,
-        restore_details_name=RestoreDetailsName.DEFAULT)
+        # Type must be LRSRestore in order to proceed with stop-log-replay, else raise exception
+        if restore_details.type_properties_type.lower() == 'lrsrestore':
+            return client.begin_delete(
+                database_name=database_name,
+                managed_instance_name=managed_instance_name,
+                resource_group_name=resource_group_name)
 
-    # If type is present, it must be lrsrestore in order to proceed with stop-log-replay
-    if (hasattr(restore_details, 'type_properties_type') and restore_details.type_properties_type.lower() != 'lrsrestore'):
         raise CLIError(
             f'Cannot stop the log replay as database {database_name} on the instance {managed_instance_name} '
             f'in the resource group {resource_group_name} was not created with log replay service.')
-
-    return client.begin_delete(
-        database_name=database_name,
-        managed_instance_name=managed_instance_name,
-        resource_group_name=resource_group_name)
+    except Exception as ex:
+        # Map RestoreDetailsNotAvailableOrExpired to a more descriptive error
+        if (ex and 'RestoreDetailsNotAvailableOrExpired' in str(ex)):
+            raise CLIError(
+                f'Cannot stop the log replay as database {database_name} on the instance {managed_instance_name} '
+                f'in the resource group {resource_group_name} was not created with log replay service.')
+        raise ex
 
 
 def managed_db_log_replay_complete_restore(

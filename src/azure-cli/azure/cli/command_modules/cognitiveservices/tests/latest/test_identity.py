@@ -20,7 +20,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
             'sname': sname,
             'kind': 'Face',
             'sku': 'E0',
-            'location': 'centraluseuap'
+            'location': 'SOUTHCENTRALUS'
         })
 
         # test to create cognitive services account
@@ -48,7 +48,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
             'sname': sname,
             'kind': 'Face',
             'sku': 'E0',
-            'location': 'centraluseuap'
+            'location': 'SOUTHCENTRALUS'
         })
 
         # test to create cognitive services account
