@@ -169,10 +169,10 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                vnet_name=subnet_info["vnet_name"],
                                subnet_name=subnet_info["subnet_name"])
         subnet_resource_id = subnet_info["subnet_resource_id"]
-        vnet_route_all_enabled = None
+        vnet_route_all_enabled = True
     else:
         subnet_resource_id = None
-        vnet_route_all_enabled = True
+        vnet_route_all_enabled = None
 
     if using_webapp_up:
         https_only = using_webapp_up
