@@ -16,6 +16,9 @@ from azure.cli.command_modules.resource._bicep import (
     _bicep_version_check_file_path,
 )
 from azure.cli.core.azclierror import InvalidTemplateError
+from azure.cli.core.mock import DummyCli
+
+cli_ctx = DummyCli()
 
 
 class TestBicep(unittest.TestCase):
@@ -24,7 +27,7 @@ class TestBicep(unittest.TestCase):
         isfile_stub.return_value = False
 
         with self.assertRaisesRegex(CLIError, 'Bicep CLI not found. Install it now by running "az bicep install".'):
-            run_bicep_command(["--version"], auto_install=False)
+            run_bicep_command(cli_ctx, ["--version"], auto_install=False)
 
     @mock.patch("azure.cli.command_modules.resource._bicep._logger.warning")
     @mock.patch("azure.cli.command_modules.resource._bicep._run_command")
@@ -45,11 +48,10 @@ class TestBicep(unittest.TestCase):
         _get_bicep_installed_version_stub.return_value = "1.0.0"
         get_bicep_latest_release_tag_stub.return_value = "v2.0.0"
 
-        run_bicep_command(["--version"], check_version=True)
+        run_bicep_command(cli_ctx, ["--version"])
 
         warning_mock.assert_called_once_with(
-            'A new Bicep release is available: %s. Upgrade now by running "az bicep upgrade".',
-            "v2.0.0",
+            'A new Bicep release is available: %s. Upgrade now by running "az bicep upgrade".', "v2.0.0",
         )
 
     @mock.patch("azure.cli.command_modules.resource._bicep._logger.warning")
@@ -74,7 +76,7 @@ class TestBicep(unittest.TestCase):
             _get_bicep_installed_version_stub.return_value = "1.0.0"
             get_bicep_latest_release_tag_stub.return_value = "v2.0.0"
 
-            run_bicep_command(["--version"], check_version=True)
+            run_bicep_command(cli_ctx, ["--version"])
 
             self.assertTrue(os.path.isfile(_bicep_version_check_file_path))
         finally:
