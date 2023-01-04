@@ -203,7 +203,7 @@ def _use_binary_from_path(cli_ctx):
         return False
 
     _logger.warning(
-        'The configuration value of bicep.use_binary_from_path is invalid: "%s". Possible values include "if_running_in_ci" and booleans.',  # pylint: disable=line-too-long
+        'The configuration value of bicep.use_binary_from_path is invalid: "%s". Possible values include "if_running_in_ci" and Booleans.',  # pylint: disable=line-too-long
         use_binary_from_path,
     )
 
