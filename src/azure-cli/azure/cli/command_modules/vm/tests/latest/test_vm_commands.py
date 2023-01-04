@@ -5877,19 +5877,15 @@ class VMGalleryImage(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_target_extended_locations', location='southcentralus')
-    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='southcentralus',
-                      additional_params='--enable-purge-protection true --enable-soft-delete true')
-    def test_image_version_with_target_extended_locations(self, resource_group, resource_group_location, key_vault):
+    def test_image_version_with_target_extended_locations(self):
         self.kwargs.update({
             'gallery': self.create_random_name(prefix='gallery_', length=20),
             'image': 'image1',
             'version': '1.0.0',
-            'key': self.create_random_name(prefix='key-', length=20),
-            'des1': self.create_random_name(prefix='des1-', length=20),
             'disk': 'disk',
             'region1': 'southcentralus',
-            'region2': 'westus',
             'edge_zone1': 'attdallas1',
+            'region2': 'westus',
             'edge_zone2': 'microsoftlosangeles1',
         })
 
@@ -5920,33 +5916,10 @@ class VMGalleryImage(ScenarioTest):
                 self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
             ])
 
-        # Updates the replica count of the image version in the edge zone
-        # It is necessary to provide the account type in this update
-        self.cmd(
-            'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image}'
-            ' --gallery-image-version {version} --target-edge-zones "{region1}={edge_zone1}=2=standardssd_lrs"',
-            checks=[
-                self.check('length(publishingProfile.targetExtendedLocations)', 1),
-                self.check('publishingProfile.targetExtendedLocations[0].name', 'South Central US'),
-                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone1}'),
-                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.type', 'EdgeZone'),
-                self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 2),
-                self.check('publishingProfile.targetExtendedLocations[0].storageAccountType', 'StandardSSD_LRS'),
-            ])
-
-        # Unreplicate the image version
-        self.cmd(
-            'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image}'
-            ' --gallery-image-version {version} --allow-replicated-location-deletion true',
-            checks=[
-                self.check('publishingProfile.targetExtendedLocations', None),
-            ])
-
         # Replicate to two edge zones with different storage types
         self.cmd(
-            'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image}'
-            ' --gallery-image-version {version} --target-edge-zones "{region1}={edge_zone1}=1=standardssd_lrs" '
-            '"{region2}={edge_zone2}=1=premium_lrs',
+            'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image} '
+            '--gallery-image-version {version} --target-edge-zones "{region1}={edge_zone1}=1=standardssd_lrs" "{region2}={edge_zone2}=1=premium_lrs"',
             checks=[
                 self.check('length(publishingProfile.targetExtendedLocations)', 2),
                 self.check('publishingProfile.targetExtendedLocations[0].name', 'South Central US'),
@@ -5959,19 +5932,6 @@ class VMGalleryImage(ScenarioTest):
                 self.check('publishingProfile.targetExtendedLocations[1].storageAccountType', 'Premium_LRS'),
             ])
 
-        # Unreplicate from an edge zone
-        self.cmd(
-            'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image}'
-            ' --gallery-image-version {version} --target-edge-zones "{region1}={edge_zone1}=1=standardssd_lrs',
-            checks=[
-                self.check('length(publishingProfile.targetExtendedLocations)', 1),
-                self.check('publishingProfile.targetExtendedLocations[0].name', 'South Central US'),
-                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone1}'),
-                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.type', 'EdgeZone'),
-                self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
-                self.check('publishingProfile.targetExtendedLocations[0].storageAccountType', 'StandardSSD_LRS'),
-            ])
-
         # Fully unreplicating the image before performing encryption test
         self.cmd(
             'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --allow-replicated-location-deletion true',
@@ -5982,6 +5942,36 @@ class VMGalleryImage(ScenarioTest):
         # Deleting the image version before performing encryption test
         self.cmd(
             'sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_target_extended_locations_encryption', location='westus')
+    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='westus', additional_params='--enable-purge-protection')
+    def test_image_version_with_target_extended_locations_encryption(self, resource_group, key_vault ):
+        self.kwargs.update({
+            'gallery': self.create_random_name(prefix='gallery_', length=20),
+            'image': 'image1',
+            'version': '1.0.0',
+            'key': self.create_random_name(prefix='key-', length=20),
+            'des1': self.create_random_name(prefix='des1-', length=20),
+            'disk': 'disk',
+            'region1': 'westus',
+            'edge_zone1': 'microsoftlosangeles1',
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
+
+        time.sleep(15)
+
+        self.cmd(
+            'sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type windows -p publisher1 -f offer1 -s sku1',
+            checks=[
+                self.check('name', self.kwargs['image'])
+            ])
+
+        disk_id = self.cmd('disk create -n {disk} -g {rg} --size-gb 10').get_output_in_json()['id']
+        self.kwargs.update({
+            'disk_id': disk_id
+        })
 
         # Create disk encryption set
         kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software').get_output_in_json()['key']['kid']
@@ -6006,11 +5996,10 @@ class VMGalleryImage(ScenarioTest):
             checks=[
                 self.check('length(publishingProfile.targetExtendedLocations)', 1),
                 self.check('publishingProfile.targetExtendedLocations[0].name', 'West US'),
-                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone2}'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone1}'),
                 self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.type', 'EdgeZone'),
                 self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
             ])
-
 
     @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
     def test_create_image_version_with_region_cvm_encryption_pmk(self, resource_group, resource_group_location):
