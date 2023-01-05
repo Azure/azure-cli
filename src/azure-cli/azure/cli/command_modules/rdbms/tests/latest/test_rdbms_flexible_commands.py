@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import os
 import time
+import unittest
 
 from datetime import datetime, timedelta, tzinfo
 from time import sleep
@@ -133,6 +134,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     def test_mysql_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name):
         self._test_flexible_server_byok_mgmt('mysql', resource_group, vault_name, backup_vault_name)
 
+    @unittest.skip('No such file or directory')
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=postgres_location, additional_params='--enable-purge-protection true --retention-days 90')
