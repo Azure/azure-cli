@@ -508,8 +508,8 @@ class AKSAgentPoolContext(BaseAKSContext):
             if raw_os_sku == sku_2019 or raw_os_sku == sku_2022:
                 raise InvalidArgumentValueError(
                     "OS SKU is invalid for Linux OS Type." 
-                    "Please specify '--os-type Windows' for Windows SKUs"
-                    )
+                    " Please specify '--os-type Windows' for Windows SKUs"
+                )
         return os_type
 
     def get_os_type(self) -> Union[str, None]:
