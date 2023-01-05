@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-statements
+import json
 from unittest import mock
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
@@ -24,6 +25,7 @@ class IoTHubTest(ScenarioTest):
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
     def test_iot_hub(self, resource_group, resource_group_location, storage_account):
+        # for some reason the recording is missing a ] and a } after the routing.endpoints.eventHubs
         hub = self.create_random_name(prefix='iot-hub-for-test-11', length=32)
         rg = resource_group
         location = resource_group_location
@@ -341,6 +343,12 @@ class IoTHubTest(ScenarioTest):
 
         # Test 'az iot hub route test'
         self.cmd('iot hub route test --hub-name {0} -g {1} -n {2}'.format(hub, rg, route_name),
+                 checks=[self.check('result', 'true')])
+
+        # Test 'az iot hub route test'
+        self.kwargs["route_properties"] = json.dumps({"body": 4})
+        props = "--sp '{route_properties}' --ap '{route_properties}'"
+        self.cmd('iot hub route test --hub-name {0} -g {1} -n {2} {3}'.format(hub, rg, route_name, props),
                  checks=[self.check('result', 'true')])
 
         # Test 'az iot hub route test'

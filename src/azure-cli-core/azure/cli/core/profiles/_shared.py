@@ -152,11 +152,11 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_STORAGE: '2022-05-01',
+        ResourceType.MGMT_STORAGE: '2022-09-01',
         ResourceType.MGMT_NETWORK: '2022-01-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2022-08-01', {
             'resource_skus': '2019-04-01',
-            'disks': '2022-03-02',
+            'disks': '2022-07-02',
             'disk_encryption_sets': '2022-03-02',
             'disk_accesses': '2020-05-01',
             'snapshots': '2022-03-02',
@@ -178,9 +178,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2021-05-01',
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
-        ResourceType.MGMT_KEYVAULT: SDKProfile('2021-04-01-preview', {
-            'vaults': '2022-07-01'
-        }),
+        ResourceType.MGMT_KEYVAULT: '2022-07-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2020-04-01-preview', {
             'classic_administrators': '2015-06-01',
             'role_definitions': '2018-01-01-preview',
@@ -243,13 +241,13 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.MGMT_MSI: '2022-01-31-preview',
         ResourceType.MGMT_APPSERVICE: '2022-03-01',
-        ResourceType.MGMT_IOTHUB: '2021-07-02',
+        ResourceType.MGMT_IOTHUB: '2022-04-30-preview',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
         ResourceType.MGMT_IOTCENTRAL: '2021-11-01-preview',
         ResourceType.MGMT_ARO: '2022-04-01',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-09-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-11-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
         }),

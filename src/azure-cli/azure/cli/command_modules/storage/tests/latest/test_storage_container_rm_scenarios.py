@@ -13,7 +13,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 class StorageContainerRmScenarios(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="cli", location="eastus")
-    @StorageAccountPreparer(name_prefix="containerrm", location="eastus")
+    @StorageAccountPreparer(name_prefix="containerrm", location="eastus", allow_blob_public_access=True)
     def test_storage_container_using_rm_main_scenario(self):
         # 1. Test create command.
 
