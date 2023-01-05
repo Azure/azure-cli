@@ -5932,9 +5932,24 @@ class VMGalleryImage(ScenarioTest):
                 self.check('publishingProfile.targetExtendedLocations[1].storageAccountType', 'Premium_LRS'),
             ])
 
-        # Fully unreplicating the image before performing encryption test
+        # Target extended locations will not be updated if --target-edge-zones is not specified
         self.cmd(
-            'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --allow-replicated-location-deletion true',
+            'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}',
+            checks=[
+                self.check('length(publishingProfile.targetExtendedLocations)', 2),
+                self.check('publishingProfile.targetExtendedLocations[0].name', 'South Central US'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone1}'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
+                self.check('publishingProfile.targetExtendedLocations[0].storageAccountType', 'StandardSSD_LRS'),
+                self.check('publishingProfile.targetExtendedLocations[1].name', 'West US'),
+                self.check('publishingProfile.targetExtendedLocations[1].extendedLocation.name', '{edge_zone2}'),
+                self.check('publishingProfile.targetExtendedLocations[1].extendedLocationReplicaCount', 1),
+                self.check('publishingProfile.targetExtendedLocations[1].storageAccountType', 'Premium_LRS'),
+            ])
+
+        # Target extended locations will be updated to None if '--target-edge-zones None' is specified
+        self.cmd(
+            'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-edge-zones None --allow-replicated-location-deletion true',
             checks=[
                 self.check('publishingProfile.targetExtendedLocations', None),
             ])
