@@ -664,7 +664,7 @@ def load_arguments(self, _):
         c.argument('outfile', arg_type=bicep_outfile_type)
         c.argument('stdout', arg_type=bicep_stdout_type)
         c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, builds the bicep file without restoring external modules.")
-    
+
     with self.argument_context('bicep format') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep file to format in the file system.")
         c.argument('outdir', arg_type=bicep_outdir_type)
