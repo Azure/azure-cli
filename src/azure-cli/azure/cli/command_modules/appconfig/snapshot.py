@@ -36,10 +36,10 @@ def create_snapshot(cmd,
                     tags=None
                     ):
 
-    _client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
+    client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        return _client.begin_create_snapshot(snapshot_name, filters, composition_type, retention_period, tags)
+        return client.begin_create_snapshot(snapshot_name, filters, composition_type, retention_period, tags)
 
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.CONFLICT:
@@ -68,20 +68,10 @@ def show_snapshot(cmd,
                 break
             query_fields.append(field.name.lower())
 
-    _client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
+    client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        snapshot = _client.get_snapshot(snapshot_name, fields=query_fields)
-
-        if not query_fields:
-            return snapshot
-
-        partial_snapshot = {}
-
-        for field in query_fields:
-            partial_snapshot[field] = snapshot.__dict__[field]
-
-        return partial_snapshot
+        snapshot = client.get_snapshot(snapshot_name, fields=query_fields)
 
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.NOT_FOUND:
@@ -91,6 +81,16 @@ def show_snapshot(cmd,
 
     except Exception as exception:
         raise CLIError("Request failed. {}".format(str(exception)))
+
+    if not query_fields:
+        return snapshot
+
+    partial_snapshot = {}
+
+    for field in query_fields:
+        partial_snapshot[field] = snapshot.__dict__[field]
+
+    return partial_snapshot
 
 
 def list_snapshots(cmd,
@@ -113,10 +113,10 @@ def list_snapshots(cmd,
                 break
             query_fields.append(field.name.lower())
 
-    _client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
+    client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        snapshots_iterable = _client.list_snapshots(name=snapshot_name, status=status, fields=query_fields)
+        snapshots_iterable = client.list_snapshots(name=snapshot_name, status=status, fields=query_fields)
 
     except HttpResponseError as exception:
         raise AzureResponseError(str(exception))
@@ -156,10 +156,10 @@ def archive_snapshot(cmd,
                      auth_mode='key',
                      endpoint=None):
 
-    _client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
+    client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        return _client.archive_snapshot(snapshot_name)
+        return client.archive_snapshot(snapshot_name)
 
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.NOT_FOUND:
@@ -178,10 +178,10 @@ def recover_snapshot(cmd,
                      auth_mode='key',
                      endpoint=None):
 
-    _client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
+    client = _get_snapshot_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        return _client.recover_snapshot(snapshot_name)
+        return client.recover_snapshot(snapshot_name)
 
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.NOT_FOUND:

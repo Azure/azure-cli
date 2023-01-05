@@ -55,9 +55,9 @@ class Snapshot:
     :ivar str items_link:
         Endpoint that can be used to query keys-values in a snapshot
     :ivar int retention_period:
-        Number of days for which an archived snapshot will be kept before being deleted.
+        Number of seconds for which an archived snapshot will be kept before being deleted.
     :ivar int status_code:
-        The status code returned in the event where snapshot creation fails.
+        The status code returned during the snapshot creation process.
     '''
 
     def __init__(self,
@@ -102,7 +102,8 @@ class Snapshot:
             "\nItem count: " + str(self.items_count) + \
             "\nTags: " + (str(self.tags) if self.tags else '{}') + \
             "\nItems Link: " + self.items_link + \
-            "\nRetention Period: " + str(self.retention_period)
+            "\nRetention Period: " + str(self.retention_period) + \
+            "\nStatus Code: " + str(self.status_code)
 
     @classmethod
     def from_json(cls, data_dict: any):
@@ -118,7 +119,8 @@ class Snapshot:
             items_count=data_dict.get("items_count", 0),
             tags=data_dict.get("tags", {}),
             items_link=data_dict.get("items_link", None),
-            retention_period=data_dict.get("retention_period", 0)
+            retention_period=data_dict.get("retention_period", 0),
+            status_code=data_dict.get("status_code", 0)
         )
 
 

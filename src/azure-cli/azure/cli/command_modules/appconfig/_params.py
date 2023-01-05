@@ -96,7 +96,7 @@ def load_arguments(self, _):
         options_list=['--filters'],
         validator=validate_snapshot_filters,
         nargs='+',
-        help='Space-separated key and label filters used to build an app configuration snapshot. These values should be escaped JSON objects.'
+        help='Space-separated list of escaped JSON objects that represent the key and label filters used to build an App Configuration snapshot.'
     )
 
     with self.argument_context('appconfig') as c:
