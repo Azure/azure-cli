@@ -2750,14 +2750,6 @@ examples:
     text: az bicep format --file {bicep_file} --outdir {out_dir}
   - name: Foramt a Bicep file and save the result to the specified file.
     text: az bicep format --file {bicep_file} --outfile {out_file}
-  - name: Foramt a Bicep file set newline char. Valid values are ( Auto | LF | CRLF | CR ).
-    text: az bicep format --file {bicep_file} --newline {newline}
-  - name: Foramt a Bicep file set indentation kind. Valid values are ( Space | Tab ).
-    text: az bicep format --file {bicep_file} --indentKind {indentKind}
-  - name: Foramt a Bicep file set number of spaces to indent with (Only valid with --indentKind set to Space).
-    text: az bicep format --file {bicep_file} --indentSize {indentSize}
-  - name: Foramt a Bicep file insert a final newline.
-    text: az bicep format --file {bicep_file} --insertFinalNewline
 """
 
 helps['bicep decompile'] = """
