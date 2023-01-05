@@ -31,15 +31,18 @@ from azure.mgmt.security.models import (SecurityContact,
                                         AutomationActionLogicApp,
                                         AutomationActionEventHub,
                                         AutomationRuleSet,
-                                        AutomationTriggeringRule)
-from azure.mgmt.security.models._security_center_enums import Enum69
+                                        AutomationTriggeringRule,
+                                        SettingName)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError)
 from msrestazure.tools import resource_id
 from msrestazure.azure_exceptions import CloudError
+from knack.log import get_logger
 from ._utils import (
     run_cli_cmd
 )
+
+logger = get_logger(__name__)
 
 # --------------------------------------------------------------------------------------------
 # Security Tasks
@@ -52,7 +55,8 @@ def list_security_tasks(client, resource_group_name=None):
         client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     if resource_group_name:
-        return client.tasks.list_by_resource_group(resource_group_name)
+        return client.tasks.list_by_resource_group(resource_group_name,
+                                                   client._config.asc_location)  # pylint: disable=protected-access
 
     return client.tasks.list()
 
@@ -63,9 +67,12 @@ def get_security_task(client, resource_name, resource_group_name=None):
         client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     if resource_group_name:
-        return client.tasks.get_resource_group_level_task(resource_group_name, resource_name)
+        return client.tasks.get_resource_group_level_task(resource_group_name,
+                                                          client._config.asc_location,  # pylint: disable=protected-access
+                                                          resource_name)
 
-    return client.tasks.get_subscription_level_task(resource_name)
+    return client.tasks.get_subscription_level_task(client._config.asc_location,  # pylint: disable=protected-access
+                                                    resource_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -78,9 +85,9 @@ def list_security_alerts(client, resource_group_name=None, location=None):
         client._config.asc_location = location  # pylint: disable=protected-access
 
         if resource_group_name:
-            return client.list_resource_group_level_by_region(resource_group_name)
+            return client.list_resource_group_level_by_region(location, resource_group_name)
 
-        return client.list_subscription_level_by_region()
+        return client.list_subscription_level_by_region(location)
 
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
@@ -93,9 +100,9 @@ def get_security_alert(client, location, resource_name, resource_group_name=None
     client._config.asc_location = location  # pylint: disable=protected-access
 
     if resource_group_name:
-        return client.get_resource_group_level(resource_name, resource_group_name)
+        return client.get_resource_group_level(resource_group_name, location, resource_name)
 
-    return client.get_subscription_level(resource_name)
+    return client.get_subscription_level(location, resource_name)
 
 
 def update_security_alert(client, location, resource_name, status, resource_group_name=None):
@@ -104,18 +111,22 @@ def update_security_alert(client, location, resource_name, status, resource_grou
 
     if resource_group_name:
         if status == "Dismiss":
-            client.update_resource_group_level_state_to_dismiss(resource_name, resource_group_name)
+            client.update_resource_group_level_state_to_dismiss(resource_group_name, location, resource_name)
         if status == "Activate":
-            client.update_resource_group_level_state_to_activate(resource_name, resource_group_name)
+            client.update_resource_group_level_state_to_activate(resource_group_name, location, resource_name)
         if status == "Resolve":
-            client.update_resource_group_level_state_to_resolve(resource_name, resource_group_name)
+            client.update_resource_group_level_state_to_resolve(resource_group_name, location, resource_name)
+        if status == "InProgress":
+            client.update_resource_group_level_state_to_in_progress(resource_group_name, location, resource_name)
     else:
         if status == "Dismiss":
-            client.update_subscription_level_state_to_dismiss(resource_name)
+            client.update_subscription_level_state_to_dismiss(location, resource_name)
         if status == "Activate":
-            client.update_subscription_level_state_to_activate(resource_name)
+            client.update_subscription_level_state_to_activate(location, resource_name)
         if status == "Resolve":
-            client.update_subscription_level_state_to_resolve(resource_name)
+            client.update_subscription_level_state_to_resolve(location, resource_name)
+        if status == "InProgress":
+            client.update_subscription_level_state_to_in_progress(location, resource_name)
 
 # --------------------------------------------------------------------------------------------
 # Security Alerts Suppression Rule
@@ -231,7 +242,7 @@ def get_security_setting(client, setting_name):
 
 def update_security_setting(client, setting_name, enabled):
 
-    if setting_name == Enum69.SENTINEL:
+    if setting_name == SettingName.SENTINEL:
         setting = AlertSyncSettings()
     else:
         setting = DataExportSettings()
@@ -322,7 +333,8 @@ def get_security_discovered_security_solution(client, resource_name, resource_gr
     for loc in client.locations.list():
         client._config.asc_location = loc.name  # pylint: disable=protected-access
 
-    return client.discovered_security_solutions.get(resource_group_name, resource_name)
+    return client.discovered_security_solutions.get(resource_group_name, client._config.asc_location,  # pylint: disable=protected-access
+                                                    resource_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -351,7 +363,8 @@ def get_security_external_security_solution(client, resource_name, resource_grou
     for loc in client.locations.list():
         client._config.asc_location = loc.name  # pylint: disable=protected-access
 
-    return client.external_security_solutions.get(resource_group_name, resource_name)
+    return client.external_security_solutions.get(resource_group_name, client._config.asc_location,  # pylint: disable=protected-access
+                                                  resource_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -364,9 +377,9 @@ def list_security_jit_network_access_policies(client, resource_group_name=None, 
         client._config.asc_location = location  # pylint: disable=protected-access
 
         if resource_group_name:
-            return client.list_by_resource_group_and_region(resource_group_name)
+            return client.list_by_resource_group_and_region(resource_group_name, location)
 
-        return client.list_by_region()
+        return client.list_by_region(location)
 
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
@@ -378,7 +391,7 @@ def get_security_jit_network_access_policy(client, location, resource_name, reso
 
     client._config.asc_location = location  # pylint: disable=protected-access
 
-    return client.get(resource_group_name, resource_name)
+    return client.get(resource_group_name, location, resource_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -394,7 +407,7 @@ def get_security_location(client, resource_name):
 
     client._config.asc_location = resource_name  # pylint: disable=protected-access
 
-    return client.get()
+    return client.get(resource_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -442,7 +455,9 @@ def get_security_topology(client, resource_name, resource_group_name):
     for loc in client.locations.list():
         client._config.asc_location = loc.name  # pylint: disable=protected-access
 
-    return client.topology.get(resource_group_name, resource_name)
+    return client.topology.get(resource_group_name,
+                               client._config.asc_location,  # pylint: disable=protected-access
+                               resource_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -731,9 +746,14 @@ def list_security_adaptive_application_controls(client):
     return client.list()
 
 
-def get_security_adaptive_application_controls(client, group_name):
+def get_security_adaptive_application_controls(client, group_name, location=None):
 
-    return client.get(group_name=group_name)
+    if location is None:
+        default_location = "centralus"
+        logger.warning("Please be aware that default location '%s' used. Use can use 'list' operation to get all resources and locations", default_location)
+        return client.get(default_location, group_name=group_name)
+
+    return client.get(location, group_name=group_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -785,7 +805,9 @@ def get_security_allowed_connections(client, resource_name, resource_group_name)
     for loc in client.locations.list():
         client._config.asc_location = loc.name  # pylint: disable=protected-access
 
-    return client.allowed_connections.get(resource_group_name, resource_name)
+    return client.allowed_connections.get(resource_group_name,
+                                          client._config.asc_location,  # pylint: disable=protected-access
+                                          resource_name)
 
 
 # --------------------------------------------------------------------------------------------

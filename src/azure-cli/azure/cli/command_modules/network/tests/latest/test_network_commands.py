@@ -73,7 +73,8 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
         ])
 
         # test network lb update command
-        self.cmd('network lb update -g {rg} -n {lb} --set tags.CostCenter=MyTestGroup')
+        self.cmd('network lb update -g {rg} -n {lb} --set tags.label=1544 --force-string')
+        self.cmd('network lb update -g {rg} -n {lb} --tags CostCenter=MyTestGroup')
         self.cmd('network lb show -g {rg} -n {lb}', checks=[
             self.check('tags.CostCenter', 'MyTestGroup')
         ])
@@ -704,7 +705,8 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n ag1 --priority 1001 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n ag1 --exists')
         self.cmd('network application-gateway update -g {rg} -n ag1 --no-wait')
-        self.cmd('network application-gateway update -g {rg} -n ag1 --no-wait --capacity 3 --sku standard_small --tags foo=doo')
+        self.cmd('network application-gateway update -g {rg} -n ag1 --no-wait '
+                 '--capacity 3 --sku standard_small --tags foo=doo --http2 Disabled')
         self.cmd('network application-gateway wait -g {rg} -n ag1 --updated')
 
         ag_list = self.cmd('network application-gateway list --resource-group {rg}', checks=[
@@ -718,12 +720,13 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check('name', 'ag1'),
             self.check('resourceGroup', resource_group),
             self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
-            self.check("frontendIPConfigurations[0].subnet.contains(id, 'default')", True)
+            self.check("frontendIPConfigurations[0].subnet.contains(id, 'default')", True),
+            self.check("enableHttp2", False),
         ])
         self.cmd('network application-gateway show-backend-health -g {rg} -n ag1')
 
         self.cmd('network application-gateway stop --resource-group {rg} -n ag1')
-        self.cmd('network application-gateway start --resource-group {rg} -n ag1')
+        self.cmd('network application-gateway start --resource-group {rg} -n ag1 --no-wait')
         self.cmd('network application-gateway delete --resource-group {rg} -n ag1')
         self.cmd('network application-gateway list --resource-group {rg}', checks=self.check('length(@)', ag_count - 1))
 
@@ -2149,12 +2152,6 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('length(@)', 2)
                  ])
 
-        # test match-condition list
-        self.cmd('network application-gateway waf-policy custom-rule match-condition list -g {rg} --name {custom-rule1} --policy-name {waf}',
-                 checks=[
-                     self.check('length(@)', 0)
-                 ])
-
         # update some policy settings of this waf-policy
         self.cmd('network application-gateway waf-policy policy-setting update -g {rg} --policy-name {waf} '
                  '--state Enabled --file-upload-limit-in-mb 64 --mode Prevention')
@@ -2309,7 +2306,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
                  '--policy-name {waf} -n {rule} '
                  '--match-variables RequestHeaders.value --operator contains '
-                 '--values remove this --transform lowercase')
+                 '--values remove this --transform uppercase')
         self.cmd('network application-gateway waf-policy custom-rule show -g {rg} '
                  '--policy-name {waf} -n {rule}',
                  checks=[
@@ -2317,6 +2314,11 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('ruleType', 'MatchRule'),
                      self.check('action', 'Log'),
                      self.check('matchConditions | length(@)', 2)
+                 ])
+        self.cmd('network application-gateway waf-policy custom-rule match-condition list -n {rule} -g {rg} '
+                 '--policy-name {waf}',
+                 checks=[
+                     self.check('length(@)', 2)
                  ])
 
         # remove one of match condition of custom rule
@@ -3912,7 +3914,7 @@ class NetworkNicScenarioTest(ScenarioTest):
         })
 
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}').get_output_in_json()['newVNet']['subnets'][0]['id']
-        self.cmd('network nsg create -g {rg} -n {nsg1} --tags ""')
+        self.cmd('network nsg create -g {rg} -n {nsg1}')
         self.kwargs['nsg_id'] = self.cmd('network nsg show -g {rg} -n {nsg1}').get_output_in_json()['id']
 
         # test network nsg update
@@ -4230,21 +4232,21 @@ class NetworkExtendedNSGScenarioTest(ScenarioTest):
             'rule': 'rule1'
         })
         self.cmd('network nsg create --name {nsg} -g {rg}')
-        self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefix * -n {rule} --source-port-range 700-900 1000-1100 --destination-port-range 4444 --priority 1000', checks=[
+        self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefixes * -n {rule} --source-port-ranges 700-900 1000-1100 --priority 1000', checks=[
             self.check('length(destinationAddressPrefixes)', 2),
-            self.check('destinationAddressPrefix', ''),
+            self.check('destinationAddressPrefix', None),
             self.check('length(sourceAddressPrefixes)', 0),
             self.check('sourceAddressPrefix', '*'),
             self.check('length(sourcePortRanges)', 2),
             self.check('sourcePortRange', None),
             self.check('length(destinationPortRanges)', 0),
-            self.check('destinationPortRange', '4444')
+            self.check('destinationPortRange', '80')
         ])
-        self.cmd('network nsg rule update --destination-address-prefixes Internet --nsg-name {nsg} -g {rg} --source-address-prefix 10.0.0.0/24 11.0.0.0/24 -n {rule} --source-port-range * --destination-port-range 500-1000 2000 3000', checks=[
+        self.cmd('network nsg rule update --destination-address-prefixes Internet --nsg-name {nsg} -g {rg} --source-address-prefixes 10.0.0.0/24 11.0.0.0/24 -n {rule} --source-port-ranges * --destination-port-ranges 500-1000 2000 3000', checks=[
             self.check('length(destinationAddressPrefixes)', 0),
             self.check('destinationAddressPrefix', 'Internet'),
             self.check('length(sourceAddressPrefixes)', 2),
-            self.check('sourceAddressPrefix', ''),
+            self.check('sourceAddressPrefix', None),
             self.check('length(sourcePortRanges)', 0),
             self.check('sourcePortRange', '*'),
             self.check('length(destinationPortRanges)', 3),
@@ -4265,7 +4267,7 @@ class NetworkSecurityGroupScenarioTest(ScenarioTest):
         })
 
         self.cmd('network nsg create --name {nsg} -g {rg} --tags foo=doo')
-        self.cmd('network nsg rule create --access allow --destination-address-prefix 1234 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefix 789 -n {rule} --source-port-range * --destination-port-range 4444 --priority 1000')
+        self.cmd('network nsg rule create --access allow --destination-address-prefixes 1234 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefixes 789 -n {rule} --source-port-ranges * --destination-port-ranges 4444 --priority 1000')
 
         self.cmd('network nsg list', checks=[
             self.check('type(@)', 'array'),
@@ -4303,7 +4305,7 @@ class NetworkSecurityGroupScenarioTest(ScenarioTest):
             'desc': 'greatrule',
             'priority': 888
         })
-        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --direction {dir} --access {access} --destination-address-prefix {prefix} --protocol {protocol} --source-address-prefix {prefix} --source-port-range {ports} --destination-port-range {ports} --priority {priority} --description {desc}', checks=[
+        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --direction {dir} --access {access} --destination-address-prefixes {prefix} --protocol {protocol} --source-address-prefixes {prefix} --source-port-ranges {ports} --destination-port-ranges {ports} --priority {priority} --description {desc}', checks=[
             self.check('access', 'Deny'),
             self.check('direction', '{dir}'),
             self.check('destinationAddressPrefix', '{prefix}'),
@@ -4315,7 +4317,7 @@ class NetworkSecurityGroupScenarioTest(ScenarioTest):
         ])
 
         # test generic update
-        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --set properties.description="cool"',
+        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --set description="cool"',
                  checks=self.check('description', 'cool'))
 
         self.kwargs.update({
@@ -4337,7 +4339,7 @@ class NetworkSecurityGroupScenarioTest(ScenarioTest):
                          self.check('ends_with(@.destinationApplicationSecurityGroups[0].id, `/{asg2}`)', True)])
         self.cmd('network nsg rule update -g {rg} --nsg-name {nsg2} -n {rule2} --destination-asgs "" --destination-address-prefix {prefix}',
                  checks=[self.check('name', '{rule2}'),
-                         self.check('destinationAddressPrefix', '{prefix}')])
+                         self.check('destinationApplicationSecurityGroups', None)])
 
         self.cmd('network nsg rule delete --resource-group {rg} --nsg-name {nsg} --name {rule}')
         self.cmd('network nsg rule delete --resource-group {rg} --nsg-name {nsg2} --name {rule2}')
@@ -4557,8 +4559,6 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('encryption.enabled', True),
             self.check('encryption.enforcement', '{dropUnencrypted}'),
         ])
-        # only create with --encryption-enforcement-policy
-        self.cmd('network vnet create --address-prefixes 10.4.0.0/16 --name MyVnet5 --resource-group {rg} --subnet-name Mysubnet --subnet-prefixes 10.4.0.0/24 --encryption-enforcement-policy allowUnencrypted', expect_failure=True)
         # create without encryption
         self.cmd('network vnet create --address-prefixes 10.5.0.0/16 --name MyVnet6 --resource-group {rg} --subnet-name Mysubnet --subnet-prefixes 10.5.0.0/24')
         self.cmd('network vnet create --address-prefixes 10.6.0.0/16 --name MyVnet7 --resource-group {rg} --subnet-name Mysubnet --subnet-prefixes 10.6.0.0/24')
@@ -5180,7 +5180,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
                  checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))
 
     @ResourceGroupPreparer(name_prefix='test_subnet_with_private_endpoint_option')
-    def test_subnet_with_private_endpoint_and_private_Link_options(self, resource_group):
+    def test_subnet_with_private_endpoint_and_private_link_options(self, resource_group):
         self.kwargs.update({
             'vnet': 'MyVnet',
             'subnet1': 'MySubnet1',

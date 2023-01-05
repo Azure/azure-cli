@@ -17,10 +17,12 @@ class SecurityCenterAdaptiveadaptiveApplicationControlsTests(ScenarioTest):
 
         assert len(adaptive_application_controls) >= 0
         group_name = adaptive_application_controls['value'][0]['name']
+        location = adaptive_application_controls['value'][0]['location']
         self.kwargs.update({
-            'group_name': group_name
+            'group_name': group_name,
+            'location': location
         })
 
-        adaptive_application_controls = self.cmd('az security adaptive-application-controls show --group-name {group_name}').get_output_in_json()
+        adaptive_application_controls = self.cmd('az security adaptive-application-controls show --group-name {group_name} --location {location}').get_output_in_json()
 
         assert len(adaptive_application_controls) >= 0
