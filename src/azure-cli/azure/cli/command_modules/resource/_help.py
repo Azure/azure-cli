@@ -2699,9 +2699,9 @@ long-summary: |
 
   bicep.check_version accepts Boolean values and defaults to True. If set to False, version checks for Bicep CLI installed via Azure CLI will be disabled.
 
-  The possible values of bicep.use_binary_from_path are if_running_in_ci and Booleans. The default value is if_running_in_ci.
+  The possible values of bicep.use_binary_from_path are if_found_in_ci and Booleans. The default value is if_found_in_ci.
 
-  With if_running_in_ci, GitHub Actions and Azure Pipeline users may expect some delay (usually a few days) in getting the latest version of Bicep CLI, since the az bicep commands will use the pre-installed Bicep CLI on the build agents, but the build agents has a different release cycle. The benefit is that the az bicep commands will not download the Bicep CLI on each pipeline run.
+  With if_found_in_ci, GitHub Actions and Azure Pipeline users may expect some delay (usually a few days) in getting the latest version of Bicep CLI, since the az bicep commands will use the pre-installed Bicep CLI on the build agents, but the build agents has a different release cycle. The benefit is that the az bicep commands will not download the Bicep CLI on each pipeline run.
 
   Setting bicep.use_binary_from_path to True forces the az bicep commands to use the Bicep executable added to PATH (if it exists), which indicates that the user is intended to manage the Bicep CLI, and version checks will be disabled.
 """
