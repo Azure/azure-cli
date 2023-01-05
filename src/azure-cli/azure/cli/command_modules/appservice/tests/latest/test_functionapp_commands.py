@@ -1387,7 +1387,7 @@ class FunctionAppFunctionTests(LiveScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_multiple_function_list(self, resource_group, storage_account):
-        zip_file = os.path.join(TEST_DIR, 'sample_multiple_csx_function_httptrigger/sample_multiple_csx_function_httptrigger.zip')
+        zip_file = os.path.join(TEST_DIR, 'data/sample_multiple_csx_function_httptrigger/sample_multiple_csx_function_httptrigger.zip')
         functionapp_name = self.create_random_name('functionappkeys', 40)
         plan_name = self.create_random_name(prefix='functionappkeysplan', length=40)
         function_name = "HttpTrigger"

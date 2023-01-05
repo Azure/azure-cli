@@ -692,7 +692,6 @@ examples:
   - name: List functions.
     text: >
         az functionapp function list -g MyResourceGroup -n MyFunctionAppName
-    crafted: true
 """
 
 helps['functionapp function keys'] = """
