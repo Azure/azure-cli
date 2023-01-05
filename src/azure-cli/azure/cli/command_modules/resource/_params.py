@@ -673,6 +673,9 @@ def load_arguments(self, _):
         c.argument('indentKind', arg_type=bicep_indentkind_type, help="Set indentation kind. Valid values are ( Space | Tab ).")
         c.argument('indentSize', arg_type=bicep_indentsize_type, help="Number of spaces to indent with (Only valid with --indentKind set to Space).")
         c.argument('insertFinalNewline', arg_type=bicep_insertfinalnewline_type, help="Insert a final newline.")
+        c.argument('indent_kind', arg_type=bicep_indentkind_type, help="Set indentation kind. Valid values are ( Space | Tab ).")
+        c.argument('indent_size', arg_type=bicep_indentsize_type, help="Number of spaces to indent with (Only valid with --indentKind set to Space).")
+        c.argument('insert_final_newline', arg_type=bicep_insertfinalnewline_type, help="Insert a final newline.")
         c.argument('newline', arg_type=bicep_newline_type, help="Set newline char. Valid values are ( Auto | LF | CRLF | CR ).")
 
     with self.argument_context('bicep decompile') as c:
