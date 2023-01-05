@@ -64,7 +64,7 @@ def run_bicep_command(cli_ctx, args, auto_install=True):
         if which("bicep") is None:
             raise ValidationError('Could not find the "bicep" executable on PATH. To install Bicep via Azure CLI, set the "bicep.use_binary_from_path" configuration to False and run "az bicep install".')
 
-        bicep_version_message = _run_command("bicep", "--version")
+        bicep_version_message = _run_command("bicep", ["--version"])
 
         _logger.debug("Using Bicep CLI from PATH. %s", bicep_version_message)
 
