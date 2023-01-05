@@ -452,11 +452,12 @@ class MainCommandsLoader(CLICommandsLoader):
                     return self.command_table
                 if is_autocomplete():
                     # If the command is not complete in autocomplete mode, we should match shorter command.
-                    # For example, `account sho` should match `account`. Finally, suggestion `show` is returned.
+                    # For example, `account sho` should match `account`.
                     logger.debug("Could not find a match in the command or command group table for '%s'", raw_cmd)
                     raw_cmd = ' '.join(raw_cmd.split()[:-1])
                     logger.debug("In autocomplete mode, try to match shorter cmd: '%s'", raw_cmd)
                     if not raw_cmd:
+                        # If full command is 'az acc', raw_cmd is '', we don't need to match it.
                         logger.debug("Cmd is empty, return")
                         return self.command_table
                     if raw_cmd in self.command_group_table:
