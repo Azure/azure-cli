@@ -1118,6 +1118,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('sku', arg_type=static_web_app_sku_arg_type)
     with self.argument_context('staticwebapp functions link') as c:
         c.argument('function_resource_id', help="Resource ID of the functionapp to link. Can be retrieved with 'az functionapp --query id'")
+        c.argument('environment_name', help="Name of the environment of static site")
         c.argument('force', help="Force the function link even if the function is already linked to a static webapp. May be needed if the function was previously linked to a static webapp.")
     with self.argument_context('staticwebapp backends link') as c:
         c.argument('backend_resource_id', help="Resource ID of the backend to link.")
