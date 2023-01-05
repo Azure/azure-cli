@@ -115,12 +115,12 @@ class Snapshot:
             composition_type=data_dict.get("composition_type", None),
             created=data_dict.get("created", None),
             expires=data_dict.get("expires", None),
-            size=data_dict.get("size", 0),
-            items_count=data_dict.get("items_count", 0),
-            tags=data_dict.get("tags", {}),
+            size=data_dict.get("size", None),
+            items_count=data_dict.get("items_count", None),
+            tags=data_dict.get("tags", None),
             items_link=data_dict.get("items_link", None),
-            retention_period=data_dict.get("retention_period", 0),
-            status_code=data_dict.get("status_code", 0)
+            retention_period=data_dict.get("retention_period", None),
+            status_code=data_dict.get("status_code", None)
         )
 
 
