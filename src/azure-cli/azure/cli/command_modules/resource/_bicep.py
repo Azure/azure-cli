@@ -62,7 +62,9 @@ def run_bicep_command(cli_ctx, args, auto_install=True):
         from shutil import which
 
         if which("bicep") is None:
-            raise ValidationError('Could not find the "bicep" executable on PATH. To install Bicep via Azure CLI, set the "bicep.use_binary_from_path" configuration to False and run "az bicep install".')
+            raise ValidationError(
+                'Could not find the "bicep" executable on PATH. To install Bicep via Azure CLI, set the "bicep.use_binary_from_path" configuration to False and run "az bicep install".'  # pylint: disable=line-too-long
+            )
 
         bicep_version_message = _run_command("bicep", ["--version"])
 
@@ -194,6 +196,7 @@ def supports_bicep_publish():
 def _bicep_installed_in_ci():
     if "GITHUB_ACTIONS" in os.environ or "TF_BUILD" in os.environ:
         from shutil import which
+
         return which("bicep") is not None
     return False
 
