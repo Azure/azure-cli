@@ -40,6 +40,8 @@ from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRo
 from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
 from .aaz.latest.network.nsg import Create as _NSGCreate
 from .aaz.latest.network.nsg.rule import Create as _NSGRuleCreate, Update as _NSGRuleUpdate
+from .aaz.latest.network.private_endpoint import Update as _PrivateEndpointUpdate
+from .aaz.latest.network.private_endpoint.dns_zone_group import Create as _PrivateEndpointPrivateDnsZoneGroupCreate
 from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
 from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdate
 from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
@@ -3437,6 +3439,45 @@ class ExpressRoutePortLinkUpdate(_ExpressRoutePortLinkUpdate):
 
 
 # region PrivateEndpoint
+# _PrivateEndpointCreate
+class PrivateEndpointCreate():
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZBoolArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.private_connection_resource_id = AAZStrArg(
+            options=['--private-connection-resource-id'],
+            help="The resource id of the private endpoint to connect to.")
+        args_schema.group_id = AAZStrArg(
+            options=['--group-id'],
+            help="The ID of the group obtained from the remote resource that this private endpoint should connect to. "
+                 "You can use \"az network private-link-resource list\" to obtain the supported group ids. "
+                 "You must provide this except for PrivateLinkService.")
+        args_schema.request_message = AAZStrArg(
+            options=['--request-message'],
+            help="A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.")
+        args_schema.connection_name = AAZStrArg(
+            options=['--connection-name'],
+            help="Name of the private link service connection.")
+        args_schema.manual_request = AAZBoolArg(
+            options=['--manual-request'],
+            help="Use manual request to establish the connection. Configure it as 'true' when you don't have access to the subscription of private link service. Allowed values: false, true.")
+
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        pls_connection = {'name': args.connection_name,
+                          'group_ids': [args.group_id],
+                          'request_message': args.request_message,
+                          'private_link_service_id': args.private_link_service_id}
+        if args.manual_request:
+            args.manual_private_link_service_connections = [pls_connection]
+        else:
+            args.private_link_service_connections = [pls_connection]
+
+
 def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, subnet,
                             private_connection_resource_id, connection_name, group_ids=None,
                             virtual_network_name=None, tags=None, location=None,
@@ -3487,6 +3528,25 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
     return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
 
 
+class PrivateEndpointUpdate(_PrivateEndpointUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.request_message = AAZStrArg(
+            options=['--request-message'],
+            help="A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.")
+
+        return args_schema
+
+    def pre_instance_update(self, instance):
+        args = self.ctx.args
+        if has_value(instance.properties.privateLinkServiceConnections):
+            instance.properties.privateLinkServiceConnections[0].properties.requestMessage = args.request_message
+        else:
+            instance.properties.manualPrivateLinkServiceConnections[0].properties.requestMessage = args.request_message
+
+
 def update_private_endpoint(instance, cmd, tags=None, request_message=None):
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags)
@@ -3519,6 +3579,28 @@ def create_private_endpoint_private_dns_zone_group(cmd, resource_group_name, pri
                                          private_endpoint_name=private_endpoint_name,
                                          private_dns_zone_group_name=private_dns_zone_group_name,
                                          parameters=private_dns_zone_group)
+
+
+class PrivateEndpointPrivateDnsZoneGroupCreate(_PrivateEndpointPrivateDnsZoneGroupCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.private_dns_zone = AAZResourceIdArg(
+            options=['--private-dns-zone'],
+            help="Name or ID of the private dns zone.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/privateDnsZones/{}"
+            )
+        )
+        args_schema.zone_name = AAZStrArg(options=['--zone-name'], help="Name of the private dns zone.")
+
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.private_dns_zone_configs = [{'name': args.zone_name, 'private_dns_zone_id': args.private_dns_zone}]
 
 
 def add_private_endpoint_private_dns_zone(cmd, resource_group_name, private_endpoint_name,
