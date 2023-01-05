@@ -2,16 +2,18 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
+# pylint: disable=no-self-use, no-member, too-many-lines, unused-argument
+# pylint: disable=protected-access, too-few-public-methods
+
 from collections import Counter, OrderedDict
 
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from knack.log import get_logger
 
-# pylint: disable=no-self-use,no-member,too-many-lines,unused-argument,protected-access,too-few-public-methods
 from azure.cli.core.aaz import has_value
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
-from azure.cli.command_modules.network.aaz.latest.network.nsg.rule import Update as _NsgRuleUpdate
 from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
@@ -36,8 +38,8 @@ from .aaz.latest.network.express_route.peering import Create as _ExpressRoutePee
 from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCreate
 from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRoutePortIdentityAssign
 from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
-from .aaz.latest.network.private_endpoint import Create as _PrivateEndpointCreate, Update as _PrivateEndpointUpdate
-from .aaz.latest.network.private_endpoint.dns_zone_group import Create as _PrivateEndpointPrivateDnsZoneGroupCreate
+from .aaz.latest.network.nsg import Create as _NSGCreate
+from .aaz.latest.network.nsg.rule import Create as _NSGRuleCreate, Update as _NSGRuleUpdate
 from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
 from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdate
 from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
@@ -103,16 +105,6 @@ def list_lbs(cmd, resource_group_name=None):
 
 def list_nics(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'network_interfaces', resource_group_name)
-
-
-def list_nsg_rules(cmd, resource_group_name, network_security_group_name, include_default=False):
-    from azure.cli.command_modules.network.aaz.latest.network.nsg import Show
-    nsg = Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name,
-                                                  'name': network_security_group_name})
-    rules = nsg['securityRules']
-    if include_default:
-        rules = rules + nsg['defaultSecurityRules']
-    return rules
 
 
 def list_custom_ip_prefixes(cmd, resource_group_name=None):
@@ -3445,43 +3437,6 @@ class ExpressRoutePortLinkUpdate(_ExpressRoutePortLinkUpdate):
 
 
 # region PrivateEndpoint
-class PrivateEndpointCreate(_PrivateEndpointCreate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZBoolArg, AAZStrArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.private_connection_resource_id = AAZStrArg(
-            options=['--private-connection-resource-id'],
-            help="The resource id of the private endpoint to connect to.")
-        args_schema.group_id = AAZStrArg(
-            options=['--group-id'],
-            help="The ID of the group obtained from the remote resource that this private endpoint should connect to. "
-                 "You can use \"az network private-link-resource list\" to obtain the supported group ids. "
-                 "You must provide this except for PrivateLinkService.")
-        args_schema.request_message = AAZStrArg(
-            options=['--request-message'],
-            help="A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.")
-        args_schema.connection_name = AAZStrArg(
-            options=['--connection-name'],
-            help="Name of the private link service connection.")
-        args_schema.manual_request = AAZBoolArg(
-            options=['--manual-request'],
-            help="Use manual request to establish the connection. Configure it as 'true' when you don't have access to the subscription of private link service. Allowed values: false, true.")
-
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        pls_connection = {'name': args.connection_name,
-                          'group_ids': [args.group_id],
-                          'request_message': args.request_message,
-                          'private_link_service_id': args.private_link_service_id}
-        if args.manual_request:
-            args.manual_private_link_service_connections = [pls_connection]
-        else:
-            args.private_link_service_connections = [pls_connection]
-
 def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, subnet,
                             private_connection_resource_id, connection_name, group_ids=None,
                             virtual_network_name=None, tags=None, location=None,
@@ -3532,25 +3487,6 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
     return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
 
 
-class PrivateEndpointUpdate(_PrivateEndpointUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.request_message = AAZStrArg(
-            options=['--request-message'],
-            help="A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.")
-
-        return args_schema
-
-    def pre_instance_update(self, instance):
-        args = self.ctx.args
-        if has_value(instance.properties.privateLinkServiceConnections):
-            instance.properties.privateLinkServiceConnections[0].properties.requestMessage = args.request_message
-        else:
-            instance.properties.manualPrivateLinkServiceConnections[0].properties.requestMessage = args.request_message
-
-
 def update_private_endpoint(instance, cmd, tags=None, request_message=None):
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags)
@@ -3583,28 +3519,6 @@ def create_private_endpoint_private_dns_zone_group(cmd, resource_group_name, pri
                                          private_endpoint_name=private_endpoint_name,
                                          private_dns_zone_group_name=private_dns_zone_group_name,
                                          parameters=private_dns_zone_group)
-
-
-class PrivateEndpointPrivateDnsZoneGroupCreate(_PrivateEndpointPrivateDnsZoneGroupCreate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.private_dns_zone = AAZResourceIdArg(
-            options=['--private-dns-zone'],
-            help="Name or ID of the private dns zone.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/privateDnsZones/{}"
-            )
-        )
-        args_schema.zone_name = AAZStrArg(options=['--zone-name'], help="Name of the private dns zone.")
-
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        args.private_dns_zone_configs = [{'name': args.zone_name, 'private_dns_zone_id': args.private_dns_zone}]
 
 
 def add_private_endpoint_private_dns_zone(cmd, resource_group_name, private_endpoint_name,
@@ -5266,149 +5180,150 @@ def remove_nic_ip_config_inbound_nat_rule(
 
 
 # region NetworkSecurityGroups
-def create_nsg(cmd, resource_group_name, network_security_group_name, location=None, tags=None):
-    from azure.cli.command_modules.network.aaz.latest.network.nsg import Create
-    return Create(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "name": network_security_group_name,
-        "location": location,
-        "tags": tags
-    })
-
-
-def _create_singular_or_plural_property(kwargs, val, singular_name, plural_name):
-
-    if not val:
+def _handle_plural_or_singular(args, plural_name, singular_name):
+    values = getattr(args, plural_name)
+    if not has_value(values):
         return
-    if not isinstance(val, list):
-        val = [val]
-    if len(val) > 1:
-        kwargs[plural_name] = val
-        kwargs[singular_name] = None
-    else:
-        kwargs[singular_name] = val[0]
-        kwargs[plural_name] = None
+
+    setattr(args, plural_name, values if len(values) > 1 else None)
+    setattr(args, singular_name, values[0] if len(values) == 1 else None)
 
 
-def _handle_asg_property(kwargs, key, asgs):
-    prefix = key.split('_', 1)[0] + '_'
-    if asgs:
-        kwargs[key] = [{"id": asg.id} for asg in asgs]
-        if kwargs[prefix + 'address_prefix']:
-            kwargs[prefix + 'address_prefix'] = ''
+class NSGCreate(_NSGCreate):
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return {"NewNSG": result}
 
 
-def create_nsg_rule(cmd, resource_group_name, network_security_group_name, security_rule_name,
-                    priority, description=None, protocol=None, access=None, direction=None,
-                    source_port_ranges='*', source_address_prefixes='*',
-                    destination_port_ranges=80, destination_address_prefixes='*',
-                    source_asgs=None, destination_asgs=None):
-    kwargs = {
-        'protocol': protocol,
-        'direction': direction,
-        'description': description,
-        'priority': priority,
-        'access': access,
-        'name': security_rule_name,
-        'resource_group': resource_group_name,
-        'nsg_name': network_security_group_name,
-    }
-    _create_singular_or_plural_property(kwargs, source_address_prefixes,
-                                        'source_address_prefix', 'source_address_prefixes')
-    _create_singular_or_plural_property(kwargs, destination_address_prefixes,
-                                        'destination_address_prefix', 'destination_address_prefixes')
-    _create_singular_or_plural_property(kwargs, source_port_ranges,
-                                        'source_port_range', 'source_port_ranges')
-    _create_singular_or_plural_property(kwargs, destination_port_ranges,
-                                        'destination_port_range', 'destination_port_ranges')
+class NSGRuleCreate(_NSGRuleCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.priority._required = True
+        args_schema.destination_asgs = AAZListArg(
+            options=["--destination-asgs"],
+            arg_group="Destination",
+            help="Space-separated list of application security group names or IDs. Limited by backend server, "
+                 "temporarily this argument only supports one application security group name or ID.",
+        )
+        args_schema.destination_asgs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationSecurityGroups/{}",
+            ),
+        )
+        args_schema.source_asgs = AAZListArg(
+            options=["--source-asgs"],
+            arg_group="Source",
+            help="Space-separated list of application security group names or IDs. Limited by backend server, "
+                 "temporarily this argument only supports one application security group name or ID.",
+        )
+        args_schema.source_asgs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationSecurityGroups/{}",
+            ),
+        )
+        # filter arguments
+        args_schema.destination_address_prefix._registered = False
+        args_schema.destination_application_security_groups._registered = False
+        args_schema.destination_port_range._registered = False
+        args_schema.source_address_prefix._registered = False
+        args_schema.source_application_security_groups._registered = False
+        args_schema.source_port_range._registered = False
+        return args_schema
 
-    # workaround for issue https://github.com/Azure/azure-rest-api-specs/issues/1591
-    kwargs['source_address_prefix'] = kwargs['source_address_prefix'] or ''
-    kwargs['destination_address_prefix'] = kwargs['destination_address_prefix'] or ''
+    def pre_operations(self):
+        args = self.ctx.args
+        _handle_plural_or_singular(args, "destination_address_prefixes", "destination_address_prefix")
+        _handle_plural_or_singular(args, "destination_port_ranges", "destination_port_range")
+        _handle_plural_or_singular(args, "source_address_prefixes", "source_address_prefix")
+        _handle_plural_or_singular(args, "source_port_ranges", "source_port_range")
+        # handle application security groups
+        if has_value(args.destination_asgs):
+            args.destination_application_security_groups = [{"id": asg_id} for asg_id in args.destination_asgs]
+            if has_value(args.destination_address_prefix):
+                args.destination_address_prefix = None
+        if has_value(args.source_asgs):
+            args.source_application_security_groups = [{"id": asg_id} for asg_id in args.source_asgs]
+            if has_value(args.source_address_prefix):
+                args.source_address_prefix = None
 
-    _handle_asg_property(kwargs, 'source_asgs', source_asgs)
-    _handle_asg_property(kwargs, 'destination_asgs', destination_asgs)
 
-    from .aaz.latest.network.nsg.rule import Create
-    return Create(cli_ctx=cmd.cli_ctx)(command_args=kwargs)
-
-
-class NsgRuleUpdate(_NsgRuleUpdate):
-
+class NSGRuleUpdate(_NSGRuleUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
 
         class EmptyListArgFormat(AAZListArgFormat):
             def __call__(self, ctx, value):
-                data = value._data
-                if has_value(data) and len(data) == 1 and data[0] == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
+                if value.to_serialized_data() == [""]:
                     logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
                     value._data = None
                 return super().__call__(ctx, value)
 
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.destination_asgs = AAZListArg(
-            options=['--destination-asgs'],
+            options=["--destination-asgs"],
             arg_group="Destination",
+            help="Space-separated list of application security group names or IDs. Limited by backend server, "
+                 "temporarily this argument only supports one application security group name or ID.",
             nullable=True,
-            help="Space-separated list of application security group names or supports one application security group name or ID. Use null to detach it.",
-            fmt=EmptyListArgFormat()
+            fmt=EmptyListArgFormat(),
         )
         args_schema.destination_asgs.Element = AAZResourceIdArg(
             nullable=True,
-            fmt=EmptyResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/applicationSecurityGroups/{}"
-            )
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationSecurityGroups/{}",
+            ),
         )
         args_schema.source_asgs = AAZListArg(
-            options=['--source-asgs'],
+            options=["--source-asgs"],
             arg_group="Source",
+            help="Space-separated list of application security group names or IDs. Limited by backend server, "
+                 "temporarily this argument only supports one application security group name or ID.",
             nullable=True,
-            help="Space-separated list of application security group names or IDs. Limited by backend server, temporarily this argument only supports one application security group name or ID. Use null to detach it.",
-            fmt=EmptyListArgFormat()
+            fmt=EmptyListArgFormat(),
         )
         args_schema.source_asgs.Element = AAZResourceIdArg(
             nullable=True,
-            fmt=EmptyResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/applicationSecurityGroups/{}"
-            )
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationSecurityGroups/{}",
+            ),
         )
-        args_schema.destination_asgs_id._registered = False
-        args_schema.source_asgs_id._registered = False
-
+        # filter arguments
+        args_schema.destination_address_prefix._registered = False
+        args_schema.destination_application_security_groups._registered = False
+        args_schema.destination_port_range._registered = False
+        args_schema.source_address_prefix._registered = False
+        args_schema.source_application_security_groups._registered = False
+        args_schema.source_port_range._registered = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.destination_asgs):
-            args.destination_asgs_id = assign_aaz_list_arg(
-                args.destination_asgs_id,
-                args.destination_asgs,
-                element_transformer=lambda _, destination_asgs_id: {"id": destination_asgs_id}
-            )
-
-        if has_value(args.source_asgs):
-            args.source_asgs_id = assign_aaz_list_arg(
-                args.source_asgs_id,
-                args.source_asgs,
-                element_transformer=lambda _, source_asgs_id: {"id": source_asgs_id}
-            )
+        # handle application security groups
+        args.destination_application_security_groups = assign_aaz_list_arg(
+            args.destination_application_security_groups,
+            args.destination_asgs,
+            element_transformer=lambda _, asg_id: {"id": asg_id}
+        )
+        args.source_application_security_groups = assign_aaz_list_arg(
+            args.source_application_security_groups,
+            args.source_asgs,
+            element_transformer=lambda _, asg_id: {"id": asg_id}
+        )
 
     def pre_instance_update(self, instance):
         if instance.properties.sourceAddressPrefix:
             instance.properties.sourceAddressPrefixes = [instance.properties.sourceAddressPrefix]
-            instance.properties.sourceAddressPrefix = ''
+            instance.properties.sourceAddressPrefix = None
         if instance.properties.destinationAddressPrefix:
             instance.properties.destinationAddressPrefixes = [instance.properties.destinationAddressPrefix]
-            instance.properties.destinationAddressPrefix = ''
+            instance.properties.destinationAddressPrefix = None
         if instance.properties.sourcePortRange:
             instance.properties.sourcePortRanges = [instance.properties.sourcePortRange]
             instance.properties.sourcePortRange = None
@@ -5429,6 +5344,17 @@ class NsgRuleUpdate(_NsgRuleUpdate):
         if instance.properties.destinationPortRanges and len(instance.properties.destinationPortRanges) == 1:
             instance.properties.destinationPortRange = instance.properties.destinationPortRanges[0]
             instance.properties.destinationPortRanges = None
+
+
+def list_nsg_rules(cmd, resource_group_name, network_security_group_name, include_default=False):
+    from .aaz.latest.network.nsg import Show
+    nsg = Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "name": network_security_group_name
+    })
+
+    rules = nsg["securityRules"]
+    return rules + nsg["defaultSecurityRules"] if include_default else rules
 # endregion
 
 
@@ -6990,9 +6916,7 @@ class VNetSubnetCreate(_VNetSubnetCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.address_prefixes) and len(args.address_prefixes) == 1:
-            args.address_prefix = args.address_prefixes[0]
-            args.address_prefixes = None
+        _handle_plural_or_singular(args, "address_prefixes", "address_prefix")
 
         def delegation_trans(index, service_name):
             service_name = str(service_name)
@@ -7122,10 +7046,7 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.address_prefixes):
-            prefixes = args.address_prefixes
-            args.address_prefixes = prefixes if len(prefixes) > 1 else None
-            args.address_prefix = prefixes[0] if len(prefixes) == 1 else None
+        _handle_plural_or_singular(args, "address_prefixes", "address_prefix")
 
         def delegation_trans(index, service_name):
             service_name = str(service_name)

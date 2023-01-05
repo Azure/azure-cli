@@ -411,6 +411,18 @@ examples:
     crafted: true
 """
 
+helps['functionapp cors credentials'] = """
+type: command
+short-summary: Enable or disable access-control-allow-credentials.
+examples:
+  - name: Enable CORS access-control-allow-credentials.
+    text: az functionapp cors credentials --name MyFunctionApp --resource-group MyResourceGroup --enable true
+    crafted: true
+  - name: Disable CORS access-control-allow-credentials.
+    text: az functionapp cors credentials --name MyFunctionApp --resource-group MyResourceGroup --enable false
+    crafted: false
+"""
+
 helps['functionapp create'] = """
 type: command
 short-summary: Create a function app.
@@ -1109,7 +1121,7 @@ type: command
 short-summary: Set a web app's settings.
 parameters:
   - name: --settings
-    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. See https://go.microsoft.com/fwlink/?linkid=2219923 for more information on file format and editing app settings in bulk.
   - name: --slot-settings
     short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. Given setting are added to the configuration and marked as Deployment slot setting by default.
 examples:

@@ -433,6 +433,9 @@ parameters:
   - name: --enable-oidc-issuer
     type: bool
     short-summary: Enable OIDC issuer.
+  - name: --enable-keda
+    type: bool
+    short-summary: Enable KEDA workload auto-scaler.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -501,6 +504,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyMC --kubernetes-version 1.20.13 --location westus2 --host-group-id /subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/hostGroups/myHostGroup --node-vm-size VMSize --enable-managed-identity --assign-identity <user_assigned_identity_resource_id>
   - name: Create a kubernetes cluster with no CNI installed.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --network-plugin none
+  - name: Create a kubernetes cluster with KEDA workload autoscaler enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-keda
 """
 
 helps['aks update'] = """
@@ -709,6 +714,12 @@ parameters:
   - name: --enable-oidc-issuer
     type: bool
     short-summary: Enable OIDC issuer.
+  - name: --enable-keda
+    type: bool
+    short-summary: Enable KEDA workload auto-scaler.
+  - name: --disable-keda
+    type: bool
+    short-summary: Disable KEDA workload auto-scaler.
 
 examples:
   - name: Reconcile the cluster back to its current state.
@@ -759,6 +770,10 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-windows-gmsa
   - name: Enable Windows gmsa for a kubernetes cluster without setting DNS server in the vnet used by the cluster.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-windows-gmsa --gmsa-dns-server "10.240.0.4" --gmsa-root-domain-name "contoso.com"
+  - name: Enable KEDA workload autoscaler for an existing kubernetes cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-keda
+  - name: Disable KEDA workload autoscaler for an existing kubernetes cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-keda
 """
 
 helps['aks delete'] = """
