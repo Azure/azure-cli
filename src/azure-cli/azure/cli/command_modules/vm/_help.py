@@ -1593,6 +1593,9 @@ examples:
   - name: Create a VM by attaching to a managed operating system disk.
     text: >
         az vm create -g MyResourceGroup -n MyVm --attach-os-disk MyOsDisk --os-type linux
+  - name: Create a VM by attaching to an unmanaged operating system disk from a VHD blob uri.
+    text: >
+        az vm create -g MyResourceGroup -n MyVm --attach-os-disk https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd --os-type linux --use-unmanaged-disk
   - name: 'Create an Ubuntu Linux VM using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/linux/using-cloud-init.'
     text: >
         az vm create -g MyResourceGroup -n MyVm --image debian --custom-data MyCloudInitScript.yml
