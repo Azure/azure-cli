@@ -1327,7 +1327,8 @@ def load_arguments(self, _):
             c.argument('replica_count', help='The default number of replicas to be created per region. To set regional replication counts, use --target-regions', type=int)
             c.argument('target_edge_zones', nargs='*', min_api='2022-01-03',
                        help='Space-separated list of regions, edge zones, replica counts and storage types. Use <region>=<edge zone>[=<replica count>][=<storage account type>] to optionally set the replica count and/or storage account type for each region. '
-                            'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used.')
+                            'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used. '
+                            'If "--target-edge-zones None" is specified, the target extended locations will be cleared.')
             c.argument('allow_replicated_location_deletion', arg_type=get_three_state_flag(), min_api='2022-03-03', help='Indicate whether or not removing this gallery image version from replicated regions is allowed.')
 
     with self.argument_context('sig show-community') as c:

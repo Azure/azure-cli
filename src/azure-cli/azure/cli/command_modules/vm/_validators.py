@@ -2222,7 +2222,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
         namespace.target_regions = regions_info
 
     if hasattr(namespace, 'target_edge_zones') and namespace.target_edge_zones:
-        if 'none' in [zone.lower() for zone in namespace.target_edge_zones]:
+        if len(namespace.target_edge_zones) == 1 and namespace.target_edge_zones[0].lower() == 'none':
             namespace.target_edge_zones = []
             return
         if hasattr(namespace, 'target_zone_encryption') and namespace.target_zone_encryption:

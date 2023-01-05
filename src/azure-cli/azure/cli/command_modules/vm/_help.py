@@ -1075,6 +1075,12 @@ examples:
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.0.0 \\
         --target-edge-zones westus=microsoftlosangeles1 eastus=microsoftlosangeles2=1
+  - name: Clear the replication extended locations
+    text: |
+        az sig image-version update --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --gallery-image-version 1.0.0 \\
+        --target-edge-zones None
   - name: Replicate to an additional region. Optional, you can set the replica count for the region and exclude this image when using the latest version of the image definition.
     text: |
         az sig image-version update --resource-group MyResourceGroup \\
