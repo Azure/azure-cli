@@ -1132,6 +1132,10 @@ class TestAAZArg(unittest.TestCase):
             blank="666"
         )
 
+        schema.properties.new_i_pv6 = AAZStrArg(
+            options=["new_ipv6"],
+        )
+
         schema.properties.pt = AAZFloatArg(
             options=["pt"],
             nullable=True,
@@ -1228,14 +1232,15 @@ class TestAAZArg(unittest.TestCase):
         dest_ops.apply(v, "properties")
         self.assertEqual(v.properties, None)
 
-        action.setup_operations(dest_ops, ["{enable:True,tags:null,vnets:null,pt:12.123}"])
+        action.setup_operations(dest_ops, ["{enable:True,tags:null,vnets:null,pt:12.123,newIPv6:'00:00:00'}"])
         self.assertEqual(len(dest_ops._ops), 10)
         dest_ops.apply(v, "properties")
         self.assertEqual(v.properties, {
             "enable": True,
             "tags": None,
             "vnets": None,
-            "pt": 12.123
+            "pt": 12.123,
+            "new_i_pv6": '00:00:00'
         })
 
     def test_aaz_has_value_for_buildin(self):

@@ -619,9 +619,19 @@ class TestStaticAppCommands(unittest.TestCase):
         functionapp_resource_id = "/subscriptions/sub/resourceGroups/{}/providers/Microsoft.Web/sites/{}".format(
             self.rg1, functionapp_name
         )
-        link_user_function(self.mock_cmd, self.name1, self.rg1, functionapp_resource_id)
+        link_user_function(self.mock_cmd, self.name1, self.rg1, functionapp_resource_id, None)
 
         self.staticapp_client.begin_register_user_provided_function_app_with_static_site.assert_called_once()
+
+    @mock.patch("azure.cli.command_modules.appservice.static_sites.show_app")
+    def test_functions_link_with_environment(self, *args, **kwargs):
+        functionapp_name = "functionapp"
+        functionapp_resource_id = "/subscriptions/sub/resourceGroups/{}/providers/Microsoft.Web/sites/{}".format(
+            self.rg1, functionapp_name
+        )
+        link_user_function(self.mock_cmd, self.name1, self.rg1, functionapp_resource_id, self.environment1)
+
+        self.staticapp_client.begin_register_user_provided_function_app_with_static_site_build.assert_called_once()
 
     @mock.patch("azure.cli.command_modules.appservice.static_sites.get_user_function", return_value=[mock.MagicMock()])
     def test_functions_unlink(self, *args, **kwargs):
