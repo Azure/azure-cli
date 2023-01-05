@@ -3674,7 +3674,7 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
         print(output)
 
 
-def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, indentKind=None, indentSize=None, insertFinalNewline=None):
+def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, indent_kind=None, indent_size=None, insert_final_newline=None):
     ensure_bicep_installation()
 
     minimum_supported_version = "0.12.1"
@@ -3688,12 +3688,12 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
             args += ["--stdout"]
         if newline:
             args += ["--newline", newline]
-        if indentKind:
-            args += ["--indentKind", indentKind]
-        if indentSize:
-            args += ["--indentSize", indentSize]
-        if insertFinalNewline:
-            args += ["--insertFinalNewline", insertFinalNewline]
+        if indent_kind:
+            args += ["--indentKind", indent_kind]
+        if indent_size:
+            args += ["--indentSize", indent_size]
+        if insert_final_newline:
+            args += ["--insertFinalNewline", insert_final_newline]
 
         output = run_bicep_command(args)
 
