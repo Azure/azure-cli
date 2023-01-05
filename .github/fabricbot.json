@@ -12258,19 +12258,30 @@
       "version": "1.0",
       "config": {
         "conditions": {
-          "operator": "or",
+          "operator": "and",
           "operands": [
             {
-              "name": "titleContains",
+              "name": "isAction",
               "parameters": {
-                "titlePattern": "az appservice ase"
+                "action": "opened"
               }
             },
             {
-              "name": "bodyContains",
-              "parameters": {
-                "bodyPattern": "az appservice ase"
-              }
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az appservice ase"
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az appservice ase"
+                  }
+                }
+              ]
             }
           ]
         },
@@ -12309,19 +12320,30 @@
       "version": "1.0",
       "config": {
         "conditions": {
-          "operator": "or",
+          "operator": "and",
           "operands": [
             {
-              "name": "titleContains",
+              "name": "isAction",
               "parameters": {
-                "titlePattern": "az webapp auth"
+                "action": "opened"
               }
             },
             {
-              "name": "bodyContains",
-              "parameters": {
-                "bodyPattern": "az webapp auth"
-              }
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az webapp auth"
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az webapp auth"
+                  }
+                }
+              ]
             }
           ]
         },
@@ -12360,21 +12382,32 @@
       "version": "1.0",
       "config": {
         "conditions": {
-          "operator": "or",
+          "operator": "and",
           "operands": [
             {
-              "name": "titleContains",
+              "name": "isAction",
               "parameters": {
-                "titlePattern": "(az webapp config backup|az webapp config snapshot)",
-                "isRegex": true
+                "action": "opened"
               }
             },
             {
-              "name": "bodyContains",
-              "parameters": {
-                "bodyPattern": "(az webapp config backup|az webapp config snapshot)",
-                "isRegex": true
-              }
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "(az webapp config backup|az webapp config snapshot)",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "(az webapp config backup|az webapp config snapshot)",
+                    "isRegex": true
+                  }
+                }
+              ]
             }
           ]
         },
@@ -12413,23 +12446,29 @@
       "version": "1.0",
       "config": {
         "conditions": {
-          "operator": "or",
+          "operator": "and",
           "operands": [
             {
-              "name": "titleContains",
+              "name": "isAction",
               "parameters": {
-                "isRegex": true,
-                "titlePattern": "(az appservice domain|az webapp config ssl)"
+                "action": "opened"
               }
             },
             {
-              "operator": "not",
+              "operator": "or",
               "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "(az appservice domain|az webapp config ssl)",
+                    "isRegex": true
+                  }
+                },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "isRegex": true,
-                    "bodyPattern": "(az appservice domain|az webapp config ssl)"
+                    "bodyPattern": "(az appservice domain|az webapp config ssl)",
+                    "isRegex": true
                   }
                 }
               ]
@@ -12471,19 +12510,30 @@
       "version": "1.0",
       "config": {
         "conditions": {
-          "operator": "or",
+          "operator": "and",
           "operands": [
             {
-              "name": "titleContains",
+              "name": "isAction",
               "parameters": {
-                "titlePattern": "az webapp deploy"
+                "action": "opened"
               }
             },
             {
-              "name": "bodyContains",
-              "parameters": {
-                "bodyPattern": "az webapp deploy"
-              }
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az webapp deploy"
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az webapp deploy"
+                  }
+                }
+              ]
             }
           ]
         },
@@ -12522,21 +12572,32 @@
       "version": "1.0",
       "config": {
         "conditions": {
-          "operator": "or",
+          "operator": "and",
           "operands": [
             {
-              "name": "titleContains",
+              "name": "isAction",
               "parameters": {
-                "isRegex": true,
-                "titlePattern": "(az appservice list-locations|az appservice plan|az webapp browse|az webapp config|az webapp connection|az webapp cors|az webapp create|az webapp delete|az webapp deleted|az webapp identity|az webapp list|az webapp list-instances|az webapp list-runtimes|az webapp restart|az webapp scale|az webapp show|az webapp start|az webapp stop|az webapp up|az webapp update|az webapp webjob)"
+                "action": "opened"
               }
             },
             {
-              "name": "bodyContains",
-              "parameters": {
-                "isRegex": true,
-                "bodyPattern": "(az appservice list-locations|az appservice plan|az webapp browse|az webapp config|az webapp connection|az webapp cors|az webapp create|az webapp delete|az webapp deleted|az webapp identity|az webapp list|az webapp list-instances|az webapp list-runtimes|az webapp restart|az webapp scale|az webapp show|az webapp start|az webapp stop|az webapp up|az webapp update|az webapp webjob)"
-              }
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "(az appservice list-locations|az appservice plan|az webapp browse|az webapp config|az webapp connection|az webapp cors|az webapp create|az webapp delete|az webapp deleted|az webapp identity|az webapp list|az webapp list-instances|az webapp list-runtimes|az webapp restart|az webapp scale|az webapp show|az webapp start|az webapp stop|az webapp up|az webapp update|az webapp webjob)",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "(az appservice list-locations|az appservice plan|az webapp browse|az webapp config|az webapp connection|az webapp cors|az webapp create|az webapp delete|az webapp deleted|az webapp identity|az webapp list|az webapp list-instances|az webapp list-runtimes|az webapp restart|az webapp scale|az webapp show|az webapp start|az webapp stop|az webapp up|az webapp update|az webapp webjob)",
+                    "isRegex": true
+                  }
+                }
+              ]
             }
           ]
         },
@@ -12575,19 +12636,30 @@
       "version": "1.0",
       "config": {
         "conditions": {
-          "operator": "or",
+          "operator": "and",
           "operands": [
             {
-              "name": "titleContains",
+              "name": "isAction",
               "parameters": {
-                "titlePattern": "az appservice kube"
+                "action": "opened"
               }
             },
             {
-              "name": "bodyContains",
-              "parameters": {
-                "bodyPattern": "az appservice kube"
-              }
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az appservice kube"
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az appservice kube"
+                  }
+                }
+              ]
             }
           ]
         },
@@ -12629,18 +12701,29 @@
           "operator": "or",
           "operands": [
             {
-              "name": "titleContains",
+              "name": "isAction",
               "parameters": {
-                "titlePattern": "(az webapp log|az webapp scan)",
-                "isRegex": true
+                "action": "opened"
               }
             },
             {
-              "name": "bodyContains",
-              "parameters": {
-                "bodyPattern": "(az webapp log|az webapp scan)",
-                "isRegex": true
-              }
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "(az webapp log|az webapp scan)",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "(az webapp log|az webapp scan)",
+                    "isRegex": true
+                  }
+                }
+              ]
             }
           ]
         },
@@ -12679,21 +12762,32 @@
       "version": "1.0",
       "config": {
         "conditions": {
-          "operator": "or",
+          "operator": "and",
           "operands": [
             {
-              "name": "titleContains",
+              "name": "isAction",
               "parameters": {
-                "titlePattern": "(az appservice vnet-integration|az webapp config access-restriction|az webapp vnet-integration)",
-                "isRegex": true
+                "action": "opened"
               }
             },
             {
-              "name": "bodyContains",
-              "parameters": {
-                "bodyPattern": "(az appservice vnet-integration|az webapp config access-restriction|az webapp vnet-integration)",
-                "isRegex": true
-              }
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "(az appservice vnet-integration|az webapp config access-restriction|az webapp vnet-integration)",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "(az appservice vnet-integration|az webapp config access-restriction|az webapp vnet-integration)",
+                    "isRegex": true
+                  }
+                }
+              ]
             }
           ]
         },
@@ -12732,21 +12826,32 @@
       "version": "1.0",
       "config": {
         "conditions": {
-          "operator": "or",
+          "operator": "and",
           "operands": [
             {
-              "name": "titleContains",
+              "name": "isAction",
               "parameters": {
-                "titlePattern": "(az appservice hybrid-connection|az webapp config hostname|az webapp create-remote-connection|az webapp hybrid-connection|az webapp ssh|az webapp traffic-routing)",
-                "isRegex": true
+                "action": "opened"
               }
             },
             {
-              "name": "bodyContains",
-              "parameters": {
-                "bodyPattern": "(az appservice hybrid-connection|az webapp config hostname|az webapp create-remote-connection|az webapp hybrid-connection|az webapp ssh|az webapp traffic-routing)",
-                "isRegex": true
-              }
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "(az appservice hybrid-connection|az webapp config hostname|az webapp create-remote-connection|az webapp hybrid-connection|az webapp ssh|az webapp traffic-routing)",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "(az appservice hybrid-connection|az webapp config hostname|az webapp create-remote-connection|az webapp hybrid-connection|az webapp ssh|az webapp traffic-routing)",
+                    "isRegex": true
+                  }
+                }
+              ]
             }
           ]
         },
