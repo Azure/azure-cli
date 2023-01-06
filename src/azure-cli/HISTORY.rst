@@ -59,7 +59,7 @@ Release History
 **Monitor**
 
 * [BREAKING CHANGE] `az monitor action-group test-notifications create`: Remove notification in resource group and subscription level (#24965)
-* `az monitor diagnostic-settings create`: Create with resource-id and export without workspace (#24875)
+* `az monitor diagnostic-settings create`: Create with resource id and export without workspace (#24875)
 
 **NetAppFiles**
 
