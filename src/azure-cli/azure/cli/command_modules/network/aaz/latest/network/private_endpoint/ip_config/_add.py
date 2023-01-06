@@ -89,7 +89,7 @@ class Add(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
         return result
 
     class SubresourceSelector(AAZJsonSelector):

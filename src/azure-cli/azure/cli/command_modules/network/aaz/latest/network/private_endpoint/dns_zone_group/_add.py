@@ -64,8 +64,8 @@ class Add(AAZCommand):
             help="Name of the resource that is unique within a resource group. This name can be used to access the resource.",
             required=True,
         )
-        _args_schema.private_dns_zone = AAZStrArg(
-            options=["--private-dns-zone"],
+        _args_schema.private_dns_zone_id = AAZStrArg(
+            options=["--private-dns-zone-id"],
             help="Name or ID of the private dns zone.",
         )
         return cls._args_schema
@@ -331,7 +331,7 @@ class Add(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("privateDnsZoneId", AAZStrType, ".private_dns_zone")
+                properties.set_prop("privateDnsZoneId", AAZStrType, ".private_dns_zone_id")
 
             return _instance_value
 
