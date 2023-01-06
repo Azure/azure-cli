@@ -20,7 +20,6 @@ from azure.cli.command_modules.network._client_factory import (
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_public_ip_addresses, cf_connection_monitor,
     cf_dns_references, cf_private_endpoints,
-    cf_app_gateway_waf_policy,
     cf_private_link_services, cf_private_endpoint_types,
     cf_virtual_router, cf_virtual_router_peering, cf_bastion_hosts, cf_flow_logs,
     cf_private_dns_zone_groups, cf_load_balancer_backend_pools)
@@ -67,11 +66,6 @@ def load_command_table(self, _):
     network_ag_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#ApplicationGatewaysOperations.{}',
         client_factory=cf_application_gateways
-    )
-
-    network_ag_waf_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#WebApplicationFirewallPoliciesOperations.{}',
-        client_factory=cf_app_gateway_waf_policy
     )
 
     network_util = CliCommandType(
