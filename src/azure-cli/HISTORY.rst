@@ -88,7 +88,7 @@ Release History
 
 **Service Connector**
 
-* `az connection`: Support local connection which allow local environment to connect Azure resource (#24905)
+* `az connection`: Support local connection which allows local environment to connect Azure resource (#24905)
 * Fix #24806: `az webapp connection create mysql-flexible`: Fix mysql connection command with  `--system-identity` (#24825)
 
 **SQL**
