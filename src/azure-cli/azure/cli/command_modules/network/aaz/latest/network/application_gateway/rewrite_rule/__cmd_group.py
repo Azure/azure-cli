@@ -12,12 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "network application-gateway",
+    "network application-gateway rewrite-rule",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage application-level routing and load balancing services.
-
-    To learn more about Application Gateway, visit https://learn.microsoft.com/en-us/azure/application-gateway/quick-create-cli.
+    """Manage rewrite rules of an application gateway.
     """
     pass
 
