@@ -333,16 +333,19 @@ def ensure_container_insights_for_monitoring(
             "Could not locate resource group in workspace-resource-id URL."
         )
 
-    resources = get_resources_client(cmd.cli_ctx, subscription_id)
-    try:
-        resource = resources.get_by_id(
-            workspace_resource_id, "2015-11-01-preview"
-        )
-        location = resource.location
-        # location can have spaces for example 'East US' hence remove the spaces
-        location = location.replace(" ", "").lower()
-    except HttpResponseError as ex:
-         raise ex
+    location = ""
+    # region of workspace can be different from region of RG so find the location of the workspace_resource_id
+    if not remove_monitoring:
+        resources = get_resources_client(cmd.cli_ctx, subscription_id)
+        try:
+            resource = resources.get_by_id(
+                workspace_resource_id, "2015-11-01-preview"
+            )
+            location = resource.location
+            # location can have spaces for example 'East US' hence remove the spaces
+            location = location.replace(" ", "").lower()
+        except HttpResponseError as ex:
+            raise ex
 
     if aad_route:
         cluster_resource_id = (
