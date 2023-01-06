@@ -28,10 +28,10 @@ Release History
 * `az appservice ase update`: Add `--allow-incoming-ftp-connections` to allow incoming FTP connections (#24882)
 * `az appservice ase update`: Add `--allow-remote-debugging` to allow remote debugging (#24882)
 * Fix #19893: `az appservice plan create`: Fix the bug that cannot create app plan in a different subscription for ASEv3 (#24917)
-* Fix#16478: `az functionapp cors credentials`: Add enable/disable CORS creds command (#24958)
-* Fix#22934: `az functionapp delete`: Add new parameter `--keep-empty-plan` to support keeping empty app service plan (#24890)
-* Fix#19469: `az functionapp vnet-integration add`: Add consumption plan validation (#24912)
-* `az staticwebapp functions link`: Add environment-name parameter (#23894)
+* Fix #16478: `az functionapp cors credentials`: Add enable/disable CORS creds commands (#24958)
+* Fix #22934: `az functionapp delete`: Add new parameter `--keep-empty-plan` to support keeping empty app service plan (#24890)
+* Fix #19469: `az functionapp vnet-integration add`: Add consumption plan validation (#24912)
+* `az staticwebapp functions link`: Add new parameter `--environment-name` to support setting the environment name of static site (#23894)
 
 **ARM**
 
