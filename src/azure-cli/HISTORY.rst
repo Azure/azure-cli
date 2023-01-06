@@ -60,7 +60,6 @@ Release History
 **Monitor**
 
 * [BREAKING CHANGE] `az monitor action-group test-notifications create`: Remove notification in resource group and subscription level (#24965)
-* [BREAKING CHANGE] `az monitor diagnostic-settings update`: Migrate from codegen V2 (#24967)
 * `az monitor diagnostic-settings create`: Create with resource-id and export without workspace (#24875)
 * `az monitor log-profiles`: Migrate create, show, delete, list cmds (#24950)
 
