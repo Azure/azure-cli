@@ -3211,6 +3211,32 @@ examples:
         az network cross-region-lb create -g MyResourceGroup -n MyLb
 """
 
+helps['network cross-region-lb update'] = """
+type: command
+short-summary: Update a cross-region load balancer.
+long-summary: >
+    This command can only be used to update the tags for a load balancer. Name and resource group are immutable and cannot be updated.
+examples:
+  - name: Update the tags of a load balancer.
+    text: az network cross-region-lb update -g MyResourceGroup -n MyLb --set tags.CostCenter=MyBusinessGroup
+"""
+
+helps['network cross-region-lb list'] = """
+type: command
+short-summary: List load balancers.
+examples:
+  - name: List load balancers.
+    text: az network cross-region-lb list -g MyResourceGroup
+"""
+
+helps['network cross-region-lb wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the cross-region load balancer is met.
+examples:
+  - name: Wait for load balancer to return as created.
+    text: |
+        az network cross-region-lb wait -g MyResourceGroup -n MyLB --created
+"""
 
 helps['network cross-region-lb address-pool'] = """
 type: group
@@ -3490,6 +3516,22 @@ examples:
     examples:
   - name: Update a load balancing rule to support HA ports.
     text: az network cross-region-lb rule update -g MyResourceGroup --lb-name MyLb -n MyLbRule \\ --protocol All --frontend-port 0 --backend-port 0
+"""
+
+helps['network lb'] = """
+type: group
+short-summary: Manage and configure load balancers.
+long-summary: |
+  To learn more about Azure Load Balancer visit https://docs.microsoft.com/azure/load-balancer/load-balancer-get-started-internet-arm-cli
+"""
+
+helps['network lb wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the load balancer is met.
+examples:
+  - name: Wait for load balancer to return as created.
+    text: |
+        az network lb wait -g MyResourceGroup -n MyLB --created
 """
 
 helps['network lb address-pool'] = """

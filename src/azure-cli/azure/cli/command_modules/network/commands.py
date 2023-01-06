@@ -654,7 +654,7 @@ def load_command_table(self, _):
     # endregion
 
     # region cross-region load balancer
-    with self.command_group('network cross-region-lb', network_lb_sdk) as g:
+    with self.command_group('network cross-region-lb') as g:
         g.custom_command('create', 'create_cross_region_load_balancer', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_cross_region_lb_create_namespace, exception_handler=handle_template_based_exception)
 
         from .aaz.latest.network.lb import Wait
