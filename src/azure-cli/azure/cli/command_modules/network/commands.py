@@ -21,9 +21,9 @@ from azure.cli.command_modules.network._client_factory import (
     cf_public_ip_addresses, cf_connection_monitor,
     cf_dns_references, cf_private_endpoints,
     cf_app_gateway_waf_policy,
-    cf_private_link_services, cf_private_endpoint_types,
+    cf_private_link_services,
     cf_virtual_router, cf_virtual_router_peering, cf_bastion_hosts, cf_flow_logs,
-    cf_private_dns_zone_groups, cf_load_balancer_backend_pools)
+    cf_load_balancer_backend_pools)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
     delete_lb_resource_property_entry)
@@ -102,12 +102,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#PrivateEndpointsOperations.{}',
         client_factory=cf_private_endpoints,
         min_api='2020-06-01'
-    )
-
-    network_private_endpoint_dns_zone_group_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#PrivateDnsZoneGroupsOperations.{}',
-        client_factory=cf_private_dns_zone_groups,
-        min_api='2020-03-01'
     )
 
     network_private_link_service_sdk = CliCommandType(
@@ -503,18 +497,8 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_private_endpoint', min_api='2019-04-01')
         from azure.cli.command_modules.network.custom import PrivateEndpointUpdate
         self.command_table['network private-endpoint update'] = PrivateEndpointUpdate(loader=self)
-        # g.command('delete', 'begin_delete', min_api='2019-04-01')
-        # g.custom_command('list', 'list_private_endpoints')
-        # g.show_command('show')
-        # g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_private_endpoint', min_api='2019-04-01')
-        # g.command(
-        #     'list-types', 'list',
-        #     operations_tmpl='azure.mgmt.network.operations#AvailablePrivateEndpointTypesOperations.{}',
-        #     client_factory=cf_private_endpoint_types,
-        #     min_api='2019-04-01'
-        # )
 
-    with self.command_group('network private-endpoint dns-zone-group', network_private_endpoint_dns_zone_group_sdk, min_api='2020-03-01') as g:
+    with self.command_group('network private-endpoint dns-zone-group'):
         from azure.cli.command_modules.network.custom import PrivateEndpointPrivateDnsZoneGroupCreate, \
             PrivateEndpointPrivateDnsZoneAdd, PrivateEndpointPrivateDnsZoneRemove
         self.command_table['network private-endpoint dns-zone-group create'] = \
@@ -523,28 +507,16 @@ def load_command_table(self, _):
             PrivateEndpointPrivateDnsZoneAdd(loader=self)
         self.command_table['network private-endpoint dns-zone-group remove'] = \
             PrivateEndpointPrivateDnsZoneRemove(loader=self)
-        # g.custom_command('create', 'create_private_endpoint_private_dns_zone_group')
-        # g.custom_command('add', 'add_private_endpoint_private_dns_zone')
-        # g.custom_command('remove', 'remove_private_endpoint_private_dns_zone')
-        # g.command('delete', 'begin_delete')
-        # g.show_command('show')
-        # g.command('list', 'list')
 
-    with self.command_group('network private-endpoint ip-config', network_private_endpoint_sdk, min_api='2021-05-01') as g:
+    with self.command_group('network private-endpoint ip-config'):
         from azure.cli.command_modules.network.custom import PrivateEndpointIpConfigAdd, PrivateEndpointIpConfigRemove
         self.command_table['network private-endpoint ip-config add'] = PrivateEndpointIpConfigAdd(loader=self)
         self.command_table['network private-endpoint ip-config remove'] = PrivateEndpointIpConfigRemove(loader=self)
-        # g.custom_command('add', 'add_private_endpoint_ip_config')
-        # g.custom_command('remove', 'remove_private_endpoint_ip_config')
-        # g.custom_command('list', 'list_private_endpoint_ip_config')
 
-    with self.command_group('network private-endpoint asg', network_private_endpoint_sdk, min_api='2021-05-01') as g:
+    with self.command_group('network private-endpoint asg'):
         from azure.cli.command_modules.network.custom import PrivateEndpointAsgAdd, PrivateEndpointAsgRemove
         self.command_table['network private-endpoint asg add'] = PrivateEndpointAsgAdd(loader=self)
         self.command_table['network private-endpoint asg remove'] = PrivateEndpointAsgRemove(loader=self)
-        # g.custom_command('add', 'add_private_endpoint_asg')
-        # g.custom_command('remove', 'remove_private_endpoint_asg')
-        # g.custom_command('list', 'list_private_endpoint_asg')
     # endregion
 
     # region PrivateLinkServices

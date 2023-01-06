@@ -36,14 +36,6 @@ def cf_private_endpoints(cli_ctx, _):
     return network_client_factory(cli_ctx).private_endpoints
 
 
-def cf_private_dns_zone_groups(cli_ctx, _):
-    return network_client_factory(cli_ctx).private_dns_zone_groups
-
-
-def cf_private_endpoint_types(cli_ctx, _):
-    return network_client_factory(cli_ctx).available_private_endpoint_types
-
-
 def cf_private_link_services(cli_ctx, _):
     return network_client_factory(cli_ctx).private_link_services
 

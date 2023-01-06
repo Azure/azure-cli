@@ -49,7 +49,7 @@ class Add(AAZCommand):
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
             help="Name of the private dns zone group.",
-            required=True,
+            # required=True,
         )
         _args_schema.endpoint_name = AAZStrArg(
             options=["--endpoint-name"],

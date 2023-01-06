@@ -57,7 +57,7 @@ class Add(AAZCommand):
         _args_schema.asg_id = AAZResourceIdArg(
             options=["--asg-id"],
             help="ID of application security group in which the private endpoint IP configuration is included.",
-            required=True,
+            # required=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/applicationSecurityGroups/{}",
             ),
