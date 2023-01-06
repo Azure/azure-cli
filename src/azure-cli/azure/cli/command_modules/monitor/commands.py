@@ -102,6 +102,9 @@ def load_command_table(self, _):
                          supports_no_wait=True)
         g.wait_command('wait')
 
+    from .operations.action_groups import ActionGroupCreate
+    self.command_table['monitor action-group create'] = ActionGroupCreate(loader=self, table_transformer=action_group_list_table)
+
     with self.command_group('monitor activity-log', activity_log_sdk) as g:
         g.custom_command('list', 'list_activity_log', client_factory=cf_activity_log)
         g.command('list-categories', 'list')

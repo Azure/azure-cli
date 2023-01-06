@@ -50,18 +50,26 @@ class Create(AAZCommand):
             required=True,
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
+            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
         _args_schema.location = AAZResourceLocationArg(
-            help="Resource location",
+            help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
             required=True,
             fmt=AAZResourceLocationArgFormat(
                 resource_group_arg="resource_group",
             ),
         )
+        _args_schema.group_short_name = AAZStrArg(
+            options=["--short-name", "--group-short-name"],
+            help="The short name of the action group. This will be used in SMS messages.",
+            fmt=AAZStrArgFormat(
+                max_length=12,
+            ),
+        )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
-            help="Resource tags",
+            help="Space-separated tags: key[=value] [key[=value] ...]. Use '' to clear existing tags.",
         )
 
         tags = cls._args_schema.tags
@@ -105,14 +113,6 @@ class Create(AAZCommand):
             options=["--event-hub-receivers"],
             arg_group="Properties",
             help="The list of event hub receivers that are part of this action group.",
-        )
-        _args_schema.group_short_name = AAZStrArg(
-            options=["--group-short-name"],
-            arg_group="Properties",
-            help="The short name of the action group. This will be used in SMS messages.",
-            fmt=AAZStrArgFormat(
-                max_length=12,
-            ),
         )
         _args_schema.itsm_receivers = AAZListArg(
             options=["--itsm-receivers"],
