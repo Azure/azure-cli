@@ -654,13 +654,16 @@ def load_command_table(self, _):
     # endregion
 
     # region cross-region load balancer
-    with self.command_group('network cross-region-lb', network_lb_sdk) as g:
-        g.show_command('show', 'get')
+    with self.command_group('network cross-region-lb') as g:
         g.custom_command('create', 'create_cross_region_load_balancer', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_cross_region_lb_create_namespace, exception_handler=handle_template_based_exception)
-        g.command('delete', 'begin_delete')
-        g.custom_command('list', 'list_lbs')
-        g.generic_update_command('update', setter_name='begin_create_or_update')
-        g.wait_command('wait')
+
+        from .aaz.latest.network.lb import Wait
+        from .operations.load_balancer import CrossRegionLoadBalancerShow, CrossRegionLoadBalancerDelete, CrossRegionLoadBalancerUpdate, CrossRegionLoadBalancerList
+        self.command_table['network cross-region-lb show'] = CrossRegionLoadBalancerShow(loader=self)
+        self.command_table['network cross-region-lb delete'] = CrossRegionLoadBalancerDelete(loader=self)
+        self.command_table['network cross-region-lb list'] = CrossRegionLoadBalancerList(loader=self)
+        self.command_table['network cross-region-lb update'] = CrossRegionLoadBalancerUpdate(loader=self)
+        self.command_table['network cross-region-lb wait'] = Wait(loader=self)
 
     cross_region_lb_property_map = {
         'frontend_ip_configurations': 'frontend-ip',
