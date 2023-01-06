@@ -12,7 +12,7 @@ Release History
 
 **AKS**
 
-* `aks create`: Add new parameter `--data-collection-settings` to support for AKS Monitoring Addon in MSI auth mode (#24777)
+* `az aks create`: Add new parameter `--data-collection-settings` to support for AKS Monitoring Addon in MSI auth mode (#24777)
 * `az aks install-cli`: Automatically add the installation directories to system path on windows (#24986)
 * `az aks create/update`: Add support for KEDA workload auto-scaler (#25007)
 
