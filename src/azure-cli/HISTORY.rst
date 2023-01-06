@@ -46,8 +46,7 @@ Release History
 * Fix #24896: `az vm create`: Fix the bug that the VM cannot be created from ACG image to other resource group (#24948)
 * `az disk create`: Add new parameter `--performance-plus` to support boosting the performance target (#24913)
 * `az vm list`: Add new paramter `--vmss` to support querying VM instances in a specific VMSS (#24813)
-* `az sig image-version create`: Add parameters `--target-edge-zone-encryption` and `--target-edge-zones` to support edge zones (#24202)
-* `az sig image-version update`: Add parameters `--target-edge-zone-encryption` and `--target-edge-zones` to support edge zones (#24202)
+* `az sig image-version create/update`: Add parameters `--target-edge-zone-encryption` and `--target-edge-zones` to support edge zones (#24202)
 
 **Container**
 
