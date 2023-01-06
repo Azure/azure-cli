@@ -73,7 +73,7 @@ Release History
 
 * `az network vnet-gateway create`: Add parameter `--edge-zone-vnet-id` for local gateway (#24642)
 * Fix #24853: `az network nsg rule create`: `--destination-asgs` and `--source-asgs` cannot be used (#24894)
-* Fix #24883: `az network application-gateway stop/start`: Missed parameter `--ids` (#24924)
+* Fix #24883: `az network application-gateway stop/start`: Add missed parameter `--ids` (#24924)
 * `az network watcher packet-capture create`: Resolve local path issue for Linux VM (#24936)
 * `az network lb update`: Expose parameter `--tags` (#25035)
 
