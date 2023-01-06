@@ -82,7 +82,7 @@ Release History
 **Redis**
 
 * `az redis import/export`: Add new optional parameter `--preferred-data-archive-method` (#24979)
-* `az redis server-link`: Linked server has two new properties:  `geoReplicatedPrimaryHostName` and `primaryHostName` (#24979)
+* `az redis server-link`: Linked server has two new properties: `geoReplicatedPrimaryHostName` and `primaryHostName` (#24979)
 
 **Security**
 
