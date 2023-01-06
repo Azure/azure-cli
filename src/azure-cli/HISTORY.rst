@@ -85,7 +85,7 @@ Release History
 
 **Security**
 
-* Update code with last Python version (#24878)
+* `az security alert update`: `--status` now support `resolve` and `inprogress` (#24878)
 
 **Service Connector**
 
