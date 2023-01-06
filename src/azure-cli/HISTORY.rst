@@ -95,7 +95,7 @@ Release History
 **SQL**
 
 * `az sql server/db/mi/midb advanced-threat-protection-setting show/update`: Support `advanced-threat-protection-setting` commands (#24953)
-* `az sql db threat-policy`: Declaring deprecation of this cmd group in version 2.45.0 (#24962)
+* `az sql db threat-policy`: Declare deprecation of this command group in version 2.45.0 (#24962)
 * `az sql db`: Add `--preferred-enclave-type` argument (#25002)
 
 **Storage**
