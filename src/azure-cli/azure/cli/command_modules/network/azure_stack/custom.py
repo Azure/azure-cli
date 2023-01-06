@@ -13,21 +13,13 @@ from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
 from azure.cli.core.util import CLIError, sdk_no_wait, find_child_item, find_child_collection
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
-    UnrecognizedArgumentError, ResourceNotFoundError, CLIInternalError, ArgumentUsageError, \
-    MutuallyExclusiveArgumentError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, UnrecognizedArgumentError, ResourceNotFoundError, \
+    ArgumentUsageError, MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, supported_api_version
 
 from azure.cli.command_modules.network.azure_stack._client_factory import network_client_factory
 from azure.cli.command_modules.network.azure_stack.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.azure_stack.zone_file.make_zone_file import make_zone_file
-
-import threading
-import time
-import platform
-import subprocess
-import tempfile
-import requests
 
 logger = get_logger(__name__)
 

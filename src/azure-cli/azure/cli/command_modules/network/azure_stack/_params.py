@@ -36,7 +36,7 @@ from azure.cli.command_modules.network.azure_stack._validators import (
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument,
     validate_vpn_connection_name_or_id,
-    process_vnet_name_or_id, validate_trusted_client_cert, validate_scale_unit_ranges)
+    process_vnet_name_or_id, validate_trusted_client_cert)
 from azure.cli.command_modules.network.azure_stack._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
     ag_url_map_rule_completion_list, tm_endpoint_completion_list, get_sdk_completer)

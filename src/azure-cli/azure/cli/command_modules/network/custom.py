@@ -19,8 +19,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt
 
 from azure.cli.core.util import CLIError, sdk_no_wait, find_child_item, find_child_collection
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
-    UnrecognizedArgumentError, ResourceNotFoundError, CLIInternalError, ArgumentUsageError, \
-    MutuallyExclusiveArgumentError
+    UnrecognizedArgumentError, ResourceNotFoundError, ArgumentUsageError, MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, supported_api_version
 
 from azure.cli.command_modules.network._client_factory import network_client_factory
@@ -44,14 +43,6 @@ from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
 from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdate
 from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
 from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update as _VNetSubnetUpdate
-
-import threading
-import time
-import platform
-import subprocess
-import tempfile
-import requests
-
 
 logger = get_logger(__name__)
 
