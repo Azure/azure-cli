@@ -247,12 +247,12 @@ class AppConfigSnapshotClient:
 
         from datetime import datetime
         from knack.log import get_logger
-        
+
         def _get_elapsed_time(start_time: datetime):
             return (datetime.now() - start_time).total_seconds()
 
         logger = get_logger(__name__)
-        
+
         logger.warning("Starting...")
         current_state = self.create_snapshot(
             name,
