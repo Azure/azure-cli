@@ -221,17 +221,21 @@ def load_command_table(self, _):
     # endregion
 
     # region ApplicationGateways
-    with self.command_group('network application-gateway') as g:
-        g.custom_command('create', 'create_application_gateway',
+    with self.command_group("network application-gateway") as g:
+        from .custom import ApplicationGatewayUpdate
+        self.command_table["network application-gateway update"] = ApplicationGatewayUpdate(loader=self)
+        g.custom_command("show-backend-health", "show_ag_backend_health")
+        g.custom_command("create", "create_application_gateway",
                          transform=DeploymentOutputLongRunningOperation(self.cli_ctx),
                          supports_no_wait=True,
                          table_transformer=deployment_validate_table_format,
                          validator=process_ag_create_namespace,
                          exception_handler=handle_template_based_exception)
-        g.custom_command('show-backend-health', 'show_ag_backend_health')
 
-        from .custom import ApplicationGatewayUpdate
-        self.command_table["network application-gateway update"] = ApplicationGatewayUpdate(loader=self)
+    with self.command_group("network application-gateway rewrite-rule"):
+        from .custom import AGRewriteRuleCreate, AGRewriteRuleUpdate
+        self.command_table["network application-gateway rewrite-rule create"] = AGRewriteRuleCreate(loader=self)
+        self.command_table["network application-gateway rewrite-rule update"] = AGRewriteRuleUpdate(loader=self)
 
     subresource_properties = [
         {'prop': 'authentication_certificates', 'name': 'auth-cert'},
@@ -244,7 +248,6 @@ def load_command_table(self, _):
         {'prop': 'request_routing_rules', 'name': 'rule', 'validator': process_ag_rule_create_namespace},
         {'prop': 'probes', 'name': 'probe'},
         {'prop': 'url_path_maps', 'name': 'url-path-map', 'validator': process_ag_url_path_map_create_namespace},
-        {'prop': 'rewrite_rule_sets', 'name': 'rewrite-rule set'}
     ]
     if self.supported_api_version(min_api='2018-08-01'):
         subresource_properties.append({'prop': 'trusted_root_certificates', 'name': 'root-cert'})
@@ -277,30 +280,6 @@ def load_command_table(self, _):
                                      custom_func_name='update_ag_{}'.format(_make_singular(subresource)),
                                      child_collection_prop_name=subresource, validator=create_validator)
 
-    with self.command_group('network application-gateway rewrite-rule', network_ag_sdk, min_api='2018-12-01') as g:
-        g.custom_command('create', 'create_ag_rewrite_rule', supports_no_wait=True)
-        g.custom_show_command('show', 'show_ag_rewrite_rule')
-        g.custom_command('list', 'list_ag_rewrite_rules')
-        g.custom_command('delete', 'delete_ag_rewrite_rule', supports_no_wait=True)
-        g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='update_ag_rewrite_rule',
-                                 child_collection_prop_name='rewrite_rule_sets.rewrite_rules',
-                                 child_collection_key='name.name',
-                                 child_arg_name='rule_set_name.rule_name')
-
-    with self.command_group('network application-gateway rewrite-rule condition', network_ag_sdk, min_api='2018-12-01') as g:
-        g.custom_command('create', 'create_ag_rewrite_rule_condition', supports_no_wait=True)
-        g.custom_show_command('show', 'show_ag_rewrite_rule_condition')
-        g.custom_command('list', 'list_ag_rewrite_rule_conditions')
-        g.custom_command('delete', 'delete_ag_rewrite_rule_condition', supports_no_wait=True)
-        g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='update_ag_rewrite_rule_condition',
-                                 child_collection_prop_name='rewrite_rule_sets.rewrite_rules.conditions',
-                                 child_collection_key='name.name.variable',
-                                 child_arg_name='rule_set_name.rule_name.variable')
-
     with self.command_group('network application-gateway redirect-config', network_util, min_api='2017-06-01') as g:
         subresource = 'redirect_configurations'
         g.command('list', list_network_resource_property('application_gateways', subresource))
@@ -312,11 +291,6 @@ def load_command_table(self, _):
                                  setter_name='begin_create_or_update',
                                  custom_func_name='update_ag_{}'.format(_make_singular(subresource)),
                                  child_collection_prop_name=subresource, doc_string_source='ApplicationGatewayRedirectConfiguration')
-
-    with self.command_group('network application-gateway rewrite-rule', network_ag_sdk, min_api='2018-12-01') as g:
-        g.command('condition list-server-variables', 'list_available_server_variables')
-        g.command('list-request-headers', 'list_available_request_headers')
-        g.command('list-response-headers', 'list_available_response_headers')
 
     with self.command_group('network application-gateway ssl-policy') as g:
         g.custom_command('set', 'set_ag_ssl_policy_2017_06_01', min_api='2017-06-01', supports_no_wait=True, validator=process_ag_ssl_policy_set_namespace, doc_string_source='ApplicationGatewaySslPolicy')
@@ -362,38 +336,6 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_ag_private_link_ip')
         g.custom_command('list', 'list_ag_private_link_ip')
         g.wait_command('wait')
-    # endregion
-
-    # region ApplicationGatewayWAFPolicy
-    with self.command_group('network application-gateway waf-policy', min_api='2018-12-01') as g:
-        g.custom_command('create', 'create_ag_waf_policy')
-
-    with self.command_group("network application-gateway waf-policy policy-setting") as g:
-        g.custom_command("list", "list_waf_policy_setting")
-
-    with self.command_group("network application-gateway waf-policy custom-rule match-condition"):
-        from .custom import WAFCustomRuleMatchConditionAdd
-        self.command_table["network application-gateway waf-policy custom-rule match-condition add"] = WAFCustomRuleMatchConditionAdd(loader=self)
-
-    with self.command_group('network application-gateway waf-policy managed-rule rule-set', min_api='2019-09-01') as g:
-        g.custom_command('add', 'add_waf_managed_rule_set')
-        g.custom_command('remove', 'remove_waf_managed_rule_set')
-        g.custom_command('list', 'list_waf_managed_rules')
-        g.custom_command('update', 'update_waf_managed_rule_set', validator=process_appgw_waf_policy_update)
-
-    with self.command_group('network application-gateway waf-policy managed-rule exclusion', network_ag_waf_sdk,
-                            client_factory=cf_app_gateway_waf_policy,
-                            min_api='2019-09-01') as g:
-        g.custom_command('add', 'add_waf_managed_rule_exclusion')
-        g.custom_command('remove', 'remove_waf_managed_rule_exclusion')
-        g.custom_command('list', 'list_waf_managed_rules')
-
-    with self.command_group('network application-gateway waf-policy managed-rule exclusion rule-set', network_ag_waf_sdk,
-                            client_factory=cf_app_gateway_waf_policy,
-                            min_api='2021-05-01') as g:
-        g.custom_command('add', 'add_waf_exclusion_rule_set')
-        g.custom_command('remove', 'remove_waf_exclusion_rule_set')
-        g.custom_command('list', 'list_waf_managed_rules')
 
     with self.command_group('network application-gateway client-cert', network_ag_sdk, min_api='2020-06-01') as g:
         g.custom_command('add', 'add_trusted_client_certificate')
@@ -408,6 +350,34 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_ssl_profile')
         g.custom_show_command('show', 'show_ssl_profile')
         g.custom_command('update', 'update_ssl_profile')
+    # endregion
+
+    # region ApplicationGatewayWAFPolicy
+    with self.command_group("network application-gateway waf-policy"):
+        from .custom import WAFCreate
+        self.command_table["network application-gateway waf-policy create"] = WAFCreate(loader=self)
+
+    with self.command_group("network application-gateway waf-policy custom-rule match-condition"):
+        from .custom import WAFCustomRuleMatchConditionAdd
+        self.command_table["network application-gateway waf-policy custom-rule match-condition add"] = WAFCustomRuleMatchConditionAdd(loader=self)
+
+    with self.command_group("network application-gateway waf-policy managed-rule exclusion") as g:
+        g.custom_command("remove", "remove_waf_managed_rule_exclusion")
+        g.custom_command("list", "list_waf_managed_rules")
+
+    with self.command_group("network application-gateway waf-policy managed-rule exclusion rule-set") as g:
+        g.custom_command("add", "add_waf_exclusion_rule_set")
+        g.custom_command("remove", "remove_waf_exclusion_rule_set")
+        g.custom_command("list", "list_waf_managed_rules")
+
+    with self.command_group("network application-gateway waf-policy managed-rule rule-set") as g:
+        g.custom_command("add", "add_waf_managed_rule_set")
+        g.custom_command("remove", "remove_waf_managed_rule_set")
+        g.custom_command("list", "list_waf_managed_rules")
+        g.custom_command("update", "update_waf_managed_rule_set", validator=process_appgw_waf_policy_update)
+
+    with self.command_group("network application-gateway waf-policy policy-setting") as g:
+        g.custom_command("list", "list_waf_policy_setting")
     # endregion
 
     # region DdosProtectionPlans

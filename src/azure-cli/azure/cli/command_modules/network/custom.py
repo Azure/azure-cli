@@ -17,7 +17,7 @@ from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
-from azure.cli.core.util import CLIError, sdk_no_wait, find_child_item, find_child_collection
+from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
     UnrecognizedArgumentError, ResourceNotFoundError, CLIInternalError, ArgumentUsageError, \
     MutuallyExclusiveArgumentError
@@ -28,6 +28,9 @@ from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zo
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
 from .aaz.latest.network.application_gateway import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.application_gateway.rewrite_rule import Create as _AGRewriteRuleCreate, \
+    Update as _AGRewriteRuleUpdate
+from .aaz.latest.network.application_gateway.waf_policy import Create as _WAFCreate
 from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condition import \
     Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
@@ -131,11 +134,11 @@ def list_network_watchers(cmd, resource_group_name=None):
 
 # region ApplicationGateways
 # pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
 def _is_v2_sku(sku):
     return 'v2' in sku
 
 
-# pylint: disable=too-many-statements
 def create_application_gateway(cmd, application_gateway_name, resource_group_name, location=None,
                                tags=None, no_wait=False, capacity=2,
                                cert_data=None, cert_password=None, key_vault_secret_id=None,
@@ -294,6 +297,82 @@ class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
         if has_value(args.sku):
             sku = str(args.sku)
             args.sku.tier = sku.split("_", 1)[0] if not _is_v2_sku(sku) else sku
+
+
+class AGRewriteRuleCreate(_AGRewriteRuleCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZDictArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.request_headers = AAZDictArg(
+            options=["--request-headers"],
+            help="Space-separated list of HEADER=VALUE pairs. "
+                 "Values from: `az network application-gateway rewrite-rule list-request-headers`.",
+        )
+        args_schema.request_headers.Element = AAZStrArg()
+        args_schema.response_headers = AAZDictArg(
+            options=["--response-headers"],
+            help="Space-separated list of HEADER=VALUE pairs. "
+                 "Values from: `az network application-gateway rewrite-rule list-response-headers`.",
+        )
+        args_schema.response_headers.Element = AAZStrArg()
+        args_schema.request_header_configurations._registered = False
+        args_schema.response_header_configurations._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.request_headers):
+            configurations = []
+            for k, v in args.request_headers.items():
+                configurations.append({"header_name": k, "header_value": v})
+            args.request_header_configurations = configurations
+        if has_value(args.response_headers):
+            configurations = []
+            for k, v in args.response_headers.items():
+                configurations.append({"header_name": k, "header_value": v})
+            args.response_header_configurations = configurations
+
+
+class AGRewriteRuleUpdate(_AGRewriteRuleUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZDictArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.request_headers = AAZDictArg(
+            options=["--request-headers"],
+            help="Space-separated list of HEADER=VALUE pairs. "
+                 "Values from: `az network application-gateway rewrite-rule list-request-headers`.",
+            nullable=True,
+        )
+        args_schema.request_headers.Element = AAZStrArg(
+            nullable=True,
+        )
+        args_schema.response_headers = AAZDictArg(
+            options=["--response-headers"],
+            help="Space-separated list of HEADER=VALUE pairs. "
+                 "Values from: `az network application-gateway rewrite-rule list-response-headers`.",
+            nullable=True,
+        )
+        args_schema.response_headers.Element = AAZStrArg(
+            nullable=True,
+        )
+        args_schema.request_header_configurations._registered = False
+        args_schema.response_header_configurations._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.request_headers):
+            configurations = []
+            for k, v in args.request_headers.items():
+                configurations.append({"header_name": k, "header_value": v})
+            args.request_header_configurations = configurations
+        if has_value(args.response_headers):
+            configurations = []
+            for k, v in args.response_headers.items():
+                configurations.append({"header_name": k, "header_value": v})
+            args.response_header_configurations = configurations
 
 
 def create_ag_authentication_certificate(cmd, resource_group_name, application_gateway_name, item_name,
@@ -1192,157 +1271,6 @@ def update_ag_redirect_configuration(cmd, instance, parent, item_name, redirect_
     return parent
 
 
-def create_ag_rewrite_rule_set(cmd, resource_group_name, application_gateway_name, item_name, no_wait=False):
-    ApplicationGatewayRewriteRuleSet = cmd.get_models(
-        'ApplicationGatewayRewriteRuleSet')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    new_set = ApplicationGatewayRewriteRuleSet(name=item_name)
-    upsert_to_collection(ag, 'rewrite_rule_sets', new_set, 'name')
-    if no_wait:
-        return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, application_gateway_name, ag)
-    parent = sdk_no_wait(no_wait, ncf.begin_create_or_update,
-                         resource_group_name, application_gateway_name, ag).result()
-    return find_child_item(parent, item_name,
-                           path='rewrite_rule_sets', key_path='name')
-
-
-def update_ag_rewrite_rule_set(instance, parent, item_name):
-    return parent
-
-
-def create_ag_rewrite_rule(cmd, resource_group_name, application_gateway_name, rule_set_name, rule_name,
-                           sequence=None, request_headers=None, response_headers=None, no_wait=False,
-                           modified_path=None, modified_query_string=None, enable_reroute=None):
-    (ApplicationGatewayRewriteRule,
-     ApplicationGatewayRewriteRuleActionSet,
-     ApplicationGatewayUrlConfiguration) = cmd.get_models('ApplicationGatewayRewriteRule',
-                                                          'ApplicationGatewayRewriteRuleActionSet',
-                                                          'ApplicationGatewayUrlConfiguration')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    rule_set = find_child_item(ag, rule_set_name,
-                               path='rewrite_rule_sets', key_path='name')
-    url_configuration = None
-    if any([modified_path, modified_query_string, enable_reroute]):
-        url_configuration = ApplicationGatewayUrlConfiguration(modified_path=modified_path,
-                                                               modified_query_string=modified_query_string,
-                                                               reroute=enable_reroute)
-    new_rule = ApplicationGatewayRewriteRule(
-        name=rule_name,
-        rule_sequence=sequence,
-        action_set=ApplicationGatewayRewriteRuleActionSet(
-            request_header_configurations=request_headers,
-            response_header_configurations=response_headers,
-            url_configuration=url_configuration
-        )
-    )
-    upsert_to_collection(rule_set, 'rewrite_rules', new_rule, 'name')
-    if no_wait:
-        return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, application_gateway_name, ag)
-    parent = sdk_no_wait(no_wait, ncf.begin_create_or_update,
-                         resource_group_name, application_gateway_name, ag).result()
-    return find_child_item(parent, rule_set_name, rule_name,
-                           path='rewrite_rule_sets.rewrite_rules', key_path='name.name')
-
-
-def update_ag_rewrite_rule(instance, parent, cmd, rule_set_name, rule_name, sequence=None,
-                           request_headers=None, response_headers=None,
-                           modified_path=None, modified_query_string=None, enable_reroute=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('rule_sequence', sequence)
-        c.set_param('action_set.request_header_configurations', request_headers)
-        c.set_param('action_set.response_header_configurations', response_headers)
-        ApplicationGatewayUrlConfiguration = cmd.get_models('ApplicationGatewayUrlConfiguration')
-        url_configuration = None
-        if any([modified_path, modified_query_string, enable_reroute]):
-            url_configuration = ApplicationGatewayUrlConfiguration(modified_path=modified_path,
-                                                                   modified_query_string=modified_query_string,
-                                                                   reroute=enable_reroute)
-        c.set_param('action_set.url_configuration', url_configuration)
-    return parent
-
-
-def show_ag_rewrite_rule(cmd, resource_group_name, application_gateway_name, rule_set_name, rule_name):
-    client = network_client_factory(cmd.cli_ctx).application_gateways
-    gateway = client.get(resource_group_name, application_gateway_name)
-    return find_child_item(gateway, rule_set_name, rule_name,
-                           path='rewrite_rule_sets.rewrite_rules', key_path='name.name')
-
-
-def list_ag_rewrite_rules(cmd, resource_group_name, application_gateway_name, rule_set_name):
-    client = network_client_factory(cmd.cli_ctx).application_gateways
-    gateway = client.get(resource_group_name, application_gateway_name)
-    return find_child_collection(gateway, rule_set_name, path='rewrite_rule_sets.rewrite_rules', key_path='name')
-
-
-def delete_ag_rewrite_rule(cmd, resource_group_name, application_gateway_name, rule_set_name, rule_name, no_wait=None):
-    client = network_client_factory(cmd.cli_ctx).application_gateways
-    gateway = client.get(resource_group_name, application_gateway_name)
-    rule_set = find_child_item(gateway, rule_set_name, path='rewrite_rule_sets', key_path='name')
-    rule = find_child_item(rule_set, rule_name, path='rewrite_rules', key_path='name')
-    rule_set.rewrite_rules.remove(rule)
-    sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, application_gateway_name, gateway)
-
-
-def create_ag_rewrite_rule_condition(cmd, resource_group_name, application_gateway_name, rule_set_name, rule_name,
-                                     variable, no_wait=False, pattern=None, ignore_case=None, negate=None):
-    ApplicationGatewayRewriteRuleCondition = cmd.get_models(
-        'ApplicationGatewayRewriteRuleCondition')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    rule = find_child_item(ag, rule_set_name, rule_name,
-                           path='rewrite_rule_sets.rewrite_rules', key_path='name.name')
-    new_condition = ApplicationGatewayRewriteRuleCondition(
-        variable=variable,
-        pattern=pattern,
-        ignore_case=ignore_case,
-        negate=negate
-    )
-    upsert_to_collection(rule, 'conditions', new_condition, 'variable')
-    if no_wait:
-        return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, application_gateway_name, ag)
-    parent = sdk_no_wait(no_wait, ncf.begin_create_or_update,
-                         resource_group_name, application_gateway_name, ag).result()
-    return find_child_item(parent, rule_set_name, rule_name, variable,
-                           path='rewrite_rule_sets.rewrite_rules.conditions', key_path='name.name.variable')
-
-
-def update_ag_rewrite_rule_condition(instance, parent, cmd, rule_set_name, rule_name, variable, pattern=None,
-                                     ignore_case=None, negate=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('pattern', pattern)
-        c.set_param('ignore_case', ignore_case)
-        c.set_param('negate', negate)
-    return parent
-
-
-def show_ag_rewrite_rule_condition(cmd, resource_group_name, application_gateway_name, rule_set_name,
-                                   rule_name, variable):
-    client = network_client_factory(cmd.cli_ctx).application_gateways
-    gateway = client.get(resource_group_name, application_gateway_name)
-    return find_child_item(gateway, rule_set_name, rule_name, variable,
-                           path='rewrite_rule_sets.rewrite_rules.conditions', key_path='name.name.variable')
-
-
-def list_ag_rewrite_rule_conditions(cmd, resource_group_name, application_gateway_name, rule_set_name, rule_name):
-    client = network_client_factory(cmd.cli_ctx).application_gateways
-    gateway = client.get(resource_group_name, application_gateway_name)
-    return find_child_collection(gateway, rule_set_name, rule_name,
-                                 path='rewrite_rule_sets.rewrite_rules.conditions', key_path='name.name')
-
-
-def delete_ag_rewrite_rule_condition(cmd, resource_group_name, application_gateway_name, rule_set_name,
-                                     rule_name, variable, no_wait=None):
-    client = network_client_factory(cmd.cli_ctx).application_gateways
-    gateway = client.get(resource_group_name, application_gateway_name)
-    rule = find_child_item(gateway, rule_set_name, rule_name,
-                           path='rewrite_rule_sets.rewrite_rules', key_path='name.name')
-    condition = find_child_item(rule, variable, path='conditions', key_path='variable')
-    rule.conditions.remove(condition)
-    sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, application_gateway_name, gateway)
-
-
 def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_name, protocol, host, path, interval=30,
                     timeout=120, threshold=8, no_wait=False, host_name_from_http_settings=None, min_servers=None,
                     match_body=None, match_status_codes=None, host_name_from_settings=None, port=None):
@@ -1808,27 +1736,35 @@ def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
 
 
 # region ApplicationGatewayWAFPolicy
-def create_ag_waf_policy(cmd, resource_group_name, policy_name,
-                         location=None, tags=None, rule_set_type='OWASP', rule_set_version='3.0'):
-    # https://docs.microsoft.com/en-us/azure/application-gateway/waf-overview
+class WAFCreate(_WAFCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.rule_set_type = AAZStrArg(
+            options=["--type"],
+            help="Type of the web application firewall rule set.",
+            default="OWASP",
+            enum={"Microsoft_BotManagerRuleSet": "Microsoft_BotManagerRuleSet", "OWASP": "OWASP"},
+        )
+        args_schema.rule_set_version = AAZStrArg(
+            options=["--version"],
+            help="Version of the web application firewall rule set type, 0.1 is used for Microsoft_BotManagerRuleSet",
+            default="3.0",
+            enum={"0.1": "0.1", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"},
+        )
+        return args_schema
 
-    # mandatory default rule with empty rule sets
-    managed_rule_set = {
-        "rule_set_type": rule_set_type,
-        "rule_set_version": rule_set_version
-    }
-    managed_rule_definition = {
-        "managed_rule_sets": [managed_rule_set]
-    }
-
-    from .aaz.latest.network.application_gateway.waf_policy import Create
-    return Create(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "name": policy_name,
-        "location": location,
-        "tags": tags,
-        "managed_rules": managed_rule_definition
-    })
+    def pre_operations(self):
+        args = self.ctx.args
+        managed_rule_set = {
+            "rule_set_type": args.rule_set_type,
+            "rule_set_version": args.rule_set_version
+        }
+        managed_rule_definition = {
+            "managed_rule_sets": [managed_rule_set]
+        }
+        args.managed_rules = managed_rule_definition
 # endregion
 
 
@@ -1940,7 +1876,7 @@ def add_waf_managed_rule_set(cmd, resource_group_name, policy_name,
 def update_waf_managed_rule_set(cmd, resource_group_name, policy_name,
                                 rule_set_type, rule_set_version, rule_group_name=None, rules=None):
     """
-    Update(Override) existing rule set of a WAF policy managed rules.
+    Update (Override) existing rule set of a WAF policy managed rules.
     """
     managed_rule_overrides = rules if rules else None
 
@@ -2035,7 +1971,6 @@ def remove_waf_managed_rule_set(cmd, resource_group_name, policy_name,
                         continue
 
                     new_managed_rule_sets.append(rule_set)
-
                 instance.properties.managed_rules.managed_rule_sets = new_managed_rule_sets
 
     return WAFManagedRuleSetRemove(cli_ctx=cmd.cli_ctx)(command_args={
@@ -2054,126 +1989,155 @@ def list_waf_managed_rules(cmd, resource_group_name, policy_name):
 
 
 # region ApplicationGatewayWAFPolicy ManagedRule OwaspCrsExclusionEntry
-def add_waf_managed_rule_exclusion(cmd, client, resource_group_name, policy_name,
-                                   match_variable, selector_match_operator, selector):
-    OwaspCrsExclusionEntry = cmd.get_models('OwaspCrsExclusionEntry')
+# pylint: disable=too-many-nested-blocks, line-too-long
+def remove_waf_managed_rule_exclusion(cmd, resource_group_name, policy_name):
+    from .aaz.latest.network.application_gateway.waf_policy import Update
 
-    exclusion_entry = OwaspCrsExclusionEntry(match_variable=match_variable,
-                                             selector_match_operator=selector_match_operator,
-                                             selector=selector)
+    class WAFExclusionRemove(Update):
+        def pre_instance_update(self, instance):
+            instance.properties.managed_rules.exclusions = []
 
-    waf_policy = client.get(resource_group_name, policy_name)
-
-    waf_policy.managed_rules.exclusions.append(exclusion_entry)
-
-    return client.create_or_update(resource_group_name, policy_name, waf_policy)
-
-
-def remove_waf_managed_rule_exclusion(cmd, client, resource_group_name, policy_name):
-    waf_policy = client.get(resource_group_name, policy_name)
-    waf_policy.managed_rules.exclusions = []
-    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+    return WAFExclusionRemove(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": policy_name,
+        "resource_group": resource_group_name,
+    })
 
 
-# pylint: disable=too-many-nested-blocks
-def add_waf_exclusion_rule_set(cmd, client, resource_group_name, policy_name,
-                               rule_set_type, rule_set_version,
-                               match_variable, selector_match_operator, selector,
+def add_waf_exclusion_rule_set(cmd, resource_group_name, policy_name,
+                               rule_set_type, rule_set_version, match_variable, selector_match_operator, selector,
                                rule_group_name=None, rule_ids=None):
-    def _has_exclusion():
-        policy = client.get(resource_group_name, policy_name)
-        for e in policy.managed_rules.exclusions:
-            if e.match_variable == match_variable \
-                    and e.selector_match_operator == selector_match_operator \
-                    and e.selector == selector:
-                return True
-        return False
-
-    ExclusionManagedRuleSet, ExclusionManagedRuleGroup, ExclusionManagedRule = cmd.get_models(
-        'ExclusionManagedRuleSet', 'ExclusionManagedRuleGroup', 'ExclusionManagedRule'
-    )
     # build current rules from ids
-    rules = [ExclusionManagedRule(rule_id=rule_id) for rule_id in rule_ids] if rule_ids is not None else []
+    if rule_ids is None:
+        rules = []
+    else:
+        rules = [{"rule_id": rule_id} for rule_id in rule_ids]
     # build current rule group from rules
     curr_rule_group = None
     if rule_group_name is not None:
-        curr_rule_group = ExclusionManagedRuleGroup(rule_group_name=rule_group_name, rules=rules)
+        curr_rule_group = {
+            "rule_group_name": rule_group_name,
+            "rules": rules,
+        }
     # build current rule set from rule group
-    curr_rule_set = ExclusionManagedRuleSet(rule_set_type=rule_set_type,
-                                            rule_set_version=rule_set_version,
-                                            rule_groups=[curr_rule_group] if curr_rule_group is not None else [])
-
-    if not _has_exclusion():
-        OwaspCrsExclusionEntry = cmd.get_models('OwaspCrsExclusionEntry')
-        exclusion = OwaspCrsExclusionEntry(match_variable=match_variable,
-                                           selector_match_operator=selector_match_operator,
-                                           selector=selector,
-                                           exclusion_managed_rule_sets=[curr_rule_set])
-        waf_policy = client.get(resource_group_name, policy_name)
-        waf_policy.managed_rules.exclusions.append(exclusion)
+    if curr_rule_group is None:
+        rule_groups = []
     else:
-        waf_policy = client.get(resource_group_name, policy_name)
-        for exclusion in waf_policy.managed_rules.exclusions:
-            if exclusion.match_variable == match_variable \
-                    and exclusion.selector_match_operator == selector_match_operator \
-                    and exclusion.selector == selector:
-                for rule_set in exclusion.exclusion_managed_rule_sets:
-                    if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version == rule_set_version:
-                        for rule_group in rule_set.rule_groups:
-                            # add rules when rule group exists
-                            if rule_group.rule_group_name == rule_group_name:
-                                rule_group.rules.extend(rules)
+        rule_groups = [curr_rule_group]
+    curr_rule_set = {
+        "rule_set_type": rule_set_type,
+        "rule_set_version": rule_set_version,
+        "rule_groups": rule_groups,
+    }
+
+    from .aaz.latest.network.application_gateway.waf_policy import Update
+
+    class WAFExclusionRuleSetAdd(Update):
+        def pre_instance_update(self, instance):
+            def _has_exclusion():
+                for e in instance.properties.managed_rules.exclusions:
+                    if (e.match_variable, e.selector_match_operator, e.selector) == (match_variable, selector_match_operator, selector):
+                        return True
+
+                return False
+
+            if not _has_exclusion():
+                exclusion = {
+                    "match_variable": match_variable,
+                    "selector_match_operator": selector_match_operator,
+                    "selector": selector,
+                    "exclusion_managed_rule_sets": [curr_rule_set],
+                }
+                instance.properties.managed_rules.exclusions.append(exclusion)
+            else:
+                for exclusion in instance.properties.managed_rules.exclusions:
+                    if (exclusion.match_variable, exclusion.selector_match_operator, exclusion.selector) == (match_variable, selector_match_operator, selector):
+                        for rule_set in exclusion.exclusion_managed_rule_sets:
+                            if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version == rule_set_version:
+                                for rule_group in rule_set.rule_groups:
+                                    # add rules when rule group exists
+                                    if rule_group.rule_group_name == rule_group_name:
+                                        rule_group.rules.extend(rules)
+                                        break
+                                else:
+                                    # add a new rule group
+                                    if curr_rule_group is not None:
+                                        rule_set.rule_groups.append(curr_rule_group)
                                 break
                         else:
-                            # add a new rule group
-                            if curr_rule_group is not None:
-                                rule_set.rule_groups.append(curr_rule_group)
-                        break
-                else:
-                    # add a new rule set
-                    exclusion.exclusion_managed_rule_sets.append(curr_rule_set)
+                            # add a new rule set
+                            exclusion.exclusion_managed_rule_sets.append(curr_rule_set)
 
-    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+    return WAFExclusionRuleSetAdd(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": policy_name,
+        "resource_group": resource_group_name,
+    })
 
 
-# pylint: disable=line-too-long
-def remove_waf_exclusion_rule_set(client, resource_group_name, policy_name,
-                                  rule_set_type, rule_set_version,
-                                  match_variable, selector_match_operator, selector,
+def remove_waf_exclusion_rule_set(cmd, resource_group_name, policy_name,
+                                  rule_set_type, rule_set_version, match_variable, selector_match_operator, selector,
                                   rule_group_name=None):
-    remove_rule_set = None
-    remove_exclusion = None
-    waf_policy = client.get(resource_group_name, policy_name)
+    from .aaz.latest.network.application_gateway.waf_policy import Update
 
-    for exclusion in waf_policy.managed_rules.exclusions:
-        if (exclusion.match_variable, exclusion.selector_match_operator, exclusion.selector) \
-           == (match_variable, selector_match_operator, selector):
-            for rule_set in exclusion.exclusion_managed_rule_sets:
-                if rule_set.rule_set_type == rule_set_type or rule_set.rule_set_version == rule_set_version:
-                    if rule_group_name is None:
-                        remove_rule_set = rule_set
-                        break
+    class WAFExclusionRuleSetRemove(Update):
+        def pre_instance_update(self, instance):
+            remove_rule_set, remove_exclusion = None, None
+            for exclusion in instance.properties.managed_rules.exclusions:
+                if (exclusion.match_variable, exclusion.selector_match_operator, exclusion.selector) == (match_variable, selector_match_operator, selector):
+                    for rule_set in exclusion.exclusion_managed_rule_sets:
+                        if rule_set.rule_set_type == rule_set_type or rule_set.rule_set_version == rule_set_version:
+                            if rule_group_name is None:
+                                remove_rule_set = rule_set
+                                break
+                        # remove one rule from rule group
+                        is_removed = False
+                        new_rule_groups = []
+                        for rg in rule_set.rule_groups:
+                            if rg.rule_group_name == rule_group_name and not is_removed:
+                                is_removed = True
+                                continue
 
-                    rule_group = next((rule_group for rule_group in rule_set.rule_groups if rule_group.rule_group_name == rule_group_name), None)
-                    if rule_group is None:
-                        err_msg = f"Rule set group [{rule_group_name}] is not found."
-                        raise ResourceNotFoundError(err_msg)
+                            new_rule_groups.append(rg)
+                        if not is_removed:
+                            err_msg = f"Rule set group [{rule_group_name}] is not found."
+                            raise ResourceNotFoundError(err_msg)
 
-                    rule_set.rule_groups.remove(rule_group)
-                    if not rule_set.rule_groups:
-                        exclusion.exclusion_managed_rule_sets.remove(rule_set)
+                        rule_set.rule_groups = new_rule_groups
+
+                        if not rule_set.rule_groups:
+                            new_rule_sets = []
+                            for rs in exclusion.exclusion_managed_rule_sets:
+                                if rs == rule_set:
+                                    continue
+
+                                new_rule_sets.append(rs)
+                            exclusion.exclusion_managed_rule_sets = new_rule_sets
+                            if not exclusion.exclusion_managed_rule_sets:
+                                remove_exclusion = exclusion
+
+                    if remove_rule_set:
+                        new_rule_sets = []
+                        for rs in exclusion.exclusion_managed_rule_sets:
+                            if rs == remove_rule_set:
+                                continue
+
+                            new_rule_sets.append(rs)
+                        exclusion.exclusion_managed_rule_sets = new_rule_sets
                         if not exclusion.exclusion_managed_rule_sets:
                             remove_exclusion = exclusion
 
-            if remove_rule_set:
-                exclusion.exclusion_managed_rule_sets.remove(remove_rule_set)
-                if not exclusion.exclusion_managed_rule_sets:
-                    remove_exclusion = exclusion
+            if remove_exclusion:
+                new_exclusions = []
+                for exclusion in instance.properties.managed_rules.exclusions:
+                    if exclusion == remove_exclusion:
+                        continue
 
-    if remove_exclusion:
-        waf_policy.managed_rules.exclusions.remove(remove_exclusion)
+                    new_exclusions.append(exclusion)
+                instance.properties.managed_rules.exclusions = new_exclusions
 
-    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+    return WAFExclusionRuleSetRemove(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": policy_name,
+        "resource_group": resource_group_name,
+    })
 # endregion
 
 
