@@ -297,9 +297,9 @@ def save_pipeline_result(pipeline_result):
     # save pipeline result to file
     # /mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_3.8_latest_1.json
     filename = os.path.join(azdev_test_result_dir, f'pipeline_result_{python_version}_{profile}_{instance_idx}.json')
-    logger.info(f"save pipeline result to file: {filename}")
-    with open(os.path.join(azdev_test_result_dir, f'pipeline_result_{python_version}_{profile}_{instance_idx}.json'), 'w') as f:
+    with open(filename, 'w') as f:
         json.dump(pipeline_result, f, indent=4)
+    logger.info(f"save pipeline result to file: {filename}")
 
 
 class AutomaticScheduling(object):
@@ -396,7 +396,7 @@ class AutomaticScheduling(object):
                   ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1 --durations=10']
             parallel_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
             pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result)
-            save_pipeline_result(pipeline_result)
+        save_pipeline_result(pipeline_result)
         return serial_error_flag or parallel_error_flag
 
 
