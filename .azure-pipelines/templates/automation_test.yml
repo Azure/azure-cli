@@ -76,6 +76,7 @@ steps:
       PYTHON_VERSION: ${{ parameters.pythonVersion }}
       JOB_NAME: ${{ parameters.jobName }}
   - task: PublishBuildArtifacts@1
+    condition: always()
     inputs:
       # /mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_3.8_latest_1.json
       PathtoPublish: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.json'
