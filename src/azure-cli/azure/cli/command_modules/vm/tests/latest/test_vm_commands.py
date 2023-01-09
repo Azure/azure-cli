@@ -3270,7 +3270,7 @@ class VMCreateCustomDataScenarioTest(ScenarioTest):
 
         user_data = '#cloud-config\nhostname: myVMhostname'
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        user_data_file = os.path.join(curr_dir, 'user_data.json').replace('\\', '\\\\')
+        user_data_file = os.path.join(curr_dir, 'user_data2.json').replace('\\', '\\\\')
 
         self.kwargs.update({
             'username': 'ubuntu',
