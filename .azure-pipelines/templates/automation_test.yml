@@ -82,3 +82,17 @@ steps:
       PathtoPublish: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.json'
       ArtifactName: 'test_results'
       publishLocation: 'Container'
+  - task: PublishBuildArtifacts@1
+      condition: always()
+      inputs:
+        # /mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_{instance_idx}.serial.xml
+        PathtoPublish: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_${{ parameters.instance_idx }}.serial.xml'
+        ArtifactName: 'test_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}'
+        publishLocation: 'Container'
+  - task: PublishBuildArtifacts@1
+      condition: always()
+      inputs:
+        # /mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_{instance_idx}.parallel.xml
+        PathtoPublish: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_${{ parameters.instance_idx }}.parallel.xml'
+        ArtifactName: 'test_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}'
+        publishLocation: 'Container'
