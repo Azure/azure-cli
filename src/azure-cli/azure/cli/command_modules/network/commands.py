@@ -15,10 +15,9 @@ from azure.cli.command_modules.network._client_factory import (
     cf_application_gateways,
     cf_load_balancers,
     cf_network_interfaces, cf_network_watcher, cf_packet_capture,
-    cf_virtual_networks, cf_virtual_network_peerings, cf_virtual_network_gateway_connections,
+    cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_subnets,
     cf_public_ip_addresses, cf_connection_monitor,
     cf_dns_references, cf_private_endpoints,
     cf_app_gateway_waf_policy,
@@ -31,9 +30,9 @@ from azure.cli.command_modules.network._util import (
 from azure.cli.command_modules.network._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
-    transform_vnet_create_output, transform_public_ip_create_output,
+    transform_public_ip_create_output,
     transform_traffic_manager_create_output, transform_nic_create_output,
-    transform_nsg_create_output, transform_vnet_gateway_create_output,
+    transform_vnet_gateway_create_output,
     transform_vpn_connection, transform_vpn_connection_list,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
@@ -52,7 +51,7 @@ from azure.cli.command_modules.network._validators import (
     process_nw_packet_capture_create_namespace, process_nw_test_connectivity_namespace, process_nw_topology_namespace,
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
     process_public_ip_create_namespace,
-    process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
+    process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
     process_vpn_connection_create_namespace,
     process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace,
     process_appgw_waf_policy_update, process_cross_region_lb_frontend_ip_namespace, process_cross_region_lb_create_namespace)
@@ -138,24 +137,9 @@ def load_command_table(self, _):
         client_factory=cf_public_ip_addresses
     )
 
-    network_subnet_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#SubnetsOperations.{}',
-        client_factory=cf_subnets
-    )
-
     network_vgw_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#VirtualNetworkGatewaysOperations.{}',
         client_factory=cf_virtual_network_gateways
-    )
-
-    network_vnet_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualNetworksOperations.{}',
-        client_factory=cf_virtual_networks
-    )
-
-    network_vnet_peering_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualNetworkPeeringsOperations.{}',
-        client_factory=cf_virtual_network_peerings
     )
 
     network_vpn_sdk = CliCommandType(
@@ -218,8 +202,6 @@ def load_command_table(self, _):
         min_api='2019-11-01'
     )
 
-    network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
-
     network_load_balancers_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.network.custom#{}',
         client_factory=cf_load_balancers,
@@ -230,7 +212,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.cli.command_modules.network.custom#{}',
         client_factory=cf_network_interfaces
     )
-
     # endregion
 
     # region NetworkRoot
@@ -433,7 +414,6 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_ssl_profile')
         g.custom_show_command('show', 'show_ssl_profile')
         g.custom_command('update', 'update_ssl_profile')
-
     # endregion
 
     # region DdosProtectionPlans
@@ -567,7 +547,6 @@ def load_command_table(self, _):
     # with self.command_group('network private-link-service ip-configs', network_private_link_service_sdk) as g:
     #     g.custom_command('add', 'add_private_link_services_ipconfig')
     #     g.custom_command('remove', 'remove_private_link_services_ipconfig')
-
     # endregion
 
     # region LoadBalancers
@@ -675,13 +654,16 @@ def load_command_table(self, _):
     # endregion
 
     # region cross-region load balancer
-    with self.command_group('network cross-region-lb', network_lb_sdk) as g:
-        g.show_command('show', 'get')
+    with self.command_group('network cross-region-lb') as g:
         g.custom_command('create', 'create_cross_region_load_balancer', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_cross_region_lb_create_namespace, exception_handler=handle_template_based_exception)
-        g.command('delete', 'begin_delete')
-        g.custom_command('list', 'list_lbs')
-        g.generic_update_command('update', setter_name='begin_create_or_update')
-        g.wait_command('wait')
+
+        from .aaz.latest.network.lb import Wait
+        from .operations.load_balancer import CrossRegionLoadBalancerShow, CrossRegionLoadBalancerDelete, CrossRegionLoadBalancerUpdate, CrossRegionLoadBalancerList
+        self.command_table['network cross-region-lb show'] = CrossRegionLoadBalancerShow(loader=self)
+        self.command_table['network cross-region-lb delete'] = CrossRegionLoadBalancerDelete(loader=self)
+        self.command_table['network cross-region-lb list'] = CrossRegionLoadBalancerList(loader=self)
+        self.command_table['network cross-region-lb update'] = CrossRegionLoadBalancerUpdate(loader=self)
+        self.command_table['network cross-region-lb wait'] = Wait(loader=self)
 
     cross_region_lb_property_map = {
         'frontend_ip_configurations': 'frontend-ip',
@@ -763,20 +745,20 @@ def load_command_table(self, _):
     with self.command_group('network nic ip-config inbound-nat-rule') as g:
         g.custom_command('add', 'add_nic_ip_config_inbound_nat_rule')
         g.custom_command('remove', 'remove_nic_ip_config_inbound_nat_rule')
-
     # endregion
 
     # region NetworkSecurityGroups
-    with self.command_group('network nsg') as g:
-        g.custom_command('create', 'create_nsg', transform=transform_nsg_create_output)
+    with self.command_group("network nsg") as g:
+        from .custom import NSGCreate
+        self.command_table["network nsg create"] = NSGCreate(loader=self)
 
-    with self.command_group('network nsg rule') as g:
-        g.custom_command('list', 'list_nsg_rules', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
-        g.custom_command('create', 'create_nsg_rule')
+    with self.command_group("network nsg rule") as g:
+        from .custom import NSGRuleCreate, NSGRuleUpdate
         from .aaz.latest.network.nsg.rule import Show
-        self.command_table['network nsg rule show'] = Show(loader=self, table_transformer=transform_nsg_rule_table_output)
-        from azure.cli.command_modules.network.custom import NsgRuleUpdate
-        self.command_table['network nsg rule update'] = NsgRuleUpdate(loader=self)
+        self.command_table["network nsg rule create"] = NSGRuleCreate(loader=self)
+        self.command_table["network nsg rule update"] = NSGRuleUpdate(loader=self)
+        self.command_table["network nsg rule show"] = Show(loader=self, table_transformer=transform_nsg_rule_table_output)
+        g.custom_command("list", "list_nsg_rules", table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
     # endregion
 
     # region NetworkWatchers
@@ -916,22 +898,24 @@ def load_command_table(self, _):
     # endregion
 
     # region VirtualNetworks
-    with self.command_group('network vnet', network_vnet_sdk) as g:
+    with self.command_group("network vnet") as g:
         from .aaz.latest.network.vnet import List
+        from .custom import VNetCreate, VNetUpdate
+        self.command_table["network vnet create"] = VNetCreate(loader=self)
+        self.command_table["network vnet update"] = VNetUpdate(loader=self)
         self.command_table['network vnet list'] = List(loader=self, table_transformer=transform_vnet_table_output)
-        g.custom_command('create', 'create_vnet', transform=transform_vnet_create_output, validator=process_vnet_create_namespace)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vnet')
-        g.custom_command('list-available-ips', 'list_available_ips', min_api='2016-09-01', is_preview=True)
+        g.custom_command("list-available-ips", "list_available_ips", is_preview=True)
 
-    with self.command_group('network vnet peering', network_vnet_peering_sdk, min_api='2016-09-01') as g:
-        g.custom_command('create', 'create_vnet_peering')
-        g.custom_command('sync', 'sync_vnet_peering')
-        g.generic_update_command('update', setter_name='update_vnet_peering', setter_type=network_custom)
+    with self.command_group("network vnet peering") as g:
+        from .custom import VNetPeeringCreate
+        self.command_table["network vnet peering create"] = VNetPeeringCreate(loader=self)
+        g.custom_command("sync", "sync_vnet_peering")
 
-    with self.command_group('network vnet subnet', network_subnet_sdk) as g:
-        g.custom_command('create', 'create_subnet')
-        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='subnet_parameters', custom_func_name='update_subnet')
-        g.custom_command('list-available-ips', 'subnet_list_available_ips', min_api='2016-09-01', is_preview=True)
+    with self.command_group("network vnet subnet") as g:
+        from .custom import VNetSubnetCreate, VNetSubnetUpdate
+        self.command_table["network vnet subnet create"] = VNetSubnetCreate(loader=self)
+        self.command_table["network vnet subnet update"] = VNetSubnetUpdate(loader=self)
+        g.custom_command("list-available-ips", "subnet_list_available_ips", is_preview=True)
     # endregion
 
     # region VirtualNetworkGateways
@@ -963,8 +947,6 @@ def load_command_table(self, _):
         g.custom_command('set', 'set_vpn_client_ipsec_policy', supports_no_wait=True)
         g.show_command('show', 'begin_get_vpnclient_ipsec_parameters')
         g.wait_command('wait')
-
-    # with self.command_group
 
     with self.command_group('network vnet-gateway revoked-cert', network_vgw_sdk) as g:
         g.custom_command('create', 'create_vnet_gateway_revoked_cert')
@@ -1018,7 +1000,6 @@ def load_command_table(self, _):
         g.custom_command('start', 'start_vpn_conn_package_capture', supports_no_wait=True)
         g.custom_command('stop', 'stop_vpn_conn_package_capture', supports_no_wait=True)
         g.wait_command('wait')
-
     # endregion
 
     # region VirtualRouter
