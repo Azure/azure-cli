@@ -9587,7 +9587,7 @@ class RestorePointScenarioTest(ScenarioTest):
         self.cmd('restore-point collection create -g {rg} --collection-name {collection_name1} --source-id {collection_id} -l eastus', checks=[
             self.check('location', 'eastus'),
             self.check('source.id', '{collection_id}'),
-            self.check('source.location', 'eastus')
+            self.check('source.location', 'westus')
         ])
 
         point = self.cmd('restore-point create -g {rg} -n {point_name} --collection-name {collection_name}').get_output_in_json()
@@ -9628,7 +9628,7 @@ class ArchitectureScenarioTest(ScenarioTest):
             self.check('supportedCapabilities.architecture', 'x64')
         ])
         self.cmd('snapshot update -n {snap_name} -g {rg} --architecture Arm64', checks=[
-            self.check('supportedCapabilities.architecture', 'x86')
+            self.check('supportedCapabilities.architecture', 'Arm64')
         ])
 
 

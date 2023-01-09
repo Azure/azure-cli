@@ -150,7 +150,7 @@ class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
                  checks=self.check('length(newVNet.subnets)', 1))
         self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
                  '--disable-private-endpoint-network-policies true',
-                 checks=self.check('privateEndpointNetworkPolicies', 'Enabled'))
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
 
         # Create a private endpoint connection
         pe = self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
@@ -187,7 +187,7 @@ class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
                  checks=[
                      self.check('privateLinkServiceConnectionState.status', 'Rejected'),
                      self.check('privateLinkServiceConnectionState.description', '{rejection_desc}'),
-                     self.check('provisioningState', 'Update')
+                     self.check('provisioningState', 'Updating')
                  ])
 
         self.cmd('keyvault private-endpoint-connection wait --id {kv_pec_id} --created')

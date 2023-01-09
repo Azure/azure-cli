@@ -1795,7 +1795,7 @@ class VMSSCreateIdempotentTest(ScenarioTest):
             self.check('length([])', 1),
             self.check('[0].name', self.kwargs['vmss'] + 'VNET'),
             self.check('[0].subnets[0].addressPrefix', '10.0.0.0/24'),
-            self.check('length([0].subnets)', 2),
+            self.check('length([0].subnets)', 1),
         ])
 
 
@@ -1843,7 +1843,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
                  checks=self.check('sku.name', 'Standard'))
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
             self.check('sku.name', 'Standard'),
-            self.check('publicIpAllocationMethod', 'Dynamic')
+            self.check('publicIpAllocationMethod', 'Static')
         ])
 
 
