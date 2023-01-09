@@ -25,7 +25,7 @@ from azure.cli.command_modules.network.azure_stack._client_factory import (
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
     cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
-    cf_virtual_router, cf_virtual_router_peering, cf_bastion_hosts, cf_flow_logs,
+    cf_virtual_router, cf_virtual_router_peering, cf_flow_logs,
     cf_private_dns_zone_groups, cf_load_balancer_backend_pools, cf_virtual_hub,
     cf_custom_ip_prefixes)
 from azure.cli.command_modules.network.azure_stack._util import (
@@ -314,12 +314,6 @@ def load_command_table(self, _):
         operations_tmpl=custom_operations_tmpl,
         client_factory=cf_virtual_router_peering,
         min_api='2019-08-01'
-    )
-
-    network_bastion_hosts_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#BastionHostsOperations.{}',
-        client_factory=cf_bastion_hosts,
-        min_api='2019-11-01'
     )
 
     network_custom_ip_prefix_sdk = CliCommandType(
@@ -1272,19 +1266,6 @@ def load_command_table(self, _):
                             custom_command_type=network_virtual_hub_update_sdk) as g:
         g.custom_command('create', 'create_virtual_hub')
         g.custom_command('delete', 'delete_virtual_hub', supports_no_wait=True, confirmation=True)
-    # endregion
-
-    # region Bastion
-    with self.command_group('network bastion', network_bastion_hosts_sdk, is_preview=True) as g:
-        g.custom_command('create', 'create_bastion_host', supports_no_wait=True)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_bastion_host', supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_bastion_host')
-        g.custom_command('ssh', 'ssh_bastion_host')
-        g.custom_command('rdp', 'rdp_bastion_host')
-        g.custom_command('tunnel', 'create_bastion_tunnel')
-        g.command('delete', 'begin_delete')
-        g.wait_command('wait')
     # endregion
 
     # region PrivateLinkResource and PrivateEndpointConnection
