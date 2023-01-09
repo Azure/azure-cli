@@ -387,13 +387,15 @@ class AutomaticScheduling(object):
         if serial_tests:
             azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{instance_idx}.serial.xml")
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + serial_tests + \
-                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1 --durations=10 --tb=no']
+                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1 --durations=10']
+                  # ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1 --durations=10 --tb=no']
             serial_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
             pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result)
         if parallel_tests:
             azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{instance_idx}.parallel.xml")
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + parallel_tests + \
-                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1 --durations=10 --tb=no']
+                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1 --durations=10']
+                  # ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1 --durations=10 --tb=no']
             parallel_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
             pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result)
         save_pipeline_result(pipeline_result)
