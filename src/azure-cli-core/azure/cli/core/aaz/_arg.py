@@ -520,6 +520,13 @@ class AAZSubscriptionIdArg(AAZStrArg):
         return arg
 
 
+class AAZFileArg(AAZStrArg):
+
+    def __init__(self, fmt=None, **kwargs):
+        # fmt = fmt or AAZ
+        super().__init__(fmt=fmt, **kwargs)
+
+
 # Generic Update arguments
 class AAZGenericUpdateForceStringArg(AAZBoolArg):
 

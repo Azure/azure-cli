@@ -718,3 +718,25 @@ class AAZSubscriptionIdArgFormat(AAZBaseArgFormat):
         else:
             logger.warning("Subscription '%s' not recognized.", value._data)
         return value
+
+
+class AAZFileArgBase64EncodeFormat(AAZBaseArgFormat):
+
+    def __call__(self, ctx, value):
+        assert isinstance(value, AAZSimpleValue)
+        data = value._data
+        if data == AAZUndefined or data is None or value._is_patch:
+            return value
+
+        assert isinstance(data, str)
+
+        with open(data, 'rb') as f:
+            contents = f.read()
+            base64_data = base64.b64encode(contents)
+            try:
+                data = base64_data.decode('utf-8')
+            except UnicodeDecodeError:
+                data = str(base64_data)
+
+        value._data = data
+        return value
