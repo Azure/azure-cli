@@ -126,6 +126,18 @@ examples:
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation \\
         --key $keyIdentifier --identity testIdentity
+
+
+      # create flexible server with aad auth and password auth enabled
+
+      az postgres flexible-server create -g testGroup -n testServer --location testLocation \\
+        --active-directory-auth Enabled
+
+
+      # create flexible server with aad only auth and password auth disabled
+
+      az postgres flexible-server create -g testGroup -n testServer --location testLocation \\
+        --active-directory-auth Enabled --password-auth Disabled
 """
 
 helps['postgres flexible-server show'] = """
@@ -170,6 +182,12 @@ examples:
 
       az postgres flexible-server update --resource-group testGroup --name testserver \\
         --key $newKeyIdentifier --identity newIdentity
+
+
+      # update server to enable aad auth on existing password auth enabled server
+
+      az postgres flexible-server update --resource-group testGroup --name testserver \\
+        --active-directory-auth Enabled
 """
 
 helps['postgres flexible-server restore'] = """
