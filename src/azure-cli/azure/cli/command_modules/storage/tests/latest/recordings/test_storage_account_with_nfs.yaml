@@ -13,13 +13,13 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.44.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.8 (Linux-5.15.0-1023-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_storage_account000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_storage_account000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001","name":"cli_storage_account000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-11-17T09:42:49Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001","name":"cli_storage_account000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-01-09T07:48:07Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -28,7 +28,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Nov 2022 09:42:50 GMT
+      - Mon, 09 Jan 2023 07:48:07 GMT
       expires:
       - '-1'
       pragma:
@@ -43,10 +43,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name": "subnet000006", "properties":
-      {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies": "Disabled",
-      "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
+    body: '{"location": "westus", "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "enableDdosProtection": false, "enableVmProtection": false,
+      "subnets": [{"name": "subnet000006", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}'
     headers:
       Accept:
       - application/json
@@ -57,28 +56,26 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '304'
+      - '239'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.44.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.8 (Linux-5.15.0-1023-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005\",\r\n
-        \ \"etag\": \"W/\\\"5c68e39e-9915-4a6a-851a-bd687763494c\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"5e6962af-7cb8-4842-9672-cb3f8177d1b0\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"73f62027-a4dc-4ea2-8449-058081b9d524\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet000006\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005/subnets/subnet000006\",\r\n
-        \       \"etag\": \"W/\\\"5c68e39e-9915-4a6a-851a-bd687763494c\\\"\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"6ac0da30-ae70-4638-bbd6-42df9fa690bf\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
+        \     {\r\n        \"name\": \"subnet000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005/subnets/subnet000006\",\r\n
+        \       \"etag\": \"W/\\\"5e6962af-7cb8-4842-9672-cb3f8177d1b0\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -89,15 +86,15 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e1315a2d-8616-49e9-b1ca-ab8b51fbb1e1?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5bf31ecb-9d2b-4d04-acc5-93a1d9a8c079?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '1329'
+      - '1260'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Nov 2022 09:42:52 GMT
+      - Mon, 09 Jan 2023 07:48:10 GMT
       expires:
       - '-1'
       pragma:
@@ -110,9 +107,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 3e194a2d-c745-4fec-98ac-fae2b49d9f26
+      - 6ff7f262-a1d2-41fd-abcf-92c82cd342f2
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -130,10 +127,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.44.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.8 (Linux-5.15.0-1023-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e1315a2d-8616-49e9-b1ca-ab8b51fbb1e1?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5bf31ecb-9d2b-4d04-acc5-93a1d9a8c079?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -145,7 +142,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Nov 2022 09:42:55 GMT
+      - Mon, 09 Jan 2023 07:48:13 GMT
       expires:
       - '-1'
       pragma:
@@ -162,7 +159,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 79cffb63-bf0c-4ac4-a8aa-7428badabeb3
+      - 62f7a077-e66b-41c6-9ede-0fb643ceaa9f
     status:
       code: 200
       message: OK
@@ -180,22 +177,20 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.44.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.8 (Linux-5.15.0-1023-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005\",\r\n
-        \ \"etag\": \"W/\\\"02ff7299-b983-4451-976e-d751fa710c87\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"b9fd138f-02b8-4208-9041-de7a0ca91abf\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"73f62027-a4dc-4ea2-8449-058081b9d524\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet000006\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005/subnets/subnet000006\",\r\n
-        \       \"etag\": \"W/\\\"02ff7299-b983-4451-976e-d751fa710c87\\\"\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"6ac0da30-ae70-4638-bbd6-42df9fa690bf\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
+        \     {\r\n        \"name\": \"subnet000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005/subnets/subnet000006\",\r\n
+        \       \"etag\": \"W/\\\"b9fd138f-02b8-4208-9041-de7a0ca91abf\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -206,13 +201,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1331'
+      - '1262'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Nov 2022 09:42:55 GMT
+      - Mon, 09 Jan 2023 07:48:14 GMT
       etag:
-      - W/"02ff7299-b983-4451-976e-d751fa710c87"
+      - W/"b9fd138f-02b8-4208-9041-de7a0ca91abf"
       expires:
       - '-1'
       pragma:
@@ -229,7 +224,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1da862c0-a2a8-4911-bb19-f1acbc6b17ff
+      - ace2a18c-edfb-4c24-b06a-40a94d25f017
     status:
       code: 200
       message: OK
@@ -247,14 +242,14 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --service-endpoints
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.44.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.8 (Linux-5.15.0-1023-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005/subnets/subnet000006?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"subnet000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005/subnets/subnet000006\",\r\n
-        \ \"etag\": \"W/\\\"02ff7299-b983-4451-976e-d751fa710c87\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"b9fd138f-02b8-4208-9041-de7a0ca91abf\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -267,9 +262,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Nov 2022 09:42:56 GMT
+      - Mon, 09 Jan 2023 07:48:15 GMT
       etag:
-      - W/"02ff7299-b983-4451-976e-d751fa710c87"
+      - W/"b9fd138f-02b8-4208-9041-de7a0ca91abf"
       expires:
       - '-1'
       pragma:
@@ -286,16 +281,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1c80d821-2add-42b3-886d-74ae26c52ddc
+      - 523d0b48-b52a-4495-bca8-b0bbd647de1e
     status:
       code: 200
       message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005/subnets/subnet000006",
-      "name": "subnet000006", "type": "Microsoft.Network/virtualNetworks/subnets",
-      "properties": {"addressPrefix": "10.0.0.0/24", "serviceEndpoints": [{"service":
-      "Microsoft.Storage"}], "delegations": [], "privateEndpointNetworkPolicies":
-      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}'
+      "name": "subnet000006", "properties": {"addressPrefix": "10.0.0.0/24", "delegations":
+      [], "privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
+      "Enabled", "serviceEndpoints": [{"service": "Microsoft.Storage"}]}, "type":
+      "Microsoft.Network/virtualNetworks/subnets"}'
     headers:
       Accept:
       - application/json
@@ -312,14 +307,14 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --service-endpoints
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.44.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.8 (Linux-5.15.0-1023-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005/subnets/subnet000006?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"subnet000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005/subnets/subnet000006\",\r\n
-        \ \"etag\": \"W/\\\"6f7416b9-eb37-4c90-999e-06bbf0b7a140\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"227fcc53-5cdd-47b1-8bb0-f9ab0aa502e1\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"serviceEndpoints\": [\r\n      {\r\n        \"provisioningState\": \"Updating\",\r\n
         \       \"service\": \"Microsoft.Storage\",\r\n        \"locations\": [\r\n
@@ -330,7 +325,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/554802e9-ae42-4bcb-8623-8ca398ef7ea3?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/324d3f77-7aab-45f6-a8f4-fe1435814d88?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
@@ -338,7 +333,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Nov 2022 09:42:56 GMT
+      - Mon, 09 Jan 2023 07:48:15 GMT
       expires:
       - '-1'
       pragma:
@@ -355,9 +350,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 39576e25-feca-4001-91ac-04d07ad238fe
+      - 1de9c0b5-fa96-4346-b7a3-325a6e8fa0c0
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -375,10 +370,10 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --service-endpoints
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.44.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.8 (Linux-5.15.0-1023-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/554802e9-ae42-4bcb-8623-8ca398ef7ea3?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/324d3f77-7aab-45f6-a8f4-fe1435814d88?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -390,7 +385,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Nov 2022 09:43:00 GMT
+      - Mon, 09 Jan 2023 07:48:18 GMT
       expires:
       - '-1'
       pragma:
@@ -407,7 +402,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 813edeaf-5691-497b-b018-43e65fad28e4
+      - b30d32ba-1764-4b8f-a925-05390323ea00
     status:
       code: 200
       message: OK
@@ -425,14 +420,14 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --service-endpoints
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.44.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.8 (Linux-5.15.0-1023-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005/subnets/subnet000006?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"subnet000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005/subnets/subnet000006\",\r\n
-        \ \"etag\": \"W/\\\"c96fa153-1836-4846-ad2b-2b5a6098c44f\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"d0a02fb2-9541-47bf-811f-eefcf6c4a169\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"serviceEndpoints\": [\r\n      {\r\n        \"provisioningState\": \"Succeeded\",\r\n
         \       \"service\": \"Microsoft.Storage\",\r\n        \"locations\": [\r\n
@@ -447,9 +442,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Nov 2022 09:43:00 GMT
+      - Mon, 09 Jan 2023 07:48:18 GMT
       etag:
-      - W/"c96fa153-1836-4846-ad2b-2b5a6098c44f"
+      - W/"d0a02fb2-9541-47bf-811f-eefcf6c4a169"
       expires:
       - '-1'
       pragma:
@@ -466,7 +461,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d7acff28-b803-4167-83fe-61c1cbc96e63
+      - 782d9415-346a-4d71-a652-1f3aea6ea577
     status:
       code: 200
       message: OK
@@ -484,13 +479,13 @@ interactions:
       ParameterSetName:
       - -n -g --subnet --default-action --hns --sku --enable-nfs-v3
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.44.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.8 (Linux-5.15.0-1023-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_storage_account000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_storage_account000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001","name":"cli_storage_account000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-11-17T09:42:49Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001","name":"cli_storage_account000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-01-09T07:48:07Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -499,7 +494,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Nov 2022 09:43:00 GMT
+      - Mon, 09 Jan 2023 07:48:19 GMT
       expires:
       - '-1'
       pragma:
@@ -535,7 +530,7 @@ interactions:
       ParameterSetName:
       - -n -g --subnet --default-action --hns --sku --enable-nfs-v3
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.44.0 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.10.8 (Linux-5.15.0-1023-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Storage/storageAccounts/sa1000002?api-version=2022-09-01
@@ -550,11 +545,11 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Thu, 17 Nov 2022 09:43:04 GMT
+      - Mon, 09 Jan 2023 07:48:25 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/2070f398-3a20-4d06-8590-34a25c93746f?monitor=true&api-version=2022-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/b75e2652-b084-4170-a1a2-736774e86fc9?monitor=true&api-version=2022-09-01
       pragma:
       - no-cache
       server:
@@ -582,58 +577,13 @@ interactions:
       ParameterSetName:
       - -n -g --subnet --default-action --hns --sku --enable-nfs-v3
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.44.0 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.10.8 (Linux-5.15.0-1023-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/2070f398-3a20-4d06-8590-34a25c93746f?monitor=true&api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/b75e2652-b084-4170-a1a2-736774e86fc9?monitor=true&api-version=2022-09-01
   response:
     body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      content-type:
-      - text/plain; charset=utf-8
-      date:
-      - Thu, 17 Nov 2022 09:43:21 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/2070f398-3a20-4d06-8590-34a25c93746f?monitor=true&api-version=2022-09-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --subnet --default-action --hns --sku --enable-nfs-v3
-      User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/2070f398-3a20-4d06-8590-34a25c93746f?monitor=true&api-version=2022-09-01
-  response:
-    body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Storage/storageAccounts/sa1000002","name":"sa1000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2022-11-17T09:43:03.0830550Z","key2":"2022-11-17T09:43:03.0830550Z"},"privateEndpointConnections":[],"isNfsV3Enabled":true,"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"isHnsEnabled":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005/subnets/subnet000006","action":"Allow","state":"Succeeded"}],"ipRules":[],"defaultAction":"Deny"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-11-17T09:43:03.0987106Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-11-17T09:43:03.0987106Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2022-11-17T09:43:02.9893329Z","primaryEndpoints":{"dfs":"https://sa1000002.dfs.core.windows.net/","web":"https://sa1000002.z22.web.core.windows.net/","blob":"https://sa1000002.blob.core.windows.net/","queue":"https://sa1000002.queue.core.windows.net/","table":"https://sa1000002.table.core.windows.net/","file":"https://sa1000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Storage/storageAccounts/sa1000002","name":"sa1000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2023-01-09T07:48:21.3396232Z","key2":"2023-01-09T07:48:21.3396232Z"},"privateEndpointConnections":[],"isNfsV3Enabled":true,"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"isHnsEnabled":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005/subnets/subnet000006","action":"Allow","state":"Succeeded"}],"ipRules":[],"defaultAction":"Deny"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-01-09T07:48:22.0115421Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-01-09T07:48:22.0115421Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2023-01-09T07:48:21.2302252Z","primaryEndpoints":{"dfs":"https://sa1000002.dfs.core.windows.net/","web":"https://sa1000002.z22.web.core.windows.net/","blob":"https://sa1000002.blob.core.windows.net/","queue":"https://sa1000002.queue.core.windows.net/","table":"https://sa1000002.table.core.windows.net/","file":"https://sa1000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
@@ -642,7 +592,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 17 Nov 2022 09:43:24 GMT
+      - Mon, 09 Jan 2023 07:48:42 GMT
       expires:
       - '-1'
       pragma:
@@ -674,13 +624,13 @@ interactions:
       ParameterSetName:
       - -n -g --enable-nfs-v3
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.44.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.8 (Linux-5.15.0-1023-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_storage_account000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_storage_account000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001","name":"cli_storage_account000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-11-17T09:42:49Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001","name":"cli_storage_account000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-01-09T07:48:07Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -689,7 +639,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Nov 2022 09:43:25 GMT
+      - Mon, 09 Jan 2023 07:48:42 GMT
       expires:
       - '-1'
       pragma:
@@ -723,7 +673,7 @@ interactions:
       ParameterSetName:
       - -n -g --enable-nfs-v3
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.44.0 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.10.8 (Linux-5.15.0-1023-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Storage/storageAccounts/sa2000003?api-version=2022-09-01
@@ -738,11 +688,11 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Thu, 17 Nov 2022 09:43:29 GMT
+      - Mon, 09 Jan 2023 07:48:47 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/1b2df84c-4297-49f2-8554-8d160e972df9?monitor=true&api-version=2022-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/cd99c82e-141f-49dc-98aa-d64a02c89c23?monitor=true&api-version=2022-09-01
       pragma:
       - no-cache
       server:
@@ -752,7 +702,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 202
       message: Accepted
@@ -770,13 +720,13 @@ interactions:
       ParameterSetName:
       - -n -g --enable-nfs-v3
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.44.0 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.10.8 (Linux-5.15.0-1023-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/1b2df84c-4297-49f2-8554-8d160e972df9?monitor=true&api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/cd99c82e-141f-49dc-98aa-d64a02c89c23?monitor=true&api-version=2022-09-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Storage/storageAccounts/sa2000003","name":"sa2000003","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2022-11-17T09:43:27.9272601Z","key2":"2022-11-17T09:43:27.9272601Z"},"privateEndpointConnections":[],"isNfsV3Enabled":false,"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-11-17T09:43:27.9272601Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-11-17T09:43:27.9272601Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2022-11-17T09:43:27.8178660Z","primaryEndpoints":{"dfs":"https://sa2000003.dfs.core.windows.net/","web":"https://sa2000003.z22.web.core.windows.net/","blob":"https://sa2000003.blob.core.windows.net/","queue":"https://sa2000003.queue.core.windows.net/","table":"https://sa2000003.table.core.windows.net/","file":"https://sa2000003.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available","secondaryLocation":"eastus","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://sa2000003-secondary.dfs.core.windows.net/","web":"https://sa2000003-secondary.z22.web.core.windows.net/","blob":"https://sa2000003-secondary.blob.core.windows.net/","queue":"https://sa2000003-secondary.queue.core.windows.net/","table":"https://sa2000003-secondary.table.core.windows.net/"}}}'
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Storage/storageAccounts/sa2000003","name":"sa2000003","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2023-01-09T07:48:44.7929100Z","key2":"2023-01-09T07:48:44.7929100Z"},"privateEndpointConnections":[],"isNfsV3Enabled":false,"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-01-09T07:48:44.8085558Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-01-09T07:48:44.8085558Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2023-01-09T07:48:44.6835511Z","primaryEndpoints":{"dfs":"https://sa2000003.dfs.core.windows.net/","web":"https://sa2000003.z22.web.core.windows.net/","blob":"https://sa2000003.blob.core.windows.net/","queue":"https://sa2000003.queue.core.windows.net/","table":"https://sa2000003.table.core.windows.net/","file":"https://sa2000003.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available","secondaryLocation":"eastus","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://sa2000003-secondary.dfs.core.windows.net/","web":"https://sa2000003-secondary.z22.web.core.windows.net/","blob":"https://sa2000003-secondary.blob.core.windows.net/","queue":"https://sa2000003-secondary.queue.core.windows.net/","table":"https://sa2000003-secondary.table.core.windows.net/"}}}'
     headers:
       cache-control:
       - no-cache
@@ -785,7 +735,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 17 Nov 2022 09:43:47 GMT
+      - Mon, 09 Jan 2023 07:49:04 GMT
       expires:
       - '-1'
       pragma:
@@ -817,13 +767,13 @@ interactions:
       ParameterSetName:
       - -n -g --enable-nfs-v3 --vnet-name --subnet --default-action --hns --sku
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.44.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.8 (Linux-5.15.0-1023-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_storage_account000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_storage_account000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001","name":"cli_storage_account000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-11-17T09:42:49Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001","name":"cli_storage_account000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-01-09T07:48:07Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -832,13 +782,15 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 17 Nov 2022 09:43:48 GMT
+      - Mon, 09 Jan 2023 07:49:04 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -866,7 +818,7 @@ interactions:
       ParameterSetName:
       - -n -g --enable-nfs-v3 --vnet-name --subnet --default-action --hns --sku
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.44.0 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.10.8 (Linux-5.15.0-1023-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Storage/storageAccounts/sa3000004?api-version=2022-09-01
@@ -881,11 +833,11 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Thu, 17 Nov 2022 09:43:51 GMT
+      - Mon, 09 Jan 2023 07:49:09 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/10a7bb95-fc62-49a7-9db1-bd3a1e08d544?monitor=true&api-version=2022-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/df36b2c7-c0ba-4db1-bca1-715983d90bdf?monitor=true&api-version=2022-09-01
       pragma:
       - no-cache
       server:
@@ -895,7 +847,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1198'
     status:
       code: 202
       message: Accepted
@@ -913,58 +865,13 @@ interactions:
       ParameterSetName:
       - -n -g --enable-nfs-v3 --vnet-name --subnet --default-action --hns --sku
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.44.0 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.10.8 (Linux-5.15.0-1023-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/10a7bb95-fc62-49a7-9db1-bd3a1e08d544?monitor=true&api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/df36b2c7-c0ba-4db1-bca1-715983d90bdf?monitor=true&api-version=2022-09-01
   response:
     body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      content-type:
-      - text/plain; charset=utf-8
-      date:
-      - Thu, 17 Nov 2022 09:44:08 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/10a7bb95-fc62-49a7-9db1-bd3a1e08d544?monitor=true&api-version=2022-09-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --enable-nfs-v3 --vnet-name --subnet --default-action --hns --sku
-      User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/10a7bb95-fc62-49a7-9db1-bd3a1e08d544?monitor=true&api-version=2022-09-01
-  response:
-    body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Storage/storageAccounts/sa3000004","name":"sa3000004","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2022-11-17T09:43:49.3026005Z","key2":"2022-11-17T09:43:49.3026005Z"},"privateEndpointConnections":[],"isNfsV3Enabled":true,"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"isHnsEnabled":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005/subnets/subnet000006","action":"Allow","state":"Succeeded"}],"ipRules":[],"defaultAction":"Deny"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-11-17T09:43:49.3026005Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-11-17T09:43:49.3026005Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2022-11-17T09:43:49.1775976Z","primaryEndpoints":{"dfs":"https://sa3000004.dfs.core.windows.net/","web":"https://sa3000004.z22.web.core.windows.net/","blob":"https://sa3000004.blob.core.windows.net/","queue":"https://sa3000004.queue.core.windows.net/","table":"https://sa3000004.table.core.windows.net/","file":"https://sa3000004.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Storage/storageAccounts/sa3000004","name":"sa3000004","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2023-01-09T07:49:06.6839875Z","key2":"2023-01-09T07:49:06.6839875Z"},"privateEndpointConnections":[],"isNfsV3Enabled":true,"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"isHnsEnabled":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_storage_account000001/providers/Microsoft.Network/virtualNetworks/vnet000005/subnets/subnet000006","action":"Allow","state":"Succeeded"}],"ipRules":[],"defaultAction":"Deny"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-01-09T07:49:06.6996469Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2023-01-09T07:49:06.6996469Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2023-01-09T07:49:06.5590292Z","primaryEndpoints":{"dfs":"https://sa3000004.dfs.core.windows.net/","web":"https://sa3000004.z22.web.core.windows.net/","blob":"https://sa3000004.blob.core.windows.net/","queue":"https://sa3000004.queue.core.windows.net/","table":"https://sa3000004.table.core.windows.net/","file":"https://sa3000004.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
@@ -973,7 +880,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 17 Nov 2022 09:44:11 GMT
+      - Mon, 09 Jan 2023 07:49:26 GMT
       expires:
       - '-1'
       pragma:
