@@ -71,12 +71,12 @@ class Update(AAZCommand):
 
         # define Arg Group "Parameters"
 
-        # define Arg Group "Probe"
+        # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
         _args_schema.probes = AAZListArg(
             options=["--probes"],
-            arg_group="Probe",
+            arg_group="Properties",
             help="Collection of probe objects used in the load balancer.",
             nullable=True,
         )
@@ -129,8 +129,6 @@ class Update(AAZCommand):
             help="The URI used for requesting health status from the VM. Path is required if a protocol is set to http. Otherwise, it is not allowed. There is no default value.",
             nullable=True,
         )
-
-        # define Arg Group "Properties"
         return cls._args_schema
 
     _args_application_security_group_update = None
