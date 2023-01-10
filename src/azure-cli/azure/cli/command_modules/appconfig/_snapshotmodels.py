@@ -21,11 +21,10 @@ class SnapshotQueryFields(Enum):
     SIZE = 0x0040
     ITEMS_COUNT = 0x0080
     TAGS = 0x0100
-    ITEMS_LINK = 0x0200
+    STATUS_CODE = 0x0200
     RETENTION_PERIOD = 0x0400
     ETAG = 0x0800
-    STATUS_CODE = 0x1000
-    ALL = NAME | STATUS | FILTERS | COMPOSITION_TYPE | CREATED | EXPIRES | SIZE | ITEMS_COUNT | TAGS | RETENTION_PERIOD | ITEMS_LINK | ETAG | STATUS_CODE
+    ALL = NAME | STATUS | FILTERS | COMPOSITION_TYPE | CREATED | EXPIRES | SIZE | ITEMS_COUNT | TAGS | RETENTION_PERIOD | ETAG | STATUS_CODE
 
 
 class Snapshot:
@@ -52,8 +51,6 @@ class Snapshot:
         The number of key-values in the built snapshot.
     :ivar dict[str, str] tags:
         Dictionary of tags of the snapshot.
-    :ivar str items_link:
-        Endpoint that can be used to query keys-values in a snapshot
     :ivar int retention_period:
         Number of seconds for which an archived snapshot will be kept before being deleted.
     :ivar int status_code:
@@ -72,7 +69,6 @@ class Snapshot:
                  size=None,
                  items_count=None,
                  tags=None,
-                 items_link=None,
                  retention_period=None,
                  ):
 
@@ -87,7 +83,6 @@ class Snapshot:
         self.size = size
         self.items_count = items_count
         self.tags = tags
-        self.items_link = items_link
         self.retention_period = retention_period
 
     def __str__(self):
@@ -101,7 +96,6 @@ class Snapshot:
             "\nSize: " + str(self.size) + \
             "\nItem count: " + str(self.items_count) + \
             "\nTags: " + (str(self.tags) if self.tags else '{}') + \
-            "\nItems Link: " + self.items_link + \
             "\nRetention Period: " + str(self.retention_period) + \
             "\nStatus Code: " + str(self.status_code)
 
@@ -118,7 +112,6 @@ class Snapshot:
             size=data_dict.get("size", None),
             items_count=data_dict.get("items_count", None),
             tags=data_dict.get("tags", None),
-            items_link=data_dict.get("items_link", None),
             retention_period=data_dict.get("retention_period", None),
             status_code=data_dict.get("status_code", None)
         )

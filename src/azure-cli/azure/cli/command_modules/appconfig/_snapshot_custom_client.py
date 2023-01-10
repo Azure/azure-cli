@@ -325,26 +325,12 @@ class AppConfigSnapshotClient:
             if_none_match=None,
             **kwargs):
 
-        _headers = kwargs.pop("headers", {}) or {}
-
-        request = build_get_snapshot_request(
+        response = self._get_snapshot_raw(
             name=name,
-            select=fields,
+            fields=fields,
             if_match=if_match,
             if_none_match=if_none_match,
-            sync_token=self._sync_token,
-            headers=_headers
-        )
-
-        serialized_endpoint = self._serializer.url("endpoint", self._endpoint, 'str', skip_quote=True)
-        request.url = serialized_endpoint + request.url
-
-        response = self._client.send_request(request)
-
-        if response.status_code not in [200]:
-            map_error(status_code=response.status_code, response=response, error_map=_ERROR_MAP)
-            error = self._deserializer.failsafe_deserialize(AppConfigError, response)
-            raise HttpResponseError(response=response, model=error)
+            **kwargs)
 
         return Snapshot.from_json(json.loads(response.text()))
 
@@ -437,7 +423,7 @@ class AppConfigSnapshotClient:
 
         _headers = kwargs.pop("headers", {}) or {}
 
-        items_link = self.get_snapshot(name=name).items_link
+        items_link = self._get_snapshot_items_link(name=name)
 
         _params = {}
 
@@ -511,3 +497,53 @@ class AppConfigSnapshotClient:
             return response
 
         return ItemPaged(get_next_page_data, data_extraction_method)
+
+    def _get_snapshot_items_link(self, name):
+        snapshot_response_headers = self._get_snapshot_raw(name=name).headers
+
+        link_property = snapshot_response_headers.pop('Link', None)
+
+        if not link_property:
+            raise HttpResponseError("Items link not found.")
+
+        # The Link header property is of the format: </kv?snapshot=[snapshot-name]&api-version=[api-version]>; rel="items"
+        import re
+
+        link_header_pattern = r'<?([^>]+)>.*'
+        items_link_match = re.match(link_header_pattern, link_property)
+
+        if not items_link_match:
+            raise HttpResponseError("Malformed items link URL returned.")
+
+        return items_link_match.group(1) 
+
+    def _get_snapshot_raw(
+            self,
+            name,
+            fields=None,
+            if_match=None,
+            if_none_match=None,
+            **kwargs):
+
+        _headers = kwargs.pop("headers", {}) or {}
+
+        request = build_get_snapshot_request(
+            name=name,
+            select=fields,
+            if_match=if_match,
+            if_none_match=if_none_match,
+            sync_token=self._sync_token,
+            headers=_headers
+        )
+
+        serialized_endpoint = self._serializer.url("endpoint", self._endpoint, 'str', skip_quote=True)
+        request.url = serialized_endpoint + request.url
+
+        response = self._client.send_request(request)
+
+        if response.status_code not in [200]:
+            map_error(status_code=response.status_code, response=response, error_map=_ERROR_MAP)
+            error = self._deserializer.failsafe_deserialize(AppConfigError, response)
+            raise HttpResponseError(response=response, model=error)
+
+        return response
