@@ -10,6 +10,7 @@ VERSION_2019_06_01_PREVIEW = "2019-06-01-preview"
 VERSION_2020_11_01_PREVIEW = "2020-11-01-preview"
 VERSION_2021_08_01_PREVIEW = "2021-08-01-preview"
 VERSION_2022_02_01_PREVIEW = "2022-02-01-preview"
+VERSION_2023_01_01_PREVIEW = "2023-01-01-preview"
 
 
 def get_acr_service_client(cli_ctx, api_version=None):
@@ -21,6 +22,10 @@ def get_acr_service_client(cli_ctx, api_version=None):
 def cf_acr_registries(cli_ctx, *_):
     return get_acr_service_client(cli_ctx, VERSION_2022_02_01_PREVIEW).registries
 
+def cf_acr_cache(cli_ctx, *_):
+    from ..acr.sdk.generated._client import ContainerRegistryManagementClient
+    #print(cli_ctx.data)
+    return get_mgmt_service_client(cli_ctx, ContainerRegistryManagementClient)
 
 def cf_acr_network_rules(cli_ctx, *_):
     return get_acr_service_client(cli_ctx, api_version=VERSION_2021_08_01_PREVIEW).registries
