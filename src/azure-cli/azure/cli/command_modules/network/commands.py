@@ -42,8 +42,7 @@ from azure.cli.command_modules.network._format import (
 from azure.cli.command_modules.network._validators import (
     get_network_watcher_from_location,
     process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace, process_ag_settings_create_namespace, process_ag_http_settings_create_namespace,
-    process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
-    process_ag_url_path_map_rule_create_namespace, process_nic_create_namespace,
+    process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_nic_create_namespace,
     process_lb_create_namespace, process_lb_frontend_ip_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
@@ -237,7 +236,6 @@ def load_command_table(self, _):
         {'prop': 'http_listeners', 'name': 'http-listener', 'validator': process_ag_http_listener_create_namespace},
         {'prop': 'request_routing_rules', 'name': 'rule', 'validator': process_ag_rule_create_namespace},
         {'prop': 'probes', 'name': 'probe'},
-        {'prop': 'url_path_maps', 'name': 'url-path-map', 'validator': process_ag_url_path_map_create_namespace},
         {'prop': 'rewrite_rule_sets', 'name': 'rewrite-rule set'}
     ]
     if self.supported_api_version(min_api='2018-08-01'):
@@ -322,15 +320,16 @@ def load_command_table(self, _):
         g.command('predefined list', 'list_available_ssl_predefined_policies')
         g.show_command('predefined show', 'get_ssl_predefined_policy')
 
-    with self.command_group('network application-gateway url-path-map rule') as g:
-        g.custom_command('create', 'create_ag_url_path_map_rule', supports_no_wait=True, validator=process_ag_url_path_map_rule_create_namespace)
-        g.custom_command('delete', 'delete_ag_url_path_map_rule', supports_no_wait=True)
+    with self.command_group("network application-gateway url-path-map"):
+        from .custom import URLPathMapCreate, URLPathMapUpdate, URLPathMapRuleCreate
+        self.command_table["network application-gateway url-path-map create"] = URLPathMapCreate(loader=self)
+        self.command_table["network application-gateway url-path-map update"] = URLPathMapUpdate(loader=self)
+        self.command_table["network application-gateway url-path-map rule create"] = URLPathMapRuleCreate(loader=self)
 
-    with self.command_group('network application-gateway waf-config') as g:
-        g.custom_command('set', 'set_ag_waf_config_2017_03_01', min_api='2017-03-01', supports_no_wait=True)
-        g.custom_command('set', 'set_ag_waf_config_2016_09_01', max_api='2016-09-01', supports_no_wait=True)
-        g.custom_show_command('show', 'show_ag_waf_config')
-        g.custom_command('list-rule-sets', 'list_ag_waf_rule_sets', min_api='2017-03-01', client_factory=cf_application_gateways, table_transformer=transform_waf_rule_sets_table_output)
+    with self.command_group("network application-gateway waf-config") as g:
+        g.custom_command("list-rule-sets", "list_ag_waf_rule_sets", table_transformer=transform_waf_rule_sets_table_output)
+        g.custom_command("set", "set_ag_waf_config", supports_no_wait=True)
+        g.custom_show_command("show", "show_ag_waf_config")
 
     with self.command_group('network application-gateway identity', command_type=network_ag_sdk, min_api='2018-12-01') as g:
         g.custom_command('assign', 'assign_ag_identity', supports_no_wait=True)
