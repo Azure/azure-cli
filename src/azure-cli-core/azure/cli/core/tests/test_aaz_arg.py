@@ -882,7 +882,7 @@ class TestAAZArg(unittest.TestCase):
         # self.assertEqual(v.enable, True)
 
     def test_aaz_list_arg(self):
-        from azure.cli.core.aaz._arg import AAZListArg, AAZStrArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg import AAZListArg, AAZStrArg, AAZArgumentsSchema, AAZObjectArg
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations, _ELEMENT_APPEND_KEY
         from azure.cli.core.aaz import has_value
         schema = AAZArgumentsSchema()
@@ -896,6 +896,12 @@ class TestAAZArg(unittest.TestCase):
             nullable=True,
             blank="a blank value"
         )
+        schema.objs = AAZListArg(
+            options=["--objs"],
+            singular_options=["--obj"]
+        )
+        element = schema.objs.Element = AAZObjectArg()
+        # element.name =
 
         self.assertFalse(has_value(v.names))
 
