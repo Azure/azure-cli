@@ -743,7 +743,7 @@ class AAZFileArgFormat(AAZBaseArgFormat):
         raise NotImplementedError()
 
 
-class AAZFileArgTextFormat(AAZBaseArgFormat):
+class AAZFileArgTextFormat(AAZFileArgFormat):
 
     def __init__(self, encoding=None):
         self._encoding = encoding  # use platform default encoding when it's None
