@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.44.1
+++++++
+* No changes
+
 2.44.0
 ++++++
 * `aaz`: Support subresource selector (#24827)
