@@ -901,7 +901,8 @@ class TestAAZArg(unittest.TestCase):
             singular_options=["--obj"]
         )
         element = schema.objs.Element = AAZObjectArg()
-        # element.name =
+        element.attr = AAZStrArg(options=["--attr"])
+        element.prop = AAZStrArg(options=["--prop"])
 
         self.assertFalse(has_value(v.names))
 
@@ -983,6 +984,14 @@ class TestAAZArg(unittest.TestCase):
         self.assertEqual(len(dest_ops._ops), 15)
         dest_ops.apply(v, "names")
         self.assertEqual(v.names, ["a", "b", "a blank value", ""])
+
+        dest_ops = AAZArgActionOperations()
+        self.assertEqual(len(dest_ops._ops), 0)
+        singular_action = schema.objs.Element._build_cmd_action()
+        singular_action.setup_operations(dest_ops, ["attr=a"], prefix_keys=[_ELEMENT_APPEND_KEY])
+        singular_action.setup_operations(dest_ops, ["prop=b"], prefix_keys=[-1])
+        dest_ops.apply(v, "objs")
+        self.assertEqual(v.objs, [{"attr": "a", "prop": "b"}])
 
     def test_aaz_dict_arg(self):
         from azure.cli.core.aaz._arg import AAZDictArg, AAZStrArg, AAZArgumentsSchema
