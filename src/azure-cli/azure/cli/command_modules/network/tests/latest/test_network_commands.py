@@ -2071,7 +2071,7 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
             self.check("frontendIPConfigurations[0].publicIPAddress.contains(id, '{ip}')", True),
             self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic')
         ])
-        self.cmd('network application-gateway waf-config set -g {rg} --gateway-name {ag} --enabled true --firewall-mode prevention --rule-set-version 2.2.9 --disabled-rule-groups crs_30_http_policy --disabled-rules 981175 981176 --no-wait')
+        self.cmd('network application-gateway waf-config set -g {rg} --gateway-name {ag} --enabled true --firewall-mode prevention --rule-set-version 2.2.9 --disabled-rule-groups crs_30_http_policy --disabled-rules 981175 981176')
         self.cmd('network application-gateway waf-config show -g {rg} --gateway-name {ag}', checks=[
             self.check('enabled', True),
             self.check('firewallMode', 'Prevention'),
