@@ -8,16 +8,4 @@
 # pylint: skip-file
 # flake8: noqa
 
-from azure.cli.core.aaz import *
-
-
-@register_command_group(
-    "servicebus namespace authorization-rule keys",
-)
-class __CMDGroup(AAZCommandGroup):
-    """servicebus namespace authorization-rule keys
-    """
-    pass
-
-
-__all__ = ["__CMDGroup"]
+from .__cmd_group import *

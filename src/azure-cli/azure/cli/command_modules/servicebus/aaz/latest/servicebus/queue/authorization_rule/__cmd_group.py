@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "servicebus namespace authorization-rule keys",
+    "servicebus queue authorization-rule",
 )
 class __CMDGroup(AAZCommandGroup):
-    """servicebus namespace authorization-rule keys
+    """servicebus queue authorization-rule
     """
     pass
 

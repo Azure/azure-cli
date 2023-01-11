@@ -12,23 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "servicebus namespace authorization-rule keys renew",
+    "servicebus queue authorization-rule list",
 )
-class Renew(AAZCommand):
-    """Regenerates the primary or secondary connection strings for the namespace.
+class List(AAZCommand):
+    """List all authorization rules for a queue.
     """
 
     _aaz_info = {
         "version": "2022-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/authorizationrules/{}/regeneratekeys", "2022-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/queues/{}/authorizationrules", "2022-01-01-preview"],
         ]
     }
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return self._output()
+        return self.build_paging(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -41,50 +40,31 @@ class Renew(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.authorization_rule_name = AAZStrArg(
-            options=["--name", "--authorization-rule-name"],
-            help="The authorization rule name.",
-            required=True,
-            id_part="child_name_1",
-            fmt=AAZStrArgFormat(
-                max_length=50,
-                min_length=1,
-            ),
-        )
         _args_schema.namespace_name = AAZStrArg(
             options=["--namespace-name"],
             help="The namespace name",
             required=True,
-            id_part="name",
             fmt=AAZStrArgFormat(
                 max_length=50,
                 min_length=6,
             ),
         )
+        _args_schema.queue_name = AAZStrArg(
+            options=["--queue-name"],
+            help="The queue name.",
+            required=True,
+            fmt=AAZStrArgFormat(
+                min_length=1,
+            ),
+        )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
-        )
-
-        # define Arg Group "Parameters"
-
-        _args_schema = cls._args_schema
-        _args_schema.key_value = AAZStrArg(
-            options=["--key-value"],
-            arg_group="Parameters",
-            help="Optional, if the key value provided, is reset for KeyType value or autogenerate Key value set for keyType",
-        )
-        _args_schema.key = AAZStrArg(
-            options=["--key"],
-            arg_group="Parameters",
-            help="The access key to regenerate.",
-            required=True,
-            enum={"PrimaryKey": "PrimaryKey", "SecondaryKey": "SecondaryKey"},
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.NamespacesRegenerateKeys(ctx=self.ctx)()
+        self.QueuesListAuthorizationRules(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -96,10 +76,11 @@ class Renew(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
+        return result, next_link
 
-    class NamespacesRegenerateKeys(AAZHttpOperation):
+    class QueuesListAuthorizationRules(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -113,13 +94,13 @@ class Renew(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceBus/namespaces/{namespaceName}/AuthorizationRules/{authorizationRuleName}/regenerateKeys",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceBus/namespaces/{namespaceName}/queues/{queueName}/authorizationRules",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "POST"
+            return "GET"
 
         @property
         def error_format(self):
@@ -129,11 +110,11 @@ class Renew(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "authorizationRuleName", self.ctx.args.authorization_rule_name,
+                    "namespaceName", self.ctx.args.namespace_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "namespaceName", self.ctx.args.namespace_name,
+                    "queueName", self.ctx.args.queue_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -161,25 +142,10 @@ class Renew(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
-            )
-            _builder.set_prop("key", AAZStrType, ".key_value")
-            _builder.set_prop("keyType", AAZStrType, ".key", typ_kwargs={"flags": {"required": True}})
-
-            return self.serialize_content(_content_value)
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
@@ -199,40 +165,68 @@ class Renew(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.alias_primary_connection_string = AAZStrType(
-                serialized_name="aliasPrimaryConnectionString",
+            _schema_on_200.next_link = AAZStrType(
+                serialized_name="nextLink",
+            )
+            _schema_on_200.value = AAZListType()
+
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
+            _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.alias_secondary_connection_string = AAZStrType(
-                serialized_name="aliasSecondaryConnectionString",
+            _element.location = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.key_name = AAZStrType(
-                serialized_name="keyName",
+            _element.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.primary_connection_string = AAZStrType(
-                serialized_name="primaryConnectionString",
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _schema_on_200.primary_key = AAZStrType(
-                serialized_name="primaryKey",
+            _element.type = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.secondary_connection_string = AAZStrType(
-                serialized_name="secondaryConnectionString",
-                flags={"read_only": True},
+
+            properties = cls._schema_on_200.value.Element.properties
+            properties.rights = AAZListType(
+                flags={"required": True},
             )
-            _schema_on_200.secondary_key = AAZStrType(
-                serialized_name="secondaryKey",
-                flags={"read_only": True},
+
+            rights = cls._schema_on_200.value.Element.properties.rights
+            rights.Element = AAZStrType()
+
+            system_data = cls._schema_on_200.value.Element.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
             )
 
             return cls._schema_on_200
 
 
-class _RenewHelper:
-    """Helper class for Renew"""
+class _ListHelper:
+    """Helper class for List"""
 
 
-__all__ = ["Renew"]
+__all__ = ["List"]

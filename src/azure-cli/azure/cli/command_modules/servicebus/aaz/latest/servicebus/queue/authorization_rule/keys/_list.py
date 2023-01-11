@@ -12,16 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "servicebus namespace authorization-rule keys renew",
+    "servicebus queue authorization-rule keys list",
 )
-class Renew(AAZCommand):
-    """Regenerates the primary or secondary connection strings for the namespace.
+class List(AAZCommand):
+    """Primary and secondary connection strings to the queue.
     """
 
     _aaz_info = {
         "version": "2022-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/authorizationrules/{}/regeneratekeys", "2022-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/queues/{}/authorizationrules/{}/listkeys", "2022-01-01-preview"],
         ]
     }
 
@@ -45,7 +45,6 @@ class Renew(AAZCommand):
             options=["--name", "--authorization-rule-name"],
             help="The authorization rule name.",
             required=True,
-            id_part="child_name_1",
             fmt=AAZStrArgFormat(
                 max_length=50,
                 min_length=1,
@@ -55,36 +54,27 @@ class Renew(AAZCommand):
             options=["--namespace-name"],
             help="The namespace name",
             required=True,
-            id_part="name",
             fmt=AAZStrArgFormat(
                 max_length=50,
                 min_length=6,
             ),
         )
+        _args_schema.queue_name = AAZStrArg(
+            options=["--queue-name"],
+            help="The queue name.",
+            required=True,
+            fmt=AAZStrArgFormat(
+                min_length=1,
+            ),
+        )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
-        )
-
-        # define Arg Group "Parameters"
-
-        _args_schema = cls._args_schema
-        _args_schema.key_value = AAZStrArg(
-            options=["--key-value"],
-            arg_group="Parameters",
-            help="Optional, if the key value provided, is reset for KeyType value or autogenerate Key value set for keyType",
-        )
-        _args_schema.key = AAZStrArg(
-            options=["--key"],
-            arg_group="Parameters",
-            help="The access key to regenerate.",
-            required=True,
-            enum={"PrimaryKey": "PrimaryKey", "SecondaryKey": "SecondaryKey"},
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.NamespacesRegenerateKeys(ctx=self.ctx)()
+        self.QueuesListKeys(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -99,7 +89,7 @@ class Renew(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class NamespacesRegenerateKeys(AAZHttpOperation):
+    class QueuesListKeys(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -113,7 +103,7 @@ class Renew(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceBus/namespaces/{namespaceName}/AuthorizationRules/{authorizationRuleName}/regenerateKeys",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceBus/namespaces/{namespaceName}/queues/{queueName}/authorizationRules/{authorizationRuleName}/ListKeys",
                 **self.url_parameters
             )
 
@@ -134,6 +124,10 @@ class Renew(AAZCommand):
                 ),
                 **self.serialize_url_param(
                     "namespaceName", self.ctx.args.namespace_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "queueName", self.ctx.args.queue_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -161,25 +155,10 @@ class Renew(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
-            )
-            _builder.set_prop("key", AAZStrType, ".key_value")
-            _builder.set_prop("keyType", AAZStrType, ".key", typ_kwargs={"flags": {"required": True}})
-
-            return self.serialize_content(_content_value)
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
@@ -231,8 +210,8 @@ class Renew(AAZCommand):
             return cls._schema_on_200
 
 
-class _RenewHelper:
-    """Helper class for Renew"""
+class _ListHelper:
+    """Helper class for List"""
 
 
-__all__ = ["Renew"]
+__all__ = ["List"]

@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "servicebus namespace",
 )
 class __CMDGroup(AAZCommandGroup):
-    """AuthRuleNamespaceV2
+    """servicebus Namespace
     """
     pass
 
