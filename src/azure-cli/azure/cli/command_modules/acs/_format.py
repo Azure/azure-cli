@@ -72,7 +72,9 @@ def _aks_table_format(result):
         fqdn: fqdn || privateFqdn
     }""")
     # use ordered dicts so headers are predictable
-    return parsed.search(result, Options(dict_cls=OrderedDict))
+    # enable compatibility with legacy JSON literals
+    return parsed.search(result,
+        Options(dict_cls=OrderedDict, enable_legacy_literals=True))
 
 
 def aks_upgrades_table_format(result):

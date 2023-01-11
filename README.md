@@ -62,7 +62,7 @@ $ az vm show -g WebPropertiesRG -n Bizlogic
 
 #### Query
 
-You can use the `--query` parameter and the [JMESPath](http://jmespath.org/) query syntax to customize your output.
+You can use the `--query` parameter and the [JMESPath](http://jmespath.site/main) query syntax to customize your output.
 
 ```bash
 $ az vm list --query "[?provisioningState=='Succeeded'].{ name: name, os: storageProfile.osDisk.osType }"
