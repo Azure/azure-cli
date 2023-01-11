@@ -527,11 +527,14 @@ def load_command_table(self, _):
 
     # region PrivateLinkServices
     with self.command_group('network private-link-service', network_private_link_service_sdk) as g:
-        g.custom_command('create', 'create_private_link_service')
-        g.command('delete', 'begin_delete')
-        g.custom_command('list', 'list_private_link_services')
-        g.show_command('show')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_private_link_service')
+        from azure.cli.command_modules.network.custom import PrivateLinkServiceCreate, PrivateLinkServiceUpdate
+        self.command_table['network private-link-service create'] = PrivateLinkServiceCreate(loader=self)
+        # g.custom_command('create', 'create_private_link_service')
+        # g.command('delete', 'begin_delete')
+        # g.custom_command('list', 'list_private_link_services')
+        # g.show_command('show')
+        # g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_private_link_service')
+        self.command_table['network private-link-service update'] = PrivateLinkServiceUpdate(loader=self)
 
     with self.command_group('network private-link-service connection', network_private_link_service_sdk) as g:
         g.command('delete', 'begin_delete_private_endpoint_connection')
