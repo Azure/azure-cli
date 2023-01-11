@@ -5,6 +5,7 @@
 # pylint: disable=line-too-long, too-few-public-methods
 
 import abc
+import os.path
 import re
 import math
 
@@ -720,7 +721,7 @@ class AAZSubscriptionIdArgFormat(AAZBaseArgFormat):
         return value
 
 
-class AAZFileArgBase64EncodeFormat(AAZBaseArgFormat):
+class AAZFileArgFormat(AAZBaseArgFormat):
 
     def __call__(self, ctx, value):
         assert isinstance(value, AAZSimpleValue)
@@ -730,13 +731,38 @@ class AAZFileArgBase64EncodeFormat(AAZBaseArgFormat):
 
         assert isinstance(data, str)
 
-        with open(data, 'rb') as f:
+        if not os.path.isfile(data):
+            raise AAZInvalidArgValueError("File '{}' doesn't exist".format(data))
+
+        data = self.read_file(data)
+        value._data = data
+        return value
+
+    @abc.abstractmethod
+    def read_file(self, file_path):
+        raise NotImplementedError()
+
+
+class AAZFileArgTextFormat(AAZBaseArgFormat):
+
+    def __init__(self, encoding=None):
+        self._encoding = encoding  # use platform default encoding when it's None
+
+    def read_file(self, file_path):
+        with open(file_path, 'r', encoding=self._encoding) as f:
+            data = f.read()
+        return data
+
+
+class AAZFileArgBase64EncodeFormat(AAZFileArgFormat):
+
+    def read_file(self, file_path):
+        import base64
+        with open(file_path, 'rb') as f:
             contents = f.read()
             base64_data = base64.b64encode(contents)
             try:
                 data = base64_data.decode('utf-8')
             except UnicodeDecodeError:
                 data = str(base64_data)
-
-        value._data = data
-        return value
+        return data
