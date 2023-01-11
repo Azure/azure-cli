@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.44.0
+++++++
+* `aaz`: Support subresource selector (#24827)
+* `aaz`: Improve generic update arguments to consist with previous behaviors (#24960)
+
 2.43.0
 ++++++
 * `aaz`: Fix `has_value` function for list, dict and object arg types (#24625)

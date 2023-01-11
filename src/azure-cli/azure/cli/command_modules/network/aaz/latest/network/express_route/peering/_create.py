@@ -118,6 +118,9 @@ class Create(AAZCommand):
             options=["--routing-registry-name"],
             arg_group="Microsoft Peering",
             help="Internet Routing Registry / Regional Internet Registry. Allowed values: AFRINIC, ALTDB, APNIC, ARIN, LACNIC, LEVEL3, RADB, RIPENCC.",
+            # taken from Xplat. No enums in SDK
+            enum={"ARIN": "ARIN", "APNIC": "APNIC", "AFRINIC": "AFRINIC", "LACNIC": "LACNIC", "RIPENCC": "RIPENCC",
+                  "RADB": "RADB", "ALTDB": "ALTDB", "LEVEL3": "LEVEL3"}
         )
         _args_schema.route_filter = AAZResourceIdArg(
             options=["--route-filter"],

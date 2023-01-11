@@ -435,7 +435,7 @@ class Update(AAZCommand):
 
         def __call__(self, *args, **kwargs):
             self._update_instance_by_generic(
-                self.ctx.selectors.subresource,
+                self.ctx.selectors.subresource.required(),
                 self.ctx.generic_update_args
             )
 

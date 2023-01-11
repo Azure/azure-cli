@@ -4,6 +4,7 @@
 # license information.
 # --------------------------------------------------------------------------
 
+import unittest
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.testsdk import (
     ScenarioTest,
@@ -215,7 +216,6 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
-
 
     @record_only()
     def test_webapp_cosmossql_e2e(self):
@@ -751,8 +751,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
-
-    # @record_only()
+    @record_only()
     def test_webapp_mysqlflexible_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
