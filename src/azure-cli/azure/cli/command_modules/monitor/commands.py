@@ -90,9 +90,9 @@ def load_command_table(self, _):
         exception_handler=exception_handler)
 
     with self.command_group('monitor action-group', action_group_sdk, custom_command_type=action_group_custom) as g:
-        g.show_command('show', 'get', table_transformer=action_group_list_table)
-        g.command('create', 'create_or_update', table_transformer=action_group_list_table,
-                  validator=process_action_group_detail_for_creation)
+        # g.show_command('show', 'get', table_transformer=action_group_list_table)
+        # g.command('create', 'create_or_update', table_transformer=action_group_list_table,
+        #           validator=process_action_group_detail_for_creation)
         g.command('delete', 'delete')
         g.custom_command('enable-receiver', 'enable_receiver', table_transformer=action_group_list_table)
         g.custom_command('list', 'list_action_groups', table_transformer=action_group_list_table)
@@ -102,8 +102,10 @@ def load_command_table(self, _):
                          supports_no_wait=True)
         g.wait_command('wait')
 
-    from .operations.action_groups import ActionGroupCreate
+    from .operations.action_groups import ActionGroupCreate, ActionGroupShow
     self.command_table['monitor action-group create'] = ActionGroupCreate(loader=self, table_transformer=action_group_list_table)
+    self.command_table['monitor action-group show'] = ActionGroupShow(loader=self, table_transformer=action_group_list_table)
+
 
     with self.command_group('monitor activity-log', activity_log_sdk) as g:
         g.custom_command('list', 'list_activity_log', client_factory=cf_activity_log)

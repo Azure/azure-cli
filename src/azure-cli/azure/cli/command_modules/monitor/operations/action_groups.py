@@ -37,8 +37,16 @@ class ActionGroupCreate(_ActionGroupCreate):
             rg = parse_resource_id(args.resource.to_serialized_data())['resource_group']
             args.resource_group_name = rg
 
-        storage_account = args.storage_account.to_serialized_data()
+        #storage_account = args.storage_account.to_serialized_data()
 
+class ActionGroupShow(_ActionGroupShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        arg_schema = super()._build_arguments_schema(*args, **kwargs)
+        return arg_schema
+
+    def pre_operations(self):
+        pass
 
 def list_action_groups(client, resource_group_name=None):
     if resource_group_name:
