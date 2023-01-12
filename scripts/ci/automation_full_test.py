@@ -28,8 +28,8 @@ profile = sys.argv[3] if len(sys.argv) >= 4 else 'latest'
 serial_modules = sys.argv[4].split() if len(sys.argv) >= 5 else []
 fix_failure_tests = sys.argv[5].lower() == 'true' if len(sys.argv) >= 6 else False
 target = sys.argv[6].lower() if len(sys.argv) >= 7 else 'cli'
-working_directory = "/mnt/vss/_work/1/s" if target == 'cli' else "/mnt/vss/_work/1/s/azure-cli-extensions"
-azdev_test_result_dir = "/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env"
+working_directory = os.getenv('BUILD_SOURCESDIRECTORY') if target == 'cli' else f"{os.getenv('BUILD_SOURCESDIRECTORY')}/azure-cli-extensions"
+azdev_test_result_dir = f"~/.azdev/env_config/mnt/vss/_work/1/s/env"
 cli_jobs = {
             'acr': 45,
             'acs': 62,

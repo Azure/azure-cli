@@ -113,13 +113,13 @@ jobs:
     displayName: "Rerun tests"
   - bash: |
       publishErrorModules='false'
-      if [[ -f '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_error_modules_$(Instance_idx).txt' ]]; then
+      if [[ -f '~/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_error_modules_$(Instance_idx).txt' ]]; then
         publishErrorModules='true'
       fi
       echo "##vso[task.setvariable variable=publishErrorModules]$publishErrorModules"
 
       publishFailureTests='false'
-      if [[ -f '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_failure_tests_$(Instance_idx).txt' ]]; then
+      if [[ -f '~/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_failure_tests_$(Instance_idx).txt' ]]; then
         publishFailureTests='true'
       fi
       echo "##vso[task.setvariable variable=publishFailureTests]$publishFailureTests"
@@ -128,18 +128,18 @@ jobs:
   - task: PublishTestResults@2
     condition: succeededOrFailed()
     inputs:
-      testResultsFiles: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
+      testResultsFiles: '~/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
       testRunTitle: 'CLI Regression test results of instance $(Instance_idx)'
   - task: PublishBuildArtifacts@1
     condition: and(succeededOrFailed(), eq(variables.publishErrorModules, 'true'))
     inputs:
-      PathtoPublish: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_error_modules_$(Instance_idx).txt'
+      PathtoPublish: '~/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_error_modules_$(Instance_idx).txt'
       ArtifactName: 'error_modules'
       publishLocation: 'Container'
   - task: PublishBuildArtifacts@1
     condition: and(succeededOrFailed(), eq(variables.publishFailureTests, 'true'))
     inputs:
-      PathtoPublish: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_failure_tests_$(Instance_idx).txt'
+      PathtoPublish: '~/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_failure_tests_$(Instance_idx).txt'
       ArtifactName: 'failure_tests'
       publishLocation: 'Container'
 
@@ -169,13 +169,21 @@ jobs:
           git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli-extensions.git
 
           git fetch azclibot
+          # this would get all related branches like: "refs/heads/regression_test_23193_acrtransfer", "refs/heads/regression_test_23193_blueprint", "refs/heads/regression_test_23193_storage-preview", ...
           REGRESSION_BRANCHES=$(curl -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/repos/azclibot/azure-cli-extensions/git/matching-refs/heads/regression_test_$(Build.BuildId)_ | jq '.[] | .ref')
 
           for branch in ${REGRESSION_BRANCHES[@]}
           do
+            # this would remove the prefix 'refs/heads/':
+            # "refs/heads/regression_test_23193_storage-preview" -> regression_test_23193_storage-preview"
             branch=${branch##*/}
+            # this would remove the surfix '"':
+            # regression_test_23193_storage-preview" -> regression_test_23193_storage-preview
             branch=${branch%\"*}
             echo ${branch}
+
+            # this would extract the module name
+            # regression_test_23193_storage-preview -> storage-preview
             module=${branch##*_}
 
             pr_title="Extension Regression Test for ${module}"
