@@ -407,7 +407,7 @@ def load_arguments(self, _):
         c.argument('disabled_rule_groups', nargs='+')
         c.argument('disabled_rules', nargs='+')
         c.argument('enabled', help='Specify whether the application firewall is enabled.', arg_type=get_enum_type(['true', 'false']))
-        c.argument('firewall_mode', min_api='2016-09-01', help='Web application firewall mode.', arg_type=get_enum_type(ApplicationGatewayFirewallMode, default='detection'))
+        c.argument('firewall_mode', min_api='2016-09-01', help='Web application firewall mode.', arg_type=get_enum_type(['detection', 'prevention'], default='detection'))
 
     with self.argument_context('network application-gateway waf-config', min_api='2018-08-01') as c:
         c.argument('file_upload_limit', help='File upload size limit in MB.', type=int)

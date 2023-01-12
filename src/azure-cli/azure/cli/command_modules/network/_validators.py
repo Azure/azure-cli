@@ -1741,8 +1741,6 @@ def validate_subnet_ranges(namespace):
 # pylint: disable=too-few-public-methods
 class WafConfigExclusionAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        cmd = namespace._cmd  # pylint: disable=protected-access
-        ApplicationGatewayFirewallExclusion = cmd.get_models('ApplicationGatewayFirewallExclusion')
         if not namespace.exclusions:
             namespace.exclusions = []
         if isinstance(values, list):
@@ -1751,11 +1749,11 @@ class WafConfigExclusionAction(argparse.Action):
             variable, op, selector = values.split(' ')
         except (ValueError, TypeError):
             raise CLIError('usage error: --exclusion VARIABLE OPERATOR VALUE')
-        namespace.exclusions.append(ApplicationGatewayFirewallExclusion(
-            match_variable=variable,
-            selector_match_operator=op,
-            selector=selector
-        ))
+        namespace.exclusions.append({
+            "match_variable": variable,
+            "selector_match_operator": op,
+            "selector": selector
+        })
 
 
 def get_header_configuration_validator(dest):

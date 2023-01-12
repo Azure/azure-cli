@@ -1764,7 +1764,6 @@ def set_ag_waf_config(cmd, resource_group_name, application_gateway_name, enable
                     for value in expand_property_fn(each):
                         yield value
 
-            instance.properties.web_application_firewall_configuration = waf_config
             if disabled_rule_groups or disabled_rules:
                 disabled_groups = []
                 # disabled groups can be added directly
@@ -1783,12 +1782,13 @@ def set_ag_waf_config(cmd, resource_group_name, application_gateway_name, enable
                                 disabled_group["rules"].append(rule["ruleId"])
                         if disabled_group["rules"]:
                             disabled_groups.append(disabled_group)
-                instance.properties.web_application_firewall_configuration.disabled_rule_groups = disabled_groups
+                waf_config["disabled_rule_groups"] = disabled_groups
+            waf_config["request_body_check"] = request_body_check
+            waf_config["max_request_body_size_in_kb"] = max_request_body_size
+            waf_config["file_upload_limit_in_mb"] = file_upload_limit
+            waf_config["exclusions"] = exclusions
 
-            instance.properties.web_application_firewall_configuration.request_body_check = request_body_check
-            instance.properties.web_application_firewall_configuration.max_request_body_size_in_kb = max_request_body_size
-            instance.properties.web_application_firewall_configuration.file_upload_limit_in_mb = file_upload_limit
-            instance.properties.web_application_firewall_configuration.exclusions = exclusions
+            instance.properties.web_application_firewall_configuration = waf_config
 
     return WAFConfigSet(cli_ctx=cmd.cli_ctx)(command_args={
         "name": application_gateway_name,
