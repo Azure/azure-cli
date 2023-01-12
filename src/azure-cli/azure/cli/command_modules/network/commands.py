@@ -494,8 +494,9 @@ def load_command_table(self, _):
 
     # region PrivateEndpoint
     with self.command_group('network private-endpoint', network_private_endpoint_sdk) as g:
-        g.custom_command('create', 'create_private_endpoint', min_api='2019-04-01')
-        from azure.cli.command_modules.network.custom import PrivateEndpointUpdate
+        # g.custom_command('create', 'create_private_endpoint', min_api='2019-04-01')
+        from azure.cli.command_modules.network.custom import PrivateEndpointCreate, PrivateEndpointUpdate
+        self.command_table['network private-endpoint create'] = PrivateEndpointCreate(loader=self)
         self.command_table['network private-endpoint update'] = PrivateEndpointUpdate(loader=self)
 
     with self.command_group('network private-endpoint dns-zone-group'):
