@@ -21,9 +21,9 @@ from azure.cli.command_modules.network._client_factory import (
     cf_public_ip_addresses, cf_connection_monitor,
     cf_dns_references, cf_private_endpoints,
     cf_app_gateway_waf_policy,
-    cf_private_link_services,
-    cf_virtual_router, cf_virtual_router_peering, cf_bastion_hosts, cf_flow_logs,
-    cf_load_balancer_backend_pools)
+    cf_private_link_services, cf_private_endpoint_types,
+    cf_virtual_router, cf_virtual_router_peering, cf_flow_logs,
+    cf_private_dns_zone_groups, cf_load_balancer_backend_pools)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
     delete_lb_resource_property_entry)
@@ -102,6 +102,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#PrivateEndpointsOperations.{}',
         client_factory=cf_private_endpoints,
         min_api='2020-06-01'
+    )
+
+    network_private_endpoint_dns_zone_group_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#PrivateDnsZoneGroupsOperations.{}',
+        client_factory=cf_private_dns_zone_groups,
+        min_api='2020-03-01'
     )
 
     network_private_link_service_sdk = CliCommandType(
@@ -188,12 +194,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.cli.command_modules.network.custom#{}',
         client_factory=cf_virtual_router_peering,
         min_api='2019-08-01'
-    )
-
-    network_bastion_hosts_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#BastionHostsOperations.{}',
-        client_factory=cf_bastion_hosts,
-        min_api='2019-11-01'
     )
 
     network_load_balancers_custom = CliCommandType(
@@ -494,30 +494,35 @@ def load_command_table(self, _):
 
     # region PrivateEndpoint
     with self.command_group('network private-endpoint', network_private_endpoint_sdk) as g:
-        # g.custom_command('create', 'create_private_endpoint', min_api='2019-04-01')
-        from azure.cli.command_modules.network.custom import PrivateEndpointCreate, PrivateEndpointUpdate
-        self.command_table['network private-endpoint create'] = PrivateEndpointCreate(loader=self)
-        self.command_table['network private-endpoint update'] = PrivateEndpointUpdate(loader=self)
+        g.custom_command('create', 'create_private_endpoint', min_api='2019-04-01')
+        g.command('delete', 'begin_delete', min_api='2019-04-01')
+        g.custom_command('list', 'list_private_endpoints')
+        g.show_command('show')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_private_endpoint', min_api='2019-04-01')
+        g.command(
+            'list-types', 'list',
+            operations_tmpl='azure.mgmt.network.operations#AvailablePrivateEndpointTypesOperations.{}',
+            client_factory=cf_private_endpoint_types,
+            min_api='2019-04-01'
+        )
 
-    with self.command_group('network private-endpoint dns-zone-group'):
-        from azure.cli.command_modules.network.custom import PrivateEndpointPrivateDnsZoneGroupCreate, \
-            PrivateEndpointPrivateDnsZoneAdd, PrivateEndpointPrivateDnsZoneRemove
-        self.command_table['network private-endpoint dns-zone-group create'] = \
-            PrivateEndpointPrivateDnsZoneGroupCreate(loader=self)
-        self.command_table['network private-endpoint dns-zone-group add'] = \
-            PrivateEndpointPrivateDnsZoneAdd(loader=self)
-        self.command_table['network private-endpoint dns-zone-group remove'] = \
-            PrivateEndpointPrivateDnsZoneRemove(loader=self)
+    with self.command_group('network private-endpoint dns-zone-group', network_private_endpoint_dns_zone_group_sdk, min_api='2020-03-01') as g:
+        g.custom_command('create', 'create_private_endpoint_private_dns_zone_group')
+        g.custom_command('add', 'add_private_endpoint_private_dns_zone')
+        g.custom_command('remove', 'remove_private_endpoint_private_dns_zone')
+        g.command('delete', 'begin_delete')
+        g.show_command('show')
+        g.command('list', 'list')
 
-    with self.command_group('network private-endpoint ip-config'):
-        from azure.cli.command_modules.network.custom import PrivateEndpointIpConfigAdd, PrivateEndpointIpConfigRemove
-        self.command_table['network private-endpoint ip-config add'] = PrivateEndpointIpConfigAdd(loader=self)
-        self.command_table['network private-endpoint ip-config remove'] = PrivateEndpointIpConfigRemove(loader=self)
+    with self.command_group('network private-endpoint ip-config', network_private_endpoint_sdk, min_api='2021-05-01') as g:
+        g.custom_command('add', 'add_private_endpoint_ip_config')
+        g.custom_command('remove', 'remove_private_endpoint_ip_config')
+        g.custom_command('list', 'list_private_endpoint_ip_config')
 
-    with self.command_group('network private-endpoint asg'):
-        from azure.cli.command_modules.network.custom import PrivateEndpointAsgAdd, PrivateEndpointAsgRemove
-        self.command_table['network private-endpoint asg add'] = PrivateEndpointAsgAdd(loader=self)
-        self.command_table['network private-endpoint asg remove'] = PrivateEndpointAsgRemove(loader=self)
+    with self.command_group('network private-endpoint asg', network_private_endpoint_sdk, min_api='2021-05-01') as g:
+        g.custom_command('add', 'add_private_endpoint_asg')
+        g.custom_command('remove', 'remove_private_endpoint_asg')
+        g.custom_command('list', 'list_private_endpoint_asg')
     # endregion
 
     # region PrivateLinkServices
@@ -643,13 +648,16 @@ def load_command_table(self, _):
     # endregion
 
     # region cross-region load balancer
-    with self.command_group('network cross-region-lb', network_lb_sdk) as g:
-        g.show_command('show', 'get')
+    with self.command_group('network cross-region-lb') as g:
         g.custom_command('create', 'create_cross_region_load_balancer', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_cross_region_lb_create_namespace, exception_handler=handle_template_based_exception)
-        g.command('delete', 'begin_delete')
-        g.custom_command('list', 'list_lbs')
-        g.generic_update_command('update', setter_name='begin_create_or_update')
-        g.wait_command('wait')
+
+        from .aaz.latest.network.lb import Wait
+        from .operations.load_balancer import CrossRegionLoadBalancerShow, CrossRegionLoadBalancerDelete, CrossRegionLoadBalancerUpdate, CrossRegionLoadBalancerList
+        self.command_table['network cross-region-lb show'] = CrossRegionLoadBalancerShow(loader=self)
+        self.command_table['network cross-region-lb delete'] = CrossRegionLoadBalancerDelete(loader=self)
+        self.command_table['network cross-region-lb list'] = CrossRegionLoadBalancerList(loader=self)
+        self.command_table['network cross-region-lb update'] = CrossRegionLoadBalancerUpdate(loader=self)
+        self.command_table['network cross-region-lb wait'] = Wait(loader=self)
 
     cross_region_lb_property_map = {
         'frontend_ip_configurations': 'frontend-ip',
@@ -1021,19 +1029,6 @@ def load_command_table(self, _):
     with self.command_group('network routeserver') as g:
         g.custom_command('create', 'create_virtual_hub')
         g.custom_command('delete', 'delete_virtual_hub', supports_no_wait=True, confirmation=True)
-    # endregion
-
-    # region Bastion
-    with self.command_group('network bastion', network_bastion_hosts_sdk, is_preview=True) as g:
-        g.custom_command('create', 'create_bastion_host', supports_no_wait=True)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_bastion_host', supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_bastion_host')
-        g.custom_command('ssh', 'ssh_bastion_host')
-        g.custom_command('rdp', 'rdp_bastion_host')
-        g.custom_command('tunnel', 'create_bastion_tunnel')
-        g.command('delete', 'begin_delete')
-        g.wait_command('wait')
     # endregion
 
     # region PrivateLinkResource and PrivateEndpointConnection
