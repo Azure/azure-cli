@@ -56,28 +56,6 @@ def load_arguments_sb(self, _):
         c.argument('zone_redundant', options_list=['--zone-redundant'], is_preview=True, arg_type=get_three_state_flag(),
                    help='Enabling this property creates a ServiceBus Zone Redundant Namespace in regions supported availability zones')
 
-    # region Namespace Authorization Rule
-    with self.argument_context('servicebus namespace authorization-rule list') as c:
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
-
-    with self.argument_context('servicebus namespace authorization-rule') as c:
-        c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_1', help='Name of Namespace Authorization Rule')
-        c.argument('namespace_name', id_part='name', options_list=['--namespace-name'], help='Name of Namespace')
-
-    for scope in ['servicebus namespace authorization-rule create', 'servicebus namespace authorization-rule update', 'servicebus queue authorization-rule create', 'servicebus queue authorization-rule update', 'servicebus topic authorization-rule create', 'servicebus topic authorization-rule update']:
-        with self.argument_context(scope) as c:
-            c.argument('name', arg_type=name_type, help='Name of Authorization Rule')
-            c.argument('rights', arg_type=rights_arg_type)
-
-    with self.argument_context('servicebus namespace authorization-rule keys renew') as c:
-        c.argument('name', arg_type=name_type, help='Name of Namespace Authorization Rule')
-        c.argument('key_type', arg_type=key_arg_type)
-        c.argument('key', arg_type=keyvalue_arg_type)
-
-    with self.argument_context('servicebus namespace authorization-rule keys list') as c:
-        c.argument('authorization_rule_name', arg_type=name_type, id_part=None, help='Name of Namespace Authorization Rule')
-        c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')
-
     # region Queue
     with self.argument_context('servicebus queue') as c:
         c.argument('queue_name', arg_type=name_type, id_part='child_name_1', completer=get_queue_command_completion_list, help='Name of Queue')
@@ -104,25 +82,6 @@ def load_arguments_sb(self, _):
             c.argument('enable_batched_operations', arg_type=get_three_state_flag(), help='Allow server-side batched operations.')
 
     with self.argument_context('servicebus queue list') as c:
-        c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')
-
-    # region Queue Authorization Rule
-    with self.argument_context('servicebus queue authorization-rule') as c:
-        c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_2', help='Name of Queue Authorization Rule')
-        c.argument('queue_name', id_part='child_name_1', options_list=['--queue-name'], help='Name of Queue')
-
-    with self.argument_context('servicebus queue authorization-rule list') as c:
-        c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')
-        c.argument('queue_name', id_part=None, options_list=['--queue-name'], help='Name of Queue')
-
-    with self.argument_context('servicebus queue authorization-rule keys renew') as c:
-        c.argument('name', arg_type=name_type, help='Name of Queue Authorization Rule')
-        c.argument('key_type', arg_type=key_arg_type)
-        c.argument('key', arg_type=keyvalue_arg_type)
-
-    with self.argument_context('servicebus queue authorization-rule keys list') as c:
-        c.argument('authorization_rule_name', arg_type=name_type, id_part=None, help='Name of Queue Authorization Rule')
-        c.argument('queue_name', id_part=None, options_list=['--queue-name'], help='Name of Queue')
         c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')
 
     # region - Topic
@@ -152,25 +111,6 @@ def load_arguments_sb(self, _):
 
     with self.argument_context('servicebus topic list') as c:
         c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')
-
-    # region Topic Authorization Rule
-    with self.argument_context('servicebus topic authorization-rule') as c:
-        c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_2', help='name of Topic Authorization Rule')
-        c.argument('topic_name', options_list=['--topic-name'], id_part='child_name_1', help='name of Topic')
-
-    with self.argument_context('servicebus topic authorization-rule list') as c:
-        c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')
-        c.argument('topic_name', options_list=['--topic-name'], id_part=None, help='name of Topic')
-
-    with self.argument_context('servicebus topic authorization-rule keys renew') as c:
-        c.argument('name', arg_type=name_type, help='Name of Topic Authorization Rule')
-        c.argument('key_type', arg_type=key_arg_type)
-        c.argument('key', arg_type=keyvalue_arg_type)
-
-    with self.argument_context('servicebus topic authorization-rule keys list') as c:
-        c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')
-        c.argument('authorization_rule_name', arg_type=name_type, id_part=None, help='name of Topic Authorization Rule')
-        c.argument('topic_name', options_list=['--topic-name'], id_part=None, help='Name of Topic')
 
     with self.argument_context('servicebus topic subscription') as c:
         c.argument('subscription_name', arg_type=name_type, id_part='child_name_2', completer=get_subscriptions_command_completion_list, help='Name of Subscription')
