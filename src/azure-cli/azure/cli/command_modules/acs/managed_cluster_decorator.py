@@ -2030,6 +2030,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         # read the original value passed by the command
         network_plugin = self.raw_param.get("network_plugin")
+        network_plugin_mode = self.raw_param.get("network_plugin_mode")
         # try to read the property value corresponding to the parameter from the `mc` object
         if (
             self.mc and
@@ -2037,6 +2038,13 @@ class AKSManagedClusterContext(BaseAKSContext):
             self.mc.network_profile.network_plugin is not None
         ):
             network_plugin = self.mc.network_profile.network_plugin
+
+        if (
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.network_plugin_mode is not None
+        ):
+            network_plugin_mode = self.mc.network_profile.network_plugin_mode
 
         # this parameter does not need dynamic completion
         # validation
@@ -2051,11 +2059,11 @@ class AKSManagedClusterContext(BaseAKSContext):
                 enable_validation=False
             )
             if network_plugin:
-                if network_plugin == "azure" and pod_cidr:
-                    logger.warning(
-                        'When using `--network-plugin azure` without the preview feature '
-                        '`--network-plugin-mode overlay` the provided pod CIDR "%s" will be '
-                        'overwritten with the subnet CIDR.', pod_cidr
+                if network_plugin == "azure" and pod_cidr and network_plugin_mode != "overlay":
+                    raise InvalidArgumentValueError(
+                        "Please specify network plugin mode `overlay` when using pod_cidr or " +
+                        "use network plugin `kubenet`. For more information about Azure CNI " +
+                        "Overlay please see https://aka.ms/aksoverlay"
                     )
             else:
                 if (
