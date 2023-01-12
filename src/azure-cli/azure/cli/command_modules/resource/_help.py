@@ -2783,7 +2783,7 @@ short-summary: (Version 1.8)
 
 helps['stack mg create'] = """
 type: command
-short-summary: Create a deployment stack at management group scope
+short-summary: Create or update a deployment stack at management group scope
 examples:
   - name: Create a deployment stack using template file.
     text: az stack mg create --name "StackName" --management-group-id myMg --template-file simpleTemplate.json --location "westus2" --description "description"
@@ -2843,7 +2843,7 @@ examples:
 
 helps['stack sub create'] = """
 type: command
-short-summary: Create a deployment stack at subscription scope
+short-summary: Create or update a deployment stack at subscription scope
 examples:
   - name: Create a deployment stack using template file.
     text: az stack sub create --name "StackName" c --template-file simpleTemplate.json --location "westus2" --description "description"
@@ -2907,7 +2907,7 @@ examples:
 
 helps['stack group create'] = """
 type: command
-short-summary: Create a deployment stack at resource group scope
+short-summary: Create or update a deployment stack at resource group scope
 examples:
   - name: Create a deployment stack using template file and purge resources.
     text: az stack group create --name "StackName" --resource-group "ResourceGroup" --delete-resources --template-file simpleTemplate.json --description "description"
