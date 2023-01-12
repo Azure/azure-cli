@@ -14,7 +14,7 @@ from azure.cli.core.azclierror import (
 )
 from azure.cli.core.extension.operations import _install_deps_for_psycopg2, _run_pip
 from azure.cli.core._profile import Profile
-from ._utils import run_cli_cmd, generate_random_string, is_packaged_installed
+from ._utils import run_cli_cmd, generate_random_string, is_packaged_installed, get_object_id_of_current_user
 from ._resource_config import (
     RESOURCE,
     AUTH_TYPE
@@ -52,15 +52,8 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, client_type, c
 
     user_object_id = auth_info.get('principal_id')
     if user_object_id is None:
-        try:
-            user_info = run_cli_cmd('az ad signed-in-user show')
-            user_object_id = user_info.get('objectId') if user_info.get(
-                'objectId') else user_info.get('id')
-        except CLIInternalError as e:
-            if 'AADSTS530003' in e.error_msg:
-                logger.warning(
-                    'Please ask your IT department for help to join this device to Azure Active Directory.')
-            raise e
+        user_object_id = get_object_id_of_current_user()
+        
     if user_object_id is None:
         raise Exception(
             "No object id for user {}".format(target_handler.login_username))
@@ -116,6 +109,7 @@ class TargetHandler:
     endpoint = ""
 
     login_username = ""
+    login_usertype = ""  # servicePrincipal, user
     user_object_id = ""
     aad_username = ""
 
@@ -135,6 +129,11 @@ class TargetHandler:
         self.auth_type = auth_type
         self.login_username = run_cli_cmd(
             'az account show').get("user").get("name")
+        self.login_usertype = run_cli_cmd(
+            'az account show').get("user").get("type")
+        if(self.login_usertype not in ['servicePrincipal', 'user']):
+            raise CLIInternalError(
+                f'{self.login_usertype} is not supported. Please login as user or servicePrincipal')
         self.aad_username = "aad_" + connection_name
 
     def enable_target_aad_auth(self):

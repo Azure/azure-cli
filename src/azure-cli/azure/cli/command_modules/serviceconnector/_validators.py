@@ -24,7 +24,10 @@ from azure.cli.core.azclierror import (
     CLIInternalError
 )
 
-from ._utils import run_cli_cmd
+from ._utils import (
+    run_cli_cmd,
+    get_object_id_of_current_user
+)
 from ._resource_config import (
     CLIENT_TYPE,
     RESOURCE,
@@ -835,14 +838,6 @@ def validate_service_state(linker_parameters):
 def get_default_object_id_of_current_user(cmd, namespace):  # pylint: disable=unused-argument
     user_account_auth_info = getattr(namespace, 'user_account_auth_info', None)
     if user_account_auth_info and not user_account_auth_info.get('principal_id', None):
-        try:
-            user_info = run_cli_cmd('az ad signed-in-user show')
-        except CLIInternalError as e:
-            if 'AADSTS530003' in e.error_msg:
-                logger.warning(
-                    'Please ask your IT department for help to join this device to Azure Active Directory.')
-            raise e
-        user_object_id = user_info.get('objectId') if user_info.get(
-            'objectId') else user_info.get('id')
+        user_object_id = get_object_id_of_current_user()
         user_account_auth_info['principal_id'] = user_object_id
         setattr(namespace, 'user_account_auth_info', user_account_auth_info)
