@@ -105,7 +105,7 @@ Please specify exactly ONE (suggest connection string) in one of the following o
         if not is_valid_connection_string(connection_string):
             raise ValidationError(
                 "The connection string argument is invalid. Correct format should be Endpoint=https://example.appconfig.io;Id=xxxxx;Secret=xxxx")
-        
+
         # If both connection string specified and name specified, ensure that both arguments reference the same store
         if connection_string_from_args:
             if ';'.join(sorted(connection_string.split(';'))) != connection_string_from_args:
