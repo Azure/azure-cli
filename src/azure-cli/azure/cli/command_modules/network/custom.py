@@ -3444,15 +3444,9 @@ class PrivateEndpointCreate(_PrivateEndpointCreate):
             options=['--private-connection-resource-id'],
             help="The resource id of the private endpoint to connect to.",
             required=True)
-        args_schema.group_id = AAZStrArg(
-            options=['--group-id'],
-            help="The ID of the group obtained from the remote resource that this private endpoint should connect to. "
-                 "You can use \"az network private-link-resource list\" to obtain the supported group ids. "
-                 "You must provide this except for PrivateLinkService.")
         args_schema.group_ids = AAZListArg(
-            options=["--group-ids"],
-            help="The ID of the group obtained from the remote resource that this private endpoint should connect to. You can use \"az network private-link-resource list\" to obtain the supported group ids. You must provide this except for PrivateLinkService.,",
-            # deprecate=
+            options=["--group-ids", "--group-id"],
+            help="The ID of the group obtained from the remote resource that this private endpoint should connect to. You can use \"az network private-link-resource list\" to obtain the supported group ids. You must provide this except for PrivateLinkService.,"
         )
         args_schema.group_ids.Element = AAZStrArg()
         args_schema.request_message = AAZStrArg(
@@ -3487,12 +3481,9 @@ class PrivateEndpointCreate(_PrivateEndpointCreate):
     def pre_operations(self):
         args = self.ctx.args
         pls_connection = {'name': args.connection_name,
-                          'group_ids': [args.group_id],
+                          'group_ids': args.group_ids,
                           'request_message': args.request_message,
                           'private_link_service_id': args.private_connection_resource_id}
-
-        if has_value(args.group_ids):
-            pls_connection['group_ids'] = args.group_ids
 
         if args.manual_request:
             args.manual_private_link_service_connections = [pls_connection]
@@ -3501,56 +3492,6 @@ class PrivateEndpointCreate(_PrivateEndpointCreate):
 
         if has_value(args.subnet):
             args.subnet_id = args.subnet
-
-
-def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, subnet,
-                            private_connection_resource_id, connection_name, group_ids=None,
-                            virtual_network_name=None, tags=None, location=None,
-                            request_message=None, manual_request=None, edge_zone=None,
-                            ip_configurations=None, application_security_groups=None, custom_interface_name=None):
-    client = network_client_factory(cmd.cli_ctx).private_endpoints
-    PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint',
-                                                                           'Subnet',
-                                                                           'PrivateLinkServiceConnection')
-    pls_connection = PrivateLinkServiceConnection(private_link_service_id=private_connection_resource_id,
-                                                  group_ids=group_ids,
-                                                  request_message=request_message,
-                                                  name=connection_name)
-    private_endpoint = PrivateEndpoint(
-        location=location,
-        tags=tags,
-        subnet=Subnet(id=subnet)
-    )
-
-    if manual_request:
-        private_endpoint.manual_private_link_service_connections = [pls_connection]
-    else:
-        private_endpoint.private_link_service_connections = [pls_connection]
-
-    if edge_zone:
-        private_endpoint.extended_location = _edge_zone_model(cmd, edge_zone)
-
-    if cmd.supported_api_version(min_api='2021-05-01'):
-        if ip_configurations:
-            PrivateEndpointIPConfiguration = cmd.get_models("PrivateEndpointIPConfiguration")
-            for prop in ip_configurations:
-                ip_config = PrivateEndpointIPConfiguration(**prop)
-                try:
-                    private_endpoint.ip_configurations.append(ip_config)
-                except AttributeError:
-                    private_endpoint.ip_configurations = [ip_config]
-        if application_security_groups:
-            ApplicationSecurityGroup = cmd.get_models("ApplicationSecurityGroup")
-            for prop in application_security_groups:
-                asg = ApplicationSecurityGroup(**prop)
-                try:
-                    private_endpoint.application_security_groups.append(asg)
-                except AttributeError:
-                    private_endpoint.application_security_groups = [asg]
-        if custom_interface_name:
-            private_endpoint.custom_network_interface_name = custom_interface_name
-
-    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
 
 
 class PrivateEndpointUpdate(_PrivateEndpointUpdate):
