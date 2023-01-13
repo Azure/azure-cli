@@ -336,8 +336,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
 def flexible_server_restart(cmd, client, resource_group_name, server_name, fail_over=None):
     instance = client.get(resource_group_name, server_name)
-    if fail_over is not None and instance.high_availability.mode != "ZoneRedundant":
-        raise ArgumentUsageError("Failing over can only be triggered for zone redundant servers.")
+    if fail_over is not None and instance.high_availability.mode not in ("ZoneRedundant", "SameZone"):
+        raise ArgumentUsageError("Failing over can only be triggered for zone redundant or same zone servers.")
 
     if fail_over is not None:
         if fail_over.lower() not in ['planned', 'forced']:
