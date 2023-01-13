@@ -300,6 +300,14 @@ def load_arguments(self, _):
         c.argument('shared_image_destinations', arg_type=ib_cutput_type)
         c.argument('output_name', arg_type=ib_cutput_type)
 
+    with self.argument_context('image builder update', min_api='2022-02-14') as c:
+        c.argument('tags', tags_type)
+        # c.argument('identity', nargs='+', help='List of user assigned identities (name or ID, space delimited) of the image template.')
+
+    for scope in ['image builder identity assign', 'image builder identity remove']:
+        with self.argument_context(scope, min_api='2022-02-14') as c:
+            c.argument('user_assigned', arg_group='Managed Identity', nargs='*', help='List of user assigned identities (name or ID, space delimited) of the image template.')
+
     with self.argument_context('image builder output') as c:
         ib_sig_regions_help = "Space-separated list of regions to replicate the image version into."
         ib_img_location_help = "Location where the customized image will be created."

@@ -297,11 +297,18 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_image_templates')
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete')
-        g.generic_update_command('update', setter_name='begin_create_or_update', supports_local_cache=True)  # todo Update fails for now as service does not support updates
+        g.custom_command('update', 'update_image_template', supports_local_cache=True)
+        # g.generic_update_command('update', custom_func_name='update_image_template', setter_name='begin_update', supports_local_cache=True)
+        # g.generic_update_command('update', setter_name='begin_create_or_update', supports_local_cache=True)  # todo Update fails for now as service does not support updatesb
         g.wait_command('wait')
         g.command('run', 'begin_run', supports_no_wait=True)
         g.custom_command('show-runs', 'show_build_output')
         g.command('cancel', 'begin_cancel')
+
+    with self.command_group('image builder identity', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
+        g.custom_command('assign', 'assign_template_identity', supports_local_cache=True)
+        g.custom_command('remove', 'remove_template_identity', supports_local_cache=True)
+        g.custom_command('show', 'show_template_identity', supports_local_cache=True)
 
     with self.command_group('image builder customizer', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('add', 'add_template_customizer', supports_local_cache=True, validator=process_img_tmpl_customizer_add_namespace)
