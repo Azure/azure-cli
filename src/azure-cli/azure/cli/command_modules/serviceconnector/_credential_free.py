@@ -53,7 +53,7 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, client_type, c
     user_object_id = auth_info.get('principal_id')
     if user_object_id is None:
         user_object_id = get_object_id_of_current_user()
-        
+
     if user_object_id is None:
         raise Exception(
             "No object id for user {}".format(target_handler.login_username))

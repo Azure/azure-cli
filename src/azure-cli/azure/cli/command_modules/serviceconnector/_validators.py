@@ -21,7 +21,6 @@ from azure.cli.core.azclierror import (
     ValidationError,
     InvalidArgumentValueError,
     RequiredArgumentMissingError,
-    CLIInternalError
 )
 
 from ._utils import (
