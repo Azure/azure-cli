@@ -207,6 +207,20 @@ class NetworkPrivateEndpoints(ScenarioTest):
             ]
         )
 
+        self.cmd("network private-endpoint delete -n {pe} -g {rg}")
+        self.cmd("network private-endpoint list -g {rg}", checks=[self.check("length(@)", 0)])
+
+        # create private endpoint connection with --ip-configs
+        self.cmd(
+            "network private-endpoint create -n {pe} -g {rg} --vnet-name {vnet} --subnet {subnet} --connection-name {connection} --group-id {group_id} --private-connection-resource-id {sa_id} "
+            "--ip-configs [{{name:{ipconfig1},group-id:{group_id},member-name:blob,private-ip-address:10.0.0.4}},{{name:{ipconfig2},private-ip-address:10.0.0.6}}]",
+            checks=[
+                self.check("length(ipConfigurations)", 2),
+                self.check("ipConfigurations[0].name", self.kwargs["ipconfig1"]),
+                self.check("ipConfigurations[1].name", self.kwargs["ipconfig2"]),
+            ]
+        )
+
     @ResourceGroupPreparer(name_prefix="cli_test_network_private_endpoint_", location="eastus")
     @StorageAccountPreparer(name_prefix="asg", kind="StorageV2")
     def test_network_private_endpoint_asg(self, storage_account):
@@ -263,6 +277,20 @@ class NetworkPrivateEndpoints(ScenarioTest):
                 self.check("length(@)", 2),
                 self.check("@[0].id", self.kwargs["id1"]),
                 self.check("@[1].id", self.kwargs["id2"]),
+            ]
+        )
+
+        self.cmd("network private-endpoint delete -n {pe} -g {rg}")
+        self.cmd("network private-endpoint list -g {rg}", checks=[self.check("length(@)", 0)])
+
+        # create private endpoint connection with --asgs
+        self.cmd(
+            "network private-endpoint create -n {pe} -g {rg} --vnet-name {vnet} --subnet {subnet} --connection-name {connection} --group-id {group_id} --private-connection-resource-id {sa_id} "
+            "--asgs [{{id:{id1}}},{{id:{id2}}}]",
+            checks=[
+                self.check("length(applicationSecurityGroups)", 2),
+                self.check("applicationSecurityGroups[0].id", self.kwargs["id1"]),
+                self.check("applicationSecurityGroups[1].id", self.kwargs["id2"]),
             ]
         )
 

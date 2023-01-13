@@ -22,6 +22,9 @@ class Create(AAZCommand):
 
     :example: Create a private endpoint with ASGs.
         az network private-endpoint create -n MyPE -g MyResourceGroup --vnet-name MyVnetName --subnet MySubnet --connection-name MyConnectionName --group-id MyGroupId --private-connection-resource-id MyResourceId --asg id=MyAsgId --asg id=MyAsgId
+
+    :example: Create a private endpoint with ip-configs.
+        az network private-endpoint create -n MyPE -g MyResourceGroup --vnet-name MyVnetName --subnet MySubnet --connection-name MyConnectionName --group-id MyGroupId --private-connection-resource-id MyResourceId --ip-configs [{name:Myipconfig1,group-id:MyGroupId ,member-name:MyMemberName,private-ip-address:10.0.0.4},{name:Myipconfig2,private-ip-address:10.0.0.6}]
     """
 
     _aaz_info = {
@@ -66,8 +69,8 @@ class Create(AAZCommand):
                 resource_group_arg="resource_group",
             ),
         )
-        _args_schema.custom_network_interface_name = AAZStrArg(
-            options=["--custom-network-interface-name"],
+        _args_schema.nic_name = AAZStrArg(
+            options=["--nic-name"],
             help="The custom name of the network interface attached to the private endpoint.",
         )
         _args_schema.subnet_id = AAZResourceIdArg(
@@ -92,7 +95,7 @@ class Create(AAZCommand):
             options=["--asgs"],
             singular_options=["--asg"],
             arg_group="Application Security Group",
-            help="Application security groups in which the private endpoint IP configuration is included.",
+            help={"short-summary": "The private endpoint application security groups.", "long-summary": "Usage: --asg id=MyApplicationSecurityGroupId\nMultiple application security groups can be specified by using more than one `--asg` argument."},
         )
 
         asgs = cls._args_schema.asgs
@@ -105,18 +108,6 @@ class Create(AAZCommand):
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/applicationSecurityGroups/{}",
             ),
         )
-        _element.location = AAZResourceLocationArg(
-            options=["l", "location"],
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
-        )
-        _element.tags = AAZDictArg(
-            options=["tags"],
-        )
-
-        tags = cls._args_schema.asgs.Element.tags
-        tags.Element = AAZStrArg()
 
         # define Arg Group "ExtendedLocation"
 
@@ -160,7 +151,7 @@ class Create(AAZCommand):
             options=["--ip-configs"],
             singular_options=["--ip-config"],
             arg_group="Static IP Configuration",
-            help="A list of IP configurations of the private endpoint. This will be used to map to the First Party Service's endpoints.",
+            help={"short-summary": "The private endpoint ip configurations.", "long-summary": "Usage: --ip-config name=MyIPConfig group-id=MyGroup member-name=MyMember private-ip-address=MyPrivateIPAddress\nMultiple ip configurations can be specified by using more than one `--ip-config` argument."},
         )
 
         ip_configs = cls._args_schema.ip_configs
@@ -410,7 +401,7 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("applicationSecurityGroups", AAZListType, ".asgs")
-                properties.set_prop("customNetworkInterfaceName", AAZStrType, ".custom_network_interface_name")
+                properties.set_prop("customNetworkInterfaceName", AAZStrType, ".nic_name")
                 properties.set_prop("ipConfigurations", AAZListType, ".ip_configs")
                 properties.set_prop("manualPrivateLinkServiceConnections", AAZListType, ".manual_private_link_service_connections")
                 properties.set_prop("privateLinkServiceConnections", AAZListType, ".private_link_service_connections")
@@ -423,12 +414,6 @@ class Create(AAZCommand):
             _elements = _builder.get(".properties.applicationSecurityGroups[]")
             if _elements is not None:
                 _elements.set_prop("id", AAZStrType, ".id")
-                _elements.set_prop("location", AAZStrType, ".location")
-                _elements.set_prop("tags", AAZDictType, ".tags")
-
-            tags = _builder.get(".properties.applicationSecurityGroups[].tags")
-            if tags is not None:
-                tags.set_elements(AAZStrType, ".")
 
             ip_configurations = _builder.get(".properties.ipConfigurations")
             if ip_configurations is not None:
