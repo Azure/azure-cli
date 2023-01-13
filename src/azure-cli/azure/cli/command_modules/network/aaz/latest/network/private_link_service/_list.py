@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List private link services.
+
+    :example: List private link services.
+        az network private-link-service list --resource-group MyResourceGroup
     """
 
     _aaz_info = {

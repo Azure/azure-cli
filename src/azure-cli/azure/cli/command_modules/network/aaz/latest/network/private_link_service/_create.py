@@ -58,12 +58,12 @@ class Create(AAZCommand):
             help="The name of edge zone.",
         )
         _args_schema.location = AAZResourceLocationArg(
-            help="Resource location.",
+            help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
             fmt=AAZResourceLocationArgFormat(
                 resource_group_arg="resource_group",
             ),
         )
-        _args_schema.auto_approval = AAZObjectArg(
+        _args_schema.auto_approval = AAZListArg(
             options=["--auto-approval"],
             help="Space-separated list of subscription IDs to auto-approve.",
         )
@@ -75,7 +75,7 @@ class Create(AAZCommand):
             options=["--fqdns"],
             help="Space-separated list of FQDNs.",
         )
-        _args_schema.visibility = AAZObjectArg(
+        _args_schema.visibility = AAZListArg(
             options=["--visibility"],
             help="Space-separated list of subscription IDs for which the private link service is visible.",
         )
@@ -85,25 +85,13 @@ class Create(AAZCommand):
         )
 
         auto_approval = cls._args_schema.auto_approval
-        auto_approval.subscriptions = AAZListArg(
-            options=["subscriptions"],
-            help="The list of subscriptions.",
-        )
-
-        subscriptions = cls._args_schema.auto_approval.subscriptions
-        subscriptions.Element = AAZStrArg()
+        auto_approval.Element = AAZStrArg()
 
         fqdns = cls._args_schema.fqdns
         fqdns.Element = AAZStrArg()
 
         visibility = cls._args_schema.visibility
-        visibility.subscriptions = AAZListArg(
-            options=["subscriptions"],
-            help="The list of subscriptions.",
-        )
-
-        subscriptions = cls._args_schema.visibility.subscriptions
-        subscriptions.Element = AAZStrArg()
+        visibility.Element = AAZStrArg()
 
         tags = cls._args_schema.tags
         tags.Element = AAZStrArg()
@@ -111,8 +99,8 @@ class Create(AAZCommand):
         # define Arg Group "ExtendedLocation"
 
         _args_schema = cls._args_schema
-        _args_schema.edge_type = AAZStrArg(
-            options=["--edge-type"],
+        _args_schema.edge_zone_type = AAZStrArg(
+            options=["--edge-zone-type"],
             arg_group="ExtendedLocation",
             help="The type of the extended location.",
             default="EdgeZone",
@@ -169,7 +157,342 @@ class Create(AAZCommand):
             options=["subnet"],
             help="The reference to the subnet resource.",
         )
-        cls._build_args_subnet_create(_element.subnet)
+
+        subnet = cls._args_schema.ip_configurations.Element.subnet
+        subnet.id = AAZResourceIdArg(
+            options=["id"],
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}",
+            ),
+        )
+        subnet.name = AAZStrArg(
+            options=["name"],
+        )
+        subnet.address_prefix = AAZStrArg(
+            options=["address-prefix"],
+        )
+        subnet.address_prefixes = AAZListArg(
+            options=["address-prefixes"],
+        )
+        subnet.application_gateway_ip_configurations = AAZListArg(
+            options=["application-gateway-ip-configurations"],
+        )
+        subnet.delegations = AAZListArg(
+            options=["delegations"],
+        )
+        subnet.ip_allocations = AAZListArg(
+            options=["ip-allocations"],
+        )
+        subnet.nat_gateway = AAZObjectArg(
+            options=["nat-gateway"],
+        )
+        cls._build_args_sub_resource_create(subnet.nat_gateway)
+        subnet.network_security_group = AAZObjectArg(
+            options=["network-security-group"],
+        )
+        subnet.private_endpoint_network_policies = AAZStrArg(
+            options=["private-endpoint-network-policies"],
+            default="Disabled",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+        subnet.private_link_service_network_policies = AAZStrArg(
+            options=["private-link-service-network-policies"],
+            default="Enabled",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+        subnet.route_table = AAZObjectArg(
+            options=["route-table"],
+        )
+        subnet.service_endpoint_policies = AAZListArg(
+            options=["service-endpoint-policies"],
+        )
+        subnet.service_endpoints = AAZListArg(
+            options=["service-endpoints"],
+        )
+        subnet.type = AAZStrArg(
+            options=["type"],
+        )
+
+        address_prefixes = cls._args_schema.ip_configurations.Element.subnet.address_prefixes
+        address_prefixes.Element = AAZStrArg()
+
+        application_gateway_ip_configurations = cls._args_schema.ip_configurations.Element.subnet.application_gateway_ip_configurations
+        application_gateway_ip_configurations.Element = AAZObjectArg()
+
+        _element = cls._args_schema.ip_configurations.Element.subnet.application_gateway_ip_configurations.Element
+        _element.id = AAZStrArg(
+            options=["id"],
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+        )
+        _element.subnet = AAZObjectArg(
+            options=["subnet"],
+        )
+        cls._build_args_sub_resource_create(_element.subnet)
+
+        delegations = cls._args_schema.ip_configurations.Element.subnet.delegations
+        delegations.Element = AAZObjectArg()
+
+        _element = cls._args_schema.ip_configurations.Element.subnet.delegations.Element
+        _element.id = AAZStrArg(
+            options=["id"],
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+        )
+        _element.service_name = AAZStrArg(
+            options=["service-name"],
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+        )
+
+        ip_allocations = cls._args_schema.ip_configurations.Element.subnet.ip_allocations
+        ip_allocations.Element = AAZObjectArg()
+        cls._build_args_sub_resource_create(ip_allocations.Element)
+
+        network_security_group = cls._args_schema.ip_configurations.Element.subnet.network_security_group
+        network_security_group.id = AAZResourceIdArg(
+            options=["id"],
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/networkSecurityGroups/{}",
+            ),
+        )
+        network_security_group.location = AAZResourceLocationArg(
+            options=["l", "location"],
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        network_security_group.flush_connection = AAZBoolArg(
+            options=["flush-connection"],
+        )
+        network_security_group.security_rules = AAZListArg(
+            options=["security-rules"],
+        )
+        network_security_group.tags = AAZDictArg(
+            options=["tags"],
+        )
+
+        security_rules = cls._args_schema.ip_configurations.Element.subnet.network_security_group.security_rules
+        security_rules.Element = AAZObjectArg()
+
+        _element = cls._args_schema.ip_configurations.Element.subnet.network_security_group.security_rules.Element
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+        )
+        _element.access = AAZStrArg(
+            options=["access"],
+            enum={"Allow": "Allow", "Deny": "Deny"},
+        )
+        _element.description = AAZStrArg(
+            options=["description"],
+        )
+        _element.destination_address_prefix = AAZStrArg(
+            options=["destination-address-prefix"],
+        )
+        _element.destination_address_prefixes = AAZListArg(
+            options=["destination-address-prefixes"],
+        )
+        _element.destination_application_security_groups = AAZListArg(
+            options=["destination-application-security-groups"],
+        )
+        _element.destination_port_range = AAZStrArg(
+            options=["destination-port-range"],
+        )
+        _element.destination_port_ranges = AAZListArg(
+            options=["destination-port-ranges"],
+        )
+        _element.direction = AAZStrArg(
+            options=["direction"],
+            enum={"Inbound": "Inbound", "Outbound": "Outbound"},
+        )
+        _element.priority = AAZIntArg(
+            options=["priority"],
+        )
+        _element.protocol = AAZStrArg(
+            options=["protocol"],
+            enum={"*": "*", "Ah": "Ah", "Esp": "Esp", "Icmp": "Icmp", "Tcp": "Tcp", "Udp": "Udp"},
+        )
+        _element.source_address_prefix = AAZStrArg(
+            options=["source-address-prefix"],
+        )
+        _element.source_address_prefixes = AAZListArg(
+            options=["source-address-prefixes"],
+        )
+        _element.source_application_security_groups = AAZListArg(
+            options=["source-application-security-groups"],
+        )
+        _element.source_port_range = AAZStrArg(
+            options=["source-port-range"],
+        )
+        _element.source_port_ranges = AAZListArg(
+            options=["source-port-ranges"],
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+        )
+
+        destination_address_prefixes = cls._args_schema.ip_configurations.Element.subnet.network_security_group.security_rules.Element.destination_address_prefixes
+        destination_address_prefixes.Element = AAZStrArg()
+
+        destination_application_security_groups = cls._args_schema.ip_configurations.Element.subnet.network_security_group.security_rules.Element.destination_application_security_groups
+        destination_application_security_groups.Element = AAZObjectArg()
+        cls._build_args_application_security_group_create(destination_application_security_groups.Element)
+
+        destination_port_ranges = cls._args_schema.ip_configurations.Element.subnet.network_security_group.security_rules.Element.destination_port_ranges
+        destination_port_ranges.Element = AAZStrArg()
+
+        source_address_prefixes = cls._args_schema.ip_configurations.Element.subnet.network_security_group.security_rules.Element.source_address_prefixes
+        source_address_prefixes.Element = AAZStrArg()
+
+        source_application_security_groups = cls._args_schema.ip_configurations.Element.subnet.network_security_group.security_rules.Element.source_application_security_groups
+        source_application_security_groups.Element = AAZObjectArg()
+        cls._build_args_application_security_group_create(source_application_security_groups.Element)
+
+        source_port_ranges = cls._args_schema.ip_configurations.Element.subnet.network_security_group.security_rules.Element.source_port_ranges
+        source_port_ranges.Element = AAZStrArg()
+
+        tags = cls._args_schema.ip_configurations.Element.subnet.network_security_group.tags
+        tags.Element = AAZStrArg()
+
+        route_table = cls._args_schema.ip_configurations.Element.subnet.route_table
+        route_table.id = AAZResourceIdArg(
+            options=["id"],
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/routeTables/{}",
+            ),
+        )
+        route_table.location = AAZResourceLocationArg(
+            options=["l", "location"],
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        route_table.disable_bgp_route_propagation = AAZBoolArg(
+            options=["disable-bgp-route-propagation"],
+        )
+        route_table.routes = AAZListArg(
+            options=["routes"],
+        )
+        route_table.tags = AAZDictArg(
+            options=["tags"],
+        )
+
+        routes = cls._args_schema.ip_configurations.Element.subnet.route_table.routes
+        routes.Element = AAZObjectArg()
+
+        _element = cls._args_schema.ip_configurations.Element.subnet.route_table.routes.Element
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/routeTables/{}/routes/{}",
+            ),
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+        )
+        _element.address_prefix = AAZStrArg(
+            options=["address-prefix"],
+        )
+        _element.has_bgp_override = AAZBoolArg(
+            options=["has-bgp-override"],
+        )
+        _element.next_hop_ip_address = AAZStrArg(
+            options=["next-hop-ip-address"],
+        )
+        _element.next_hop_type = AAZStrArg(
+            options=["next-hop-type"],
+            enum={"Internet": "Internet", "None": "None", "VirtualAppliance": "VirtualAppliance", "VirtualNetworkGateway": "VirtualNetworkGateway", "VnetLocal": "VnetLocal"},
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+        )
+
+        tags = cls._args_schema.ip_configurations.Element.subnet.route_table.tags
+        tags.Element = AAZStrArg()
+
+        service_endpoint_policies = cls._args_schema.ip_configurations.Element.subnet.service_endpoint_policies
+        service_endpoint_policies.Element = AAZObjectArg()
+
+        _element = cls._args_schema.ip_configurations.Element.subnet.service_endpoint_policies.Element
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/serviceEndpointPolicies/{}",
+            ),
+        )
+        _element.location = AAZResourceLocationArg(
+            options=["l", "location"],
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        _element.contextual_service_endpoint_policies = AAZListArg(
+            options=["contextual-service-endpoint-policies"],
+        )
+        _element.service_alias = AAZStrArg(
+            options=["service-alias"],
+        )
+        _element.service_endpoint_policy_definitions = AAZListArg(
+            options=["service-endpoint-policy-definitions"],
+        )
+        _element.tags = AAZDictArg(
+            options=["tags"],
+        )
+
+        contextual_service_endpoint_policies = cls._args_schema.ip_configurations.Element.subnet.service_endpoint_policies.Element.contextual_service_endpoint_policies
+        contextual_service_endpoint_policies.Element = AAZStrArg()
+
+        service_endpoint_policy_definitions = cls._args_schema.ip_configurations.Element.subnet.service_endpoint_policies.Element.service_endpoint_policy_definitions
+        service_endpoint_policy_definitions.Element = AAZObjectArg()
+
+        _element = cls._args_schema.ip_configurations.Element.subnet.service_endpoint_policies.Element.service_endpoint_policy_definitions.Element
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/serviceEndpointPolicies/{}/serviceEndpointPolicyDefinitions/{}",
+            ),
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+        )
+        _element.description = AAZStrArg(
+            options=["description"],
+        )
+        _element.service = AAZStrArg(
+            options=["service"],
+        )
+        _element.service_resources = AAZListArg(
+            options=["service-resources"],
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+        )
+
+        service_resources = cls._args_schema.ip_configurations.Element.subnet.service_endpoint_policies.Element.service_endpoint_policy_definitions.Element.service_resources
+        service_resources.Element = AAZStrArg()
+
+        tags = cls._args_schema.ip_configurations.Element.subnet.service_endpoint_policies.Element.tags
+        tags.Element = AAZStrArg()
+
+        service_endpoints = cls._args_schema.ip_configurations.Element.subnet.service_endpoints
+        service_endpoints.Element = AAZObjectArg()
+
+        _element = cls._args_schema.ip_configurations.Element.subnet.service_endpoints.Element
+        _element.locations = AAZListArg(
+            options=["locations"],
+        )
+        _element.service = AAZStrArg(
+            options=["service"],
+        )
+
+        locations = cls._args_schema.ip_configurations.Element.subnet.service_endpoints.Element.locations
+        locations.Element = AAZStrArg()
 
         load_balancer_frontend_ip_configurations = cls._args_schema.load_balancer_frontend_ip_configurations
         load_balancer_frontend_ip_configurations.Element = AAZObjectArg()
@@ -190,7 +513,6 @@ class Create(AAZCommand):
             options=["gateway-load-balancer"],
             help="The reference to gateway load balancer frontend IP.",
         )
-        cls._build_args_sub_resource_create(_element.gateway_load_balancer)
         _element.private_ip_address = AAZStrArg(
             options=["private-ip-address"],
             help="The private IP address of the IP configuration.",
@@ -209,16 +531,360 @@ class Create(AAZCommand):
             options=["public-ip-prefix"],
             help="The reference to the Public IP Prefix resource.",
         )
-        cls._build_args_sub_resource_create(_element.public_ip_prefix)
         _element.subnet = AAZObjectArg(
             options=["subnet"],
             help="The reference to the subnet resource.",
         )
-        cls._build_args_subnet_create(_element.subnet)
         _element.zones = AAZListArg(
             options=["zones"],
             help="A list of availability zones denoting the IP allocated for the resource needs to come from.",
         )
+
+        gateway_load_balancer = cls._args_schema.load_balancer_frontend_ip_configurations.Element.gateway_load_balancer
+        gateway_load_balancer.id = AAZStrArg(
+            options=["id"],
+        )
+
+        public_ip_prefix = cls._args_schema.load_balancer_frontend_ip_configurations.Element.public_ip_prefix
+        public_ip_prefix.id = AAZStrArg(
+            options=["id"],
+        )
+
+        subnet = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet
+        subnet.id = AAZResourceIdArg(
+            options=["id"],
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}",
+            ),
+        )
+        subnet.name = AAZStrArg(
+            options=["name"],
+        )
+        subnet.address_prefix = AAZStrArg(
+            options=["address-prefix"],
+        )
+        subnet.address_prefixes = AAZListArg(
+            options=["address-prefixes"],
+        )
+        subnet.application_gateway_ip_configurations = AAZListArg(
+            options=["application-gateway-ip-configurations"],
+        )
+        subnet.delegations = AAZListArg(
+            options=["delegations"],
+        )
+        subnet.ip_allocations = AAZListArg(
+            options=["ip-allocations"],
+        )
+        subnet.nat_gateway = AAZObjectArg(
+            options=["nat-gateway"],
+        )
+        cls._build_args_sub_resource_create(subnet.nat_gateway)
+        subnet.network_security_group = AAZObjectArg(
+            options=["network-security-group"],
+        )
+        subnet.private_endpoint_network_policies = AAZStrArg(
+            options=["private-endpoint-network-policies"],
+            default="Disabled",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+        subnet.private_link_service_network_policies = AAZStrArg(
+            options=["private-link-service-network-policies"],
+            default="Enabled",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+        subnet.route_table = AAZObjectArg(
+            options=["route-table"],
+        )
+        subnet.service_endpoint_policies = AAZListArg(
+            options=["service-endpoint-policies"],
+        )
+        subnet.service_endpoints = AAZListArg(
+            options=["service-endpoints"],
+        )
+        subnet.type = AAZStrArg(
+            options=["type"],
+        )
+
+        address_prefixes = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.address_prefixes
+        address_prefixes.Element = AAZStrArg()
+
+        application_gateway_ip_configurations = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.application_gateway_ip_configurations
+        application_gateway_ip_configurations.Element = AAZObjectArg()
+
+        _element = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.application_gateway_ip_configurations.Element
+        _element.id = AAZStrArg(
+            options=["id"],
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+        )
+        _element.subnet = AAZObjectArg(
+            options=["subnet"],
+        )
+        cls._build_args_sub_resource_create(_element.subnet)
+
+        delegations = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.delegations
+        delegations.Element = AAZObjectArg()
+
+        _element = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.delegations.Element
+        _element.id = AAZStrArg(
+            options=["id"],
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+        )
+        _element.service_name = AAZStrArg(
+            options=["service-name"],
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+        )
+
+        ip_allocations = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.ip_allocations
+        ip_allocations.Element = AAZObjectArg()
+        cls._build_args_sub_resource_create(ip_allocations.Element)
+
+        network_security_group = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.network_security_group
+        network_security_group.id = AAZResourceIdArg(
+            options=["id"],
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/networkSecurityGroups/{}",
+            ),
+        )
+        network_security_group.location = AAZResourceLocationArg(
+            options=["l", "location"],
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        network_security_group.flush_connection = AAZBoolArg(
+            options=["flush-connection"],
+        )
+        network_security_group.security_rules = AAZListArg(
+            options=["security-rules"],
+        )
+        network_security_group.tags = AAZDictArg(
+            options=["tags"],
+        )
+
+        security_rules = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.network_security_group.security_rules
+        security_rules.Element = AAZObjectArg()
+
+        _element = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.network_security_group.security_rules.Element
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+        )
+        _element.access = AAZStrArg(
+            options=["access"],
+            enum={"Allow": "Allow", "Deny": "Deny"},
+        )
+        _element.description = AAZStrArg(
+            options=["description"],
+        )
+        _element.destination_address_prefix = AAZStrArg(
+            options=["destination-address-prefix"],
+        )
+        _element.destination_address_prefixes = AAZListArg(
+            options=["destination-address-prefixes"],
+        )
+        _element.destination_application_security_groups = AAZListArg(
+            options=["destination-application-security-groups"],
+        )
+        _element.destination_port_range = AAZStrArg(
+            options=["destination-port-range"],
+        )
+        _element.destination_port_ranges = AAZListArg(
+            options=["destination-port-ranges"],
+        )
+        _element.direction = AAZStrArg(
+            options=["direction"],
+            enum={"Inbound": "Inbound", "Outbound": "Outbound"},
+        )
+        _element.priority = AAZIntArg(
+            options=["priority"],
+        )
+        _element.protocol = AAZStrArg(
+            options=["protocol"],
+            enum={"*": "*", "Ah": "Ah", "Esp": "Esp", "Icmp": "Icmp", "Tcp": "Tcp", "Udp": "Udp"},
+        )
+        _element.source_address_prefix = AAZStrArg(
+            options=["source-address-prefix"],
+        )
+        _element.source_address_prefixes = AAZListArg(
+            options=["source-address-prefixes"],
+        )
+        _element.source_application_security_groups = AAZListArg(
+            options=["source-application-security-groups"],
+        )
+        _element.source_port_range = AAZStrArg(
+            options=["source-port-range"],
+        )
+        _element.source_port_ranges = AAZListArg(
+            options=["source-port-ranges"],
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+        )
+
+        destination_address_prefixes = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.network_security_group.security_rules.Element.destination_address_prefixes
+        destination_address_prefixes.Element = AAZStrArg()
+
+        destination_application_security_groups = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.network_security_group.security_rules.Element.destination_application_security_groups
+        destination_application_security_groups.Element = AAZObjectArg()
+        cls._build_args_application_security_group_create(destination_application_security_groups.Element)
+
+        destination_port_ranges = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.network_security_group.security_rules.Element.destination_port_ranges
+        destination_port_ranges.Element = AAZStrArg()
+
+        source_address_prefixes = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.network_security_group.security_rules.Element.source_address_prefixes
+        source_address_prefixes.Element = AAZStrArg()
+
+        source_application_security_groups = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.network_security_group.security_rules.Element.source_application_security_groups
+        source_application_security_groups.Element = AAZObjectArg()
+        cls._build_args_application_security_group_create(source_application_security_groups.Element)
+
+        source_port_ranges = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.network_security_group.security_rules.Element.source_port_ranges
+        source_port_ranges.Element = AAZStrArg()
+
+        tags = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.network_security_group.tags
+        tags.Element = AAZStrArg()
+
+        route_table = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.route_table
+        route_table.id = AAZResourceIdArg(
+            options=["id"],
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/routeTables/{}",
+            ),
+        )
+        route_table.location = AAZResourceLocationArg(
+            options=["l", "location"],
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        route_table.disable_bgp_route_propagation = AAZBoolArg(
+            options=["disable-bgp-route-propagation"],
+        )
+        route_table.routes = AAZListArg(
+            options=["routes"],
+        )
+        route_table.tags = AAZDictArg(
+            options=["tags"],
+        )
+
+        routes = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.route_table.routes
+        routes.Element = AAZObjectArg()
+
+        _element = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.route_table.routes.Element
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/routeTables/{}/routes/{}",
+            ),
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+        )
+        _element.address_prefix = AAZStrArg(
+            options=["address-prefix"],
+        )
+        _element.has_bgp_override = AAZBoolArg(
+            options=["has-bgp-override"],
+        )
+        _element.next_hop_ip_address = AAZStrArg(
+            options=["next-hop-ip-address"],
+        )
+        _element.next_hop_type = AAZStrArg(
+            options=["next-hop-type"],
+            enum={"Internet": "Internet", "None": "None", "VirtualAppliance": "VirtualAppliance", "VirtualNetworkGateway": "VirtualNetworkGateway", "VnetLocal": "VnetLocal"},
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+        )
+
+        tags = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.route_table.tags
+        tags.Element = AAZStrArg()
+
+        service_endpoint_policies = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.service_endpoint_policies
+        service_endpoint_policies.Element = AAZObjectArg()
+
+        _element = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.service_endpoint_policies.Element
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/serviceEndpointPolicies/{}",
+            ),
+        )
+        _element.location = AAZResourceLocationArg(
+            options=["l", "location"],
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        _element.contextual_service_endpoint_policies = AAZListArg(
+            options=["contextual-service-endpoint-policies"],
+        )
+        _element.service_alias = AAZStrArg(
+            options=["service-alias"],
+        )
+        _element.service_endpoint_policy_definitions = AAZListArg(
+            options=["service-endpoint-policy-definitions"],
+        )
+        _element.tags = AAZDictArg(
+            options=["tags"],
+        )
+
+        contextual_service_endpoint_policies = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.service_endpoint_policies.Element.contextual_service_endpoint_policies
+        contextual_service_endpoint_policies.Element = AAZStrArg()
+
+        service_endpoint_policy_definitions = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.service_endpoint_policies.Element.service_endpoint_policy_definitions
+        service_endpoint_policy_definitions.Element = AAZObjectArg()
+
+        _element = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.service_endpoint_policies.Element.service_endpoint_policy_definitions.Element
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/serviceEndpointPolicies/{}/serviceEndpointPolicyDefinitions/{}",
+            ),
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+        )
+        _element.description = AAZStrArg(
+            options=["description"],
+        )
+        _element.service = AAZStrArg(
+            options=["service"],
+        )
+        _element.service_resources = AAZListArg(
+            options=["service-resources"],
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+        )
+
+        service_resources = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.service_endpoint_policies.Element.service_endpoint_policy_definitions.Element.service_resources
+        service_resources.Element = AAZStrArg()
+
+        tags = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.service_endpoint_policies.Element.tags
+        tags.Element = AAZStrArg()
+
+        service_endpoints = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.service_endpoints
+        service_endpoints.Element = AAZObjectArg()
+
+        _element = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.service_endpoints.Element
+        _element.locations = AAZListArg(
+            options=["locations"],
+        )
+        _element.service = AAZStrArg(
+            options=["service"],
+        )
+
+        locations = cls._args_schema.load_balancer_frontend_ip_configurations.Element.subnet.service_endpoints.Element.locations
+        locations.Element = AAZStrArg()
 
         zones = cls._args_schema.load_balancer_frontend_ip_configurations.Element.zones
         zones.Element = AAZStrArg()
@@ -229,6 +895,7 @@ class Create(AAZCommand):
     @classmethod
     def _build_args_application_security_group_create(cls, _schema):
         if cls._args_application_security_group_create is not None:
+            _schema.id = cls._args_application_security_group_create.id
             _schema.location = cls._args_application_security_group_create.location
             _schema.tags = cls._args_application_security_group_create.tags
             return
@@ -236,21 +903,26 @@ class Create(AAZCommand):
         cls._args_application_security_group_create = AAZObjectArg()
 
         application_security_group_create = cls._args_application_security_group_create
+        application_security_group_create.id = AAZResourceIdArg(
+            options=["id"],
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/applicationSecurityGroups/{}",
+            ),
+        )
         application_security_group_create.location = AAZResourceLocationArg(
             options=["l", "location"],
-            help="Resource location.",
             fmt=AAZResourceLocationArgFormat(
                 resource_group_arg="resource_group",
             ),
         )
         application_security_group_create.tags = AAZDictArg(
             options=["tags"],
-            help="Resource tags.",
         )
 
         tags = cls._args_application_security_group_create.tags
         tags.Element = AAZStrArg()
 
+        _schema.id = cls._args_application_security_group_create.id
         _schema.location = cls._args_application_security_group_create.location
         _schema.tags = cls._args_application_security_group_create.tags
 
@@ -259,25 +931,23 @@ class Create(AAZCommand):
     @classmethod
     def _build_args_extended_location_create(cls, _schema):
         if cls._args_extended_location_create is not None:
-            _schema.edge_type = cls._args_extended_location_create.edge_type
-            _schema.edge_zone = cls._args_extended_location_create.edge_zone
+            _schema.name = cls._args_extended_location_create.name
+            _schema.type = cls._args_extended_location_create.type
             return
 
         cls._args_extended_location_create = AAZObjectArg()
 
         extended_location_create = cls._args_extended_location_create
-        extended_location_create.edge_zone = AAZStrArg(
-            options=["edge-zone"],
-            help="The name of edge zone.",
+        extended_location_create.name = AAZStrArg(
+            options=["name"],
         )
-        extended_location_create.edge_type = AAZStrArg(
-            options=["edge-type"],
-            help="The type of the extended location.",
+        extended_location_create.type = AAZStrArg(
+            options=["type"],
             enum={"EdgeZone": "EdgeZone"},
         )
 
-        _schema.edge_type = cls._args_extended_location_create.edge_type
-        _schema.edge_zone = cls._args_extended_location_create.edge_zone
+        _schema.name = cls._args_extended_location_create.name
+        _schema.type = cls._args_extended_location_create.type
 
     _args_public_ip_address_create = None
 
@@ -288,6 +958,7 @@ class Create(AAZCommand):
             _schema.delete_option = cls._args_public_ip_address_create.delete_option
             _schema.dns_settings = cls._args_public_ip_address_create.dns_settings
             _schema.extended_location = cls._args_public_ip_address_create.extended_location
+            _schema.id = cls._args_public_ip_address_create.id
             _schema.idle_timeout_in_minutes = cls._args_public_ip_address_create.idle_timeout_in_minutes
             _schema.ip_address = cls._args_public_ip_address_create.ip_address
             _schema.ip_tags = cls._args_public_ip_address_create.ip_tags
@@ -309,116 +980,98 @@ class Create(AAZCommand):
         public_ip_address_create = cls._args_public_ip_address_create
         public_ip_address_create.extended_location = AAZObjectArg(
             options=["extended-location"],
-            help="The extended location of the public ip address.",
         )
         cls._build_args_extended_location_create(public_ip_address_create.extended_location)
+        public_ip_address_create.id = AAZResourceIdArg(
+            options=["id"],
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/publicIPAddresses/{}",
+            ),
+        )
         public_ip_address_create.location = AAZResourceLocationArg(
             options=["l", "location"],
-            help="Resource location.",
             fmt=AAZResourceLocationArgFormat(
                 resource_group_arg="resource_group",
             ),
         )
         public_ip_address_create.ddos_settings = AAZObjectArg(
             options=["ddos-settings"],
-            help="The DDoS protection custom policy associated with the public IP address.",
         )
         public_ip_address_create.delete_option = AAZStrArg(
             options=["delete-option"],
-            help="Specify what happens to the public IP address when the VM using it is deleted",
             enum={"Delete": "Delete", "Detach": "Detach"},
         )
         public_ip_address_create.dns_settings = AAZObjectArg(
             options=["dns-settings"],
-            help="The FQDN of the DNS record associated with the public IP address.",
         )
         public_ip_address_create.idle_timeout_in_minutes = AAZIntArg(
             options=["idle-timeout-in-minutes"],
-            help="The idle timeout of the public IP address.",
         )
         public_ip_address_create.ip_address = AAZStrArg(
             options=["ip-address"],
-            help="The IP address associated with the public IP address resource.",
         )
         public_ip_address_create.ip_tags = AAZListArg(
             options=["ip-tags"],
-            help="The list of tags associated with the public IP address.",
         )
         public_ip_address_create.linked_public_ip_address = AAZObjectArg(
             options=["linked-public-ip-address"],
-            help="The linked public IP address of the public IP address resource.",
         )
         cls._build_args_public_ip_address_create(public_ip_address_create.linked_public_ip_address)
         public_ip_address_create.migration_phase = AAZStrArg(
             options=["migration-phase"],
-            help="Migration phase of Public IP Address.",
             enum={"Abort": "Abort", "Commit": "Commit", "Committed": "Committed", "None": "None", "Prepare": "Prepare"},
         )
         public_ip_address_create.nat_gateway = AAZObjectArg(
             options=["nat-gateway"],
-            help="The NatGateway for the Public IP address.",
         )
         public_ip_address_create.public_ip_address_version = AAZStrArg(
             options=["public-ip-address-version"],
-            help="The public IP address version.",
             enum={"IPv4": "IPv4", "IPv6": "IPv6"},
         )
         public_ip_address_create.public_ip_allocation_method = AAZStrArg(
             options=["public-ip-allocation-method"],
-            help="The public IP address allocation method.",
             enum={"Dynamic": "Dynamic", "Static": "Static"},
         )
         public_ip_address_create.public_ip_prefix = AAZObjectArg(
             options=["public-ip-prefix"],
-            help="The Public IP Prefix this Public IP Address should be allocated from.",
         )
         cls._build_args_sub_resource_create(public_ip_address_create.public_ip_prefix)
         public_ip_address_create.service_public_ip_address = AAZObjectArg(
             options=["service-public-ip-address"],
-            help="The service public IP address of the public IP address resource.",
         )
         cls._build_args_public_ip_address_create(public_ip_address_create.service_public_ip_address)
         public_ip_address_create.sku = AAZObjectArg(
             options=["sku"],
-            help="The public IP address SKU.",
         )
         public_ip_address_create.tags = AAZDictArg(
             options=["tags"],
-            help="Resource tags.",
         )
         public_ip_address_create.zones = AAZListArg(
             options=["zones"],
-            help="A list of availability zones denoting the IP allocated for the resource needs to come from.",
         )
 
         ddos_settings = cls._args_public_ip_address_create.ddos_settings
         ddos_settings.ddos_custom_policy = AAZObjectArg(
             options=["ddos-custom-policy"],
-            help="The DDoS custom policy associated with the public IP.",
         )
         cls._build_args_sub_resource_create(ddos_settings.ddos_custom_policy)
         ddos_settings.protected_ip = AAZBoolArg(
             options=["protected-ip"],
-            help="Enables DDoS protection on the public IP.",
         )
         ddos_settings.protection_coverage = AAZStrArg(
             options=["protection-coverage"],
-            help="The DDoS protection policy customizability of the public IP. Only standard coverage will have the ability to be customized.",
             enum={"Basic": "Basic", "Standard": "Standard"},
         )
 
         dns_settings = cls._args_public_ip_address_create.dns_settings
         dns_settings.domain_name_label = AAZStrArg(
             options=["domain-name-label"],
-            help="The domain name label. The concatenation of the domain name label and the regionalized DNS zone make up the fully qualified domain name associated with the public IP address. If a domain name label is specified, an A DNS record is created for the public IP in the Microsoft Azure DNS system.",
         )
         dns_settings.fqdn = AAZStrArg(
             options=["fqdn"],
-            help="The Fully Qualified Domain Name of the A DNS record associated with the public IP. This is the concatenation of the domainNameLabel and the regionalized DNS zone.",
         )
         dns_settings.reverse_fqdn = AAZStrArg(
             options=["reverse-fqdn"],
-            help="The reverse FQDN. A user-visible, fully qualified domain name that resolves to this public IP address. If the reverseFqdn is specified, then a PTR DNS record is created pointing from the IP address in the in-addr.arpa domain to the reverse FQDN.",
         )
 
         ip_tags = cls._args_public_ip_address_create.ip_tags
@@ -427,51 +1080,41 @@ class Create(AAZCommand):
         _element = cls._args_public_ip_address_create.ip_tags.Element
         _element.ip_tag_type = AAZStrArg(
             options=["ip-tag-type"],
-            help="The IP tag type. Example: FirstPartyUsage.",
         )
         _element.tag = AAZStrArg(
             options=["tag"],
-            help="The value of the IP tag associated with the public IP. Example: SQL.",
         )
 
         nat_gateway = cls._args_public_ip_address_create.nat_gateway
         nat_gateway.id = AAZResourceIdArg(
             options=["id"],
-            help="Resource ID.",
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/natGateways/{}",
             ),
         )
         nat_gateway.location = AAZResourceLocationArg(
             options=["l", "location"],
-            help="Resource location.",
             fmt=AAZResourceLocationArgFormat(
                 resource_group_arg="resource_group",
             ),
         )
         nat_gateway.idle_timeout_in_minutes = AAZIntArg(
             options=["idle-timeout-in-minutes"],
-            help="The idle timeout of the nat gateway.",
         )
         nat_gateway.public_ip_addresses = AAZListArg(
             options=["public-ip-addresses"],
-            help="An array of public ip addresses associated with the nat gateway resource.",
         )
         nat_gateway.public_ip_prefixes = AAZListArg(
             options=["public-ip-prefixes"],
-            help="An array of public ip prefixes associated with the nat gateway resource.",
         )
         nat_gateway.sku = AAZObjectArg(
             options=["sku"],
-            help="The nat gateway SKU.",
         )
         nat_gateway.tags = AAZDictArg(
             options=["tags"],
-            help="Resource tags.",
         )
         nat_gateway.zones = AAZListArg(
             options=["zones"],
-            help="A list of availability zones denoting the zone in which Nat Gateway should be deployed.",
         )
 
         public_ip_addresses = cls._args_public_ip_address_create.nat_gateway.public_ip_addresses
@@ -485,7 +1128,6 @@ class Create(AAZCommand):
         sku = cls._args_public_ip_address_create.nat_gateway.sku
         sku.name = AAZStrArg(
             options=["name"],
-            help="Name of Nat Gateway SKU.",
             enum={"Standard": "Standard"},
         )
 
@@ -498,12 +1140,10 @@ class Create(AAZCommand):
         sku = cls._args_public_ip_address_create.sku
         sku.name = AAZStrArg(
             options=["name"],
-            help="Name of a public IP address SKU.",
             enum={"Basic": "Basic", "Standard": "Standard"},
         )
         sku.tier = AAZStrArg(
             options=["tier"],
-            help="Tier of a public IP address SKU.",
             enum={"Global": "Global", "Regional": "Regional"},
         )
 
@@ -517,6 +1157,7 @@ class Create(AAZCommand):
         _schema.delete_option = cls._args_public_ip_address_create.delete_option
         _schema.dns_settings = cls._args_public_ip_address_create.dns_settings
         _schema.extended_location = cls._args_public_ip_address_create.extended_location
+        _schema.id = cls._args_public_ip_address_create.id
         _schema.idle_timeout_in_minutes = cls._args_public_ip_address_create.idle_timeout_in_minutes
         _schema.ip_address = cls._args_public_ip_address_create.ip_address
         _schema.ip_tags = cls._args_public_ip_address_create.ip_tags
@@ -545,457 +1186,9 @@ class Create(AAZCommand):
         sub_resource_create = cls._args_sub_resource_create
         sub_resource_create.id = AAZStrArg(
             options=["id"],
-            help="Resource ID.",
         )
 
         _schema.id = cls._args_sub_resource_create.id
-
-    _args_subnet_create = None
-
-    @classmethod
-    def _build_args_subnet_create(cls, _schema):
-        if cls._args_subnet_create is not None:
-            _schema.address_prefix = cls._args_subnet_create.address_prefix
-            _schema.address_prefixes = cls._args_subnet_create.address_prefixes
-            _schema.application_gateway_ip_configurations = cls._args_subnet_create.application_gateway_ip_configurations
-            _schema.delegations = cls._args_subnet_create.delegations
-            _schema.id = cls._args_subnet_create.id
-            _schema.ip_allocations = cls._args_subnet_create.ip_allocations
-            _schema.name = cls._args_subnet_create.name
-            _schema.nat_gateway = cls._args_subnet_create.nat_gateway
-            _schema.network_security_group = cls._args_subnet_create.network_security_group
-            _schema.private_endpoint_network_policies = cls._args_subnet_create.private_endpoint_network_policies
-            _schema.private_link_service_network_policies = cls._args_subnet_create.private_link_service_network_policies
-            _schema.route_table = cls._args_subnet_create.route_table
-            _schema.service_endpoint_policies = cls._args_subnet_create.service_endpoint_policies
-            _schema.service_endpoints = cls._args_subnet_create.service_endpoints
-            _schema.type = cls._args_subnet_create.type
-            return
-
-        cls._args_subnet_create = AAZObjectArg()
-
-        subnet_create = cls._args_subnet_create
-        subnet_create.id = AAZResourceIdArg(
-            options=["id"],
-            help="Resource ID.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}",
-            ),
-        )
-        subnet_create.name = AAZStrArg(
-            options=["name"],
-            help="The name of the resource that is unique within a resource group. This name can be used to access the resource.",
-        )
-        subnet_create.address_prefix = AAZStrArg(
-            options=["address-prefix"],
-            help="The address prefix for the subnet.",
-        )
-        subnet_create.address_prefixes = AAZListArg(
-            options=["address-prefixes"],
-            help="List of address prefixes for the subnet.",
-        )
-        subnet_create.application_gateway_ip_configurations = AAZListArg(
-            options=["application-gateway-ip-configurations"],
-            help="Application gateway IP configurations of virtual network resource.",
-        )
-        subnet_create.delegations = AAZListArg(
-            options=["delegations"],
-            help="An array of references to the delegations on the subnet.",
-        )
-        subnet_create.ip_allocations = AAZListArg(
-            options=["ip-allocations"],
-            help="Array of IpAllocation which reference this subnet.",
-        )
-        subnet_create.nat_gateway = AAZObjectArg(
-            options=["nat-gateway"],
-            help="Nat gateway associated with this subnet.",
-        )
-        cls._build_args_sub_resource_create(subnet_create.nat_gateway)
-        subnet_create.network_security_group = AAZObjectArg(
-            options=["network-security-group"],
-            help="The reference to the NetworkSecurityGroup resource.",
-        )
-        subnet_create.private_endpoint_network_policies = AAZStrArg(
-            options=["private-endpoint-network-policies"],
-            help="Enable or Disable apply network policies on private end point in the subnet.",
-            default="Disabled",
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
-        )
-        subnet_create.private_link_service_network_policies = AAZStrArg(
-            options=["private-link-service-network-policies"],
-            help="Enable or Disable apply network policies on private link service in the subnet.",
-            default="Enabled",
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
-        )
-        subnet_create.route_table = AAZObjectArg(
-            options=["route-table"],
-            help="The reference to the RouteTable resource.",
-        )
-        subnet_create.service_endpoint_policies = AAZListArg(
-            options=["service-endpoint-policies"],
-            help="An array of service endpoint policies.",
-        )
-        subnet_create.service_endpoints = AAZListArg(
-            options=["service-endpoints"],
-            help="An array of service endpoints.",
-        )
-        subnet_create.type = AAZStrArg(
-            options=["type"],
-            help="Resource type.",
-        )
-
-        address_prefixes = cls._args_subnet_create.address_prefixes
-        address_prefixes.Element = AAZStrArg()
-
-        application_gateway_ip_configurations = cls._args_subnet_create.application_gateway_ip_configurations
-        application_gateway_ip_configurations.Element = AAZObjectArg()
-
-        _element = cls._args_subnet_create.application_gateway_ip_configurations.Element
-        _element.id = AAZStrArg(
-            options=["id"],
-            help="Resource ID.",
-        )
-        _element.name = AAZStrArg(
-            options=["name"],
-            help="Name of the IP configuration that is unique within an Application Gateway.",
-        )
-        _element.subnet = AAZObjectArg(
-            options=["subnet"],
-            help="Reference to the subnet resource. A subnet from where application gateway gets its private address.",
-        )
-        cls._build_args_sub_resource_create(_element.subnet)
-
-        delegations = cls._args_subnet_create.delegations
-        delegations.Element = AAZObjectArg()
-
-        _element = cls._args_subnet_create.delegations.Element
-        _element.id = AAZStrArg(
-            options=["id"],
-            help="Resource ID.",
-        )
-        _element.name = AAZStrArg(
-            options=["name"],
-            help="The name of the resource that is unique within a subnet. This name can be used to access the resource.",
-        )
-        _element.service_name = AAZStrArg(
-            options=["service-name"],
-            help="The name of the service to whom the subnet should be delegated (e.g. Microsoft.Sql/servers).",
-        )
-        _element.type = AAZStrArg(
-            options=["type"],
-            help="Resource type.",
-        )
-
-        ip_allocations = cls._args_subnet_create.ip_allocations
-        ip_allocations.Element = AAZObjectArg()
-        cls._build_args_sub_resource_create(ip_allocations.Element)
-
-        network_security_group = cls._args_subnet_create.network_security_group
-        network_security_group.id = AAZResourceIdArg(
-            options=["id"],
-            help="Resource ID.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/networkSecurityGroups/{}",
-            ),
-        )
-        network_security_group.location = AAZResourceLocationArg(
-            options=["l", "location"],
-            help="Resource location.",
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
-        )
-        network_security_group.flush_connection = AAZBoolArg(
-            options=["flush-connection"],
-            help="When enabled, flows created from Network Security Group connections will be re-evaluated when rules are updates. Initial enablement will trigger re-evaluation.",
-        )
-        network_security_group.security_rules = AAZListArg(
-            options=["security-rules"],
-            help="A collection of security rules of the network security group.",
-        )
-        network_security_group.tags = AAZDictArg(
-            options=["tags"],
-            help="Resource tags.",
-        )
-
-        security_rules = cls._args_subnet_create.network_security_group.security_rules
-        security_rules.Element = AAZObjectArg()
-
-        _element = cls._args_subnet_create.network_security_group.security_rules.Element
-        _element.id = AAZResourceIdArg(
-            options=["id"],
-            help="Resource ID.",
-        )
-        _element.name = AAZStrArg(
-            options=["name"],
-            help="The name of the resource that is unique within a resource group. This name can be used to access the resource.",
-        )
-        _element.access = AAZStrArg(
-            options=["access"],
-            help="The network traffic is allowed or denied.",
-            enum={"Allow": "Allow", "Deny": "Deny"},
-        )
-        _element.description = AAZStrArg(
-            options=["description"],
-            help="A description for this rule. Restricted to 140 chars.",
-        )
-        _element.destination_address_prefix = AAZStrArg(
-            options=["destination-address-prefix"],
-            help="The destination address prefix. CIDR or destination IP range. Asterisk '*' can also be used to match all source IPs. Default tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used.",
-        )
-        _element.destination_address_prefixes = AAZListArg(
-            options=["destination-address-prefixes"],
-            help="The destination address prefixes. CIDR or destination IP ranges.",
-        )
-        _element.destination_application_security_groups = AAZListArg(
-            options=["destination-application-security-groups"],
-            help="The application security group specified as destination.",
-        )
-        _element.destination_port_range = AAZStrArg(
-            options=["destination-port-range"],
-            help="The destination port or range. Integer or range between 0 and 65535. Asterisk '*' can also be used to match all ports.",
-        )
-        _element.destination_port_ranges = AAZListArg(
-            options=["destination-port-ranges"],
-            help="The destination port ranges.",
-        )
-        _element.direction = AAZStrArg(
-            options=["direction"],
-            help="The direction of the rule. The direction specifies if rule will be evaluated on incoming or outgoing traffic.",
-            enum={"Inbound": "Inbound", "Outbound": "Outbound"},
-        )
-        _element.priority = AAZIntArg(
-            options=["priority"],
-            help="The priority of the rule. The value can be between 100 and 4096. The priority number must be unique for each rule in the collection. The lower the priority number, the higher the priority of the rule.",
-        )
-        _element.protocol = AAZStrArg(
-            options=["protocol"],
-            help="Network protocol this rule applies to.",
-            enum={"*": "*", "Ah": "Ah", "Esp": "Esp", "Icmp": "Icmp", "Tcp": "Tcp", "Udp": "Udp"},
-        )
-        _element.source_address_prefix = AAZStrArg(
-            options=["source-address-prefix"],
-            help="The CIDR or source IP range. Asterisk '*' can also be used to match all source IPs. Default tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used. If this is an ingress rule, specifies where network traffic originates from.",
-        )
-        _element.source_address_prefixes = AAZListArg(
-            options=["source-address-prefixes"],
-            help="The CIDR or source IP ranges.",
-        )
-        _element.source_application_security_groups = AAZListArg(
-            options=["source-application-security-groups"],
-            help="The application security group specified as source.",
-        )
-        _element.source_port_range = AAZStrArg(
-            options=["source-port-range"],
-            help="The source port or range. Integer or range between 0 and 65535. Asterisk '*' can also be used to match all ports.",
-        )
-        _element.source_port_ranges = AAZListArg(
-            options=["source-port-ranges"],
-            help="The source port ranges.",
-        )
-        _element.type = AAZStrArg(
-            options=["type"],
-            help="The type of the resource.",
-        )
-
-        destination_address_prefixes = cls._args_subnet_create.network_security_group.security_rules.Element.destination_address_prefixes
-        destination_address_prefixes.Element = AAZStrArg()
-
-        destination_application_security_groups = cls._args_subnet_create.network_security_group.security_rules.Element.destination_application_security_groups
-        destination_application_security_groups.Element = AAZObjectArg()
-        cls._build_args_application_security_group_create(destination_application_security_groups.Element)
-
-        destination_port_ranges = cls._args_subnet_create.network_security_group.security_rules.Element.destination_port_ranges
-        destination_port_ranges.Element = AAZStrArg()
-
-        source_address_prefixes = cls._args_subnet_create.network_security_group.security_rules.Element.source_address_prefixes
-        source_address_prefixes.Element = AAZStrArg()
-
-        source_application_security_groups = cls._args_subnet_create.network_security_group.security_rules.Element.source_application_security_groups
-        source_application_security_groups.Element = AAZObjectArg()
-        cls._build_args_application_security_group_create(source_application_security_groups.Element)
-
-        source_port_ranges = cls._args_subnet_create.network_security_group.security_rules.Element.source_port_ranges
-        source_port_ranges.Element = AAZStrArg()
-
-        tags = cls._args_subnet_create.network_security_group.tags
-        tags.Element = AAZStrArg()
-
-        route_table = cls._args_subnet_create.route_table
-        route_table.id = AAZResourceIdArg(
-            options=["id"],
-            help="Resource ID.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/routeTables/{}",
-            ),
-        )
-        route_table.location = AAZResourceLocationArg(
-            options=["l", "location"],
-            help="Resource location.",
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
-        )
-        route_table.disable_bgp_route_propagation = AAZBoolArg(
-            options=["disable-bgp-route-propagation"],
-            help="Whether to disable the routes learned by BGP on that route table. True means disable.",
-        )
-        route_table.routes = AAZListArg(
-            options=["routes"],
-            help="Collection of routes contained within a route table.",
-        )
-        route_table.tags = AAZDictArg(
-            options=["tags"],
-            help="Resource tags.",
-        )
-
-        routes = cls._args_subnet_create.route_table.routes
-        routes.Element = AAZObjectArg()
-
-        _element = cls._args_subnet_create.route_table.routes.Element
-        _element.id = AAZResourceIdArg(
-            options=["id"],
-            help="Resource ID.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/routeTables/{}/routes/{}",
-            ),
-        )
-        _element.name = AAZStrArg(
-            options=["name"],
-            help="The name of the resource that is unique within a resource group. This name can be used to access the resource.",
-        )
-        _element.address_prefix = AAZStrArg(
-            options=["address-prefix"],
-            help="The destination CIDR to which the route applies.",
-        )
-        _element.has_bgp_override = AAZBoolArg(
-            options=["has-bgp-override"],
-            help="A value indicating whether this route overrides overlapping BGP routes regardless of LPM.",
-        )
-        _element.next_hop_ip_address = AAZStrArg(
-            options=["next-hop-ip-address"],
-            help="The IP address packets should be forwarded to. Next hop values are only allowed in routes where the next hop type is VirtualAppliance.",
-        )
-        _element.next_hop_type = AAZStrArg(
-            options=["next-hop-type"],
-            help="The type of Azure hop the packet should be sent to.",
-            enum={"Internet": "Internet", "None": "None", "VirtualAppliance": "VirtualAppliance", "VirtualNetworkGateway": "VirtualNetworkGateway", "VnetLocal": "VnetLocal"},
-        )
-        _element.type = AAZStrArg(
-            options=["type"],
-            help="The type of the resource.",
-        )
-
-        tags = cls._args_subnet_create.route_table.tags
-        tags.Element = AAZStrArg()
-
-        service_endpoint_policies = cls._args_subnet_create.service_endpoint_policies
-        service_endpoint_policies.Element = AAZObjectArg()
-
-        _element = cls._args_subnet_create.service_endpoint_policies.Element
-        _element.id = AAZResourceIdArg(
-            options=["id"],
-            help="Resource ID.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/serviceEndpointPolicies/{}",
-            ),
-        )
-        _element.location = AAZResourceLocationArg(
-            options=["l", "location"],
-            help="Resource location.",
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
-        )
-        _element.contextual_service_endpoint_policies = AAZListArg(
-            options=["contextual-service-endpoint-policies"],
-            help="A collection of contextual service endpoint policy.",
-        )
-        _element.service_alias = AAZStrArg(
-            options=["service-alias"],
-            help="The alias indicating if the policy belongs to a service",
-        )
-        _element.service_endpoint_policy_definitions = AAZListArg(
-            options=["service-endpoint-policy-definitions"],
-            help="A collection of service endpoint policy definitions of the service endpoint policy.",
-        )
-        _element.tags = AAZDictArg(
-            options=["tags"],
-            help="Resource tags.",
-        )
-
-        contextual_service_endpoint_policies = cls._args_subnet_create.service_endpoint_policies.Element.contextual_service_endpoint_policies
-        contextual_service_endpoint_policies.Element = AAZStrArg()
-
-        service_endpoint_policy_definitions = cls._args_subnet_create.service_endpoint_policies.Element.service_endpoint_policy_definitions
-        service_endpoint_policy_definitions.Element = AAZObjectArg()
-
-        _element = cls._args_subnet_create.service_endpoint_policies.Element.service_endpoint_policy_definitions.Element
-        _element.id = AAZResourceIdArg(
-            options=["id"],
-            help="Resource ID.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/serviceEndpointPolicies/{}/serviceEndpointPolicyDefinitions/{}",
-            ),
-        )
-        _element.name = AAZStrArg(
-            options=["name"],
-            help="The name of the resource that is unique within a resource group. This name can be used to access the resource.",
-        )
-        _element.description = AAZStrArg(
-            options=["description"],
-            help="A description for this rule. Restricted to 140 chars.",
-        )
-        _element.service = AAZStrArg(
-            options=["service"],
-            help="Service endpoint name.",
-        )
-        _element.service_resources = AAZListArg(
-            options=["service-resources"],
-            help="A list of service resources.",
-        )
-        _element.type = AAZStrArg(
-            options=["type"],
-            help="The type of the resource.",
-        )
-
-        service_resources = cls._args_subnet_create.service_endpoint_policies.Element.service_endpoint_policy_definitions.Element.service_resources
-        service_resources.Element = AAZStrArg()
-
-        tags = cls._args_subnet_create.service_endpoint_policies.Element.tags
-        tags.Element = AAZStrArg()
-
-        service_endpoints = cls._args_subnet_create.service_endpoints
-        service_endpoints.Element = AAZObjectArg()
-
-        _element = cls._args_subnet_create.service_endpoints.Element
-        _element.locations = AAZListArg(
-            options=["locations"],
-            help="A list of locations.",
-        )
-        _element.service = AAZStrArg(
-            options=["service"],
-            help="The type of the endpoint service.",
-        )
-
-        locations = cls._args_subnet_create.service_endpoints.Element.locations
-        locations.Element = AAZStrArg()
-
-        _schema.address_prefix = cls._args_subnet_create.address_prefix
-        _schema.address_prefixes = cls._args_subnet_create.address_prefixes
-        _schema.application_gateway_ip_configurations = cls._args_subnet_create.application_gateway_ip_configurations
-        _schema.delegations = cls._args_subnet_create.delegations
-        _schema.id = cls._args_subnet_create.id
-        _schema.ip_allocations = cls._args_subnet_create.ip_allocations
-        _schema.name = cls._args_subnet_create.name
-        _schema.nat_gateway = cls._args_subnet_create.nat_gateway
-        _schema.network_security_group = cls._args_subnet_create.network_security_group
-        _schema.private_endpoint_network_policies = cls._args_subnet_create.private_endpoint_network_policies
-        _schema.private_link_service_network_policies = cls._args_subnet_create.private_link_service_network_policies
-        _schema.route_table = cls._args_subnet_create.route_table
-        _schema.service_endpoint_policies = cls._args_subnet_create.service_endpoint_policies
-        _schema.service_endpoints = cls._args_subnet_create.service_endpoints
-        _schema.type = cls._args_subnet_create.type
 
     def _execute_operations(self):
         self.pre_operations()
@@ -1111,20 +1304,20 @@ class Create(AAZCommand):
             extended_location = _builder.get(".extendedLocation")
             if extended_location is not None:
                 extended_location.set_prop("name", AAZStrType, ".edge_zone")
-                extended_location.set_prop("type", AAZStrType, ".edge_type")
+                extended_location.set_prop("type", AAZStrType, ".edge_zone_type")
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("autoApproval", AAZObjectType, ".auto_approval")
+                properties.set_prop("autoApproval", AAZObjectType)
                 properties.set_prop("enableProxyProtocol", AAZBoolType, ".enable_proxy_protocol")
                 properties.set_prop("fqdns", AAZListType, ".fqdns")
                 properties.set_prop("ipConfigurations", AAZListType, ".ip_configurations")
                 properties.set_prop("loadBalancerFrontendIpConfigurations", AAZListType, ".load_balancer_frontend_ip_configurations")
-                properties.set_prop("visibility", AAZObjectType, ".visibility")
+                properties.set_prop("visibility", AAZObjectType)
 
             auto_approval = _builder.get(".properties.autoApproval")
             if auto_approval is not None:
-                auto_approval.set_prop("subscriptions", AAZListType, ".subscriptions")
+                auto_approval.set_prop("subscriptions", AAZListType, ".auto_approval")
 
             subscriptions = _builder.get(".properties.autoApproval.subscriptions")
             if subscriptions is not None:
@@ -1150,7 +1343,228 @@ class Create(AAZCommand):
                 properties.set_prop("privateIPAddress", AAZStrType, ".private_ip_address")
                 properties.set_prop("privateIPAddressVersion", AAZStrType, ".private_ip_address_version")
                 properties.set_prop("privateIPAllocationMethod", AAZStrType, ".private_ip_allocation_method")
-                _CreateHelper._build_schema_subnet_create(properties.set_prop("subnet", AAZObjectType, ".subnet"))
+                properties.set_prop("subnet", AAZObjectType, ".subnet")
+
+            subnet = _builder.get(".properties.ipConfigurations[].properties.subnet")
+            if subnet is not None:
+                subnet.set_prop("id", AAZStrType, ".id")
+                subnet.set_prop("name", AAZStrType, ".name")
+                subnet.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                subnet.set_prop("type", AAZStrType, ".type")
+
+            properties = _builder.get(".properties.ipConfigurations[].properties.subnet.properties")
+            if properties is not None:
+                properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
+                properties.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
+                properties.set_prop("applicationGatewayIpConfigurations", AAZListType, ".application_gateway_ip_configurations")
+                properties.set_prop("delegations", AAZListType, ".delegations")
+                properties.set_prop("ipAllocations", AAZListType, ".ip_allocations")
+                _CreateHelper._build_schema_sub_resource_create(properties.set_prop("natGateway", AAZObjectType, ".nat_gateway"))
+                properties.set_prop("networkSecurityGroup", AAZObjectType, ".network_security_group")
+                properties.set_prop("privateEndpointNetworkPolicies", AAZStrType, ".private_endpoint_network_policies")
+                properties.set_prop("privateLinkServiceNetworkPolicies", AAZStrType, ".private_link_service_network_policies")
+                properties.set_prop("routeTable", AAZObjectType, ".route_table")
+                properties.set_prop("serviceEndpointPolicies", AAZListType, ".service_endpoint_policies")
+                properties.set_prop("serviceEndpoints", AAZListType, ".service_endpoints")
+
+            address_prefixes = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.addressPrefixes")
+            if address_prefixes is not None:
+                address_prefixes.set_elements(AAZStrType, ".")
+
+            application_gateway_ip_configurations = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.applicationGatewayIpConfigurations")
+            if application_gateway_ip_configurations is not None:
+                application_gateway_ip_configurations.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.applicationGatewayIpConfigurations[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.applicationGatewayIpConfigurations[].properties")
+            if properties is not None:
+                _CreateHelper._build_schema_sub_resource_create(properties.set_prop("subnet", AAZObjectType, ".subnet"))
+
+            delegations = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.delegations")
+            if delegations is not None:
+                delegations.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.delegations[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("type", AAZStrType, ".type")
+
+            properties = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.delegations[].properties")
+            if properties is not None:
+                properties.set_prop("serviceName", AAZStrType, ".service_name")
+
+            ip_allocations = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.ipAllocations")
+            if ip_allocations is not None:
+                _CreateHelper._build_schema_sub_resource_create(ip_allocations.set_elements(AAZObjectType, "."))
+
+            network_security_group = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.networkSecurityGroup")
+            if network_security_group is not None:
+                network_security_group.set_prop("id", AAZStrType, ".id")
+                network_security_group.set_prop("location", AAZStrType, ".location")
+                network_security_group.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                network_security_group.set_prop("tags", AAZDictType, ".tags")
+
+            properties = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.networkSecurityGroup.properties")
+            if properties is not None:
+                properties.set_prop("flushConnection", AAZBoolType, ".flush_connection")
+                properties.set_prop("securityRules", AAZListType, ".security_rules")
+
+            security_rules = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.networkSecurityGroup.properties.securityRules")
+            if security_rules is not None:
+                security_rules.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.networkSecurityGroup.properties.securityRules[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("type", AAZStrType, ".type")
+
+            properties = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.networkSecurityGroup.properties.securityRules[].properties")
+            if properties is not None:
+                properties.set_prop("access", AAZStrType, ".access", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("description", AAZStrType, ".description")
+                properties.set_prop("destinationAddressPrefix", AAZStrType, ".destination_address_prefix")
+                properties.set_prop("destinationAddressPrefixes", AAZListType, ".destination_address_prefixes")
+                properties.set_prop("destinationApplicationSecurityGroups", AAZListType, ".destination_application_security_groups")
+                properties.set_prop("destinationPortRange", AAZStrType, ".destination_port_range")
+                properties.set_prop("destinationPortRanges", AAZListType, ".destination_port_ranges")
+                properties.set_prop("direction", AAZStrType, ".direction", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("priority", AAZIntType, ".priority")
+                properties.set_prop("protocol", AAZStrType, ".protocol", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("sourceAddressPrefix", AAZStrType, ".source_address_prefix")
+                properties.set_prop("sourceAddressPrefixes", AAZListType, ".source_address_prefixes")
+                properties.set_prop("sourceApplicationSecurityGroups", AAZListType, ".source_application_security_groups")
+                properties.set_prop("sourcePortRange", AAZStrType, ".source_port_range")
+                properties.set_prop("sourcePortRanges", AAZListType, ".source_port_ranges")
+
+            destination_address_prefixes = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.networkSecurityGroup.properties.securityRules[].properties.destinationAddressPrefixes")
+            if destination_address_prefixes is not None:
+                destination_address_prefixes.set_elements(AAZStrType, ".")
+
+            destination_application_security_groups = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.networkSecurityGroup.properties.securityRules[].properties.destinationApplicationSecurityGroups")
+            if destination_application_security_groups is not None:
+                _CreateHelper._build_schema_application_security_group_create(destination_application_security_groups.set_elements(AAZObjectType, "."))
+
+            destination_port_ranges = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.networkSecurityGroup.properties.securityRules[].properties.destinationPortRanges")
+            if destination_port_ranges is not None:
+                destination_port_ranges.set_elements(AAZStrType, ".")
+
+            source_address_prefixes = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.networkSecurityGroup.properties.securityRules[].properties.sourceAddressPrefixes")
+            if source_address_prefixes is not None:
+                source_address_prefixes.set_elements(AAZStrType, ".")
+
+            source_application_security_groups = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.networkSecurityGroup.properties.securityRules[].properties.sourceApplicationSecurityGroups")
+            if source_application_security_groups is not None:
+                _CreateHelper._build_schema_application_security_group_create(source_application_security_groups.set_elements(AAZObjectType, "."))
+
+            source_port_ranges = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.networkSecurityGroup.properties.securityRules[].properties.sourcePortRanges")
+            if source_port_ranges is not None:
+                source_port_ranges.set_elements(AAZStrType, ".")
+
+            tags = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.networkSecurityGroup.tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
+
+            route_table = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.routeTable")
+            if route_table is not None:
+                route_table.set_prop("id", AAZStrType, ".id")
+                route_table.set_prop("location", AAZStrType, ".location")
+                route_table.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                route_table.set_prop("tags", AAZDictType, ".tags")
+
+            properties = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.routeTable.properties")
+            if properties is not None:
+                properties.set_prop("disableBgpRoutePropagation", AAZBoolType, ".disable_bgp_route_propagation")
+                properties.set_prop("routes", AAZListType, ".routes")
+
+            routes = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.routeTable.properties.routes")
+            if routes is not None:
+                routes.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.routeTable.properties.routes[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("type", AAZStrType, ".type")
+
+            properties = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.routeTable.properties.routes[].properties")
+            if properties is not None:
+                properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
+                properties.set_prop("hasBgpOverride", AAZBoolType, ".has_bgp_override")
+                properties.set_prop("nextHopIpAddress", AAZStrType, ".next_hop_ip_address")
+                properties.set_prop("nextHopType", AAZStrType, ".next_hop_type", typ_kwargs={"flags": {"required": True}})
+
+            tags = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.routeTable.tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
+
+            service_endpoint_policies = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.serviceEndpointPolicies")
+            if service_endpoint_policies is not None:
+                service_endpoint_policies.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.serviceEndpointPolicies[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("location", AAZStrType, ".location")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("tags", AAZDictType, ".tags")
+
+            properties = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.serviceEndpointPolicies[].properties")
+            if properties is not None:
+                properties.set_prop("contextualServiceEndpointPolicies", AAZListType, ".contextual_service_endpoint_policies")
+                properties.set_prop("serviceAlias", AAZStrType, ".service_alias")
+                properties.set_prop("serviceEndpointPolicyDefinitions", AAZListType, ".service_endpoint_policy_definitions")
+
+            contextual_service_endpoint_policies = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.serviceEndpointPolicies[].properties.contextualServiceEndpointPolicies")
+            if contextual_service_endpoint_policies is not None:
+                contextual_service_endpoint_policies.set_elements(AAZStrType, ".")
+
+            service_endpoint_policy_definitions = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions")
+            if service_endpoint_policy_definitions is not None:
+                service_endpoint_policy_definitions.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("type", AAZStrType, ".type")
+
+            properties = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions[].properties")
+            if properties is not None:
+                properties.set_prop("description", AAZStrType, ".description")
+                properties.set_prop("service", AAZStrType, ".service")
+                properties.set_prop("serviceResources", AAZListType, ".service_resources")
+
+            service_resources = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions[].properties.serviceResources")
+            if service_resources is not None:
+                service_resources.set_elements(AAZStrType, ".")
+
+            tags = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.serviceEndpointPolicies[].tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
+
+            service_endpoints = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.serviceEndpoints")
+            if service_endpoints is not None:
+                service_endpoints.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.serviceEndpoints[]")
+            if _elements is not None:
+                _elements.set_prop("locations", AAZListType, ".locations")
+                _elements.set_prop("service", AAZStrType, ".service")
+
+            locations = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.serviceEndpoints[].locations")
+            if locations is not None:
+                locations.set_elements(AAZStrType, ".")
 
             load_balancer_frontend_ip_configurations = _builder.get(".properties.loadBalancerFrontendIpConfigurations")
             if load_balancer_frontend_ip_configurations is not None:
@@ -1165,12 +1579,241 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties")
             if properties is not None:
-                _CreateHelper._build_schema_sub_resource_create(properties.set_prop("gatewayLoadBalancer", AAZObjectType, ".gateway_load_balancer"))
+                properties.set_prop("gatewayLoadBalancer", AAZObjectType, ".gateway_load_balancer")
                 properties.set_prop("privateIPAddress", AAZStrType, ".private_ip_address")
                 properties.set_prop("privateIPAddressVersion", AAZStrType, ".private_ip_address_version")
                 properties.set_prop("privateIPAllocationMethod", AAZStrType, ".private_ip_allocation_method")
-                _CreateHelper._build_schema_sub_resource_create(properties.set_prop("publicIPPrefix", AAZObjectType, ".public_ip_prefix"))
-                _CreateHelper._build_schema_subnet_create(properties.set_prop("subnet", AAZObjectType, ".subnet"))
+                properties.set_prop("publicIPPrefix", AAZObjectType, ".public_ip_prefix")
+                properties.set_prop("subnet", AAZObjectType, ".subnet")
+
+            gateway_load_balancer = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.gatewayLoadBalancer")
+            if gateway_load_balancer is not None:
+                gateway_load_balancer.set_prop("id", AAZStrType, ".id")
+
+            public_ip_prefix = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.publicIPPrefix")
+            if public_ip_prefix is not None:
+                public_ip_prefix.set_prop("id", AAZStrType, ".id")
+
+            subnet = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet")
+            if subnet is not None:
+                subnet.set_prop("id", AAZStrType, ".id")
+                subnet.set_prop("name", AAZStrType, ".name")
+                subnet.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                subnet.set_prop("type", AAZStrType, ".type")
+
+            properties = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties")
+            if properties is not None:
+                properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
+                properties.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
+                properties.set_prop("applicationGatewayIpConfigurations", AAZListType, ".application_gateway_ip_configurations")
+                properties.set_prop("delegations", AAZListType, ".delegations")
+                properties.set_prop("ipAllocations", AAZListType, ".ip_allocations")
+                _CreateHelper._build_schema_sub_resource_create(properties.set_prop("natGateway", AAZObjectType, ".nat_gateway"))
+                properties.set_prop("networkSecurityGroup", AAZObjectType, ".network_security_group")
+                properties.set_prop("privateEndpointNetworkPolicies", AAZStrType, ".private_endpoint_network_policies")
+                properties.set_prop("privateLinkServiceNetworkPolicies", AAZStrType, ".private_link_service_network_policies")
+                properties.set_prop("routeTable", AAZObjectType, ".route_table")
+                properties.set_prop("serviceEndpointPolicies", AAZListType, ".service_endpoint_policies")
+                properties.set_prop("serviceEndpoints", AAZListType, ".service_endpoints")
+
+            address_prefixes = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.addressPrefixes")
+            if address_prefixes is not None:
+                address_prefixes.set_elements(AAZStrType, ".")
+
+            application_gateway_ip_configurations = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.applicationGatewayIpConfigurations")
+            if application_gateway_ip_configurations is not None:
+                application_gateway_ip_configurations.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.applicationGatewayIpConfigurations[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.applicationGatewayIpConfigurations[].properties")
+            if properties is not None:
+                _CreateHelper._build_schema_sub_resource_create(properties.set_prop("subnet", AAZObjectType, ".subnet"))
+
+            delegations = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.delegations")
+            if delegations is not None:
+                delegations.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.delegations[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("type", AAZStrType, ".type")
+
+            properties = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.delegations[].properties")
+            if properties is not None:
+                properties.set_prop("serviceName", AAZStrType, ".service_name")
+
+            ip_allocations = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.ipAllocations")
+            if ip_allocations is not None:
+                _CreateHelper._build_schema_sub_resource_create(ip_allocations.set_elements(AAZObjectType, "."))
+
+            network_security_group = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.networkSecurityGroup")
+            if network_security_group is not None:
+                network_security_group.set_prop("id", AAZStrType, ".id")
+                network_security_group.set_prop("location", AAZStrType, ".location")
+                network_security_group.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                network_security_group.set_prop("tags", AAZDictType, ".tags")
+
+            properties = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.networkSecurityGroup.properties")
+            if properties is not None:
+                properties.set_prop("flushConnection", AAZBoolType, ".flush_connection")
+                properties.set_prop("securityRules", AAZListType, ".security_rules")
+
+            security_rules = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.networkSecurityGroup.properties.securityRules")
+            if security_rules is not None:
+                security_rules.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.networkSecurityGroup.properties.securityRules[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("type", AAZStrType, ".type")
+
+            properties = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.networkSecurityGroup.properties.securityRules[].properties")
+            if properties is not None:
+                properties.set_prop("access", AAZStrType, ".access", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("description", AAZStrType, ".description")
+                properties.set_prop("destinationAddressPrefix", AAZStrType, ".destination_address_prefix")
+                properties.set_prop("destinationAddressPrefixes", AAZListType, ".destination_address_prefixes")
+                properties.set_prop("destinationApplicationSecurityGroups", AAZListType, ".destination_application_security_groups")
+                properties.set_prop("destinationPortRange", AAZStrType, ".destination_port_range")
+                properties.set_prop("destinationPortRanges", AAZListType, ".destination_port_ranges")
+                properties.set_prop("direction", AAZStrType, ".direction", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("priority", AAZIntType, ".priority")
+                properties.set_prop("protocol", AAZStrType, ".protocol", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("sourceAddressPrefix", AAZStrType, ".source_address_prefix")
+                properties.set_prop("sourceAddressPrefixes", AAZListType, ".source_address_prefixes")
+                properties.set_prop("sourceApplicationSecurityGroups", AAZListType, ".source_application_security_groups")
+                properties.set_prop("sourcePortRange", AAZStrType, ".source_port_range")
+                properties.set_prop("sourcePortRanges", AAZListType, ".source_port_ranges")
+
+            destination_address_prefixes = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.networkSecurityGroup.properties.securityRules[].properties.destinationAddressPrefixes")
+            if destination_address_prefixes is not None:
+                destination_address_prefixes.set_elements(AAZStrType, ".")
+
+            destination_application_security_groups = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.networkSecurityGroup.properties.securityRules[].properties.destinationApplicationSecurityGroups")
+            if destination_application_security_groups is not None:
+                _CreateHelper._build_schema_application_security_group_create(destination_application_security_groups.set_elements(AAZObjectType, "."))
+
+            destination_port_ranges = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.networkSecurityGroup.properties.securityRules[].properties.destinationPortRanges")
+            if destination_port_ranges is not None:
+                destination_port_ranges.set_elements(AAZStrType, ".")
+
+            source_address_prefixes = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.networkSecurityGroup.properties.securityRules[].properties.sourceAddressPrefixes")
+            if source_address_prefixes is not None:
+                source_address_prefixes.set_elements(AAZStrType, ".")
+
+            source_application_security_groups = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.networkSecurityGroup.properties.securityRules[].properties.sourceApplicationSecurityGroups")
+            if source_application_security_groups is not None:
+                _CreateHelper._build_schema_application_security_group_create(source_application_security_groups.set_elements(AAZObjectType, "."))
+
+            source_port_ranges = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.networkSecurityGroup.properties.securityRules[].properties.sourcePortRanges")
+            if source_port_ranges is not None:
+                source_port_ranges.set_elements(AAZStrType, ".")
+
+            tags = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.networkSecurityGroup.tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
+
+            route_table = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.routeTable")
+            if route_table is not None:
+                route_table.set_prop("id", AAZStrType, ".id")
+                route_table.set_prop("location", AAZStrType, ".location")
+                route_table.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                route_table.set_prop("tags", AAZDictType, ".tags")
+
+            properties = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.routeTable.properties")
+            if properties is not None:
+                properties.set_prop("disableBgpRoutePropagation", AAZBoolType, ".disable_bgp_route_propagation")
+                properties.set_prop("routes", AAZListType, ".routes")
+
+            routes = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.routeTable.properties.routes")
+            if routes is not None:
+                routes.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.routeTable.properties.routes[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("type", AAZStrType, ".type")
+
+            properties = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.routeTable.properties.routes[].properties")
+            if properties is not None:
+                properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
+                properties.set_prop("hasBgpOverride", AAZBoolType, ".has_bgp_override")
+                properties.set_prop("nextHopIpAddress", AAZStrType, ".next_hop_ip_address")
+                properties.set_prop("nextHopType", AAZStrType, ".next_hop_type", typ_kwargs={"flags": {"required": True}})
+
+            tags = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.routeTable.tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
+
+            service_endpoint_policies = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.serviceEndpointPolicies")
+            if service_endpoint_policies is not None:
+                service_endpoint_policies.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.serviceEndpointPolicies[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("location", AAZStrType, ".location")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("tags", AAZDictType, ".tags")
+
+            properties = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.serviceEndpointPolicies[].properties")
+            if properties is not None:
+                properties.set_prop("contextualServiceEndpointPolicies", AAZListType, ".contextual_service_endpoint_policies")
+                properties.set_prop("serviceAlias", AAZStrType, ".service_alias")
+                properties.set_prop("serviceEndpointPolicyDefinitions", AAZListType, ".service_endpoint_policy_definitions")
+
+            contextual_service_endpoint_policies = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.serviceEndpointPolicies[].properties.contextualServiceEndpointPolicies")
+            if contextual_service_endpoint_policies is not None:
+                contextual_service_endpoint_policies.set_elements(AAZStrType, ".")
+
+            service_endpoint_policy_definitions = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions")
+            if service_endpoint_policy_definitions is not None:
+                service_endpoint_policy_definitions.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("type", AAZStrType, ".type")
+
+            properties = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions[].properties")
+            if properties is not None:
+                properties.set_prop("description", AAZStrType, ".description")
+                properties.set_prop("service", AAZStrType, ".service")
+                properties.set_prop("serviceResources", AAZListType, ".service_resources")
+
+            service_resources = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions[].properties.serviceResources")
+            if service_resources is not None:
+                service_resources.set_elements(AAZStrType, ".")
+
+            tags = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.serviceEndpointPolicies[].tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
+
+            service_endpoints = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.serviceEndpoints")
+            if service_endpoints is not None:
+                service_endpoints.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.serviceEndpoints[]")
+            if _elements is not None:
+                _elements.set_prop("locations", AAZListType, ".locations")
+                _elements.set_prop("service", AAZStrType, ".service")
+
+            locations = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].properties.subnet.properties.serviceEndpoints[].locations")
+            if locations is not None:
+                locations.set_elements(AAZStrType, ".")
 
             zones = _builder.get(".properties.loadBalancerFrontendIpConfigurations[].zones")
             if zones is not None:
@@ -1178,7 +1821,7 @@ class Create(AAZCommand):
 
             visibility = _builder.get(".properties.visibility")
             if visibility is not None:
-                visibility.set_prop("subscriptions", AAZListType, ".subscriptions")
+                visibility.set_prop("subscriptions", AAZListType, ".visibility")
 
             subscriptions = _builder.get(".properties.visibility.subscriptions")
             if subscriptions is not None:
@@ -1218,6 +1861,7 @@ class _CreateHelper:
     def _build_schema_application_security_group_create(cls, _builder):
         if _builder is None:
             return
+        _builder.set_prop("id", AAZStrType, ".id")
         _builder.set_prop("location", AAZStrType, ".location")
         _builder.set_prop("tags", AAZDictType, ".tags")
 
@@ -1229,14 +1873,15 @@ class _CreateHelper:
     def _build_schema_extended_location_create(cls, _builder):
         if _builder is None:
             return
-        _builder.set_prop("name", AAZStrType, ".edge_zone")
-        _builder.set_prop("type", AAZStrType, ".edge_type")
+        _builder.set_prop("name", AAZStrType, ".name")
+        _builder.set_prop("type", AAZStrType, ".type")
 
     @classmethod
     def _build_schema_public_ip_address_create(cls, _builder):
         if _builder is None:
             return
         cls._build_schema_extended_location_create(_builder.set_prop("extendedLocation", AAZObjectType, ".extended_location"))
+        _builder.set_prop("id", AAZStrType, ".id")
         _builder.set_prop("location", AAZStrType, ".location")
         _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
         _builder.set_prop("sku", AAZObjectType, ".sku")
@@ -1333,229 +1978,6 @@ class _CreateHelper:
         if _builder is None:
             return
         _builder.set_prop("id", AAZStrType, ".id")
-
-    @classmethod
-    def _build_schema_subnet_create(cls, _builder):
-        if _builder is None:
-            return
-        _builder.set_prop("id", AAZStrType, ".id")
-        _builder.set_prop("name", AAZStrType, ".name")
-        _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-        _builder.set_prop("type", AAZStrType, ".type")
-
-        properties = _builder.get(".properties")
-        if properties is not None:
-            properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
-            properties.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
-            properties.set_prop("applicationGatewayIpConfigurations", AAZListType, ".application_gateway_ip_configurations")
-            properties.set_prop("delegations", AAZListType, ".delegations")
-            properties.set_prop("ipAllocations", AAZListType, ".ip_allocations")
-            cls._build_schema_sub_resource_create(properties.set_prop("natGateway", AAZObjectType, ".nat_gateway"))
-            properties.set_prop("networkSecurityGroup", AAZObjectType, ".network_security_group")
-            properties.set_prop("privateEndpointNetworkPolicies", AAZStrType, ".private_endpoint_network_policies")
-            properties.set_prop("privateLinkServiceNetworkPolicies", AAZStrType, ".private_link_service_network_policies")
-            properties.set_prop("routeTable", AAZObjectType, ".route_table")
-            properties.set_prop("serviceEndpointPolicies", AAZListType, ".service_endpoint_policies")
-            properties.set_prop("serviceEndpoints", AAZListType, ".service_endpoints")
-
-        address_prefixes = _builder.get(".properties.addressPrefixes")
-        if address_prefixes is not None:
-            address_prefixes.set_elements(AAZStrType, ".")
-
-        application_gateway_ip_configurations = _builder.get(".properties.applicationGatewayIpConfigurations")
-        if application_gateway_ip_configurations is not None:
-            application_gateway_ip_configurations.set_elements(AAZObjectType, ".")
-
-        _elements = _builder.get(".properties.applicationGatewayIpConfigurations[]")
-        if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@Subnet_create.application_gateway_ip_configurations.[].id")
-            _elements.set_prop("name", AAZStrType, "@Subnet_create.application_gateway_ip_configurations.[].name")
-            _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-
-        properties = _builder.get(".properties.applicationGatewayIpConfigurations[].properties")
-        if properties is not None:
-            cls._build_schema_sub_resource_create(properties.set_prop("subnet", AAZObjectType, "@Subnet_create.application_gateway_ip_configurations.[].subnet"))
-
-        delegations = _builder.get(".properties.delegations")
-        if delegations is not None:
-            delegations.set_elements(AAZObjectType, ".")
-
-        _elements = _builder.get(".properties.delegations[]")
-        if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@Subnet_create.delegations.[].id")
-            _elements.set_prop("name", AAZStrType, "@Subnet_create.delegations.[].name")
-            _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _elements.set_prop("type", AAZStrType, "@Subnet_create.delegations.[].type")
-
-        properties = _builder.get(".properties.delegations[].properties")
-        if properties is not None:
-            properties.set_prop("serviceName", AAZStrType, "@Subnet_create.delegations.[].service_name")
-
-        ip_allocations = _builder.get(".properties.ipAllocations")
-        if ip_allocations is not None:
-            cls._build_schema_sub_resource_create(ip_allocations.set_elements(AAZObjectType, "."))
-
-        network_security_group = _builder.get(".properties.networkSecurityGroup")
-        if network_security_group is not None:
-            network_security_group.set_prop("id", AAZStrType, ".id")
-            network_security_group.set_prop("location", AAZStrType, ".location")
-            network_security_group.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            network_security_group.set_prop("tags", AAZDictType, ".tags")
-
-        properties = _builder.get(".properties.networkSecurityGroup.properties")
-        if properties is not None:
-            properties.set_prop("flushConnection", AAZBoolType, ".flush_connection")
-            properties.set_prop("securityRules", AAZListType, ".security_rules")
-
-        security_rules = _builder.get(".properties.networkSecurityGroup.properties.securityRules")
-        if security_rules is not None:
-            security_rules.set_elements(AAZObjectType, ".")
-
-        _elements = _builder.get(".properties.networkSecurityGroup.properties.securityRules[]")
-        if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@Subnet_create.network_security_group.security_rules.[].id")
-            _elements.set_prop("name", AAZStrType, "@Subnet_create.network_security_group.security_rules.[].name")
-            _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _elements.set_prop("type", AAZStrType, "@Subnet_create.network_security_group.security_rules.[].type")
-
-        properties = _builder.get(".properties.networkSecurityGroup.properties.securityRules[].properties")
-        if properties is not None:
-            properties.set_prop("access", AAZStrType, "@Subnet_create.network_security_group.security_rules.[].access", typ_kwargs={"flags": {"required": True}})
-            properties.set_prop("description", AAZStrType, "@Subnet_create.network_security_group.security_rules.[].description")
-            properties.set_prop("destinationAddressPrefix", AAZStrType, "@Subnet_create.network_security_group.security_rules.[].destination_address_prefix")
-            properties.set_prop("destinationAddressPrefixes", AAZListType, "@Subnet_create.network_security_group.security_rules.[].destination_address_prefixes")
-            properties.set_prop("destinationApplicationSecurityGroups", AAZListType, "@Subnet_create.network_security_group.security_rules.[].destination_application_security_groups")
-            properties.set_prop("destinationPortRange", AAZStrType, "@Subnet_create.network_security_group.security_rules.[].destination_port_range")
-            properties.set_prop("destinationPortRanges", AAZListType, "@Subnet_create.network_security_group.security_rules.[].destination_port_ranges")
-            properties.set_prop("direction", AAZStrType, "@Subnet_create.network_security_group.security_rules.[].direction", typ_kwargs={"flags": {"required": True}})
-            properties.set_prop("priority", AAZIntType, "@Subnet_create.network_security_group.security_rules.[].priority")
-            properties.set_prop("protocol", AAZStrType, "@Subnet_create.network_security_group.security_rules.[].protocol", typ_kwargs={"flags": {"required": True}})
-            properties.set_prop("sourceAddressPrefix", AAZStrType, "@Subnet_create.network_security_group.security_rules.[].source_address_prefix")
-            properties.set_prop("sourceAddressPrefixes", AAZListType, "@Subnet_create.network_security_group.security_rules.[].source_address_prefixes")
-            properties.set_prop("sourceApplicationSecurityGroups", AAZListType, "@Subnet_create.network_security_group.security_rules.[].source_application_security_groups")
-            properties.set_prop("sourcePortRange", AAZStrType, "@Subnet_create.network_security_group.security_rules.[].source_port_range")
-            properties.set_prop("sourcePortRanges", AAZListType, "@Subnet_create.network_security_group.security_rules.[].source_port_ranges")
-
-        destination_address_prefixes = _builder.get(".properties.networkSecurityGroup.properties.securityRules[].properties.destinationAddressPrefixes")
-        if destination_address_prefixes is not None:
-            destination_address_prefixes.set_elements(AAZStrType, ".")
-
-        destination_application_security_groups = _builder.get(".properties.networkSecurityGroup.properties.securityRules[].properties.destinationApplicationSecurityGroups")
-        if destination_application_security_groups is not None:
-            cls._build_schema_application_security_group_create(destination_application_security_groups.set_elements(AAZObjectType, "."))
-
-        destination_port_ranges = _builder.get(".properties.networkSecurityGroup.properties.securityRules[].properties.destinationPortRanges")
-        if destination_port_ranges is not None:
-            destination_port_ranges.set_elements(AAZStrType, ".")
-
-        source_address_prefixes = _builder.get(".properties.networkSecurityGroup.properties.securityRules[].properties.sourceAddressPrefixes")
-        if source_address_prefixes is not None:
-            source_address_prefixes.set_elements(AAZStrType, ".")
-
-        source_application_security_groups = _builder.get(".properties.networkSecurityGroup.properties.securityRules[].properties.sourceApplicationSecurityGroups")
-        if source_application_security_groups is not None:
-            cls._build_schema_application_security_group_create(source_application_security_groups.set_elements(AAZObjectType, "."))
-
-        source_port_ranges = _builder.get(".properties.networkSecurityGroup.properties.securityRules[].properties.sourcePortRanges")
-        if source_port_ranges is not None:
-            source_port_ranges.set_elements(AAZStrType, ".")
-
-        tags = _builder.get(".properties.networkSecurityGroup.tags")
-        if tags is not None:
-            tags.set_elements(AAZStrType, ".")
-
-        route_table = _builder.get(".properties.routeTable")
-        if route_table is not None:
-            route_table.set_prop("id", AAZStrType, ".id")
-            route_table.set_prop("location", AAZStrType, ".location")
-            route_table.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            route_table.set_prop("tags", AAZDictType, ".tags")
-
-        properties = _builder.get(".properties.routeTable.properties")
-        if properties is not None:
-            properties.set_prop("disableBgpRoutePropagation", AAZBoolType, ".disable_bgp_route_propagation")
-            properties.set_prop("routes", AAZListType, ".routes")
-
-        routes = _builder.get(".properties.routeTable.properties.routes")
-        if routes is not None:
-            routes.set_elements(AAZObjectType, ".")
-
-        _elements = _builder.get(".properties.routeTable.properties.routes[]")
-        if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@Subnet_create.route_table.routes.[].id")
-            _elements.set_prop("name", AAZStrType, "@Subnet_create.route_table.routes.[].name")
-            _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _elements.set_prop("type", AAZStrType, "@Subnet_create.route_table.routes.[].type")
-
-        properties = _builder.get(".properties.routeTable.properties.routes[].properties")
-        if properties is not None:
-            properties.set_prop("addressPrefix", AAZStrType, "@Subnet_create.route_table.routes.[].address_prefix")
-            properties.set_prop("hasBgpOverride", AAZBoolType, "@Subnet_create.route_table.routes.[].has_bgp_override")
-            properties.set_prop("nextHopIpAddress", AAZStrType, "@Subnet_create.route_table.routes.[].next_hop_ip_address")
-            properties.set_prop("nextHopType", AAZStrType, "@Subnet_create.route_table.routes.[].next_hop_type", typ_kwargs={"flags": {"required": True}})
-
-        tags = _builder.get(".properties.routeTable.tags")
-        if tags is not None:
-            tags.set_elements(AAZStrType, ".")
-
-        service_endpoint_policies = _builder.get(".properties.serviceEndpointPolicies")
-        if service_endpoint_policies is not None:
-            service_endpoint_policies.set_elements(AAZObjectType, ".")
-
-        _elements = _builder.get(".properties.serviceEndpointPolicies[]")
-        if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@Subnet_create.service_endpoint_policies.[].id")
-            _elements.set_prop("location", AAZStrType, "@Subnet_create.service_endpoint_policies.[].location")
-            _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _elements.set_prop("tags", AAZDictType, "@Subnet_create.service_endpoint_policies.[].tags")
-
-        properties = _builder.get(".properties.serviceEndpointPolicies[].properties")
-        if properties is not None:
-            properties.set_prop("contextualServiceEndpointPolicies", AAZListType, "@Subnet_create.service_endpoint_policies.[].contextual_service_endpoint_policies")
-            properties.set_prop("serviceAlias", AAZStrType, "@Subnet_create.service_endpoint_policies.[].service_alias")
-            properties.set_prop("serviceEndpointPolicyDefinitions", AAZListType, "@Subnet_create.service_endpoint_policies.[].service_endpoint_policy_definitions")
-
-        contextual_service_endpoint_policies = _builder.get(".properties.serviceEndpointPolicies[].properties.contextualServiceEndpointPolicies")
-        if contextual_service_endpoint_policies is not None:
-            contextual_service_endpoint_policies.set_elements(AAZStrType, ".")
-
-        service_endpoint_policy_definitions = _builder.get(".properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions")
-        if service_endpoint_policy_definitions is not None:
-            service_endpoint_policy_definitions.set_elements(AAZObjectType, ".")
-
-        _elements = _builder.get(".properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions[]")
-        if _elements is not None:
-            _elements.set_prop("id", AAZStrType, "@Subnet_create.service_endpoint_policies.[].service_endpoint_policy_definitions.[].id")
-            _elements.set_prop("name", AAZStrType, "@Subnet_create.service_endpoint_policies.[].service_endpoint_policy_definitions.[].name")
-            _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _elements.set_prop("type", AAZStrType, "@Subnet_create.service_endpoint_policies.[].service_endpoint_policy_definitions.[].type")
-
-        properties = _builder.get(".properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions[].properties")
-        if properties is not None:
-            properties.set_prop("description", AAZStrType, "@Subnet_create.service_endpoint_policies.[].service_endpoint_policy_definitions.[].description")
-            properties.set_prop("service", AAZStrType, "@Subnet_create.service_endpoint_policies.[].service_endpoint_policy_definitions.[].service")
-            properties.set_prop("serviceResources", AAZListType, "@Subnet_create.service_endpoint_policies.[].service_endpoint_policy_definitions.[].service_resources")
-
-        service_resources = _builder.get(".properties.serviceEndpointPolicies[].properties.serviceEndpointPolicyDefinitions[].properties.serviceResources")
-        if service_resources is not None:
-            service_resources.set_elements(AAZStrType, ".")
-
-        tags = _builder.get(".properties.serviceEndpointPolicies[].tags")
-        if tags is not None:
-            tags.set_elements(AAZStrType, ".")
-
-        service_endpoints = _builder.get(".properties.serviceEndpoints")
-        if service_endpoints is not None:
-            service_endpoints.set_elements(AAZObjectType, ".")
-
-        _elements = _builder.get(".properties.serviceEndpoints[]")
-        if _elements is not None:
-            _elements.set_prop("locations", AAZListType, "@Subnet_create.service_endpoints.[].locations")
-            _elements.set_prop("service", AAZStrType, "@Subnet_create.service_endpoints.[].service")
-
-        locations = _builder.get(".properties.serviceEndpoints[].locations")
-        if locations is not None:
-            locations.set_elements(AAZStrType, ".")
 
     _schema_application_security_group_read = None
 

@@ -63,30 +63,23 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
         )
-
-        # define Arg Group "Parameters"
-
-        # define Arg Group "PrivateLinkServiceConnectionState"
-
-        _args_schema = cls._args_schema
-        _args_schema.actions_required = AAZStrArg(
-            options=["--actions-required"],
-            arg_group="PrivateLinkServiceConnectionState",
+        _args_schema.action_required = AAZStrArg(
+            options=["--action-required"],
             help="A message indicating if changes on the service provider require any updates on the consumer.",
             nullable=True,
         )
         _args_schema.description = AAZStrArg(
             options=["--description"],
-            arg_group="PrivateLinkServiceConnectionState",
             help="The reason for approval/rejection of the connection.",
             nullable=True,
         )
-        _args_schema.status = AAZStrArg(
-            options=["--status"],
-            arg_group="PrivateLinkServiceConnectionState",
+        _args_schema.connection_status = AAZStrArg(
+            options=["--connection-status"],
             help="Indicates whether the connection has been Approved/Rejected/Removed by the owner of the service.  Allowed values: Approved, Rejected, Removed.",
             nullable=True,
         )
+
+        # define Arg Group "Parameters"
         return cls._args_schema
 
     def _execute_operations(self):
@@ -325,9 +318,9 @@ class Update(AAZCommand):
 
             private_link_service_connection_state = _builder.get(".properties.privateLinkServiceConnectionState")
             if private_link_service_connection_state is not None:
-                private_link_service_connection_state.set_prop("actionsRequired", AAZStrType, ".actions_required")
+                private_link_service_connection_state.set_prop("actionsRequired", AAZStrType, ".action_required")
                 private_link_service_connection_state.set_prop("description", AAZStrType, ".description")
-                private_link_service_connection_state.set_prop("status", AAZStrType, ".status")
+                private_link_service_connection_state.set_prop("status", AAZStrType, ".connection_status")
 
             return _instance_value
 

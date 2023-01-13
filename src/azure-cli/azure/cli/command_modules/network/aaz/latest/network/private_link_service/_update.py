@@ -56,7 +56,7 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
         )
-        _args_schema.auto_approval = AAZObjectArg(
+        _args_schema.auto_approval = AAZListArg(
             options=["--auto-approval"],
             help="Space-separated list of subscription IDs to auto-approve.",
             nullable=True,
@@ -71,7 +71,7 @@ class Update(AAZCommand):
             help="Space-separated list of FQDNs.",
             nullable=True,
         )
-        _args_schema.visibility = AAZObjectArg(
+        _args_schema.visibility = AAZListArg(
             options=["--visibility"],
             help="Space-separated list of subscription IDs for which the private link service is visible.",
             nullable=True,
@@ -83,14 +83,7 @@ class Update(AAZCommand):
         )
 
         auto_approval = cls._args_schema.auto_approval
-        auto_approval.subscriptions = AAZListArg(
-            options=["subscriptions"],
-            help="The list of subscriptions.",
-            nullable=True,
-        )
-
-        subscriptions = cls._args_schema.auto_approval.subscriptions
-        subscriptions.Element = AAZStrArg(
+        auto_approval.Element = AAZStrArg(
             nullable=True,
         )
 
@@ -100,14 +93,7 @@ class Update(AAZCommand):
         )
 
         visibility = cls._args_schema.visibility
-        visibility.subscriptions = AAZListArg(
-            options=["subscriptions"],
-            help="The list of subscriptions.",
-            nullable=True,
-        )
-
-        subscriptions = cls._args_schema.visibility.subscriptions
-        subscriptions.Element = AAZStrArg(
+        visibility.Element = AAZStrArg(
             nullable=True,
         )
 
@@ -1382,15 +1368,15 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("autoApproval", AAZObjectType, ".auto_approval")
+                properties.set_prop("autoApproval", AAZObjectType)
                 properties.set_prop("enableProxyProtocol", AAZBoolType, ".enable_proxy_protocol")
                 properties.set_prop("fqdns", AAZListType, ".fqdns")
                 properties.set_prop("loadBalancerFrontendIpConfigurations", AAZListType, ".load_balancer_frontend_ip_configurations")
-                properties.set_prop("visibility", AAZObjectType, ".visibility")
+                properties.set_prop("visibility", AAZObjectType)
 
             auto_approval = _builder.get(".properties.autoApproval")
             if auto_approval is not None:
-                auto_approval.set_prop("subscriptions", AAZListType, ".subscriptions")
+                auto_approval.set_prop("subscriptions", AAZListType, ".auto_approval")
 
             subscriptions = _builder.get(".properties.autoApproval.subscriptions")
             if subscriptions is not None:
@@ -1426,7 +1412,7 @@ class Update(AAZCommand):
 
             visibility = _builder.get(".properties.visibility")
             if visibility is not None:
-                visibility.set_prop("subscriptions", AAZListType, ".subscriptions")
+                visibility.set_prop("subscriptions", AAZListType, ".visibility")
 
             subscriptions = _builder.get(".properties.visibility.subscriptions")
             if subscriptions is not None:

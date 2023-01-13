@@ -536,9 +536,11 @@ def load_command_table(self, _):
         # g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_private_link_service')
         self.command_table['network private-link-service update'] = PrivateLinkServiceUpdate(loader=self)
 
-    with self.command_group('network private-link-service connection', network_private_link_service_sdk) as g:
-        g.command('delete', 'begin_delete_private_endpoint_connection')
-        g.custom_command('update', 'update_private_endpoint_connection')
+    with self.command_group('network private-link-service connection'):
+        # g.command('delete', 'begin_delete_private_endpoint_connection')
+        # g.custom_command('update', 'update_private_endpoint_connection')
+        from azure.cli.command_modules.network.custom import PrivateEndpointConnectionUpdate
+        self.command_table['network private-link-service connection update'] = PrivateEndpointConnectionUpdate(loader=self)
 
     # TODO: Due to service limitation.
     # with self.command_group('network private-link-service ip-configs', network_private_link_service_sdk) as g:

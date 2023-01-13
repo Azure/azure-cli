@@ -41,6 +41,7 @@ from .aaz.latest.network.nsg import Create as _NSGCreate
 from .aaz.latest.network.nsg.rule import Create as _NSGRuleCreate, Update as _NSGRuleUpdate
 from .aaz.latest.network.private_link_service import Create as _PrivateLinkServiceCreate, \
     Update as _PrivateLinkServiceUpdate
+from .aaz.latest.network.private_link_service.connection import Update as _PrivateEndpointConnectionUpdate
 from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
 from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdate
 from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
@@ -3649,7 +3650,7 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
 
         args_schema.ip_configurations._registered = False
         args_schema.load_balancer_frontend_ip_configurations._registered = False
-        args_schema.edge_type._registered = False
+        args_schema.edge_zone_type._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -3667,8 +3668,6 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
             args.lb_frontend_ip_configs,
             element_transformer=lambda _, lb_frontend_ip_config: {"id": lb_frontend_ip_config}
         )
-
-        print(args.load_balancer_frontend_ip_configurations)
 
 
 def create_private_link_service(cmd, resource_group_name, service_name, subnet, frontend_ip_configurations,
@@ -3711,9 +3710,10 @@ class PrivateLinkServiceUpdate(_PrivateLinkServiceUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZStrArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.", required=True)
+        args_schema.lb_name = AAZStrArg(options=['--lb-name'], help="Name of the load balancer to retrieve frontend IP configs from. Ignored if a frontend IP configuration ID is supplied.")
+        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.")
         args_schema.lb_frontend_ip_configs.Element = AAZResourceIdArg(
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIpConfigurations/{}"
@@ -3725,11 +3725,12 @@ class PrivateLinkServiceUpdate(_PrivateLinkServiceUpdate):
     def pre_operations(self):
         args = self.ctx.args
 
-        args.load_balancer_frontend_ip_configurations = assign_aaz_list_arg(
-            args.load_balancer_frontend_ip_configurations,
-            args.lb_frontend_ip_configs,
-            element_transformer=lambda _, lb_frontend_ip_config: {"id": lb_frontend_ip_config}
-        )
+        if has_value(args.lb_frontend_ip_configs):
+            args.load_balancer_frontend_ip_configurations = assign_aaz_list_arg(
+                args.load_balancer_frontend_ip_configurations,
+                args.lb_frontend_ip_configs,
+                element_transformer=lambda _, lb_frontend_ip_config: {"id": lb_frontend_ip_config}
+            )
 
 
 def update_private_link_service(instance, cmd, tags=None, frontend_ip_configurations=None, load_balancer_name=None,
@@ -3752,6 +3753,15 @@ def list_private_link_services(cmd, resource_group_name=None):
     if resource_group_name:
         return client.list(resource_group_name)
     return client.list_by_subscription()
+
+
+class PrivateEndpointConnectionUpdate(_PrivateEndpointConnectionUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.connection_status._required = True
+        return args_schema
 
 
 def update_private_endpoint_connection(cmd, resource_group_name, service_name, pe_connection_name,
