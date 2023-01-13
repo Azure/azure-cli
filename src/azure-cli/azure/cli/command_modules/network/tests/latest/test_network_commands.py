@@ -2071,12 +2071,15 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
             self.check("frontendIPConfigurations[0].publicIPAddress.contains(id, '{ip}')", True),
             self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic')
         ])
-        self.cmd('network application-gateway waf-config set -g {rg} --gateway-name {ag} --enabled true --firewall-mode prevention --rule-set-version 2.2.9 --disabled-rule-groups crs_30_http_policy --disabled-rules 981175 981176 --no-wait')
+        self.cmd('network application-gateway waf-config set -g {rg} --gateway-name {ag} --enabled true --firewall-mode prevention --rule-set-version 2.2.9 '
+                 '--disabled-rule-groups crs_30_http_policy --disabled-rules 981175 981176 '
+                 '--exclusion RequestHeaderNames StartsWith abc --exclusion RequestArgNames Equals def')
         self.cmd('network application-gateway waf-config show -g {rg} --gateway-name {ag}', checks=[
             self.check('enabled', True),
             self.check('firewallMode', 'Prevention'),
             self.check('length(disabledRuleGroups)', 2),
-            self.check('length(disabledRuleGroups[1].rules)', 2)
+            self.check('length(disabledRuleGroups[1].rules)', 2),
+            self.check('length(exclusions)', 2)
         ])
         # test list rule sets
         self.cmd('network application-gateway waf-config list-rule-sets --group *', checks=[

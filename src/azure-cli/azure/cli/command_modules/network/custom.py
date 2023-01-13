@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=no-self-use, no-member, too-many-lines, unused-argument
-# pylint: disable=protected-access, too-few-public-methods
+# pylint: disable=protected-access, too-few-public-methods, line-too-long
 
 from collections import Counter, OrderedDict
 
@@ -27,6 +27,9 @@ from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zo
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
 from .aaz.latest.network.application_gateway import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.application_gateway.url_path_map import Create as _URLPathMapCreate, \
+    Update as _URLPathMapUpdate
+from .aaz.latest.network.application_gateway.url_path_map.rule import Create as _URLPathMapRuleCreate
 from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condition import \
     Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
@@ -1573,228 +1576,259 @@ def update_ag_trusted_root_certificate(instance, parent, item_name, cert_data=No
     return parent
 
 
-def create_ag_url_path_map(cmd, resource_group_name, application_gateway_name, item_name, paths,
-                           address_pool=None, http_settings=None, redirect_config=None, rewrite_rule_set=None,
-                           default_address_pool=None, default_http_settings=None, default_redirect_config=None,
-                           no_wait=False, rule_name='default', default_rewrite_rule_set=None, firewall_policy=None):
-    ApplicationGatewayUrlPathMap, ApplicationGatewayPathRule, SubResource = cmd.get_models(
-        'ApplicationGatewayUrlPathMap', 'ApplicationGatewayPathRule', 'SubResource')
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+class URLPathMapCreate(_URLPathMapCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.rule_name = AAZStrArg(
+            options=["--rule-name"],
+            arg_group="First Rule",
+            help="Name of the rule for a URL path map.",
+            default="default",
+        )
+        args_schema.paths = AAZListArg(
+            options=["--paths"],
+            arg_group="First Rule",
+            help="Space-separated list of paths to associate with the rule. "
+                 "Valid paths start and end with \"/\", e.g, \"/bar/\".",
+            required=True,
+        )
+        args_schema.paths.Element = AAZStrArg()
+        args_schema.address_pool = AAZResourceIdArg(
+            options=["--address-pool"],
+            arg_group="First Rule",
+            help="Name or ID of the backend address pool to use with the created rule.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/backendAddressPools/{}",
+            ),
+        )
+        args_schema.http_settings = AAZResourceIdArg(
+            options=["--http-settings"],
+            arg_group="First Rule",
+            help="Name or ID of the HTTP settings to use with the created rule.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/backendHttpSettingsCollection/{}",
+            ),
+        )
+        args_schema.redirect_config = AAZResourceIdArg(
+            options=["--redirect-config"],
+            arg_group="First Rule",
+            help="Name or ID of the redirect configuration to use with the created rule.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/redirectConfigurations/{}",
+            ),
+        )
+        args_schema.rewrite_rule_set = AAZResourceIdArg(
+            options=["--rewrite-rule-set"],
+            arg_group="First Rule",
+            help="Name or ID of the rewrite rule set. If not specified, the default for the map will be used.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/rewriteRuleSets/{}",
+            ),
+        )
+        args_schema.waf_policy = AAZResourceIdArg(
+            options=["--waf-policy"],
+            arg_group="First Rule",
+            help="Name or ID of a web application firewall policy resource.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/ApplicationGatewayWebApplicationFirewallPolicies/{}",
+            ),
+        )
+        # add templates for resource id
+        args_schema.default_address_pool._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/backendAddressPools/{}",
+        )
+        args_schema.default_http_settings._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/backendHttpSettingsCollection/{}",
+        )
+        args_schema.default_redirect_config._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/redirectConfigurations/{}",
+        )
+        args_schema.default_rewrite_rule_set._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/rewriteRuleSets/{}",
+        )
+        return args_schema
 
-    new_rule = ApplicationGatewayPathRule(
-        name=rule_name,
-        backend_address_pool=SubResource(id=address_pool) if address_pool else None,
-        backend_http_settings=SubResource(id=http_settings) if http_settings else None,
-        paths=paths
-    )
-    new_map = ApplicationGatewayUrlPathMap(
-        name=item_name,
-        default_backend_address_pool=SubResource(id=default_address_pool) if default_address_pool else None,
-        default_backend_http_settings=SubResource(id=default_http_settings) if default_http_settings else None,
-        path_rules=[])
-    if cmd.supported_api_version(min_api='2017-06-01'):
-        new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else None
-        new_map.default_redirect_configuration = \
-            SubResource(id=default_redirect_config) if default_redirect_config else None
-
-    rewrite_rule_set_name = next(key for key, value in locals().items() if id(value) == id(rewrite_rule_set))
-    if cmd.supported_api_version(parameter_name=rewrite_rule_set_name):
-        new_rule.rewrite_rule_set = SubResource(id=rewrite_rule_set) if rewrite_rule_set else None
-        new_map.default_rewrite_rule_set = \
-            SubResource(id=default_rewrite_rule_set) if default_rewrite_rule_set else None
-
-    if cmd.supported_api_version(min_api='2019-09-01'):
-        new_rule.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
-
-    # pull defaults from the rule specific properties if the default-* option isn't specified
-    if new_rule.backend_address_pool and not new_map.default_backend_address_pool:
-        new_map.default_backend_address_pool = new_rule.backend_address_pool
-
-    if new_rule.backend_http_settings and not new_map.default_backend_http_settings:
-        new_map.default_backend_http_settings = new_rule.backend_http_settings
-
-    if new_rule.redirect_configuration and not new_map.default_redirect_configuration:
-        new_map.default_redirect_configuration = new_rule.redirect_configuration
-
-    new_map.path_rules.append(new_rule)
-    upsert_to_collection(ag, 'url_path_maps', new_map, 'name')
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
-
-
-def update_ag_url_path_map(cmd, instance, parent, item_name, default_address_pool=None,
-                           default_http_settings=None, default_redirect_config=None, raw=False,
-                           default_rewrite_rule_set=None):
-    SubResource = cmd.get_models('SubResource')
-    if default_address_pool == '':
-        instance.default_backend_address_pool = None
-    elif default_address_pool:
-        instance.default_backend_address_pool = SubResource(id=default_address_pool)
-
-    if default_http_settings == '':
-        instance.default_backend_http_settings = None
-    elif default_http_settings:
-        instance.default_backend_http_settings = SubResource(id=default_http_settings)
-
-    if default_redirect_config == '':
-        instance.default_redirect_configuration = None
-    elif default_redirect_config:
-        instance.default_redirect_configuration = SubResource(id=default_redirect_config)
-
-    if default_rewrite_rule_set == '':
-        instance.default_rewrite_rule_set = None
-    elif default_rewrite_rule_set:
-        instance.default_rewrite_rule_set = SubResource(id=default_rewrite_rule_set)
-    return parent
-
-
-def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_name, url_path_map_name,
-                                item_name, paths, address_pool=None, http_settings=None, redirect_config=None,
-                                firewall_policy=None, no_wait=False, rewrite_rule_set=None):
-    ApplicationGatewayPathRule, SubResource = cmd.get_models('ApplicationGatewayPathRule', 'SubResource')
-    if address_pool and redirect_config:
-        raise CLIError("Cannot reference a BackendAddressPool when Redirect Configuration is specified.")
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    url_map = next((x for x in ag.url_path_maps if x.name == url_path_map_name), None)
-    if not url_map:
-        raise CLIError('URL path map "{}" not found.'.format(url_path_map_name))
-    default_backend_pool = SubResource(id=url_map.default_backend_address_pool.id) \
-        if (url_map.default_backend_address_pool and not redirect_config) else None
-    default_http_settings = SubResource(id=url_map.default_backend_http_settings.id) \
-        if url_map.default_backend_http_settings else None
-    new_rule = ApplicationGatewayPathRule(
-        name=item_name,
-        paths=paths,
-        backend_address_pool=SubResource(id=address_pool) if address_pool else default_backend_pool,
-        backend_http_settings=SubResource(id=http_settings) if http_settings else default_http_settings)
-    if cmd.supported_api_version(min_api='2017-06-01'):
-        default_redirect = SubResource(id=url_map.default_redirect_configuration.id) \
-            if (url_map.default_redirect_configuration and not address_pool) else None
-        new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else default_redirect
-
-    rewrite_rule_set_name = next(key for key, value in locals().items() if id(value) == id(rewrite_rule_set))
-    if cmd.supported_api_version(parameter_name=rewrite_rule_set_name):
-        new_rule.rewrite_rule_set = SubResource(id=rewrite_rule_set) if rewrite_rule_set else None
-
-    if cmd.supported_api_version(min_api='2019-09-01'):
-        new_rule.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
-
-    upsert_to_collection(url_map, 'path_rules', new_rule, 'name')
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
+    def pre_operations(self):
+        args = self.ctx.args
+        rules = [{
+            "name": args.rule_name,
+            "paths": args.paths,
+            "backend_address_pool": {"id": args.address_pool} if has_value(args.address_pool) else None,
+            "backend_http_settings": {"id": args.http_settings} if has_value(args.http_settings) else None,
+            "redirect_configuration": {"id": args.redirect_config} if has_value(args.redirect_config) else None,
+            "rewrite_rule_set": {"id": args.rewrite_rule_set} if has_value(args.rewrite_rule_set) else None,
+            "firewall_policy": {"id": args.waf_policy} if has_value(args.waf_policy) else None,
+        }]
+        args.rules = rules
 
 
-def delete_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_name, url_path_map_name,
-                                item_name, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    url_map = next((x for x in ag.url_path_maps if x.name == url_path_map_name), None)
-    if not url_map:
-        raise CLIError('URL path map "{}" not found.'.format(url_path_map_name))
-    url_map.path_rules = \
-        [x for x in url_map.path_rules if x.name.lower() != item_name.lower()]
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
+class URLPathMapUpdate(_URLPathMapUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+
+        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
+            def __call__(self, ctx, value):
+                if value._data == "":
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        # apply templates for resource id
+        args_schema.default_address_pool._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/backendAddressPools/{}",
+        )
+        args_schema.default_http_settings._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/backendHttpSettingsCollection/{}",
+        )
+        args_schema.default_redirect_config._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/redirectConfigurations/{}",
+        )
+        args_schema.default_rewrite_rule_set._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/rewriteRuleSets/{}",
+        )
+        return args_schema
 
 
-def set_ag_waf_config_2016_09_01(cmd, resource_group_name, application_gateway_name, enabled,
-                                 firewall_mode=None,
-                                 no_wait=False):
-    ApplicationGatewayWebApplicationFirewallConfiguration = cmd.get_models(
-        'ApplicationGatewayWebApplicationFirewallConfiguration')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    ag.web_application_firewall_configuration = \
-        ApplicationGatewayWebApplicationFirewallConfiguration(
-            enabled=(enabled == 'true'), firewall_mode=firewall_mode)
+class URLPathMapRuleCreate(_URLPathMapRuleCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.paths._required = True
+        # add templates for resource id
+        args_schema.address_pool._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/backendAddressPools/{}",
+        )
+        args_schema.http_settings._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/backendHttpSettingsCollection/{}",
+        )
+        args_schema.redirect_config._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/redirectConfigurations/{}",
+        )
+        args_schema.rewrite_rule_set._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/rewriteRuleSets/{}",
+        )
+        args_schema.waf_policy._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/ApplicationGatewayWebApplicationFirewallPolicies/{}",
+        )
+        return args_schema
 
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, application_gateway_name, ag)
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.address_pool) and has_value(args.redirect_config):
+            err_msg = "Cannot reference a BackendAddressPool when Redirect Configuration is specified."
+            raise ArgumentUsageError(err_msg)
 
 
-def set_ag_waf_config_2017_03_01(cmd, resource_group_name, application_gateway_name, enabled,
-                                 firewall_mode=None,
-                                 rule_set_type='OWASP', rule_set_version=None,
-                                 disabled_rule_groups=None,
-                                 disabled_rules=None, no_wait=False,
-                                 request_body_check=None, max_request_body_size=None, file_upload_limit=None,
-                                 exclusions=None):
-    ApplicationGatewayWebApplicationFirewallConfiguration = cmd.get_models(
-        'ApplicationGatewayWebApplicationFirewallConfiguration')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    ag.web_application_firewall_configuration = \
-        ApplicationGatewayWebApplicationFirewallConfiguration(
-            enabled=(enabled == 'true'), firewall_mode=firewall_mode, rule_set_type=rule_set_type,
-            rule_set_version=rule_set_version)
-    if disabled_rule_groups or disabled_rules:
-        ApplicationGatewayFirewallDisabledRuleGroup = cmd.get_models('ApplicationGatewayFirewallDisabledRuleGroup')
+def set_ag_waf_config(cmd, resource_group_name, application_gateway_name, enabled,
+                      firewall_mode=None, rule_set_type="OWASP", rule_set_version=None,
+                      disabled_rule_groups=None, disabled_rules=None, no_wait=False,
+                      request_body_check=None, max_request_body_size=None, file_upload_limit=None, exclusions=None):
+    waf_config = {
+        "enabled": enabled == "true",
+        "firewall_mode": firewall_mode,
+        "rule_set_type": rule_set_type,
+        "rule_set_version": rule_set_version
+    }
 
-        disabled_groups = []
+    class WAFConfigSet(_ApplicationGatewayUpdate):
+        def pre_operations(self):
+            args = self.ctx.args
+            args.no_wait = no_wait
 
-        # disabled groups can be added directly
-        for group in disabled_rule_groups or []:
-            disabled_groups.append(ApplicationGatewayFirewallDisabledRuleGroup(rule_group_name=group))
+        def pre_instance_update(self, instance):
+            def _flatten(collection, expand_property_fn):
+                for each in collection:
+                    for value in expand_property_fn(each):
+                        yield value
 
-        def _flatten(collection, expand_property_fn):
-            for each in collection:
-                for value in expand_property_fn(each):
-                    yield value
+            if disabled_rule_groups or disabled_rules:
+                disabled_groups = []
+                # disabled groups can be added directly
+                for group in disabled_rule_groups or []:
+                    disabled_groups.append({"rule_group_name": group})
+                # for disabled rules, we have to look up the IDs
+                if disabled_rules:
+                    rule_sets = list_ag_waf_rule_sets(cmd, _type=rule_set_type, version=rule_set_version, group='*')
+                    for group in _flatten(rule_sets, lambda r: r["ruleGroups"]):
+                        disabled_group = {
+                            "rule_group_name": group["ruleGroupName"],
+                            "rules": []
+                        }
+                        for rule in group["rules"]:
+                            if str(rule["ruleId"]) in disabled_rules:
+                                disabled_group["rules"].append(rule["ruleId"])
+                        if disabled_group["rules"]:
+                            disabled_groups.append(disabled_group)
+                waf_config["disabled_rule_groups"] = disabled_groups
+            waf_config["request_body_check"] = request_body_check
+            waf_config["max_request_body_size_in_kb"] = max_request_body_size
+            waf_config["file_upload_limit_in_mb"] = file_upload_limit
+            waf_config["exclusions"] = exclusions
 
-        # for disabled rules, we have to look up the IDs
-        if disabled_rules:
-            results = list_ag_waf_rule_sets(ncf, _type=rule_set_type, version=rule_set_version, group='*')
-            for group in _flatten(results, lambda r: r.rule_groups):
-                disabled_group = ApplicationGatewayFirewallDisabledRuleGroup(
-                    rule_group_name=group.rule_group_name, rules=[])
+            instance.properties.web_application_firewall_configuration = waf_config
 
-                for rule in group.rules:
-                    if str(rule.rule_id) in disabled_rules:
-                        disabled_group.rules.append(rule.rule_id)
-                if disabled_group.rules:
-                    disabled_groups.append(disabled_group)
-        ag.web_application_firewall_configuration.disabled_rule_groups = disabled_groups
-
-    if cmd.supported_api_version(min_api='2018-08-01'):
-        ag.web_application_firewall_configuration.request_body_check = request_body_check
-        ag.web_application_firewall_configuration.max_request_body_size_in_kb = max_request_body_size
-        ag.web_application_firewall_configuration.file_upload_limit_in_mb = file_upload_limit
-        ag.web_application_firewall_configuration.exclusions = exclusions
-
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, application_gateway_name, ag)
+    return WAFConfigSet(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": application_gateway_name,
+        "resource_group": resource_group_name
+    })
 
 
 def show_ag_waf_config(cmd, resource_group_name, application_gateway_name):
-    return network_client_factory(cmd.cli_ctx).application_gateways.get(
-        resource_group_name, application_gateway_name).web_application_firewall_configuration
+    from .aaz.latest.network.application_gateway import Show
+    return Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": application_gateway_name,
+        "resource_group": resource_group_name
+    })["webApplicationFirewallConfiguration"]
 
 
-def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
-    results = client.list_available_waf_rule_sets().value
-    filtered_results = []
+def list_ag_waf_rule_sets(cmd, _type=None, version=None, group=None):
+    from .aaz.latest.network.application_gateway.waf_config import ListRuleSets
+    rule_sets = ListRuleSets(cli_ctx=cmd.cli_ctx)(command_args={})["value"]
+
+    filtered_sets = []
     # filter by rule set name or version
-    for rule_set in results:
-        if _type and _type.lower() != rule_set.rule_set_type.lower():
+    for rule_set in rule_sets:
+        if _type and _type.lower() != rule_set["ruleSetType"].lower():
             continue
-        if version and version.lower() != rule_set.rule_set_version.lower():
+        if version and version.lower() != rule_set["ruleSetVersion"].lower():
             continue
 
         filtered_groups = []
-        for rule_group in rule_set.rule_groups:
+        for rule_group in rule_set["ruleGroups"]:
             if not group:
-                rule_group.rules = None
+                rule_group["rules"] = None
                 filtered_groups.append(rule_group)
-            elif group.lower() == rule_group.rule_group_name.lower() or group == '*':
-                filtered_groups.append(rule_group)
+                continue
 
+            if group.lower() == rule_group["ruleGroupName"].lower() or group == "*":
+                filtered_groups.append(rule_group)
         if filtered_groups:
-            rule_set.rule_groups = filtered_groups
-            filtered_results.append(rule_set)
-
-    return filtered_results
-
-
+            rule_set["ruleGroups"] = filtered_groups
+            filtered_sets.append(rule_set)
+    return filtered_sets
 # endregion
 
 
