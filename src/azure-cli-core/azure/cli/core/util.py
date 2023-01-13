@@ -1369,4 +1369,5 @@ def should_encrypt_token_cache(cli_ctx):
 
 def is_autocomplete():
     """Detect if the command is running in autocomplete mode"""
-    return os.environ.get('COMP_LINE') is not None
+    from knack.completion import ARGCOMPLETE_ENV_NAME
+    return os.environ.get(ARGCOMPLETE_ENV_NAME) is not None
