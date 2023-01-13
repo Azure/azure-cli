@@ -1344,7 +1344,7 @@ type: command
 short-summary: Update the firewall configuration of a web application.
 long-summary: >
     This command is only applicable to application gateways with an SKU type of WAF. To learn
-    more, visit https://docs.microsoft.com/azure/application-gateway/application-gateway-web-application-firewall-cli
+    more, visit https://learn.microsoft.com/en-us/azure/web-application-firewall/ag/tutorial-restrict-web-traffic-cli.
 parameters:
   - name: --rule-set-type
     short-summary: Rule set type.
@@ -1371,20 +1371,13 @@ parameters:
 examples:
   - name: Configure WAF on an application gateway in detection mode with default values
     text: |
-        az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway \\
-            --enabled true --firewall-mode Detection --rule-set-version 3.0
+        az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway --enabled true --firewall-mode Detection --rule-set-version 3.0
   - name: Disable rules for validation of request body parsing and SQL injection.
     text: |
-        az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway \\
-            --enabled true --rule-set-type OWASP --rule-set-version 3.0 \\
-            --disabled-rule-groups REQUEST-942-APPLICATION-ATTACK-SQLI \\
-            --disabled-rules 920130 920140
+        az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway --enabled true --rule-set-type OWASP --rule-set-version 3.0 --disabled-rule-groups REQUEST-942-APPLICATION-ATTACK-SQLI --disabled-rules 920130 920140
   - name: Configure WAF on an application gateway with exclusions.
     text: |
-        az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway \\
-            --enabled true --firewall-mode Detection --rule-set-version 3.0 \\
-            --exclusion "RequestHeaderNames StartsWith x-header" \\
-            --exclusion "RequestArgNames Equals IgnoreThis"
+        az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway --enabled true --firewall-mode Detection --rule-set-version 3.0 --exclusion "RequestHeaderNames StartsWith x-header" --exclusion "RequestArgNames Equals IgnoreThis"
 """
 
 helps['network application-gateway waf-config show'] = """
