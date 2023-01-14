@@ -17,7 +17,7 @@ def load_arguments_eh(self, _):
     from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace, validate_rights
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
-    (KeyType, AccessRights, SkuName, TlsVersion) = self.get_models('KeyType', 'AccessRights', 'SkuName', 'TlsVersion', resource_type=ResourceType.MGMT_EVENTHUB)
+    (SkuName, TlsVersion) = self.get_models('SkuName', 'TlsVersion', resource_type=ResourceType.MGMT_EVENTHUB)
     from azure.cli.command_modules.eventhubs.action import AlertAddEncryption, ConstructPolicy
 
     event_hub_name_arg_type = CLIArgumentType(options_list=['--eventhub-name'], help='Name of EventHub')
