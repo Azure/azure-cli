@@ -243,7 +243,7 @@ def cli_eheventhub_update(cmd, instance, message_retention_in_days=None, partiti
 
     return instance
 
-# ConsumerGroup region
+
 def cli_consumergroup_create(client, resource_group_name, namespace_name, event_hub_name, name, user_metadata=None):
     return client.create_or_update(
         resource_group_name=resource_group_name,
