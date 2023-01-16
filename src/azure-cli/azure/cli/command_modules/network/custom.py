@@ -27,6 +27,7 @@ from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zo
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
 from .aaz.latest.network.application_gateway import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.application_gateway.ssl_policy import Set as _SSLPolicySet
 from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condition import \
     Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
@@ -1518,39 +1519,14 @@ def update_ag_ssl_certificate(instance, parent, item_name,
     return parent
 
 
-def set_ag_ssl_policy_2017_03_01(cmd, resource_group_name, application_gateway_name, disabled_ssl_protocols=None,
-                                 clear=False, no_wait=False):
-    ApplicationGatewaySslPolicy = cmd.get_models('ApplicationGatewaySslPolicy')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    ag.ssl_policy = None if clear else ApplicationGatewaySslPolicy(
-        disabled_ssl_protocols=disabled_ssl_protocols)
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, application_gateway_name, ag)
-
-
-def set_ag_ssl_policy_2017_06_01(cmd, resource_group_name, application_gateway_name, policy_name=None, policy_type=None,
-                                 disabled_ssl_protocols=None, cipher_suites=None, min_protocol_version=None,
-                                 no_wait=False):
-    ApplicationGatewaySslPolicy, ApplicationGatewaySslPolicyType = cmd.get_models(
-        'ApplicationGatewaySslPolicy', 'ApplicationGatewaySslPolicyType')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    if policy_name:
-        policy_type = ApplicationGatewaySslPolicyType.predefined.value
-    elif policy_type is None and (cipher_suites or min_protocol_version):
-        policy_type = ApplicationGatewaySslPolicyType.custom.value
-    ag.ssl_policy = ApplicationGatewaySslPolicy(
-        policy_name=policy_name,
-        policy_type=policy_type,
-        disabled_ssl_protocols=disabled_ssl_protocols,
-        cipher_suites=cipher_suites,
-        min_protocol_version=min_protocol_version)
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, application_gateway_name, ag)
-
-
-def show_ag_ssl_policy(cmd, resource_group_name, application_gateway_name):
-    return network_client_factory(cmd.cli_ctx).application_gateways.get(
-        resource_group_name, application_gateway_name).ssl_policy
+class SSLPolicySet(_SSLPolicySet):
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.name):
+            args.policy_type = "Predefined"
+        elif not has_value(args.policy_type) \
+                and (has_value(args.cipher_suites) or has_value(args.min_protocol_version)):
+            args.policy_type = "Custom"
 
 
 def create_ag_trusted_root_certificate(cmd, resource_group_name, application_gateway_name, item_name, no_wait=False,
