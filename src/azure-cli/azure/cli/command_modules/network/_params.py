@@ -31,17 +31,17 @@ from azure.cli.command_modules.network._validators import (
     WafConfigExclusionAction,
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
     validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs,
-    validate_user_assigned_identity, validate_virtul_network_gateway, validate_private_dns_zone,
+    validate_user_assigned_identity, validate_virtul_network_gateway,
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument,
     validate_vpn_connection_name_or_id,
-    process_vnet_name_or_id, validate_trusted_client_cert, validate_scale_unit_ranges)
+    process_vnet_name_or_id, validate_trusted_client_cert)
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
     ag_url_map_rule_completion_list, tm_endpoint_completion_list, get_sdk_completer)
 from azure.cli.command_modules.network._actions import (
     AddBackendAddressCreate, AddBackendAddressCreateForCrossRegionLB, TrustedClientCertificateCreate,
-    SslProfilesCreate, NatRuleCreate, IPConfigsCreate, ASGsCreate, AddMappingRequest, WAFRulesCreate)
+    SslProfilesCreate, NatRuleCreate, AddMappingRequest, WAFRulesCreate)
 from azure.cli.core.util import get_json_object
 from azure.cli.core.profiles import ResourceType
 
@@ -49,7 +49,7 @@ from azure.cli.core.profiles import ResourceType
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
 def load_arguments(self, _):
 
-    (ApplicationGatewayFirewallMode, ApplicationGatewayProtocol, ApplicationGatewayRedirectType,
+    (ApplicationGatewayProtocol, ApplicationGatewayRedirectType,
      ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySkuName, ApplicationGatewaySslProtocol, AuthenticationMethod,
      Direction, VpnAuthenticationType,
      FlowLogFormatType, HTTPMethod, IPAllocationMethod,
@@ -59,7 +59,7 @@ def load_arguments(self, _):
      ConnectionMonitorEndpointFilterType, ConnectionMonitorTestConfigurationProtocol,
      PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType, GatewayLoadBalancerTunnelProtocol,
      GatewayLoadBalancerTunnelInterfaceType, VpnNatRuleType, VpnNatRuleMode, LoadBalancerBackendAddressAdminState, PacketCaptureTargetType) = self.get_models(
-         'ApplicationGatewayFirewallMode', 'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
+         'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol', 'AuthenticationMethod',
          'Direction', 'VpnAuthenticationType',
          'FlowLogFormatType', 'HTTPMethod', 'IPAllocationMethod',
@@ -87,7 +87,6 @@ def load_arguments(self, _):
     http_protocol_type = CLIArgumentType(get_enum_type(ApplicationGatewayProtocol))
     ag_servers_type = CLIArgumentType(nargs='+', help='Space-separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
     app_gateway_name_type = CLIArgumentType(help='Name of the application gateway.', options_list='--gateway-name', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
-    bastion_host_name_type = CLIArgumentType(help='Name of the bastion host.', options_list='--bastion-host-name', completer=get_resource_name_completion_list('Microsoft.Network/bastionHosts'), id_part='name')
     zone_compatible_type = CLIArgumentType(
         options_list=['--zone', '-z'],
         nargs='+',
@@ -408,7 +407,7 @@ def load_arguments(self, _):
         c.argument('disabled_rule_groups', nargs='+')
         c.argument('disabled_rules', nargs='+')
         c.argument('enabled', help='Specify whether the application firewall is enabled.', arg_type=get_enum_type(['true', 'false']))
-        c.argument('firewall_mode', min_api='2016-09-01', help='Web application firewall mode.', arg_type=get_enum_type(ApplicationGatewayFirewallMode, default='detection'))
+        c.argument('firewall_mode', min_api='2016-09-01', help='Web application firewall mode.', arg_type=get_enum_type(['detection', 'prevention'], default='detection'))
 
     with self.argument_context('network application-gateway waf-config', min_api='2018-08-01') as c:
         c.argument('file_upload_limit', help='File upload size limit in MB.', type=int)
@@ -754,50 +753,6 @@ def load_arguments(self, _):
                    options_list=['--file', '-f'],
                    help="Directory or the file path of the letter to be saved to. If the file name extension is not .pdf, Azure CLI will help to append. "
                         "Be careful, the existing file might get overwritten")
-    # endregion
-
-    # region PrivateEndpoint
-    private_endpoint_name = CLIArgumentType(options_list='--endpoint-name', id_part='name', help='Name of the private endpoint.', completer=get_resource_name_completion_list('Microsoft.Network/interfaceEndpoints'))
-
-    with self.argument_context('network private-endpoint') as c:
-        c.argument('private_endpoint_name', private_endpoint_name, options_list=['--name', '-n'])
-        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name') + ' and do not specify the --vnet-name'
-        c.argument('subnet', validator=get_subnet_validator(), help=subnet_help, id_part=None)
-        c.argument('virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', metavar='', id_part=None)
-        c.argument('private_connection_resource_id', help='The resource id of the private endpoint to connect to')
-        c.argument('group_ids', nargs='+', options_list=[c.deprecate(target='--group-ids', redirect='--group-id'), '--group-id'],
-                   help='The ID of the group obtained from the remote resource that this private endpoint should connect to. '
-                        'You can use "az network private-link-resource list" to obtain the supported group ids. You must provide this except for PrivateLinkService')
-        c.argument('request_message', help='A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.')
-        c.argument('manual_request', help="Use manual request to establish the connection. Configure it as 'true' when you don't have access to the subscription of private link service.", arg_type=get_three_state_flag())
-        c.argument('connection_name', help='Name of the private link service connection.')
-        c.ignore('expand')
-        c.argument('edge_zone', edge_zone)
-        c.argument('custom_interface_name', nic_type, options_list='--nic-name', min_api='2021-05-01', help='The custom name of the network interface attached to the private endpoint.')
-
-    with self.argument_context('network private-endpoint dns-zone-group') as c:
-        c.argument('private_dns_zone', help='Name or ID of the private dns zone.', validator=validate_private_dns_zone)
-        c.argument('private_dns_zone_name', options_list=['--zone-name'], help='Name of the private dns zone.')
-        c.argument('private_dns_zone_group_name', options_list=['--name', '-n'], help='Name of the private dns zone group.')
-        c.argument('private_endpoint_name', private_endpoint_name, id_part=None)
-
-    with self.argument_context('network private-endpoint', arg_group='Static IP Configuration') as c:
-        c.argument('ip_configurations', options_list=['--ip-config'], min_api='2021-05-01', nargs='+', action=IPConfigsCreate)
-
-    with self.argument_context('network private-endpoint', arg_group='Application Security Group') as c:
-        c.argument('application_security_groups', options_list=['--asg'], min_api='2021-05-01', nargs='+', action=ASGsCreate)
-
-    with self.argument_context('network private-endpoint ip-config') as c:
-        c.argument('private_endpoint_name', private_endpoint_name, id_part=None)
-        c.argument('ip_config_name', help='Name of the ip configuration.', options_list=['--name', '-n'])
-        c.argument('group_id', help='The ID of a group obtained from the remote resource that this private endpoint should connect to.')
-        c.argument('member_name', help='The member name of a group obtained from the remote resource that this private endpoint should connect to.')
-        c.argument('private_ip_address', private_ip_address_type, help="A private ip address obtained from the private endpoint's subnet.")
-
-    with self.argument_context('network private-endpoint asg') as c:
-        c.argument('private_endpoint_name', private_endpoint_name, id_part=None)
-        c.argument('application_security_group_id', options_list='--asg-id', help='ID of application security group in which the private endpoint IP configuration is included.')
     # endregion
 
     # region PrivateLinkService
@@ -1964,38 +1919,6 @@ def load_arguments(self, _):
 
     with self.argument_context('network traffic-manager endpoint list') as c:
         c.argument('profile_name', id_part=None)
-    # endregion
-
-    # region Bastion
-    with self.argument_context('network bastion') as c:
-        c.argument('bastion_host_name', bastion_host_name_type, options_list=['--name', '-n'])
-        c.argument('public_ip_address', help='Name or ID of the Azure public IP. The SKU of the public IP must be Standard.', validator=get_public_ip_validator())
-        c.argument('virtual_network_name', options_list=['--vnet-name'], help='Name of the virtual network. It must have a subnet called AzureBastionSubnet.', validator=get_subnet_validator())
-        c.argument('resource_port', help='Resource port of the target VM to which the bastion will connect.', options_list=['--resource-port'])
-        c.argument('target_resource_id', help='ResourceId of the target Virtual Machine.', options_list=['--target-resource-id'])
-        c.argument('scale_units', type=int, min_api='2021-03-01', options_list=['--scale-units'],
-                   validator=validate_scale_unit_ranges,
-                   help='The scale units for the Bastion Host resource, which minimum is 2 and maximum is 50.')
-        c.argument('sku', arg_type=get_enum_type(['Basic', 'Standard']), min_api='2021-03-01',
-                   options_list=['--sku'], help='The SKU of this Bastion Host.')
-        c.ignore('subnet')
-    with self.argument_context('network bastion create') as c:
-        c.argument('sku', default='Standard')
-    for scope in ['create', 'update']:
-        with self.argument_context('network bastion {}'.format(scope)) as c:
-            c.argument('disable_copy_paste', help='Disable copy and paste for all sessions on this Azure Bastion resource', arg_type=get_three_state_flag())
-            c.argument('enable_tunneling', help='Enable Native Client Support on this Azure Bastion resource', arg_type=get_three_state_flag())
-            c.argument('enable_ip_connect', help='Enable IP-based Connections on this Azure Bastion resource', arg_type=get_three_state_flag())
-    with self.argument_context('network bastion ssh') as c:
-        c.argument('auth_type', help='Auth type to use for SSH connections.', options_list=['--auth-type'])
-        c.argument('username', help='User name for SSH connections.', options_list=['--username'])
-        c.argument('ssh_key', help='SSH key file location for SSH connections.', options_list=['--ssh-key'])
-    with self.argument_context('network bastion rdp') as c:
-        c.argument('disable_gateway', arg_type=get_three_state_flag(), help='Flag to disable access through RD gateway.')
-        c.argument('configure', help='Flag to configure RDP session.', action='store_true')
-    with self.argument_context('network bastion tunnel') as c:
-        c.argument('port', help='Local port to use for the tunneling.', options_list=['--port'])
-        c.argument('timeout', help='Timeout for connection to bastion host tunnel.', options_list=['--timeout'])
     # endregion
 
     # region PrivateLinkResource and PrivateEndpointConnection

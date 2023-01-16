@@ -32,18 +32,6 @@ def cf_flow_logs(cli_ctx, _):
     return network_client_factory(cli_ctx).flow_logs
 
 
-def cf_private_endpoints(cli_ctx, _):
-    return network_client_factory(cli_ctx).private_endpoints
-
-
-def cf_private_dns_zone_groups(cli_ctx, _):
-    return network_client_factory(cli_ctx).private_dns_zone_groups
-
-
-def cf_private_endpoint_types(cli_ctx, _):
-    return network_client_factory(cli_ctx).available_private_endpoint_types
-
-
 def cf_private_link_services(cli_ctx, _):
     return network_client_factory(cli_ctx).private_link_services
 
@@ -80,24 +68,12 @@ def cf_public_ip_addresses(cli_ctx, _):
     return network_client_factory(cli_ctx).public_ip_addresses
 
 
-def cf_subnets(cli_ctx, _):
-    return network_client_factory(cli_ctx).subnets
-
-
 def cf_virtual_network_gateway_connections(cli_ctx, _):
     return network_client_factory(cli_ctx).virtual_network_gateway_connections
 
 
 def cf_virtual_network_gateways(cli_ctx, _):
     return network_client_factory(cli_ctx).virtual_network_gateways
-
-
-def cf_virtual_networks(cli_ctx, _):
-    return network_client_factory(cli_ctx).virtual_networks
-
-
-def cf_virtual_network_peerings(cli_ctx, _):
-    return network_client_factory(cli_ctx).virtual_network_peerings
 
 
 def cf_dns_references(cli_ctx, _):
@@ -128,7 +104,3 @@ def cf_virtual_hub(cli_ctx, _):
 
 def cf_virtual_router_peering(cli_ctx, _):
     return network_client_factory(cli_ctx).virtual_router_peerings
-
-
-def cf_bastion_hosts(cli_ctx, _):
-    return network_client_factory(cli_ctx).bastion_hosts

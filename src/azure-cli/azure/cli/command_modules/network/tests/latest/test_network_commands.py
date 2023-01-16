@@ -73,7 +73,8 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
         ])
 
         # test network lb update command
-        self.cmd('network lb update -g {rg} -n {lb} --set tags.CostCenter=MyTestGroup')
+        self.cmd('network lb update -g {rg} -n {lb} --set tags.label=1544 --force-string')
+        self.cmd('network lb update -g {rg} -n {lb} --tags CostCenter=MyTestGroup')
         self.cmd('network lb show -g {rg} -n {lb}', checks=[
             self.check('tags.CostCenter', 'MyTestGroup')
         ])
@@ -206,6 +207,20 @@ class NetworkPrivateEndpoints(ScenarioTest):
             ]
         )
 
+        self.cmd("network private-endpoint delete -n {pe} -g {rg}")
+        self.cmd("network private-endpoint list -g {rg}", checks=[self.check("length(@)", 0)])
+
+        # create private endpoint connection with --ip-configs
+        self.cmd(
+            "network private-endpoint create -n {pe} -g {rg} --vnet-name {vnet} --subnet {subnet} --connection-name {connection} --group-id {group_id} --private-connection-resource-id {sa_id} "
+            "--ip-configs [{{name:{ipconfig1},group-id:{group_id},member-name:blob,private-ip-address:10.0.0.4}},{{name:{ipconfig2},private-ip-address:10.0.0.6}}]",
+            checks=[
+                self.check("length(ipConfigurations)", 2),
+                self.check("ipConfigurations[0].name", self.kwargs["ipconfig1"]),
+                self.check("ipConfigurations[1].name", self.kwargs["ipconfig2"]),
+            ]
+        )
+
     @ResourceGroupPreparer(name_prefix="cli_test_network_private_endpoint_", location="eastus")
     @StorageAccountPreparer(name_prefix="asg", kind="StorageV2")
     def test_network_private_endpoint_asg(self, storage_account):
@@ -262,6 +277,20 @@ class NetworkPrivateEndpoints(ScenarioTest):
                 self.check("length(@)", 2),
                 self.check("@[0].id", self.kwargs["id1"]),
                 self.check("@[1].id", self.kwargs["id2"]),
+            ]
+        )
+
+        self.cmd("network private-endpoint delete -n {pe} -g {rg}")
+        self.cmd("network private-endpoint list -g {rg}", checks=[self.check("length(@)", 0)])
+
+        # create private endpoint connection with --asgs
+        self.cmd(
+            "network private-endpoint create -n {pe} -g {rg} --vnet-name {vnet} --subnet {subnet} --connection-name {connection} --group-id {group_id} --private-connection-resource-id {sa_id} "
+            "--asgs [{{id:{id1}}},{{id:{id2}}}]",
+            checks=[
+                self.check("length(applicationSecurityGroups)", 2),
+                self.check("applicationSecurityGroups[0].id", self.kwargs["id1"]),
+                self.check("applicationSecurityGroups[1].id", self.kwargs["id2"]),
             ]
         )
 
@@ -2070,12 +2099,15 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
             self.check("frontendIPConfigurations[0].publicIPAddress.contains(id, '{ip}')", True),
             self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic')
         ])
-        self.cmd('network application-gateway waf-config set -g {rg} --gateway-name {ag} --enabled true --firewall-mode prevention --rule-set-version 2.2.9 --disabled-rule-groups crs_30_http_policy --disabled-rules 981175 981176 --no-wait')
+        self.cmd('network application-gateway waf-config set -g {rg} --gateway-name {ag} --enabled true --firewall-mode prevention --rule-set-version 2.2.9 '
+                 '--disabled-rule-groups crs_30_http_policy --disabled-rules 981175 981176 '
+                 '--exclusion RequestHeaderNames StartsWith abc --exclusion RequestArgNames Equals def')
         self.cmd('network application-gateway waf-config show -g {rg} --gateway-name {ag}', checks=[
             self.check('enabled', True),
             self.check('firewallMode', 'Prevention'),
             self.check('length(disabledRuleGroups)', 2),
-            self.check('length(disabledRuleGroups[1].rules)', 2)
+            self.check('length(disabledRuleGroups[1].rules)', 2),
+            self.check('length(exclusions)', 2)
         ])
         # test list rule sets
         self.cmd('network application-gateway waf-config list-rule-sets --group *', checks=[
@@ -3913,7 +3945,7 @@ class NetworkNicScenarioTest(ScenarioTest):
         })
 
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}').get_output_in_json()['newVNet']['subnets'][0]['id']
-        self.cmd('network nsg create -g {rg} -n {nsg1} --tags ""')
+        self.cmd('network nsg create -g {rg} -n {nsg1}')
         self.kwargs['nsg_id'] = self.cmd('network nsg show -g {rg} -n {nsg1}').get_output_in_json()['id']
 
         # test network nsg update
@@ -4231,21 +4263,21 @@ class NetworkExtendedNSGScenarioTest(ScenarioTest):
             'rule': 'rule1'
         })
         self.cmd('network nsg create --name {nsg} -g {rg}')
-        self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefix * -n {rule} --source-port-range 700-900 1000-1100 --destination-port-range 4444 --priority 1000', checks=[
+        self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefixes * -n {rule} --source-port-ranges 700-900 1000-1100 --priority 1000', checks=[
             self.check('length(destinationAddressPrefixes)', 2),
-            self.check('destinationAddressPrefix', ''),
+            self.check('destinationAddressPrefix', None),
             self.check('length(sourceAddressPrefixes)', 0),
             self.check('sourceAddressPrefix', '*'),
             self.check('length(sourcePortRanges)', 2),
             self.check('sourcePortRange', None),
             self.check('length(destinationPortRanges)', 0),
-            self.check('destinationPortRange', '4444')
+            self.check('destinationPortRange', '80')
         ])
-        self.cmd('network nsg rule update --destination-address-prefixes Internet --nsg-name {nsg} -g {rg} --source-address-prefix 10.0.0.0/24 11.0.0.0/24 -n {rule} --source-port-range * --destination-port-range 500-1000 2000 3000', checks=[
+        self.cmd('network nsg rule update --destination-address-prefixes Internet --nsg-name {nsg} -g {rg} --source-address-prefixes 10.0.0.0/24 11.0.0.0/24 -n {rule} --source-port-ranges * --destination-port-ranges 500-1000 2000 3000', checks=[
             self.check('length(destinationAddressPrefixes)', 0),
             self.check('destinationAddressPrefix', 'Internet'),
             self.check('length(sourceAddressPrefixes)', 2),
-            self.check('sourceAddressPrefix', ''),
+            self.check('sourceAddressPrefix', None),
             self.check('length(sourcePortRanges)', 0),
             self.check('sourcePortRange', '*'),
             self.check('length(destinationPortRanges)', 3),
@@ -4266,7 +4298,7 @@ class NetworkSecurityGroupScenarioTest(ScenarioTest):
         })
 
         self.cmd('network nsg create --name {nsg} -g {rg} --tags foo=doo')
-        self.cmd('network nsg rule create --access allow --destination-address-prefix 1234 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefix 789 -n {rule} --source-port-range * --destination-port-range 4444 --priority 1000')
+        self.cmd('network nsg rule create --access allow --destination-address-prefixes 1234 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefixes 789 -n {rule} --source-port-ranges * --destination-port-ranges 4444 --priority 1000')
 
         self.cmd('network nsg list', checks=[
             self.check('type(@)', 'array'),
@@ -4304,7 +4336,7 @@ class NetworkSecurityGroupScenarioTest(ScenarioTest):
             'desc': 'greatrule',
             'priority': 888
         })
-        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --direction {dir} --access {access} --destination-address-prefix {prefix} --protocol {protocol} --source-address-prefix {prefix} --source-port-range {ports} --destination-port-range {ports} --priority {priority} --description {desc}', checks=[
+        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --direction {dir} --access {access} --destination-address-prefixes {prefix} --protocol {protocol} --source-address-prefixes {prefix} --source-port-ranges {ports} --destination-port-ranges {ports} --priority {priority} --description {desc}', checks=[
             self.check('access', 'Deny'),
             self.check('direction', '{dir}'),
             self.check('destinationAddressPrefix', '{prefix}'),
@@ -4338,7 +4370,7 @@ class NetworkSecurityGroupScenarioTest(ScenarioTest):
                          self.check('ends_with(@.destinationApplicationSecurityGroups[0].id, `/{asg2}`)', True)])
         self.cmd('network nsg rule update -g {rg} --nsg-name {nsg2} -n {rule2} --destination-asgs "" --destination-address-prefix {prefix}',
                  checks=[self.check('name', '{rule2}'),
-                         self.check('destinationAddressPrefix', '{prefix}')])
+                         self.check('destinationApplicationSecurityGroups', None)])
 
         self.cmd('network nsg rule delete --resource-group {rg} --nsg-name {nsg} --name {rule}')
         self.cmd('network nsg rule delete --resource-group {rg} --nsg-name {nsg2} --name {rule2}')
@@ -4558,8 +4590,6 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('encryption.enabled', True),
             self.check('encryption.enforcement', '{dropUnencrypted}'),
         ])
-        # only create with --encryption-enforcement-policy
-        self.cmd('network vnet create --address-prefixes 10.4.0.0/16 --name MyVnet5 --resource-group {rg} --subnet-name Mysubnet --subnet-prefixes 10.4.0.0/24 --encryption-enforcement-policy allowUnencrypted', expect_failure=True)
         # create without encryption
         self.cmd('network vnet create --address-prefixes 10.5.0.0/16 --name MyVnet6 --resource-group {rg} --subnet-name Mysubnet --subnet-prefixes 10.5.0.0/24')
         self.cmd('network vnet create --address-prefixes 10.6.0.0/16 --name MyVnet7 --resource-group {rg} --subnet-name Mysubnet --subnet-prefixes 10.6.0.0/24')
@@ -5180,7 +5210,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
                  checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))
 
     @ResourceGroupPreparer(name_prefix='test_subnet_with_private_endpoint_option')
-    def test_subnet_with_private_endpoint_and_private_Link_options(self, resource_group):
+    def test_subnet_with_private_endpoint_and_private_link_options(self, resource_group):
         self.kwargs.update({
             'vnet': 'MyVnet',
             'subnet1': 'MySubnet1',
@@ -5994,54 +6024,6 @@ class NetworkServiceAliasesScenarioTest(ScenarioTest):
 
         # test list-service-tags
         self.cmd('network list-service-tags -l centralus', checks=self.check('type(@)', 'object'))
-
-class NetworkBastionHostScenarioTest(ScenarioTest):
-
-    @unittest.skip('az network bastion update: InvalidRequestContent The request content was invalid and could not be deserialized: Required property `name` not found in `sku`.' )
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='test_network_bastion_host')
-    def test_network_bastion_host_create(self, resource_group):
-        self.kwargs.update({
-            'rg': resource_group,
-            'vm': 'clivm',
-            'vnet': 'vnet',
-            'subnet1': 'AzureBastionSubnet',
-            'subnet2': 'vmSubnet',
-            'ip1': 'ip1',
-            'num': 29,
-            'num2': 28,
-            'bastion': 'clibastion'
-        })
-        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1}')
-        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
-        self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard')
-        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --vnet-name {vnet} --subnet {subnet2} '
-                 '--admin-password TestPassword11!! --admin-username testadmin --authentication-type password --nsg-rule None')
-        self.cmd('network bastion create -g {rg} -n {bastion} --vnet-name {vnet} --public-ip-address {ip1} --scale-units {num} --enable-tunneling --enable-ip-connect --disable-copy-paste --tags a=b', checks=[
-            self.check('type', 'Microsoft.Network/bastionHosts'),
-            self.check('name', '{bastion}'),
-            self.check('scaleUnits', '{num}'),
-            self.check('sku.name', 'Standard'),
-            self.check('disableCopyPaste', True),
-            self.check('enableTunneling', True),
-            self.check('enableIpConnect', True),
-            self.check('tags.a', 'b')
-        ])
-        self.cmd('network bastion update -g {rg} -n {bastion} --scale-units {num2} --enable-tunneling false --enable-ip-connect false --disable-copy-paste false ', checks=[
-            self.check('scaleUnits', '{num2}'),
-            self.check('disableCopyPaste', False),
-            self.check('enableTunneling', False),
-            self.check('enableIpConnect', False)
-        ])
-        self.cmd('network bastion list')
-        self.cmd('network bastion list -g {rg}', checks=[
-            self.check('length(@)', 1)
-        ])
-        self.cmd('network bastion show -g {rg} -n {bastion}', checks=[
-            self.check('type', 'Microsoft.Network/bastionHosts'),
-            self.check('name', '{bastion}')
-        ])
-        self.cmd('network bastion delete -g {rg} -n {bastion}')
 
 
 class NetworkVirtualNetworkGatewayNatRule(ScenarioTest):

@@ -19,7 +19,7 @@ from azure.cli.core.commands.template_create import get_folded_parameter_validat
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_parameter_set
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 
 logger = get_logger(__name__)
 
@@ -618,13 +618,6 @@ def validate_private_dns_zone(cmd, namespace):
             type='privateDnsZones')
 
 
-def validate_scale_unit_ranges(namespace):
-    unit_num = namespace.scale_units
-    err_msg = "The number of --scale-units should in range [2, 50]."
-    if unit_num is not None and (unit_num < 2 or unit_num > 50):
-        raise InvalidArgumentValueError(err_msg)
-
-
 def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_new=False,
                                   default_none=False):
     from msrestazure.tools import is_valid_resource_id, resource_id
@@ -769,56 +762,6 @@ def process_ag_ssl_policy_set_namespace(namespace):
         raise ValueError('incorrect usage: --disabled-ssl-protocols PROTOCOL [...] | --clear')
 
 
-def process_ag_url_path_map_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
-    from msrestazure.tools import is_valid_resource_id
-    if namespace.default_address_pool and not is_valid_resource_id(namespace.default_address_pool):
-        namespace.default_address_pool = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'backendAddressPools', namespace.default_address_pool)
-
-    if namespace.default_http_settings and not is_valid_resource_id(
-            namespace.default_http_settings):
-        namespace.default_http_settings = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'backendHttpSettingsCollection', namespace.default_http_settings)
-
-    if namespace.default_redirect_config and not is_valid_resource_id(
-            namespace.default_redirect_config):
-        namespace.default_redirect_config = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'redirectConfigurations', namespace.default_redirect_config)
-
-    if hasattr(namespace, 'firewall_policy') and \
-            namespace.firewall_policy and not is_valid_resource_id(namespace.firewall_policy):
-        namespace.firewall_policy = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'firewallPolicy', namespace.firewall_policy
-        )
-
-    if namespace.default_rewrite_rule_set and not is_valid_resource_id(namespace.default_rewrite_rule_set):
-        namespace.default_rewrite_rule_set = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'rewriteRuleSets', namespace.default_rewrite_rule_set)
-
-    if hasattr(namespace, 'rule_name'):
-        process_ag_url_path_map_rule_create_namespace(cmd, namespace)
-
-
-def process_ag_url_path_map_rule_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
-    from msrestazure.tools import is_valid_resource_id
-    if namespace.address_pool and not is_valid_resource_id(namespace.address_pool):
-        namespace.address_pool = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'backendAddressPools', namespace.address_pool)
-
-    if namespace.http_settings and not is_valid_resource_id(namespace.http_settings):
-        namespace.http_settings = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'backendHttpSettingsCollection', namespace.http_settings)
-
-    if namespace.redirect_config and not is_valid_resource_id(
-            namespace.redirect_config):
-        namespace.redirect_config = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'redirectConfigurations', namespace.redirect_config)
-
-    if namespace.rewrite_rule_set and not is_valid_resource_id(namespace.rewrite_rule_set):
-        namespace.rewrite_rule_set = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'rewriteRuleSets', namespace.rewrite_rule_set)
-
-
 def process_ag_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     get_servers_validator(camel_case=True)(namespace)
@@ -945,28 +888,6 @@ def _inform_coming_breaking_change_for_public_ip(namespace):
                        ' when sku is Standard and zone is not provided:'
                        ' For zonal regions, you will get a zone-redundant IP indicated by zones:["1","2","3"];'
                        ' For non-zonal regions, you will get a non zone-redundant IP indicated by zones:null.')
-
-
-def process_vnet_create_namespace(cmd, namespace):
-    get_default_location_from_resource_group(cmd, namespace)
-    validate_ddos_name_or_id(cmd, namespace)
-    validate_tags(namespace)
-    get_nsg_validator()(cmd, namespace)
-
-    if namespace.subnet_prefix and not namespace.subnet_name:
-        if cmd.supported_api_version(min_api='2018-08-01'):
-            raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefixes PREFIXES]')
-        raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefix PREFIX]')
-
-    if namespace.subnet_name and not namespace.subnet_prefix:
-        if isinstance(namespace.vnet_prefixes, str):
-            namespace.vnet_prefixes = [namespace.vnet_prefixes]
-        prefix_components = namespace.vnet_prefixes[0].split('/', 1)
-        address = prefix_components[0]
-        bit_mask = int(prefix_components[1])
-        subnet_mask = 24 if bit_mask < 24 else bit_mask
-        subnet_prefix = '{}/{}'.format(address, subnet_mask)
-        namespace.subnet_prefix = [subnet_prefix] if cmd.supported_api_version(min_api='2018-08-01') else subnet_prefix
 
 
 def _validate_cert(namespace, param_name):
@@ -1820,8 +1741,6 @@ def validate_subnet_ranges(namespace):
 # pylint: disable=too-few-public-methods
 class WafConfigExclusionAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        cmd = namespace._cmd  # pylint: disable=protected-access
-        ApplicationGatewayFirewallExclusion = cmd.get_models('ApplicationGatewayFirewallExclusion')
         if not namespace.exclusions:
             namespace.exclusions = []
         if isinstance(values, list):
@@ -1830,11 +1749,11 @@ class WafConfigExclusionAction(argparse.Action):
             variable, op, selector = values.split(' ')
         except (ValueError, TypeError):
             raise CLIError('usage error: --exclusion VARIABLE OPERATOR VALUE')
-        namespace.exclusions.append(ApplicationGatewayFirewallExclusion(
-            match_variable=variable,
-            selector_match_operator=op,
-            selector=selector
-        ))
+        namespace.exclusions.append({
+            "match_variable": variable,
+            "selector_match_operator": op,
+            "selector": selector
+        })
 
 
 def get_header_configuration_validator(dest):
