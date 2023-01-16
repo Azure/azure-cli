@@ -49,6 +49,9 @@ from .aaz.latest.network.private_endpoint.dns_zone_group import Create as _Priva
     Add as _PrivateEndpointPrivateDnsZoneAdd, Remove as _PrivateEndpointPrivateDnsZoneRemove
 from .aaz.latest.network.private_endpoint.ip_config import Remove as _PrivateEndpointIpConfigRemove, \
     Add as _PrivateEndpointIpConfigAdd
+from .aaz.latest.network.private_link_service import Create as _PrivateLinkServiceCreate, \
+    Update as _PrivateLinkServiceUpdate
+from .aaz.latest.network.private_link_service.connection import Update as _PrivateEndpointConnectionUpdate
 from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
 from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdate
 from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
@@ -3655,78 +3658,93 @@ class PrivateEndpointAsgRemove(_PrivateEndpointAsgRemove):
 
 
 # region PrivateLinkService
-def create_private_link_service(cmd, resource_group_name, service_name, subnet, frontend_ip_configurations,
-                                private_ip_address=None, private_ip_allocation_method=None,
-                                private_ip_address_version=None,
-                                virtual_network_name=None, public_ip_address=None,
-                                location=None, tags=None, load_balancer_name=None,
-                                visibility=None, auto_approval=None, fqdns=None,
-                                enable_proxy_protocol=None, edge_zone=None):
-    client = network_client_factory(cmd.cli_ctx).private_link_services
-    FrontendIPConfiguration, PrivateLinkService, PrivateLinkServiceIpConfiguration, PublicIPAddress, Subnet = \
-        cmd.get_models('FrontendIPConfiguration', 'PrivateLinkService', 'PrivateLinkServiceIpConfiguration',
-                       'PublicIPAddress', 'Subnet')
-    pls_ip_config = PrivateLinkServiceIpConfiguration(
-        name='{}_ipconfig_0'.format(service_name),
-        private_ip_address=private_ip_address,
-        private_ip_allocation_method=private_ip_allocation_method,
-        private_ip_address_version=private_ip_address_version,
-        subnet=subnet and Subnet(id=subnet),
-        public_ip_address=public_ip_address and PublicIPAddress(id=public_ip_address)
-    )
-    link_service = PrivateLinkService(
-        location=location,
-        load_balancer_frontend_ip_configurations=frontend_ip_configurations and [
-            FrontendIPConfiguration(id=ip_config) for ip_config in frontend_ip_configurations
-        ],
-        ip_configurations=[pls_ip_config],
-        visbility=visibility,
-        auto_approval=auto_approval,
-        fqdns=fqdns,
-        tags=tags,
-        enable_proxy_protocol=enable_proxy_protocol
-    )
-    if edge_zone:
-        link_service.extended_location = _edge_zone_model(cmd, edge_zone)
-    return client.begin_create_or_update(resource_group_name, service_name, link_service)
+class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vnet_name = AAZStrArg(options=['--vnet-name'], arg_group="IP Configuration", help="The virtual network (VNet) name.")
+        args_schema.subnet = AAZResourceIdArg(
+            options=['--subnet'],
+            arg_group="IP Configuration",
+            help="Name or ID of subnet to use. If name provided, also supply `--vnet-name`.",
+            required=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{vnet_name}/subnets/{}"
+            )
+        )
+        args_schema.private_ip_address = AAZStrArg(options=['--private-ip-address'], arg_group="IP Configuration", help="Static private IP address to use.")
+        args_schema.private_ip_address_version = AAZStrArg(options=['--private-ip-address-version'], arg_group="IP Configuration", help="IP version of the private IP address.",
+                                                           default="IPv4", enum={"IPv4": "IPv4", "IPv6": "IPv6"})
+        args_schema.private_ip_allocation_method = AAZStrArg(options=['--private-ip-allocation-method'], arg_group="IP Configuration", help="Private IP address allocation method.",
+                                                             enum={"Dynamic": "Dynamic", "Static": "Static"})
+        args_schema.lb_name = AAZStrArg(options=['--lb-name'], help="Name of the load balancer to retrieve frontend IP configs from. Ignored if a frontend IP configuration ID is supplied.")
+        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.", required=True)
+        args_schema.lb_frontend_ip_configs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIpConfigurations/{}"
+            )
+        )
+
+        args_schema.ip_configurations._registered = False
+        args_schema.load_balancer_frontend_ip_configurations._registered = False
+        args_schema.edge_zone_type._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.ip_configurations = [{
+            'name': '{}_ipconfig_0'.format(args.name.to_serialized_data()),
+            'private_ip_address': args.private_ip_address,
+            'private_ip_allocation_method': args.private_ip_allocation_method,
+            'private_ip_address_version': args.private_ip_address_version,
+            'subnet': {'id': args.subnet}
+        }]
+
+        args.load_balancer_frontend_ip_configurations = assign_aaz_list_arg(
+            args.load_balancer_frontend_ip_configurations,
+            args.lb_frontend_ip_configs,
+            element_transformer=lambda _, lb_frontend_ip_config: {"id": lb_frontend_ip_config}
+        )
 
 
-def update_private_link_service(instance, cmd, tags=None, frontend_ip_configurations=None, load_balancer_name=None,
-                                visibility=None, auto_approval=None, fqdns=None, enable_proxy_protocol=None):
-    FrontendIPConfiguration = cmd.get_models('FrontendIPConfiguration')
-    with cmd.update_context(instance) as c:
-        c.set_param('tags', tags)
-        c.set_param('load_balancer_frontend_ip_configurations', frontend_ip_configurations and [
-            FrontendIPConfiguration(id=ip_config) for ip_config in frontend_ip_configurations
-        ])
-        c.set_param('visibility', visibility)
-        c.set_param('auto_approval', auto_approval)
-        c.set_param('fqdns', fqdns)
-        c.set_param('enable_proxy_protocol', enable_proxy_protocol)
-    return instance
+class PrivateLinkServiceUpdate(_PrivateLinkServiceUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.lb_name = AAZStrArg(options=['--lb-name'], help="Name of the load balancer to retrieve frontend IP configs from. Ignored if a frontend IP configuration ID is supplied.")
+        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.")
+        args_schema.lb_frontend_ip_configs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIpConfigurations/{}"
+            )
+        )
+        args_schema.load_balancer_frontend_ip_configurations._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+
+        if has_value(args.lb_frontend_ip_configs):
+            args.load_balancer_frontend_ip_configurations = assign_aaz_list_arg(
+                args.load_balancer_frontend_ip_configurations,
+                args.lb_frontend_ip_configs,
+                element_transformer=lambda _, lb_frontend_ip_config: {"id": lb_frontend_ip_config}
+            )
 
 
-def list_private_link_services(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).private_link_services
-    if resource_group_name:
-        return client.list(resource_group_name)
-    return client.list_by_subscription()
+class PrivateEndpointConnectionUpdate(_PrivateEndpointConnectionUpdate):
 
-
-def update_private_endpoint_connection(cmd, resource_group_name, service_name, pe_connection_name,
-                                       connection_status, description=None, action_required=None):
-    client = network_client_factory(cmd.cli_ctx).private_link_services
-    PrivateEndpointConnection, PrivateLinkServiceConnectionState = cmd.get_models('PrivateEndpointConnection',
-                                                                                  'PrivateLinkServiceConnectionState')
-    connection_state = PrivateLinkServiceConnectionState(
-        status=connection_status,
-        description=description,
-        actions_required=action_required
-    )
-    pe_connection = PrivateEndpointConnection(
-        private_link_service_connection_state=connection_state
-    )
-    return client.update_private_endpoint_connection(resource_group_name, service_name, pe_connection_name, pe_connection)  # pylint: disable=line-too-long
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZArgEnum
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.connection_status._required = True
+        args_schema.connection_status.enum = AAZArgEnum({"Approved": "Approved", "Rejected": "Rejected", "Removed": "Removed"})
+        return args_schema
 
 
 def add_private_link_services_ipconfig(cmd, resource_group_name, service_name,

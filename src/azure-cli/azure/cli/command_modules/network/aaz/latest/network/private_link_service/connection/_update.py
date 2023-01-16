@@ -75,7 +75,7 @@ class Update(AAZCommand):
         )
         _args_schema.connection_status = AAZStrArg(
             options=["--connection-status"],
-            help="Indicates whether the connection has been Approved/Rejected/Removed by the owner of the service.  Allowed values: Approved, Rejected, Removed.",
+            help="Indicates whether the connection has been Approved/Rejected/Removed by the owner of the service.",
             nullable=True,
         )
 
