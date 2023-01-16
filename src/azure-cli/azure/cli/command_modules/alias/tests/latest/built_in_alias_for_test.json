@@ -1,0 +1,22 @@
+{
+  "sa": {
+      "command": "storage account"
+  },
+  "storage account bsp": {
+    "command": "storage account blob-service-properties"
+  },
+  "timeseriesinsights environment create": {
+    "command": "timeseriesinsights environment longterm create",
+    "--type {{type}}": {
+      "command": "timeseriesinsights environment {{type}} create"
+    }
+  },
+  "configure": {
+    "--list-defaults {{defaults_flag}}": {
+      "command": "config get{% if defaults_flag!=\"false\" %} defaults{% endif %}"
+    },
+    "--list-defaults {{defaults_flag}} --scope {{scope}}": {
+      "command": "config get {% if defaults_flag!=\"false\" %} defaults{% endif %}{% if scope=='local'%} --local{% endif %}"
+    }
+  }
+}

@@ -35,7 +35,7 @@ class ManagedServicesTests(ScenarioTest):
         }
 
         # put definition
-        self.cmd('az managedservices definition create --name {name} --tenant-id  {tenant-id} --principal-id {principal-id} --role-definition-id {role-definition-id} --definition-id {definition-id}',
+        self.cmd('az managed-services definition create --name {name} --tenant-id  {tenant-id} --principal-id {principal-id} --role-definition-id {role-definition-id} --definition-id {definition-id}',
                  checks=[
                      self.check('name', '{definition-id}'),
                      self.check('properties.provisioningState', 'Succeeded'),
@@ -44,7 +44,7 @@ class ManagedServicesTests(ScenarioTest):
                      self.check('properties.authorizations[0].principalId', '{principal-id}')])
 
         # get definition
-        self.cmd('az managedservices definition show --definition {definition-id}',
+        self.cmd('az managed-services definition show --definition {definition-id}',
                  checks=[
                      self.check('name', '{definition-id}')])
 
@@ -57,21 +57,21 @@ class ManagedServicesTests(ScenarioTest):
             'registration-definition-resource-id': definition_resource_id
         })
         # put assignment
-        self.cmd('az managedservices assignment  create --definition {registration-definition-resource-id} --assignment-id {assignment-id}',
+        self.cmd('az managed-services assignment  create --definition {registration-definition-resource-id} --assignment-id {assignment-id}',
                  checks=[
                      self.check('name', '{assignment-id}'),
                      self.check('properties.provisioningState', 'Succeeded')])
 
         # get assignment
-        self.cmd('az managedservices assignment  show --assignment {assignment-id}',
+        self.cmd('az managed-services assignment  show --assignment {assignment-id}',
                  checks=[
                      self.check('name', '{assignment-id}'), ])
 
         # delete assignment
-        self.cmd('az managedservices assignment  delete --assignment {assignment-id}')
+        self.cmd('az managed-services assignment  delete --assignment {assignment-id}')
 
         # list assignments
-        assignments_list = self.cmd('az managedservices assignment  list').get_output_in_json()
+        assignments_list = self.cmd('az managed-services assignment  list').get_output_in_json()
         assignments = []
         for assignment in assignments_list:
             name = assignment['name']
@@ -79,10 +79,10 @@ class ManagedServicesTests(ScenarioTest):
             self.assertTrue(assignment_id not in assignments)
 
         # delete definition
-        self.cmd('az managedservices definition delete --definition {definition-id}')
+        self.cmd('az managed-services definition delete --definition {definition-id}')
 
         # list definitions
-        definitions_list = self.cmd('az managedservices definition list').get_output_in_json()
+        definitions_list = self.cmd('az managed-services definition list').get_output_in_json()
         definitions = []
         for entry in definitions_list:
             name = entry['name']

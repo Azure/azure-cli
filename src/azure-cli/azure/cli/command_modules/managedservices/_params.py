@@ -9,16 +9,16 @@ from azure.cli.core.commands.parameters import get_three_state_flag
 
 def load_arguments(self, _):
 
-    for item in ['managedservices definition show', 'managedservices definition delete']:
+    for item in ['managed-services definition show', 'managed-services definition delete']:
         with self.argument_context(item) as c:
             c.argument('definition', help='The identifier (guid) or the fully qualified resource id of the registration definition. When resource id is used, subscription id and resource group parameters are ignored.')
 
-    for item in ['managedservices assignment list', 'managedservices assignment show']:
+    for item in ['managed-services assignment list', 'managed-services assignment show']:
         with self.argument_context(item) as c:
             c.argument('include_definition', arg_type=get_three_state_flag(),
                        help='When provided, gets the associated registration definition details.')
 
-    for item in ['managedservices assignment show', 'managedservices assignment delete']:
+    for item in ['managed-services assignment show', 'managed-services assignment delete']:
         with self.argument_context(item) as c:
             c.argument('assignment',
                        help='The identifier (guid) or the fully qualified resource id of the registration assignment. When resource id is used, subscription id and resource group parameters are ignored.')

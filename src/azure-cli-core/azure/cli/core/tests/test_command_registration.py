@@ -241,6 +241,7 @@ class TestCommandRegistration(unittest.TestCase):
     @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
     @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
     @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    @mock.patch('azure.cli.core.PRE_LOADED_MODULES', [])
     def test_register_command_from_extension(self):
 
         cli = DummyCli()
@@ -265,6 +266,7 @@ class TestCommandRegistration(unittest.TestCase):
     @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
     @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
     @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    @mock.patch('azure.cli.core.PRE_LOADED_MODULES', [])
     def test_command_index(self):
         from azure.cli.core._session import INDEX
         from azure.cli.core import CommandIndex, __version__
@@ -394,6 +396,7 @@ class TestCommandRegistration(unittest.TestCase):
     @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
     @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
     @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    @mock.patch('azure.cli.core.PRE_LOADED_MODULES', [])
     def test_command_index_always_loaded_extensions(self):
         from azure.cli.core import CommandIndex
 
@@ -419,6 +422,7 @@ class TestCommandRegistration(unittest.TestCase):
     @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
     @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
     @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    @mock.patch('azure.cli.core.PRE_LOADED_MODULES', [])
     def test_command_index_positional_argument(self):
         from azure.cli.core._session import INDEX
         from azure.cli.core import CommandIndex
