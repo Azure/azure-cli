@@ -508,7 +508,7 @@ def load_command_table(self, _):
     # endregion
 
     # region PrivateLinkServices
-    with self.command_group('network private-link-service', network_private_link_service_sdk) as g:
+    with self.command_group('network private-link-service'):
         from azure.cli.command_modules.network.custom import PrivateLinkServiceCreate, PrivateLinkServiceUpdate
         self.command_table['network private-link-service create'] = PrivateLinkServiceCreate(loader=self)
         self.command_table['network private-link-service update'] = PrivateLinkServiceUpdate(loader=self)
