@@ -36,7 +36,7 @@ from azure.cli.command_modules.network._format import (
     transform_vpn_connection, transform_vpn_connection_list,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
-    transform_network_usage_list, transform_network_usage_table, transform_nsg_rule_table_output,
+    transform_network_usage_table, transform_nsg_rule_table_output,
     transform_vnet_table_output, transform_effective_route_table, transform_effective_nsg,
     transform_vnet_gateway_routes_table, transform_vnet_gateway_bgp_peer_table)
 from azure.cli.command_modules.network._validators import (
@@ -209,8 +209,9 @@ def load_command_table(self, _):
 
     # region NetworkRoot
     with self.command_group('network'):
-        from azure.cli.command_modules.network.aaz.latest.network import ListUsages
-        self.command_table['network list-usages'] = ListUsages(loader=self, transform=transform_network_usage_list, table_transformer=transform_network_usage_table)
+        from azure.cli.command_modules.network.custom import UsagesList
+        self.command_table['network list-usages'] = UsagesList(loader=self,
+                                                               table_transformer=transform_network_usage_table)
     # endregion
 
     # region ApplicationGateways

@@ -26,6 +26,7 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
+from .aaz.latest.network import ListUsages as _UsagesList
 from .aaz.latest.network.application_gateway import Update as _ApplicationGatewayUpdate
 from .aaz.latest.network.application_gateway.url_path_map import Create as _URLPathMapCreate, \
     Update as _URLPathMapUpdate
@@ -8158,4 +8159,18 @@ def update_shared_key(cmd, instance, value):
     with cmd.update_context(instance) as c:
         c.set_param('value', value)
     return instance
+# endregion
+
+
+# region usages
+class UsagesList(_UsagesList):
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
+        result = list(result)
+        for item in result:
+            item['currentValue'] = str(item['currentValue'])
+            item['limit'] = str(item['limit'])
+            item['localName'] = item['name']['localizedValue']
+        return result, next_link
 # endregion
