@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2018-08-01",
+        "version": "2022-04-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}", "2018-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}", "2022-04-01-preview"],
         ]
     }
 
@@ -56,7 +56,17 @@ class Show(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         self.ProfilesGet(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -110,7 +120,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-08-01",
+                    "api-version", "2022-04-01-preview",
                     required=True,
                 ),
             }
@@ -200,6 +210,9 @@ class Show(AAZCommand):
             _element.type = AAZStrType()
 
             properties = cls._schema_on_200.properties.endpoints.Element.properties
+            properties.always_serve = AAZStrType(
+                serialized_name="alwaysServe",
+            )
             properties.custom_headers = AAZListType(
                 serialized_name="customHeaders",
             )

@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network custom-ip prefix delete",
-    confirmation="",
 )
 class Delete(AAZCommand):
     """Delete a custom IP prefix resource.

@@ -52,7 +52,7 @@ jobs:
           sed -i "s/$(PACKAGE)==.*/$(PACKAGE)==$(TARGET_PACKAGE_VERSION)/g" ./src/azure-cli/requirements.py3.Darwin.txt
 
           if [[ -n "$(RESOURCE_TYPE)" ]]; then
-            python scripts/bump_version/update_api_profile.py "$(RESOURCE_TYPE)" "$(TARGET_API_VERSION)"
+            python scripts/regression_test/update_api_profile.py "$(RESOURCE_TYPE)" "$(TARGET_API_VERSION)"
           fi
 
           git add .
@@ -127,7 +127,7 @@ jobs:
       displayName: "Rerun tests"
     - task: PublishTestResults@2
       inputs:
-        testResultsFiles: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
+        testResultsFiles: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
         testRunTitle: 'CLI Regression test results of instance $(Instance_idx)'
 
 - job: CreatePR

@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.42.0"
+VERSION = "2.44.1"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -43,13 +43,13 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'argcomplete~=1.8',
+    'argcomplete~=2.0',
     'azure-cli-telemetry==1.0.8.*',
     'azure-mgmt-core>=1.2.0,<2',
     'cryptography',
     'humanfriendly~=10.0',
     'jmespath',
-    'knack~=0.10.0',
+    'knack~=0.10.1',
     'msal-extensions~=1.0.0',
     'msal[broker]==1.20.0',
     'msrestazure~=0.6.4',
