@@ -561,32 +561,18 @@ def load_command_table(self, _):
                                  setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_inbound_nat_pool')
 
-    with self.command_group('network lb address-pool', network_lb_backend_pool_sdk) as g:
-        g.custom_command('create', 'create_lb_backend_address_pool')
-        g.generic_update_command('update', setter_name='begin_create_or_update',
-                                 custom_func_name='set_lb_backend_address_pool')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.custom_command('delete', 'delete_lb_backend_address_pool')
+    with self.command_group('network lb outbound-rule', network_lb_sdk, min_api='2018-07-01') as g:
+        g.custom_command('create', 'create_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
+        g.generic_update_command('update', child_collection_prop_name='outbound_rules',
+                                 getter_name='lb_get',
+                                 getter_type=network_load_balancers_custom,
+                                 setter_name='begin_create_or_update',
+                                 custom_func_name='set_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
 
-    with self.command_group('network lb address-pool', network_lb_sdk, max_api='2020-03-01') as g:
-        g.custom_command('create', 'create_lb_backend_address_pool')
-
-    with self.command_group('network lb address-pool', network_util, max_api='2020-03-01') as g:
-        g.command('list', list_network_resource_property('load_balancers', 'backend_address_pools'))
-        g.show_command('show', get_network_resource_property_entry('load_balancers', 'backend_address_pools'))
-        g.command('delete', delete_lb_resource_property_entry('load_balancers', 'backend_address_pools'))
-
-    with self.command_group('network lb address-pool address', network_lb_backend_pool_sdk, is_preview=True) as g:
-        g.custom_command('add', 'add_lb_backend_address_pool_address')
-        g.custom_command('remove', 'remove_lb_backend_address_pool_address')
-        g.custom_command('list', 'list_lb_backend_address_pool_address')
-
-    with self.command_group('network lb address-pool tunnel-interface', network_lb_backend_pool_sdk, min_api='2021-02-01', is_preview=True) as g:
-        g.custom_command('add', 'add_lb_backend_address_pool_tunnel_interface')
-        g.custom_command('update', 'update_lb_backend_address_pool_tunnel_interface')
-        g.custom_command('remove', 'remove_lb_backend_address_pool_tunnel_interface')
-        g.custom_command('list', 'list_lb_backend_address_pool_tunnel_interface')
+    with self.command_group('network lb outbound-rule', network_util, min_api='2018-07-01') as g:
+        g.command('list', list_network_resource_property('load_balancers', 'outbound_rules'))
+        g.show_command('show', get_network_resource_property_entry('load_balancers', 'outbound_rules'))
+        g.command('delete', delete_lb_resource_property_entry('load_balancers', 'outbound_rules'))
 
     with self.command_group('network lb rule', network_lb_sdk) as g:
         g.custom_command('create', 'create_lb_rule')
@@ -603,18 +589,25 @@ def load_command_table(self, _):
     with self.command_group('network lb probe', network_util) as g:
         g.command('delete', delete_lb_resource_property_entry('load_balancers', 'probes'))
 
-    with self.command_group('network lb outbound-rule', network_lb_sdk, min_api='2018-07-01') as g:
-        g.custom_command('create', 'create_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
-        g.generic_update_command('update', child_collection_prop_name='outbound_rules',
-                                 getter_name='lb_get',
-                                 getter_type=network_load_balancers_custom,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
+    with self.command_group('network lb address-pool', network_lb_backend_pool_sdk) as g:
+        g.custom_command('create', 'create_lb_backend_address_pool')
+        g.generic_update_command('update', setter_name='begin_create_or_update',
+                                 custom_func_name='set_lb_backend_address_pool')
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.custom_command('delete', 'delete_lb_backend_address_pool')
 
-    with self.command_group('network lb outbound-rule', network_util, min_api='2018-07-01') as g:
-        g.command('list', list_network_resource_property('load_balancers', 'outbound_rules'))
-        g.show_command('show', get_network_resource_property_entry('load_balancers', 'outbound_rules'))
-        g.command('delete', delete_lb_resource_property_entry('load_balancers', 'outbound_rules'))
+    with self.command_group('network lb address-pool address', network_lb_backend_pool_sdk, is_preview=True) as g:
+        g.custom_command('add', 'add_lb_backend_address_pool_address')
+        g.custom_command('remove', 'remove_lb_backend_address_pool_address')
+        g.custom_command('list', 'list_lb_backend_address_pool_address')
+
+    with self.command_group('network lb address-pool tunnel-interface', network_lb_backend_pool_sdk, min_api='2021-02-01', is_preview=True) as g:
+        g.custom_command('add', 'add_lb_backend_address_pool_tunnel_interface')
+        g.custom_command('update', 'update_lb_backend_address_pool_tunnel_interface')
+        g.custom_command('remove', 'remove_lb_backend_address_pool_tunnel_interface')
+        g.custom_command('list', 'list_lb_backend_address_pool_tunnel_interface')
+
     # endregion
 
     # region cross-region load balancer
