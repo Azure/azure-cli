@@ -5,13 +5,12 @@
 import time
 import unittest
 from unittest import mock
-from knack.testsdk import record_only
-from knack.util import CLIError
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
 from azure.core.exceptions import HttpResponseError
+from knack.util import CLIError
+from msrestazure.tools import parse_resource_id
 
-from msrestazure.tools import parse_resource_id, resource_id
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
 
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
@@ -457,14 +456,12 @@ class ImageTemplateTest(ScenarioTest):
     def test_image_build_identity(self, resource_group):
         self._identity_role(resource_group)
 
-        subscription_id = '0b1f6471-1bf0-4dda-aec3-cb9272f09590'
         self.kwargs.update({
             'img_src': LINUX_IMAGE_SOURCE,
             'gallery': self.create_random_name("sig_", 10),
             'sig1': 'image1',
             'tmpl': 'template01',
-            'script': TEST_SHELL_SCRIPT_URL,
-
+            'script': TEST_SHELL_SCRIPT_URL
         })
 
         self.cmd('sig create -g {rg} --gallery-name {gallery}')
@@ -479,9 +476,7 @@ class ImageTemplateTest(ScenarioTest):
         # send put request using cached template object
         self.cmd('image builder update -n {tmpl} -g {rg}')
 
-        ide_id = resource_id(subscription=subscription_id, resource_group=resource_group,
-                             namespace='Microsoft.ManagedIdentity', type='userAssignedIdentities',
-                             name=self.kwargs['ide'])
+        ide_id = self.cmd('identity show -n {ide} -g {rg}').get_output_in_json()['id']
 
         # remove identity
         self.cmd('image builder identity remove -n {tmpl} -g {rg} --user-assigned',
