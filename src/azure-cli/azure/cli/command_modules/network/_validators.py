@@ -762,56 +762,6 @@ def process_ag_ssl_policy_set_namespace(namespace):
         raise ValueError('incorrect usage: --disabled-ssl-protocols PROTOCOL [...] | --clear')
 
 
-def process_ag_url_path_map_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
-    from msrestazure.tools import is_valid_resource_id
-    if namespace.default_address_pool and not is_valid_resource_id(namespace.default_address_pool):
-        namespace.default_address_pool = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'backendAddressPools', namespace.default_address_pool)
-
-    if namespace.default_http_settings and not is_valid_resource_id(
-            namespace.default_http_settings):
-        namespace.default_http_settings = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'backendHttpSettingsCollection', namespace.default_http_settings)
-
-    if namespace.default_redirect_config and not is_valid_resource_id(
-            namespace.default_redirect_config):
-        namespace.default_redirect_config = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'redirectConfigurations', namespace.default_redirect_config)
-
-    if hasattr(namespace, 'firewall_policy') and \
-            namespace.firewall_policy and not is_valid_resource_id(namespace.firewall_policy):
-        namespace.firewall_policy = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'firewallPolicy', namespace.firewall_policy
-        )
-
-    if namespace.default_rewrite_rule_set and not is_valid_resource_id(namespace.default_rewrite_rule_set):
-        namespace.default_rewrite_rule_set = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'rewriteRuleSets', namespace.default_rewrite_rule_set)
-
-    if hasattr(namespace, 'rule_name'):
-        process_ag_url_path_map_rule_create_namespace(cmd, namespace)
-
-
-def process_ag_url_path_map_rule_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
-    from msrestazure.tools import is_valid_resource_id
-    if namespace.address_pool and not is_valid_resource_id(namespace.address_pool):
-        namespace.address_pool = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'backendAddressPools', namespace.address_pool)
-
-    if namespace.http_settings and not is_valid_resource_id(namespace.http_settings):
-        namespace.http_settings = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'backendHttpSettingsCollection', namespace.http_settings)
-
-    if namespace.redirect_config and not is_valid_resource_id(
-            namespace.redirect_config):
-        namespace.redirect_config = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'redirectConfigurations', namespace.redirect_config)
-
-    if namespace.rewrite_rule_set and not is_valid_resource_id(namespace.rewrite_rule_set):
-        namespace.rewrite_rule_set = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'rewriteRuleSets', namespace.rewrite_rule_set)
-
-
 def process_ag_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     get_servers_validator(camel_case=True)(namespace)
@@ -1791,8 +1741,6 @@ def validate_subnet_ranges(namespace):
 # pylint: disable=too-few-public-methods
 class WafConfigExclusionAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        cmd = namespace._cmd  # pylint: disable=protected-access
-        ApplicationGatewayFirewallExclusion = cmd.get_models('ApplicationGatewayFirewallExclusion')
         if not namespace.exclusions:
             namespace.exclusions = []
         if isinstance(values, list):
@@ -1801,11 +1749,11 @@ class WafConfigExclusionAction(argparse.Action):
             variable, op, selector = values.split(' ')
         except (ValueError, TypeError):
             raise CLIError('usage error: --exclusion VARIABLE OPERATOR VALUE')
-        namespace.exclusions.append(ApplicationGatewayFirewallExclusion(
-            match_variable=variable,
-            selector_match_operator=op,
-            selector=selector
-        ))
+        namespace.exclusions.append({
+            "match_variable": variable,
+            "selector_match_operator": op,
+            "selector": selector
+        })
 
 
 def get_header_configuration_validator(dest):

@@ -1344,7 +1344,7 @@ type: command
 short-summary: Update the firewall configuration of a web application.
 long-summary: >
     This command is only applicable to application gateways with an SKU type of WAF. To learn
-    more, visit https://docs.microsoft.com/azure/application-gateway/application-gateway-web-application-firewall-cli
+    more, visit https://learn.microsoft.com/en-us/azure/web-application-firewall/ag/tutorial-restrict-web-traffic-cli.
 parameters:
   - name: --rule-set-type
     short-summary: Rule set type.
@@ -1371,20 +1371,13 @@ parameters:
 examples:
   - name: Configure WAF on an application gateway in detection mode with default values
     text: |
-        az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway \\
-            --enabled true --firewall-mode Detection --rule-set-version 3.0
+        az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway --enabled true --firewall-mode Detection --rule-set-version 3.0
   - name: Disable rules for validation of request body parsing and SQL injection.
     text: |
-        az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway \\
-            --enabled true --rule-set-type OWASP --rule-set-version 3.0 \\
-            --disabled-rule-groups REQUEST-942-APPLICATION-ATTACK-SQLI \\
-            --disabled-rules 920130 920140
+        az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway --enabled true --rule-set-type OWASP --rule-set-version 3.0 --disabled-rule-groups REQUEST-942-APPLICATION-ATTACK-SQLI --disabled-rules 920130 920140
   - name: Configure WAF on an application gateway with exclusions.
     text: |
-        az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway \\
-            --enabled true --firewall-mode Detection --rule-set-version 3.0 \\
-            --exclusion "RequestHeaderNames StartsWith x-header" \\
-            --exclusion "RequestArgNames Equals IgnoreThis"
+        az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway --enabled true --firewall-mode Detection --rule-set-version 3.0 --exclusion "RequestHeaderNames StartsWith x-header" --exclusion "RequestArgNames Equals IgnoreThis"
 """
 
 helps['network application-gateway waf-config show'] = """
@@ -4457,30 +4450,6 @@ examples:
 helps['network private-endpoint'] = """
 type: group
 short-summary: Manage private endpoints.
-"""
-
-helps['network private-endpoint create'] = """
-type: command
-short-summary: Create a private endpoint.
-
-parameters:
-  - name: --ip-config
-    short-summary: The private endpoint ip configurations.
-    long-summary: |
-        Usage: --ip-config name=MyIPConfig group-id=MyGroup member-name=MyMember private-ip-address=MyPrivateIPAddress
-        Multiple ip configurations can be specified by using more than one `--ip-config` argument.
-  - name: --asg
-    short-summary: The private endpoint application security groups.
-    long-summary: |
-        Usage: --asg id=MyApplicationSecurityGroupId
-        Multiple application security groups can be specified by using more than one `--asg` argument.
-
-examples:
-  - name: Create a private endpoint.
-    text: az network private-endpoint create -g MyResourceGroup -n MyPE --vnet-name MyVnetName --subnet MySubnet --private-connection-resource-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/privateLinkServices/MyPLS" --connection-name tttt -l centralus
-  - name: Create a private endpoint with ASGs.
-    text: |
-        az network private-endpoint create -n MyPE -g MyResourceGroup --vnet-name MyVnetName --subnet MySubnet --connection-name MyConnectionName --group-id MyGroupId --private-connection-resource-id MyResourceId --asg id=MyAsgId --asg id=MyAsgId
 """
 
 helps['network private-endpoint delete'] = """
