@@ -32,10 +32,6 @@ def cf_flow_logs(cli_ctx, _):
     return network_client_factory(cli_ctx).flow_logs
 
 
-def cf_private_endpoints(cli_ctx, _):
-    return network_client_factory(cli_ctx).private_endpoints
-
-
 def cf_private_link_services(cli_ctx, _):
     return network_client_factory(cli_ctx).private_link_services
 

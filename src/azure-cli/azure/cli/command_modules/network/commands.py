@@ -19,7 +19,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_virtual_network_gateways,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_public_ip_addresses, cf_connection_monitor,
-    cf_dns_references, cf_private_endpoints,
+    cf_dns_references,
     cf_app_gateway_waf_policy,
     cf_private_link_services,
     cf_virtual_router, cf_virtual_router_peering, cf_flow_logs,
@@ -96,12 +96,6 @@ def load_command_table(self, _):
         client_factory=cf_dns_references,
         resource_type=ResourceType.MGMT_NETWORK_DNS,
         min_api='2018-05-01'
-    )
-
-    network_private_endpoint_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#PrivateEndpointsOperations.{}',
-        client_factory=cf_private_endpoints,
-        min_api='2020-06-01'
     )
 
     network_private_link_service_sdk = CliCommandType(
@@ -487,7 +481,7 @@ def load_command_table(self, _):
     # endregion
 
     # region PrivateEndpoint
-    with self.command_group('network private-endpoint', network_private_endpoint_sdk) as g:
+    with self.command_group('network private-endpoint'):
         from azure.cli.command_modules.network.custom import PrivateEndpointCreate, PrivateEndpointUpdate
         self.command_table['network private-endpoint create'] = PrivateEndpointCreate(loader=self)
         self.command_table['network private-endpoint update'] = PrivateEndpointUpdate(loader=self)
