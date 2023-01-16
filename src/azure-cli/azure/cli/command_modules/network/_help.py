@@ -4452,30 +4452,6 @@ type: group
 short-summary: Manage private endpoints.
 """
 
-helps['network private-endpoint create'] = """
-type: command
-short-summary: Create a private endpoint.
-
-parameters:
-  - name: --ip-config
-    short-summary: The private endpoint ip configurations.
-    long-summary: |
-        Usage: --ip-config name=MyIPConfig group-id=MyGroup member-name=MyMember private-ip-address=MyPrivateIPAddress
-        Multiple ip configurations can be specified by using more than one `--ip-config` argument.
-  - name: --asg
-    short-summary: The private endpoint application security groups.
-    long-summary: |
-        Usage: --asg id=MyApplicationSecurityGroupId
-        Multiple application security groups can be specified by using more than one `--asg` argument.
-
-examples:
-  - name: Create a private endpoint.
-    text: az network private-endpoint create -g MyResourceGroup -n MyPE --vnet-name MyVnetName --subnet MySubnet --private-connection-resource-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/privateLinkServices/MyPLS" --connection-name tttt -l centralus
-  - name: Create a private endpoint with ASGs.
-    text: |
-        az network private-endpoint create -n MyPE -g MyResourceGroup --vnet-name MyVnetName --subnet MySubnet --connection-name MyConnectionName --group-id MyGroupId --private-connection-resource-id MyResourceId --asg id=MyAsgId --asg id=MyAsgId
-"""
-
 helps['network private-endpoint delete'] = """
 type: command
 short-summary: Delete a private endpoint.

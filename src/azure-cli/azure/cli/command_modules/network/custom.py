@@ -43,6 +43,12 @@ from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRo
 from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
 from .aaz.latest.network.nsg import Create as _NSGCreate
 from .aaz.latest.network.nsg.rule import Create as _NSGRuleCreate, Update as _NSGRuleUpdate
+from .aaz.latest.network.private_endpoint import Create as _PrivateEndpointCreate, Update as _PrivateEndpointUpdate
+from .aaz.latest.network.private_endpoint.asg import Add as _PrivateEndpointAsgAdd, Remove as _PrivateEndpointAsgRemove
+from .aaz.latest.network.private_endpoint.dns_zone_group import Create as _PrivateEndpointPrivateDnsZoneGroupCreate, \
+    Add as _PrivateEndpointPrivateDnsZoneAdd, Remove as _PrivateEndpointPrivateDnsZoneRemove
+from .aaz.latest.network.private_endpoint.ip_config import Remove as _PrivateEndpointIpConfigRemove, \
+    Add as _PrivateEndpointIpConfigAdd
 from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
 from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdate
 from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
@@ -3463,192 +3469,188 @@ class ExpressRoutePortLinkUpdate(_ExpressRoutePortLinkUpdate):
 
 
 # region PrivateEndpoint
-def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, subnet,
-                            private_connection_resource_id, connection_name, group_ids=None,
-                            virtual_network_name=None, tags=None, location=None,
-                            request_message=None, manual_request=None, edge_zone=None,
-                            ip_configurations=None, application_security_groups=None, custom_interface_name=None):
-    client = network_client_factory(cmd.cli_ctx).private_endpoints
-    PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint',
-                                                                           'Subnet',
-                                                                           'PrivateLinkServiceConnection')
-    pls_connection = PrivateLinkServiceConnection(private_link_service_id=private_connection_resource_id,
-                                                  group_ids=group_ids,
-                                                  request_message=request_message,
-                                                  name=connection_name)
-    private_endpoint = PrivateEndpoint(
-        location=location,
-        tags=tags,
-        subnet=Subnet(id=subnet)
-    )
+class PrivateEndpointCreate(_PrivateEndpointCreate):
 
-    if manual_request:
-        private_endpoint.manual_private_link_service_connections = [pls_connection]
-    else:
-        private_endpoint.private_link_service_connections = [pls_connection]
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.private_connection_resource_id = AAZStrArg(
+            options=['--private-connection-resource-id'],
+            help="The resource id of the private endpoint to connect to.",
+            required=True)
+        args_schema.group_ids = AAZListArg(
+            options=["--group-ids", "--group-id"],
+            help="The ID of the group obtained from the remote resource that this private endpoint should connect to. You can use \"az network private-link-resource list\" to obtain the supported group ids. You must provide this except for PrivateLinkService.,"
+        )
+        args_schema.group_ids.Element = AAZStrArg()
+        args_schema.request_message = AAZStrArg(
+            options=['--request-message'],
+            help="A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.")
+        args_schema.connection_name = AAZStrArg(
+            options=['--connection-name'],
+            help="Name of the private link service connection.",
+            required=True)
+        args_schema.manual_request = AAZBoolArg(
+            options=['--manual-request'],
+            help="Use manual request to establish the connection. Configure it as 'true' when you don't have access to the subscription of private link service.")
+        args_schema.vnet_name = AAZStrArg(
+            options=['--vnet-name'],
+            help="The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).")
+        args_schema.subnet = AAZResourceIdArg(
+            options=['--subnet'],
+            help="Name or ID of an existing subnet. If name specified, also specify --vnet-name. "
+                 "If you want to use an existing subnet in other resource group or subscription, please provide the ID instead of the name of the subnet and do not specify the--vnet-name.",
+            required=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{vnet_name}/subnets/{}"
+            )
+        )
+        args_schema.manual_private_link_service_connections._registered = False
+        args_schema.private_link_service_connections._registered = False
+        args_schema.edge_zone_type._registered = False
+        args_schema.subnet_id._registered = False
 
-    if edge_zone:
-        private_endpoint.extended_location = _edge_zone_model(cmd, edge_zone)
+        return args_schema
 
-    if cmd.supported_api_version(min_api='2021-05-01'):
-        if ip_configurations:
-            PrivateEndpointIPConfiguration = cmd.get_models("PrivateEndpointIPConfiguration")
-            for prop in ip_configurations:
-                ip_config = PrivateEndpointIPConfiguration(**prop)
-                try:
-                    private_endpoint.ip_configurations.append(ip_config)
-                except AttributeError:
-                    private_endpoint.ip_configurations = [ip_config]
-        if application_security_groups:
-            ApplicationSecurityGroup = cmd.get_models("ApplicationSecurityGroup")
-            for prop in application_security_groups:
-                asg = ApplicationSecurityGroup(**prop)
-                try:
-                    private_endpoint.application_security_groups.append(asg)
-                except AttributeError:
-                    private_endpoint.application_security_groups = [asg]
-        if custom_interface_name:
-            private_endpoint.custom_network_interface_name = custom_interface_name
+    def pre_operations(self):
+        args = self.ctx.args
+        pls_connection = {'name': args.connection_name,
+                          'group_ids': args.group_ids,
+                          'request_message': args.request_message,
+                          'private_link_service_id': args.private_connection_resource_id}
 
-    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
-
-
-def update_private_endpoint(instance, cmd, tags=None, request_message=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('tags', tags)
-
-    if request_message is not None:
-        if instance.private_link_service_connections:
-            instance.private_link_service_connections[0].request_message = request_message
+        if args.manual_request:
+            args.manual_private_link_service_connections = [pls_connection]
         else:
-            instance.manual_private_link_service_connections[0].request_message = request_message
+            args.private_link_service_connections = [pls_connection]
 
-    return instance
-
-
-def list_private_endpoints(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).private_endpoints
-    if resource_group_name:
-        return client.list(resource_group_name)
-    return client.list_by_subscription()
+        if has_value(args.subnet):
+            args.subnet_id = args.subnet
 
 
-def create_private_endpoint_private_dns_zone_group(cmd, resource_group_name, private_endpoint_name,
-                                                   private_dns_zone_group_name,
-                                                   private_dns_zone_name, private_dns_zone):
-    client = network_client_factory(cmd.cli_ctx).private_dns_zone_groups
-    PrivateDnsZoneGroup, PrivateDnsZoneConfig = cmd.get_models('PrivateDnsZoneGroup', 'PrivateDnsZoneConfig')
-    private_dns_zone_group = PrivateDnsZoneGroup(name=private_dns_zone_group_name,
-                                                 private_dns_zone_configs=[PrivateDnsZoneConfig(private_dns_zone_id=private_dns_zone,  # pylint: disable=line-too-long
-                                                                                                name=private_dns_zone_name)])  # pylint: disable=line-too-long
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         private_endpoint_name=private_endpoint_name,
-                                         private_dns_zone_group_name=private_dns_zone_group_name,
-                                         parameters=private_dns_zone_group)
+class PrivateEndpointUpdate(_PrivateEndpointUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.request_message = AAZStrArg(
+            options=['--request-message'],
+            help="A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.")
+
+        args_schema.manual_private_link_service_connections._registered = False
+        args_schema.private_link_service_connections._registered = False
+
+        return args_schema
+
+    def pre_instance_update(self, instance):
+        args = self.ctx.args
+        if has_value(args.request_message):
+            if has_value(instance.properties.private_link_service_connections):
+                instance.properties.private_link_service_connections[0].properties.request_message = args.request_message
+            elif has_value(instance.properties.manual_private_link_service_connections):
+                instance.properties.manual_private_link_service_connections[0].properties.request_message = args.request_message
 
 
-def add_private_endpoint_private_dns_zone(cmd, resource_group_name, private_endpoint_name,
-                                          private_dns_zone_group_name,
-                                          private_dns_zone_name, private_dns_zone):
-    client = network_client_factory(cmd.cli_ctx).private_dns_zone_groups
-    PrivateDnsZoneConfig = cmd.get_models('PrivateDnsZoneConfig')
-    private_dns_zone_group = client.get(resource_group_name=resource_group_name,
-                                        private_endpoint_name=private_endpoint_name,
-                                        private_dns_zone_group_name=private_dns_zone_group_name)
-    private_dns_zone = PrivateDnsZoneConfig(private_dns_zone_id=private_dns_zone, name=private_dns_zone_name)
-    private_dns_zone_group.private_dns_zone_configs.append(private_dns_zone)
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         private_endpoint_name=private_endpoint_name,
-                                         private_dns_zone_group_name=private_dns_zone_group_name,
-                                         parameters=private_dns_zone_group)
+class PrivateEndpointPrivateDnsZoneGroupCreate(_PrivateEndpointPrivateDnsZoneGroupCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.private_dns_zone = AAZResourceIdArg(
+            options=['--private-dns-zone'],
+            help="Name or ID of the private dns zone.",
+            required=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/privateDnsZones/{}"
+            )
+        )
+        args_schema.zone_name = AAZStrArg(options=['--zone-name'], help="Name of the private dns zone.", required=True)
+        args_schema.private_dns_zone_configs._registered = False
+
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.private_dns_zone_configs = [{'name': args.zone_name, 'private_dns_zone_id': args.private_dns_zone}]
 
 
-def remove_private_endpoint_private_dns_zone(cmd, resource_group_name, private_endpoint_name,
-                                             private_dns_zone_group_name,
-                                             private_dns_zone_name):
-    client = network_client_factory(cmd.cli_ctx).private_dns_zone_groups
-    private_dns_zone_group = client.get(resource_group_name=resource_group_name,
-                                        private_endpoint_name=private_endpoint_name,
-                                        private_dns_zone_group_name=private_dns_zone_group_name)
-    private_dns_zone_configs = [item for item in private_dns_zone_group.private_dns_zone_configs if item.name != private_dns_zone_name]  # pylint: disable=line-too-long
-    private_dns_zone_group.private_dns_zone_configs = private_dns_zone_configs
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         private_endpoint_name=private_endpoint_name,
-                                         private_dns_zone_group_name=private_dns_zone_group_name,
-                                         parameters=private_dns_zone_group)
+class PrivateEndpointPrivateDnsZoneAdd(_PrivateEndpointPrivateDnsZoneAdd):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.private_dns_zone = AAZResourceIdArg(
+            options=['--private-dns-zone'],
+            help="Name or ID of the private dns zone.",
+            required=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/privateDnsZones/{}"
+            )
+        )
+        args_schema.private_dns_zone_id._registered = False
+
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.private_dns_zone_id = args.private_dns_zone
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def add_private_endpoint_ip_config(cmd, resource_group_name, private_endpoint_name,
-                                   ip_config_name=None, group_id=None, member_name=None, private_ip_address=None):
-    client = network_client_factory(cmd.cli_ctx).private_endpoints
-    private_endpoint = client.get(resource_group_name, private_endpoint_name)
+class PrivateEndpointPrivateDnsZoneRemove(_PrivateEndpointPrivateDnsZoneRemove):
 
-    PrivateEndpointIPConfiguration = cmd.get_models("PrivateEndpointIPConfiguration")
-    ip_config = PrivateEndpointIPConfiguration(
-        name=ip_config_name,
-        group_id=group_id,
-        member_name=member_name,
-        private_ip_address=private_ip_address
-    )
-    private_endpoint.ip_configurations.append(ip_config)
-    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def remove_private_endpoint_ip_config(cmd, resource_group_name, private_endpoint_name, ip_config_name):
-    client = network_client_factory(cmd.cli_ctx).private_endpoints
-    private_endpoint = client.get(resource_group_name, private_endpoint_name)
+class PrivateEndpointIpConfigAdd(_PrivateEndpointIpConfigAdd):
 
-    ip_config = None
-    for item in private_endpoint.ip_configurations:
-        if item.name == ip_config_name:
-            ip_config = item
-            break
-    if ip_config is None:
-        logger.warning("IP Configuration %s doesn't exist.", ip_config_name)
-        return private_endpoint
-    private_endpoint.ip_configurations.remove(ip_config)
-    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def list_private_endpoint_ip_config(cmd, resource_group_name, private_endpoint_name):
-    client = network_client_factory(cmd.cli_ctx).private_endpoints
-    private_endpoint = client.get(resource_group_name, private_endpoint_name)
-    return private_endpoint.ip_configurations
+class PrivateEndpointIpConfigRemove(_PrivateEndpointIpConfigRemove):
+
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def add_private_endpoint_asg(cmd, resource_group_name, private_endpoint_name, application_security_group_id=None):
-    client = network_client_factory(cmd.cli_ctx).private_endpoints
-    private_endpoint = client.get(resource_group_name, private_endpoint_name)
+class PrivateEndpointAsgAdd(_PrivateEndpointAsgAdd):
 
-    ApplicationSecurityGroup = cmd.get_models("ApplicationSecurityGroup")
-    asg = ApplicationSecurityGroup(id=application_security_group_id)
-    try:
-        private_endpoint.application_security_groups.append(asg)
-    except AttributeError:
-        private_endpoint.application_security_groups = [asg]
-    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def remove_private_endpoint_asg(cmd, resource_group_name, private_endpoint_name, application_security_group_id):
-    client = network_client_factory(cmd.cli_ctx).private_endpoints
-    private_endpoint = client.get(resource_group_name, private_endpoint_name)
+class PrivateEndpointAsgRemove(_PrivateEndpointAsgRemove):
 
-    asg = None
-    for item in private_endpoint.application_security_groups:
-        if item.id == application_security_group_id:
-            asg = item
-            break
-    if asg is None:
-        logger.warning("Application security group %s doesn't exist.", application_security_group_id)
-        return private_endpoint
-    private_endpoint.application_security_groups.remove(asg)
-    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
 
-
-def list_private_endpoint_asg(cmd, resource_group_name, private_endpoint_name):
-    client = network_client_factory(cmd.cli_ctx).private_endpoints
-    private_endpoint = client.get(resource_group_name, private_endpoint_name)
-    return private_endpoint.application_security_groups
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 # endregion
 
 
