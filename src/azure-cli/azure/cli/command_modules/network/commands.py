@@ -22,7 +22,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_dns_references, cf_private_endpoints,
     cf_app_gateway_waf_policy,
     cf_private_link_services, cf_private_endpoint_types,
-    cf_virtual_router, cf_virtual_router_peering, cf_bastion_hosts, cf_flow_logs,
+    cf_virtual_router, cf_virtual_router_peering, cf_flow_logs,
     cf_private_dns_zone_groups, cf_load_balancer_backend_pools)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
@@ -32,7 +32,7 @@ from azure.cli.command_modules.network._format import (
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
     transform_public_ip_create_output,
     transform_traffic_manager_create_output, transform_nic_create_output,
-    transform_nsg_create_output, transform_vnet_gateway_create_output,
+    transform_vnet_gateway_create_output,
     transform_vpn_connection, transform_vpn_connection_list,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
@@ -196,12 +196,6 @@ def load_command_table(self, _):
         min_api='2019-08-01'
     )
 
-    network_bastion_hosts_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#BastionHostsOperations.{}',
-        client_factory=cf_bastion_hosts,
-        min_api='2019-11-01'
-    )
-
     network_load_balancers_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.network.custom#{}',
         client_factory=cf_load_balancers,
@@ -212,7 +206,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.cli.command_modules.network.custom#{}',
         client_factory=cf_network_interfaces
     )
-
     # endregion
 
     # region NetworkRoot
@@ -415,7 +408,6 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_ssl_profile')
         g.custom_show_command('show', 'show_ssl_profile')
         g.custom_command('update', 'update_ssl_profile')
-
     # endregion
 
     # region DdosProtectionPlans
@@ -549,7 +541,6 @@ def load_command_table(self, _):
     # with self.command_group('network private-link-service ip-configs', network_private_link_service_sdk) as g:
     #     g.custom_command('add', 'add_private_link_services_ipconfig')
     #     g.custom_command('remove', 'remove_private_link_services_ipconfig')
-
     # endregion
 
     # region LoadBalancers
@@ -657,13 +648,16 @@ def load_command_table(self, _):
     # endregion
 
     # region cross-region load balancer
-    with self.command_group('network cross-region-lb', network_lb_sdk) as g:
-        g.show_command('show', 'get')
+    with self.command_group('network cross-region-lb') as g:
         g.custom_command('create', 'create_cross_region_load_balancer', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_cross_region_lb_create_namespace, exception_handler=handle_template_based_exception)
-        g.command('delete', 'begin_delete')
-        g.custom_command('list', 'list_lbs')
-        g.generic_update_command('update', setter_name='begin_create_or_update')
-        g.wait_command('wait')
+
+        from .aaz.latest.network.lb import Wait
+        from .operations.load_balancer import CrossRegionLoadBalancerShow, CrossRegionLoadBalancerDelete, CrossRegionLoadBalancerUpdate, CrossRegionLoadBalancerList
+        self.command_table['network cross-region-lb show'] = CrossRegionLoadBalancerShow(loader=self)
+        self.command_table['network cross-region-lb delete'] = CrossRegionLoadBalancerDelete(loader=self)
+        self.command_table['network cross-region-lb list'] = CrossRegionLoadBalancerList(loader=self)
+        self.command_table['network cross-region-lb update'] = CrossRegionLoadBalancerUpdate(loader=self)
+        self.command_table['network cross-region-lb wait'] = Wait(loader=self)
 
     cross_region_lb_property_map = {
         'frontend_ip_configurations': 'frontend-ip',
@@ -745,20 +739,20 @@ def load_command_table(self, _):
     with self.command_group('network nic ip-config inbound-nat-rule') as g:
         g.custom_command('add', 'add_nic_ip_config_inbound_nat_rule')
         g.custom_command('remove', 'remove_nic_ip_config_inbound_nat_rule')
-
     # endregion
 
     # region NetworkSecurityGroups
-    with self.command_group('network nsg') as g:
-        g.custom_command('create', 'create_nsg', transform=transform_nsg_create_output)
+    with self.command_group("network nsg") as g:
+        from .custom import NSGCreate
+        self.command_table["network nsg create"] = NSGCreate(loader=self)
 
-    with self.command_group('network nsg rule') as g:
-        g.custom_command('list', 'list_nsg_rules', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
-        g.custom_command('create', 'create_nsg_rule')
+    with self.command_group("network nsg rule") as g:
+        from .custom import NSGRuleCreate, NSGRuleUpdate
         from .aaz.latest.network.nsg.rule import Show
-        self.command_table['network nsg rule show'] = Show(loader=self, table_transformer=transform_nsg_rule_table_output)
-        from azure.cli.command_modules.network.custom import NsgRuleUpdate
-        self.command_table['network nsg rule update'] = NsgRuleUpdate(loader=self)
+        self.command_table["network nsg rule create"] = NSGRuleCreate(loader=self)
+        self.command_table["network nsg rule update"] = NSGRuleUpdate(loader=self)
+        self.command_table["network nsg rule show"] = Show(loader=self, table_transformer=transform_nsg_rule_table_output)
+        g.custom_command("list", "list_nsg_rules", table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
     # endregion
 
     # region NetworkWatchers
@@ -948,8 +942,6 @@ def load_command_table(self, _):
         g.show_command('show', 'begin_get_vpnclient_ipsec_parameters')
         g.wait_command('wait')
 
-    # with self.command_group
-
     with self.command_group('network vnet-gateway revoked-cert', network_vgw_sdk) as g:
         g.custom_command('create', 'create_vnet_gateway_revoked_cert')
         g.custom_command('delete', 'delete_vnet_gateway_revoked_cert')
@@ -1002,7 +994,6 @@ def load_command_table(self, _):
         g.custom_command('start', 'start_vpn_conn_package_capture', supports_no_wait=True)
         g.custom_command('stop', 'stop_vpn_conn_package_capture', supports_no_wait=True)
         g.wait_command('wait')
-
     # endregion
 
     # region VirtualRouter
@@ -1038,19 +1029,6 @@ def load_command_table(self, _):
     with self.command_group('network routeserver') as g:
         g.custom_command('create', 'create_virtual_hub')
         g.custom_command('delete', 'delete_virtual_hub', supports_no_wait=True, confirmation=True)
-    # endregion
-
-    # region Bastion
-    with self.command_group('network bastion', network_bastion_hosts_sdk, is_preview=True) as g:
-        g.custom_command('create', 'create_bastion_host', supports_no_wait=True)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_bastion_host', supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_bastion_host')
-        g.custom_command('ssh', 'ssh_bastion_host')
-        g.custom_command('rdp', 'rdp_bastion_host')
-        g.custom_command('tunnel', 'create_bastion_tunnel')
-        g.command('delete', 'begin_delete')
-        g.wait_command('wait')
     # endregion
 
     # region PrivateLinkResource and PrivateEndpointConnection

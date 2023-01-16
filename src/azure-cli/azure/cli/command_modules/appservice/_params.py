@@ -699,6 +699,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('vnet', options_list=['--vnet'], help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
         c.argument('subnet', options_list=['--subnet'], help="Name or resource ID of the pre-existing subnet to have the webapp join. The --vnet is argument also needed if specifying subnet by name.")
 
+    with self.argument_context('functionapp cors credentials') as c:
+        c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())
+
     with self.argument_context('functionapp vnet-integration') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
         c.argument('slot', help="The name of the slot. Default to the productions slot if not specified")
@@ -752,7 +755,9 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('functionapp show') as c:
         c.argument('name', arg_type=functionapp_name_arg_type)
     with self.argument_context('functionapp delete') as c:
-        c.argument('name', arg_type=functionapp_name_arg_type, local_context_attribute=None)
+        c.argument('name', arg_type=functionapp_name_arg_type, local_context_attribute=None, help='The name of the functionapp')
+        c.argument('keep_empty_plan', action='store_true', help='keep empty app service plan')
+
     with self.argument_context('functionapp config appsettings') as c:
         c.argument('slot_settings', nargs='+', help="space-separated slot app settings in a format of `<name>=<value>`")
 
@@ -1113,6 +1118,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('sku', arg_type=static_web_app_sku_arg_type)
     with self.argument_context('staticwebapp functions link') as c:
         c.argument('function_resource_id', help="Resource ID of the functionapp to link. Can be retrieved with 'az functionapp --query id'")
+        c.argument('environment_name', help="Name of the environment of static site")
         c.argument('force', help="Force the function link even if the function is already linked to a static webapp. May be needed if the function was previously linked to a static webapp.")
     with self.argument_context('staticwebapp backends link') as c:
         c.argument('backend_resource_id', help="Resource ID of the backend to link.")

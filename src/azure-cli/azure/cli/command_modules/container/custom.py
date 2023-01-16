@@ -615,12 +615,14 @@ def container_export(cmd, resource_group_name, name, file):
         identity = resource['identity'].type
         if identity != ResourceIdentityType.none:
             resource['identity'] = resource['identity'].__dict__
-            identity_entry = {'type': resource['identity']['type'].value}
+            identity_entry = {'type': resource['identity']['type']}
             if resource['identity']['user_assigned_identities']:
                 identity_entry['user_assigned_identities'] = {k: {} for k in resource['identity']['user_assigned_identities']}
             resource['identity'] = identity_entry
+        else:
+            resource.pop('identity', None)
     except (KeyError, AttributeError):
-        resource.pop('indentity', None)
+        resource.pop('identity', None)
 
     # Remove container instance views
     for i in range(len(resource['properties']['containers'])):

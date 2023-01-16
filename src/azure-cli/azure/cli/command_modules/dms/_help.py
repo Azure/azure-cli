@@ -260,10 +260,34 @@ parameters:
                   "target_database_name": "targetSchema1",
                   // Table mapping from source to target schemas [Optional]
                   // Don't add it if all tables of this database needs to be migrated
-                  "table_map": {"sourceSchema1.table1": "targetSchema1.table1",
-                                "sourceSchema1.table2": "targetSchema1.table2",
-                                "sourceSchema1.table3": "targetSchema1.table3",
-                                ..n}
+                  "table_map": {
+                        "sourceSchema1.table1": "targetSchema1.table1",
+                        "sourceSchema1.table2": "targetSchema1.table2",
+                        "sourceSchema1.table3": "targetSchema1.table3",
+                        ..n
+                    }
+                    // the below items are only necessary for selective schema migration
+                    // optional, migrates schema for the following tables
+                    'tables_to_migrate_schema': {
+                        "sourceSchema1.table2": "targetSchema1.table2",
+                        "sourceSchema1.table3": "targetSchema1.table3"
+                    },
+                    // optional, migrates the enumerated views
+                    'selected_views': [
+                        'sourceSchema1.view1'
+                    ],
+                    // optional, migrates the enumerated triggers
+                    'selected_triggers': [
+                        'sourceSchema1.on_table1_updated'
+                    ],
+                    // optional, migrates the enumerated routines
+                    'selected_routines': [
+                        'sourceSchema1.build_report'
+                    ],
+                    // optional, migrates the enumerated events
+                    'selected_events': [
+                        'sourceSchema1.nightly_maintenance'
+                    ]
                 },
                 ...n
             ],
@@ -293,9 +317,28 @@ parameters:
                 "ThrottleQueryTableDataRangeTaskAtBatchCount": 36,
                 // Optional setting that configures the delay between updates of result objects in Azure Table Storage.
                 "DelayProgressUpdatesInStorageInterval": "00:00:30",
-                },
-            // [Optional]
-            "make_source_server_read_only": "true|false"
+            },
+            // Optional setting to set the source server read only.
+            "make_source_server_read_only": "true|false",
+            // Optional setting to enable consistent backup. True by default for the sync migration, and false otherwise.
+            "enable_consistent_backup": "true|false",
+            // Optional. If true, all view definitions will be migrated in the selected databases.
+            "migrate_all_views": "true|false",
+            // Optional. If true, all trigger definitions will be migrated in the selected databases.
+            "migrate_all_triggers": "true|false",
+            // Optional. If true, all event definitions will be migrated in the selected databases.
+            "migrate_all_events": "true|false",
+            // Optional. If true, all stored proc definitions will be migrated in the selected databases.
+            "migrate_all_routines": "true|false",
+            // Optional. If true, all table's schemas will be migrated.
+            "migrate_all_tables_schema": "true|false",
+            // Optional. If true, all users/grants will be migrated.
+            "migrate_user_system_tables": "true|false",
+            // Binlog position to start the migration from. Only applicable for the ReplicateChanges migration.
+            "binLogInfo": {
+                "filename": "binlog.0004523",
+                "position": 283287
+            }
         }
 
   - name: --source-connection-json
