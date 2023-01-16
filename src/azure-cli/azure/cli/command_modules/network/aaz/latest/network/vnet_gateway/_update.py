@@ -59,6 +59,58 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
         )
+        _args_schema.location = AAZResourceLocationArg(
+            help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
+            nullable=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        _args_schema.gateway_default_site = AAZStrArg(
+            options=["--gateway-default-site"],
+            help="Name or ID of a local network gateway representing a local network site with default routes.",
+            nullable=True,
+        )
+        _args_schema.gateway_type = AAZStrArg(
+            options=["--gateway-type"],
+            help="The gateway type.",
+            nullable=True,
+            enum={"ExpressRoute": "ExpressRoute", "LocalGateway": "LocalGateway", "Vpn": "Vpn"},
+        )
+        _args_schema.sku = AAZStrArg(
+            options=["--sku"],
+            help="VNet gateway SKU.",
+            default="Basic",
+            nullable=True,
+            enum={"Basic": "Basic", "ErGw1AZ": "ErGw1AZ", "ErGw2AZ": "ErGw2AZ", "ErGw3AZ": "ErGw3AZ", "HighPerformance": "HighPerformance", "Standard": "Standard", "UltraPerformance": "UltraPerformance", "VpnGw1": "VpnGw1", "VpnGw1AZ": "VpnGw1AZ", "VpnGw2": "VpnGw2", "VpnGw2AZ": "VpnGw2AZ", "VpnGw3": "VpnGw3", "VpnGw3AZ": "VpnGw3AZ", "VpnGw4": "VpnGw4", "VpnGw4AZ": "VpnGw4AZ", "VpnGw5": "VpnGw5", "VpnGw5AZ": "VpnGw5AZ"},
+        )
+        _args_schema.vpn_auth_type = AAZListArg(
+            options=["--vpn-auth-type"],
+            help="VPN authentication types enabled for the virtual network gateway.",
+            nullable=True,
+        )
+        _args_schema.vpn_type = AAZStrArg(
+            options=["--vpn-type"],
+            help="VPN routing type.",
+            nullable=True,
+            enum={"PolicyBased": "PolicyBased", "RouteBased": "RouteBased"},
+        )
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            help="Space-separated tags: key[=value] [key[=value] ...]. Use \"\" to clear existing tags.",
+            nullable=True,
+        )
+
+        vpn_auth_type = cls._args_schema.vpn_auth_type
+        vpn_auth_type.Element = AAZStrArg(
+            nullable=True,
+            enum={"AAD": "AAD", "Certificate": "Certificate", "Radius": "Radius"},
+        )
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg(
+            nullable=True,
+        )
 
         # define Arg Group "AAD Authentication"
 
@@ -110,7 +162,7 @@ class Update(AAZCommand):
         _args_schema.enable_bgp = AAZBoolArg(
             options=["--enable-bgp"],
             arg_group="BGP Peering",
-            help="Whether BGP is enabled for this virtual network gateway or not.",
+            help="Enable BGP (Border Gateway Protocol).",
             nullable=True,
         )
 
@@ -119,6 +171,56 @@ class Update(AAZCommand):
         # define Arg Group "Parameters"
 
         # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.active = AAZBoolArg(
+            options=["--active"],
+            arg_group="Properties",
+            help="ActiveActive flag.",
+            nullable=True,
+        )
+        _args_schema.ip_configurations = AAZListArg(
+            options=["--ip-configurations"],
+            arg_group="Properties",
+            help="IP configurations for virtual network gateway.",
+            nullable=True,
+        )
+        _args_schema.sku_tier = AAZStrArg(
+            options=["--sku-tier"],
+            arg_group="Properties",
+            help="Gateway SKU tier.",
+            nullable=True,
+            enum={"Basic": "Basic", "ErGw1AZ": "ErGw1AZ", "ErGw2AZ": "ErGw2AZ", "ErGw3AZ": "ErGw3AZ", "HighPerformance": "HighPerformance", "Standard": "Standard", "UltraPerformance": "UltraPerformance", "VpnGw1": "VpnGw1", "VpnGw1AZ": "VpnGw1AZ", "VpnGw2": "VpnGw2", "VpnGw2AZ": "VpnGw2AZ", "VpnGw3": "VpnGw3", "VpnGw3AZ": "VpnGw3AZ", "VpnGw4": "VpnGw4", "VpnGw4AZ": "VpnGw4AZ", "VpnGw5": "VpnGw5", "VpnGw5AZ": "VpnGw5AZ"},
+        )
+
+        ip_configurations = cls._args_schema.ip_configurations
+        ip_configurations.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.ip_configurations.Element
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="The name of the resource that is unique within a resource group. This name can be used to access the resource.",
+            nullable=True,
+        )
+        _element.private_ip_allocation_method = AAZStrArg(
+            options=["private-ip-allocation-method"],
+            help="The private IP address allocation method.",
+            nullable=True,
+            enum={"Dynamic": "Dynamic", "Static": "Static"},
+        )
+        _element.public_ip_address = AAZObjectArg(
+            options=["public-ip-address"],
+            help="The reference to the public IP resource.",
+            nullable=True,
+        )
+        cls._build_args_sub_resource_update(_element.public_ip_address)
+        _element.subnet = AAZStrArg(
+            options=["subnet"],
+            help="test",
+            nullable=True,
+        )
 
         # define Arg Group "Root Cert Authentication"
 
@@ -198,121 +300,6 @@ class Update(AAZCommand):
         )
 
         # define Arg Group "VpnClientConfiguration"
-
-        # define Arg Group "test"
-
-        _args_schema = cls._args_schema
-        _args_schema.location = AAZResourceLocationArg(
-            arg_group="test",
-            help="Resource location.",
-            nullable=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
-        )
-        _args_schema.gateway_default_site = AAZStrArg(
-            options=["--gateway-default-site"],
-            arg_group="test",
-            help="Name or ID of a local network gateway representing a local network site with default routes.",
-            nullable=True,
-        )
-        _args_schema.gateway_type = AAZStrArg(
-            options=["--gateway-type"],
-            arg_group="test",
-            help="The gateway type.",
-            nullable=True,
-            enum={"ExpressRoute": "ExpressRoute", "LocalGateway": "LocalGateway", "Vpn": "Vpn"},
-        )
-        _args_schema.ip_configurations = AAZListArg(
-            options=["--ip-configurations"],
-            arg_group="test",
-            help="IP configurations for virtual network gateway.",
-            nullable=True,
-        )
-        _args_schema.sku = AAZStrArg(
-            options=["--sku"],
-            arg_group="test",
-            help="VNet gateway SKU.",
-            default="Basic",
-            nullable=True,
-            enum={"Basic": "Basic", "ErGw1AZ": "ErGw1AZ", "ErGw2AZ": "ErGw2AZ", "ErGw3AZ": "ErGw3AZ", "HighPerformance": "HighPerformance", "Standard": "Standard", "UltraPerformance": "UltraPerformance", "VpnGw1": "VpnGw1", "VpnGw1AZ": "VpnGw1AZ", "VpnGw2": "VpnGw2", "VpnGw2AZ": "VpnGw2AZ", "VpnGw3": "VpnGw3", "VpnGw3AZ": "VpnGw3AZ", "VpnGw4": "VpnGw4", "VpnGw4AZ": "VpnGw4AZ", "VpnGw5": "VpnGw5", "VpnGw5AZ": "VpnGw5AZ"},
-        )
-        _args_schema.vpn_auth_type = AAZListArg(
-            options=["--vpn-auth-type"],
-            arg_group="test",
-            help="VPN authentication types enabled for the virtual network gateway.  Allowed values: AAD, Certificate, Radius.",
-            nullable=True,
-        )
-        _args_schema.vpn_type = AAZStrArg(
-            options=["--vpn-type"],
-            arg_group="test",
-            help="VPN routing type.",
-            nullable=True,
-            enum={"PolicyBased": "PolicyBased", "RouteBased": "RouteBased"},
-        )
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            arg_group="test",
-            help="Resource tags.",
-            nullable=True,
-        )
-
-        ip_configurations = cls._args_schema.ip_configurations
-        ip_configurations.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.ip_configurations.Element
-        _element.name = AAZStrArg(
-            options=["name"],
-            help="The name of the resource that is unique within a resource group. This name can be used to access the resource.",
-            nullable=True,
-        )
-        _element.private_ip_allocation_method = AAZStrArg(
-            options=["private-ip-allocation-method"],
-            help="The private IP address allocation method.",
-            nullable=True,
-            enum={"Dynamic": "Dynamic", "Static": "Static"},
-        )
-        _element.public_ip_address = AAZObjectArg(
-            options=["public-ip-address"],
-            help="The reference to the public IP resource.",
-            nullable=True,
-        )
-        cls._build_args_sub_resource_update(_element.public_ip_address)
-        _element.subnet = AAZStrArg(
-            options=["subnet"],
-            help="test",
-            nullable=True,
-        )
-
-        vpn_auth_type = cls._args_schema.vpn_auth_type
-        vpn_auth_type.Element = AAZStrArg(
-            nullable=True,
-            enum={"AAD": "AAD", "Certificate": "Certificate", "Radius": "Radius"},
-        )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg(
-            nullable=True,
-        )
-
-        # define Arg Group "test2"
-
-        _args_schema = cls._args_schema
-        _args_schema.active = AAZBoolArg(
-            options=["--active"],
-            arg_group="test2",
-            help="ActiveActive flag.",
-            nullable=True,
-        )
-        _args_schema.sku_tier = AAZStrArg(
-            options=["--sku-tier"],
-            arg_group="test2",
-            help="Gateway SKU tier.",
-            nullable=True,
-            enum={"Basic": "Basic", "ErGw1AZ": "ErGw1AZ", "ErGw2AZ": "ErGw2AZ", "ErGw3AZ": "ErGw3AZ", "HighPerformance": "HighPerformance", "Standard": "Standard", "UltraPerformance": "UltraPerformance", "VpnGw1": "VpnGw1", "VpnGw1AZ": "VpnGw1AZ", "VpnGw2": "VpnGw2", "VpnGw2AZ": "VpnGw2AZ", "VpnGw3": "VpnGw3", "VpnGw3AZ": "VpnGw3AZ", "VpnGw4": "VpnGw4", "VpnGw4AZ": "VpnGw4AZ", "VpnGw5": "VpnGw5", "VpnGw5AZ": "VpnGw5AZ"},
-        )
         return cls._args_schema
 
     _args_address_space_update = None

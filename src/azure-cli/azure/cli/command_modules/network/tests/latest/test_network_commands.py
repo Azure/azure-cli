@@ -4834,8 +4834,8 @@ class NetworkVpnConnectionNatRule(ScenarioTest):
         self.cmd('network public-ip create -g {rg} -n {ip}')
 
         vg = self.cmd('network vnet-gateway create -g {rg} -n {vg} --vnet {vnet} --public-ip-address {ip} --sku {sku} '
-                      '--nat-rule name={nat} mode=IngressSnat internal-mappings={i_map} external-mappings={e_map} '
-                      '--nat-rule name={nat1} mode=EgressSnat internal-mappings={i_map1} external-mappings={e_map1}',
+                      '--nat-rule [{{name:{nat},mode:IngressSnat,internal-mappings:[{i_map}],external-mappings:[{e_map}]}},'
+                      '{{name:{nat1},mode:EgressSnat,internal-mappings:[{i_map1}],external-mappings:[{e_map1}]}}]',
                       checks=[self.check('length(vnetGateway.natRules)', 2)]).get_output_in_json()
 
         self.kwargs.update({'id': vg['vnetGateway']['natRules'][0]['id']})

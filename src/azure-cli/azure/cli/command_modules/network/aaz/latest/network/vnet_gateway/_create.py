@@ -62,6 +62,93 @@ class Create(AAZCommand):
             help="Name of the VNet gateway.",
             required=True,
         )
+        _args_schema.edge_zone = AAZStrArg(
+            options=["--edge-zone"],
+            help="The name of edge zone.",
+        )
+        _args_schema.location = AAZResourceLocationArg(
+            help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        _args_schema.gateway_default_site = AAZStrArg(
+            options=["--gateway-default-site"],
+            help="Name or ID of a local network gateway representing a local network site with default routes.",
+        )
+        _args_schema.gateway_type = AAZStrArg(
+            options=["--gateway-type"],
+            help="The gateway type.",
+            default="Vpn",
+            enum={"ExpressRoute": "ExpressRoute", "LocalGateway": "LocalGateway", "Vpn": "Vpn"},
+        )
+        _args_schema.ip_configurations = AAZListArg(
+            options=["--ip-configurations"],
+            help="IP configurations for virtual network gateway.",
+        )
+        _args_schema.sku = AAZStrArg(
+            options=["--sku"],
+            help="VNet gateway SKU.",
+            default="Basic",
+            enum={"Basic": "Basic", "ErGw1AZ": "ErGw1AZ", "ErGw2AZ": "ErGw2AZ", "ErGw3AZ": "ErGw3AZ", "HighPerformance": "HighPerformance", "Standard": "Standard", "UltraPerformance": "UltraPerformance", "VpnGw1": "VpnGw1", "VpnGw1AZ": "VpnGw1AZ", "VpnGw2": "VpnGw2", "VpnGw2AZ": "VpnGw2AZ", "VpnGw3": "VpnGw3", "VpnGw3AZ": "VpnGw3AZ", "VpnGw4": "VpnGw4", "VpnGw4AZ": "VpnGw4AZ", "VpnGw5": "VpnGw5", "VpnGw5AZ": "VpnGw5AZ"},
+        )
+        _args_schema.edge_zone_vnet_id = AAZStrArg(
+            options=["--edge-zone-vnet-id"],
+            help="The Extended vnet resource id of the local gateway.",
+        )
+        _args_schema.vpn_auth_type = AAZListArg(
+            options=["--vpn-auth-type"],
+            help="VPN authentication types enabled for the virtual network gateway.",
+        )
+        _args_schema.vpn_gateway_generation = AAZStrArg(
+            options=["--vpn-gateway-generation"],
+            help="The generation for the virtual network gateway. vpn_gateway_generation should not be provided if gateway_type is not Vpn.",
+            enum={"Generation1": "Generation1", "Generation2": "Generation2", "None": "None"},
+        )
+        _args_schema.vpn_type = AAZStrArg(
+            options=["--vpn-type"],
+            help="VPN routing type.",
+            default="RouteBased",
+            enum={"PolicyBased": "PolicyBased", "RouteBased": "RouteBased"},
+        )
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            help="Space-separated tags: key[=value] [key[=value] ...]. Use \"\" to clear existing tags.",
+        )
+
+        ip_configurations = cls._args_schema.ip_configurations
+        ip_configurations.Element = AAZObjectArg()
+
+        _element = cls._args_schema.ip_configurations.Element
+        _element.id = AAZStrArg(
+            options=["id"],
+            help="Resource ID.",
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="The name of the resource that is unique within a resource group. This name can be used to access the resource.",
+        )
+        _element.private_ip_allocation_method = AAZStrArg(
+            options=["private-ip-allocation-method"],
+            help="The private IP address allocation method.",
+            enum={"Dynamic": "Dynamic", "Static": "Static"},
+        )
+        _element.public_ip_address = AAZStrArg(
+            options=["public-ip-address"],
+            help="The reference to the public IP resource.",
+        )
+        _element.subnet = AAZStrArg(
+            options=["subnet"],
+            help="test",
+        )
+
+        vpn_auth_type = cls._args_schema.vpn_auth_type
+        vpn_auth_type.Element = AAZStrArg(
+            enum={"AAD": "AAD", "Certificate": "Certificate", "Radius": "Radius"},
+        )
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg()
 
         # define Arg Group "AAD Authentication"
 
@@ -107,7 +194,7 @@ class Create(AAZCommand):
         _args_schema.enable_bgp = AAZBoolArg(
             options=["--enable-bgp"],
             arg_group="BGP Peering",
-            help="Whether BGP is enabled for this virtual network gateway or not.",
+            help="Enable BGP (Border Gateway Protocol).",
         )
 
         # define Arg Group "BgpSettings"
@@ -115,16 +202,17 @@ class Create(AAZCommand):
         # define Arg Group "Nat Rule"
 
         _args_schema = cls._args_schema
-        _args_schema.nat_rule = AAZListArg(
-            options=["--nat-rule"],
+        _args_schema.nat_rules = AAZListArg(
+            options=["--nat-rules"],
+            singular_options=["--nat-rule"],
             arg_group="Nat Rule",
-            help="NatRules for virtual network gateway.",
+            help={"short-summary": "VirtualNetworkGatewayNatRule Resource.", "long-summary": "Usage: --nat-rule name=rule type=Static mode=EgressSnat internal-mappings=10.4.0.0/24 external-mappings=192.168.21.0/24 ip-config-id=/subscriptions/subid/resourceGroups/rg1/providers/Microsoft.Network/virtualNetworkGateways/gateway1/ipConfigurations/default\n        name: Required.The name of the resource that is unique within a resource group. This name can be used to access the resource.\n        internal-mappings: Required.The private IP address internal mapping for NAT.\n        external-mappings: Required.The private IP address external mapping for NAT.\n        type: The type of NAT rule for VPN NAT.\n        mode: The Source NAT direction of a VPN NAT.\n        ip-config-id: The IP Configuration ID this NAT rule applies to."},
         )
 
-        nat_rule = cls._args_schema.nat_rule
-        nat_rule.Element = AAZObjectArg()
+        nat_rules = cls._args_schema.nat_rules
+        nat_rules.Element = AAZObjectArg()
 
-        _element = cls._args_schema.nat_rule.Element
+        _element = cls._args_schema.nat_rules.Element
         _element.name = AAZStrArg(
             options=["name"],
             help="Required. The name of the resource that is unique within a resource group. This name can be used to access the resource.",
@@ -152,18 +240,18 @@ class Create(AAZCommand):
             enum={"Dynamic": "Dynamic", "Static": "Static"},
         )
 
-        external_mappings_ip = cls._args_schema.nat_rule.Element.external_mappings_ip
+        external_mappings_ip = cls._args_schema.nat_rules.Element.external_mappings_ip
         external_mappings_ip.Element = AAZObjectArg()
 
-        _element = cls._args_schema.nat_rule.Element.external_mappings_ip.Element
+        _element = cls._args_schema.nat_rules.Element.external_mappings_ip.Element
         _element.address_space = AAZStrArg(
             options=["address-space"],
         )
 
-        internal_mappings_ip = cls._args_schema.nat_rule.Element.internal_mappings_ip
+        internal_mappings_ip = cls._args_schema.nat_rules.Element.internal_mappings_ip
         internal_mappings_ip.Element = AAZObjectArg()
 
-        _element = cls._args_schema.nat_rule.Element.internal_mappings_ip.Element
+        _element = cls._args_schema.nat_rules.Element.internal_mappings_ip.Element
         _element.address_space = AAZStrArg(
             options=["address-space"],
         )
@@ -171,6 +259,26 @@ class Create(AAZCommand):
         # define Arg Group "Parameters"
 
         # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.edge_zone_type = AAZStrArg(
+            options=["--edge-zone-type"],
+            arg_group="Properties",
+            help="The type of the extended location.",
+            default="EdgeZone",
+            enum={"EdgeZone": "EdgeZone"},
+        )
+        _args_schema.active = AAZBoolArg(
+            options=["--active"],
+            arg_group="Properties",
+            help="ActiveActive flag.",
+        )
+        _args_schema.sku_tier = AAZStrArg(
+            options=["--sku-tier"],
+            arg_group="Properties",
+            help="Gateway SKU tier.",
+            enum={"Basic": "Basic", "ErGw1AZ": "ErGw1AZ", "ErGw2AZ": "ErGw2AZ", "ErGw3AZ": "ErGw3AZ", "HighPerformance": "HighPerformance", "Standard": "Standard", "UltraPerformance": "UltraPerformance", "VpnGw1": "VpnGw1", "VpnGw1AZ": "VpnGw1AZ", "VpnGw2": "VpnGw2", "VpnGw2AZ": "VpnGw2AZ", "VpnGw3": "VpnGw3", "VpnGw3AZ": "VpnGw3AZ", "VpnGw4": "VpnGw4", "VpnGw4AZ": "VpnGw4AZ", "VpnGw5": "VpnGw5", "VpnGw5AZ": "VpnGw5AZ"},
+        )
 
         # define Arg Group "Root Cert Authentication"
 
@@ -236,129 +344,6 @@ class Create(AAZCommand):
         )
 
         # define Arg Group "VpnClientConfiguration"
-
-        # define Arg Group "test"
-
-        _args_schema = cls._args_schema
-        _args_schema.edge_zone = AAZStrArg(
-            options=["--edge-zone"],
-            arg_group="test",
-            help="The name of edge zone.",
-        )
-        _args_schema.location = AAZResourceLocationArg(
-            arg_group="test",
-            help="Resource location.",
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
-        )
-        _args_schema.gateway_default_site = AAZStrArg(
-            options=["--gateway-default-site"],
-            arg_group="test",
-            help="Name or ID of a local network gateway representing a local network site with default routes.",
-        )
-        _args_schema.gateway_type = AAZStrArg(
-            options=["--gateway-type"],
-            arg_group="test",
-            help="The gateway type.",
-            default="Vpn",
-            enum={"ExpressRoute": "ExpressRoute", "LocalGateway": "LocalGateway", "Vpn": "Vpn"},
-        )
-        _args_schema.ip_configurations = AAZListArg(
-            options=["--ip-configurations"],
-            arg_group="test",
-            help="IP configurations for virtual network gateway.",
-        )
-        _args_schema.sku = AAZStrArg(
-            options=["--sku"],
-            arg_group="test",
-            help="VNet gateway SKU.",
-            default="Basic",
-            enum={"Basic": "Basic", "ErGw1AZ": "ErGw1AZ", "ErGw2AZ": "ErGw2AZ", "ErGw3AZ": "ErGw3AZ", "HighPerformance": "HighPerformance", "Standard": "Standard", "UltraPerformance": "UltraPerformance", "VpnGw1": "VpnGw1", "VpnGw1AZ": "VpnGw1AZ", "VpnGw2": "VpnGw2", "VpnGw2AZ": "VpnGw2AZ", "VpnGw3": "VpnGw3", "VpnGw3AZ": "VpnGw3AZ", "VpnGw4": "VpnGw4", "VpnGw4AZ": "VpnGw4AZ", "VpnGw5": "VpnGw5", "VpnGw5AZ": "VpnGw5AZ"},
-        )
-        _args_schema.edge_zone_vnet_id = AAZStrArg(
-            options=["--edge-zone-vnet-id"],
-            arg_group="test",
-            help="The Extended vnet resource id of the local gateway.",
-        )
-        _args_schema.vpn_auth_type = AAZListArg(
-            options=["--vpn-auth-type"],
-            arg_group="test",
-            help="VPN authentication types enabled for the virtual network gateway.  Allowed values: AAD, Certificate, Radius.",
-        )
-        _args_schema.vpn_gateway_generation = AAZStrArg(
-            options=["--vpn-gateway-generation"],
-            arg_group="test",
-            help="The generation for the virtual network gateway. vpn_gateway_generation should not be provided if gateway_type is not Vpn.",
-            enum={"Generation1": "Generation1", "Generation2": "Generation2", "None": "None"},
-        )
-        _args_schema.vpn_type = AAZStrArg(
-            options=["--vpn-type"],
-            arg_group="test",
-            help="VPN routing type.",
-            enum={"PolicyBased": "PolicyBased", "RouteBased": "RouteBased"},
-        )
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            arg_group="test",
-            help="Resource tags.",
-        )
-
-        ip_configurations = cls._args_schema.ip_configurations
-        ip_configurations.Element = AAZObjectArg()
-
-        _element = cls._args_schema.ip_configurations.Element
-        _element.id = AAZStrArg(
-            options=["id"],
-            help="Resource ID.",
-        )
-        _element.name = AAZStrArg(
-            options=["name"],
-            help="The name of the resource that is unique within a resource group. This name can be used to access the resource.",
-        )
-        _element.private_ip_allocation_method = AAZStrArg(
-            options=["private-ip-allocation-method"],
-            help="The private IP address allocation method.",
-            enum={"Dynamic": "Dynamic", "Static": "Static"},
-        )
-        _element.public_ip_address = AAZStrArg(
-            options=["public-ip-address"],
-            help="The reference to the public IP resource.",
-        )
-        _element.subnet = AAZStrArg(
-            options=["subnet"],
-            help="test",
-        )
-
-        vpn_auth_type = cls._args_schema.vpn_auth_type
-        vpn_auth_type.Element = AAZStrArg(
-            enum={"AAD": "AAD", "Certificate": "Certificate", "Radius": "Radius"},
-        )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg()
-
-        # define Arg Group "test2"
-
-        _args_schema = cls._args_schema
-        _args_schema.edge_zone_type = AAZStrArg(
-            options=["--edge-zone-type"],
-            arg_group="test2",
-            help="The type of the extended location.",
-            default="EdgeZone",
-            enum={"EdgeZone": "EdgeZone"},
-        )
-        _args_schema.active = AAZBoolArg(
-            options=["--active"],
-            arg_group="test2",
-            help="ActiveActive flag.",
-        )
-        _args_schema.sku_tier = AAZStrArg(
-            options=["--sku-tier"],
-            arg_group="test2",
-            help="Gateway SKU tier.",
-            enum={"Basic": "Basic", "ErGw1AZ": "ErGw1AZ", "ErGw2AZ": "ErGw2AZ", "ErGw3AZ": "ErGw3AZ", "HighPerformance": "HighPerformance", "Standard": "Standard", "UltraPerformance": "UltraPerformance", "VpnGw1": "VpnGw1", "VpnGw1AZ": "VpnGw1AZ", "VpnGw2": "VpnGw2", "VpnGw2AZ": "VpnGw2AZ", "VpnGw3": "VpnGw3", "VpnGw3AZ": "VpnGw3AZ", "VpnGw4": "VpnGw4", "VpnGw4AZ": "VpnGw4AZ", "VpnGw5": "VpnGw5", "VpnGw5AZ": "VpnGw5AZ"},
-        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -486,7 +471,7 @@ class Create(AAZCommand):
                 properties.set_prop("gatewayDefaultSite", AAZObjectType)
                 properties.set_prop("gatewayType", AAZStrType, ".gateway_type")
                 properties.set_prop("ipConfigurations", AAZListType, ".ip_configurations")
-                properties.set_prop("natRules", AAZListType, ".nat_rule")
+                properties.set_prop("natRules", AAZListType, ".nat_rules")
                 properties.set_prop("sku", AAZObjectType)
                 properties.set_prop("vNetExtendedLocationResourceId", AAZStrType, ".edge_zone_vnet_id")
                 properties.set_prop("vpnClientConfiguration", AAZObjectType)
