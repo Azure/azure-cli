@@ -746,8 +746,55 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                                              object_id=object_id,
                                              permissions=permissions)]
 
-    if not sku:
-        sku = 'standard'
+    deploy_parameters = {
+        "vaultName": {
+            "value": vault_name
+        },
+        "tenantId": {
+            "value": tenant_id
+        }
+    }
+
+    if location:
+        deploy_parameters["location"] = {"value": location}
+    if enabled_for_deployment is not None:
+        deploy_parameters["enabledForDeployment"] = {"value": enabled_for_deployment}
+    if enabled_for_disk_encryption is not None:
+        deploy_parameters["enabledForDiskEncryption"] = {"value": enabled_for_disk_encryption}
+    if enabled_for_template_deployment is not None:
+        deploy_parameters["enabledForTemplateDeployment"] = {"value": enabled_for_template_deployment}
+    if enable_purge_protection is not None:
+        deploy_parameters["enablePurgeProtection"] = {"value": enable_purge_protection}
+    if enable_rbac_authorization is not None:
+        deploy_parameters["enableRbacAuthorization"] = {"value": enable_rbac_authorization}
+    if retention_days:
+        deploy_parameters["softDeleteRetentionInDays"] = {"value": int(retention_days)}
+    if bypass:
+        deploy_parameters["networkRuleBypassOptions"] = {"value": bypass}
+    if default_action:
+        deploy_parameters["NetworkRuleAction"] = {"value": default_action}
+    if network_acls_ips:
+        deploy_parameters["ipRules"] = {"value": network_acls_ips}
+    if network_acls_vnets:
+        deploy_parameters["virtualNetworkRules"] = {"value": network_acls_vnets}
+    if access_policies:
+        deploy_parameters["accessPolicies"] = {"value": access_policies}
+    if sku:
+        deploy_parameters["skuName"] = {"value": sku}
+    if tags:
+        deploy_parameters["tags"] = {"value": tags}
+
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    deploy_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    TemplateLink = cmd.get_models('TemplateLink', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    template_link = TemplateLink(uri="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/modules/Microsoft.KeyVault/vaults/1.0/azuredeploy.json")
+    properties = DeploymentProperties(template_link=template_link, parameters=deploy_parameters, mode='incremental')
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
+
+    from azure.cli.core.util import random_string
+    return deploy_client.begin_create_or_update(resource_group_name, 'keyvault_deploy_' + random_string(32), deployment)
 
     properties = VaultProperties(tenant_id=tenant_id,
                                  sku=Sku(name=sku, family='A'),
