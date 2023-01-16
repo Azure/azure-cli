@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=no-self-use, no-member, too-many-lines, unused-argument
-# pylint: disable=protected-access, too-few-public-methods
+# pylint: disable=protected-access, too-few-public-methods, line-too-long
 
 from collections import Counter, OrderedDict
 
@@ -26,7 +26,11 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
+from .aaz.latest.network import ListUsages as _UsagesList
 from .aaz.latest.network.application_gateway import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.application_gateway.url_path_map import Create as _URLPathMapCreate, \
+    Update as _URLPathMapUpdate
+from .aaz.latest.network.application_gateway.url_path_map.rule import Create as _URLPathMapRuleCreate
 from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condition import \
     Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
@@ -39,9 +43,12 @@ from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRo
 from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
 from .aaz.latest.network.nsg import Create as _NSGCreate
 from .aaz.latest.network.nsg.rule import Create as _NSGRuleCreate, Update as _NSGRuleUpdate
-from .aaz.latest.network.private_link_service import Create as _PrivateLinkServiceCreate, \
-    Update as _PrivateLinkServiceUpdate
-from .aaz.latest.network.private_link_service.connection import Update as _PrivateEndpointConnectionUpdate
+from .aaz.latest.network.private_endpoint import Create as _PrivateEndpointCreate, Update as _PrivateEndpointUpdate
+from .aaz.latest.network.private_endpoint.asg import Add as _PrivateEndpointAsgAdd, Remove as _PrivateEndpointAsgRemove
+from .aaz.latest.network.private_endpoint.dns_zone_group import Create as _PrivateEndpointPrivateDnsZoneGroupCreate, \
+    Add as _PrivateEndpointPrivateDnsZoneAdd, Remove as _PrivateEndpointPrivateDnsZoneRemove
+from .aaz.latest.network.private_endpoint.ip_config import Remove as _PrivateEndpointIpConfigRemove, \
+    Add as _PrivateEndpointIpConfigAdd
 from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
 from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdate
 from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
@@ -1576,228 +1583,259 @@ def update_ag_trusted_root_certificate(instance, parent, item_name, cert_data=No
     return parent
 
 
-def create_ag_url_path_map(cmd, resource_group_name, application_gateway_name, item_name, paths,
-                           address_pool=None, http_settings=None, redirect_config=None, rewrite_rule_set=None,
-                           default_address_pool=None, default_http_settings=None, default_redirect_config=None,
-                           no_wait=False, rule_name='default', default_rewrite_rule_set=None, firewall_policy=None):
-    ApplicationGatewayUrlPathMap, ApplicationGatewayPathRule, SubResource = cmd.get_models(
-        'ApplicationGatewayUrlPathMap', 'ApplicationGatewayPathRule', 'SubResource')
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+class URLPathMapCreate(_URLPathMapCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.rule_name = AAZStrArg(
+            options=["--rule-name"],
+            arg_group="First Rule",
+            help="Name of the rule for a URL path map.",
+            default="default",
+        )
+        args_schema.paths = AAZListArg(
+            options=["--paths"],
+            arg_group="First Rule",
+            help="Space-separated list of paths to associate with the rule. "
+                 "Valid paths start and end with \"/\", e.g, \"/bar/\".",
+            required=True,
+        )
+        args_schema.paths.Element = AAZStrArg()
+        args_schema.address_pool = AAZResourceIdArg(
+            options=["--address-pool"],
+            arg_group="First Rule",
+            help="Name or ID of the backend address pool to use with the created rule.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/backendAddressPools/{}",
+            ),
+        )
+        args_schema.http_settings = AAZResourceIdArg(
+            options=["--http-settings"],
+            arg_group="First Rule",
+            help="Name or ID of the HTTP settings to use with the created rule.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/backendHttpSettingsCollection/{}",
+            ),
+        )
+        args_schema.redirect_config = AAZResourceIdArg(
+            options=["--redirect-config"],
+            arg_group="First Rule",
+            help="Name or ID of the redirect configuration to use with the created rule.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/redirectConfigurations/{}",
+            ),
+        )
+        args_schema.rewrite_rule_set = AAZResourceIdArg(
+            options=["--rewrite-rule-set"],
+            arg_group="First Rule",
+            help="Name or ID of the rewrite rule set. If not specified, the default for the map will be used.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/rewriteRuleSets/{}",
+            ),
+        )
+        args_schema.waf_policy = AAZResourceIdArg(
+            options=["--waf-policy"],
+            arg_group="First Rule",
+            help="Name or ID of a web application firewall policy resource.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/ApplicationGatewayWebApplicationFirewallPolicies/{}",
+            ),
+        )
+        # add templates for resource id
+        args_schema.default_address_pool._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/backendAddressPools/{}",
+        )
+        args_schema.default_http_settings._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/backendHttpSettingsCollection/{}",
+        )
+        args_schema.default_redirect_config._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/redirectConfigurations/{}",
+        )
+        args_schema.default_rewrite_rule_set._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/rewriteRuleSets/{}",
+        )
+        return args_schema
 
-    new_rule = ApplicationGatewayPathRule(
-        name=rule_name,
-        backend_address_pool=SubResource(id=address_pool) if address_pool else None,
-        backend_http_settings=SubResource(id=http_settings) if http_settings else None,
-        paths=paths
-    )
-    new_map = ApplicationGatewayUrlPathMap(
-        name=item_name,
-        default_backend_address_pool=SubResource(id=default_address_pool) if default_address_pool else None,
-        default_backend_http_settings=SubResource(id=default_http_settings) if default_http_settings else None,
-        path_rules=[])
-    if cmd.supported_api_version(min_api='2017-06-01'):
-        new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else None
-        new_map.default_redirect_configuration = \
-            SubResource(id=default_redirect_config) if default_redirect_config else None
-
-    rewrite_rule_set_name = next(key for key, value in locals().items() if id(value) == id(rewrite_rule_set))
-    if cmd.supported_api_version(parameter_name=rewrite_rule_set_name):
-        new_rule.rewrite_rule_set = SubResource(id=rewrite_rule_set) if rewrite_rule_set else None
-        new_map.default_rewrite_rule_set = \
-            SubResource(id=default_rewrite_rule_set) if default_rewrite_rule_set else None
-
-    if cmd.supported_api_version(min_api='2019-09-01'):
-        new_rule.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
-
-    # pull defaults from the rule specific properties if the default-* option isn't specified
-    if new_rule.backend_address_pool and not new_map.default_backend_address_pool:
-        new_map.default_backend_address_pool = new_rule.backend_address_pool
-
-    if new_rule.backend_http_settings and not new_map.default_backend_http_settings:
-        new_map.default_backend_http_settings = new_rule.backend_http_settings
-
-    if new_rule.redirect_configuration and not new_map.default_redirect_configuration:
-        new_map.default_redirect_configuration = new_rule.redirect_configuration
-
-    new_map.path_rules.append(new_rule)
-    upsert_to_collection(ag, 'url_path_maps', new_map, 'name')
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
-
-
-def update_ag_url_path_map(cmd, instance, parent, item_name, default_address_pool=None,
-                           default_http_settings=None, default_redirect_config=None, raw=False,
-                           default_rewrite_rule_set=None):
-    SubResource = cmd.get_models('SubResource')
-    if default_address_pool == '':
-        instance.default_backend_address_pool = None
-    elif default_address_pool:
-        instance.default_backend_address_pool = SubResource(id=default_address_pool)
-
-    if default_http_settings == '':
-        instance.default_backend_http_settings = None
-    elif default_http_settings:
-        instance.default_backend_http_settings = SubResource(id=default_http_settings)
-
-    if default_redirect_config == '':
-        instance.default_redirect_configuration = None
-    elif default_redirect_config:
-        instance.default_redirect_configuration = SubResource(id=default_redirect_config)
-
-    if default_rewrite_rule_set == '':
-        instance.default_rewrite_rule_set = None
-    elif default_rewrite_rule_set:
-        instance.default_rewrite_rule_set = SubResource(id=default_rewrite_rule_set)
-    return parent
-
-
-def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_name, url_path_map_name,
-                                item_name, paths, address_pool=None, http_settings=None, redirect_config=None,
-                                firewall_policy=None, no_wait=False, rewrite_rule_set=None):
-    ApplicationGatewayPathRule, SubResource = cmd.get_models('ApplicationGatewayPathRule', 'SubResource')
-    if address_pool and redirect_config:
-        raise CLIError("Cannot reference a BackendAddressPool when Redirect Configuration is specified.")
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    url_map = next((x for x in ag.url_path_maps if x.name == url_path_map_name), None)
-    if not url_map:
-        raise CLIError('URL path map "{}" not found.'.format(url_path_map_name))
-    default_backend_pool = SubResource(id=url_map.default_backend_address_pool.id) \
-        if (url_map.default_backend_address_pool and not redirect_config) else None
-    default_http_settings = SubResource(id=url_map.default_backend_http_settings.id) \
-        if url_map.default_backend_http_settings else None
-    new_rule = ApplicationGatewayPathRule(
-        name=item_name,
-        paths=paths,
-        backend_address_pool=SubResource(id=address_pool) if address_pool else default_backend_pool,
-        backend_http_settings=SubResource(id=http_settings) if http_settings else default_http_settings)
-    if cmd.supported_api_version(min_api='2017-06-01'):
-        default_redirect = SubResource(id=url_map.default_redirect_configuration.id) \
-            if (url_map.default_redirect_configuration and not address_pool) else None
-        new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else default_redirect
-
-    rewrite_rule_set_name = next(key for key, value in locals().items() if id(value) == id(rewrite_rule_set))
-    if cmd.supported_api_version(parameter_name=rewrite_rule_set_name):
-        new_rule.rewrite_rule_set = SubResource(id=rewrite_rule_set) if rewrite_rule_set else None
-
-    if cmd.supported_api_version(min_api='2019-09-01'):
-        new_rule.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
-
-    upsert_to_collection(url_map, 'path_rules', new_rule, 'name')
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
+    def pre_operations(self):
+        args = self.ctx.args
+        rules = [{
+            "name": args.rule_name,
+            "paths": args.paths,
+            "backend_address_pool": {"id": args.address_pool} if has_value(args.address_pool) else None,
+            "backend_http_settings": {"id": args.http_settings} if has_value(args.http_settings) else None,
+            "redirect_configuration": {"id": args.redirect_config} if has_value(args.redirect_config) else None,
+            "rewrite_rule_set": {"id": args.rewrite_rule_set} if has_value(args.rewrite_rule_set) else None,
+            "firewall_policy": {"id": args.waf_policy} if has_value(args.waf_policy) else None,
+        }]
+        args.rules = rules
 
 
-def delete_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_name, url_path_map_name,
-                                item_name, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    url_map = next((x for x in ag.url_path_maps if x.name == url_path_map_name), None)
-    if not url_map:
-        raise CLIError('URL path map "{}" not found.'.format(url_path_map_name))
-    url_map.path_rules = \
-        [x for x in url_map.path_rules if x.name.lower() != item_name.lower()]
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
+class URLPathMapUpdate(_URLPathMapUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+
+        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
+            def __call__(self, ctx, value):
+                if value._data == "":
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        # apply templates for resource id
+        args_schema.default_address_pool._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/backendAddressPools/{}",
+        )
+        args_schema.default_http_settings._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/backendHttpSettingsCollection/{}",
+        )
+        args_schema.default_redirect_config._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/redirectConfigurations/{}",
+        )
+        args_schema.default_rewrite_rule_set._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/rewriteRuleSets/{}",
+        )
+        return args_schema
 
 
-def set_ag_waf_config_2016_09_01(cmd, resource_group_name, application_gateway_name, enabled,
-                                 firewall_mode=None,
-                                 no_wait=False):
-    ApplicationGatewayWebApplicationFirewallConfiguration = cmd.get_models(
-        'ApplicationGatewayWebApplicationFirewallConfiguration')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    ag.web_application_firewall_configuration = \
-        ApplicationGatewayWebApplicationFirewallConfiguration(
-            enabled=(enabled == 'true'), firewall_mode=firewall_mode)
+class URLPathMapRuleCreate(_URLPathMapRuleCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.paths._required = True
+        # add templates for resource id
+        args_schema.address_pool._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/backendAddressPools/{}",
+        )
+        args_schema.http_settings._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/backendHttpSettingsCollection/{}",
+        )
+        args_schema.redirect_config._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/redirectConfigurations/{}",
+        )
+        args_schema.rewrite_rule_set._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/rewriteRuleSets/{}",
+        )
+        args_schema.waf_policy._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/ApplicationGatewayWebApplicationFirewallPolicies/{}",
+        )
+        return args_schema
 
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, application_gateway_name, ag)
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.address_pool) and has_value(args.redirect_config):
+            err_msg = "Cannot reference a BackendAddressPool when Redirect Configuration is specified."
+            raise ArgumentUsageError(err_msg)
 
 
-def set_ag_waf_config_2017_03_01(cmd, resource_group_name, application_gateway_name, enabled,
-                                 firewall_mode=None,
-                                 rule_set_type='OWASP', rule_set_version=None,
-                                 disabled_rule_groups=None,
-                                 disabled_rules=None, no_wait=False,
-                                 request_body_check=None, max_request_body_size=None, file_upload_limit=None,
-                                 exclusions=None):
-    ApplicationGatewayWebApplicationFirewallConfiguration = cmd.get_models(
-        'ApplicationGatewayWebApplicationFirewallConfiguration')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    ag.web_application_firewall_configuration = \
-        ApplicationGatewayWebApplicationFirewallConfiguration(
-            enabled=(enabled == 'true'), firewall_mode=firewall_mode, rule_set_type=rule_set_type,
-            rule_set_version=rule_set_version)
-    if disabled_rule_groups or disabled_rules:
-        ApplicationGatewayFirewallDisabledRuleGroup = cmd.get_models('ApplicationGatewayFirewallDisabledRuleGroup')
+def set_ag_waf_config(cmd, resource_group_name, application_gateway_name, enabled,
+                      firewall_mode=None, rule_set_type="OWASP", rule_set_version=None,
+                      disabled_rule_groups=None, disabled_rules=None, no_wait=False,
+                      request_body_check=None, max_request_body_size=None, file_upload_limit=None, exclusions=None):
+    waf_config = {
+        "enabled": enabled == "true",
+        "firewall_mode": firewall_mode,
+        "rule_set_type": rule_set_type,
+        "rule_set_version": rule_set_version
+    }
 
-        disabled_groups = []
+    class WAFConfigSet(_ApplicationGatewayUpdate):
+        def pre_operations(self):
+            args = self.ctx.args
+            args.no_wait = no_wait
 
-        # disabled groups can be added directly
-        for group in disabled_rule_groups or []:
-            disabled_groups.append(ApplicationGatewayFirewallDisabledRuleGroup(rule_group_name=group))
+        def pre_instance_update(self, instance):
+            def _flatten(collection, expand_property_fn):
+                for each in collection:
+                    for value in expand_property_fn(each):
+                        yield value
 
-        def _flatten(collection, expand_property_fn):
-            for each in collection:
-                for value in expand_property_fn(each):
-                    yield value
+            if disabled_rule_groups or disabled_rules:
+                disabled_groups = []
+                # disabled groups can be added directly
+                for group in disabled_rule_groups or []:
+                    disabled_groups.append({"rule_group_name": group})
+                # for disabled rules, we have to look up the IDs
+                if disabled_rules:
+                    rule_sets = list_ag_waf_rule_sets(cmd, _type=rule_set_type, version=rule_set_version, group='*')
+                    for group in _flatten(rule_sets, lambda r: r["ruleGroups"]):
+                        disabled_group = {
+                            "rule_group_name": group["ruleGroupName"],
+                            "rules": []
+                        }
+                        for rule in group["rules"]:
+                            if str(rule["ruleId"]) in disabled_rules:
+                                disabled_group["rules"].append(rule["ruleId"])
+                        if disabled_group["rules"]:
+                            disabled_groups.append(disabled_group)
+                waf_config["disabled_rule_groups"] = disabled_groups
+            waf_config["request_body_check"] = request_body_check
+            waf_config["max_request_body_size_in_kb"] = max_request_body_size
+            waf_config["file_upload_limit_in_mb"] = file_upload_limit
+            waf_config["exclusions"] = exclusions
 
-        # for disabled rules, we have to look up the IDs
-        if disabled_rules:
-            results = list_ag_waf_rule_sets(ncf, _type=rule_set_type, version=rule_set_version, group='*')
-            for group in _flatten(results, lambda r: r.rule_groups):
-                disabled_group = ApplicationGatewayFirewallDisabledRuleGroup(
-                    rule_group_name=group.rule_group_name, rules=[])
+            instance.properties.web_application_firewall_configuration = waf_config
 
-                for rule in group.rules:
-                    if str(rule.rule_id) in disabled_rules:
-                        disabled_group.rules.append(rule.rule_id)
-                if disabled_group.rules:
-                    disabled_groups.append(disabled_group)
-        ag.web_application_firewall_configuration.disabled_rule_groups = disabled_groups
-
-    if cmd.supported_api_version(min_api='2018-08-01'):
-        ag.web_application_firewall_configuration.request_body_check = request_body_check
-        ag.web_application_firewall_configuration.max_request_body_size_in_kb = max_request_body_size
-        ag.web_application_firewall_configuration.file_upload_limit_in_mb = file_upload_limit
-        ag.web_application_firewall_configuration.exclusions = exclusions
-
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, application_gateway_name, ag)
+    return WAFConfigSet(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": application_gateway_name,
+        "resource_group": resource_group_name
+    })
 
 
 def show_ag_waf_config(cmd, resource_group_name, application_gateway_name):
-    return network_client_factory(cmd.cli_ctx).application_gateways.get(
-        resource_group_name, application_gateway_name).web_application_firewall_configuration
+    from .aaz.latest.network.application_gateway import Show
+    return Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": application_gateway_name,
+        "resource_group": resource_group_name
+    })["webApplicationFirewallConfiguration"]
 
 
-def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
-    results = client.list_available_waf_rule_sets().value
-    filtered_results = []
+def list_ag_waf_rule_sets(cmd, _type=None, version=None, group=None):
+    from .aaz.latest.network.application_gateway.waf_config import ListRuleSets
+    rule_sets = ListRuleSets(cli_ctx=cmd.cli_ctx)(command_args={})["value"]
+
+    filtered_sets = []
     # filter by rule set name or version
-    for rule_set in results:
-        if _type and _type.lower() != rule_set.rule_set_type.lower():
+    for rule_set in rule_sets:
+        if _type and _type.lower() != rule_set["ruleSetType"].lower():
             continue
-        if version and version.lower() != rule_set.rule_set_version.lower():
+        if version and version.lower() != rule_set["ruleSetVersion"].lower():
             continue
 
         filtered_groups = []
-        for rule_group in rule_set.rule_groups:
+        for rule_group in rule_set["ruleGroups"]:
             if not group:
-                rule_group.rules = None
+                rule_group["rules"] = None
                 filtered_groups.append(rule_group)
-            elif group.lower() == rule_group.rule_group_name.lower() or group == '*':
-                filtered_groups.append(rule_group)
+                continue
 
+            if group.lower() == rule_group["ruleGroupName"].lower() or group == "*":
+                filtered_groups.append(rule_group)
         if filtered_groups:
-            rule_set.rule_groups = filtered_groups
-            filtered_results.append(rule_set)
-
-    return filtered_results
-
-
+            rule_set["ruleGroups"] = filtered_groups
+            filtered_sets.append(rule_set)
+    return filtered_sets
 # endregion
 
 
@@ -3431,245 +3469,192 @@ class ExpressRoutePortLinkUpdate(_ExpressRoutePortLinkUpdate):
 
 
 # region PrivateEndpoint
-def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, subnet,
-                            private_connection_resource_id, connection_name, group_ids=None,
-                            virtual_network_name=None, tags=None, location=None,
-                            request_message=None, manual_request=None, edge_zone=None,
-                            ip_configurations=None, application_security_groups=None, custom_interface_name=None):
-    client = network_client_factory(cmd.cli_ctx).private_endpoints
-    PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint',
-                                                                           'Subnet',
-                                                                           'PrivateLinkServiceConnection')
-    pls_connection = PrivateLinkServiceConnection(private_link_service_id=private_connection_resource_id,
-                                                  group_ids=group_ids,
-                                                  request_message=request_message,
-                                                  name=connection_name)
-    private_endpoint = PrivateEndpoint(
-        location=location,
-        tags=tags,
-        subnet=Subnet(id=subnet)
-    )
-
-    if manual_request:
-        private_endpoint.manual_private_link_service_connections = [pls_connection]
-    else:
-        private_endpoint.private_link_service_connections = [pls_connection]
-
-    if edge_zone:
-        private_endpoint.extended_location = _edge_zone_model(cmd, edge_zone)
-
-    if cmd.supported_api_version(min_api='2021-05-01'):
-        if ip_configurations:
-            PrivateEndpointIPConfiguration = cmd.get_models("PrivateEndpointIPConfiguration")
-            for prop in ip_configurations:
-                ip_config = PrivateEndpointIPConfiguration(**prop)
-                try:
-                    private_endpoint.ip_configurations.append(ip_config)
-                except AttributeError:
-                    private_endpoint.ip_configurations = [ip_config]
-        if application_security_groups:
-            ApplicationSecurityGroup = cmd.get_models("ApplicationSecurityGroup")
-            for prop in application_security_groups:
-                asg = ApplicationSecurityGroup(**prop)
-                try:
-                    private_endpoint.application_security_groups.append(asg)
-                except AttributeError:
-                    private_endpoint.application_security_groups = [asg]
-        if custom_interface_name:
-            private_endpoint.custom_network_interface_name = custom_interface_name
-
-    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
-
-
-def update_private_endpoint(instance, cmd, tags=None, request_message=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('tags', tags)
-
-    if request_message is not None:
-        if instance.private_link_service_connections:
-            instance.private_link_service_connections[0].request_message = request_message
-        else:
-            instance.manual_private_link_service_connections[0].request_message = request_message
-
-    return instance
-
-
-def list_private_endpoints(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).private_endpoints
-    if resource_group_name:
-        return client.list(resource_group_name)
-    return client.list_by_subscription()
-
-
-def create_private_endpoint_private_dns_zone_group(cmd, resource_group_name, private_endpoint_name,
-                                                   private_dns_zone_group_name,
-                                                   private_dns_zone_name, private_dns_zone):
-    client = network_client_factory(cmd.cli_ctx).private_dns_zone_groups
-    PrivateDnsZoneGroup, PrivateDnsZoneConfig = cmd.get_models('PrivateDnsZoneGroup', 'PrivateDnsZoneConfig')
-    private_dns_zone_group = PrivateDnsZoneGroup(name=private_dns_zone_group_name,
-                                                 private_dns_zone_configs=[PrivateDnsZoneConfig(private_dns_zone_id=private_dns_zone,  # pylint: disable=line-too-long
-                                                                                                name=private_dns_zone_name)])  # pylint: disable=line-too-long
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         private_endpoint_name=private_endpoint_name,
-                                         private_dns_zone_group_name=private_dns_zone_group_name,
-                                         parameters=private_dns_zone_group)
-
-
-def add_private_endpoint_private_dns_zone(cmd, resource_group_name, private_endpoint_name,
-                                          private_dns_zone_group_name,
-                                          private_dns_zone_name, private_dns_zone):
-    client = network_client_factory(cmd.cli_ctx).private_dns_zone_groups
-    PrivateDnsZoneConfig = cmd.get_models('PrivateDnsZoneConfig')
-    private_dns_zone_group = client.get(resource_group_name=resource_group_name,
-                                        private_endpoint_name=private_endpoint_name,
-                                        private_dns_zone_group_name=private_dns_zone_group_name)
-    private_dns_zone = PrivateDnsZoneConfig(private_dns_zone_id=private_dns_zone, name=private_dns_zone_name)
-    private_dns_zone_group.private_dns_zone_configs.append(private_dns_zone)
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         private_endpoint_name=private_endpoint_name,
-                                         private_dns_zone_group_name=private_dns_zone_group_name,
-                                         parameters=private_dns_zone_group)
-
-
-def remove_private_endpoint_private_dns_zone(cmd, resource_group_name, private_endpoint_name,
-                                             private_dns_zone_group_name,
-                                             private_dns_zone_name):
-    client = network_client_factory(cmd.cli_ctx).private_dns_zone_groups
-    private_dns_zone_group = client.get(resource_group_name=resource_group_name,
-                                        private_endpoint_name=private_endpoint_name,
-                                        private_dns_zone_group_name=private_dns_zone_group_name)
-    private_dns_zone_configs = [item for item in private_dns_zone_group.private_dns_zone_configs if item.name != private_dns_zone_name]  # pylint: disable=line-too-long
-    private_dns_zone_group.private_dns_zone_configs = private_dns_zone_configs
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         private_endpoint_name=private_endpoint_name,
-                                         private_dns_zone_group_name=private_dns_zone_group_name,
-                                         parameters=private_dns_zone_group)
-
-
-def add_private_endpoint_ip_config(cmd, resource_group_name, private_endpoint_name,
-                                   ip_config_name=None, group_id=None, member_name=None, private_ip_address=None):
-    client = network_client_factory(cmd.cli_ctx).private_endpoints
-    private_endpoint = client.get(resource_group_name, private_endpoint_name)
-
-    PrivateEndpointIPConfiguration = cmd.get_models("PrivateEndpointIPConfiguration")
-    ip_config = PrivateEndpointIPConfiguration(
-        name=ip_config_name,
-        group_id=group_id,
-        member_name=member_name,
-        private_ip_address=private_ip_address
-    )
-    private_endpoint.ip_configurations.append(ip_config)
-    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
-
-
-def remove_private_endpoint_ip_config(cmd, resource_group_name, private_endpoint_name, ip_config_name):
-    client = network_client_factory(cmd.cli_ctx).private_endpoints
-    private_endpoint = client.get(resource_group_name, private_endpoint_name)
-
-    ip_config = None
-    for item in private_endpoint.ip_configurations:
-        if item.name == ip_config_name:
-            ip_config = item
-            break
-    if ip_config is None:
-        logger.warning("IP Configuration %s doesn't exist.", ip_config_name)
-        return private_endpoint
-    private_endpoint.ip_configurations.remove(ip_config)
-    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
-
-
-def list_private_endpoint_ip_config(cmd, resource_group_name, private_endpoint_name):
-    client = network_client_factory(cmd.cli_ctx).private_endpoints
-    private_endpoint = client.get(resource_group_name, private_endpoint_name)
-    return private_endpoint.ip_configurations
-
-
-def add_private_endpoint_asg(cmd, resource_group_name, private_endpoint_name, application_security_group_id=None):
-    client = network_client_factory(cmd.cli_ctx).private_endpoints
-    private_endpoint = client.get(resource_group_name, private_endpoint_name)
-
-    ApplicationSecurityGroup = cmd.get_models("ApplicationSecurityGroup")
-    asg = ApplicationSecurityGroup(id=application_security_group_id)
-    try:
-        private_endpoint.application_security_groups.append(asg)
-    except AttributeError:
-        private_endpoint.application_security_groups = [asg]
-    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
-
-
-def remove_private_endpoint_asg(cmd, resource_group_name, private_endpoint_name, application_security_group_id):
-    client = network_client_factory(cmd.cli_ctx).private_endpoints
-    private_endpoint = client.get(resource_group_name, private_endpoint_name)
-
-    asg = None
-    for item in private_endpoint.application_security_groups:
-        if item.id == application_security_group_id:
-            asg = item
-            break
-    if asg is None:
-        logger.warning("Application security group %s doesn't exist.", application_security_group_id)
-        return private_endpoint
-    private_endpoint.application_security_groups.remove(asg)
-    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
-
-
-def list_private_endpoint_asg(cmd, resource_group_name, private_endpoint_name):
-    client = network_client_factory(cmd.cli_ctx).private_endpoints
-    private_endpoint = client.get(resource_group_name, private_endpoint_name)
-    return private_endpoint.application_security_groups
-# endregion
-
-
-# region PrivateLinkService
-class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
+class PrivateEndpointCreate(_PrivateEndpointCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.vnet_name = AAZStrArg(options=['--vnet-name'], arg_group="IP Configuration", help="The virtual network (VNet) name.")
+        args_schema.private_connection_resource_id = AAZStrArg(
+            options=['--private-connection-resource-id'],
+            help="The resource id of the private endpoint to connect to.",
+            required=True)
+        args_schema.group_ids = AAZListArg(
+            options=["--group-ids", "--group-id"],
+            help="The ID of the group obtained from the remote resource that this private endpoint should connect to. You can use \"az network private-link-resource list\" to obtain the supported group ids. You must provide this except for PrivateLinkService.,"
+        )
+        args_schema.group_ids.Element = AAZStrArg()
+        args_schema.request_message = AAZStrArg(
+            options=['--request-message'],
+            help="A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.")
+        args_schema.connection_name = AAZStrArg(
+            options=['--connection-name'],
+            help="Name of the private link service connection.",
+            required=True)
+        args_schema.manual_request = AAZBoolArg(
+            options=['--manual-request'],
+            help="Use manual request to establish the connection. Configure it as 'true' when you don't have access to the subscription of private link service.")
+        args_schema.vnet_name = AAZStrArg(
+            options=['--vnet-name'],
+            help="The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).")
         args_schema.subnet = AAZResourceIdArg(
             options=['--subnet'],
-            arg_group="IP Configuration",
-            help="Name or ID of subnet to use. If name provided, also supply `--vnet-name`.",
+            help="Name or ID of an existing subnet. If name specified, also specify --vnet-name. "
+                 "If you want to use an existing subnet in other resource group or subscription, please provide the ID instead of the name of the subnet and do not specify the--vnet-name.",
             required=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{vnet_name}/subnets/{}"
             )
         )
-        args_schema.private_ip_address = AAZStrArg(options=['--private-ip-address'], arg_group="IP Configuration", help="Static private IP address to use.")
-        args_schema.private_ip_address_version = AAZStrArg(options=['--private-ip-address-version'], arg_group="IP Configuration", help="IP version of the private IP address. Allowed values:IPv4, IPv6. Default: IPv4.")
-        args_schema.private_ip_allocation_method = AAZStrArg(options=['--private-ip-allocation-method'], arg_group="IP Configuration", help="Private IP address allocation method.  Allowed values:Dynamic, Static.")
-        args_schema.lb_name = AAZStrArg(options=['--lb-name'], help="Name of the load balancer to retrieve frontend IP configs from. Ignored if a frontend IP configuration ID is supplied.")
-        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.", required=True)
-        args_schema.lb_frontend_ip_configs.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIpConfigurations/{}"
-            )
-        )
-
-        args_schema.ip_configurations._registered = False
-        args_schema.load_balancer_frontend_ip_configurations._registered = False
+        args_schema.manual_private_link_service_connections._registered = False
+        args_schema.private_link_service_connections._registered = False
         args_schema.edge_zone_type._registered = False
+        args_schema.subnet_id._registered = False
+
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        args.ip_configurations = [{
-            'name': '{}_ipconfig_0'.format(args.name.to_serialized_data()),
-            'private_ip_address': args.private_ip_address,
-            'private_ip_allocation_method': args.private_ip_allocation_method,
-            'private_ip_address_version': args.private_ip_address_version,
-            'subnet': {'id': args.subnet}
-        }]
+        pls_connection = {'name': args.connection_name,
+                          'group_ids': args.group_ids,
+                          'request_message': args.request_message,
+                          'private_link_service_id': args.private_connection_resource_id}
 
-        args.load_balancer_frontend_ip_configurations = assign_aaz_list_arg(
-            args.load_balancer_frontend_ip_configurations,
-            args.lb_frontend_ip_configs,
-            element_transformer=lambda _, lb_frontend_ip_config: {"id": lb_frontend_ip_config}
+        if args.manual_request:
+            args.manual_private_link_service_connections = [pls_connection]
+        else:
+            args.private_link_service_connections = [pls_connection]
+
+        if has_value(args.subnet):
+            args.subnet_id = args.subnet
+
+
+class PrivateEndpointUpdate(_PrivateEndpointUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.request_message = AAZStrArg(
+            options=['--request-message'],
+            help="A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.")
+
+        args_schema.manual_private_link_service_connections._registered = False
+        args_schema.private_link_service_connections._registered = False
+
+        return args_schema
+
+    def pre_instance_update(self, instance):
+        args = self.ctx.args
+        if has_value(args.request_message):
+            if has_value(instance.properties.private_link_service_connections):
+                instance.properties.private_link_service_connections[0].properties.request_message = args.request_message
+            elif has_value(instance.properties.manual_private_link_service_connections):
+                instance.properties.manual_private_link_service_connections[0].properties.request_message = args.request_message
+
+
+class PrivateEndpointPrivateDnsZoneGroupCreate(_PrivateEndpointPrivateDnsZoneGroupCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.private_dns_zone = AAZResourceIdArg(
+            options=['--private-dns-zone'],
+            help="Name or ID of the private dns zone.",
+            required=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/privateDnsZones/{}"
+            )
         )
+        args_schema.zone_name = AAZStrArg(options=['--zone-name'], help="Name of the private dns zone.", required=True)
+        args_schema.private_dns_zone_configs._registered = False
+
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.private_dns_zone_configs = [{'name': args.zone_name, 'private_dns_zone_id': args.private_dns_zone}]
 
 
+class PrivateEndpointPrivateDnsZoneAdd(_PrivateEndpointPrivateDnsZoneAdd):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.private_dns_zone = AAZResourceIdArg(
+            options=['--private-dns-zone'],
+            help="Name or ID of the private dns zone.",
+            required=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/privateDnsZones/{}"
+            )
+        )
+        args_schema.private_dns_zone_id._registered = False
+
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.private_dns_zone_id = args.private_dns_zone
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class PrivateEndpointPrivateDnsZoneRemove(_PrivateEndpointPrivateDnsZoneRemove):
+
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class PrivateEndpointIpConfigAdd(_PrivateEndpointIpConfigAdd):
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class PrivateEndpointIpConfigRemove(_PrivateEndpointIpConfigRemove):
+
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class PrivateEndpointAsgAdd(_PrivateEndpointAsgAdd):
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class PrivateEndpointAsgRemove(_PrivateEndpointAsgRemove):
+
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+# endregion
+
+
+# region PrivateLinkService
 def create_private_link_service(cmd, resource_group_name, service_name, subnet, frontend_ip_configurations,
                                 private_ip_address=None, private_ip_allocation_method=None,
                                 private_ip_address_version=None,
@@ -3706,33 +3691,6 @@ def create_private_link_service(cmd, resource_group_name, service_name, subnet, 
     return client.begin_create_or_update(resource_group_name, service_name, link_service)
 
 
-class PrivateLinkServiceUpdate(_PrivateLinkServiceUpdate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.lb_name = AAZStrArg(options=['--lb-name'], help="Name of the load balancer to retrieve frontend IP configs from. Ignored if a frontend IP configuration ID is supplied.")
-        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.")
-        args_schema.lb_frontend_ip_configs.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIpConfigurations/{}"
-            )
-        )
-        args_schema.load_balancer_frontend_ip_configurations._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-
-        if has_value(args.lb_frontend_ip_configs):
-            args.load_balancer_frontend_ip_configurations = assign_aaz_list_arg(
-                args.load_balancer_frontend_ip_configurations,
-                args.lb_frontend_ip_configs,
-                element_transformer=lambda _, lb_frontend_ip_config: {"id": lb_frontend_ip_config}
-            )
-
-
 def update_private_link_service(instance, cmd, tags=None, frontend_ip_configurations=None, load_balancer_name=None,
                                 visibility=None, auto_approval=None, fqdns=None, enable_proxy_protocol=None):
     FrontendIPConfiguration = cmd.get_models('FrontendIPConfiguration')
@@ -3753,15 +3711,6 @@ def list_private_link_services(cmd, resource_group_name=None):
     if resource_group_name:
         return client.list(resource_group_name)
     return client.list_by_subscription()
-
-
-class PrivateEndpointConnectionUpdate(_PrivateEndpointConnectionUpdate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.connection_status._required = True
-        return args_schema
 
 
 def update_private_endpoint_connection(cmd, resource_group_name, service_name, pe_connection_name,
@@ -8212,4 +8161,18 @@ def update_shared_key(cmd, instance, value):
     with cmd.update_context(instance) as c:
         c.set_param('value', value)
     return instance
+# endregion
+
+
+# region usages
+class UsagesList(_UsagesList):
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
+        result = list(result)
+        for item in result:
+            item['currentValue'] = str(item['currentValue'])
+            item['limit'] = str(item['limit'])
+            item['localName'] = item['name']['localizedValue']
+        return result, next_link
 # endregion

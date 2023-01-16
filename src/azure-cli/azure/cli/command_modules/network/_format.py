@@ -206,15 +206,6 @@ def transform_waf_rule_sets_table_output(result):
     return transformed
 
 
-def transform_network_usage_list(result):
-    result = list(result)
-    for item in result:
-        item.current_value = str(item.current_value)
-        item.limit = str(item.limit)
-        item.local_name = item.name.localized_value
-    return result
-
-
 def transform_network_usage_table(result):
     transformed = []
     for item in result:

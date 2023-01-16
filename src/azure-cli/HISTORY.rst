@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.44.1
+++++++
+
+**Network**
+
+* Hotfix: Fix #25086: `az network lb probe`: Expose parameter `--probes` (#25093)
+
 2.44.0
 ++++++
 

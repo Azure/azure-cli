@@ -19,11 +19,11 @@ from azure.cli.command_modules.network._client_factory import (
     cf_virtual_network_gateways,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_public_ip_addresses, cf_connection_monitor,
-    cf_dns_references, cf_private_endpoints,
+    cf_dns_references,
     cf_app_gateway_waf_policy,
-    cf_private_link_services, cf_private_endpoint_types,
+    cf_private_link_services,
     cf_virtual_router, cf_virtual_router_peering, cf_flow_logs,
-    cf_private_dns_zone_groups, cf_load_balancer_backend_pools)
+    cf_load_balancer_backend_pools)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
     delete_lb_resource_property_entry)
@@ -36,14 +36,13 @@ from azure.cli.command_modules.network._format import (
     transform_vpn_connection, transform_vpn_connection_list,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
-    transform_network_usage_list, transform_network_usage_table, transform_nsg_rule_table_output,
+    transform_network_usage_table, transform_nsg_rule_table_output,
     transform_vnet_table_output, transform_effective_route_table, transform_effective_nsg,
     transform_vnet_gateway_routes_table, transform_vnet_gateway_bgp_peer_table)
 from azure.cli.command_modules.network._validators import (
     get_network_watcher_from_location,
     process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace, process_ag_settings_create_namespace, process_ag_http_settings_create_namespace,
-    process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
-    process_ag_url_path_map_rule_create_namespace, process_nic_create_namespace,
+    process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_nic_create_namespace,
     process_lb_create_namespace, process_lb_frontend_ip_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
@@ -96,18 +95,6 @@ def load_command_table(self, _):
         client_factory=cf_dns_references,
         resource_type=ResourceType.MGMT_NETWORK_DNS,
         min_api='2018-05-01'
-    )
-
-    network_private_endpoint_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#PrivateEndpointsOperations.{}',
-        client_factory=cf_private_endpoints,
-        min_api='2020-06-01'
-    )
-
-    network_private_endpoint_dns_zone_group_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#PrivateDnsZoneGroupsOperations.{}',
-        client_factory=cf_private_dns_zone_groups,
-        min_api='2020-03-01'
     )
 
     network_private_link_service_sdk = CliCommandType(
@@ -210,8 +197,9 @@ def load_command_table(self, _):
 
     # region NetworkRoot
     with self.command_group('network'):
-        from azure.cli.command_modules.network.aaz.latest.network import ListUsages
-        self.command_table['network list-usages'] = ListUsages(loader=self, transform=transform_network_usage_list, table_transformer=transform_network_usage_table)
+        from azure.cli.command_modules.network.custom import UsagesList
+        self.command_table['network list-usages'] = UsagesList(loader=self,
+                                                               table_transformer=transform_network_usage_table)
     # endregion
 
     # region ApplicationGateways
@@ -237,7 +225,6 @@ def load_command_table(self, _):
         {'prop': 'http_listeners', 'name': 'http-listener', 'validator': process_ag_http_listener_create_namespace},
         {'prop': 'request_routing_rules', 'name': 'rule', 'validator': process_ag_rule_create_namespace},
         {'prop': 'probes', 'name': 'probe'},
-        {'prop': 'url_path_maps', 'name': 'url-path-map', 'validator': process_ag_url_path_map_create_namespace},
         {'prop': 'rewrite_rule_sets', 'name': 'rewrite-rule set'}
     ]
     if self.supported_api_version(min_api='2018-08-01'):
@@ -322,15 +309,16 @@ def load_command_table(self, _):
         g.command('predefined list', 'list_available_ssl_predefined_policies')
         g.show_command('predefined show', 'get_ssl_predefined_policy')
 
-    with self.command_group('network application-gateway url-path-map rule') as g:
-        g.custom_command('create', 'create_ag_url_path_map_rule', supports_no_wait=True, validator=process_ag_url_path_map_rule_create_namespace)
-        g.custom_command('delete', 'delete_ag_url_path_map_rule', supports_no_wait=True)
+    with self.command_group("network application-gateway url-path-map"):
+        from .custom import URLPathMapCreate, URLPathMapUpdate, URLPathMapRuleCreate
+        self.command_table["network application-gateway url-path-map create"] = URLPathMapCreate(loader=self)
+        self.command_table["network application-gateway url-path-map update"] = URLPathMapUpdate(loader=self)
+        self.command_table["network application-gateway url-path-map rule create"] = URLPathMapRuleCreate(loader=self)
 
-    with self.command_group('network application-gateway waf-config') as g:
-        g.custom_command('set', 'set_ag_waf_config_2017_03_01', min_api='2017-03-01', supports_no_wait=True)
-        g.custom_command('set', 'set_ag_waf_config_2016_09_01', max_api='2016-09-01', supports_no_wait=True)
-        g.custom_show_command('show', 'show_ag_waf_config')
-        g.custom_command('list-rule-sets', 'list_ag_waf_rule_sets', min_api='2017-03-01', client_factory=cf_application_gateways, table_transformer=transform_waf_rule_sets_table_output)
+    with self.command_group("network application-gateway waf-config") as g:
+        g.custom_command("list-rule-sets", "list_ag_waf_rule_sets", table_transformer=transform_waf_rule_sets_table_output)
+        g.custom_command("set", "set_ag_waf_config", supports_no_wait=True)
+        g.custom_show_command("show", "show_ag_waf_config")
 
     with self.command_group('network application-gateway identity', command_type=network_ag_sdk, min_api='2018-12-01') as g:
         g.custom_command('assign', 'assign_ag_identity', supports_no_wait=True)
@@ -493,36 +481,30 @@ def load_command_table(self, _):
     # endregion
 
     # region PrivateEndpoint
-    with self.command_group('network private-endpoint', network_private_endpoint_sdk) as g:
-        g.custom_command('create', 'create_private_endpoint', min_api='2019-04-01')
-        g.command('delete', 'begin_delete', min_api='2019-04-01')
-        g.custom_command('list', 'list_private_endpoints')
-        g.show_command('show')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_private_endpoint', min_api='2019-04-01')
-        g.command(
-            'list-types', 'list',
-            operations_tmpl='azure.mgmt.network.operations#AvailablePrivateEndpointTypesOperations.{}',
-            client_factory=cf_private_endpoint_types,
-            min_api='2019-04-01'
-        )
+    with self.command_group('network private-endpoint'):
+        from azure.cli.command_modules.network.custom import PrivateEndpointCreate, PrivateEndpointUpdate
+        self.command_table['network private-endpoint create'] = PrivateEndpointCreate(loader=self)
+        self.command_table['network private-endpoint update'] = PrivateEndpointUpdate(loader=self)
 
-    with self.command_group('network private-endpoint dns-zone-group', network_private_endpoint_dns_zone_group_sdk, min_api='2020-03-01') as g:
-        g.custom_command('create', 'create_private_endpoint_private_dns_zone_group')
-        g.custom_command('add', 'add_private_endpoint_private_dns_zone')
-        g.custom_command('remove', 'remove_private_endpoint_private_dns_zone')
-        g.command('delete', 'begin_delete')
-        g.show_command('show')
-        g.command('list', 'list')
+    with self.command_group('network private-endpoint dns-zone-group'):
+        from azure.cli.command_modules.network.custom import PrivateEndpointPrivateDnsZoneGroupCreate, \
+            PrivateEndpointPrivateDnsZoneAdd, PrivateEndpointPrivateDnsZoneRemove
+        self.command_table['network private-endpoint dns-zone-group create'] = \
+            PrivateEndpointPrivateDnsZoneGroupCreate(loader=self)
+        self.command_table['network private-endpoint dns-zone-group add'] = \
+            PrivateEndpointPrivateDnsZoneAdd(loader=self)
+        self.command_table['network private-endpoint dns-zone-group remove'] = \
+            PrivateEndpointPrivateDnsZoneRemove(loader=self)
 
-    with self.command_group('network private-endpoint ip-config', network_private_endpoint_sdk, min_api='2021-05-01') as g:
-        g.custom_command('add', 'add_private_endpoint_ip_config')
-        g.custom_command('remove', 'remove_private_endpoint_ip_config')
-        g.custom_command('list', 'list_private_endpoint_ip_config')
+    with self.command_group('network private-endpoint ip-config'):
+        from azure.cli.command_modules.network.custom import PrivateEndpointIpConfigAdd, PrivateEndpointIpConfigRemove
+        self.command_table['network private-endpoint ip-config add'] = PrivateEndpointIpConfigAdd(loader=self)
+        self.command_table['network private-endpoint ip-config remove'] = PrivateEndpointIpConfigRemove(loader=self)
 
-    with self.command_group('network private-endpoint asg', network_private_endpoint_sdk, min_api='2021-05-01') as g:
-        g.custom_command('add', 'add_private_endpoint_asg')
-        g.custom_command('remove', 'remove_private_endpoint_asg')
-        g.custom_command('list', 'list_private_endpoint_asg')
+    with self.command_group('network private-endpoint asg'):
+        from azure.cli.command_modules.network.custom import PrivateEndpointAsgAdd, PrivateEndpointAsgRemove
+        self.command_table['network private-endpoint asg add'] = PrivateEndpointAsgAdd(loader=self)
+        self.command_table['network private-endpoint asg remove'] = PrivateEndpointAsgRemove(loader=self)
     # endregion
 
     # region PrivateLinkServices
