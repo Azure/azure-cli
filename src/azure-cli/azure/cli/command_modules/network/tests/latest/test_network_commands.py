@@ -1268,7 +1268,10 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
 
         # test ssl-policy list-options
         self.cmd('network application-gateway ssl-policy list-options', checks=[
-            self.check('length(@)', 10)
+            self.exists('availableCipherSuites'),
+            self.exists('availableProtocols'),
+            self.exists('predefinedPolicies'),
+            self.check('type', 'Microsoft.Network/ApplicationGatewayAvailableSslOptions'),
         ])
 
     @ResourceGroupPreparer(name_prefix='test_appgw_with_tcp', location='westus')
