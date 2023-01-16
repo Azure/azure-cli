@@ -30,7 +30,7 @@ from azure.cli.command_modules.network._validators import (
     validate_custom_headers, validate_status_code_ranges, validate_subnet_ranges,
     WafConfigExclusionAction,
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
-    validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs,
+    validate_waf_policy,
     validate_user_assigned_identity, validate_virtul_network_gateway,
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument,
