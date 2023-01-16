@@ -338,12 +338,14 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
             1. CLI context is missing
             2. In air-gapped clouds
             3. In testing environments
+            4. In autocomplete mode
 
         :return: whether Aladdin service need to be disabled or not
         :type: bool
         """
 
         from azure.cli.core.cloud import CLOUDS_FORBIDDING_ALADDIN_REQUEST
+        from azure.cli.core.util import is_autocomplete
 
         # CLI is not started well
         if not self.cli_ctx or not self.cli_ctx.cloud:
@@ -355,6 +357,9 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
 
         # for testing environments
         if self.cli_ctx.__class__.__name__ == 'DummyCli':
+            return True
+
+        if is_autocomplete():
             return True
 
         return False
