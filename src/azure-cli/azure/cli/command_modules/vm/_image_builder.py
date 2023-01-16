@@ -526,42 +526,11 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
-def update_image_template(cmd, client, resource_group_name, image_template_name, tags=None):
-    # existing_instance = None
-    # cached_instance = None
-    # try:
-    #     existing_instance = client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
-    # except HttpResponseError:
-    #     pass
-    #
-    # try:
-    #     cached_instance = cached_get(cmd, client.virtual_machine_image_templates.get,
-    #                                  resource_group_name=resource_group_name,
-    #                                  image_template_name=image_template_name) if existing_instance is None else None
-    # except HttpResponseError:
-    #     pass
-    #
-    #
-
-    from azure.mgmt.imagebuilder.models import ImageTemplateUpdateParameters
-    image_template_update = ImageTemplateUpdateParameters()
-    if tags:
-        image_template_update.tags = tags
-    return cached_put(cmd, client.virtual_machine_image_templates.begin_update, parameters=image_template_update,
-                      resource_group_name=resource_group_name, image_template_name=image_template_name)
-
-
-# def get_image_template(cmd, resource_group_name, image_template_name):
-#     client = _compute_client_factory(cmd.cli_ctx)
-#     return client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
-
-
 def assign_template_identity(cmd, client, resource_group_name, image_template_name, user_assigned=None):
     from azure.mgmt.imagebuilder.models import (ImageTemplateIdentity, ImageTemplateUpdateParameters,
                                                 ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties)  # pylint: disable=line-too-long
 
     from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
-    # client = _compute_client_factory(cmd.cli_ctx)
 
     def getter():
         return client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
@@ -582,7 +551,7 @@ def assign_template_identity(cmd, client, resource_group_name, image_template_na
 
         updated_user_assigned = list(existing_user_identities.union(add_user_assigned))
 
-        default_user_identity = ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties()
+        default_user_identity = ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties()  # pylint: disable=line-too-long
         user_assigned_identities = dict.fromkeys(updated_user_assigned, default_user_identity)
 
         image_template_identity = ImageTemplateIdentity(type='UserAssigned',
@@ -597,7 +566,6 @@ def assign_template_identity(cmd, client, resource_group_name, image_template_na
 
 def remove_template_identity(cmd, client, resource_group_name, image_template_name, user_assigned=None):
     from azure.mgmt.imagebuilder.models import ImageTemplateUpdateParameters
-    # client = _compute_client_factory(cmd.cli_ctx)
 
     def getter():
         return client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
@@ -605,7 +573,7 @@ def remove_template_identity(cmd, client, resource_group_name, image_template_na
     def setter(resource_group_name, image_template_name, image_template):
         image_template_update = ImageTemplateUpdateParameters(identity=image_template.identity)
         return client.virtual_machine_image_templates.begin_update(resource_group_name, image_template_name,
-                                                        image_template_update)
+                                                                   image_template_update)
 
     return _remove_template_identity(cmd, resource_group_name, image_template_name, user_assigned, getter, setter)
 
@@ -648,7 +616,7 @@ def _remove_template_identity(cmd, resource_group_name, image_template_name, use
     return result.identity
 
 
-def show_template_identity(cmd, client, resource_group_name, image_template_name):
+def show_template_identity(client, resource_group_name, image_template_name):
     return client.virtual_machine_image_templates.get(resource_group_name, image_template_name).identity
 
 

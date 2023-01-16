@@ -506,6 +506,41 @@ examples:
         az image builder validator show -n myTemplate -g myGroup --defer
 """
 
+helps['image builder identity'] = """
+type: group
+short-summary: Manage identities of an image builder template.
+"""
+
+helps['image builder identity assign'] = """
+type: command
+short-summary: Add managed identities to an existing image builder template.
+examples:
+  - name: Add a user assigned managed identity to an existing image builder template.
+    text: >
+        az image builder identity assign --name MyImageBuilderTemplate --resource-group MyResourceGroup --user-assigned MyAssignedId
+"""
+
+helps['image builder identity remove'] = """
+type: command
+short-summary: Remove managed identities from an existing image builder template.
+examples:
+  - name: Remove a user assigned managed identity from an existing image builder template.
+    text: >
+        az image builder identity remove --name MyImageBuilderTemplate --resource-group MyResourceGroup --user-assigned MyAssignedId
+  - name: Remove all user assigned managed identities from an existing image builder.
+    text: >
+        az image builder identity remove --name MyImageBuilderTemplate --resource-group MyResourceGroup --user-assigned
+"""
+
+helps['image builder identity show'] = """
+type: command
+short-summary: Display managed identities of a image builder template.
+examples:
+  - name: Display managed identities of a image builder template.
+    text: |
+        az image builder identity show --name MyImageBuilderTemplate --resource-group MyResourceGroup
+"""
+
 helps['image builder delete'] = """
 type: command
 short-summary: Delete image builder template.

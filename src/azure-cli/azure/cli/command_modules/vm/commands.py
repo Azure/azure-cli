@@ -297,9 +297,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_image_templates')
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete')
-        g.custom_command('update', 'update_image_template', supports_local_cache=True)
-        # g.generic_update_command('update', custom_func_name='update_image_template', setter_name='begin_update', supports_local_cache=True)
-        # g.generic_update_command('update', setter_name='begin_create_or_update', supports_local_cache=True)  # todo Update fails for now as service does not support updatesb
+        g.generic_update_command('update', setter_name='begin_create_or_update', supports_local_cache=True)  # todo Update fails for now as service does not support updates
         g.wait_command('wait')
         g.command('run', 'begin_run', supports_no_wait=True)
         g.custom_command('show-runs', 'show_build_output')
