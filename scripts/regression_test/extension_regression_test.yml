@@ -113,13 +113,13 @@ jobs:
     displayName: "Rerun tests"
   - bash: |
       publishErrorModules='false'
-      if [[ -f '~/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_error_modules_$(Instance_idx).txt' ]]; then
+      if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_error_modules_$(Instance_idx).txt' ]]; then
         publishErrorModules='true'
       fi
       echo "##vso[task.setvariable variable=publishErrorModules]$publishErrorModules"
 
       publishFailureTests='false'
-      if [[ -f '~/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_failure_tests_$(Instance_idx).txt' ]]; then
+      if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_failure_tests_$(Instance_idx).txt' ]]; then
         publishFailureTests='true'
       fi
       echo "##vso[task.setvariable variable=publishFailureTests]$publishFailureTests"
@@ -128,18 +128,18 @@ jobs:
   - task: PublishTestResults@2
     condition: succeededOrFailed()
     inputs:
-      testResultsFiles: '~/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
+      testResultsFiles: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
       testRunTitle: 'CLI Regression test results of instance $(Instance_idx)'
   - task: PublishBuildArtifacts@1
     condition: and(succeededOrFailed(), eq(variables.publishErrorModules, 'true'))
     inputs:
-      PathtoPublish: '~/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_error_modules_$(Instance_idx).txt'
+      PathtoPublish: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_error_modules_$(Instance_idx).txt'
       ArtifactName: 'error_modules'
       publishLocation: 'Container'
   - task: PublishBuildArtifacts@1
     condition: and(succeededOrFailed(), eq(variables.publishFailureTests, 'true'))
     inputs:
-      PathtoPublish: '~/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_failure_tests_$(Instance_idx).txt'
+      PathtoPublish: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_failure_tests_$(Instance_idx).txt'
       ArtifactName: 'failure_tests'
       publishLocation: 'Container'
 
