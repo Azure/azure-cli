@@ -16,8 +16,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 from azure.cli.command_modules.network._validators import (
-    dns_zone_name_type,
-    validate_ssl_cert, validate_cert, validate_inbound_nat_rule_id_list,
+    dns_zone_name_type, validate_cert, validate_inbound_nat_rule_id_list,
     validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
     validate_address_pool_name_or_id, load_cert_file, validate_metadata,
     validate_dns_record_type, validate_target_listener,
