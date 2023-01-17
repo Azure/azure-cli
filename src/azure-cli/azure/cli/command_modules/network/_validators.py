@@ -746,11 +746,6 @@ def process_ag_routing_rule_create_namespace(cmd, namespace):  # pylint: disable
             cmd.cli_ctx, namespace, 'backendSettingsCollection', namespace.settings)
 
 
-def process_ag_ssl_policy_set_namespace(namespace):
-    if namespace.disabled_ssl_protocols and getattr(namespace, 'clear', None):
-        raise ValueError('incorrect usage: --disabled-ssl-protocols PROTOCOL [...] | --clear')
-
-
 def process_ag_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     get_servers_validator(camel_case=True)(namespace)
