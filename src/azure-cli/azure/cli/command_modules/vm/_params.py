@@ -302,7 +302,7 @@ def load_arguments(self, _):
 
     for scope in ['image builder identity assign', 'image builder identity remove']:
         with self.argument_context(scope, min_api='2022-02-14') as c:
-            c.argument('user_assigned', arg_group='Managed Identity', nargs='*', help='Only one user assigned identity (name or ID, space delimited) of the image template.')
+            c.argument('user_assigned', arg_group='Managed Identity', nargs='*', help='Specify one user assigned identity (name or ID, space delimited) of the image template.')
 
     with self.argument_context('image builder output') as c:
         ib_sig_regions_help = "Space-separated list of regions to replicate the image version into."
