@@ -37,9 +37,12 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError)
 from msrestazure.tools import resource_id
 from msrestazure.azure_exceptions import CloudError
+from knack.log import get_logger
 from ._utils import (
     run_cli_cmd
 )
+
+logger = get_logger(__name__)
 
 # --------------------------------------------------------------------------------------------
 # Security Tasks
@@ -52,7 +55,8 @@ def list_security_tasks(client, resource_group_name=None):
         client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     if resource_group_name:
-        return client.tasks.list_by_resource_group(resource_group_name)
+        return client.tasks.list_by_resource_group(resource_group_name,
+                                                   client._config.asc_location)  # pylint: disable=protected-access
 
     return client.tasks.list()
 
@@ -81,10 +85,9 @@ def list_security_alerts(client, resource_group_name=None, location=None):
         client._config.asc_location = location  # pylint: disable=protected-access
 
         if resource_group_name:
-            return client.list_resource_group_level_by_region(client._config.asc_location,  # pylint: disable=protected-access
-                                                              resource_group_name)
+            return client.list_resource_group_level_by_region(location, resource_group_name)
 
-        return client.list_subscription_level_by_region(client._config.asc_location)  # pylint: disable=protected-access
+        return client.list_subscription_level_by_region(location)
 
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
@@ -330,7 +333,8 @@ def get_security_discovered_security_solution(client, resource_name, resource_gr
     for loc in client.locations.list():
         client._config.asc_location = loc.name  # pylint: disable=protected-access
 
-    return client.discovered_security_solutions.get(resource_group_name, resource_name)
+    return client.discovered_security_solutions.get(resource_group_name, client._config.asc_location,  # pylint: disable=protected-access
+                                                    resource_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -359,7 +363,8 @@ def get_security_external_security_solution(client, resource_name, resource_grou
     for loc in client.locations.list():
         client._config.asc_location = loc.name  # pylint: disable=protected-access
 
-    return client.external_security_solutions.get(resource_group_name, resource_name)
+    return client.external_security_solutions.get(resource_group_name, client._config.asc_location,  # pylint: disable=protected-access
+                                                  resource_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -372,9 +377,9 @@ def list_security_jit_network_access_policies(client, resource_group_name=None, 
         client._config.asc_location = location  # pylint: disable=protected-access
 
         if resource_group_name:
-            return client.list_by_resource_group_and_region(resource_group_name)
+            return client.list_by_resource_group_and_region(resource_group_name, location)
 
-        return client.list_by_region()
+        return client.list_by_region(location)
 
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
@@ -386,7 +391,7 @@ def get_security_jit_network_access_policy(client, location, resource_name, reso
 
     client._config.asc_location = location  # pylint: disable=protected-access
 
-    return client.get(resource_group_name, resource_name)
+    return client.get(resource_group_name, location, resource_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -402,7 +407,7 @@ def get_security_location(client, resource_name):
 
     client._config.asc_location = resource_name  # pylint: disable=protected-access
 
-    return client.get(client._config.asc_location)  # pylint: disable=protected-access
+    return client.get(resource_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -450,7 +455,9 @@ def get_security_topology(client, resource_name, resource_group_name):
     for loc in client.locations.list():
         client._config.asc_location = loc.name  # pylint: disable=protected-access
 
-    return client.topology.get(resource_group_name, resource_name)
+    return client.topology.get(resource_group_name,
+                               client._config.asc_location,  # pylint: disable=protected-access
+                               resource_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -736,16 +743,17 @@ def get_security_sub_assessment(cmd, client, resource_name, assessment_name, ass
 
 def list_security_adaptive_application_controls(client):
 
-    return client.adaptive_application_controls.list()
+    return client.list()
 
 
-def get_security_adaptive_application_controls(client, group_name):
+def get_security_adaptive_application_controls(client, group_name, location=None):
 
-    for loc in client.locations.list():
-        client._config.asc_location = loc.name  # pylint: disable=protected-access
+    if location is None:
+        default_location = "centralus"
+        logger.warning("Please be aware that default location '%s' used. Use can use 'list' operation to get all resources and locations", default_location)
+        return client.get(default_location, group_name=group_name)
 
-    return client.adaptive_application_controls.get(client._config.asc_location,  # pylint: disable=protected-access
-                                                    group_name=group_name)
+    return client.get(location, group_name=group_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -797,7 +805,9 @@ def get_security_allowed_connections(client, resource_name, resource_group_name)
     for loc in client.locations.list():
         client._config.asc_location = loc.name  # pylint: disable=protected-access
 
-    return client.allowed_connections.get(resource_group_name, resource_name)
+    return client.allowed_connections.get(resource_group_name,
+                                          client._config.asc_location,  # pylint: disable=protected-access
+                                          resource_name)
 
 
 # --------------------------------------------------------------------------------------------

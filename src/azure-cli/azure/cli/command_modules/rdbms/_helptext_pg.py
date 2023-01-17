@@ -306,7 +306,7 @@ examples:
   - name: >
       Create a firewall rule allowing connections to all Azure services
     text: >
-      az postgres flexible-server firewall-rule create --resource-group testGroup --name testserver --start-ip-address 0.0.0.0
+      az postgres flexible-server firewall-rule create --resource-group testGroup --name testserver --rule-name allowazureservices --start-ip-address 0.0.0.0
 """
 
 helps['postgres flexible-server firewall-rule list'] = """

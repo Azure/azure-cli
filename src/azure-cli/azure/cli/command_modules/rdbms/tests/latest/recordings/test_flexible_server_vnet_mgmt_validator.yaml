@@ -1,7 +1,7 @@
 interactions:
 - request:
-    body: '{"location": "eastus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
-      ["172.1.0.0/16"]}, "dhcpOptions": {}}}'
+    body: '{"location": "eastus", "properties": {"addressSpace": {"addressPrefixes":
+      ["172.1.0.0/16"]}, "enableDdosProtection": false, "enableVmProtection": false}}'
     headers:
       Accept:
       - application/json
@@ -12,7 +12,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '124'
+      - '153'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -40,7 +40,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '680'
+      - '611'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -144,7 +144,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '681'
+      - '612'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1574,7 +1574,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '630'
+      - '174'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -1582,7 +1582,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.43.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.5 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet/subnets/testsubnet?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"testvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet\",\r\n
@@ -1617,7 +1617,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2011'
+      - '1161'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1631,10 +1631,6 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
@@ -1642,8 +1638,8 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
-      code: 200
-      message: OK
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
@@ -1709,7 +1705,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.43.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.5 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet/subnets/testsubnet?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"testvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet\",\r\n
@@ -1740,7 +1736,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2013'
+      - '1162'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -2010,7 +2006,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
-        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"virtualNetworks/taggedTrafficConsumers","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -2028,21 +2031,21 @@ interactions:
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01"],"defaultApiVersion":"2020-03-01","zoneMappings":[{"location":"Australia
-        East","zones":["3","2","1"]},{"location":"Brazil South","zones":["3","2","1"]},{"location":"Canada
-        Central","zones":["3","2","1"]},{"location":"Central India","zones":["3","2","1"]},{"location":"Central
-        US","zones":["3","2","1"]},{"location":"Central US EUAP","zones":["2","1"]},{"location":"East
-        Asia","zones":["3","2","1"]},{"location":"East US","zones":["3","2","1"]},{"location":"East
-        US 2","zones":["3","2","1"]},{"location":"East US 2 EUAP","zones":["3","2","1"]},{"location":"France
-        Central","zones":["3","2","1"]},{"location":"Germany West Central","zones":["3","2","1"]},{"location":"Japan
-        East","zones":["3","2","1"]},{"location":"Korea Central","zones":["3","2","1"]},{"location":"North
-        Central US","zones":[]},{"location":"North Europe","zones":["3","2","1"]},{"location":"Norway
-        East","zones":["3","2","1"]},{"location":"Qatar Central","zones":["3","2","1"]},{"location":"South
-        Africa North","zones":["3","2","1"]},{"location":"South Central US","zones":["3","2","1"]},{"location":"Southeast
-        Asia","zones":["3","2","1"]},{"location":"Sweden Central","zones":["3","2","1"]},{"location":"Switzerland
-        North","zones":["3","2","1"]},{"location":"UAE North","zones":["3","2","1"]},{"location":"UK
-        South","zones":["3","2","1"]},{"location":"West Europe","zones":["3","2","1"]},{"location":"West
-        US","zones":[]},{"location":"West US 2","zones":["3","2","1"]},{"location":"West
-        US 3","zones":["3","2","1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"publicIPAddresses","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -2052,21 +2055,27 @@ interactions:
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"zoneMappings":[{"location":"Australia
-        East","zones":["3","2","1"]},{"location":"Brazil South","zones":["3","2","1"]},{"location":"Canada
-        Central","zones":["3","2","1"]},{"location":"Central India","zones":["3","2","1"]},{"location":"Central
-        US","zones":["3","2","1"]},{"location":"Central US EUAP","zones":["2","1"]},{"location":"East
-        Asia","zones":["3","2","1"]},{"location":"East US","zones":["3","2","1"]},{"location":"East
-        US 2","zones":["3","2","1"]},{"location":"East US 2 EUAP","zones":["3","2","1"]},{"location":"France
-        Central","zones":["3","2","1"]},{"location":"Germany West Central","zones":["3","2","1"]},{"location":"Japan
-        East","zones":["3","2","1"]},{"location":"Korea Central","zones":["3","2","1"]},{"location":"North
-        Central US","zones":[]},{"location":"North Europe","zones":["3","2","1"]},{"location":"Norway
-        East","zones":["3","2","1"]},{"location":"Qatar Central","zones":["3","2","1"]},{"location":"South
-        Africa North","zones":["3","2","1"]},{"location":"South Central US","zones":["3","2","1"]},{"location":"Southeast
-        Asia","zones":["3","2","1"]},{"location":"Sweden Central","zones":["3","2","1"]},{"location":"Switzerland
-        North","zones":["3","2","1"]},{"location":"UAE North","zones":["3","2","1"]},{"location":"UK
-        South","zones":["3","2","1"]},{"location":"West Europe","zones":["3","2","1"]},{"location":"West
-        US","zones":[]},{"location":"West US 2","zones":["3","2","1"]},{"location":"West
-        US 3","zones":["3","2","1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"locationMappings":[{"location":"East US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"internalPublicIpAddresses","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -2084,21 +2093,27 @@ interactions:
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01"],"defaultApiVersion":"2020-06-01","zoneMappings":[{"location":"Australia
-        East","zones":["3","2","1"]},{"location":"Brazil South","zones":["3","2","1"]},{"location":"Canada
-        Central","zones":["3","2","1"]},{"location":"Central India","zones":["3","2","1"]},{"location":"Central
-        US","zones":["3","2","1"]},{"location":"Central US EUAP","zones":["2","1"]},{"location":"East
-        Asia","zones":["3","2","1"]},{"location":"East US","zones":["3","2","1"]},{"location":"East
-        US 2","zones":["3","2","1"]},{"location":"East US 2 EUAP","zones":["3","2","1"]},{"location":"France
-        Central","zones":["3","2","1"]},{"location":"Germany West Central","zones":["3","2","1"]},{"location":"Japan
-        East","zones":["3","2","1"]},{"location":"Korea Central","zones":["3","2","1"]},{"location":"North
-        Central US","zones":[]},{"location":"North Europe","zones":["3","2","1"]},{"location":"Norway
-        East","zones":["3","2","1"]},{"location":"Qatar Central","zones":["3","2","1"]},{"location":"South
-        Africa North","zones":["3","2","1"]},{"location":"South Central US","zones":["3","2","1"]},{"location":"Southeast
-        Asia","zones":["3","2","1"]},{"location":"Sweden Central","zones":["3","2","1"]},{"location":"Switzerland
-        North","zones":["3","2","1"]},{"location":"UAE North","zones":["3","2","1"]},{"location":"UK
-        South","zones":["3","2","1"]},{"location":"West Europe","zones":["3","2","1"]},{"location":"West
-        US","zones":[]},{"location":"West US 2","zones":["3","2","1"]},{"location":"West
-        US 3","zones":["3","2","1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"locationMappings":[{"location":"East US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkInterfaces","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -2107,7 +2122,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
-        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"dscpConfigurations","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -2125,7 +2147,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
-        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01"],"defaultApiVersion":"2020-03-01","capabilities":"CrossResourceGroupResourceMove,
+        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01"],"defaultApiVersion":"2020-03-01","locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"privateEndpoints/privateLinkServiceProxies","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -2151,7 +2180,14 @@ interactions:
         South","Korea Central","Korea South","France Central","Australia Central","South
         Africa North","UAE North","Switzerland North","Germany West Central","Norway
         East","West US 3","Jio India West","Sweden Central","Qatar Central","Central
-        US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkSecurityGroups","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -2206,21 +2242,27 @@ interactions:
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01"],"defaultApiVersion":"2020-03-01","zoneMappings":[{"location":"Australia
-        East","zones":["3","2","1"]},{"location":"Brazil South","zones":["3","2","1"]},{"location":"Canada
-        Central","zones":["3","2","1"]},{"location":"Central India","zones":["3","2","1"]},{"location":"Central
-        US","zones":["3","2","1"]},{"location":"Central US EUAP","zones":["2","1"]},{"location":"East
-        Asia","zones":["3","2","1"]},{"location":"East US","zones":["3","2","1"]},{"location":"East
-        US 2","zones":["3","2","1"]},{"location":"East US 2 EUAP","zones":["3","2","1"]},{"location":"France
-        Central","zones":["3","2","1"]},{"location":"Germany West Central","zones":["3","2","1"]},{"location":"Japan
-        East","zones":["3","2","1"]},{"location":"Korea Central","zones":["3","2","1"]},{"location":"North
-        Central US","zones":[]},{"location":"North Europe","zones":["3","2","1"]},{"location":"Norway
-        East","zones":["3","2","1"]},{"location":"Qatar Central","zones":["3","2","1"]},{"location":"South
-        Africa North","zones":["3","2","1"]},{"location":"South Central US","zones":["3","2","1"]},{"location":"Southeast
-        Asia","zones":["3","2","1"]},{"location":"Sweden Central","zones":["3","2","1"]},{"location":"Switzerland
-        North","zones":["3","2","1"]},{"location":"UAE North","zones":["3","2","1"]},{"location":"UK
-        South","zones":["3","2","1"]},{"location":"West Europe","zones":["3","2","1"]},{"location":"West
-        US","zones":[]},{"location":"West US 2","zones":["3","2","1"]},{"location":"West
-        US 3","zones":["3","2","1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"locationMappings":[{"location":"East US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkWatchers","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -2265,7 +2307,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
-        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"localNetworkGateways","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -2293,21 +2342,21 @@ interactions:
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","zoneMappings":[{"location":"Australia
-        East","zones":["3","2","1"]},{"location":"Brazil South","zones":["3","2","1"]},{"location":"Canada
-        Central","zones":["3","2","1"]},{"location":"Central India","zones":["3","2","1"]},{"location":"Central
-        US","zones":["3","2","1"]},{"location":"Central US EUAP","zones":["2","1"]},{"location":"East
-        Asia","zones":["3","2","1"]},{"location":"East US","zones":["3","2","1"]},{"location":"East
-        US 2","zones":["3","2","1"]},{"location":"East US 2 EUAP","zones":["3","2","1"]},{"location":"France
-        Central","zones":["3","2","1"]},{"location":"Germany West Central","zones":["3","2","1"]},{"location":"Japan
-        East","zones":["3","2","1"]},{"location":"Korea Central","zones":["3","2","1"]},{"location":"North
-        Central US","zones":[]},{"location":"North Europe","zones":["3","2","1"]},{"location":"Norway
-        East","zones":["3","2","1"]},{"location":"Qatar Central","zones":["3","2","1"]},{"location":"South
-        Africa North","zones":["3","2","1"]},{"location":"South Central US","zones":["3","2","1"]},{"location":"Southeast
-        Asia","zones":["3","2","1"]},{"location":"Sweden Central","zones":["3","2","1"]},{"location":"Switzerland
-        North","zones":["3","2","1"]},{"location":"UAE North","zones":["3","2","1"]},{"location":"UK
-        South","zones":["3","2","1"]},{"location":"West Europe","zones":["3","2","1"]},{"location":"West
-        US","zones":[]},{"location":"West US 2","zones":["3","2","1"]},{"location":"West
-        US 3","zones":["3","2","1"]}],"capabilities":"SupportsTags, SupportsLocation"},{"resourceType":"applicationGatewayWebApplicationFirewallPolicies","locations":["West
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"capabilities":"SupportsTags, SupportsLocation"},{"resourceType":"applicationGatewayWebApplicationFirewallPolicies","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
         West","Brazil South","Australia East","Australia Southeast","Central India","South
@@ -2769,21 +2818,21 @@ interactions:
         South","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01"],"defaultApiVersion":"2020-03-01","zoneMappings":[{"location":"Australia
-        East","zones":["3","2","1"]},{"location":"Brazil South","zones":["3","2","1"]},{"location":"Canada
-        Central","zones":["3","2","1"]},{"location":"Central India","zones":["3","2","1"]},{"location":"Central
-        US","zones":["3","2","1"]},{"location":"Central US EUAP","zones":["2","1"]},{"location":"East
-        Asia","zones":["3","2","1"]},{"location":"East US","zones":["3","2","1"]},{"location":"East
-        US 2","zones":["3","2","1"]},{"location":"East US 2 EUAP","zones":["3","2","1"]},{"location":"France
-        Central","zones":["3","2","1"]},{"location":"Germany West Central","zones":["3","2","1"]},{"location":"Japan
-        East","zones":["3","2","1"]},{"location":"Korea Central","zones":["3","2","1"]},{"location":"North
-        Central US","zones":[]},{"location":"North Europe","zones":["3","2","1"]},{"location":"Norway
-        East","zones":["3","2","1"]},{"location":"Qatar Central","zones":["3","2","1"]},{"location":"South
-        Africa North","zones":["3","2","1"]},{"location":"South Central US","zones":["3","2","1"]},{"location":"Southeast
-        Asia","zones":["3","2","1"]},{"location":"Sweden Central","zones":["3","2","1"]},{"location":"Switzerland
-        North","zones":["3","2","1"]},{"location":"UAE North","zones":["3","2","1"]},{"location":"UK
-        South","zones":["3","2","1"]},{"location":"West Europe","zones":["3","2","1"]},{"location":"West
-        US","zones":[]},{"location":"West US 2","zones":["3","2","1"]},{"location":"West
-        US 3","zones":["3","2","1"]}],"capabilities":"SupportsTags, SupportsLocation"},{"resourceType":"azureFirewallFqdnTags","locations":["West
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"capabilities":"SupportsTags, SupportsLocation"},{"resourceType":"azureFirewallFqdnTags","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
         West","Brazil South","Australia East","Australia Southeast","Central India","South
@@ -2808,7 +2857,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
-        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01"],"defaultApiVersion":"2020-03-01","capabilities":"SupportsTags,
+        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01"],"defaultApiVersion":"2020-03-01","locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"SupportsTags,
         SupportsLocation"},{"resourceType":"locations/privateLinkServices","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -2967,7 +3023,15 @@ interactions:
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01"],"capabilities":"None"},{"resourceType":"networkWatchers/lenses","locations":["Central
         US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01"],"defaultApiVersion":"2020-03-01","capabilities":"CrossResourceGroupResourceMove,
-        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"frontdoorOperationResults","locations":["global"],"apiVersions":["2022-05-01","2021-06-01","2020-11-01","2020-07-01","2020-05-01","2020-04-01","2020-01-01","2019-11-01","2019-10-01","2019-08-01","2019-05-01","2019-04-01","2019-03-01","2018-08-01"],"defaultApiVersion":"2020-07-01","capabilities":"None"},{"resourceType":"frontdoors","locations":["Central
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"expressRouteProviderPorts","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Central US EUAP","East US 2 EUAP","Korea Central","Korea
+        South","France Central","Australia Central","South Africa North","UAE North","Switzerland
+        North","Germany West Central","Norway East","West US 3","Jio India West","Sweden
+        Central"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01"],"defaultApiVersion":"2020-06-01","capabilities":"None"},{"resourceType":"frontdoorOperationResults","locations":["global"],"apiVersions":["2022-05-01","2021-06-01","2020-11-01","2020-07-01","2020-05-01","2020-04-01","2020-01-01","2019-11-01","2019-10-01","2019-08-01","2019-05-01","2019-04-01","2019-03-01","2018-08-01"],"defaultApiVersion":"2020-07-01","capabilities":"None"},{"resourceType":"frontdoors","locations":["Central
         US EUAP","East US 2 EUAP","global","Central US","East US","East US 2","North
         Central US","South Central US","West US","North Europe","West Europe","East
         Asia","Southeast Asia","Japan East","Japan West","Brazil South","Australia
@@ -2995,7 +3059,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '147324'
+      - '157435'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -3060,7 +3124,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2013'
+      - '1944'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -3134,7 +3198,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2013'
+      - '1944'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -3188,7 +3252,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
-        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"virtualNetworks/taggedTrafficConsumers","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -3206,21 +3277,21 @@ interactions:
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01"],"defaultApiVersion":"2020-03-01","zoneMappings":[{"location":"Australia
-        East","zones":["3","2","1"]},{"location":"Brazil South","zones":["3","2","1"]},{"location":"Canada
-        Central","zones":["3","2","1"]},{"location":"Central India","zones":["3","2","1"]},{"location":"Central
-        US","zones":["3","2","1"]},{"location":"Central US EUAP","zones":["2","1"]},{"location":"East
-        Asia","zones":["3","2","1"]},{"location":"East US","zones":["3","2","1"]},{"location":"East
-        US 2","zones":["3","2","1"]},{"location":"East US 2 EUAP","zones":["3","2","1"]},{"location":"France
-        Central","zones":["3","2","1"]},{"location":"Germany West Central","zones":["3","2","1"]},{"location":"Japan
-        East","zones":["3","2","1"]},{"location":"Korea Central","zones":["3","2","1"]},{"location":"North
-        Central US","zones":[]},{"location":"North Europe","zones":["3","2","1"]},{"location":"Norway
-        East","zones":["3","2","1"]},{"location":"Qatar Central","zones":["3","2","1"]},{"location":"South
-        Africa North","zones":["3","2","1"]},{"location":"South Central US","zones":["3","2","1"]},{"location":"Southeast
-        Asia","zones":["3","2","1"]},{"location":"Sweden Central","zones":["3","2","1"]},{"location":"Switzerland
-        North","zones":["3","2","1"]},{"location":"UAE North","zones":["3","2","1"]},{"location":"UK
-        South","zones":["3","2","1"]},{"location":"West Europe","zones":["3","2","1"]},{"location":"West
-        US","zones":[]},{"location":"West US 2","zones":["3","2","1"]},{"location":"West
-        US 3","zones":["3","2","1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"publicIPAddresses","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -3230,21 +3301,27 @@ interactions:
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"zoneMappings":[{"location":"Australia
-        East","zones":["3","2","1"]},{"location":"Brazil South","zones":["3","2","1"]},{"location":"Canada
-        Central","zones":["3","2","1"]},{"location":"Central India","zones":["3","2","1"]},{"location":"Central
-        US","zones":["3","2","1"]},{"location":"Central US EUAP","zones":["2","1"]},{"location":"East
-        Asia","zones":["3","2","1"]},{"location":"East US","zones":["3","2","1"]},{"location":"East
-        US 2","zones":["3","2","1"]},{"location":"East US 2 EUAP","zones":["3","2","1"]},{"location":"France
-        Central","zones":["3","2","1"]},{"location":"Germany West Central","zones":["3","2","1"]},{"location":"Japan
-        East","zones":["3","2","1"]},{"location":"Korea Central","zones":["3","2","1"]},{"location":"North
-        Central US","zones":[]},{"location":"North Europe","zones":["3","2","1"]},{"location":"Norway
-        East","zones":["3","2","1"]},{"location":"Qatar Central","zones":["3","2","1"]},{"location":"South
-        Africa North","zones":["3","2","1"]},{"location":"South Central US","zones":["3","2","1"]},{"location":"Southeast
-        Asia","zones":["3","2","1"]},{"location":"Sweden Central","zones":["3","2","1"]},{"location":"Switzerland
-        North","zones":["3","2","1"]},{"location":"UAE North","zones":["3","2","1"]},{"location":"UK
-        South","zones":["3","2","1"]},{"location":"West Europe","zones":["3","2","1"]},{"location":"West
-        US","zones":[]},{"location":"West US 2","zones":["3","2","1"]},{"location":"West
-        US 3","zones":["3","2","1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"locationMappings":[{"location":"East US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"internalPublicIpAddresses","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -3262,21 +3339,27 @@ interactions:
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01"],"defaultApiVersion":"2020-06-01","zoneMappings":[{"location":"Australia
-        East","zones":["3","2","1"]},{"location":"Brazil South","zones":["3","2","1"]},{"location":"Canada
-        Central","zones":["3","2","1"]},{"location":"Central India","zones":["3","2","1"]},{"location":"Central
-        US","zones":["3","2","1"]},{"location":"Central US EUAP","zones":["2","1"]},{"location":"East
-        Asia","zones":["3","2","1"]},{"location":"East US","zones":["3","2","1"]},{"location":"East
-        US 2","zones":["3","2","1"]},{"location":"East US 2 EUAP","zones":["3","2","1"]},{"location":"France
-        Central","zones":["3","2","1"]},{"location":"Germany West Central","zones":["3","2","1"]},{"location":"Japan
-        East","zones":["3","2","1"]},{"location":"Korea Central","zones":["3","2","1"]},{"location":"North
-        Central US","zones":[]},{"location":"North Europe","zones":["3","2","1"]},{"location":"Norway
-        East","zones":["3","2","1"]},{"location":"Qatar Central","zones":["3","2","1"]},{"location":"South
-        Africa North","zones":["3","2","1"]},{"location":"South Central US","zones":["3","2","1"]},{"location":"Southeast
-        Asia","zones":["3","2","1"]},{"location":"Sweden Central","zones":["3","2","1"]},{"location":"Switzerland
-        North","zones":["3","2","1"]},{"location":"UAE North","zones":["3","2","1"]},{"location":"UK
-        South","zones":["3","2","1"]},{"location":"West Europe","zones":["3","2","1"]},{"location":"West
-        US","zones":[]},{"location":"West US 2","zones":["3","2","1"]},{"location":"West
-        US 3","zones":["3","2","1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"locationMappings":[{"location":"East US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkInterfaces","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -3285,7 +3368,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
-        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"dscpConfigurations","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -3303,7 +3393,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
-        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01"],"defaultApiVersion":"2020-03-01","capabilities":"CrossResourceGroupResourceMove,
+        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01"],"defaultApiVersion":"2020-03-01","locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"privateEndpoints/privateLinkServiceProxies","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -3329,7 +3426,14 @@ interactions:
         South","Korea Central","Korea South","France Central","Australia Central","South
         Africa North","UAE North","Switzerland North","Germany West Central","Norway
         East","West US 3","Jio India West","Sweden Central","Qatar Central","Central
-        US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkSecurityGroups","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -3384,21 +3488,27 @@ interactions:
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01"],"defaultApiVersion":"2020-03-01","zoneMappings":[{"location":"Australia
-        East","zones":["3","2","1"]},{"location":"Brazil South","zones":["3","2","1"]},{"location":"Canada
-        Central","zones":["3","2","1"]},{"location":"Central India","zones":["3","2","1"]},{"location":"Central
-        US","zones":["3","2","1"]},{"location":"Central US EUAP","zones":["2","1"]},{"location":"East
-        Asia","zones":["3","2","1"]},{"location":"East US","zones":["3","2","1"]},{"location":"East
-        US 2","zones":["3","2","1"]},{"location":"East US 2 EUAP","zones":["3","2","1"]},{"location":"France
-        Central","zones":["3","2","1"]},{"location":"Germany West Central","zones":["3","2","1"]},{"location":"Japan
-        East","zones":["3","2","1"]},{"location":"Korea Central","zones":["3","2","1"]},{"location":"North
-        Central US","zones":[]},{"location":"North Europe","zones":["3","2","1"]},{"location":"Norway
-        East","zones":["3","2","1"]},{"location":"Qatar Central","zones":["3","2","1"]},{"location":"South
-        Africa North","zones":["3","2","1"]},{"location":"South Central US","zones":["3","2","1"]},{"location":"Southeast
-        Asia","zones":["3","2","1"]},{"location":"Sweden Central","zones":["3","2","1"]},{"location":"Switzerland
-        North","zones":["3","2","1"]},{"location":"UAE North","zones":["3","2","1"]},{"location":"UK
-        South","zones":["3","2","1"]},{"location":"West Europe","zones":["3","2","1"]},{"location":"West
-        US","zones":[]},{"location":"West US 2","zones":["3","2","1"]},{"location":"West
-        US 3","zones":["3","2","1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"locationMappings":[{"location":"East US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkWatchers","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -3443,7 +3553,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
-        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"localNetworkGateways","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -3471,21 +3588,21 @@ interactions:
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","zoneMappings":[{"location":"Australia
-        East","zones":["3","2","1"]},{"location":"Brazil South","zones":["3","2","1"]},{"location":"Canada
-        Central","zones":["3","2","1"]},{"location":"Central India","zones":["3","2","1"]},{"location":"Central
-        US","zones":["3","2","1"]},{"location":"Central US EUAP","zones":["2","1"]},{"location":"East
-        Asia","zones":["3","2","1"]},{"location":"East US","zones":["3","2","1"]},{"location":"East
-        US 2","zones":["3","2","1"]},{"location":"East US 2 EUAP","zones":["3","2","1"]},{"location":"France
-        Central","zones":["3","2","1"]},{"location":"Germany West Central","zones":["3","2","1"]},{"location":"Japan
-        East","zones":["3","2","1"]},{"location":"Korea Central","zones":["3","2","1"]},{"location":"North
-        Central US","zones":[]},{"location":"North Europe","zones":["3","2","1"]},{"location":"Norway
-        East","zones":["3","2","1"]},{"location":"Qatar Central","zones":["3","2","1"]},{"location":"South
-        Africa North","zones":["3","2","1"]},{"location":"South Central US","zones":["3","2","1"]},{"location":"Southeast
-        Asia","zones":["3","2","1"]},{"location":"Sweden Central","zones":["3","2","1"]},{"location":"Switzerland
-        North","zones":["3","2","1"]},{"location":"UAE North","zones":["3","2","1"]},{"location":"UK
-        South","zones":["3","2","1"]},{"location":"West Europe","zones":["3","2","1"]},{"location":"West
-        US","zones":[]},{"location":"West US 2","zones":["3","2","1"]},{"location":"West
-        US 3","zones":["3","2","1"]}],"capabilities":"SupportsTags, SupportsLocation"},{"resourceType":"applicationGatewayWebApplicationFirewallPolicies","locations":["West
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"capabilities":"SupportsTags, SupportsLocation"},{"resourceType":"applicationGatewayWebApplicationFirewallPolicies","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
         West","Brazil South","Australia East","Australia Southeast","Central India","South
@@ -3947,21 +4064,21 @@ interactions:
         South","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01"],"defaultApiVersion":"2020-03-01","zoneMappings":[{"location":"Australia
-        East","zones":["3","2","1"]},{"location":"Brazil South","zones":["3","2","1"]},{"location":"Canada
-        Central","zones":["3","2","1"]},{"location":"Central India","zones":["3","2","1"]},{"location":"Central
-        US","zones":["3","2","1"]},{"location":"Central US EUAP","zones":["2","1"]},{"location":"East
-        Asia","zones":["3","2","1"]},{"location":"East US","zones":["3","2","1"]},{"location":"East
-        US 2","zones":["3","2","1"]},{"location":"East US 2 EUAP","zones":["3","2","1"]},{"location":"France
-        Central","zones":["3","2","1"]},{"location":"Germany West Central","zones":["3","2","1"]},{"location":"Japan
-        East","zones":["3","2","1"]},{"location":"Korea Central","zones":["3","2","1"]},{"location":"North
-        Central US","zones":[]},{"location":"North Europe","zones":["3","2","1"]},{"location":"Norway
-        East","zones":["3","2","1"]},{"location":"Qatar Central","zones":["3","2","1"]},{"location":"South
-        Africa North","zones":["3","2","1"]},{"location":"South Central US","zones":["3","2","1"]},{"location":"Southeast
-        Asia","zones":["3","2","1"]},{"location":"Sweden Central","zones":["3","2","1"]},{"location":"Switzerland
-        North","zones":["3","2","1"]},{"location":"UAE North","zones":["3","2","1"]},{"location":"UK
-        South","zones":["3","2","1"]},{"location":"West Europe","zones":["3","2","1"]},{"location":"West
-        US","zones":[]},{"location":"West US 2","zones":["3","2","1"]},{"location":"West
-        US 3","zones":["3","2","1"]}],"capabilities":"SupportsTags, SupportsLocation"},{"resourceType":"azureFirewallFqdnTags","locations":["West
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"capabilities":"SupportsTags, SupportsLocation"},{"resourceType":"azureFirewallFqdnTags","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
         West","Brazil South","Australia East","Australia Southeast","Central India","South
@@ -3986,7 +4103,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
-        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01"],"defaultApiVersion":"2020-03-01","capabilities":"SupportsTags,
+        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01"],"defaultApiVersion":"2020-03-01","locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"SupportsTags,
         SupportsLocation"},{"resourceType":"locations/privateLinkServices","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -4145,7 +4269,15 @@ interactions:
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01"],"capabilities":"None"},{"resourceType":"networkWatchers/lenses","locations":["Central
         US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01"],"defaultApiVersion":"2020-03-01","capabilities":"CrossResourceGroupResourceMove,
-        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"frontdoorOperationResults","locations":["global"],"apiVersions":["2022-05-01","2021-06-01","2020-11-01","2020-07-01","2020-05-01","2020-04-01","2020-01-01","2019-11-01","2019-10-01","2019-08-01","2019-05-01","2019-04-01","2019-03-01","2018-08-01"],"defaultApiVersion":"2020-07-01","capabilities":"None"},{"resourceType":"frontdoors","locations":["Central
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"expressRouteProviderPorts","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Central US EUAP","East US 2 EUAP","Korea Central","Korea
+        South","France Central","Australia Central","South Africa North","UAE North","Switzerland
+        North","Germany West Central","Norway East","West US 3","Jio India West","Sweden
+        Central"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01"],"defaultApiVersion":"2020-06-01","capabilities":"None"},{"resourceType":"frontdoorOperationResults","locations":["global"],"apiVersions":["2022-05-01","2021-06-01","2020-11-01","2020-07-01","2020-05-01","2020-04-01","2020-01-01","2019-11-01","2019-10-01","2019-08-01","2019-05-01","2019-04-01","2019-03-01","2018-08-01"],"defaultApiVersion":"2020-07-01","capabilities":"None"},{"resourceType":"frontdoors","locations":["Central
         US EUAP","East US 2 EUAP","global","Central US","East US","East US 2","North
         Central US","South Central US","West US","North Europe","West Europe","East
         Asia","Southeast Asia","Japan East","Japan West","Brazil South","Australia
@@ -4173,7 +4305,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '147324'
+      - '157435'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -4281,7 +4413,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
-        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"virtualNetworks/taggedTrafficConsumers","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -4299,21 +4438,21 @@ interactions:
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01"],"defaultApiVersion":"2020-03-01","zoneMappings":[{"location":"Australia
-        East","zones":["3","2","1"]},{"location":"Brazil South","zones":["3","2","1"]},{"location":"Canada
-        Central","zones":["3","2","1"]},{"location":"Central India","zones":["3","2","1"]},{"location":"Central
-        US","zones":["3","2","1"]},{"location":"Central US EUAP","zones":["2","1"]},{"location":"East
-        Asia","zones":["3","2","1"]},{"location":"East US","zones":["3","2","1"]},{"location":"East
-        US 2","zones":["3","2","1"]},{"location":"East US 2 EUAP","zones":["3","2","1"]},{"location":"France
-        Central","zones":["3","2","1"]},{"location":"Germany West Central","zones":["3","2","1"]},{"location":"Japan
-        East","zones":["3","2","1"]},{"location":"Korea Central","zones":["3","2","1"]},{"location":"North
-        Central US","zones":[]},{"location":"North Europe","zones":["3","2","1"]},{"location":"Norway
-        East","zones":["3","2","1"]},{"location":"Qatar Central","zones":["3","2","1"]},{"location":"South
-        Africa North","zones":["3","2","1"]},{"location":"South Central US","zones":["3","2","1"]},{"location":"Southeast
-        Asia","zones":["3","2","1"]},{"location":"Sweden Central","zones":["3","2","1"]},{"location":"Switzerland
-        North","zones":["3","2","1"]},{"location":"UAE North","zones":["3","2","1"]},{"location":"UK
-        South","zones":["3","2","1"]},{"location":"West Europe","zones":["3","2","1"]},{"location":"West
-        US","zones":[]},{"location":"West US 2","zones":["3","2","1"]},{"location":"West
-        US 3","zones":["3","2","1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"publicIPAddresses","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -4323,21 +4462,27 @@ interactions:
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"zoneMappings":[{"location":"Australia
-        East","zones":["3","2","1"]},{"location":"Brazil South","zones":["3","2","1"]},{"location":"Canada
-        Central","zones":["3","2","1"]},{"location":"Central India","zones":["3","2","1"]},{"location":"Central
-        US","zones":["3","2","1"]},{"location":"Central US EUAP","zones":["2","1"]},{"location":"East
-        Asia","zones":["3","2","1"]},{"location":"East US","zones":["3","2","1"]},{"location":"East
-        US 2","zones":["3","2","1"]},{"location":"East US 2 EUAP","zones":["3","2","1"]},{"location":"France
-        Central","zones":["3","2","1"]},{"location":"Germany West Central","zones":["3","2","1"]},{"location":"Japan
-        East","zones":["3","2","1"]},{"location":"Korea Central","zones":["3","2","1"]},{"location":"North
-        Central US","zones":[]},{"location":"North Europe","zones":["3","2","1"]},{"location":"Norway
-        East","zones":["3","2","1"]},{"location":"Qatar Central","zones":["3","2","1"]},{"location":"South
-        Africa North","zones":["3","2","1"]},{"location":"South Central US","zones":["3","2","1"]},{"location":"Southeast
-        Asia","zones":["3","2","1"]},{"location":"Sweden Central","zones":["3","2","1"]},{"location":"Switzerland
-        North","zones":["3","2","1"]},{"location":"UAE North","zones":["3","2","1"]},{"location":"UK
-        South","zones":["3","2","1"]},{"location":"West Europe","zones":["3","2","1"]},{"location":"West
-        US","zones":[]},{"location":"West US 2","zones":["3","2","1"]},{"location":"West
-        US 3","zones":["3","2","1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"locationMappings":[{"location":"East US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"internalPublicIpAddresses","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -4355,21 +4500,27 @@ interactions:
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01"],"defaultApiVersion":"2020-06-01","zoneMappings":[{"location":"Australia
-        East","zones":["3","2","1"]},{"location":"Brazil South","zones":["3","2","1"]},{"location":"Canada
-        Central","zones":["3","2","1"]},{"location":"Central India","zones":["3","2","1"]},{"location":"Central
-        US","zones":["3","2","1"]},{"location":"Central US EUAP","zones":["2","1"]},{"location":"East
-        Asia","zones":["3","2","1"]},{"location":"East US","zones":["3","2","1"]},{"location":"East
-        US 2","zones":["3","2","1"]},{"location":"East US 2 EUAP","zones":["3","2","1"]},{"location":"France
-        Central","zones":["3","2","1"]},{"location":"Germany West Central","zones":["3","2","1"]},{"location":"Japan
-        East","zones":["3","2","1"]},{"location":"Korea Central","zones":["3","2","1"]},{"location":"North
-        Central US","zones":[]},{"location":"North Europe","zones":["3","2","1"]},{"location":"Norway
-        East","zones":["3","2","1"]},{"location":"Qatar Central","zones":["3","2","1"]},{"location":"South
-        Africa North","zones":["3","2","1"]},{"location":"South Central US","zones":["3","2","1"]},{"location":"Southeast
-        Asia","zones":["3","2","1"]},{"location":"Sweden Central","zones":["3","2","1"]},{"location":"Switzerland
-        North","zones":["3","2","1"]},{"location":"UAE North","zones":["3","2","1"]},{"location":"UK
-        South","zones":["3","2","1"]},{"location":"West Europe","zones":["3","2","1"]},{"location":"West
-        US","zones":[]},{"location":"West US 2","zones":["3","2","1"]},{"location":"West
-        US 3","zones":["3","2","1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"locationMappings":[{"location":"East US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkInterfaces","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -4378,7 +4529,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
-        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"dscpConfigurations","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -4396,7 +4554,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
-        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01"],"defaultApiVersion":"2020-03-01","capabilities":"CrossResourceGroupResourceMove,
+        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01"],"defaultApiVersion":"2020-03-01","locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"privateEndpoints/privateLinkServiceProxies","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -4422,7 +4587,14 @@ interactions:
         South","Korea Central","Korea South","France Central","Australia Central","South
         Africa North","UAE North","Switzerland North","Germany West Central","Norway
         East","West US 3","Jio India West","Sweden Central","Qatar Central","Central
-        US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkSecurityGroups","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -4477,21 +4649,27 @@ interactions:
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01"],"defaultApiVersion":"2020-03-01","zoneMappings":[{"location":"Australia
-        East","zones":["3","2","1"]},{"location":"Brazil South","zones":["3","2","1"]},{"location":"Canada
-        Central","zones":["3","2","1"]},{"location":"Central India","zones":["3","2","1"]},{"location":"Central
-        US","zones":["3","2","1"]},{"location":"Central US EUAP","zones":["2","1"]},{"location":"East
-        Asia","zones":["3","2","1"]},{"location":"East US","zones":["3","2","1"]},{"location":"East
-        US 2","zones":["3","2","1"]},{"location":"East US 2 EUAP","zones":["3","2","1"]},{"location":"France
-        Central","zones":["3","2","1"]},{"location":"Germany West Central","zones":["3","2","1"]},{"location":"Japan
-        East","zones":["3","2","1"]},{"location":"Korea Central","zones":["3","2","1"]},{"location":"North
-        Central US","zones":[]},{"location":"North Europe","zones":["3","2","1"]},{"location":"Norway
-        East","zones":["3","2","1"]},{"location":"Qatar Central","zones":["3","2","1"]},{"location":"South
-        Africa North","zones":["3","2","1"]},{"location":"South Central US","zones":["3","2","1"]},{"location":"Southeast
-        Asia","zones":["3","2","1"]},{"location":"Sweden Central","zones":["3","2","1"]},{"location":"Switzerland
-        North","zones":["3","2","1"]},{"location":"UAE North","zones":["3","2","1"]},{"location":"UK
-        South","zones":["3","2","1"]},{"location":"West Europe","zones":["3","2","1"]},{"location":"West
-        US","zones":[]},{"location":"West US 2","zones":["3","2","1"]},{"location":"West
-        US 3","zones":["3","2","1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"locationMappings":[{"location":"East US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkWatchers","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -4536,7 +4714,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
-        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"localNetworkGateways","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -4564,21 +4749,21 @@ interactions:
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","zoneMappings":[{"location":"Australia
-        East","zones":["3","2","1"]},{"location":"Brazil South","zones":["3","2","1"]},{"location":"Canada
-        Central","zones":["3","2","1"]},{"location":"Central India","zones":["3","2","1"]},{"location":"Central
-        US","zones":["3","2","1"]},{"location":"Central US EUAP","zones":["2","1"]},{"location":"East
-        Asia","zones":["3","2","1"]},{"location":"East US","zones":["3","2","1"]},{"location":"East
-        US 2","zones":["3","2","1"]},{"location":"East US 2 EUAP","zones":["3","2","1"]},{"location":"France
-        Central","zones":["3","2","1"]},{"location":"Germany West Central","zones":["3","2","1"]},{"location":"Japan
-        East","zones":["3","2","1"]},{"location":"Korea Central","zones":["3","2","1"]},{"location":"North
-        Central US","zones":[]},{"location":"North Europe","zones":["3","2","1"]},{"location":"Norway
-        East","zones":["3","2","1"]},{"location":"Qatar Central","zones":["3","2","1"]},{"location":"South
-        Africa North","zones":["3","2","1"]},{"location":"South Central US","zones":["3","2","1"]},{"location":"Southeast
-        Asia","zones":["3","2","1"]},{"location":"Sweden Central","zones":["3","2","1"]},{"location":"Switzerland
-        North","zones":["3","2","1"]},{"location":"UAE North","zones":["3","2","1"]},{"location":"UK
-        South","zones":["3","2","1"]},{"location":"West Europe","zones":["3","2","1"]},{"location":"West
-        US","zones":[]},{"location":"West US 2","zones":["3","2","1"]},{"location":"West
-        US 3","zones":["3","2","1"]}],"capabilities":"SupportsTags, SupportsLocation"},{"resourceType":"applicationGatewayWebApplicationFirewallPolicies","locations":["West
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"capabilities":"SupportsTags, SupportsLocation"},{"resourceType":"applicationGatewayWebApplicationFirewallPolicies","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
         West","Brazil South","Australia East","Australia Southeast","Central India","South
@@ -5040,21 +5225,21 @@ interactions:
         South","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01"],"defaultApiVersion":"2020-03-01","zoneMappings":[{"location":"Australia
-        East","zones":["3","2","1"]},{"location":"Brazil South","zones":["3","2","1"]},{"location":"Canada
-        Central","zones":["3","2","1"]},{"location":"Central India","zones":["3","2","1"]},{"location":"Central
-        US","zones":["3","2","1"]},{"location":"Central US EUAP","zones":["2","1"]},{"location":"East
-        Asia","zones":["3","2","1"]},{"location":"East US","zones":["3","2","1"]},{"location":"East
-        US 2","zones":["3","2","1"]},{"location":"East US 2 EUAP","zones":["3","2","1"]},{"location":"France
-        Central","zones":["3","2","1"]},{"location":"Germany West Central","zones":["3","2","1"]},{"location":"Japan
-        East","zones":["3","2","1"]},{"location":"Korea Central","zones":["3","2","1"]},{"location":"North
-        Central US","zones":[]},{"location":"North Europe","zones":["3","2","1"]},{"location":"Norway
-        East","zones":["3","2","1"]},{"location":"Qatar Central","zones":["3","2","1"]},{"location":"South
-        Africa North","zones":["3","2","1"]},{"location":"South Central US","zones":["3","2","1"]},{"location":"Southeast
-        Asia","zones":["3","2","1"]},{"location":"Sweden Central","zones":["3","2","1"]},{"location":"Switzerland
-        North","zones":["3","2","1"]},{"location":"UAE North","zones":["3","2","1"]},{"location":"UK
-        South","zones":["3","2","1"]},{"location":"West Europe","zones":["3","2","1"]},{"location":"West
-        US","zones":[]},{"location":"West US 2","zones":["3","2","1"]},{"location":"West
-        US 3","zones":["3","2","1"]}],"capabilities":"SupportsTags, SupportsLocation"},{"resourceType":"azureFirewallFqdnTags","locations":["West
+        East","zones":["2","3","1"]},{"location":"Brazil South","zones":["2","3","1"]},{"location":"Canada
+        Central","zones":["2","3","1"]},{"location":"Central India","zones":["2","3","1"]},{"location":"Central
+        US","zones":["2","3","1"]},{"location":"Central US EUAP","zones":["1","2"]},{"location":"East
+        Asia","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"France
+        Central","zones":["2","3","1"]},{"location":"Germany West Central","zones":["2","3","1"]},{"location":"Japan
+        East","zones":["2","3","1"]},{"location":"Korea Central","zones":["2","3","1"]},{"location":"North
+        Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
+        East","zones":["2","3","1"]},{"location":"Qatar Central","zones":["2","3","1"]},{"location":"South
+        Africa North","zones":["2","3","1"]},{"location":"South Central US","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"Sweden Central","zones":["2","3","1"]},{"location":"Switzerland
+        North","zones":["2","3","1"]},{"location":"UAE North","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
+        US","zones":[]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"capabilities":"SupportsTags, SupportsLocation"},{"resourceType":"azureFirewallFqdnTags","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
         West","Brazil South","Australia East","Australia Southeast","Central India","South
@@ -5079,7 +5264,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
-        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01"],"defaultApiVersion":"2020-03-01","capabilities":"SupportsTags,
+        Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01"],"defaultApiVersion":"2020-03-01","locationMappings":[{"location":"East
+        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftdclabs1","microsoftb25lab1","ezerr10","cvxhou1"]},{"location":"West
+        US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1","aezlosangeles1","attlosangeles1"]},{"location":"Canada
+        Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
+        US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
+        US","type":"EdgeZone","extendedLocations":["microsoftnewyork1","vzwindsor1","ezecustomerlabboston1"]},{"location":"Australia
+        Southeast","type":"EdgeZone","extendedLocations":["microsoftperth1"]},{"location":"South
+        Central US","type":"EdgeZone","extendedLocations":["attdallas1","ezecustomerlabhouston1"]}],"capabilities":"SupportsTags,
         SupportsLocation"},{"resourceType":"locations/privateLinkServices","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -5238,7 +5430,15 @@ interactions:
         Central","Norway East","West US 3","Jio India West","Sweden Central","Qatar
         Central","Central US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01"],"capabilities":"None"},{"resourceType":"networkWatchers/lenses","locations":["Central
         US EUAP","East US 2 EUAP"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01"],"defaultApiVersion":"2020-03-01","capabilities":"CrossResourceGroupResourceMove,
-        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"frontdoorOperationResults","locations":["global"],"apiVersions":["2022-05-01","2021-06-01","2020-11-01","2020-07-01","2020-05-01","2020-04-01","2020-01-01","2019-11-01","2019-10-01","2019-08-01","2019-05-01","2019-04-01","2019-03-01","2018-08-01"],"defaultApiVersion":"2020-07-01","capabilities":"None"},{"resourceType":"frontdoors","locations":["Central
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"expressRouteProviderPorts","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Central US EUAP","East US 2 EUAP","Korea Central","Korea
+        South","France Central","Australia Central","South Africa North","UAE North","Switzerland
+        North","Germany West Central","Norway East","West US 3","Jio India West","Sweden
+        Central"],"apiVersions":["2022-07-01","2022-05-01","2022-01-01","2021-12-01","2021-08-01","2021-06-01","2021-05-01","2021-04-01","2021-03-01","2021-02-01","2021-01-01","2020-11-01","2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01"],"defaultApiVersion":"2020-06-01","capabilities":"None"},{"resourceType":"frontdoorOperationResults","locations":["global"],"apiVersions":["2022-05-01","2021-06-01","2020-11-01","2020-07-01","2020-05-01","2020-04-01","2020-01-01","2019-11-01","2019-10-01","2019-08-01","2019-05-01","2019-04-01","2019-03-01","2018-08-01"],"defaultApiVersion":"2020-07-01","capabilities":"None"},{"resourceType":"frontdoors","locations":["Central
         US EUAP","East US 2 EUAP","global","Central US","East US","East US 2","North
         Central US","South Central US","West US","North Europe","West Europe","East
         Asia","Southeast Asia","Japan East","Japan West","Brazil South","Australia
@@ -5266,7 +5466,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '147324'
+      - '157435'
       content-type:
       - application/json; charset=utf-8
       date:
