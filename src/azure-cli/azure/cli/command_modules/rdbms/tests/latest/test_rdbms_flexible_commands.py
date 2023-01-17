@@ -2240,7 +2240,7 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_identity_aad_admin_mgmt(self, resource_group):
-        self._test_identity_aad_admin_mgmt('mysql', resource_group)
+        self._test_identity_aad_admin_mgmt('mysql', resource_group, 'enabled')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2375,16 +2375,12 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
                     .format(database_engine, resource_group, replica[1], admin_id_arg),
                     checks=admin_checks)
 
-        aad_auth_only_value = 'OFF'
-        if password_auth == 'disabled':
-            aad_auth_only_value = 'ON'
-
         if database_engine == 'mysql':
-            # verify that aad_auth_only=ON in primary server and all replicas
+            # verify that aad_auth_only=OFF in primary server and all replicas
             for server_name in [server, replica[0], replica[1]]:
                 self.cmd('{} flexible-server parameter show -g {} -s {} -n aad_auth_only'
                          .format(database_engine, resource_group, server_name),
-                         checks=[JMESPathCheck('value', aad_auth_only_value)])
+                         checks=[JMESPathCheck('value', 'OFF')])
         elif database_engine == 'postgres':
             # verify that authConfig.activeDirectoryAuth=enabled and authConfig.passwordAuth=disabled in primary server and all replicas
             for server_name in [server, replica[0], replica[1]]:
@@ -2393,13 +2389,11 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
                 self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name), checks=list_checks)
 
         if database_engine == 'mysql':
-            if password_auth == 'disabled':
-                aad_auth_only_value = 'OFF'
-            # set aad_auth_only=ON if password_auth==disabled else aad_auth_only=OFF in primary server and replica 2
+            # set aad_auth_only=ON in primary server and replica 2
             for server_name in [server, replica[1]]:
                 self.cmd('{} flexible-server parameter set -g {} -s {} -n aad_auth_only -v {}'
-                         .format(database_engine, resource_group, server_name, aad_auth_only_value),
-                         checks=[JMESPathCheck('value', aad_auth_only_value)])
+                         .format(database_engine, resource_group, server_name, 'ON'),
+                         checks=[JMESPathCheck('value', 'ON')])
 
             # try to remove identity 2 from primary server
             self.cmd('{} flexible-server identity remove -g {} -s {} -n {} --yes'
@@ -2425,7 +2419,7 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
             for server_name in [server, replica[0], replica[1]]:
                 self.cmd('{} flexible-server parameter show -g {} -s {} -n aad_auth_only'
                          .format(database_engine, resource_group, server_name),
-                         checks=[JMESPathCheck('value', aad_auth_only_value)])
+                         checks=[JMESPathCheck('value', 'OFF')])
 
         # add identity 3 to primary server
         self.cmd('{} flexible-server identity assign -g {} -s {} -n {}'
