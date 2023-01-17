@@ -41,7 +41,7 @@ from azure.cli.command_modules.network._format import (
 from azure.cli.command_modules.network._validators import (
     get_network_watcher_from_location,
     process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace, process_ag_settings_create_namespace, process_ag_http_settings_create_namespace,
-    process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_nic_create_namespace,
+    process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_nic_create_namespace,
     process_lb_create_namespace, process_lb_frontend_ip_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
@@ -292,15 +292,15 @@ def load_command_table(self, _):
         g.command('list-request-headers', 'list_available_request_headers')
         g.command('list-response-headers', 'list_available_response_headers')
 
-    with self.command_group('network application-gateway ssl-policy') as g:
-        g.custom_command('set', 'set_ag_ssl_policy_2017_06_01', min_api='2017-06-01', supports_no_wait=True, validator=process_ag_ssl_policy_set_namespace, doc_string_source='ApplicationGatewaySslPolicy')
-        g.custom_command('set', 'set_ag_ssl_policy_2017_03_01', max_api='2017-03-01', supports_no_wait=True, validator=process_ag_ssl_policy_set_namespace)
-        g.custom_show_command('show', 'show_ag_ssl_policy')
+    with self.command_group("network application-gateway ssl-policy"):
+        from .custom import SSLPolicySet
+        self.command_table["network application-gateway ssl-policy set"] = SSLPolicySet(loader=self)
 
-    with self.command_group('network application-gateway ssl-policy', network_ag_sdk, min_api='2017-06-01') as g:
-        g.command('list-options', 'list_available_ssl_options')
-        g.command('predefined list', 'list_available_ssl_predefined_policies')
-        g.show_command('predefined show', 'get_ssl_predefined_policy')
+    with self.command_group("network application-gateway ssl-profile"):
+        from .custom import SSLProfileAdd, SSLProfileUpdate, SSLProfileRemove
+        self.command_table["network application-gateway ssl-profile add"] = SSLProfileAdd(loader=self)
+        self.command_table["network application-gateway ssl-profile update"] = SSLProfileUpdate(loader=self)
+        self.command_table["network application-gateway ssl-profile remove"] = SSLProfileRemove(loader=self)
 
     with self.command_group("network application-gateway url-path-map"):
         from .custom import URLPathMapCreate, URLPathMapUpdate, URLPathMapRuleCreate
@@ -382,13 +382,6 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_trusted_client_certificate')
         g.custom_show_command('show', 'show_trusted_client_certificate')
         g.custom_command('update', 'update_trusted_client_certificate')
-
-    with self.command_group('network application-gateway ssl-profile', network_ag_sdk, min_api='2020-06-01') as g:
-        g.custom_command('add', 'add_ssl_profile')
-        g.custom_command('remove', 'remove_ssl_profile')
-        g.custom_command('list', 'list_ssl_profile')
-        g.custom_show_command('show', 'show_ssl_profile')
-        g.custom_command('update', 'update_ssl_profile')
     # endregion
 
     # region DdosProtectionPlans
