@@ -28,6 +28,7 @@ from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone
 
 from .aaz.latest.network import ListUsages as _UsagesList
 from .aaz.latest.network.application_gateway import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.application_gateway.ssl_cert import Create as _SSLCertCreate, Update as _SSLCertUpdate
 from .aaz.latest.network.application_gateway.ssl_policy import Set as _SSLPolicySet
 from .aaz.latest.network.application_gateway.ssl_profile import Add as _SSLProfileAdd, Update as _SSLProfileUpdate, \
     Remove as _SSLProfileRemove
@@ -1501,27 +1502,43 @@ def update_ag_routing_rule(cmd, instance, parent, item_name, address_pool=None,
     return parent
 
 
-def create_ag_ssl_certificate(cmd, resource_group_name, application_gateway_name, item_name, cert_data=None,
-                              cert_password=None, key_vault_secret_id=None, no_wait=False):
-    ApplicationGatewaySslCertificate = cmd.get_models('ApplicationGatewaySslCertificate')
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    new_cert = ApplicationGatewaySslCertificate(
-        name=item_name, data=cert_data, password=cert_password, key_vault_secret_id=key_vault_secret_id)
-    upsert_to_collection(ag, 'ssl_certificates', new_cert, 'name')
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
+class SSLCertCreate(_SSLCertCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.cert_file = AAZFileArg(
+            options=["--cert-file"],
+            help="Path to the pfx certificate file.",
+            fmt=AAZFileArgBase64EncodeFormat(),
+        )
+        args_schema.data._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.cert_file):
+            args.data = args.cert_file
 
 
-def update_ag_ssl_certificate(instance, parent, item_name,
-                              cert_data=None, cert_password=None, key_vault_secret_id=None):
-    if cert_data is not None:
-        instance.data = cert_data
-    if cert_password is not None:
-        instance.password = cert_password
-    if key_vault_secret_id is not None:
-        instance.key_vault_secret_id = key_vault_secret_id
-    return parent
+class SSLCertUpdate(_SSLCertUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.cert_file = AAZFileArg(
+            options=["--cert-file"],
+            help="Path to the pfx certificate file.",
+            fmt=AAZFileArgBase64EncodeFormat(),
+            nullable=True,
+        )
+        args_schema.data._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.cert_file):
+            args.data = args.cert_file
 
 
 class SSLPolicySet(_SSLPolicySet):
