@@ -32,7 +32,6 @@ DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
 MINIMUM_IOPS = 300
 RESOURCE_PROVIDER = 'Microsoft.DBforMySQL'
 
-
 # region create without args
 # pylint: disable=too-many-locals, too-many-statements, raise-missing-from
 def flexible_server_create(cmd, client,
@@ -45,7 +44,7 @@ def flexible_server_create(cmd, client,
                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
-                           iops=None, auto_grow=None, geo_redundant_backup=None,
+                           iops=None, auto_grow=None, auto_io_scaling=None, geo_redundant_backup=None,
                            byok_identity=None, backup_byok_identity=None, byok_key=None, backup_byok_key=None,
                            yes=False):
     # Generate missing parameters
@@ -110,7 +109,8 @@ def flexible_server_create(cmd, client,
 
     storage = mysql_flexibleservers.models.Storage(storage_size_gb=storage_gb,
                                                    iops=iops,
-                                                   auto_grow=auto_grow)
+                                                   auto_grow=auto_grow,
+                                                   auto_io_scaling=auto_io_scaling)
 
     backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                  geo_redundant_backup=geo_redundant_backup)
@@ -329,6 +329,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        storage_gb=None,
                                        auto_grow=None,
                                        iops=None,
+                                       auto_io_scaling=None,
                                        backup_retention=None,
                                        geo_redundant_backup=None,
                                        administrator_login_password=None,
@@ -444,7 +445,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
     if storage_gb:
         instance.storage.storage_size_gb = storage_gb
 
-    if not iops:
+    if not iops and not auto_io_scaling:
         iops = instance.storage.iops
     instance.storage.iops = _determine_iops(storage_gb=instance.storage.storage_size_gb,
                                             iops_info=iops_info,
@@ -454,6 +455,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     if auto_grow:
         instance.storage.storage_autogrow = auto_grow
+
+    if auto_io_scaling:
+        instance.storage.storage_autogrow = auto_io_scaling
 
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
