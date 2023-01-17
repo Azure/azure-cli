@@ -21,7 +21,6 @@ from azure.cli.command_modules.network._client_factory import (
     cf_public_ip_addresses, cf_connection_monitor,
     cf_dns_references,
     cf_app_gateway_waf_policy,
-    cf_private_link_services,
     cf_virtual_router, cf_virtual_router_peering, cf_flow_logs,
     cf_load_balancer_backend_pools)
 from azure.cli.command_modules.network._util import (
@@ -42,7 +41,7 @@ from azure.cli.command_modules.network._format import (
 from azure.cli.command_modules.network._validators import (
     get_network_watcher_from_location,
     process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace, process_ag_settings_create_namespace, process_ag_http_settings_create_namespace,
-    process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_nic_create_namespace,
+    process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_nic_create_namespace,
     process_lb_create_namespace, process_lb_frontend_ip_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
@@ -95,12 +94,6 @@ def load_command_table(self, _):
         client_factory=cf_dns_references,
         resource_type=ResourceType.MGMT_NETWORK_DNS,
         min_api='2018-05-01'
-    )
-
-    network_private_link_service_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#PrivateLinkServicesOperations.{}',
-        client_factory=cf_private_link_services,
-        min_api='2019-04-01'
     )
 
     network_lb_sdk = CliCommandType(
@@ -299,15 +292,15 @@ def load_command_table(self, _):
         g.command('list-request-headers', 'list_available_request_headers')
         g.command('list-response-headers', 'list_available_response_headers')
 
-    with self.command_group('network application-gateway ssl-policy') as g:
-        g.custom_command('set', 'set_ag_ssl_policy_2017_06_01', min_api='2017-06-01', supports_no_wait=True, validator=process_ag_ssl_policy_set_namespace, doc_string_source='ApplicationGatewaySslPolicy')
-        g.custom_command('set', 'set_ag_ssl_policy_2017_03_01', max_api='2017-03-01', supports_no_wait=True, validator=process_ag_ssl_policy_set_namespace)
-        g.custom_show_command('show', 'show_ag_ssl_policy')
+    with self.command_group("network application-gateway ssl-policy"):
+        from .custom import SSLPolicySet
+        self.command_table["network application-gateway ssl-policy set"] = SSLPolicySet(loader=self)
 
-    with self.command_group('network application-gateway ssl-policy', network_ag_sdk, min_api='2017-06-01') as g:
-        g.command('list-options', 'list_available_ssl_options')
-        g.command('predefined list', 'list_available_ssl_predefined_policies')
-        g.show_command('predefined show', 'get_ssl_predefined_policy')
+    with self.command_group("network application-gateway ssl-profile"):
+        from .custom import SSLProfileAdd, SSLProfileUpdate, SSLProfileRemove
+        self.command_table["network application-gateway ssl-profile add"] = SSLProfileAdd(loader=self)
+        self.command_table["network application-gateway ssl-profile update"] = SSLProfileUpdate(loader=self)
+        self.command_table["network application-gateway ssl-profile remove"] = SSLProfileRemove(loader=self)
 
     with self.command_group("network application-gateway url-path-map"):
         from .custom import URLPathMapCreate, URLPathMapUpdate, URLPathMapRuleCreate
@@ -389,13 +382,6 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_trusted_client_certificate')
         g.custom_show_command('show', 'show_trusted_client_certificate')
         g.custom_command('update', 'update_trusted_client_certificate')
-
-    with self.command_group('network application-gateway ssl-profile', network_ag_sdk, min_api='2020-06-01') as g:
-        g.custom_command('add', 'add_ssl_profile')
-        g.custom_command('remove', 'remove_ssl_profile')
-        g.custom_command('list', 'list_ssl_profile')
-        g.custom_show_command('show', 'show_ssl_profile')
-        g.custom_command('update', 'update_ssl_profile')
     # endregion
 
     # region DdosProtectionPlans
@@ -508,16 +494,14 @@ def load_command_table(self, _):
     # endregion
 
     # region PrivateLinkServices
-    with self.command_group('network private-link-service', network_private_link_service_sdk) as g:
-        g.custom_command('create', 'create_private_link_service')
-        g.command('delete', 'begin_delete')
-        g.custom_command('list', 'list_private_link_services')
-        g.show_command('show')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_private_link_service')
+    with self.command_group('network private-link-service'):
+        from azure.cli.command_modules.network.custom import PrivateLinkServiceCreate, PrivateLinkServiceUpdate
+        self.command_table['network private-link-service create'] = PrivateLinkServiceCreate(loader=self)
+        self.command_table['network private-link-service update'] = PrivateLinkServiceUpdate(loader=self)
 
-    with self.command_group('network private-link-service connection', network_private_link_service_sdk) as g:
-        g.command('delete', 'begin_delete_private_endpoint_connection')
-        g.custom_command('update', 'update_private_endpoint_connection')
+    with self.command_group('network private-link-service connection'):
+        from azure.cli.command_modules.network.custom import PrivateEndpointConnectionUpdate
+        self.command_table['network private-link-service connection update'] = PrivateEndpointConnectionUpdate(loader=self)
 
     # TODO: Due to service limitation.
     # with self.command_group('network private-link-service ip-configs', network_private_link_service_sdk) as g:

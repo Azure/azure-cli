@@ -28,6 +28,9 @@ from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone
 
 from .aaz.latest.network import ListUsages as _UsagesList
 from .aaz.latest.network.application_gateway import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.application_gateway.ssl_policy import Set as _SSLPolicySet
+from .aaz.latest.network.application_gateway.ssl_profile import Add as _SSLProfileAdd, Update as _SSLProfileUpdate, \
+    Remove as _SSLProfileRemove
 from .aaz.latest.network.application_gateway.url_path_map import Create as _URLPathMapCreate, \
     Update as _URLPathMapUpdate
 from .aaz.latest.network.application_gateway.url_path_map.rule import Create as _URLPathMapRuleCreate
@@ -49,6 +52,9 @@ from .aaz.latest.network.private_endpoint.dns_zone_group import Create as _Priva
     Add as _PrivateEndpointPrivateDnsZoneAdd, Remove as _PrivateEndpointPrivateDnsZoneRemove
 from .aaz.latest.network.private_endpoint.ip_config import Remove as _PrivateEndpointIpConfigRemove, \
     Add as _PrivateEndpointIpConfigAdd
+from .aaz.latest.network.private_link_service import Create as _PrivateLinkServiceCreate, \
+    Update as _PrivateLinkServiceUpdate
+from .aaz.latest.network.private_link_service.connection import Update as _PrivateEndpointConnectionUpdate
 from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
 from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdate
 from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
@@ -800,104 +806,94 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
 
 
 # region application-gateway ssl-profile
-def add_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name, policy_name=None,
-                    policy_type=None, min_protocol_version=None, cipher_suites=None, disabled_ssl_protocols=None,
-                    trusted_client_certificates=None, client_auth_configuration=None, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    (SubResource,
-     ApplicationGatewaySslPolicy,
-     ApplicationGatewayClientAuthConfiguration,
-     ApplicationGatewaySslProfile) = cmd.get_models('SubResource',
-                                                    'ApplicationGatewaySslPolicy',
-                                                    'ApplicationGatewayClientAuthConfiguration',
-                                                    'ApplicationGatewaySslProfile')
-    sr_trusted_client_certificates = [SubResource(id=item) for item in
-                                      trusted_client_certificates] if trusted_client_certificates else None
-    ssl_policy = ApplicationGatewaySslPolicy(policy_name=policy_name, policy_type=policy_type,
-                                             min_protocol_version=min_protocol_version,
-                                             cipher_suites=cipher_suites, disabled_ssl_protocols=disabled_ssl_protocols)
-    client_auth = ApplicationGatewayClientAuthConfiguration(
-        verify_client_cert_issuer_dn=client_auth_configuration) if client_auth_configuration else None
-    ssl_profile = ApplicationGatewaySslProfile(trusted_client_certificates=sr_trusted_client_certificates,
-                                               ssl_policy=ssl_policy, client_auth_configuration=client_auth,
-                                               name=ssl_profile_name)
-    appgw.ssl_profiles.append(ssl_profile)
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
-                       application_gateway_name, appgw)
+class SSLProfileAdd(_SSLProfileAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.client_auth_config = AAZBoolArg(
+            options=["--client-auth-configuration", "--client-auth-config"],
+            help="Client authentication configuration of the application gateway resource.",
+        )
+        args_schema.trusted_client_certs = AAZListArg(
+            options=["--trusted-client-certificates", "--trusted-client-cert"],
+            help="Array of references to application gateway trusted client certificates.",
+        )
+        args_schema.trusted_client_certs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/trustedClientCertificates/{}",
+            ),
+        )
+        args_schema.auth_configuration._registered = False
+        args_schema.client_certificates._registered = False
+        return args_schema
 
-
-def update_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name, policy_name=None,
-                       policy_type=None, min_protocol_version=None, cipher_suites=None, disabled_ssl_protocols=None,
-                       trusted_client_certificates=None, client_auth_configuration=None, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    instance = None
-    for profile in appgw.ssl_profiles:
-        if profile.name == ssl_profile_name:
-            instance = profile
-            break
-    else:
-        raise ResourceNotFoundError(f"Ssl profiles {ssl_profile_name} doesn't exist")
-
-    if policy_name is not None:
-        instance.ssl_policy.policy_name = policy_name
-    if policy_type is not None:
-        instance.ssl_policy.policy_type = policy_type
-    if min_protocol_version is not None:
-        instance.ssl_policy.min_protocol_version = min_protocol_version
-    if cipher_suites is not None:
-        instance.ssl_policy.cipher_suites = cipher_suites
-    if disabled_ssl_protocols is not None:
-        instance.ssl_policy.disabled_ssl_protocols = disabled_ssl_protocols
-    if trusted_client_certificates is not None:
-        SubResource = cmd.get_models('SubResource')
-        instance.trusted_client_certificates = [SubResource(id=item) for item in trusted_client_certificates]
-    if client_auth_configuration is not None:
-        ApplicationGatewayClientAuthConfiguration = cmd.get_models('ApplicationGatewayClientAuthConfiguration')
-        instance.client_auth_configuration = ApplicationGatewayClientAuthConfiguration(
-            verify_client_cert_issuer_dn=(client_auth_configuration == 'True')
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.client_auth_config):
+            args.auth_configuration.verify_client_cert_issuer_dn = args.client_auth_config
+        args.client_certificates = assign_aaz_list_arg(
+            args.client_certificates,
+            args.trusted_client_certs,
+            element_transformer=lambda _, cert_id: {"id": cert_id}
         )
 
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
-                       application_gateway_name, appgw)
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def list_ssl_profile(cmd, resource_group_name, application_gateway_name):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    return appgw.ssl_profiles
+class SSLProfileUpdate(_SSLProfileUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.client_auth_config = AAZBoolArg(
+            options=["--client-auth-configuration", "--client-auth-config"],
+            help="Client authentication configuration of the application gateway resource.",
+            nullable=True,
+        )
+        args_schema.trusted_client_certs = AAZListArg(
+            options=["--trusted-client-certificates", "--trusted-client-cert"],
+            help="Array of references to application gateway trusted client certificates.",
+            nullable=True,
+        )
+        args_schema.trusted_client_certs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/trustedClientCertificates/{}",
+            ),
+            nullable=True,
+        )
+        args_schema.auth_configuration._registered = False
+        args_schema.client_certificates._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.client_auth_config):
+            args.auth_configuration.verify_client_cert_issuer_dn = args.client_auth_config
+        args.client_certificates = assign_aaz_list_arg(
+            args.client_certificates,
+            args.trusted_client_certs,
+            element_transformer=lambda _, cert_id: {"id": cert_id}
+        )
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def remove_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+class SSLProfileRemove(_SSLProfileRemove):
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
 
-    for profile in appgw.ssl_profiles:
-        if profile.name == ssl_profile_name:
-            appgw.ssl_profiles.remove(profile)
-            break
-    else:
-        raise ResourceNotFoundError(f"Ssl profiles {ssl_profile_name} doesn't exist")
-
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
-                       application_gateway_name, appgw)
-
-
-def show_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    instance = None
-    for profile in appgw.ssl_profiles:
-        if profile.name == ssl_profile_name:
-            instance = profile
-            break
-    else:
-        raise ResourceNotFoundError(f"Ssl profiles {ssl_profile_name} doesn't exist")
-    return instance
-
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 # endregion
 
 
@@ -1528,39 +1524,14 @@ def update_ag_ssl_certificate(instance, parent, item_name,
     return parent
 
 
-def set_ag_ssl_policy_2017_03_01(cmd, resource_group_name, application_gateway_name, disabled_ssl_protocols=None,
-                                 clear=False, no_wait=False):
-    ApplicationGatewaySslPolicy = cmd.get_models('ApplicationGatewaySslPolicy')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    ag.ssl_policy = None if clear else ApplicationGatewaySslPolicy(
-        disabled_ssl_protocols=disabled_ssl_protocols)
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, application_gateway_name, ag)
-
-
-def set_ag_ssl_policy_2017_06_01(cmd, resource_group_name, application_gateway_name, policy_name=None, policy_type=None,
-                                 disabled_ssl_protocols=None, cipher_suites=None, min_protocol_version=None,
-                                 no_wait=False):
-    ApplicationGatewaySslPolicy, ApplicationGatewaySslPolicyType = cmd.get_models(
-        'ApplicationGatewaySslPolicy', 'ApplicationGatewaySslPolicyType')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    if policy_name:
-        policy_type = ApplicationGatewaySslPolicyType.predefined.value
-    elif policy_type is None and (cipher_suites or min_protocol_version):
-        policy_type = ApplicationGatewaySslPolicyType.custom.value
-    ag.ssl_policy = ApplicationGatewaySslPolicy(
-        policy_name=policy_name,
-        policy_type=policy_type,
-        disabled_ssl_protocols=disabled_ssl_protocols,
-        cipher_suites=cipher_suites,
-        min_protocol_version=min_protocol_version)
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, application_gateway_name, ag)
-
-
-def show_ag_ssl_policy(cmd, resource_group_name, application_gateway_name):
-    return network_client_factory(cmd.cli_ctx).application_gateways.get(
-        resource_group_name, application_gateway_name).ssl_policy
+class SSLPolicySet(_SSLPolicySet):
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.name):
+            args.policy_type = "Predefined"
+        elif not has_value(args.policy_type) \
+                and (has_value(args.cipher_suites) or has_value(args.min_protocol_version)):
+            args.policy_type = "Custom"
 
 
 def create_ag_trusted_root_certificate(cmd, resource_group_name, application_gateway_name, item_name, no_wait=False,
@@ -3655,78 +3626,93 @@ class PrivateEndpointAsgRemove(_PrivateEndpointAsgRemove):
 
 
 # region PrivateLinkService
-def create_private_link_service(cmd, resource_group_name, service_name, subnet, frontend_ip_configurations,
-                                private_ip_address=None, private_ip_allocation_method=None,
-                                private_ip_address_version=None,
-                                virtual_network_name=None, public_ip_address=None,
-                                location=None, tags=None, load_balancer_name=None,
-                                visibility=None, auto_approval=None, fqdns=None,
-                                enable_proxy_protocol=None, edge_zone=None):
-    client = network_client_factory(cmd.cli_ctx).private_link_services
-    FrontendIPConfiguration, PrivateLinkService, PrivateLinkServiceIpConfiguration, PublicIPAddress, Subnet = \
-        cmd.get_models('FrontendIPConfiguration', 'PrivateLinkService', 'PrivateLinkServiceIpConfiguration',
-                       'PublicIPAddress', 'Subnet')
-    pls_ip_config = PrivateLinkServiceIpConfiguration(
-        name='{}_ipconfig_0'.format(service_name),
-        private_ip_address=private_ip_address,
-        private_ip_allocation_method=private_ip_allocation_method,
-        private_ip_address_version=private_ip_address_version,
-        subnet=subnet and Subnet(id=subnet),
-        public_ip_address=public_ip_address and PublicIPAddress(id=public_ip_address)
-    )
-    link_service = PrivateLinkService(
-        location=location,
-        load_balancer_frontend_ip_configurations=frontend_ip_configurations and [
-            FrontendIPConfiguration(id=ip_config) for ip_config in frontend_ip_configurations
-        ],
-        ip_configurations=[pls_ip_config],
-        visbility=visibility,
-        auto_approval=auto_approval,
-        fqdns=fqdns,
-        tags=tags,
-        enable_proxy_protocol=enable_proxy_protocol
-    )
-    if edge_zone:
-        link_service.extended_location = _edge_zone_model(cmd, edge_zone)
-    return client.begin_create_or_update(resource_group_name, service_name, link_service)
+class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vnet_name = AAZStrArg(options=['--vnet-name'], arg_group="IP Configuration", help="The virtual network (VNet) name.")
+        args_schema.subnet = AAZResourceIdArg(
+            options=['--subnet'],
+            arg_group="IP Configuration",
+            help="Name or ID of subnet to use. If name provided, also supply `--vnet-name`.",
+            required=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{vnet_name}/subnets/{}"
+            )
+        )
+        args_schema.private_ip_address = AAZStrArg(options=['--private-ip-address'], arg_group="IP Configuration", help="Static private IP address to use.")
+        args_schema.private_ip_address_version = AAZStrArg(options=['--private-ip-address-version'], arg_group="IP Configuration", help="IP version of the private IP address.",
+                                                           default="IPv4", enum={"IPv4": "IPv4", "IPv6": "IPv6"})
+        args_schema.private_ip_allocation_method = AAZStrArg(options=['--private-ip-allocation-method'], arg_group="IP Configuration", help="Private IP address allocation method.",
+                                                             enum={"Dynamic": "Dynamic", "Static": "Static"})
+        args_schema.lb_name = AAZStrArg(options=['--lb-name'], help="Name of the load balancer to retrieve frontend IP configs from. Ignored if a frontend IP configuration ID is supplied.")
+        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.", required=True)
+        args_schema.lb_frontend_ip_configs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIpConfigurations/{}"
+            )
+        )
+
+        args_schema.ip_configurations._registered = False
+        args_schema.load_balancer_frontend_ip_configurations._registered = False
+        args_schema.edge_zone_type._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.ip_configurations = [{
+            'name': '{}_ipconfig_0'.format(args.name.to_serialized_data()),
+            'private_ip_address': args.private_ip_address,
+            'private_ip_allocation_method': args.private_ip_allocation_method,
+            'private_ip_address_version': args.private_ip_address_version,
+            'subnet': {'id': args.subnet}
+        }]
+
+        args.load_balancer_frontend_ip_configurations = assign_aaz_list_arg(
+            args.load_balancer_frontend_ip_configurations,
+            args.lb_frontend_ip_configs,
+            element_transformer=lambda _, lb_frontend_ip_config: {"id": lb_frontend_ip_config}
+        )
 
 
-def update_private_link_service(instance, cmd, tags=None, frontend_ip_configurations=None, load_balancer_name=None,
-                                visibility=None, auto_approval=None, fqdns=None, enable_proxy_protocol=None):
-    FrontendIPConfiguration = cmd.get_models('FrontendIPConfiguration')
-    with cmd.update_context(instance) as c:
-        c.set_param('tags', tags)
-        c.set_param('load_balancer_frontend_ip_configurations', frontend_ip_configurations and [
-            FrontendIPConfiguration(id=ip_config) for ip_config in frontend_ip_configurations
-        ])
-        c.set_param('visibility', visibility)
-        c.set_param('auto_approval', auto_approval)
-        c.set_param('fqdns', fqdns)
-        c.set_param('enable_proxy_protocol', enable_proxy_protocol)
-    return instance
+class PrivateLinkServiceUpdate(_PrivateLinkServiceUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.lb_name = AAZStrArg(options=['--lb-name'], help="Name of the load balancer to retrieve frontend IP configs from. Ignored if a frontend IP configuration ID is supplied.")
+        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.")
+        args_schema.lb_frontend_ip_configs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIpConfigurations/{}"
+            )
+        )
+        args_schema.load_balancer_frontend_ip_configurations._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+
+        if has_value(args.lb_frontend_ip_configs):
+            args.load_balancer_frontend_ip_configurations = assign_aaz_list_arg(
+                args.load_balancer_frontend_ip_configurations,
+                args.lb_frontend_ip_configs,
+                element_transformer=lambda _, lb_frontend_ip_config: {"id": lb_frontend_ip_config}
+            )
 
 
-def list_private_link_services(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).private_link_services
-    if resource_group_name:
-        return client.list(resource_group_name)
-    return client.list_by_subscription()
+class PrivateEndpointConnectionUpdate(_PrivateEndpointConnectionUpdate):
 
-
-def update_private_endpoint_connection(cmd, resource_group_name, service_name, pe_connection_name,
-                                       connection_status, description=None, action_required=None):
-    client = network_client_factory(cmd.cli_ctx).private_link_services
-    PrivateEndpointConnection, PrivateLinkServiceConnectionState = cmd.get_models('PrivateEndpointConnection',
-                                                                                  'PrivateLinkServiceConnectionState')
-    connection_state = PrivateLinkServiceConnectionState(
-        status=connection_status,
-        description=description,
-        actions_required=action_required
-    )
-    pe_connection = PrivateEndpointConnection(
-        private_link_service_connection_state=connection_state
-    )
-    return client.update_private_endpoint_connection(resource_group_name, service_name, pe_connection_name, pe_connection)  # pylint: disable=line-too-long
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZArgEnum
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.connection_status._required = True
+        args_schema.connection_status.enum = AAZArgEnum({"Approved": "Approved", "Rejected": "Rejected", "Removed": "Removed"})
+        return args_schema
 
 
 def add_private_link_services_ipconfig(cmd, resource_group_name, service_name,

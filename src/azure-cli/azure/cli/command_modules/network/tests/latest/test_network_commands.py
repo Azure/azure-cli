@@ -416,7 +416,7 @@ class NetworkPrivateLinkService(ScenarioTest):
             self.check('enableProxyProtocol', True)
         ])
 
-        self.cmd('network private-link-service update -g {rg} -n {lks1} --visibility {sub1} {sub1} --auto-approval {sub1} {sub1}  --enable-proxy-protocol False', checks=[
+        self.cmd('network private-link-service update -g {rg} -n {lks1} --visibility {sub1} {sub1} --auto-approval {sub1} {sub1} --enable-proxy-protocol False', checks=[
             self.check('length(visibility.subscriptions)', 2),
             self.check('length(autoApproval.subscriptions)', 2),
             self.check('enableProxyProtocol', False)
@@ -1037,10 +1037,10 @@ class NetworkAppGatewaySslProfileScenarioTest(ScenarioTest):
 
         self.cmd('network application-gateway ssl-profile update -g {rg} --gateway-name {gw} --name {name1} '
                  '--client-auth-configuration False',
-                 checks=[self.check('sslProfiles[1].clientAuthConfiguration.verifyClientCertIssuerDn', False)])
+                 checks=[self.check('sslProfiles[1].clientAuthConfiguration.verifyClientCertIssuerDN', False)])
 
         self.cmd('network application-gateway ssl-profile show -g {rg} --gateway-name {gw} --name {name1} ',
-                 checks=[self.check('clientAuthConfiguration.verifyClientCertIssuerDn', False)])
+                 checks=[self.check('clientAuthConfiguration.verifyClientCertIssuerDN', False)])
 
         self.cmd('network application-gateway ssl-profile list -g {rg} --gateway-name {gw}',
                  checks=[self.check('length(@)', 2)])
@@ -1296,7 +1296,10 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
 
         # test ssl-policy list-options
         self.cmd('network application-gateway ssl-policy list-options', checks=[
-            self.check('length(@)', 10)
+            self.exists('availableCipherSuites'),
+            self.exists('availableProtocols'),
+            self.exists('predefinedPolicies'),
+            self.check('type', 'Microsoft.Network/ApplicationGatewayAvailableSslOptions'),
         ])
 
     @ResourceGroupPreparer(name_prefix='test_appgw_with_tcp', location='westus')

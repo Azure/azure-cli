@@ -73,17 +73,6 @@ def get_asg_validator(loader, dest):
     return _validate_asg_name_or_id
 
 
-def get_subscription_list_validator(dest, model_class):
-    def _validate_subscription_list(cmd, namespace):
-        val = getattr(namespace, dest, None)
-        if not val:
-            return
-        model = cmd.get_models(model_class)
-        setattr(namespace, dest, model(subscriptions=val))
-
-    return _validate_subscription_list
-
-
 def get_vnet_validator(dest):
     from msrestazure.tools import is_valid_resource_id, resource_id
 
@@ -755,11 +744,6 @@ def process_ag_routing_rule_create_namespace(cmd, namespace):  # pylint: disable
     if namespace.settings and not is_valid_resource_id(namespace.settings):
         namespace.settings = _generate_ag_subproperty_id(
             cmd.cli_ctx, namespace, 'backendSettingsCollection', namespace.settings)
-
-
-def process_ag_ssl_policy_set_namespace(namespace):
-    if namespace.disabled_ssl_protocols and getattr(namespace, 'clear', None):
-        raise ValueError('incorrect usage: --disabled-ssl-protocols PROTOCOL [...] | --clear')
 
 
 def process_ag_create_namespace(cmd, namespace):
