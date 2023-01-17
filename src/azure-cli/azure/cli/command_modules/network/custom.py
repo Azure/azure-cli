@@ -806,12 +806,11 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
 class SSLProfileAdd(_SSLProfileAdd):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.client_auth_config = AAZStrArg(
+        args_schema.client_auth_config = AAZBoolArg(
             options=["--client-auth-configuration", "--client-auth-config"],
             help="Client authentication configuration of the application gateway resource.",
-            enum={"True": "True", "False": "False"},
         )
         args_schema.trusted_client_certs = AAZListArg(
             options=["--trusted-client-certificates", "--trusted-client-cert"],
@@ -830,7 +829,7 @@ class SSLProfileAdd(_SSLProfileAdd):
     def pre_operations(self):
         args = self.ctx.args
         if has_value(args.client_auth_config):
-            args.auth_configuration = {"verify_client_cert_issuer_dn": args.client_auth_config == "True"}
+            args.auth_configuration.verify_client_cert_issuer_dn = args.client_auth_config
         args.client_certificates = assign_aaz_list_arg(
             args.client_certificates,
             args.trusted_client_certs,
@@ -845,12 +844,11 @@ class SSLProfileAdd(_SSLProfileAdd):
 class SSLProfileUpdate(_SSLProfileUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.client_auth_config = AAZStrArg(
+        args_schema.client_auth_config = AAZBoolArg(
             options=["--client-auth-configuration", "--client-auth-config"],
             help="Client authentication configuration of the application gateway resource.",
-            enum={"True": "True", "False": "False"},
             nullable=True,
         )
         args_schema.trusted_client_certs = AAZListArg(
@@ -872,7 +870,7 @@ class SSLProfileUpdate(_SSLProfileUpdate):
     def pre_operations(self):
         args = self.ctx.args
         if has_value(args.client_auth_config):
-            args.auth_configuration = {"verify_client_cert_issuer_dn": args.client_auth_config == "True"}
+            args.auth_configuration.verify_client_cert_issuer_dn = args.client_auth_config
         args.client_certificates = assign_aaz_list_arg(
             args.client_certificates,
             args.trusted_client_certs,
