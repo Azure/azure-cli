@@ -993,7 +993,7 @@ parameters:
     short-summary: "Describe how VMs are added to or removed from nodepools."
   - name: --node-taints
     type: string
-    short-summary: The node taints for the node pool. Pass the empty string `""` to remove all taints.
+    short-summary: The node taints for the node pool.
   - name: --labels
     type: string
     short-summary: The node labels for the node pool. See https://aka.ms/node-labels for syntax of labels.
