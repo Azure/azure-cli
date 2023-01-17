@@ -12,26 +12,25 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network application-gateway ssl-policy set",
+    "network application-gateway ssl-profile update",
 )
-class Set(AAZCommand):
-    """Update an SSL policy settings.
+class Update(AAZCommand):
+    """Update SSL profile of the application gateway.
 
-    :example: Set a predefined SSL policy.
-        az network application-gateway ssl-policy set -g MyResourceGroup --gateway-name MyAppGateway -n AppGwSslPolicy20170401S --policy-type Predefined
-
-    :example: Set a custom SSL policy with TLSv1_2 and the cipher suites below.
-        az network application-gateway ssl-policy set -g MyResourceGroup --gateway-name MyAppGateway --policy-type Custom --min-protocol-version TLSv1_2 --cipher-suites TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_RSA_WITH_AES_128_GCM_SHA256
+    :example: Update SSL profile for an existing application gateway.
+        az network application-gateway ssl-profile update --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile --client-auth-configuration False
     """
 
     _aaz_info = {
         "version": "2022-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2022-05-01", "properties.sslPolicy"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2022-05-01", "properties.sslProfiles[]"],
         ]
     }
 
     AZ_SUPPORT_NO_WAIT = True
+
+    AZ_SUPPORT_GENERIC_UPDATE = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
@@ -57,45 +56,121 @@ class Set(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+        _args_schema.name = AAZStrArg(
+            options=["--name"],
+            help="Name of the SSL profile.",
+            required=True,
+        )
+        _args_schema.auth_configuration = AAZObjectArg(
+            options=["--auth-configuration"],
+            help="Client authentication configuration of the application gateway resource.",
+            nullable=True,
+        )
+        _args_schema.client_certificates = AAZListArg(
+            options=["--client-certificates"],
+            help="Array of references to application gateway trusted client certificates.",
+            nullable=True,
+        )
+
+        auth_configuration = cls._args_schema.auth_configuration
+        auth_configuration.verify_client_cert_issuer_dn = AAZBoolArg(
+            options=["verify-client-cert-issuer-dn"],
+            help="Verify client certificate issuer name on the application gateway.",
+            nullable=True,
+        )
+        auth_configuration.verify_client_revocation = AAZStrArg(
+            options=["verify-client-revocation"],
+            help="Verify client certificate revocation status.",
+            nullable=True,
+            enum={"None": "None", "OCSP": "OCSP"},
+        )
+
+        client_certificates = cls._args_schema.client_certificates
+        client_certificates.Element = AAZObjectArg(
+            nullable=True,
+        )
+        cls._build_args_sub_resource_update(client_certificates.Element)
+
+        # define Arg Group "Parameters.properties.sslProfiles[]"
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
         _args_schema.cipher_suites = AAZListArg(
             options=["--cipher-suites"],
-            help="SSL cipher suites to be enabled in the specified order to application gateway. Values from `az network application-gateway ssl-policy list-options`.",
+            arg_group="Properties",
+            help="SSL cipher suites to be enabled in the specified order to application gateway.",
+            nullable=True,
         )
         _args_schema.disabled_ssl_protocols = AAZListArg(
-            options=["--disabled-ssl-protocols"],
-            help="Space-separated list of protocols to disable. Values from `az network application-gateway ssl-policy list-options`.",
+            options=["--disabled-protocols", "--disabled-ssl-protocols"],
+            arg_group="Properties",
+            help="Space-separated list of protocols to disable.",
+            nullable=True,
         )
         _args_schema.min_protocol_version = AAZStrArg(
             options=["--min-protocol-version"],
-            help="Minimum version of SSL protocol to be supported on application gateway. Values from: `az network application-gateway ssl-policy list-options`.",
+            arg_group="Properties",
+            help="Minimum version of SSL protocol to be supported on application gateway.",
+            nullable=True,
             enum={"TLSv1_0": "TLSv1_0", "TLSv1_1": "TLSv1_1", "TLSv1_2": "TLSv1_2", "TLSv1_3": "TLSv1_3"},
         )
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
+        _args_schema.policy_name = AAZStrArg(
+            options=["--policy-name"],
+            arg_group="Properties",
             help="Name of SSL policy.",
+            nullable=True,
             enum={"AppGwSslPolicy20150501": "AppGwSslPolicy20150501", "AppGwSslPolicy20170401": "AppGwSslPolicy20170401", "AppGwSslPolicy20170401S": "AppGwSslPolicy20170401S", "AppGwSslPolicy20220101": "AppGwSslPolicy20220101", "AppGwSslPolicy20220101S": "AppGwSslPolicy20220101S"},
         )
         _args_schema.policy_type = AAZStrArg(
             options=["--policy-type"],
+            arg_group="Properties",
             help="Type of SSL policy.",
+            nullable=True,
             enum={"Custom": "Custom", "CustomV2": "CustomV2", "Predefined": "Predefined"},
         )
 
         cipher_suites = cls._args_schema.cipher_suites
         cipher_suites.Element = AAZStrArg(
+            nullable=True,
             enum={"TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA": "TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA", "TLS_DHE_DSS_WITH_AES_128_CBC_SHA": "TLS_DHE_DSS_WITH_AES_128_CBC_SHA", "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256": "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256", "TLS_DHE_DSS_WITH_AES_256_CBC_SHA": "TLS_DHE_DSS_WITH_AES_256_CBC_SHA", "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256": "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA": "TLS_DHE_RSA_WITH_AES_128_CBC_SHA", "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256": "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_DHE_RSA_WITH_AES_256_CBC_SHA": "TLS_DHE_RSA_WITH_AES_256_CBC_SHA", "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384": "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA": "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256": "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA": "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA", "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384": "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384": "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA": "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256": "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA": "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384": "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_3DES_EDE_CBC_SHA": "TLS_RSA_WITH_3DES_EDE_CBC_SHA", "TLS_RSA_WITH_AES_128_CBC_SHA": "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_128_CBC_SHA256": "TLS_RSA_WITH_AES_128_CBC_SHA256", "TLS_RSA_WITH_AES_128_GCM_SHA256": "TLS_RSA_WITH_AES_128_GCM_SHA256", "TLS_RSA_WITH_AES_256_CBC_SHA": "TLS_RSA_WITH_AES_256_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA256": "TLS_RSA_WITH_AES_256_CBC_SHA256", "TLS_RSA_WITH_AES_256_GCM_SHA384": "TLS_RSA_WITH_AES_256_GCM_SHA384"},
         )
 
         disabled_ssl_protocols = cls._args_schema.disabled_ssl_protocols
         disabled_ssl_protocols.Element = AAZStrArg(
+            nullable=True,
             enum={"TLSv1_0": "TLSv1_0", "TLSv1_1": "TLSv1_1", "TLSv1_2": "TLSv1_2", "TLSv1_3": "TLSv1_3"},
         )
         return cls._args_schema
 
+    _args_sub_resource_update = None
+
+    @classmethod
+    def _build_args_sub_resource_update(cls, _schema):
+        if cls._args_sub_resource_update is not None:
+            _schema.id = cls._args_sub_resource_update.id
+            return
+
+        cls._args_sub_resource_update = AAZObjectArg(
+            nullable=True,
+        )
+
+        sub_resource_update = cls._args_sub_resource_update
+        sub_resource_update.id = AAZStrArg(
+            options=["id"],
+            help="Resource ID.",
+            nullable=True,
+        )
+
+        _schema.id = cls._args_sub_resource_update.id
+
     def _execute_operations(self):
         self.pre_operations()
         self.ApplicationGatewaysGet(ctx=self.ctx)()
-        self.InstanceCreateByJson(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.selectors.subresource.required())
+        self.InstanceUpdateByJson(ctx=self.ctx)()
+        self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.selectors.subresource.required())
         yield self.ApplicationGatewaysCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -107,6 +182,14 @@ class Set(AAZCommand):
     def post_operations(self):
         pass
 
+    @register_callback
+    def pre_instance_update(self, instance):
+        pass
+
+    @register_callback
+    def post_instance_update(self, instance):
+        pass
+
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
         return result
@@ -115,11 +198,25 @@ class Set(AAZCommand):
 
         def _get(self):
             result = self.ctx.vars.instance
-            return result.properties.sslPolicy
+            result = result.properties.sslProfiles
+            filters = enumerate(result)
+            filters = filter(
+                lambda e: e[1].name == self.ctx.args.name,
+                filters
+            )
+            idx = next(filters)[0]
+            return result[idx]
 
         def _set(self, value):
             result = self.ctx.vars.instance
-            result.properties.sslPolicy = value
+            result = result.properties.sslProfiles
+            filters = enumerate(result)
+            filters = filter(
+                lambda e: e[1].name == self.ctx.args.name,
+                filters
+            )
+            idx = next(filters, [len(result)])[0]
+            result[idx] = value
             return
 
     class ApplicationGatewaysGet(AAZHttpOperation):
@@ -201,7 +298,7 @@ class Set(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _SetHelper._build_schema_application_gateway_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_application_gateway_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -312,39 +409,74 @@ class Set(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _SetHelper._build_schema_application_gateway_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_application_gateway_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
-    class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
+    class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
         def __call__(self, *args, **kwargs):
-            self.ctx.selectors.subresource.set(self._create_instance())
+            self._update_instance(self.ctx.selectors.subresource.required())
 
-        def _create_instance(self):
+        def _update_instance(self, instance):
             _instance_value, _builder = self.new_content_builder(
                 self.ctx.args,
+                value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("cipherSuites", AAZListType, ".cipher_suites")
-            _builder.set_prop("disabledSslProtocols", AAZListType, ".disabled_ssl_protocols")
-            _builder.set_prop("minProtocolVersion", AAZStrType, ".min_protocol_version")
-            _builder.set_prop("policyName", AAZStrType, ".name")
-            _builder.set_prop("policyType", AAZStrType, ".policy_type")
+            _builder.set_prop("name", AAZStrType, ".name")
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
-            cipher_suites = _builder.get(".cipherSuites")
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("clientAuthConfiguration", AAZObjectType, ".auth_configuration")
+                properties.set_prop("sslPolicy", AAZObjectType)
+                properties.set_prop("trustedClientCertificates", AAZListType, ".client_certificates")
+
+            client_auth_configuration = _builder.get(".properties.clientAuthConfiguration")
+            if client_auth_configuration is not None:
+                client_auth_configuration.set_prop("verifyClientCertIssuerDN", AAZBoolType, ".verify_client_cert_issuer_dn")
+                client_auth_configuration.set_prop("verifyClientRevocation", AAZStrType, ".verify_client_revocation")
+
+            ssl_policy = _builder.get(".properties.sslPolicy")
+            if ssl_policy is not None:
+                ssl_policy.set_prop("cipherSuites", AAZListType, ".cipher_suites")
+                ssl_policy.set_prop("disabledSslProtocols", AAZListType, ".disabled_ssl_protocols")
+                ssl_policy.set_prop("minProtocolVersion", AAZStrType, ".min_protocol_version")
+                ssl_policy.set_prop("policyName", AAZStrType, ".policy_name")
+                ssl_policy.set_prop("policyType", AAZStrType, ".policy_type")
+
+            cipher_suites = _builder.get(".properties.sslPolicy.cipherSuites")
             if cipher_suites is not None:
                 cipher_suites.set_elements(AAZStrType, ".")
 
-            disabled_ssl_protocols = _builder.get(".disabledSslProtocols")
+            disabled_ssl_protocols = _builder.get(".properties.sslPolicy.disabledSslProtocols")
             if disabled_ssl_protocols is not None:
                 disabled_ssl_protocols.set_elements(AAZStrType, ".")
 
+            trusted_client_certificates = _builder.get(".properties.trustedClientCertificates")
+            if trusted_client_certificates is not None:
+                _UpdateHelper._build_schema_sub_resource_update(trusted_client_certificates.set_elements(AAZObjectType, "."))
+
             return _instance_value
 
+    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
 
-class _SetHelper:
-    """Helper class for Set"""
+        def __call__(self, *args, **kwargs):
+            self._update_instance_by_generic(
+                self.ctx.selectors.subresource.required(),
+                self.ctx.generic_update_args
+            )
+
+
+class _UpdateHelper:
+    """Helper class for Update"""
+
+    @classmethod
+    def _build_schema_sub_resource_update(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("id", AAZStrType, ".id")
 
     _schema_application_gateway_backend_address_pool_read = None
 
@@ -3782,4 +3914,4 @@ class _SetHelper:
         _schema.type = cls._schema_virtual_network_tap_read.type
 
 
-__all__ = ["Set"]
+__all__ = ["Update"]

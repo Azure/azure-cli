@@ -12,31 +12,27 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network application-gateway ssl-policy set",
+    "network application-gateway ssl-profile list",
 )
-class Set(AAZCommand):
-    """Update an SSL policy settings.
+class List(AAZCommand):
+    """List the existing SSL profiles of the application gateway.
 
-    :example: Set a predefined SSL policy.
-        az network application-gateway ssl-policy set -g MyResourceGroup --gateway-name MyAppGateway -n AppGwSslPolicy20170401S --policy-type Predefined
-
-    :example: Set a custom SSL policy with TLSv1_2 and the cipher suites below.
-        az network application-gateway ssl-policy set -g MyResourceGroup --gateway-name MyAppGateway --policy-type Custom --min-protocol-version TLSv1_2 --cipher-suites TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_RSA_WITH_AES_128_GCM_SHA256
+    :example: List all the SSL profiles for an existing application gateway.
+        az network application-gateway ssl-profile list --gateway-name MyAppGateway -g MyResourceGroup
     """
 
     _aaz_info = {
         "version": "2022-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2022-05-01", "properties.sslPolicy"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2022-05-01", "properties.sslProfiles"],
         ]
     }
-
-    AZ_SUPPORT_NO_WAIT = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
         self.SubresourceSelector(ctx=self.ctx, name="subresource")
-        return self.build_lro_poller(self._execute_operations, self._output)
+        self._execute_operations()
+        return self._output()
 
     _args_schema = None
 
@@ -57,46 +53,11 @@ class Set(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.cipher_suites = AAZListArg(
-            options=["--cipher-suites"],
-            help="SSL cipher suites to be enabled in the specified order to application gateway. Values from `az network application-gateway ssl-policy list-options`.",
-        )
-        _args_schema.disabled_ssl_protocols = AAZListArg(
-            options=["--disabled-ssl-protocols"],
-            help="Space-separated list of protocols to disable. Values from `az network application-gateway ssl-policy list-options`.",
-        )
-        _args_schema.min_protocol_version = AAZStrArg(
-            options=["--min-protocol-version"],
-            help="Minimum version of SSL protocol to be supported on application gateway. Values from: `az network application-gateway ssl-policy list-options`.",
-            enum={"TLSv1_0": "TLSv1_0", "TLSv1_1": "TLSv1_1", "TLSv1_2": "TLSv1_2", "TLSv1_3": "TLSv1_3"},
-        )
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            help="Name of SSL policy.",
-            enum={"AppGwSslPolicy20150501": "AppGwSslPolicy20150501", "AppGwSslPolicy20170401": "AppGwSslPolicy20170401", "AppGwSslPolicy20170401S": "AppGwSslPolicy20170401S", "AppGwSslPolicy20220101": "AppGwSslPolicy20220101", "AppGwSslPolicy20220101S": "AppGwSslPolicy20220101S"},
-        )
-        _args_schema.policy_type = AAZStrArg(
-            options=["--policy-type"],
-            help="Type of SSL policy.",
-            enum={"Custom": "Custom", "CustomV2": "CustomV2", "Predefined": "Predefined"},
-        )
-
-        cipher_suites = cls._args_schema.cipher_suites
-        cipher_suites.Element = AAZStrArg(
-            enum={"TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA": "TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA", "TLS_DHE_DSS_WITH_AES_128_CBC_SHA": "TLS_DHE_DSS_WITH_AES_128_CBC_SHA", "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256": "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256", "TLS_DHE_DSS_WITH_AES_256_CBC_SHA": "TLS_DHE_DSS_WITH_AES_256_CBC_SHA", "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256": "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA": "TLS_DHE_RSA_WITH_AES_128_CBC_SHA", "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256": "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_DHE_RSA_WITH_AES_256_CBC_SHA": "TLS_DHE_RSA_WITH_AES_256_CBC_SHA", "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384": "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA": "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256": "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA": "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA", "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384": "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384": "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA": "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256": "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA": "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384": "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_3DES_EDE_CBC_SHA": "TLS_RSA_WITH_3DES_EDE_CBC_SHA", "TLS_RSA_WITH_AES_128_CBC_SHA": "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_128_CBC_SHA256": "TLS_RSA_WITH_AES_128_CBC_SHA256", "TLS_RSA_WITH_AES_128_GCM_SHA256": "TLS_RSA_WITH_AES_128_GCM_SHA256", "TLS_RSA_WITH_AES_256_CBC_SHA": "TLS_RSA_WITH_AES_256_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA256": "TLS_RSA_WITH_AES_256_CBC_SHA256", "TLS_RSA_WITH_AES_256_GCM_SHA384": "TLS_RSA_WITH_AES_256_GCM_SHA384"},
-        )
-
-        disabled_ssl_protocols = cls._args_schema.disabled_ssl_protocols
-        disabled_ssl_protocols.Element = AAZStrArg(
-            enum={"TLSv1_0": "TLSv1_0", "TLSv1_1": "TLSv1_1", "TLSv1_2": "TLSv1_2", "TLSv1_3": "TLSv1_3"},
-        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.ApplicationGatewaysGet(ctx=self.ctx)()
-        self.InstanceCreateByJson(ctx=self.ctx)()
-        yield self.ApplicationGatewaysCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -115,11 +76,11 @@ class Set(AAZCommand):
 
         def _get(self):
             result = self.ctx.vars.instance
-            return result.properties.sslPolicy
+            return result.properties.sslProfiles
 
         def _set(self, value):
             result = self.ctx.vars.instance
-            result.properties.sslPolicy = value
+            result.properties.sslProfiles = value
             return
 
     class ApplicationGatewaysGet(AAZHttpOperation):
@@ -201,150 +162,13 @@ class Set(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _SetHelper._build_schema_application_gateway_read(cls._schema_on_200)
+            _ListHelper._build_schema_application_gateway_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
-    class ApplicationGatewaysCreateOrUpdate(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
 
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [202]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200, 201]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "PUT"
-
-        @property
-        def error_format(self):
-            return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "applicationGatewayName", self.ctx.args.gateway_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "api-version", "2022-05-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=self.ctx.vars.instance,
-            )
-
-            return self.serialize_content(_content_value)
-
-        def on_200_201(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200_201
-            )
-
-        _schema_on_200_201 = None
-
-        @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
-
-            cls._schema_on_200_201 = AAZObjectType()
-            _SetHelper._build_schema_application_gateway_read(cls._schema_on_200_201)
-
-            return cls._schema_on_200_201
-
-    class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
-
-        def __call__(self, *args, **kwargs):
-            self.ctx.selectors.subresource.set(self._create_instance())
-
-        def _create_instance(self):
-            _instance_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                typ=AAZObjectType
-            )
-            _builder.set_prop("cipherSuites", AAZListType, ".cipher_suites")
-            _builder.set_prop("disabledSslProtocols", AAZListType, ".disabled_ssl_protocols")
-            _builder.set_prop("minProtocolVersion", AAZStrType, ".min_protocol_version")
-            _builder.set_prop("policyName", AAZStrType, ".name")
-            _builder.set_prop("policyType", AAZStrType, ".policy_type")
-
-            cipher_suites = _builder.get(".cipherSuites")
-            if cipher_suites is not None:
-                cipher_suites.set_elements(AAZStrType, ".")
-
-            disabled_ssl_protocols = _builder.get(".disabledSslProtocols")
-            if disabled_ssl_protocols is not None:
-                disabled_ssl_protocols.set_elements(AAZStrType, ".")
-
-            return _instance_value
-
-
-class _SetHelper:
-    """Helper class for Set"""
+class _ListHelper:
+    """Helper class for List"""
 
     _schema_application_gateway_backend_address_pool_read = None
 
@@ -3782,4 +3606,4 @@ class _SetHelper:
         _schema.type = cls._schema_virtual_network_tap_read.type
 
 
-__all__ = ["Set"]
+__all__ = ["List"]

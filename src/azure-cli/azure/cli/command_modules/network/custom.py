@@ -29,6 +29,8 @@ from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone
 from .aaz.latest.network import ListUsages as _UsagesList
 from .aaz.latest.network.application_gateway import Update as _ApplicationGatewayUpdate
 from .aaz.latest.network.application_gateway.ssl_policy import Set as _SSLPolicySet
+from .aaz.latest.network.application_gateway.ssl_profile import Add as _SSLProfileAdd, Update as _SSLProfileUpdate, \
+    Remove as _SSLProfileRemove
 from .aaz.latest.network.application_gateway.url_path_map import Create as _URLPathMapCreate, \
     Update as _URLPathMapUpdate
 from .aaz.latest.network.application_gateway.url_path_map.rule import Create as _URLPathMapRuleCreate
@@ -801,104 +803,96 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
 
 
 # region application-gateway ssl-profile
-def add_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name, policy_name=None,
-                    policy_type=None, min_protocol_version=None, cipher_suites=None, disabled_ssl_protocols=None,
-                    trusted_client_certificates=None, client_auth_configuration=None, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    (SubResource,
-     ApplicationGatewaySslPolicy,
-     ApplicationGatewayClientAuthConfiguration,
-     ApplicationGatewaySslProfile) = cmd.get_models('SubResource',
-                                                    'ApplicationGatewaySslPolicy',
-                                                    'ApplicationGatewayClientAuthConfiguration',
-                                                    'ApplicationGatewaySslProfile')
-    sr_trusted_client_certificates = [SubResource(id=item) for item in
-                                      trusted_client_certificates] if trusted_client_certificates else None
-    ssl_policy = ApplicationGatewaySslPolicy(policy_name=policy_name, policy_type=policy_type,
-                                             min_protocol_version=min_protocol_version,
-                                             cipher_suites=cipher_suites, disabled_ssl_protocols=disabled_ssl_protocols)
-    client_auth = ApplicationGatewayClientAuthConfiguration(
-        verify_client_cert_issuer_dn=client_auth_configuration) if client_auth_configuration else None
-    ssl_profile = ApplicationGatewaySslProfile(trusted_client_certificates=sr_trusted_client_certificates,
-                                               ssl_policy=ssl_policy, client_auth_configuration=client_auth,
-                                               name=ssl_profile_name)
-    appgw.ssl_profiles.append(ssl_profile)
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
-                       application_gateway_name, appgw)
+class SSLProfileAdd(_SSLProfileAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.client_auth_config = AAZStrArg(
+            options=["--client-auth-configuration", "--client-auth-config"],
+            help="Client authentication configuration of the application gateway resource.",
+            enum={"True": "True", "False": "False"},
+        )
+        args_schema.trusted_client_certs = AAZListArg(
+            options=["--trusted-client-certificates", "--trusted-client-cert"],
+            help="Array of references to application gateway trusted client certificates.",
+        )
+        args_schema.trusted_client_certs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/trustedClientCertificates/{}",
+            ),
+        )
+        args_schema.auth_configuration._registered = False
+        args_schema.client_certificates._registered = False
+        return args_schema
 
-
-def update_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name, policy_name=None,
-                       policy_type=None, min_protocol_version=None, cipher_suites=None, disabled_ssl_protocols=None,
-                       trusted_client_certificates=None, client_auth_configuration=None, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    instance = None
-    for profile in appgw.ssl_profiles:
-        if profile.name == ssl_profile_name:
-            instance = profile
-            break
-    else:
-        raise ResourceNotFoundError(f"Ssl profiles {ssl_profile_name} doesn't exist")
-
-    if policy_name is not None:
-        instance.ssl_policy.policy_name = policy_name
-    if policy_type is not None:
-        instance.ssl_policy.policy_type = policy_type
-    if min_protocol_version is not None:
-        instance.ssl_policy.min_protocol_version = min_protocol_version
-    if cipher_suites is not None:
-        instance.ssl_policy.cipher_suites = cipher_suites
-    if disabled_ssl_protocols is not None:
-        instance.ssl_policy.disabled_ssl_protocols = disabled_ssl_protocols
-    if trusted_client_certificates is not None:
-        SubResource = cmd.get_models('SubResource')
-        instance.trusted_client_certificates = [SubResource(id=item) for item in trusted_client_certificates]
-    if client_auth_configuration is not None:
-        ApplicationGatewayClientAuthConfiguration = cmd.get_models('ApplicationGatewayClientAuthConfiguration')
-        instance.client_auth_configuration = ApplicationGatewayClientAuthConfiguration(
-            verify_client_cert_issuer_dn=(client_auth_configuration == 'True')
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.client_auth_config):
+            args.auth_configuration = {"verify_client_cert_issuer_dn": args.client_auth_config == "True"}
+        args.client_certificates = assign_aaz_list_arg(
+            args.client_certificates,
+            args.trusted_client_certs,
+            element_transformer=lambda _, cert_id: {"id": cert_id}
         )
 
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
-                       application_gateway_name, appgw)
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def list_ssl_profile(cmd, resource_group_name, application_gateway_name):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    return appgw.ssl_profiles
+class SSLProfileUpdate(_SSLProfileUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.client_auth_config = AAZStrArg(
+            options=["--client-auth-configuration", "--client-auth-config"],
+            help="Client authentication configuration of the application gateway resource.",
+            enum={"True": "True", "False": "False"},
+            nullable=True,
+        )
+        args_schema.trusted_client_certs = AAZListArg(
+            options=["--trusted-client-certificates", "--trusted-client-cert"],
+            help="Array of references to application gateway trusted client certificates.",
+            nullable=True,
+        )
+        args_schema.trusted_client_certs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/trustedClientCertificates/{}",
+            ),
+            nullable=True,
+        )
+        args_schema.auth_configuration._registered = False
+        args_schema.client_certificates._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.client_auth_config):
+            args.auth_configuration = {"verify_client_cert_issuer_dn": args.client_auth_config == "True"}
+        args.client_certificates = assign_aaz_list_arg(
+            args.client_certificates,
+            args.trusted_client_certs,
+            element_transformer=lambda _, cert_id: {"id": cert_id}
+        )
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def remove_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+class SSLProfileRemove(_SSLProfileRemove):
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
 
-    for profile in appgw.ssl_profiles:
-        if profile.name == ssl_profile_name:
-            appgw.ssl_profiles.remove(profile)
-            break
-    else:
-        raise ResourceNotFoundError(f"Ssl profiles {ssl_profile_name} doesn't exist")
-
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
-                       application_gateway_name, appgw)
-
-
-def show_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    instance = None
-    for profile in appgw.ssl_profiles:
-        if profile.name == ssl_profile_name:
-            instance = profile
-            break
-    else:
-        raise ResourceNotFoundError(f"Ssl profiles {ssl_profile_name} doesn't exist")
-    return instance
-
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 # endregion
 
 

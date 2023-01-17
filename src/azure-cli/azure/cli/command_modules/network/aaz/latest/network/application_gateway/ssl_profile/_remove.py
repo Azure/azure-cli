@@ -12,22 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network application-gateway ssl-policy set",
+    "network application-gateway ssl-profile remove",
 )
-class Set(AAZCommand):
-    """Update an SSL policy settings.
+class Remove(AAZCommand):
+    """Remove an existing SSL profile of the application gateway.
 
-    :example: Set a predefined SSL policy.
-        az network application-gateway ssl-policy set -g MyResourceGroup --gateway-name MyAppGateway -n AppGwSslPolicy20170401S --policy-type Predefined
-
-    :example: Set a custom SSL policy with TLSv1_2 and the cipher suites below.
-        az network application-gateway ssl-policy set -g MyResourceGroup --gateway-name MyAppGateway --policy-type Custom --min-protocol-version TLSv1_2 --cipher-suites TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_RSA_WITH_AES_128_GCM_SHA256
+    :example: Remove SSL profile for an existing application gateway.
+        az network application-gateway ssl-profile remove --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile
     """
 
     _aaz_info = {
         "version": "2022-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2022-05-01", "properties.sslPolicy"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2022-05-01", "properties.sslProfiles[]"],
         ]
     }
 
@@ -36,7 +33,7 @@ class Set(AAZCommand):
     def _handler(self, command_args):
         super()._handler(command_args)
         self.SubresourceSelector(ctx=self.ctx, name="subresource")
-        return self.build_lro_poller(self._execute_operations, self._output)
+        return self.build_lro_poller(self._execute_operations, None)
 
     _args_schema = None
 
@@ -57,45 +54,17 @@ class Set(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.cipher_suites = AAZListArg(
-            options=["--cipher-suites"],
-            help="SSL cipher suites to be enabled in the specified order to application gateway. Values from `az network application-gateway ssl-policy list-options`.",
-        )
-        _args_schema.disabled_ssl_protocols = AAZListArg(
-            options=["--disabled-ssl-protocols"],
-            help="Space-separated list of protocols to disable. Values from `az network application-gateway ssl-policy list-options`.",
-        )
-        _args_schema.min_protocol_version = AAZStrArg(
-            options=["--min-protocol-version"],
-            help="Minimum version of SSL protocol to be supported on application gateway. Values from: `az network application-gateway ssl-policy list-options`.",
-            enum={"TLSv1_0": "TLSv1_0", "TLSv1_1": "TLSv1_1", "TLSv1_2": "TLSv1_2", "TLSv1_3": "TLSv1_3"},
-        )
         _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            help="Name of SSL policy.",
-            enum={"AppGwSslPolicy20150501": "AppGwSslPolicy20150501", "AppGwSslPolicy20170401": "AppGwSslPolicy20170401", "AppGwSslPolicy20170401S": "AppGwSslPolicy20170401S", "AppGwSslPolicy20220101": "AppGwSslPolicy20220101", "AppGwSslPolicy20220101S": "AppGwSslPolicy20220101S"},
-        )
-        _args_schema.policy_type = AAZStrArg(
-            options=["--policy-type"],
-            help="Type of SSL policy.",
-            enum={"Custom": "Custom", "CustomV2": "CustomV2", "Predefined": "Predefined"},
-        )
-
-        cipher_suites = cls._args_schema.cipher_suites
-        cipher_suites.Element = AAZStrArg(
-            enum={"TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA": "TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA", "TLS_DHE_DSS_WITH_AES_128_CBC_SHA": "TLS_DHE_DSS_WITH_AES_128_CBC_SHA", "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256": "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256", "TLS_DHE_DSS_WITH_AES_256_CBC_SHA": "TLS_DHE_DSS_WITH_AES_256_CBC_SHA", "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256": "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA": "TLS_DHE_RSA_WITH_AES_128_CBC_SHA", "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256": "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_DHE_RSA_WITH_AES_256_CBC_SHA": "TLS_DHE_RSA_WITH_AES_256_CBC_SHA", "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384": "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA": "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256": "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA": "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA", "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384": "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384": "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA": "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256": "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA": "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384": "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_3DES_EDE_CBC_SHA": "TLS_RSA_WITH_3DES_EDE_CBC_SHA", "TLS_RSA_WITH_AES_128_CBC_SHA": "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_128_CBC_SHA256": "TLS_RSA_WITH_AES_128_CBC_SHA256", "TLS_RSA_WITH_AES_128_GCM_SHA256": "TLS_RSA_WITH_AES_128_GCM_SHA256", "TLS_RSA_WITH_AES_256_CBC_SHA": "TLS_RSA_WITH_AES_256_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA256": "TLS_RSA_WITH_AES_256_CBC_SHA256", "TLS_RSA_WITH_AES_256_GCM_SHA384": "TLS_RSA_WITH_AES_256_GCM_SHA384"},
-        )
-
-        disabled_ssl_protocols = cls._args_schema.disabled_ssl_protocols
-        disabled_ssl_protocols.Element = AAZStrArg(
-            enum={"TLSv1_0": "TLSv1_0", "TLSv1_1": "TLSv1_1", "TLSv1_2": "TLSv1_2", "TLSv1_3": "TLSv1_3"},
+            options=["--name"],
+            help="Name of the SSL profile.",
+            required=True,
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.ApplicationGatewaysGet(ctx=self.ctx)()
-        self.InstanceCreateByJson(ctx=self.ctx)()
+        self.InstanceDeleteByJson(ctx=self.ctx)()
         yield self.ApplicationGatewaysCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -107,19 +76,29 @@ class Set(AAZCommand):
     def post_operations(self):
         pass
 
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
-        return result
-
     class SubresourceSelector(AAZJsonSelector):
 
         def _get(self):
             result = self.ctx.vars.instance
-            return result.properties.sslPolicy
+            result = result.properties.sslProfiles
+            filters = enumerate(result)
+            filters = filter(
+                lambda e: e[1].name == self.ctx.args.name,
+                filters
+            )
+            idx = next(filters)[0]
+            return result[idx]
 
         def _set(self, value):
             result = self.ctx.vars.instance
-            result.properties.sslPolicy = value
+            result = result.properties.sslProfiles
+            filters = enumerate(result)
+            filters = filter(
+                lambda e: e[1].name == self.ctx.args.name,
+                filters
+            )
+            idx = next(filters, [len(result)])[0]
+            result[idx] = value
             return
 
     class ApplicationGatewaysGet(AAZHttpOperation):
@@ -201,7 +180,7 @@ class Set(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _SetHelper._build_schema_application_gateway_read(cls._schema_on_200)
+            _RemoveHelper._build_schema_application_gateway_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -312,39 +291,18 @@ class Set(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _SetHelper._build_schema_application_gateway_read(cls._schema_on_200_201)
+            _RemoveHelper._build_schema_application_gateway_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
-    class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
+    class InstanceDeleteByJson(AAZJsonInstanceDeleteOperation):
 
         def __call__(self, *args, **kwargs):
-            self.ctx.selectors.subresource.set(self._create_instance())
-
-        def _create_instance(self):
-            _instance_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                typ=AAZObjectType
-            )
-            _builder.set_prop("cipherSuites", AAZListType, ".cipher_suites")
-            _builder.set_prop("disabledSslProtocols", AAZListType, ".disabled_ssl_protocols")
-            _builder.set_prop("minProtocolVersion", AAZStrType, ".min_protocol_version")
-            _builder.set_prop("policyName", AAZStrType, ".name")
-            _builder.set_prop("policyType", AAZStrType, ".policy_type")
-
-            cipher_suites = _builder.get(".cipherSuites")
-            if cipher_suites is not None:
-                cipher_suites.set_elements(AAZStrType, ".")
-
-            disabled_ssl_protocols = _builder.get(".disabledSslProtocols")
-            if disabled_ssl_protocols is not None:
-                disabled_ssl_protocols.set_elements(AAZStrType, ".")
-
-            return _instance_value
+            self.ctx.selectors.subresource.set(self._delete_instance())
 
 
-class _SetHelper:
-    """Helper class for Set"""
+class _RemoveHelper:
+    """Helper class for Remove"""
 
     _schema_application_gateway_backend_address_pool_read = None
 
@@ -3782,4 +3740,4 @@ class _SetHelper:
         _schema.type = cls._schema_virtual_network_tap_read.type
 
 
-__all__ = ["Set"]
+__all__ = ["Remove"]
