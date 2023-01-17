@@ -21,7 +21,6 @@ from azure.cli.command_modules.network._client_factory import (
     cf_public_ip_addresses, cf_connection_monitor,
     cf_dns_references,
     cf_app_gateway_waf_policy,
-    cf_private_link_services,
     cf_virtual_router, cf_virtual_router_peering, cf_flow_logs,
     cf_load_balancer_backend_pools)
 from azure.cli.command_modules.network._util import (
@@ -95,12 +94,6 @@ def load_command_table(self, _):
         client_factory=cf_dns_references,
         resource_type=ResourceType.MGMT_NETWORK_DNS,
         min_api='2018-05-01'
-    )
-
-    network_private_link_service_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#PrivateLinkServicesOperations.{}',
-        client_factory=cf_private_link_services,
-        min_api='2019-04-01'
     )
 
     network_lb_sdk = CliCommandType(
