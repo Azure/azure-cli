@@ -513,7 +513,7 @@ short-summary: Manage identities of an image builder template.
 
 helps['image builder identity assign'] = """
 type: command
-short-summary: Add managed identities to an existing image builder template.
+short-summary: Add managed identities to an existing image builder template. Currently, only one user identity is supported.
 examples:
   - name: Add a user assigned managed identity to an existing image builder template.
     text: >

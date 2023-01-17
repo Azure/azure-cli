@@ -604,10 +604,9 @@ def _remove_template_identity(cmd, resource_group_name, image_template_name, use
 
         if not list(existing_user_identities - user_identities_to_remove):
             resource.identity.type = "None"
+            resource.identity.user_assigned_identities = None
 
-    resource.identity.user_assigned_identities = None
-
-    if user_identities_to_remove and resource.identity.type not in "None":
+    if user_identities_to_remove and resource.identity.type != "None":
         resource.identity.user_assigned_identities = {}
         for identity in user_identities_to_remove:
             resource.identity.user_assigned_identities[identity] = None

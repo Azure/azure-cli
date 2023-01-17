@@ -479,7 +479,7 @@ class ImageTemplateTest(ScenarioTest):
         ide_id = self.cmd('identity show -n {ide} -g {rg}').get_output_in_json()['id']
 
         # remove identity
-        self.cmd('image builder identity remove -n {tmpl} -g {rg} --user-assigned',
+        self.cmd('image builder identity remove -n {tmpl} -g {rg} --user-assigned --yes',
                  checks=[
                      self.check('type', 'None'),
                      self.check('userAssignedIdentities', None)
@@ -502,7 +502,7 @@ class ImageTemplateTest(ScenarioTest):
         self.assertEqual(result_identities, [ide_id.lower()])
 
         # remove identity
-        self.cmd('image builder identity remove -n {tmpl} -g {rg} --user-assigned {ide}',
+        self.cmd('image builder identity remove -n {tmpl} -g {rg} --user-assigned {ide} --yes',
                  checks=[
                      self.check('type', 'None'),
                      self.check('userAssignedIdentities', None)
