@@ -126,14 +126,16 @@ examples:
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation \\
         --key $keyIdentifier --identity testIdentity
-
-
+  - name: >
+      Create a PostgreSQL flexible server with active directory auth as well as password auth.
+    text: >
       # create flexible server with aad auth and password auth enabled
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation \\
         --active-directory-auth Enabled
-
-
+  - name: >
+      Create a PostgreSQL flexible server with active directory auth only.
+    text: >
       # create flexible server with aad only auth and password auth disabled
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation \\
@@ -170,6 +172,8 @@ examples:
     text: az postgres flexible-server update --resource-group testGroup --name testserver --tags "k1=v1" "k2=v2"
   - name: Reset password
     text: az postgres flexible-server update --resource-group testGroup --name testserver -p password123
+  - name: Update a flexible server to enable active directory auth for password auth enabled server
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --active-directory-auth Enabled
   - name: Change key/identity for data encryption. Data encryption cannot be enabled post server creation, this will only update the key/identity.
     text: >
       # get key identifier of the existing key
@@ -182,12 +186,6 @@ examples:
 
       az postgres flexible-server update --resource-group testGroup --name testserver \\
         --key $newKeyIdentifier --identity newIdentity
-
-
-      # update server to enable aad auth on existing password auth enabled server
-
-      az postgres flexible-server update --resource-group testGroup --name testserver \\
-        --active-directory-auth Enabled
 """
 
 helps['postgres flexible-server restore'] = """
