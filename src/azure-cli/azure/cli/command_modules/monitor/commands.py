@@ -96,15 +96,16 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.custom_command('enable-receiver', 'enable_receiver', table_transformer=action_group_list_table)
         g.custom_command('list', 'list_action_groups', table_transformer=action_group_list_table)
-        g.generic_update_command('update', custom_func_name='update_action_groups', setter_arg_name='action_group',
-                                 table_transformer=action_group_list_table)
+        # g.generic_update_command('update', custom_func_name='update_action_groups', setter_arg_name='action_group',
+        #                          table_transformer=action_group_list_table)
         g.custom_command('test-notifications create', 'post_notifications', table_transformer=action_group_list_table,
                          supports_no_wait=True)
         g.wait_command('wait')
 
-    from .operations.action_groups import ActionGroupCreate, ActionGroupShow
+    from .operations.action_groups import ActionGroupCreate, ActionGroupShow, ActionGroupUpdate
     self.command_table['monitor action-group create'] = ActionGroupCreate(loader=self, table_transformer=action_group_list_table)
     self.command_table['monitor action-group show'] = ActionGroupShow(loader=self, table_transformer=action_group_list_table)
+    self.command_table['monitor action-group update'] = ActionGroupUpdate(loader=self, table_transformer=action_group_list_table)
 
 
     with self.command_group('monitor activity-log', activity_log_sdk) as g:

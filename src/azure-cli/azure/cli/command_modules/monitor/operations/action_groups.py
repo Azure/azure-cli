@@ -5,6 +5,7 @@
 
 from ..aaz.latest.monitor.action_group import Show as _ActionGroupShow
 from ..aaz.latest.monitor.action_group import Create as _ActionGroupCreate
+from ..aaz.latest.monitor.action_group import Update as _ActionGroupUpdate
 
 class ActionGroupCreate(_ActionGroupCreate):
     @classmethod
@@ -47,6 +48,38 @@ class ActionGroupShow(_ActionGroupShow):
 
     def pre_operations(self):
         pass
+
+class ActionGroupUpdate(_ActionGroupUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        arg_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        arg_schema.arm_role_receivers._registered = False  # pylint:disable=protected-access
+        arg_schema.automation_runbook_receivers._registered = False  # pylint:disable=protected-access
+        arg_schema.azure_app_push_receivers._registered = False  # pylint:disable=protected-access
+        arg_schema.azure_function_receivers._registered = False  # pylint:disable=protected-access
+        arg_schema.email_receivers._registered = False  # pylint:disable=protected-access
+        arg_schema.enabled._registered = False  # pylint:disable=protected-access
+        arg_schema.event_hub_receivers._registered = False  # pylint:disable=protected-access
+        arg_schema.itsm_receivers._registered = False  # pylint:disable=protected-access
+        arg_schema.logic_app_receivers._registered = False  # pylint:disable=protected-access
+        arg_schema.sms_receivers._registered = False  # pylint:disable=protected-access
+        arg_schema.voice_receivers._registered = False  # pylint:disable=protected-access
+        arg_schema.webhook_receivers._registered = False  # pylint:disable=protected-access
+
+        return arg_schema
+
+    def pre_operations(self):
+        ctx = self.ctx
+        from azure.cli.core.aaz import has_value
+        from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
+        args = ctx.args
+        rg = args.resource_group_name.to_serialized_data()
+
+        if not has_value(rg):
+            rg = parse_resource_id(args.resource.to_serialized_data())['resource_group']
+            args.resource_group_name = rg
+
 
 def list_action_groups(client, resource_group_name=None):
     if resource_group_name:
