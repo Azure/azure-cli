@@ -30,7 +30,7 @@ from azure.cli.command_modules.network._validators import (
     validate_custom_headers, validate_status_code_ranges, validate_subnet_ranges,
     WafConfigExclusionAction,
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
-    validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs,
+    validate_waf_policy,
     validate_user_assigned_identity, validate_virtul_network_gateway,
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument,
@@ -757,33 +757,6 @@ def load_arguments(self, _):
 
     # region PrivateLinkService
     service_name = CLIArgumentType(options_list='--service-name', id_part='name', help='Name of the private link service.', completer=get_resource_name_completion_list('Microsoft.Network/privateLinkServices'))
-    with self.argument_context('network private-link-service') as c:
-        c.argument('service_name', service_name, options_list=['--name', '-n'])
-        c.argument('auto_approval', nargs='+', help='Space-separated list of subscription IDs to auto-approve.', validator=get_subscription_list_validator('auto_approval', 'PrivateLinkServicePropertiesAutoApproval'))
-        c.argument('visibility', nargs='+', help='Space-separated list of subscription IDs for which the private link service is visible.', validator=get_subscription_list_validator('visibility', 'PrivateLinkServicePropertiesVisibility'))
-        c.argument('frontend_ip_configurations', nargs='+', options_list='--lb-frontend-ip-configs', help='Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.', validator=validate_frontend_ip_configs)
-        c.argument('load_balancer_name', options_list='--lb-name', help='Name of the load balancer to retrieve frontend IP configs from. Ignored if a frontend IP configuration ID is supplied.')
-        c.argument('private_endpoint_connections', nargs='+', help='Space-separated list of private endpoint connections.')
-        c.argument('fqdns', nargs='+', help='Space-separated list of FQDNs.')
-        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        c.argument('enable_proxy_protocol', help='Enable proxy protocol for private link service.', arg_type=get_three_state_flag(), min_api='2019-09-01')
-        c.argument('edge_zone', edge_zone)
-
-    with self.argument_context('network private-link-service', arg_group='IP Configuration') as c:
-        c.argument('private_ip_address', private_ip_address_type)
-        c.argument('private_ip_allocation_method', help='Private IP address allocation method', arg_type=get_enum_type(IPAllocationMethod))
-        c.argument('private_ip_address_version', help='IP version of the private IP address.', arg_type=get_enum_type(IPVersion, 'ipv4'))
-        c.argument('public_ip_address', help='Name or ID of the a public IP address to use.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), validator=get_public_ip_validator())
-        c.argument('subnet', help='Name or ID of subnet to use. If name provided, also supply `--vnet-name`.', validator=get_subnet_validator())
-        c.argument('virtual_network_name', options_list='--vnet-name')
-
-    with self.argument_context('network private-link-service connection') as c:
-        c.argument('service_name', service_name, id_part=None)
-        c.argument('pe_connection_name', help='Name of the private endpoint connection. List them by using "az network private-link-service show".', options_list=['--name', '-n'])
-        c.argument('action_required', help='A message indicating if changes on the service provider require any updates on the consumer.')
-        c.argument('description', help='The reason for approval/rejection of the connection.')
-        c.argument('connection_status', help='Indicates whether the connection has been Approved/Rejected/Removed by the owner of the service.', arg_type=get_enum_type(['Approved', 'Rejected', 'Removed']))
-
     with self.argument_context('network private-link-service ip-configs') as c:
         c.argument('service_name', service_name)
         c.argument('ip_config_name', help='Name of the ip configuration.', options_list=['--name', '-n'])
