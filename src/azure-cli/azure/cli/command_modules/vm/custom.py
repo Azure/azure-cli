@@ -4779,12 +4779,6 @@ def create_dedicated_host_group(cmd, client, host_group_name, resource_group_nam
     return client.create_or_update(resource_group_name, host_group_name, parameters=host_group_params)
 
 
-def list_dedicated_host_groups(cmd, client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list_by_subscription()
-
-
 def get_dedicated_host_group_instance_view(client, host_group_name, resource_group_name):
     return client.get(resource_group_name, host_group_name, expand="instanceView")
 
