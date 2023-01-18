@@ -155,11 +155,6 @@ def load_command_table(self, _):
         operation_group='virtual_machine_scale_sets'
     )
 
-    network_nic_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#NetworkInterfacesOperations.{}',
-        client_factory=cf_ni
-    )
-
     compute_galleries_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#GalleriesOperations.{}',
         client_factory=cf_galleries,
@@ -525,11 +520,6 @@ def load_command_table(self, _):
 
     with self.command_group('vmss extension image', compute_vm_extension_image_sdk) as g:
         g.custom_command('list', 'list_vm_extension_images')
-
-    with self.command_group('vmss nic', network_nic_sdk) as g:
-        g.command('list', 'list_virtual_machine_scale_set_network_interfaces')
-        g.command('list-vm-nics', 'list_virtual_machine_scale_set_vm_network_interfaces')
-        g.show_command('show', 'get_virtual_machine_scale_set_network_interface')
 
     with self.command_group('vmss run-command', compute_vmss_run_sdk, client_factory=cf_vmss_run_commands, min_api='2018-04-01') as g:
         g.custom_command('invoke', 'vmss_run_command_invoke')

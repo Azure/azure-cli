@@ -46,7 +46,7 @@ class List(AAZCommand):
         )
         _args_schema.virtual_machine_scale_set_name = AAZStrArg(
             options=["--vmss-name", "--virtual-machine-scale-set-name"],
-            help="Scale set name.",
+            help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
             required=True,
         )
         return cls._args_schema

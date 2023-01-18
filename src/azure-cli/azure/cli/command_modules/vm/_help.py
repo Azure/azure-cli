@@ -3374,11 +3374,6 @@ examples:
     crafted: true
 """
 
-helps['vmss nic'] = """
-type: group
-short-summary: Manage network interfaces of a VMSS.
-"""
-
 helps['vmss reimage'] = """
 type: command
 short-summary: Reimage VMs within a VMSS.
