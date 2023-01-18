@@ -7187,7 +7187,7 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name,
                 private_ip_allocation_method='Dynamic',
                 name='vnetGatewayConfig{}'.format(i)
             )
-        vnet_gateway.ip_configurations.append(ip_configuration)
+            vnet_gateway.ip_configurations.append(ip_configuration)
     else:
         vnet_gateway.vpn_type = None
         vnet_gateway.sku = None
