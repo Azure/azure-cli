@@ -19,7 +19,7 @@ from azure.cli.core.commands.template_create import get_folded_parameter_validat
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_parameter_set
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 
 logger = get_logger(__name__)
 
@@ -739,13 +739,6 @@ def validate_private_dns_zone(cmd, namespace):
             name=namespace.private_dns_zone,
             namespace='Microsoft.Network',
             type='privateDnsZones')
-
-
-def validate_scale_unit_ranges(namespace):
-    unit_num = namespace.scale_units
-    err_msg = "The number of --scale-units should in range [2, 50]."
-    if unit_num is not None and (unit_num < 2 or unit_num > 50):
-        raise InvalidArgumentValueError(err_msg)
 
 
 def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_new=False,

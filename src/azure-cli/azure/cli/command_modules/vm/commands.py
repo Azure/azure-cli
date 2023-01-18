@@ -303,6 +303,11 @@ def load_command_table(self, _):
         g.custom_command('show-runs', 'show_build_output')
         g.command('cancel', 'begin_cancel')
 
+    with self.command_group('image builder identity', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
+        g.custom_command('assign', 'assign_template_identity', supports_local_cache=True)
+        g.custom_command('remove', 'remove_template_identity', supports_local_cache=True, confirmation=True)
+        g.custom_show_command('show', 'show_template_identity', supports_local_cache=True)
+
     with self.command_group('image builder customizer', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('add', 'add_template_customizer', supports_local_cache=True, validator=process_img_tmpl_customizer_add_namespace)
         g.custom_command('remove', 'remove_template_customizer', supports_local_cache=True)
@@ -524,9 +529,6 @@ def load_command_table(self, _):
         g.custom_command('upgrade', 'upgrade_vmss_extension', min_api='2020-06-01', supports_no_wait=True)
 
     with self.command_group('vmss extension image', compute_vm_extension_image_sdk) as g:
-        g.show_command('show', 'get')
-        g.command('list-names', 'list_types')
-        g.command('list-versions', 'list_versions')
         g.custom_command('list', 'list_vm_extension_images')
 
     with self.command_group('vmss nic', network_nic_sdk) as g:
@@ -575,7 +577,7 @@ def load_command_table(self, _):
 
     with self.command_group('sig image-version', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
         g.command('delete', 'begin_delete')
-        g.show_command('show', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, TargetRegions: publishingProfile.targetRegions && join(`, `, publishingProfile.targetRegions[*].name), ReplicationState:replicationStatus.aggregatedState}')
+        g.show_command('show', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, TargetRegions: publishingProfile.targetRegions && join(`, `, publishingProfile.targetRegions[*].name), EdgeZones: publishingProfile.targetExtendedLocations && join(`, `, publishingProfile.targetExtendedLocations[*].name), ReplicationState:replicationStatus.aggregatedState}')
         g.command('list', 'list_by_gallery_image')
         g.custom_command('create', 'create_image_version', supports_no_wait=True, validator=process_image_version_create_namespace)
         g.generic_update_command('update', getter_name='get_image_version_to_update', setter_arg_name='gallery_image_version', setter_name='update_image_version', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_image_version_update_namespace)
@@ -638,11 +640,8 @@ def load_command_table(self, _):
         g.wait_command('wait')
 
     with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk, client_factory=cf_gallery_application_version, min_api='2021-07-01', operation_group='gallery_application_versions') as g:
-        g.command('list', 'list_by_gallery_application')
-        g.show_command('show', 'get')
         g.custom_command('create', 'gallery_application_version_create', supports_no_wait=True)
         g.custom_command('update', 'gallery_application_version_update', supports_no_wait=True)
-        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
 
     with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
         g.show_command('show', 'get')
@@ -679,7 +678,6 @@ def load_command_table(self, _):
     with self.command_group('restore-point', restore_point, client_factory=cf_restore_point, min_api='2021-03-01') as g:
         g.custom_show_command('show', 'restore_point_show')
         g.custom_command('create', 'restore_point_create', supports_no_wait=True)
-        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.wait_command('wait')
 
     with self.command_group('restore-point collection', restore_point_collection, min_api='2021-03-01',

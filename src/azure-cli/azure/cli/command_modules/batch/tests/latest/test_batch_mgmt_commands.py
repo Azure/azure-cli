@@ -27,12 +27,13 @@ class BatchMgmtScenarioTests(ScenarioTest):
     @StorageAccountPreparer(location='eastus', name_prefix='clibatchteststor')
     def test_batch_general_arm_cmd(self, resource_group, storage_account):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
-
+        account_name2 = self.create_random_name(prefix='clibatchtestacct', length=24)
         self.kwargs.update({
             'rg': resource_group,
             'str_n': storage_account,
             'loc': 'eastus',
             'acc': account_name,
+            'acc2': account_name2,
             'ip': resource_group + 'ip',
             'poolname': 'batch_account_cmd_pool'
         })
@@ -44,6 +45,13 @@ class BatchMgmtScenarioTests(ScenarioTest):
         self.cmd('batch account create -g {rg} -n {acc} -l {loc}').assert_with_checks([
             self.check('name', '{acc}'),
             self.check('location', '{loc}'),
+            self.check('resourceGroup', '{rg}')])
+
+         # test create account with default set
+        self.cmd('batch account create -g {rg} -n {acc2} -l {loc} --encryption-key-source Microsoft.Batch').assert_with_checks([
+            self.check('name', '{acc2}'),
+            self.check('location', '{loc}'),
+            self.check('encryption.keySource', 'Microsoft.Batch'),
             self.check('resourceGroup', '{rg}')])
 
         time.sleep(100)
@@ -92,6 +100,7 @@ class BatchMgmtScenarioTests(ScenarioTest):
 
         # test batch account delete
         self.cmd('batch account delete -g {rg} -n {acc} --yes')
+        self.cmd('batch account delete -g {rg} -n {acc2} --yes')
         self.cmd('batch account list -g {rg}').assert_with_checks(self.is_empty())
 
         self.cmd('batch location quotas show -l {loc}').assert_with_checks(
