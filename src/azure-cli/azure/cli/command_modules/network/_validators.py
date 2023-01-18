@@ -806,21 +806,6 @@ def process_cross_region_lb_create_namespace(cmd, namespace):
             'specify --public-ip-dns-name only if creating a new public IP address.')
 
 
-def process_cross_region_lb_frontend_ip_namespace(cmd, namespace):
-    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
-
-    if namespace.public_ip_prefix:
-        if not is_valid_resource_id(namespace.public_ip_prefix):
-            namespace.public_ip_prefix = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=namespace.resource_group_name,
-                namespace='Microsoft.Network',
-                type='publicIpPrefixes',
-                name=namespace.public_ip_prefix)
-
-    get_public_ip_validator()(cmd, namespace)
-
-
 def process_nic_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_tags(namespace)

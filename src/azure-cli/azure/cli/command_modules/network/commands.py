@@ -52,7 +52,7 @@ from azure.cli.command_modules.network._validators import (
     process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
     process_vpn_connection_create_namespace,
     process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace,
-    process_appgw_waf_policy_update, process_cross_region_lb_frontend_ip_namespace, process_cross_region_lb_create_namespace)
+    process_appgw_waf_policy_update, process_cross_region_lb_create_namespace)
 
 NETWORK_VROUTER_DEPRECATION_INFO = 'network routeserver'
 NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
@@ -634,13 +634,6 @@ def load_command_table(self, _):
             g.command('list', list_network_resource_property('load_balancers', subresource))
             g.show_command('show', get_network_resource_property_entry('load_balancers', subresource))
             g.command('delete', delete_lb_resource_property_entry('load_balancers', subresource))
-
-    # with self.command_group('network cross-region-lb frontend-ip', network_lb_sdk) as g:
-    #     g.custom_command('create', 'create_cross_region_lb_frontend_ip_configuration', validator=process_cross_region_lb_frontend_ip_namespace)
-    #     g.generic_update_command('update', child_collection_prop_name='frontend_ip_configurations',
-    #                              setter_name='begin_create_or_update',
-    #                              custom_func_name='set_cross_region_lb_frontend_ip_configuration',
-    #                              validator=process_cross_region_lb_frontend_ip_namespace)
 
     with self.command_group('network cross-region-lb address-pool', network_lb_backend_pool_sdk) as g:
         g.custom_command('create', 'create_cross_region_lb_backend_address_pool')

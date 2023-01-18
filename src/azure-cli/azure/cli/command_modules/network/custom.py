@@ -4311,42 +4311,6 @@ def create_cross_region_load_balancer(cmd, load_balancer_name, resource_group_na
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
-def create_cross_region_lb_frontend_ip_configuration(
-        cmd, resource_group_name, load_balancer_name, item_name, public_ip_address=None,
-        public_ip_prefix=None, zone=None):
-    FrontendIPConfiguration, SubResource = cmd.get_models(
-        'FrontendIPConfiguration', 'SubResource')
-    ncf = network_client_factory(cmd.cli_ctx)
-    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
-
-    new_config = FrontendIPConfiguration(
-        name=item_name,
-        public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
-        public_ip_prefix=SubResource(id=public_ip_prefix) if public_ip_prefix else None)
-
-    if zone and cmd.supported_api_version(min_api='2017-06-01'):
-        new_config.zones = zone
-
-    upsert_to_collection(lb, 'frontend_ip_configurations', new_config, 'name')
-    poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
-    return get_property(poller.result().frontend_ip_configurations, item_name)
-
-
-def set_cross_region_lb_frontend_ip_configuration(
-        cmd, instance, parent, item_name, public_ip_address=None, public_ip_prefix=None):
-    PublicIPAddress, SubResource = cmd.get_models('PublicIPAddress', 'SubResource')
-
-    if public_ip_address == '':
-        instance.public_ip_address = None
-    elif public_ip_address is not None:
-        instance.public_ip_address = PublicIPAddress(id=public_ip_address)
-
-    if public_ip_prefix:
-        instance.public_ip_prefix = SubResource(id=public_ip_prefix)
-
-    return parent
-
-
 def create_cross_region_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
                                                 backend_addresses=None, backend_addresses_config_file=None):
     if backend_addresses and backend_addresses_config_file:
