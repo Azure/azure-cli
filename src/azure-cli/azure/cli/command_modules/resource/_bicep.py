@@ -73,7 +73,10 @@ def run_bicep_command(cli_ctx, args, auto_install=True):
         return _run_command("bicep", args)
 
     installation_path = _get_bicep_installation_path(platform.system())
+    _logger.debug("Bicep CLI installation path: %s", installation_path)
+
     installed = os.path.isfile(installation_path)
+    _logger.debug("Bicep CLI installed: %s.", installed)
 
     check_version = cli_ctx.config.getboolean("bicep", "check_version", True)
 
