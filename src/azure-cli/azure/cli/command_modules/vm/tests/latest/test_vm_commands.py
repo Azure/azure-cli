@@ -6448,13 +6448,13 @@ class VMGalleryApplication(ScenarioTest):
         ])
         self.cmd('sig gallery-application list -r {gallery} -g {rg}', checks=[
             self.check('[0].name', '{app_name}'),
-            self.check('[0].supportedOsType', 'Windows'),
+            self.check('[0].supportedOSType', 'Windows'),
             self.check('[0].description', 'test'),
             self.check('[0].tags', {'tag': 'test'})
             ])
         self.cmd('sig gallery-application show -n {app_name} -r {gallery} -g {rg}', checks=[
             self.check('name', '{app_name}'),
-            self.check('supportedOsType', 'Windows'),
+            self.check('supportedOSType', 'Windows'),
             self.check('description', 'test'),
             self.check('tags', {'tag': 'test'})
         ])

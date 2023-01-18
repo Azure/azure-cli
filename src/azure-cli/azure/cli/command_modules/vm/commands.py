@@ -617,11 +617,8 @@ def load_command_table(self, _):
         g.command('show-shared', 'get')
 
     with self.command_group('sig gallery-application', compute_gallery_application_sdk, client_factory=cf_gallery_application, min_api='2021-07-01', operation_group='gallery_applications') as g:
-        g.command('list', 'list_by_gallery')
-        g.show_command('show', 'get')
         g.custom_command('create', 'gallery_application_create', supports_no_wait=True)
         g.custom_command('update', 'gallery_application_update', supports_no_wait=True)
-        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.wait_command('wait')
 
     with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk, client_factory=cf_gallery_application_version, min_api='2021-07-01', operation_group='gallery_application_versions') as g:
