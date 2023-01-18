@@ -83,9 +83,9 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.private_ip_address_version = AAZStrArg(
-            options=["--private-ip-address-version"],
+            options=["--private-ipv", "--private-ip-address-version"],
             arg_group="Properties",
-            help="The private IP address version to use.",
+            help="Whether the specific ipconfiguration is IPv4 or IPv6. Default is taken as IPv4.",
             nullable=True,
             enum={"IPv4": "IPv4", "IPv6": "IPv6"},
         )

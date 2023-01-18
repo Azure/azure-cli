@@ -79,7 +79,7 @@ class Create(AAZCommand):
             help="Static private IP address to associate with the configuration.",
         )
         _args_schema.private_ip_address_version = AAZStrArg(
-            options=["--private-ip-address-version"],
+            options=["--private-ipv", "--private-ip-address-version"],
             arg_group="Properties",
             help="Whether the specific ipconfiguration is IPv4 or IPv6. Default is taken as IPv4.",
             default="IPv4",

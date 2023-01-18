@@ -608,20 +608,21 @@ def load_command_table(self, _):
     with self.command_group('network cross-region-lb') as g:
         g.custom_command('create', 'create_cross_region_load_balancer', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_cross_region_lb_create_namespace, exception_handler=handle_template_based_exception)
 
-    from .aaz.latest.network.lb import Wait
-    from .operations.load_balancer import CrossRegionLoadBalancerShow, CrossRegionLoadBalancerDelete, CrossRegionLoadBalancerUpdate, CrossRegionLoadBalancerList
-    self.command_table['network cross-region-lb show'] = CrossRegionLoadBalancerShow(loader=self)
-    self.command_table['network cross-region-lb delete'] = CrossRegionLoadBalancerDelete(loader=self)
-    self.command_table['network cross-region-lb list'] = CrossRegionLoadBalancerList(loader=self)
-    self.command_table['network cross-region-lb update'] = CrossRegionLoadBalancerUpdate(loader=self)
-    self.command_table['network cross-region-lb wait'] = Wait(loader=self)
+        from .aaz.latest.network.lb import Wait
+        from .operations.load_balancer import CrossRegionLoadBalancerShow, CrossRegionLoadBalancerDelete, CrossRegionLoadBalancerUpdate, CrossRegionLoadBalancerList
+        self.command_table['network cross-region-lb show'] = CrossRegionLoadBalancerShow(loader=self)
+        self.command_table['network cross-region-lb delete'] = CrossRegionLoadBalancerDelete(loader=self)
+        self.command_table['network cross-region-lb list'] = CrossRegionLoadBalancerList(loader=self)
+        self.command_table['network cross-region-lb update'] = CrossRegionLoadBalancerUpdate(loader=self)
+        self.command_table['network cross-region-lb wait'] = Wait(loader=self)
 
-    from .operations.load_balancer import CrossRegionLoadBalancerFrontendIPShow, CrossRegionLoadBalancerFrontendIPList, CrossRegionLoadBalancerFrontendIPDelete, CrossRegionLoadBalancerFrontendIPCreate, CrossRegionLoadBalancerFrontendIPUpdate
-    self.command_table['network cross-region-lb frontend-ip show'] = CrossRegionLoadBalancerFrontendIPShow(loader=self)
-    self.command_table['network cross-region-lb frontend-ip delete'] = CrossRegionLoadBalancerFrontendIPDelete(loader=self)
-    self.command_table['network cross-region-lb frontend-ip list'] = CrossRegionLoadBalancerFrontendIPList(loader=self)
-    self.command_table['network cross-region-lb frontend-ip create'] = CrossRegionLoadBalancerFrontendIPCreate(loader=self)
-    self.command_table['network cross-region-lb frontend-ip update'] = CrossRegionLoadBalancerFrontendIPUpdate(loader=self)
+    with self.command_group('network cross-region-lb frontend-ip') as g:
+        from .operations.load_balancer import CrossRegionLoadBalancerFrontendIPShow, CrossRegionLoadBalancerFrontendIPList, CrossRegionLoadBalancerFrontendIPDelete, CrossRegionLoadBalancerFrontendIPCreate, CrossRegionLoadBalancerFrontendIPUpdate
+        self.command_table['network cross-region-lb frontend-ip show'] = CrossRegionLoadBalancerFrontendIPShow(loader=self)
+        self.command_table['network cross-region-lb frontend-ip delete'] = CrossRegionLoadBalancerFrontendIPDelete(loader=self)
+        self.command_table['network cross-region-lb frontend-ip list'] = CrossRegionLoadBalancerFrontendIPList(loader=self)
+        self.command_table['network cross-region-lb frontend-ip create'] = CrossRegionLoadBalancerFrontendIPCreate(loader=self)
+        self.command_table['network cross-region-lb frontend-ip update'] = CrossRegionLoadBalancerFrontendIPUpdate(loader=self)
 
     cross_region_lb_property_map = {
         # 'frontend_ip_configurations': 'frontend-ip',

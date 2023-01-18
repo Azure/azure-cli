@@ -2,16 +2,15 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value
-
+# pylint: disable=line-too-long, protected-access, too-few-public-methods
 from knack.log import get_logger
 from azure.cli.core.azclierror import ArgumentUsageError
-
+from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value
 from ..aaz.latest.network.lb import Delete as _LBDelete, Update as _LBUpdate, List as _LBList, Show as _LBShow
-
 from ..aaz.latest.network.lb.frontend_ip import Create as _LBFrontendIPCreate, Update as _LBFrontendIPUpdate, \
     Show as _LBFrontendIPShow, Delete as _LBFrontendIPDelete, List as _LBFrontendIPList
+
+
 logger = get_logger(__name__)
 
 
@@ -27,7 +26,7 @@ class LBFrontendIPCreate(_LBFrontendIPCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat, AAZArgEnum
+        from azure.cli.core.aaz import AAZStrArg, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.vnet_name = AAZStrArg(
             arg_group="Properties",
@@ -257,4 +256,3 @@ class CrossRegionLoadBalancerFrontendIPUpdate(_LBFrontendIPUpdate):
         args_schema.subnet._registered = False
         args_schema.gateway_lb._registered = False
         return args_schema
-
