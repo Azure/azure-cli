@@ -4007,82 +4007,6 @@ def set_lb_inbound_nat_pool(
     return parent
 
 
-def create_lb_frontend_ip_configuration(
-        cmd, resource_group_name, load_balancer_name, item_name, public_ip_address=None,
-        public_ip_prefix=None, subnet=None, virtual_network_name=None, private_ip_address=None,
-        private_ip_address_version=None, private_ip_address_allocation=None, zone=None):
-    FrontendIPConfiguration, SubResource, Subnet = cmd.get_models(
-        'FrontendIPConfiguration', 'SubResource', 'Subnet')
-    ncf = network_client_factory(cmd.cli_ctx)
-    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
-
-    if public_ip_address is None:
-        logger.warning(
-            "Please note that the default public IP used for LB frontend will be changed from Basic to Standard "
-            "in the future."
-        )
-    if private_ip_address_allocation is None:
-        private_ip_address_allocation = 'static' if private_ip_address else 'dynamic'
-
-    new_config = FrontendIPConfiguration(
-        name=item_name,
-        private_ip_address=private_ip_address,
-        private_ip_address_version=private_ip_address_version,
-        private_ip_allocation_method=private_ip_address_allocation,
-        public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
-        public_ip_prefix=SubResource(id=public_ip_prefix) if public_ip_prefix else None,
-        subnet=Subnet(id=subnet) if subnet else None)
-
-    if zone and cmd.supported_api_version(min_api='2017-06-01'):
-        new_config.zones = zone
-
-    upsert_to_collection(lb, 'frontend_ip_configurations', new_config, 'name')
-    poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
-    return get_property(poller.result().frontend_ip_configurations, item_name)
-
-
-def update_lb_frontend_ip_configuration_setter(cmd, resource_group_name, load_balancer_name, parameters, gateway_lb):
-    aux_subscriptions = []
-    if is_valid_resource_id(gateway_lb):
-        aux_subscriptions.append(parse_resource_id(gateway_lb)['subscription'])
-    client = network_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions).load_balancers
-    return client.begin_create_or_update(resource_group_name, load_balancer_name, parameters)
-
-
-def set_lb_frontend_ip_configuration(
-        cmd, instance, parent, item_name, private_ip_address=None,
-        private_ip_address_allocation=None, public_ip_address=None,
-        subnet=None, virtual_network_name=None, public_ip_prefix=None, gateway_lb=None):
-    PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
-    if not private_ip_address:
-        instance.private_ip_allocation_method = 'dynamic'
-        instance.private_ip_address = None
-    elif private_ip_address is not None:
-        instance.private_ip_allocation_method = 'static'
-        instance.private_ip_address = private_ip_address
-
-    # Doesn't support update operation for now
-    # if cmd.supported_api_version(min_api='2019-04-01'):
-    #    instance.private_ip_address_version = private_ip_address_version
-
-    if subnet == '':
-        instance.subnet = None
-    elif subnet is not None:
-        instance.subnet = Subnet(id=subnet)
-
-    if public_ip_address == '':
-        instance.public_ip_address = None
-    elif public_ip_address is not None:
-        instance.public_ip_address = PublicIPAddress(id=public_ip_address)
-
-    if public_ip_prefix:
-        instance.public_ip_prefix = SubResource(id=public_ip_prefix)
-    if gateway_lb is not None:
-        instance.gateway_load_balancer = None if gateway_lb == '' else SubResource(id=gateway_lb)
-
-    return parent
-
-
 def _process_vnet_name_and_id(vnet, cmd, resource_group_name):
     if vnet and not is_valid_resource_id(vnet):
         vnet = resource_id(
@@ -4385,42 +4309,6 @@ def create_cross_region_load_balancer(cmd, load_balancer_name, resource_group_na
         return client.validate(resource_group_name, deployment_name, deployment)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
-
-
-def create_cross_region_lb_frontend_ip_configuration(
-        cmd, resource_group_name, load_balancer_name, item_name, public_ip_address=None,
-        public_ip_prefix=None, zone=None):
-    FrontendIPConfiguration, SubResource = cmd.get_models(
-        'FrontendIPConfiguration', 'SubResource')
-    ncf = network_client_factory(cmd.cli_ctx)
-    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
-
-    new_config = FrontendIPConfiguration(
-        name=item_name,
-        public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
-        public_ip_prefix=SubResource(id=public_ip_prefix) if public_ip_prefix else None)
-
-    if zone and cmd.supported_api_version(min_api='2017-06-01'):
-        new_config.zones = zone
-
-    upsert_to_collection(lb, 'frontend_ip_configurations', new_config, 'name')
-    poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
-    return get_property(poller.result().frontend_ip_configurations, item_name)
-
-
-def set_cross_region_lb_frontend_ip_configuration(
-        cmd, instance, parent, item_name, public_ip_address=None, public_ip_prefix=None):
-    PublicIPAddress, SubResource = cmd.get_models('PublicIPAddress', 'SubResource')
-
-    if public_ip_address == '':
-        instance.public_ip_address = None
-    elif public_ip_address is not None:
-        instance.public_ip_address = PublicIPAddress(id=public_ip_address)
-
-    if public_ip_prefix:
-        instance.public_ip_prefix = SubResource(id=public_ip_prefix)
-
-    return parent
 
 
 def create_cross_region_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,

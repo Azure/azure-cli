@@ -794,28 +794,6 @@ def process_lb_create_namespace(cmd, namespace):
         namespace.virtual_network_name = None
 
 
-def process_lb_frontend_ip_namespace(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.subnet and namespace.public_ip_address:
-        raise ValueError(
-            'incorrect usage: --subnet NAME --vnet-name NAME | '
-            '--subnet ID | --public-ip NAME_OR_ID')
-
-    if namespace.public_ip_prefix:
-        if not is_valid_resource_id(namespace.public_ip_prefix):
-            namespace.public_ip_prefix = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=namespace.resource_group_name,
-                namespace='Microsoft.Network',
-                type='publicIpPrefixes',
-                name=namespace.public_ip_prefix)
-
-    if namespace.subnet:
-        get_subnet_validator()(cmd, namespace)
-    else:
-        get_public_ip_validator()(cmd, namespace)
-
-
 def process_cross_region_lb_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_tags(namespace)
@@ -826,21 +804,6 @@ def process_cross_region_lb_create_namespace(cmd, namespace):
     if namespace.public_ip_dns_name and namespace.public_ip_address_type != 'new':
         raise CLIError(
             'specify --public-ip-dns-name only if creating a new public IP address.')
-
-
-def process_cross_region_lb_frontend_ip_namespace(cmd, namespace):
-    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
-
-    if namespace.public_ip_prefix:
-        if not is_valid_resource_id(namespace.public_ip_prefix):
-            namespace.public_ip_prefix = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=namespace.resource_group_name,
-                namespace='Microsoft.Network',
-                type='publicIpPrefixes',
-                name=namespace.public_ip_prefix)
-
-    get_public_ip_validator()(cmd, namespace)
 
 
 def process_nic_create_namespace(cmd, namespace):
