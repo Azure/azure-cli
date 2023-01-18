@@ -1123,7 +1123,7 @@ parameters:
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
   - name: --node-taints
     type: string
-    short-summary: The node taints for the node pool. You can update the existing node taint of a nodepool or create a new node taint for a nodepool.
+    short-summary: The node taints for the node pool. You can update the existing node taint of a nodepool or create a new node taint for a nodepool. Pass the empty string `""` to remove all taints.
   - name: --labels
     type: string
     short-summary: The node labels for the node pool. See https://aka.ms/node-labels for syntax of labels.
