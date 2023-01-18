@@ -192,3 +192,69 @@ class CrossRegionLoadBalancerFrontendIPDelete(_LBFrontendIPDelete):
         az network cross-region-lb frontend-ip delete -g MyResourceGroup --lb-name MyLb -n MyFrontendIp
     """
 
+
+@register_command("network cross-region-lb frontend-ip create")
+class CrossRegionLoadBalancerFrontendIPCreate(_LBFrontendIPCreate):
+    """Create a frontend IP address.
+
+    :example: Create a frontend ip address for a public load balancer.
+        az network cross-region-lb frontend-ip create -g MyResourceGroup --lb-name MyLb -n MyFrontendIp --public-ip-address MyFrontendIp
+    """
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZArgEnum
+
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.public_ip_prefix._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIpPrefixes/{}",
+        )
+        args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIPAddresses/{}",
+        )
+        args_schema.zones.Element.enum = AAZArgEnum({
+            "1": "1",
+            "2": "2",
+            "3": "3",
+        })
+
+        args_schema.private_ip_address._registered = False
+        args_schema.private_ip_address_version._registered = False
+        args_schema.private_ip_allocation_method._registered = False
+        args_schema.subnet._registered = False
+        args_schema.gateway_lb._registered = False
+        return args_schema
+
+
+@register_command("network cross-region-lb frontend-ip update")
+class CrossRegionLoadBalancerFrontendIPUpdate(_LBFrontendIPUpdate):
+    """Update a frontend IP address.
+
+    :example: Update the frontend IP address of a public load balancer.
+        az network cross-region-lb frontend-ip update -g MyResourceGroup --lb-name MyLb -n MyFrontendIp --public-ip-address MyFrontendIp
+    """
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZArgEnum
+
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.public_ip_prefix._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIpPrefixes/{}",
+        )
+        args_schema.public_ip_address._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIPAddresses/{}",
+        )
+        args_schema.zones.Element.enum = AAZArgEnum({
+            "1": "1",
+            "2": "2",
+            "3": "3",
+        })
+
+        args_schema.private_ip_address._registered = False
+        args_schema.private_ip_address_version._registered = False
+        args_schema.private_ip_allocation_method._registered = False
+        args_schema.subnet._registered = False
+        args_schema.gateway_lb._registered = False
+        return args_schema
+

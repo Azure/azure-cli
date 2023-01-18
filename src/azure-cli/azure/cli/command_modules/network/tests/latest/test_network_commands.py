@@ -3288,12 +3288,12 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 2))
         self.cmd('network cross-region-lb frontend-ip update -g {rg} --lb-name lb1 -n ipconfig1 --public-ip-address publicip3')
         self.cmd('network cross-region-lb frontend-ip show -g {rg} --lb-name lb1 -n ipconfig1',
-                 checks=self.check("publicIpAddress.contains(id, 'publicip3')", True))
+                 checks=self.check("publicIPAddress.contains(id, 'publicip3')", True))
 
         # test generic update
         self.kwargs['ip2_id'] = resource_id(subscription=self.get_subscription_id(), resource_group=self.kwargs['rg'], namespace='Microsoft.Network', type='publicIPAddresses', name='publicip2')
-        self.cmd('network cross-region-lb frontend-ip update -g {rg} --lb-name lb1 -n ipconfig1 --set publicIpAddress.id="{ip2_id}"',
-                 checks=self.check("publicIpAddress.contains(id, 'publicip2')", True))
+        self.cmd('network cross-region-lb frontend-ip update -g {rg} --lb-name lb1 -n ipconfig1 --set publicIPAddress.id="{ip2_id}"',
+                 checks=self.check("publicIPAddress.contains(id, 'publicip2')", True))
         self.cmd('network cross-region-lb frontend-ip delete -g {rg} --lb-name lb1 -n ipconfig1')
         self.cmd('network cross-region-lb frontend-ip list -g {rg} --lb-name lb1',
                  checks=self.check('length(@)', 1))

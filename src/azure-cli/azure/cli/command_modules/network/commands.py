@@ -616,10 +616,12 @@ def load_command_table(self, _):
     self.command_table['network cross-region-lb update'] = CrossRegionLoadBalancerUpdate(loader=self)
     self.command_table['network cross-region-lb wait'] = Wait(loader=self)
 
-    from .operations.load_balancer import CrossRegionLoadBalancerFrontendIPShow, CrossRegionLoadBalancerFrontendIPList, CrossRegionLoadBalancerFrontendIPDelete
+    from .operations.load_balancer import CrossRegionLoadBalancerFrontendIPShow, CrossRegionLoadBalancerFrontendIPList, CrossRegionLoadBalancerFrontendIPDelete, CrossRegionLoadBalancerFrontendIPCreate, CrossRegionLoadBalancerFrontendIPUpdate
     self.command_table['network cross-region-lb frontend-ip show'] = CrossRegionLoadBalancerFrontendIPShow(loader=self)
     self.command_table['network cross-region-lb frontend-ip delete'] = CrossRegionLoadBalancerFrontendIPDelete(loader=self)
     self.command_table['network cross-region-lb frontend-ip list'] = CrossRegionLoadBalancerFrontendIPList(loader=self)
+    self.command_table['network cross-region-lb frontend-ip create'] = CrossRegionLoadBalancerFrontendIPCreate(loader=self)
+    self.command_table['network cross-region-lb frontend-ip update'] = CrossRegionLoadBalancerFrontendIPUpdate(loader=self)
 
     cross_region_lb_property_map = {
         # 'frontend_ip_configurations': 'frontend-ip',
@@ -633,12 +635,12 @@ def load_command_table(self, _):
             g.show_command('show', get_network_resource_property_entry('load_balancers', subresource))
             g.command('delete', delete_lb_resource_property_entry('load_balancers', subresource))
 
-    with self.command_group('network cross-region-lb frontend-ip', network_lb_sdk) as g:
-        g.custom_command('create', 'create_cross_region_lb_frontend_ip_configuration', validator=process_cross_region_lb_frontend_ip_namespace)
-        g.generic_update_command('update', child_collection_prop_name='frontend_ip_configurations',
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_cross_region_lb_frontend_ip_configuration',
-                                 validator=process_cross_region_lb_frontend_ip_namespace)
+    # with self.command_group('network cross-region-lb frontend-ip', network_lb_sdk) as g:
+    #     g.custom_command('create', 'create_cross_region_lb_frontend_ip_configuration', validator=process_cross_region_lb_frontend_ip_namespace)
+    #     g.generic_update_command('update', child_collection_prop_name='frontend_ip_configurations',
+    #                              setter_name='begin_create_or_update',
+    #                              custom_func_name='set_cross_region_lb_frontend_ip_configuration',
+    #                              validator=process_cross_region_lb_frontend_ip_namespace)
 
     with self.command_group('network cross-region-lb address-pool', network_lb_backend_pool_sdk) as g:
         g.custom_command('create', 'create_cross_region_lb_backend_address_pool')
