@@ -16,8 +16,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 from azure.cli.command_modules.network._validators import (
-    dns_zone_name_type,
-    validate_ssl_cert, validate_cert, validate_inbound_nat_rule_id_list,
+    dns_zone_name_type, validate_cert, validate_inbound_nat_rule_id_list,
     validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
     validate_address_pool_name_or_id, load_cert_file, validate_metadata,
     validate_dns_record_type, validate_target_listener,
@@ -182,7 +181,6 @@ def load_arguments(self, _):
 
     ag_subresources = [
         {'name': 'auth-cert', 'display': 'authentication certificate', 'ref': 'authentication_certificates'},
-        {'name': 'ssl-cert', 'display': 'SSL certificate', 'ref': 'ssl_certificates'},
         {'name': 'frontend-ip', 'display': 'frontend IP configuration', 'ref': 'frontend_ip_configurations'},
         {'name': 'frontend-port', 'display': 'frontend port', 'ref': 'frontend_ports'},
         {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
@@ -364,11 +362,6 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway routing-rule') as c:
         c.argument('listener', help='The name or ID of the listener.', completer=get_ag_subresource_completion_list('listeners'))
         c.argument('settings', help='The name or ID of the settings.', completer=get_ag_subresource_completion_list('backend_settings_collection'))
-
-    with self.argument_context('network application-gateway ssl-cert') as c:
-        c.argument('cert_data', options_list='--cert-file', type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_ssl_cert)
-        c.argument('cert_password', help='Certificate password.')
-        c.argument('key_vault_secret_id', help="Secret Id of (base-64 encoded unencrypted pfx) 'Secret' or 'Certificate' object stored in Azure KeyVault.")
 
     with self.argument_context('network application-gateway ssl-policy') as c:
         c.argument('clear', action='store_true', help='Clear SSL policy.')
