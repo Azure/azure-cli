@@ -210,7 +210,6 @@ def load_command_table(self, _):
 
     subresource_properties = [
         {'prop': 'authentication_certificates', 'name': 'auth-cert'},
-        {'prop': 'ssl_certificates', 'name': 'ssl-cert'},
         {'prop': 'frontend_ip_configurations', 'name': 'frontend-ip'},
         {'prop': 'frontend_ports', 'name': 'frontend-port'},
         {'prop': 'backend_address_pools', 'name': 'address-pool'},
@@ -291,6 +290,11 @@ def load_command_table(self, _):
         g.command('condition list-server-variables', 'list_available_server_variables')
         g.command('list-request-headers', 'list_available_request_headers')
         g.command('list-response-headers', 'list_available_response_headers')
+
+    with self.command_group("network application-gateway ssl-cert"):
+        from .custom import SSLCertCreate, SSLCertUpdate
+        self.command_table["network application-gateway ssl-cert create"] = SSLCertCreate(loader=self)
+        self.command_table["network application-gateway ssl-cert update"] = SSLCertUpdate(loader=self)
 
     with self.command_group("network application-gateway ssl-policy"):
         from .custom import SSLPolicySet
