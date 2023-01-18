@@ -68,6 +68,11 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.gateway_lb = AAZStrArg(
+            options=["--gateway-lb"],
+            arg_group="Properties",
+            help="The reference to gateway load balancer frontend IP.",
+        )
         _args_schema.private_ip_address = AAZStrArg(
             options=["--private-ip-address"],
             arg_group="Properties",
@@ -713,6 +718,10 @@ class Create(AAZCommand):
                 properties.set_prop("publicIPAddress", AAZObjectType)
                 properties.set_prop("publicIPPrefix", AAZObjectType)
                 properties.set_prop("subnet", AAZObjectType)
+
+            gateway_load_balancer = _builder.get(".properties.gatewayLoadBalancer")
+            if gateway_load_balancer is not None:
+                gateway_load_balancer.set_prop("id", AAZStrType, ".gateway_lb")
 
             public_ip_address = _builder.get(".properties.publicIPAddress")
             if public_ip_address is not None:

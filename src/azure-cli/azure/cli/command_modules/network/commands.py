@@ -42,7 +42,7 @@ from azure.cli.command_modules.network._validators import (
     get_network_watcher_from_location,
     process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace, process_ag_settings_create_namespace, process_ag_http_settings_create_namespace,
     process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_nic_create_namespace,
-    process_lb_create_namespace, process_lb_frontend_ip_namespace, process_nw_cm_v2_create_namespace,
+    process_lb_create_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
     process_nw_flow_log_set_namespace, process_nw_flow_log_create_namespace, process_nw_flow_log_show_namespace,
@@ -534,16 +534,6 @@ def load_command_table(self, _):
             g.command('list', list_network_resource_property('load_balancers', subresource))
             g.show_command('show', get_network_resource_property_entry('load_balancers', subresource))
             g.command('delete', delete_lb_resource_property_entry('load_balancers', subresource))
-
-    # with self.command_group('network lb frontend-ip', network_lb_sdk) as g:
-    #     g.custom_command('create', 'create_lb_frontend_ip_configuration', validator=process_lb_frontend_ip_namespace)
-    #     g.generic_update_command('update', child_collection_prop_name='frontend_ip_configurations',
-    #                              getter_name='lb_get',
-    #                              getter_type=network_load_balancers_custom,
-    #                              setter_name='update_lb_frontend_ip_configuration_setter',
-    #                              setter_type=network_load_balancers_custom,
-    #                              custom_func_name='set_lb_frontend_ip_configuration',
-    #                              validator=process_lb_frontend_ip_namespace)
 
     from .operations.load_balancer import LBFrontendIPCreate, LBFrontendIPUpdate
     self.command_table["network lb frontend-ip create"] = LBFrontendIPCreate(loader=self)

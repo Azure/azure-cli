@@ -43,6 +43,9 @@ class LBFrontendIPCreate(_LBFrontendIPCreate):
         args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIPAddresses/{}",
         )
+        args_schema.gateway_lb._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}"
+        )
 
         args_schema.zones.Element.enum = AAZArgEnum({
             "1": "1",
@@ -57,7 +60,7 @@ class LBFrontendIPCreate(_LBFrontendIPCreate):
         if has_value(args.subnet) and has_value(args.public_ip_address):
             raise ArgumentUsageError(
                 'incorrect usage: --subnet NAME --vnet-name NAME | '
-                '--subnet ID | --public-ip NAME_OR_ID')
+                '--subnet ID | --public-ip-address NAME_OR_ID')
 
         if not has_value(args.public_ip_address):
             logger.warning(
@@ -92,8 +95,7 @@ class LBFrontendIPUpdate(_LBFrontendIPUpdate):
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIPAddresses/{}",
         )
         args_schema.gateway_lb._fmt = EmptyResourceIdArgFormat(
-            # TODO: verify this template
-            # template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}"
         )
 
         args_schema.zones.Element.enum = AAZArgEnum({
