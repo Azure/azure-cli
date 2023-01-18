@@ -180,10 +180,8 @@ def load_arguments(self, _):
         c.argument('capacity', help='The number of instances to use with the application gateway.', type=int)
 
     ag_subresources = [
-        {'name': 'auth-cert', 'display': 'authentication certificate', 'ref': 'authentication_certificates'},
         {'name': 'frontend-ip', 'display': 'frontend IP configuration', 'ref': 'frontend_ip_configurations'},
         {'name': 'frontend-port', 'display': 'frontend port', 'ref': 'frontend_ports'},
-        {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
         {'name': 'http-settings', 'display': 'backed HTTP settings', 'ref': 'backend_http_settings_collection'},
         {'name': 'http-listener', 'display': 'HTTP listener', 'ref': 'http_listeners'},
         {'name': 'rule', 'display': 'request routing rule', 'ref': 'request_routing_rules'},
@@ -192,8 +190,6 @@ def load_arguments(self, _):
         {'name': 'redirect-config', 'display': 'redirect configuration', 'ref': 'redirect_configurations'},
         {'name': 'private-link', 'display': 'private link', 'ref': 'private_link_configurations'}
     ]
-    if self.supported_api_version(min_api='2018-08-01'):
-        ag_subresources.append({'name': 'root-cert', 'display': 'trusted root certificate', 'ref': 'trusted_root_certificates'})
     if self.supported_api_version(min_api='2018-12-01'):
         ag_subresources.append({'name': 'rewrite-rule set', 'display': 'rewrite rule set', 'ref': 'rewrite_rule_sets'})
     if self.supported_api_version(min_api='2021-08-01'):
@@ -218,16 +214,6 @@ def load_arguments(self, _):
     for item in ['create', 'http-settings']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
             c.argument('connection_draining_timeout', min_api='2016-12-01', type=int, help='The time in seconds after a backend server is removed during which on open connection remains active. Range: 0 (disabled) to 3600', arg_group='Gateway' if item == 'create' else None)
-
-    with self.argument_context('network application-gateway address-pool') as c:
-        c.argument('servers', ag_servers_type, arg_group=None)
-
-    for scope in ['auth-cert', 'root-cert']:
-        with self.argument_context('network application-gateway {}'.format(scope)) as c:
-            c.argument('cert_data', options_list='--cert-file', help='Certificate file path.', type=file_type, completer=FilesCompleter(), validator=validate_cert)
-
-    with self.argument_context('network application-gateway root-cert') as c:
-        c.argument('keyvault_secret', help='KeyVault secret ID.')
 
     with self.argument_context('network application-gateway frontend-ip create') as c:
         c.argument('public_ip_address', validator=get_public_ip_validator(), help='The name or ID of the public IP address.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))

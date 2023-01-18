@@ -8,9 +8,9 @@
 
 from collections import Counter, OrderedDict
 
-from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
-
+import socket
 from knack.log import get_logger
+from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from azure.cli.core.aaz import has_value
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
@@ -28,6 +28,10 @@ from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone
 
 from .aaz.latest.network import ListUsages as _UsagesList
 from .aaz.latest.network.application_gateway import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.application_gateway.address_pool import Create as _AddressPoolCreate, \
+    Update as _AddressPoolUpdate
+from .aaz.latest.network.application_gateway.auth_cert import Create as _AuthCertCreate, Update as _AuthCertUpdate
+from .aaz.latest.network.application_gateway.root_cert import Create as _RootCertCreate, Update as _RootCertUpdate
 from .aaz.latest.network.application_gateway.ssl_cert import Create as _SSLCertCreate, Update as _SSLCertUpdate
 from .aaz.latest.network.application_gateway.ssl_policy import Set as _SSLPolicySet
 from .aaz.latest.network.application_gateway.ssl_profile import Add as _SSLProfileAdd, Update as _SSLProfileUpdate, \
@@ -304,36 +308,108 @@ class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
             args.sku.tier = sku.split("_", 1)[0] if not _is_v2_sku(sku) else sku
 
 
-def create_ag_authentication_certificate(cmd, resource_group_name, application_gateway_name, item_name,
-                                         cert_data, no_wait=False):
-    AuthCert = cmd.get_models('ApplicationGatewayAuthenticationCertificate')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    new_cert = AuthCert(data=cert_data, name=item_name)
-    upsert_to_collection(ag, 'authentication_certificates', new_cert, 'name')
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, application_gateway_name, ag)
+class AuthCertCreate(_AuthCertCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.cert_file = AAZFileArg(
+            options=["--cert-file"],
+            help="Path to the certificate file.",
+            required=True,
+            fmt=AAZFileArgBase64EncodeFormat(),
+        )
+        args_schema.data._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.cert_file):
+            args.data = args.cert_file
 
 
-def update_ag_authentication_certificate(instance, parent, item_name, cert_data):
-    instance.data = cert_data
-    return parent
+class AuthCertUpdate(_AuthCertUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.cert_file = AAZFileArg(
+            options=["--cert-file"],
+            help="Path to the certificate file.",
+            required=True,
+            fmt=AAZFileArgBase64EncodeFormat(),
+            nullable=True,
+        )
+        args_schema.data._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.cert_file):
+            args.data = args.cert_file
 
 
-def create_ag_backend_address_pool(cmd, resource_group_name, application_gateway_name, item_name,
-                                   servers=None, no_wait=False):
-    ApplicationGatewayBackendAddressPool = cmd.get_models('ApplicationGatewayBackendAddressPool')
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    new_pool = ApplicationGatewayBackendAddressPool(name=item_name, backend_addresses=servers)
-    upsert_to_collection(ag, 'backend_address_pools', new_pool, 'name')
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
+class AddressPoolCreate(_AddressPoolCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.servers = AAZListArg(
+            options=["--servers"],
+            help="Space-separated list of IP addresses or DNS names corresponding to backend servers."
+        )
+        args_schema.servers.Element = AAZStrArg()
+        args_schema.backend_addresses._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+
+        def server_trans(_, server):
+            try:
+                socket.inet_aton(str(server))  # pylint:disable=no-member
+                return {"ip_address": server}
+            except socket.error:  # pylint:disable=no-member
+                return {"fqdn": server}
+
+        args.backend_addresses = assign_aaz_list_arg(
+            args.backend_addresses,
+            args.servers,
+            element_transformer=server_trans
+        )
 
 
-def update_ag_backend_address_pool(instance, parent, item_name, servers=None):
-    if servers is not None:
-        instance.backend_addresses = servers
-    return parent
+class AddressPoolUpdate(_AddressPoolUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.servers = AAZListArg(
+            options=["--servers"],
+            help="Space-separated list of IP addresses or DNS names corresponding to backend servers.",
+            nullable=True,
+        )
+        args_schema.servers.Element = AAZStrArg(
+            nullable=True,
+        )
+        args_schema.backend_addresses._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+
+        def server_trans(_, server):
+            try:
+                socket.inet_aton(str(server))  # pylint:disable=no-member
+                return {"ip_address": server}
+            except socket.error:  # pylint:disable=no-member
+                return {"fqdn": server}
+
+        args.backend_addresses = assign_aaz_list_arg(
+            args.backend_addresses,
+            args.servers,
+            element_transformer=server_trans
+        )
 
 
 def create_ag_frontend_ip_configuration(cmd, resource_group_name, application_gateway_name, item_name,
@@ -1551,24 +1627,47 @@ class SSLPolicySet(_SSLPolicySet):
             args.policy_type = "Custom"
 
 
-def create_ag_trusted_root_certificate(cmd, resource_group_name, application_gateway_name, item_name, no_wait=False,
-                                       cert_data=None, keyvault_secret=None):
-    ApplicationGatewayTrustedRootCertificate = cmd.get_models('ApplicationGatewayTrustedRootCertificate')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    root_cert = ApplicationGatewayTrustedRootCertificate(name=item_name, data=cert_data,
-                                                         key_vault_secret_id=keyvault_secret)
-    upsert_to_collection(ag, 'trusted_root_certificates', root_cert, 'name')
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
+class RootCertCreate(_RootCertCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.cert_file = AAZFileArg(
+            options=["--cert-file"],
+            help="Path to the certificate file.",
+            fmt=AAZFileArgBase64EncodeFormat(),
+        )
+        args_schema.data._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.cert_file):
+            args.data = args.cert_file
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def update_ag_trusted_root_certificate(instance, parent, item_name, cert_data=None, keyvault_secret=None):
-    if cert_data is not None:
-        instance.data = cert_data
-    if keyvault_secret is not None:
-        instance.key_vault_secret_id = keyvault_secret
-    return parent
+class RootCertUpdate(_RootCertUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.cert_file = AAZFileArg(
+            options=["--cert-file"],
+            help="Path to the certificate file.",
+            fmt=AAZFileArgBase64EncodeFormat(),
+            nullable=True,
+        )
+        args_schema.data._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.cert_file):
+            args.data = args.cert_file
 
 
 class URLPathMapCreate(_URLPathMapCreate):

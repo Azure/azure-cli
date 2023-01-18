@@ -209,18 +209,14 @@ def load_command_table(self, _):
         self.command_table["network application-gateway update"] = ApplicationGatewayUpdate(loader=self)
 
     subresource_properties = [
-        {'prop': 'authentication_certificates', 'name': 'auth-cert'},
         {'prop': 'frontend_ip_configurations', 'name': 'frontend-ip'},
         {'prop': 'frontend_ports', 'name': 'frontend-port'},
-        {'prop': 'backend_address_pools', 'name': 'address-pool'},
         {'prop': 'backend_http_settings_collection', 'name': 'http-settings', 'validator': process_ag_http_settings_create_namespace},
         {'prop': 'http_listeners', 'name': 'http-listener', 'validator': process_ag_http_listener_create_namespace},
         {'prop': 'request_routing_rules', 'name': 'rule', 'validator': process_ag_rule_create_namespace},
         {'prop': 'probes', 'name': 'probe'},
         {'prop': 'rewrite_rule_sets', 'name': 'rewrite-rule set'}
     ]
-    if self.supported_api_version(min_api='2018-08-01'):
-        subresource_properties.append({'prop': 'trusted_root_certificates', 'name': 'root-cert'})
     if self.supported_api_version(min_api='2021-08-01'):
         subresource_properties.append({'prop': 'backend_settings_collection', 'name': 'settings', 'validator': process_ag_settings_create_namespace})
         subresource_properties.append({'prop': 'listeners', 'name': 'listener', 'validator': process_ag_listener_create_namespace})
@@ -249,6 +245,21 @@ def load_command_table(self, _):
                                      setter_name='begin_create_or_update',
                                      custom_func_name='update_ag_{}'.format(_make_singular(subresource)),
                                      child_collection_prop_name=subresource, validator=create_validator)
+
+    with self.command_group("network application-gateway address-pool"):
+        from .custom import AddressPoolCreate, AddressPoolUpdate
+        self.command_table["network application-gateway address-pool create"] = AddressPoolCreate(loader=self)
+        self.command_table["network application-gateway address-pool update"] = AddressPoolUpdate(loader=self)
+
+    with self.command_group("network application-gateway auth-cert"):
+        from .custom import AuthCertCreate, AuthCertUpdate
+        self.command_table["network application-gateway auth-cert create"] = AuthCertCreate(loader=self)
+        self.command_table["network application-gateway auth-cert update"] = AuthCertUpdate(loader=self)
+
+    with self.command_group("network application-gateway root-cert"):
+        from .custom import RootCertCreate, RootCertUpdate
+        self.command_table["network application-gateway root-cert create"] = RootCertCreate(loader=self)
+        self.command_table["network application-gateway root-cert update"] = RootCertUpdate(loader=self)
 
     with self.command_group('network application-gateway rewrite-rule', network_ag_sdk, min_api='2018-12-01') as g:
         g.custom_command('create', 'create_ag_rewrite_rule', supports_no_wait=True)
