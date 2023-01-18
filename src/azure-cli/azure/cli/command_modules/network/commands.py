@@ -256,6 +256,12 @@ def load_command_table(self, _):
         self.command_table["network application-gateway auth-cert create"] = AuthCertCreate(loader=self)
         self.command_table["network application-gateway auth-cert update"] = AuthCertUpdate(loader=self)
 
+    with self.command_group("network application-gateway client-cert"):
+        from .custom import ClientCertAdd, ClientCertRemove, ClientCertUpdate
+        self.command_table["network application-gateway client-cert add"] = ClientCertAdd(loader=self)
+        self.command_table["network application-gateway client-cert remove"] = ClientCertRemove(loader=self)
+        self.command_table["network application-gateway client-cert update"] = ClientCertUpdate(loader=self)
+
     with self.command_group("network application-gateway root-cert"):
         from .custom import RootCertCreate, RootCertUpdate
         self.command_table["network application-gateway root-cert create"] = RootCertCreate(loader=self)
@@ -390,13 +396,6 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_waf_exclusion_rule_set')
         g.custom_command('remove', 'remove_waf_exclusion_rule_set')
         g.custom_command('list', 'list_waf_exclusion_rule_set')
-
-    with self.command_group('network application-gateway client-cert', network_ag_sdk, min_api='2020-06-01') as g:
-        g.custom_command('add', 'add_trusted_client_certificate')
-        g.custom_command('remove', 'remove_trusted_client_certificate')
-        g.custom_command('list', 'list_trusted_client_certificate')
-        g.custom_show_command('show', 'show_trusted_client_certificate')
-        g.custom_command('update', 'update_trusted_client_certificate')
     # endregion
 
     # region DdosProtectionPlans

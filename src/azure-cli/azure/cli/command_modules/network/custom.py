@@ -31,6 +31,8 @@ from .aaz.latest.network.application_gateway import Update as _ApplicationGatewa
 from .aaz.latest.network.application_gateway.address_pool import Create as _AddressPoolCreate, \
     Update as _AddressPoolUpdate
 from .aaz.latest.network.application_gateway.auth_cert import Create as _AuthCertCreate, Update as _AuthCertUpdate
+from .aaz.latest.network.application_gateway.client_cert import Add as _ClientCertAdd, Remove as _ClientCertRemove, \
+    Update as _ClientCertUpdate
 from .aaz.latest.network.application_gateway.root_cert import Create as _RootCertCreate, Update as _RootCertUpdate
 from .aaz.latest.network.application_gateway.ssl_cert import Create as _SSLCertCreate, Update as _SSLCertUpdate
 from .aaz.latest.network.application_gateway.ssl_policy import Set as _SSLPolicySet
@@ -781,69 +783,60 @@ def remove_ag_private_link(cmd,
 
 
 # region application-gateway trusted-client-certificates
-def add_trusted_client_certificate(cmd, resource_group_name, application_gateway_name, client_cert_name,
-                                   client_cert_data, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    ApplicationGatewayTrustedClientCertificate = cmd.get_models('ApplicationGatewayTrustedClientCertificate')
-    cert = ApplicationGatewayTrustedClientCertificate(name=client_cert_name, data=client_cert_data)
-    appgw.trusted_client_certificates.append(cert)
+class ClientCertAdd(_ClientCertAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.data = AAZFileArg(
+            options=["--data"],
+            help="Path to the certificate file.",
+            required=True,
+            fmt=AAZFileArgBase64EncodeFormat(),
+        )
+        args_schema.cert_data._registered = False
+        return args_schema
 
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
-                       application_gateway_name, appgw)
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.data):
+            args.cert_data = args.data
 
-
-def update_trusted_client_certificate(cmd, resource_group_name, application_gateway_name, client_cert_name,
-                                      client_cert_data, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    for cert in appgw.trusted_client_certificates:
-        if cert.name == client_cert_name:
-            cert.data = client_cert_data
-            break
-    else:
-        raise ResourceNotFoundError(f"Trusted client certificate {client_cert_name} doesn't exist")
-
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
-                       application_gateway_name, appgw)
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def list_trusted_client_certificate(cmd, resource_group_name, application_gateway_name):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    return appgw.trusted_client_certificates
+class ClientCertRemove(_ClientCertRemove):
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def remove_trusted_client_certificate(cmd, resource_group_name, application_gateway_name, client_cert_name,
-                                      no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+class ClientCertUpdate(_ClientCertUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.data = AAZFileArg(
+            options=["--data"],
+            help="Path to the certificate file.",
+            required=True,
+            fmt=AAZFileArgBase64EncodeFormat(),
+            nullable=True,
+        )
+        args_schema.cert_data._registered = False
+        return args_schema
 
-    for cert in appgw.trusted_client_certificates:
-        if cert.name == client_cert_name:
-            appgw.trusted_client_certificates.remove(cert)
-            break
-    else:
-        raise ResourceNotFoundError(f"Trusted client certificate {client_cert_name} doesn't exist")
-
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
-                       application_gateway_name, appgw)
-
-
-def show_trusted_client_certificate(cmd, resource_group_name, application_gateway_name, client_cert_name):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    instance = None
-    for cert in appgw.trusted_client_certificates:
-        if cert.name == client_cert_name:
-            instance = cert
-            break
-    else:
-        raise ResourceNotFoundError(f"Trusted client certificate {client_cert_name} doesn't exist")
-
-    return instance
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.data):
+            args.cert_data = args.data
 
 
 def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, expand=None,
