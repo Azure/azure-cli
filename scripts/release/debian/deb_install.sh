@@ -92,8 +92,22 @@ setup() {
             exit 1
         fi
     fi
-    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/azure-cli ${CLI_REPO} main" \
+
+    # Check for older format /etc/apt/trusted.gpg.d/microsoft.gpg key
+    if test -s /etc/apt/trusted.gpg.d/microsoft.gpg && command -v gpg >/dev/null 2>&1; then
+        fingerprint=$(gpg --with-colons --show-keys /etc/apt/trusted.gpg.d/microsoft.gpg 2>/dev/null | grep ^fpr | cut -f10 -d:)
+        if test ${#fingerprint} -eq 40 && command -v apt-key >/dev/null 2>&1; then
+            echo "Found older /etc/apt/trusted.gpg.d/microsoft.gpg."
+            assert_consent "Remove from the main keyring?" ${global_consent}
+            echo -n "Removing from the main keyring ... "
+            apt-key del $fingerprint && test -f /etc/apt/trusted.gpg.d/microsoft.gpg~ && rm /etc/apt/trusted.gpg.d/microsoft.gpg~
+        fi
+    fi
+
+    # Create sources.list.d file
+    echo "deb [arch=`dpkg --print-architecture` signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/azure-cli ${CLI_REPO} main" \
         > /etc/apt/sources.list.d/azure-cli.list
+
     apt-get update
     set +v
 
