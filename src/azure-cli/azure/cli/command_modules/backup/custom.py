@@ -17,7 +17,7 @@ from azure.cli.core.profiles import ResourceType
 
 from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, PatchVault, IdentityData, \
     CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity, MonitoringSettings, \
-    AzureMonitorAlertSettings, ClassicAlertSettings
+    AzureMonitorAlertSettings, ClassicAlertSettings, SecuritySettings, ImmutabilitySettings
 from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
     AzureIaaSComputeVMProtectedItem, AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, \
     BackupRequestResource, IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
@@ -112,8 +112,9 @@ password_length = 15
 # pylint: disable=too-many-function-args
 
 
-def create_vault(client, vault_name, resource_group_name, location, tags=None, public_network_access=None,
-                 classic_alerts='Enable', azure_monitor_alerts_for_job_failures='Enable'):
+def create_vault(client, vault_name, resource_group_name, location, tags=None, 
+                 public_network_access=None, immutability_state = None, classic_alerts='Enable',
+                 azure_monitor_alerts_for_job_failures='Enable'):
     vault_sku = Sku(name=SkuName.standard)
     if public_network_access is None:
         # get the existing value of public_network_access so the request is made correctly
@@ -131,7 +132,12 @@ def create_vault(client, vault_name, resource_group_name, location, tags=None, p
             azure_monitor_alert_settings=AzureMonitorAlertSettings(
                 alerts_for_all_job_failures=azure_monitor_alerts_for_job_failures + 'd'),
             classic_alert_settings=ClassicAlertSettings(alerts_for_critical_operations=classic_alerts + 'd')),
-        public_network_access=public_network_access + 'd')
+        public_network_access=public_network_access + 'd',
+        security_settings=SecuritySettings(
+            immutability_settings=ImmutabilitySettings(
+                state = immutability_state
+            )
+        ))
     vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
     return client.begin_create_or_update(resource_group_name, vault_name, vault)
 
