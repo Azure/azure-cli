@@ -199,13 +199,18 @@ def supports_bicep_publish():
 def _bicep_installed_in_ci():
     if "GITHUB_ACTIONS" in os.environ or "TF_BUILD" in os.environ:
         from shutil import which
+        installed = which("bicep") is not None
 
-        return which("bicep") is not None
+        _logger.debug("Running in a CI environment. Bicep CLI available on PATH: %s.", installed)
+
+        return installed
     return False
 
 
 def _use_binary_from_path(cli_ctx):
     use_binary_from_path = cli_ctx.config.get("bicep", "use_binary_from_path", "if_found_in_ci").lower()
+    
+    _logger.debug('Current value of "use_binary_from_path": %s.', use_binary_from_path)
 
     if use_binary_from_path == "if_found_in_ci":
         # With if_found_in_ci, GitHub Actions and Azure Pipeline users may expect some delay (usually a few days)
