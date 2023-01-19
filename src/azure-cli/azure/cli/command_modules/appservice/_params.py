@@ -547,7 +547,6 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot.')
         c.argument('backup_id', help='Id of the backup.')
 
-
     with self.argument_context('webapp config snapshot') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
         c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot.')
