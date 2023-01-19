@@ -1531,13 +1531,15 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             'res': 'application-gateway http-listener',
             'name': 'mylistener',
             'gateway_ip': 'ip1',
-            'port': 'cliport'
+            'port': 'cliport',
+            'waf': 'waf1',
         })
 
         self.cmd('network public-ip create -g {rg} -n {gateway_ip} --sku Standard')
+        self.cmd('network application-gateway waf-policy create -n {waf} -g {rg}')
         self.cmd('network application-gateway create -g {rg} -n {ag} '
                  '--sku WAF_v2 '
-                 '--public-ip-address {gateway_ip} --priority 1001')
+                 '--public-ip-address {gateway_ip} --waf-policy {waf} --priority 1001')
         self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {ag} -n {port} --port 18080')
 
         self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --frontend-port {port} --host-names "*.contoso.com" "www.microsoft.com"')
