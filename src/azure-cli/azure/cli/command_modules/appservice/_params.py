@@ -543,6 +543,11 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('ignore_hostname_conflict', help='Ignores custom hostnames stored in the backup',
                    action='store_true')
 
+    with self.argument_context('webapp config backup delete') as c:
+        c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot.')
+        c.argument('backup_id', help='Id of the backup.')
+
+
     with self.argument_context('webapp config snapshot') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
         c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot.')
