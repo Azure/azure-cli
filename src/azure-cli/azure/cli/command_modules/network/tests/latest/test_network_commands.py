@@ -4864,8 +4864,8 @@ class NetworkVpnConnectionNatRule(ScenarioTest):
         self.cmd('network public-ip create -g {rg} -n {ip}')
 
         vg = self.cmd('network vnet-gateway create -g {rg} -n {vg} --vnet {vnet} --public-ip-address {ip} --sku {sku} '
-                      '--nat-rule [{{name:{nat},mode:IngressSnat,internal-mappings:[{i_map}],external-mappings:[{e_map}]}},'
-                      '{{name:{nat1},mode:EgressSnat,internal-mappings:[{i_map1}],external-mappings:[{e_map1}]}}]',
+                      '--nat-rule name={nat} mode=IngressSnat internal-mappings={i_map} external-mappings={e_map} '
+                      '--nat-rule name={nat1} mode=EgressSnat internal-mappings={i_map1} external-mappings={e_map1}',
                       checks=[self.check('length(vnetGateway.natRules)', 2)]).get_output_in_json()
 
         self.kwargs.update({'id': vg['vnetGateway']['natRules'][0]['id']})
@@ -4923,7 +4923,6 @@ class NetworkVnetGatewayMultiAuth(ScenarioTest):
             'root_cert_name': 'root-cert',
             'root_cert_data': os.path.join(TEST_DIR, 'test-root-cert.cer'),
         })
-
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
         self.cmd('network public-ip create -g {rg} -n {ip}')
         self.cmd('network vnet-gateway create -g {rg} -n {gw} --public-ip-address {ip} --vnet {vnet} --sku {gw_sku} '
@@ -5417,7 +5416,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             'vnet2_id': '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet2}'.format(**self.kwargs)
         })
 
-        with self.assertRaisesRegex(CLIError, 'vpn_gateway_generation should not be provided if gateway_type is not Vpn.'):
+        with self.assertRaisesRegex(HttpResponseError, 'vpn_gateway_generation should not be provided if gateway_type is not Vpn.'):
             self.cmd(
                 'network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --gateway-type ExpressRoute --vpn-gateway-generation Generation1')
 
@@ -6300,7 +6299,7 @@ class NetworkExtendedLocation(ScenarioTest):
         self.kwargs.update({
             'rg': resource_group,
             'vnet': 'vnet',
-            'gateway_type' : 'LocalGateway',
+            'gateway_type': 'LocalGateway',
             'edge_name': 'microsoftrrdclab3',
         })
         self.cmd('az network vnet create -g {rg} -n {vnet} --location eastus2euap --address-prefix 10.30.0.0/16 --edge-zone {edge_name}')

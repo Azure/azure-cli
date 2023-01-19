@@ -80,7 +80,6 @@ class Update(AAZCommand):
         _args_schema.sku = AAZStrArg(
             options=["--sku"],
             help="VNet gateway SKU.",
-            default="Basic",
             nullable=True,
             enum={"Basic": "Basic", "ErGw1AZ": "ErGw1AZ", "ErGw2AZ": "ErGw2AZ", "ErGw3AZ": "ErGw3AZ", "HighPerformance": "HighPerformance", "Standard": "Standard", "UltraPerformance": "UltraPerformance", "VpnGw1": "VpnGw1", "VpnGw1AZ": "VpnGw1AZ", "VpnGw2": "VpnGw2", "VpnGw2AZ": "VpnGw2AZ", "VpnGw3": "VpnGw3", "VpnGw3AZ": "VpnGw3AZ", "VpnGw4": "VpnGw4", "VpnGw4AZ": "VpnGw4AZ", "VpnGw5": "VpnGw5", "VpnGw5AZ": "VpnGw5AZ"},
         )
@@ -277,6 +276,7 @@ class Update(AAZCommand):
         )
         _args_schema.address_prefixes = AAZListArg(
             options=["--address-prefixes"],
+            singular_options=["--address-prefix"],
             arg_group="VPN Client",
             help="Space-separated list of CIDR prefixes representing the address space for the P2S Vpnclient.",
             nullable=True,

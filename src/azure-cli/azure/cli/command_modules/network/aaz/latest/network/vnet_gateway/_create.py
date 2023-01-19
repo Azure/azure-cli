@@ -265,7 +265,6 @@ class Create(AAZCommand):
             options=["--edge-zone-type"],
             arg_group="Properties",
             help="The type of the extended location.",
-            default="EdgeZone",
             enum={"EdgeZone": "EdgeZone"},
         )
         _args_schema.active = AAZBoolArg(
@@ -323,6 +322,7 @@ class Create(AAZCommand):
         )
         _args_schema.address_prefixes = AAZListArg(
             options=["--address-prefixes"],
+            singular_options=["--address-prefix"],
             arg_group="VPN Client",
             help="Space-separated list of CIDR prefixes representing the address space for the P2S Vpnclient.",
         )
