@@ -12,28 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network lb inbound-nat-pool create",
+    "network lb inbound-nat-rule wait",
 )
-class Create(AAZCommand):
-    """Create an inbound NAT address pool.
-
-    :example: Create an inbound NAT address pool.
-        az network lb inbound-nat-pool create -g MyResourceGroup --lb-name MyLb -n MyNatPool --protocol Tcp --frontend-port-range-start 80 --frontend-port-range-end 89 --backend-port 80 --frontend-ip MyFrontendIp
+class Wait(AAZWaitCommand):
+    """Place the CLI in a waiting state until a condition is met.
     """
 
     _aaz_info = {
-        "version": "2022-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}", "2022-05-01", "properties.inboundNatPools[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}", "2022-05-01", "properties.inboundNatRules[]"],
         ]
     }
 
-    AZ_SUPPORT_NO_WAIT = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
-        self.SubresourceSelector(ctx=self.ctx, name="subresource")
-        return self.build_lro_poller(self._execute_operations, self._output)
+        self._execute_operations()
+        return self._output()
 
     _args_schema = None
 
@@ -50,75 +44,16 @@ class Create(AAZCommand):
             options=["--lb-name"],
             help="The load balancer name.",
             required=True,
+            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
-        )
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            help="The name of the resource that is unique within the set of inbound NAT pools used by the load balancer. This name can be used to access the resource.",
-            required=True,
-        )
-
-        # define Arg Group "Parameters.properties.inboundNatPools[]"
-
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.backend_port = AAZIntArg(
-            options=["--backend-port"],
-            arg_group="Properties",
-            help="The port used for internal connections on the endpoint. Acceptable values are between 1 and 65535.",
-            required=True,
-        )
-        _args_schema.enable_floating_ip = AAZBoolArg(
-            options=["--floating-ip", "--enable-floating-ip"],
-            arg_group="Properties",
-            help="Configures a virtual machine's endpoint for the floating IP capability required to configure a SQL AlwaysOn Availability Group. This setting is required when using the SQL AlwaysOn Availability Groups in SQL server. This setting can't be changed after you create the endpoint.",
-        )
-        _args_schema.enable_tcp_reset = AAZBoolArg(
-            options=["--enable-tcp-reset"],
-            arg_group="Properties",
-            help="Receive bidirectional TCP Reset on TCP flow idle timeout or unexpected connection termination. This element is only used when the protocol is set to TCP.",
-        )
-        _args_schema.frontend_ip_name = AAZStrArg(
-            options=["--frontend-ip", "--frontend-ip-name"],
-            arg_group="Properties",
-            help="The name or ID of the frontend IP configuration.",
-        )
-        _args_schema.frontend_port_range_end = AAZIntArg(
-            options=["--frontend-port-range-end"],
-            arg_group="Properties",
-            help="The last port number in the range of external ports that will be used to provide Inbound Nat to NICs associated with a load balancer. Acceptable values range between 1 and 65535.",
-            required=True,
-        )
-        _args_schema.frontend_port_range_start = AAZIntArg(
-            options=["--frontend-port-range-start"],
-            arg_group="Properties",
-            help="The first port number in the range of external ports that will be used to provide Inbound Nat to NICs associated with a load balancer. Acceptable values range between 1 and 65534.",
-            required=True,
-        )
-        _args_schema.idle_timeout_in_minutes = AAZIntArg(
-            options=["--idle-timeout", "--idle-timeout-in-minutes"],
-            arg_group="Properties",
-            help="The timeout for the TCP idle connection. The value can be set between 4 and 30 minutes. The default value is 4 minutes. This element is only used when the protocol is set to TCP.",
-        )
-        _args_schema.protocol = AAZStrArg(
-            options=["--protocol"],
-            arg_group="Properties",
-            help="The reference to the transport protocol used by the inbound NAT pool.",
-            required=True,
-            enum={"All": "All", "Tcp": "Tcp", "Udp": "Udp"},
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.LoadBalancersGet(ctx=self.ctx)()
-        self.pre_instance_create()
-        self.InstanceCreateByJson(ctx=self.ctx)()
-        self.post_instance_create(self.ctx.selectors.subresource.required())
-        yield self.LoadBalancersCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -129,42 +64,9 @@ class Create(AAZCommand):
     def post_operations(self):
         pass
 
-    @register_callback
-    def pre_instance_create(self):
-        pass
-
-    @register_callback
-    def post_instance_create(self, instance):
-        pass
-
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
         return result
-
-    class SubresourceSelector(AAZJsonSelector):
-
-        def _get(self):
-            result = self.ctx.vars.instance
-            result = result.properties.inboundNatPools
-            filters = enumerate(result)
-            filters = filter(
-                lambda e: e[1].name == self.ctx.args.name,
-                filters
-            )
-            idx = next(filters)[0]
-            return result[idx]
-
-        def _set(self, value):
-            result = self.ctx.vars.instance
-            result = result.properties.inboundNatPools
-            filters = enumerate(result)
-            filters = filter(
-                lambda e: e[1].name == self.ctx.args.name,
-                filters
-            )
-            idx = next(filters, [len(result)])[0]
-            result[idx] = value
-            return
 
     class LoadBalancersGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -245,154 +147,13 @@ class Create(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _CreateHelper._build_schema_load_balancer_read(cls._schema_on_200)
+            _WaitHelper._build_schema_load_balancer_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
-    class LoadBalancersCreateOrUpdate(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
 
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [202]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200, 201]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "PUT"
-
-        @property
-        def error_format(self):
-            return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "loadBalancerName", self.ctx.args.lb_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "api-version", "2022-05-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=self.ctx.vars.instance,
-            )
-
-            return self.serialize_content(_content_value)
-
-        def on_200_201(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200_201
-            )
-
-        _schema_on_200_201 = None
-
-        @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
-
-            cls._schema_on_200_201 = AAZObjectType()
-            _CreateHelper._build_schema_load_balancer_read(cls._schema_on_200_201)
-
-            return cls._schema_on_200_201
-
-    class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
-
-        def __call__(self, *args, **kwargs):
-            self.ctx.selectors.subresource.set(self._create_instance())
-
-        def _create_instance(self):
-            _instance_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                typ=AAZObjectType
-            )
-            _builder.set_prop("name", AAZStrType, ".name")
-            _builder.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
-
-            properties = _builder.get(".properties")
-            if properties is not None:
-                properties.set_prop("backendPort", AAZIntType, ".backend_port", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("enableFloatingIP", AAZBoolType, ".enable_floating_ip")
-                properties.set_prop("enableTcpReset", AAZBoolType, ".enable_tcp_reset")
-                properties.set_prop("frontendIPConfiguration", AAZObjectType)
-                properties.set_prop("frontendPortRangeEnd", AAZIntType, ".frontend_port_range_end", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("frontendPortRangeStart", AAZIntType, ".frontend_port_range_start", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("idleTimeoutInMinutes", AAZIntType, ".idle_timeout_in_minutes")
-                properties.set_prop("protocol", AAZStrType, ".protocol", typ_kwargs={"flags": {"required": True}})
-
-            frontend_ip_configuration = _builder.get(".properties.frontendIPConfiguration")
-            if frontend_ip_configuration is not None:
-                frontend_ip_configuration.set_prop("id", AAZStrType, ".frontend_ip_name")
-
-            return _instance_value
-
-
-class _CreateHelper:
-    """Helper class for Create"""
+class _WaitHelper:
+    """Helper class for Wait"""
 
     _schema_application_security_group_read = None
 
@@ -2830,4 +2591,4 @@ class _CreateHelper:
         _schema.type = cls._schema_virtual_network_tap_read.type
 
 
-__all__ = ["Create"]
+__all__ = ["Wait"]

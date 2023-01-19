@@ -12,23 +12,25 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network lb inbound-nat-pool create",
+    "network lb inbound-nat-rule update",
 )
-class Create(AAZCommand):
-    """Create an inbound NAT address pool.
+class Update(AAZCommand):
+    """Update an inbound NAT rule.
 
-    :example: Create an inbound NAT address pool.
-        az network lb inbound-nat-pool create -g MyResourceGroup --lb-name MyLb -n MyNatPool --protocol Tcp --frontend-port-range-start 80 --frontend-port-range-end 89 --backend-port 80 --frontend-ip MyFrontendIp
+    :example: Update an inbound NAT rule to disable floating IP and modify idle timeout duration.
+        az network lb inbound-nat-rule update -g MyResourceGroup --lb-name MyLb -n MyNatRule --floating-ip false --idle-timeout 5
     """
 
     _aaz_info = {
         "version": "2022-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}", "2022-05-01", "properties.inboundNatPools[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}", "2022-05-01", "properties.inboundNatRules[]"],
         ]
     }
 
     AZ_SUPPORT_NO_WAIT = True
+
+    AZ_SUPPORT_GENERIC_UPDATE = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
@@ -56,58 +58,74 @@ class Create(AAZCommand):
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the resource that is unique within the set of inbound NAT pools used by the load balancer. This name can be used to access the resource.",
+            help="The name of the resource that is unique within the set of inbound NAT rules used by the load balancer.",
             required=True,
         )
 
-        # define Arg Group "Parameters.properties.inboundNatPools[]"
+        # define Arg Group "Parameters.properties.inboundNatRules[]"
 
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.backend_address_pool = AAZStrArg(
+            options=["--backend-pool-name", "--backend-address-pool"],
+            arg_group="Properties",
+            help="The name or ID of the backend address pool",
+            nullable=True,
+        )
         _args_schema.backend_port = AAZIntArg(
             options=["--backend-port"],
             arg_group="Properties",
-            help="The port used for internal connections on the endpoint. Acceptable values are between 1 and 65535.",
-            required=True,
+            help="The port used for the internal endpoint. Acceptable values range from 1 to 65535.",
+            nullable=True,
         )
         _args_schema.enable_floating_ip = AAZBoolArg(
             options=["--floating-ip", "--enable-floating-ip"],
             arg_group="Properties",
             help="Configures a virtual machine's endpoint for the floating IP capability required to configure a SQL AlwaysOn Availability Group. This setting is required when using the SQL AlwaysOn Availability Groups in SQL server. This setting can't be changed after you create the endpoint.",
+            nullable=True,
         )
         _args_schema.enable_tcp_reset = AAZBoolArg(
             options=["--enable-tcp-reset"],
             arg_group="Properties",
             help="Receive bidirectional TCP Reset on TCP flow idle timeout or unexpected connection termination. This element is only used when the protocol is set to TCP.",
+            nullable=True,
         )
         _args_schema.frontend_ip_name = AAZStrArg(
             options=["--frontend-ip", "--frontend-ip-name"],
             arg_group="Properties",
-            help="The name or ID of the frontend IP configuration.",
+            help="The name of ID of the frontend IP configuration.",
+            nullable=True,
+        )
+        _args_schema.frontend_port = AAZIntArg(
+            options=["--frontend-port"],
+            arg_group="Properties",
+            help="The port for the external endpoint. Port numbers for each rule must be unique within the Load Balancer. Acceptable values range from 1 to 65534.",
+            nullable=True,
         )
         _args_schema.frontend_port_range_end = AAZIntArg(
             options=["--frontend-port-range-end"],
             arg_group="Properties",
-            help="The last port number in the range of external ports that will be used to provide Inbound Nat to NICs associated with a load balancer. Acceptable values range between 1 and 65535.",
-            required=True,
+            help="The port range end for the external endpoint. This property is used together with BackendAddressPool and FrontendPortRangeStart. Individual inbound NAT rule port mappings will be created for each backend address from BackendAddressPool. Acceptable values range from 1 to 65534.",
+            nullable=True,
         )
         _args_schema.frontend_port_range_start = AAZIntArg(
             options=["--frontend-port-range-start"],
             arg_group="Properties",
-            help="The first port number in the range of external ports that will be used to provide Inbound Nat to NICs associated with a load balancer. Acceptable values range between 1 and 65534.",
-            required=True,
+            help="The port range start for the external endpoint. This property is used together with BackendAddressPool and FrontendPortRangeEnd. Individual inbound NAT rule port mappings will be created for each backend address from BackendAddressPool. Acceptable values range from 1 to 65534.",
+            nullable=True,
         )
         _args_schema.idle_timeout_in_minutes = AAZIntArg(
             options=["--idle-timeout", "--idle-timeout-in-minutes"],
             arg_group="Properties",
             help="The timeout for the TCP idle connection. The value can be set between 4 and 30 minutes. The default value is 4 minutes. This element is only used when the protocol is set to TCP.",
+            nullable=True,
         )
         _args_schema.protocol = AAZStrArg(
             options=["--protocol"],
             arg_group="Properties",
-            help="The reference to the transport protocol used by the inbound NAT pool.",
-            required=True,
+            help="The reference to the transport protocol used by the load balancing rule.",
+            nullable=True,
             enum={"All": "All", "Tcp": "Tcp", "Udp": "Udp"},
         )
         return cls._args_schema
@@ -115,9 +133,10 @@ class Create(AAZCommand):
     def _execute_operations(self):
         self.pre_operations()
         self.LoadBalancersGet(ctx=self.ctx)()
-        self.pre_instance_create()
-        self.InstanceCreateByJson(ctx=self.ctx)()
-        self.post_instance_create(self.ctx.selectors.subresource.required())
+        self.pre_instance_update(self.ctx.selectors.subresource.required())
+        self.InstanceUpdateByJson(ctx=self.ctx)()
+        self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.selectors.subresource.required())
         yield self.LoadBalancersCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -130,11 +149,11 @@ class Create(AAZCommand):
         pass
 
     @register_callback
-    def pre_instance_create(self):
+    def pre_instance_update(self, instance):
         pass
 
     @register_callback
-    def post_instance_create(self, instance):
+    def post_instance_update(self, instance):
         pass
 
     def _output(self, *args, **kwargs):
@@ -145,7 +164,7 @@ class Create(AAZCommand):
 
         def _get(self):
             result = self.ctx.vars.instance
-            result = result.properties.inboundNatPools
+            result = result.properties.inboundNatRules
             filters = enumerate(result)
             filters = filter(
                 lambda e: e[1].name == self.ctx.args.name,
@@ -156,7 +175,7 @@ class Create(AAZCommand):
 
         def _set(self, value):
             result = self.ctx.vars.instance
-            result = result.properties.inboundNatPools
+            result = result.properties.inboundNatRules
             filters = enumerate(result)
             filters = filter(
                 lambda e: e[1].name == self.ctx.args.name,
@@ -245,7 +264,7 @@ class Create(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _CreateHelper._build_schema_load_balancer_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_load_balancer_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -356,33 +375,40 @@ class Create(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _CreateHelper._build_schema_load_balancer_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_load_balancer_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
-    class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
+    class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
         def __call__(self, *args, **kwargs):
-            self.ctx.selectors.subresource.set(self._create_instance())
+            self._update_instance(self.ctx.selectors.subresource.required())
 
-        def _create_instance(self):
+        def _update_instance(self, instance):
             _instance_value, _builder = self.new_content_builder(
                 self.ctx.args,
+                value=instance,
                 typ=AAZObjectType
             )
             _builder.set_prop("name", AAZStrType, ".name")
-            _builder.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("backendPort", AAZIntType, ".backend_port", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("backendAddressPool", AAZObjectType)
+                properties.set_prop("backendPort", AAZIntType, ".backend_port")
                 properties.set_prop("enableFloatingIP", AAZBoolType, ".enable_floating_ip")
                 properties.set_prop("enableTcpReset", AAZBoolType, ".enable_tcp_reset")
                 properties.set_prop("frontendIPConfiguration", AAZObjectType)
-                properties.set_prop("frontendPortRangeEnd", AAZIntType, ".frontend_port_range_end", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("frontendPortRangeStart", AAZIntType, ".frontend_port_range_start", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("frontendPort", AAZIntType, ".frontend_port")
+                properties.set_prop("frontendPortRangeEnd", AAZIntType, ".frontend_port_range_end")
+                properties.set_prop("frontendPortRangeStart", AAZIntType, ".frontend_port_range_start")
                 properties.set_prop("idleTimeoutInMinutes", AAZIntType, ".idle_timeout_in_minutes")
-                properties.set_prop("protocol", AAZStrType, ".protocol", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("protocol", AAZStrType, ".protocol")
+
+            backend_address_pool = _builder.get(".properties.backendAddressPool")
+            if backend_address_pool is not None:
+                backend_address_pool.set_prop("id", AAZStrType, ".backend_address_pool")
 
             frontend_ip_configuration = _builder.get(".properties.frontendIPConfiguration")
             if frontend_ip_configuration is not None:
@@ -390,9 +416,17 @@ class Create(AAZCommand):
 
             return _instance_value
 
+    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
 
-class _CreateHelper:
-    """Helper class for Create"""
+        def __call__(self, *args, **kwargs):
+            self._update_instance_by_generic(
+                self.ctx.selectors.subresource.required(),
+                self.ctx.generic_update_args
+            )
+
+
+class _UpdateHelper:
+    """Helper class for Update"""
 
     _schema_application_security_group_read = None
 
@@ -2830,4 +2864,4 @@ class _CreateHelper:
         _schema.type = cls._schema_virtual_network_tap_read.type
 
 
-__all__ = ["Create"]
+__all__ = ["Update"]

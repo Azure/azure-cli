@@ -534,7 +534,6 @@ def load_command_table(self, _):
         g.custom_command('list-mapping', 'list_load_balancer_mapping')
 
     property_map = {
-        'inbound_nat_rules': 'inbound-nat-rule',
         'load_balancing_rules': 'rule'
     }
     for subresource, alias in property_map.items():
@@ -547,13 +546,9 @@ def load_command_table(self, _):
     self.command_table["network lb frontend-ip create"] = LBFrontendIPCreate(loader=self)
     self.command_table["network lb frontend-ip update"] = LBFrontendIPUpdate(loader=self)
 
-    with self.command_group('network lb inbound-nat-rule', network_lb_sdk) as g:
-        g.custom_command('create', 'create_lb_inbound_nat_rule')
-        g.generic_update_command('update', child_collection_prop_name='inbound_nat_rules',
-                                 getter_name='lb_get',
-                                 getter_type=network_load_balancers_custom,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_lb_inbound_nat_rule')
+    from .operations.load_balancer import LBInboundNatRuleCreate, LBInboundNatRuleUpdate
+    self.command_table["network lb inbound-nat-rule create"] = LBInboundNatRuleCreate(loader=self)
+    self.command_table["network lb inbound-nat-rule update"] = LBInboundNatRuleUpdate(loader=self)
 
     from .operations.load_balancer import LBInboundNatPoolCreate, LBInboundNatPoolUpdate
     self.command_table["network lb inbound-nat-pool create"] = LBInboundNatPoolCreate(loader=self)

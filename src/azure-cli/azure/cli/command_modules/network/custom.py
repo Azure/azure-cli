@@ -3980,35 +3980,6 @@ def list_load_balancer_mapping(cmd, resource_group_name, load_balancer_name, bac
     return ListMapping(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
-def create_lb_inbound_nat_rule(
-        cmd, resource_group_name, load_balancer_name, item_name, protocol, backend_port, frontend_port=None,
-        frontend_ip_name=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
-        frontend_port_range_start=None, frontend_port_range_end=None, backend_pool_name=None):
-    InboundNatRule, SubResource = cmd.get_models('InboundNatRule', 'SubResource')
-    ncf = network_client_factory(cmd.cli_ctx)
-    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
-    if not frontend_ip_name:
-        frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
-    frontend_ip = get_property(lb.frontend_ip_configurations, frontend_ip_name)  # pylint: disable=no-member
-    new_rule = InboundNatRule(
-        name=item_name, protocol=protocol,
-        frontend_port=frontend_port, backend_port=backend_port,
-        frontend_ip_configuration=frontend_ip,
-        enable_floating_ip=floating_ip,
-        idle_timeout_in_minutes=idle_timeout,
-        enable_tcp_reset=enable_tcp_reset)
-    if frontend_port_range_end and cmd.supported_api_version('2021-03-01'):
-        new_rule.frontend_port_range_end = frontend_port_range_end
-    if frontend_port_range_start and cmd.supported_api_version('2021-03-01'):
-        new_rule.frontend_port_range_start = frontend_port_range_start
-    if backend_pool_name and cmd.supported_api_version('2021-03-01'):
-        backend_pool_id = get_property(lb.backend_address_pools, backend_pool_name).id
-        new_rule.backend_address_pool = SubResource(id=backend_pool_id)
-    upsert_to_collection(lb, 'inbound_nat_rules', new_rule, 'name')
-    poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
-    return get_property(poller.result().inbound_nat_rules, item_name)
-
-
 # workaround for : https://github.com/Azure/azure-cli/issues/17071
 def lb_get(client, resource_group_name, load_balancer_name):
     lb = client.get(resource_group_name, load_balancer_name)
@@ -4022,31 +3993,6 @@ def lb_get_operation(lb):
             item.zones = None
 
     return lb
-
-
-def set_lb_inbound_nat_rule(
-        cmd, instance, parent, item_name, protocol=None, frontend_port=None,
-        frontend_ip_name=None, backend_port=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
-        frontend_port_range_start=None, frontend_port_range_end=None):
-    if frontend_ip_name:
-        instance.frontend_ip_configuration = \
-            get_property(parent.frontend_ip_configurations, frontend_ip_name)
-
-    if enable_tcp_reset is not None:
-        instance.enable_tcp_reset = enable_tcp_reset
-    if frontend_port_range_start is not None and cmd.supported_api_version('2021-03-01'):
-        instance.frontend_port_range_start = frontend_port_range_start
-    if frontend_port_range_end is not None and cmd.supported_api_version('2021-03-01'):
-        instance.frontend_port_range_end = frontend_port_range_end
-
-    with cmd.update_context(instance) as c:
-        c.set_param('protocol', protocol)
-        c.set_param('frontend_port', frontend_port)
-        c.set_param('backend_port', backend_port)
-        c.set_param('idle_timeout_in_minutes', idle_timeout)
-        c.set_param('enable_floating_ip', floating_ip)
-
-    return parent
 
 
 def create_lb_inbound_nat_pool(
