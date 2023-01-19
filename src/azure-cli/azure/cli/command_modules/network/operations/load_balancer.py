@@ -134,29 +134,21 @@ class LBInboundNatPoolCreate(_LBInboundNatPoolCreate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.frontend_ip_name = AAZStrArg(
-            options=["--frontend-ip-name"],
-            arg_group="Properties",
-            help="The name the frontend IP configuration. If only one exists, omit to use as default.",
-        )
 
-        args_schema.frontend_ip._registered = False
+        args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
+        )
         return args_schema
 
     def pre_instance_create(self):
         args = self.ctx.args
-        instance = self.ctx.vars.instance
-        if has_value(args.frontend_ip_name):
-            frontend_ip_name = args.frontend_ip_name.to_serialized_data()
-            for frontend_ip in instance.properties.frontend_ip_configurations:
-                if frontend_ip.name == frontend_ip_name:
-                    args.frontend_ip = frontend_ip.id
-                    break
-            if not has_value(args.frontend_ip):
-                raise InvalidArgumentValueError(
-                    "FrontendIpConfiguration '{}' does not exist".format(frontend_ip_name))
-        elif has_value(instance.properties.frontend_ip_configurations) and len(instance.properties.frontend_ip_configurations) == 1:
-            args.frontend_ip = instance.properties.frontend_ip_configurations[0].id
+        if not has_value(args.frontend_ip_name):
+            instance = self.ctx.vars.instance
+            frontend_ip_configurations = instance.properties.frontend_ip_configurations
+            if len(frontend_ip_configurations) == 1:
+                args.frontend_ip_name = instance.properties.frontend_ip_configurations[0].id
+            elif len(frontend_ip_configurations) > 1:
+                raise ArgumentUsageError("Multiple FrontendIpConfigurations found in loadbalancer. Specify --frontend-ip explicitly.")
 
 
 class LBInboundNatPoolUpdate(_LBInboundNatPoolUpdate):
@@ -165,31 +157,10 @@ class LBInboundNatPoolUpdate(_LBInboundNatPoolUpdate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.frontend_ip_name = AAZStrArg(
-            options=["--frontend-ip-name"],
-            arg_group="Properties",
-            help="The name the frontend IP configuration.",
-            nullable=True
+        args_schema.frontend_ip_name._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
         )
-
-        args_schema.frontend_ip._registered = False
         return args_schema
-
-    def pre_instance_update(self, instance):
-        args = self.ctx.args
-        instance = self.ctx.vars.instance
-        if has_value(args.frontend_ip_name):
-            frontend_ip_name = args.frontend_ip_name.to_serialized_data()
-            if frontend_ip_name is None:
-                args.frontend_ip = None
-            else:
-                for frontend_ip in instance.properties.frontend_ip_configurations:
-                    if frontend_ip.name == frontend_ip_name:
-                        args.frontend_ip = frontend_ip.id
-                        break
-                if not has_value(args.frontend_ip):
-                    raise InvalidArgumentValueError(
-                        "FrontendIpConfiguration '{}' does not exist".format(frontend_ip_name))
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.frontend_ip_configuration.id):

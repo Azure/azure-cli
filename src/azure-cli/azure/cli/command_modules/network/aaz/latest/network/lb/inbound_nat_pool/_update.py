@@ -87,8 +87,8 @@ class Update(AAZCommand):
             help="Receive bidirectional TCP Reset on TCP flow idle timeout or unexpected connection termination. This element is only used when the protocol is set to TCP.",
             nullable=True,
         )
-        _args_schema.frontend_ip = AAZStrArg(
-            options=["--frontend-ip"],
+        _args_schema.frontend_ip_name = AAZStrArg(
+            options=["--frontend-ip", "--frontend-ip-name"],
             arg_group="Properties",
             help="The name or ID of the frontend IP configuration.",
             nullable=True,
@@ -393,7 +393,7 @@ class Update(AAZCommand):
 
             frontend_ip_configuration = _builder.get(".properties.frontendIPConfiguration")
             if frontend_ip_configuration is not None:
-                frontend_ip_configuration.set_prop("id", AAZStrType, ".frontend_ip")
+                frontend_ip_configuration.set_prop("id", AAZStrType, ".frontend_ip_name")
 
             return _instance_value
 
