@@ -10,8 +10,7 @@ from ..aaz.latest.network.lb import Delete as _LBDelete, Update as _LBUpdate, Li
 from ..aaz.latest.network.lb.frontend_ip import Create as _LBFrontendIPCreate, Update as _LBFrontendIPUpdate, \
     Show as _LBFrontendIPShow, Delete as _LBFrontendIPDelete, List as _LBFrontendIPList
 from ..aaz.latest.network.lb.inbound_nat_pool import Create as _LBInboundNatPoolCreate, \
-    Update as _LBInboundNatPoolUpdate, Show as _LBInboundNatPoolShow, Delete as _LBInboundNatPoolDelete, \
-    List as _LBInboundNatPoolList
+    Update as _LBInboundNatPoolUpdate
 
 
 logger = get_logger(__name__)
