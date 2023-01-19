@@ -234,7 +234,9 @@ def load_arguments(self, _):
         c.argument('identifier_uri', help='graph application identifier, must be in uri format')
         c.argument('spn', help='service principal name')
         c.argument('upn', help='user principal name, e.g. john.doe@contoso.com')
-        c.argument('query_filter', options_list=['--filter'], help='OData filter, e.g. --filter "displayname eq \'test\' and servicePrincipalType eq \'Application\'"')
+        c.argument('query_filter', options_list=['--filter'],
+                   help='The $filter OData query parameter to retrieve a subset of a collection. '
+                        'For more information, see https://learn.microsoft.com/graph/filter-query-parameter')
 
     with self.argument_context('ad user') as c:
         c.argument('mail_nickname', help='mail alias. Defaults to user principal name')
