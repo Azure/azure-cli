@@ -1252,12 +1252,14 @@ def restore_files_unmount_rp(cmd, client, resource_group_name, vault_name, conta
         cust_help.track_backup_operation(cmd.cli_ctx, resource_group_name, result, vault_name)
 
 
-def disable_protection(cmd, client, resource_group_name, vault_name, item):
+def disable_protection(cmd, client, resource_group_name, vault_name, item,
+            retain_recovery_points_as_per_policy=False):
     # Get container and item URIs
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
-    vm_item = _get_disable_protection_request(item)
+    vm_item = _get_disable_protection_request(item,
+            retain_recovery_points_as_per_policy=retain_recovery_points_as_per_policy)
 
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, vm_item, cls=cust_help.get_pipeline_response)
@@ -1268,7 +1270,7 @@ def undelete_protection(cmd, client, resource_group_name, vault_name, item):
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
-    vm_item = _get_disable_protection_request(item, True)
+    vm_item = _get_disable_protection_request(item, undelete=True)
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, vm_item, cls=cust_help.get_pipeline_response)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
@@ -1458,11 +1460,15 @@ def _get_storage_account_id(cli_ctx, storage_account_sub, storage_account_name, 
 
 
 # pylint: disable=inconsistent-return-statements
-def _get_disable_protection_request(item, undelete=False):
+def _get_disable_protection_request(item, undelete=False,
+            retain_recovery_points_as_per_policy=False):
     if item.properties.workload_type == WorkloadType.vm.value:
         vm_item_properties = _get_vm_item_properties_from_vm_id(item.properties.virtual_machine_id)
         vm_item_properties.policy_id = ''
-        vm_item_properties.protection_state = ProtectionState.protection_stopped
+        if retain_recovery_points_as_per_policy:
+            vm_item_properties.protection_state = ProtectionState.backups_suspended
+        else:
+            vm_item_properties.protection_state = ProtectionState.protection_stopped
         vm_item_properties.source_resource_id = item.properties.source_resource_id
         if undelete:
             vm_item_properties.is_rehydrate = True
