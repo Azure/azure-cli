@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Manage application-level routing and load balancing services.
 
-    To learn more about Application Gateway, visit https://docs.microsoft.com/azure/application-gateway/application-gateway-create-gateway-cli.
+    To learn more about Application Gateway, visit https://learn.microsoft.com/en-us/azure/application-gateway/quick-create-cli.
     """
     pass
 
