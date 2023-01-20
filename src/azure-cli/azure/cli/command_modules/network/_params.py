@@ -179,7 +179,6 @@ def load_arguments(self, _):
         c.argument('capacity', help='The number of instances to use with the application gateway.', type=int)
 
     ag_subresources = [
-        {'name': 'http-settings', 'display': 'backed HTTP settings', 'ref': 'backend_http_settings_collection'},
         {'name': 'http-listener', 'display': 'HTTP listener', 'ref': 'http_listeners'},
         {'name': 'rule', 'display': 'request routing rule', 'ref': 'request_routing_rules'},
         {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
@@ -190,7 +189,6 @@ def load_arguments(self, _):
     if self.supported_api_version(min_api='2018-12-01'):
         ag_subresources.append({'name': 'rewrite-rule set', 'display': 'rewrite rule set', 'ref': 'rewrite_rule_sets'})
     if self.supported_api_version(min_api='2021-08-01'):
-        ag_subresources.append({'name': 'settings', 'display': 'backed settings', 'ref': 'backend_settings_collection'})
         ag_subresources.append({'name': 'listener', 'display': 'listener', 'ref': 'listeners'})
         ag_subresources.append({'name': 'routing-rule', 'display': 'routing rule', 'ref': 'routing_rules'})
 
@@ -208,13 +206,8 @@ def load_arguments(self, _):
         with self.argument_context('network application-gateway {} list'.format(item['name'])) as c:
             c.argument('resource_name', options_list=['--gateway-name'], id_part=None)
 
-    for item in ['create', 'http-settings']:
-        with self.argument_context('network application-gateway {}'.format(item)) as c:
-            c.argument('connection_draining_timeout', min_api='2016-12-01', type=int, help='The time in seconds after a backend server is removed during which on open connection remains active. Range: 0 (disabled) to 3600', arg_group='Gateway' if item == 'create' else None)
-
-    for item in ['frontend-port', 'http-settings', 'settings']:
-        with self.argument_context('network application-gateway {}'.format(item)) as c:
-            c.argument('port', help='The port number.', type=int)
+    with self.argument_context('network application-gateway create') as c:
+        c.argument('connection_draining_timeout', min_api='2016-12-01', type=int, help='The time in seconds after a backend server is removed during which on open connection remains active. Range: 0 (disabled) to 3600', arg_group='Gateway')
 
     for item in ['http-settings', 'settings', 'probe']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
@@ -289,21 +282,6 @@ def load_arguments(self, _):
     for scope in ['rewrite-rule list', 'rewrite-rule condition list']:
         with self.argument_context('network application-gateway {}'.format(scope)) as c:
             c.argument('application_gateway_name', app_gateway_name_type, id_part=None)
-
-    with self.argument_context('network application-gateway http-settings') as c:
-        c.argument('cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable cookie-based affinity.')
-        c.argument('timeout', help='Request timeout in seconds.')
-        c.argument('probe', help='Name or ID of the probe to associate with the HTTP settings.', completer=get_ag_subresource_completion_list('probes'))
-        c.argument('auth_certs', nargs='+', min_api='2016-09-01', help='Space-separated list of authentication certificates (names or IDs) to associate with the HTTP settings.')
-        c.argument('root_certs', nargs='+', min_api='2019-04-01', help='Space-separated list of trusted root certificates (names or IDs) to associate with the HTTP settings. --host-name or --host-name-from-backend-pool is required when this field is set.')
-
-    with self.argument_context('network application-gateway settings') as c:
-        c.argument('timeout', help='Request timeout in seconds.')
-        c.argument('probe', help='Name or ID of the probe to associate with the settings.', completer=get_ag_subresource_completion_list('probes'))
-        c.argument('root_certs', nargs='+', help='Space-separated list of trusted root certificates (names or IDs) to associate with the settings. --host-name or --host-name-from-backend-pool is required when this field is set.')
-        c.argument('host_name', help='Host header sent to the backend servers.')
-        c.argument('host_name_from_backend_pool', options_list=['--backend-pool-host-name'], help='Use host name of the backend server as the host header.', arg_type=get_three_state_flag())
-        c.argument('path', help='Path that will prefix all requests.')
 
     with self.argument_context('network application-gateway probe') as c:
         c.argument('host', help='The name of the host to send the probe.')
@@ -403,13 +381,6 @@ def load_arguments(self, _):
         c.argument('cipher_suites', nargs='*', help='SSL cipher suites to be enabled in the specified order to application gateway.')
         c.argument('min_protocol_version', help='Minimum version of SSL protocol to be supported on application gateway.')
         c.argument('disabled_ssl_protocols', nargs='+', help='Space-separated list of protocols to disable.')
-
-    with self.argument_context('network application-gateway http-settings', min_api='2017-06-01') as c:
-        c.argument('host_name', help='Host header sent to the backend servers.')
-        c.argument('host_name_from_backend_pool', help='Use host name of the backend server as the host header.', arg_type=get_three_state_flag())
-        c.argument('affinity_cookie_name', help='Name used for the affinity cookie.')
-        c.argument('enable_probe', help='Whether the probe is enabled.', arg_type=get_three_state_flag())
-        c.argument('path', help='Path that will prefix all HTTP requests.')
 
     with self.argument_context('network application-gateway probe', min_api='2017-06-01') as c:
         c.argument('host', default=None, required=False, help='The name of the host to send the probe.')
