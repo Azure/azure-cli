@@ -3602,7 +3602,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 3))
         self.cmd('network lb inbound-nat-rule update -g {rg} --lb-name {lb} -n rule1 --floating-ip true --idle-timeout 10')
         self.cmd('network lb inbound-nat-rule show -g {rg} --lb-name {lb} -n rule1', checks=[
-            self.check('enableFloatingIp', True),
+            self.check('enableFloatingIP', True),
             self.check('idleTimeoutInMinutes', 10)
         ])
         # test generic update
@@ -3663,7 +3663,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb inbound-nat-pool show -g {rg} --lb-name {lb} -n rule1000', checks=[
             self.check('protocol', 'Udp'),
             self.check('backendPort', 50),
-            self.check('enableFloatingIp', True),
+            self.check('enableFloatingIP', True),
             self.check('idleTimeoutInMinutes', 20)
         ])
         # test generic update
