@@ -33,6 +33,7 @@ from .aaz.latest.network.application_gateway.address_pool import Create as _Addr
 from .aaz.latest.network.application_gateway.auth_cert import Create as _AuthCertCreate, Update as _AuthCertUpdate
 from .aaz.latest.network.application_gateway.client_cert import Add as _ClientCertAdd, Remove as _ClientCertRemove, \
     Update as _ClientCertUpdate
+from .aaz.latest.network.application_gateway.frontend_ip import Create as _FrontendIPCreate, Update as _FrontendIPUpdate
 from .aaz.latest.network.application_gateway.root_cert import Create as _RootCertCreate, Update as _RootCertUpdate
 from .aaz.latest.network.application_gateway.ssl_cert import Create as _SSLCertCreate, Update as _SSLCertUpdate
 from .aaz.latest.network.application_gateway.ssl_policy import Set as _SSLPolicySet
@@ -414,58 +415,49 @@ class AddressPoolUpdate(_AddressPoolUpdate):
         )
 
 
-def create_ag_frontend_ip_configuration(cmd, resource_group_name, application_gateway_name, item_name,
-                                        public_ip_address=None, subnet=None,
-                                        virtual_network_name=None, private_ip_address=None,
-                                        private_ip_address_allocation=None, no_wait=False):
-    ApplicationGatewayFrontendIPConfiguration, SubResource = cmd.get_models(
-        'ApplicationGatewayFrontendIPConfiguration', 'SubResource')
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    if public_ip_address:
-        new_config = ApplicationGatewayFrontendIPConfiguration(
-            name=item_name,
-            public_ip_address=SubResource(id=public_ip_address))
-    else:
-        new_config = ApplicationGatewayFrontendIPConfiguration(
-            name=item_name,
-            private_ip_address=private_ip_address if private_ip_address else None,
-            private_ip_allocation_method='Static' if private_ip_address else 'Dynamic',
-            subnet=SubResource(id=subnet))
-    upsert_to_collection(ag, 'frontend_ip_configurations', new_config, 'name')
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
+class FrontedIPCreate(_FrontendIPCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vnet_name = AAZStrArg(
+            options=["--vnet-name"],
+            help="Name of the virtual network corresponding to the subnet."
+        )
+        args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/publicIpAddresses/{}",
+        )
+        args_schema.subnet._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/virtualNetworks/{vnet_name}/subnets/{}",
+        )
+        args_schema.private_ip_allocation_method._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.private_ip_allocation_method = "Static" if has_value(args.private_ip_address) else "Dynamic"
 
 
-def update_ag_frontend_ip_configuration(cmd, instance, parent, item_name, public_ip_address=None,
-                                        subnet=None, virtual_network_name=None,
-                                        private_ip_address=None):
-    SubResource = cmd.get_models('SubResource')
-    if public_ip_address is not None:
-        instance.public_ip_address = SubResource(id=public_ip_address)
-    if subnet is not None:
-        instance.subnet = SubResource(id=subnet)
-    if private_ip_address is not None:
-        instance.private_ip_address = private_ip_address
-        instance.private_ip_allocation_method = 'Static'
-    return parent
+class FrontedIPUpdate(_FrontendIPUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vnet_name = AAZStrArg(
+            options=["--vnet-name"],
+            help="Name of the virtual network corresponding to the subnet."
+        )
+        args_schema.subnet._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/virtualNetworks/{vnet_name}/subnets/{}",
+        )
+        args_schema.private_ip_allocation_method._registered = False
+        return args_schema
 
-
-def create_ag_frontend_port(cmd, resource_group_name, application_gateway_name, item_name, port,
-                            no_wait=False):
-    ApplicationGatewayFrontendPort = cmd.get_models('ApplicationGatewayFrontendPort')
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    new_port = ApplicationGatewayFrontendPort(name=item_name, port=port)
-    upsert_to_collection(ag, 'frontend_ports', new_port, 'name')
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
-
-
-def update_ag_frontend_port(instance, parent, item_name, port=None):
-    if port is not None:
-        instance.port = port
-    return parent
+    def post_instance_update(self, instance):
+        instance.properties.private_ip_allocation_method = "Static" if has_value(instance.properties.private_ip_address) else "Dynamic"
 
 
 def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, item_name,

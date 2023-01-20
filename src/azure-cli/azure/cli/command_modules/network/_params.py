@@ -179,8 +179,6 @@ def load_arguments(self, _):
         c.argument('capacity', help='The number of instances to use with the application gateway.', type=int)
 
     ag_subresources = [
-        {'name': 'frontend-ip', 'display': 'frontend IP configuration', 'ref': 'frontend_ip_configurations'},
-        {'name': 'frontend-port', 'display': 'frontend port', 'ref': 'frontend_ports'},
         {'name': 'http-settings', 'display': 'backed HTTP settings', 'ref': 'backend_http_settings_collection'},
         {'name': 'http-listener', 'display': 'HTTP listener', 'ref': 'http_listeners'},
         {'name': 'rule', 'display': 'request routing rule', 'ref': 'request_routing_rules'},
@@ -213,17 +211,6 @@ def load_arguments(self, _):
     for item in ['create', 'http-settings']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
             c.argument('connection_draining_timeout', min_api='2016-12-01', type=int, help='The time in seconds after a backend server is removed during which on open connection remains active. Range: 0 (disabled) to 3600', arg_group='Gateway' if item == 'create' else None)
-
-    with self.argument_context('network application-gateway frontend-ip create') as c:
-        c.argument('public_ip_address', validator=get_public_ip_validator(), help='The name or ID of the public IP address.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
-
-    for item in ['create', 'update']:
-        with self.argument_context('network application-gateway frontend-ip {}'.format(item)) as c:
-            c.argument('subnet', validator=get_subnet_validator(), help='The name or ID of the subnet.')
-            c.argument('virtual_network_name', help='The name of the virtual network corresponding to the subnet.', id_part=None, arg_group=None)
-
-    with self.argument_context('network application-gateway frontend-ip update') as c:
-        c.argument('public_ip_address', validator=get_public_ip_validator(), help='The name or ID of the public IP address.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), deprecate_info=c.deprecate(hide=True))
 
     for item in ['frontend-port', 'http-settings', 'settings']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
