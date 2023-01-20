@@ -7567,9 +7567,9 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
                                                 fmt=AAZFileArgBase64EncodeFormat())
         args_schema.root_cert_name = AAZStrArg(options=['--root-cert-name'], arg_group="Root Cert Authentication",
                                                help="Root certificate name.")
-        args_schema.custom_routes = AAZListArg(options=['--custom-routes'],
-                                               help="Space-separated list of CIDR prefixes representing the custom routes address space specified by the customer for VpnClient.")
-        args_schema.custom_routes.Element = AAZStrArg()
+        # args_schema.custom_routes = AAZListArg(options=['--custom-routes'],
+        #                                        help="Space-separated list of CIDR prefixes representing the custom routes address space specified by the customer for VpnClient.")
+        # args_schema.custom_routes.Element = AAZStrArg()
         args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
         )
@@ -7582,12 +7582,6 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.custom_routes):
-            args.custom_routes_resource = assign_aaz_list_arg(
-                args.custom_routes_resource,
-                args.custom_routes,
-                element_transformer=lambda _, custom_route: {"address_prefixes": custom_route}
-            )
 
         if has_value(args.root_cert_data):
             import os
@@ -7601,13 +7595,13 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
         args = self.ctx.args
         if has_value(args.root_cert_data):
             collection = instance.properties.vpnClientConfiguration.vpnClientRootCertificates.to_serialized_data()
-            root_certificate = {'name': args.root_cert_name, 'public_cert_data': args.root_cert_data}
-            value = args.root_cert_name.to_serialized_data()
-            match = next((x for x in collection if getattr(x, 'name', None) == value), None)
-            if match:
-                collection.remove(match)
-            collection.append(root_certificate)
-            args.vpn_client_root_certificates = collection
+            root_certificate = [{'name': args.root_cert_name, 'public_cert_data': args.root_cert_data}]
+            # value = args.root_cert_name.to_serialized_data()
+            # match = next((x for x in collection if getattr(x, 'name', None) == value), None)
+            # if match:
+            #     collection.remove(match)
+            # collection.append(root_certificate)
+            args.vpn_client_root_certificates = root_certificate
 
         subnet_id = '{}/subnets/GatewaySubnet'.format(args.vnet) if has_value(args.vnet) else \
             instance.properties.ip_configurations[0].properties.subnet.id

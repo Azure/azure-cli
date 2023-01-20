@@ -255,13 +255,12 @@ class Update(AAZCommand):
         # define Arg Group "VPN Client"
 
         _args_schema = cls._args_schema
-        _args_schema.custom_routes_resource = AAZObjectArg(
-            options=["--custom-routes-resource"],
+        _args_schema.custom_routes = AAZListArg(
+            options=["--custom-routes"],
             arg_group="VPN Client",
-            help="The reference to the address space resource which represents the custom routes address space specified by the customer for virtual network gateway and VpnClient.",
+            help="Space-separated list of CIDR prefixes representing the custom routes address space specified by the customer for VpnClient.",
             nullable=True,
         )
-        cls._build_args_address_space_update(_args_schema.custom_routes_resource)
         _args_schema.radius_server = AAZStrArg(
             options=["--radius-server"],
             arg_group="VPN Client",
@@ -288,6 +287,11 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        custom_routes = cls._args_schema.custom_routes
+        custom_routes.Element = AAZStrArg(
+            nullable=True,
+        )
+
         address_prefixes = cls._args_schema.address_prefixes
         address_prefixes.Element = AAZStrArg(
             nullable=True,
@@ -301,32 +305,6 @@ class Update(AAZCommand):
 
         # define Arg Group "VpnClientConfiguration"
         return cls._args_schema
-
-    _args_address_space_update = None
-
-    @classmethod
-    def _build_args_address_space_update(cls, _schema):
-        if cls._args_address_space_update is not None:
-            _schema.address_prefixes = cls._args_address_space_update.address_prefixes
-            return
-
-        cls._args_address_space_update = AAZObjectArg(
-            nullable=True,
-        )
-
-        address_space_update = cls._args_address_space_update
-        address_space_update.address_prefixes = AAZListArg(
-            options=["address-prefixes"],
-            help="A list of address blocks reserved for this virtual network in CIDR notation.",
-            nullable=True,
-        )
-
-        address_prefixes = cls._args_address_space_update.address_prefixes
-        address_prefixes.Element = AAZStrArg(
-            nullable=True,
-        )
-
-        _schema.address_prefixes = cls._args_address_space_update.address_prefixes
 
     _args_sub_resource_update = None
 
@@ -614,7 +592,7 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("activeActive", AAZBoolType, ".active")
                 properties.set_prop("bgpSettings", AAZObjectType)
-                _UpdateHelper._build_schema_address_space_update(properties.set_prop("customRoutes", AAZObjectType, ".custom_routes_resource"))
+                properties.set_prop("customRoutes", AAZObjectType)
                 properties.set_prop("enableBgp", AAZBoolType, ".enable_bgp")
                 properties.set_prop("gatewayDefaultSite", AAZObjectType)
                 properties.set_prop("gatewayType", AAZStrType, ".gateway_type")
@@ -628,6 +606,14 @@ class Update(AAZCommand):
                 bgp_settings.set_prop("asn", AAZIntType, ".asn")
                 bgp_settings.set_prop("bgpPeeringAddress", AAZStrType, ".bgp_peering_address")
                 bgp_settings.set_prop("peerWeight", AAZIntType, ".peer_weight")
+
+            custom_routes = _builder.get(".properties.customRoutes")
+            if custom_routes is not None:
+                custom_routes.set_prop("addressPrefixes", AAZListType, ".custom_routes")
+
+            address_prefixes = _builder.get(".properties.customRoutes.addressPrefixes")
+            if address_prefixes is not None:
+                address_prefixes.set_elements(AAZStrType, ".")
 
             gateway_default_site = _builder.get(".properties.gatewayDefaultSite")
             if gateway_default_site is not None:
@@ -716,16 +702,6 @@ class Update(AAZCommand):
 
 class _UpdateHelper:
     """Helper class for Update"""
-
-    @classmethod
-    def _build_schema_address_space_update(cls, _builder):
-        if _builder is None:
-            return
-        _builder.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
-
-        address_prefixes = _builder.get(".addressPrefixes")
-        if address_prefixes is not None:
-            address_prefixes.set_elements(AAZStrType, ".")
 
     @classmethod
     def _build_schema_sub_resource_update(cls, _builder):
