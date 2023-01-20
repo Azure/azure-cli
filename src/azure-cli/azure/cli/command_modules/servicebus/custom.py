@@ -123,7 +123,7 @@ def cli_keys_renew(client, resource_group_name, namespace_name, name, key_type, 
 
 
 # Queue Region
-def cli_sbqueue_create(cmd, client, resource_group_name, namespace_name, queue_name, lock_duration=None,
+'''def cli_sbqueue_create(cmd, client, resource_group_name, namespace_name, queue_name, lock_duration=None,
                        max_size_in_megabytes=None, requires_duplicate_detection=None, requires_session=None,
                        default_message_time_to_live=None, dead_lettering_on_message_expiration=None,
                        duplicate_detection_history_time_window=None, max_delivery_count=None, status=None,
@@ -569,7 +569,7 @@ def cli_rules_update(cmd, instance,
     if requires_preprocessing is not None:
         instance.correlation_filter.requires_preprocessing = requires_preprocessing
 
-    return instance
+    return instance'''
 
 
 # DisasterRecoveryConfigs Region

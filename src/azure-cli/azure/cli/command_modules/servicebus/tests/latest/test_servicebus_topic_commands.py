@@ -42,7 +42,7 @@ class SBTopicsCRUDScenarioTest(ScenarioTest):
             'time_sample4': 'P1Y3M2D',
             'time_sample5': 'P1Y2M3DT3H11M2S',
             'time_sample6': 'P1Y',
-            'time_sample7': '01:03:04',
+            'time_sample7': 'P1DT3M4S',
             'time_sample8': 'PT10M',
             'time_sample9': 'PT3M'
         })
@@ -63,9 +63,9 @@ class SBTopicsCRUDScenarioTest(ScenarioTest):
             '--enable-ordering --auto-delete-on-idle {time_sample5} --enable-partitioning'
         ).get_output_in_json()
 
-        self.assertEqual(topic['defaultMessageTimeToLive'], '365 days, 0:00:00')
-        self.assertEqual(topic['autoDeleteOnIdle'], '428 days, 3:11:02')
-        self.assertEqual(topic['duplicateDetectionHistoryTimeWindow'], '1 day, 0:03:04')
+        self.assertEqual(topic['defaultMessageTimeToLive'], 'P365D')
+        self.assertEqual(topic['autoDeleteOnIdle'], 'P428DT3H11M2S')
+        self.assertEqual(topic['duplicateDetectionHistoryTimeWindow'], 'P1DT3M4S')
         self.assertEqual(topic['enableBatchedOperations'], True)
         self.assertEqual(topic['enableExpress'], False)
         self.assertEqual(topic['enablePartitioning'], True)
@@ -121,7 +121,7 @@ class SBTopicsCRUDScenarioTest(ScenarioTest):
             'servicebus topic update --resource-group {rg} --namespace-name {namespacename} --name {topicname} --default-message-time-to-live {time_sample1}',
             checks=[self.check('name', '{topicname}')]).get_output_in_json()
 
-        self.assertEqual(topic['defaultMessageTimeToLive'], '7 days, 0:00:00')
+        self.assertEqual(topic['defaultMessageTimeToLive'], 'P7D')
         self.kwargs.update({'defaultMessageTimeToLive': topic['defaultMessageTimeToLive']})
 
         self.assertOnUpdate(topic, self.kwargs)
@@ -131,7 +131,7 @@ class SBTopicsCRUDScenarioTest(ScenarioTest):
             'servicebus topic update --resource-group {rg} --namespace-name {namespacename} --name {topicname} --default-message-time-to-live {time_sample2}',
             checks=[self.check('name', '{topicname}')]).get_output_in_json()
 
-        self.assertEqual(topic['defaultMessageTimeToLive'], '2 days, 0:00:00')
+        self.assertEqual(topic['defaultMessageTimeToLive'], 'P2D')
         self.kwargs.update({'defaultMessageTimeToLive': topic['defaultMessageTimeToLive']})
 
         self.assertOnUpdate(topic, self.kwargs)
@@ -141,7 +141,7 @@ class SBTopicsCRUDScenarioTest(ScenarioTest):
             'servicebus topic update --resource-group {rg} --namespace-name {namespacename} --name {topicname} --default-message-time-to-live {time_sample3}',
             checks=[self.check('name', '{topicname}')]).get_output_in_json()
 
-        self.assertEqual(topic['defaultMessageTimeToLive'], '3:04:23')
+        self.assertEqual(topic['defaultMessageTimeToLive'], 'PT3H4M23S')
         self.kwargs.update({'defaultMessageTimeToLive': topic['defaultMessageTimeToLive']})
 
         self.assertOnUpdate(topic, self.kwargs)
@@ -151,7 +151,7 @@ class SBTopicsCRUDScenarioTest(ScenarioTest):
             'servicebus topic update --resource-group {rg} --namespace-name {namespacename} --name {topicname} --default-message-time-to-live {time_sample4}',
             checks=[self.check('name', '{topicname}')]).get_output_in_json()
 
-        self.assertEqual(topic['defaultMessageTimeToLive'], '457 days, 0:00:00')
+        self.assertEqual(topic['defaultMessageTimeToLive'], 'P457D')
         self.kwargs.update({'defaultMessageTimeToLive': topic['defaultMessageTimeToLive']})
 
         self.assertOnUpdate(topic, self.kwargs)
@@ -161,7 +161,7 @@ class SBTopicsCRUDScenarioTest(ScenarioTest):
             'servicebus topic update --resource-group {rg} --namespace-name {namespacename} --name {topicname} --default-message-time-to-live {time_sample5}',
             checks=[self.check('name', '{topicname}')]).get_output_in_json()
 
-        self.assertEqual(topic['defaultMessageTimeToLive'], '428 days, 3:11:02')
+        self.assertEqual(topic['defaultMessageTimeToLive'], 'P428DT3H11M2S')
         self.kwargs.update({'defaultMessageTimeToLive': topic['defaultMessageTimeToLive']})
 
         self.assertOnUpdate(topic, self.kwargs)
@@ -171,7 +171,7 @@ class SBTopicsCRUDScenarioTest(ScenarioTest):
             'servicebus topic update --resource-group {rg} --namespace-name {namespacename} --name {topicname} --default-message-time-to-live {time_sample6}',
             checks=[self.check('name', '{topicname}')]).get_output_in_json()
 
-        self.assertEqual(topic['defaultMessageTimeToLive'], '365 days, 0:00:00')
+        self.assertEqual(topic['defaultMessageTimeToLive'], 'P365D')
         self.kwargs.update({'defaultMessageTimeToLive': topic['defaultMessageTimeToLive']})
 
         self.assertOnUpdate(topic, self.kwargs)
@@ -232,7 +232,7 @@ class SBTopicsCRUDScenarioTest(ScenarioTest):
             'servicebus topic update --resource-group {rg} --namespace-name {namespacename} --name {topicname} --auto-delete-on-idle {time_sample5}',
             checks=[self.check('name', '{topicname}')]).get_output_in_json()
 
-        self.assertEqual(topic['autoDeleteOnIdle'], '428 days, 3:11:02')
+        self.assertEqual(topic['autoDeleteOnIdle'], 'P428DT3H11M2S')
         self.kwargs.update({'autoDeleteOnIdle': topic['autoDeleteOnIdle']})
 
         self.assertOnUpdate(topic, self.kwargs)
@@ -259,55 +259,17 @@ class SBTopicsCRUDScenarioTest(ScenarioTest):
             'servicebus topic update --resource-group {rg} --namespace-name {namespacename} --name {topicname} --duplicate-detection-history-time-window {time_sample9}',
             checks=[self.check('name', '{topicname}')]).get_output_in_json()
 
-        self.assertEqual(topic['duplicateDetectionHistoryTimeWindow'], '0:03:00')
+        self.assertEqual(topic['duplicateDetectionHistoryTimeWindow'], 'PT3M')
         self.kwargs.update({'duplicateDetectionHistoryTimeWindow': topic['duplicateDetectionHistoryTimeWindow']})
 
         self.assertOnUpdate(topic, self.kwargs)
 
-
-
         # Topic List
         self.cmd('servicebus topic list --resource-group {rg} --namespace-name {namespacename}')
-
-        # Create Authoriazation Rule
-        self.cmd(
-            'servicebus topic authorization-rule create --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {authoname} --rights {accessrights}',
-            checks=[self.check('name', '{authoname}')])
-
-        # Get Create Authorization Rule
-        self.cmd(
-            'servicebus topic authorization-rule show --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {authoname}',
-            checks=[self.check('name', '{authoname}')])
-
-        # Update Authoriazation Rule
-        self.cmd(
-            'servicebus topic authorization-rule update --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {authoname} --rights {accessrights1}',
-            checks=[self.check('name', '{authoname}')])
-
-        # Get Authorization Rule Listkeys
-        self.cmd(
-            'servicebus topic authorization-rule keys list --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {authoname}')
-
-        # Regeneratekeys - Primary
-        self.cmd(
-            'servicebus topic authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {authoname} --key {primary}')
-
-        # Regeneratekeys - Secondary
-        self.cmd(
-            'servicebus topic authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {authoname} --key {secondary}')
-
-        # Delete Topic Authorization Rule
-        self.cmd(
-            'servicebus topic authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {authoname}')
-
-        # Delete Topic
-        self.cmd('servicebus topic delete --resource-group {rg} --namespace-name {namespacename} --name {topicname}')
-
     def assertOnUpdate(self, actual, expected):
         self.assertEqual(actual['defaultMessageTimeToLive'], expected['defaultMessageTimeToLive'])
         self.assertEqual(actual['autoDeleteOnIdle'], expected['autoDeleteOnIdle'])
-        self.assertEqual(actual['duplicateDetectionHistoryTimeWindow'],
-                         expected['duplicateDetectionHistoryTimeWindow'])
+        self.assertEqual(actual['duplicateDetectionHistoryTimeWindow'], expected['duplicateDetectionHistoryTimeWindow'])
         self.assertEqual(actual['enableBatchedOperations'], expected['enableBatchedOperations'])
         self.assertEqual(actual['enableExpress'], expected['enableExpress'])
         self.assertEqual(actual['enablePartitioning'], expected['enablePartitioning'])

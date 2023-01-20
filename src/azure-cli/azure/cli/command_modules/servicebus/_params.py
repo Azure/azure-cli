@@ -78,7 +78,7 @@ def load_arguments_sb(self, _):
         c.argument('authorization_rule_name', arg_type=name_type, id_part=None, help='Name of Namespace Authorization Rule')
         c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')
 
-    # region Queue
+    '''# region Queue
     with self.argument_context('servicebus queue') as c:
         c.argument('queue_name', arg_type=name_type, id_part='child_name_1', completer=get_queue_command_completion_list, help='Name of Queue')
 
@@ -232,7 +232,7 @@ def load_arguments_sb(self, _):
     with self.argument_context('servicebus topic subscription rule list') as c:
         c.argument('subscription_name', options_list=['--subscription-name'], id_part=None, help='Name of Subscription')
         c.argument('topic_name', options_list=['--topic-name'], id_part=None, help='Name of Topic')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')'''
 
     # Geo DR - Disaster Recovery Configs - Alias  : Region
     with self.argument_context('servicebus georecovery-alias exists') as c:
