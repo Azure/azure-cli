@@ -291,7 +291,7 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
 
 
 def disable_protection(cmd, client, resource_group_name, vault_name, item,
-            retain_recovery_points_as_per_policy=False):
+                       retain_recovery_points_as_per_policy=False):
     # Get container and item URIs
     container_uri = helper.get_protection_container_uri_from_id(item.id)
     item_uri = helper.get_protected_item_uri_from_id(item.id)

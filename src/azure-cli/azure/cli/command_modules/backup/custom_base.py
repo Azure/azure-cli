@@ -179,7 +179,7 @@ def backup_now(cmd, client, resource_group_name, vault_name, item_name, retain_u
 
 
 def disable_protection(cmd, client, resource_group_name, vault_name, item_name, container_name,
-                       backup_management_type=None, workload_type=None, delete_backup_data=False, 
+                       backup_management_type=None, workload_type=None, delete_backup_data=False,
                        retain_recovery_points_as_per_policy=False, tenant_id=None):
 
     items_client = backup_protected_items_cf(cmd.cli_ctx)
@@ -195,13 +195,13 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item_name, 
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.disable_protection(cmd, client, resource_group_name, vault_name, item,
-            retain_recovery_points_as_per_policy)
+                                         retain_recovery_points_as_per_policy)
     if item.properties.backup_management_type.lower() == "azurestorage":
         return custom_afs.disable_protection(cmd, client, resource_group_name, vault_name, item,
-            retain_recovery_points_as_per_policy)
+                                             retain_recovery_points_as_per_policy)
     if item.properties.backup_management_type.lower() == "azureworkload":
         return custom_wl.disable_protection(cmd, client, resource_group_name, vault_name, item,
-            retain_recovery_points_as_per_policy)
+                                            retain_recovery_points_as_per_policy)
     return None
 
 

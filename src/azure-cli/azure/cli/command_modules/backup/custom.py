@@ -112,8 +112,8 @@ password_length = 15
 # pylint: disable=too-many-function-args
 
 
-def create_vault(client, vault_name, resource_group_name, location, tags=None, 
-                 public_network_access=None, immutability_state = None, classic_alerts='Enable',
+def create_vault(client, vault_name, resource_group_name, location, tags=None,
+                 public_network_access=None, immutability_state=None, classic_alerts='Enable',
                  azure_monitor_alerts_for_job_failures='Enable'):
     vault_sku = Sku(name=SkuName.standard)
     if public_network_access is None:
@@ -135,7 +135,7 @@ def create_vault(client, vault_name, resource_group_name, location, tags=None,
         public_network_access=public_network_access + 'd',
         security_settings=SecuritySettings(
             immutability_settings=ImmutabilitySettings(
-                state = immutability_state
+                state=immutability_state
             )
         ))
     vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
@@ -1253,13 +1253,14 @@ def restore_files_unmount_rp(cmd, client, resource_group_name, vault_name, conta
 
 
 def disable_protection(cmd, client, resource_group_name, vault_name, item,
-            retain_recovery_points_as_per_policy=False):
+                       retain_recovery_points_as_per_policy=False):
     # Get container and item URIs
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
-    vm_item = _get_disable_protection_request(item,
-            retain_recovery_points_as_per_policy=retain_recovery_points_as_per_policy)
+    # Parameters: item, undelete=True, retain_recovery_points_as_per_policy=False. Passed like this
+    # because the parameter=variable format breaks linting.
+    vm_item = _get_disable_protection_request(item, False, retain_recovery_points_as_per_policy)
 
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, vm_item, cls=cust_help.get_pipeline_response)
@@ -1270,7 +1271,9 @@ def undelete_protection(cmd, client, resource_group_name, vault_name, item):
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
-    vm_item = _get_disable_protection_request(item, undelete=True)
+    # Parameters: item, undelete=True, retain_recovery_points_as_per_policy=False. Passed like this to
+    # maintain consistency wih call in disable_protection, where parameter=variable format breaks linting.
+    vm_item = _get_disable_protection_request(item, True, False)
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, vm_item, cls=cust_help.get_pipeline_response)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
@@ -1461,7 +1464,7 @@ def _get_storage_account_id(cli_ctx, storage_account_sub, storage_account_name, 
 
 # pylint: disable=inconsistent-return-statements
 def _get_disable_protection_request(item, undelete=False,
-            retain_recovery_points_as_per_policy=False):
+                                    retain_recovery_points_as_per_policy=False):
     if item.properties.workload_type == WorkloadType.vm.value:
         vm_item_properties = _get_vm_item_properties_from_vm_id(item.properties.virtual_machine_id)
         vm_item_properties.policy_id = ''

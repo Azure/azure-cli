@@ -293,6 +293,7 @@ def load_arguments(self, _):
 
     with self.argument_context('backup protection disable') as c:
         c.argument('delete_backup_data', arg_type=get_three_state_flag(), help='Option to delete existing backed up data in the Recovery services vault.')
+        c.argument('retain_recovery_points_as_per_policy', arg_type=get_three_state_flag(), help='Filler')
         c.argument('backup_management_type', backup_management_type)
         c.argument('workload_type', workload_type)
         c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')

@@ -501,7 +501,7 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until,
 
 
 def disable_protection(cmd, client, resource_group_name, vault_name, item,
-            retain_recovery_points_as_per_policy=False):
+                       retain_recovery_points_as_per_policy=False):
 
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
@@ -517,7 +517,7 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item,
     if retain_recovery_points_as_per_policy:
         properties.protection_state = ProtectionState.backups_suspended
     else:
-        properties.protection_state = ProtectionStatus.protection_stopped
+        properties.protection_state = ProtectionState.protection_stopped
     properties.policy_id = ''
     param = ProtectedItemResource(properties=properties)
 
