@@ -87,7 +87,7 @@ def validate_ase_create(cmd, namespace):
 
 
 def _validate_asp_sku(sku, app_service_environment, zone_redundant):
-    if zone_redundant and get_sku_tier(sku).upper() not in ['PREMIUMV2', 'PREMIUMV3', 'ISOLATEDV2']:
+    if zone_redundant and get_sku_tier(sku).upper() not in ['PREMIUMV2', 'PREMIUMV3', 'PREMIUMMV3' 'ISOLATEDV2']:
         raise ValidationError("Zone redundancy cannot be enabled for sku {}".format(sku))
     # Isolated SKU is supported only for ASE
     if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2']:
