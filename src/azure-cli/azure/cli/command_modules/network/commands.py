@@ -209,8 +209,6 @@ def load_command_table(self, _):
         self.command_table["network application-gateway update"] = ApplicationGatewayUpdate(loader=self)
 
     subresource_properties = [
-        {'prop': 'frontend_ip_configurations', 'name': 'frontend-ip'},
-        {'prop': 'frontend_ports', 'name': 'frontend-port'},
         {'prop': 'backend_http_settings_collection', 'name': 'http-settings', 'validator': process_ag_http_settings_create_namespace},
         {'prop': 'http_listeners', 'name': 'http-listener', 'validator': process_ag_http_listener_create_namespace},
         {'prop': 'request_routing_rules', 'name': 'rule', 'validator': process_ag_rule_create_namespace},
@@ -261,6 +259,11 @@ def load_command_table(self, _):
         self.command_table["network application-gateway client-cert add"] = ClientCertAdd(loader=self)
         self.command_table["network application-gateway client-cert remove"] = ClientCertRemove(loader=self)
         self.command_table["network application-gateway client-cert update"] = ClientCertUpdate(loader=self)
+
+    with self.command_group("network application-gateway frontend-ip"):
+        from .custom import FrontedIPCreate, FrontedIPUpdate
+        self.command_table["network application-gateway frontend-ip create"] = FrontedIPCreate(loader=self)
+        self.command_table["network application-gateway frontend-ip update"] = FrontedIPUpdate(loader=self)
 
     with self.command_group("network application-gateway root-cert"):
         from .custom import RootCertCreate, RootCertUpdate
