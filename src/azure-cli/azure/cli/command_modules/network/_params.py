@@ -718,9 +718,7 @@ def load_arguments(self, _):
 
     lb_subresources = [
         {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
-        {'name': 'frontend-ip', 'display': 'frontend IP configuration', 'ref': 'frontend_ip_configurations'},
         {'name': 'inbound-nat-rule', 'display': 'inbound NAT rule', 'ref': 'inbound_nat_rules'},
-        {'name': 'inbound-nat-pool', 'display': 'inbound NAT pool', 'ref': 'inbound_nat_pools'},
         {'name': 'rule', 'display': 'load balancing rule', 'ref': 'load_balancing_rules'},
         {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
         {'name': 'outbound-rule', 'display': 'outbound rule', 'ref': 'outbound_rules'},

@@ -9,6 +9,10 @@ from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_val
 from ..aaz.latest.network.lb import Delete as _LBDelete, Update as _LBUpdate, List as _LBList, Show as _LBShow
 from ..aaz.latest.network.lb.frontend_ip import Create as _LBFrontendIPCreate, Update as _LBFrontendIPUpdate, \
     Show as _LBFrontendIPShow, Delete as _LBFrontendIPDelete, List as _LBFrontendIPList
+from ..aaz.latest.network.lb.inbound_nat_pool import Create as _LBInboundNatPoolCreate, \
+    Update as _LBInboundNatPoolUpdate
+from ..aaz.latest.network.lb.inbound_nat_rule import Create as _LBInboundNatRuleCreate, \
+    Update as _LBInboundNatRuleUpdate
 
 
 logger = get_logger(__name__)
@@ -124,6 +128,93 @@ class LBFrontendIPUpdate(_LBFrontendIPUpdate):
             instance.properties.public_ip_prefix = None
         if not has_value(instance.properties.gateway_load_balancer.id):
             instance.properties.gateway_load_balancer = None
+
+
+class LBInboundNatPoolCreate(_LBInboundNatPoolCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
+        )
+        return args_schema
+
+    def pre_instance_create(self):
+        args = self.ctx.args
+        if not has_value(args.frontend_ip_name):
+            instance = self.ctx.vars.instance
+            frontend_ip_configurations = instance.properties.frontend_ip_configurations
+            if len(frontend_ip_configurations) == 1:
+                args.frontend_ip_name = instance.properties.frontend_ip_configurations[0].id
+            elif len(frontend_ip_configurations) > 1:
+                raise ArgumentUsageError("Multiple FrontendIpConfigurations found in loadbalancer. Specify --frontend-ip explicitly.")
+
+
+class LBInboundNatPoolUpdate(_LBInboundNatPoolUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.frontend_ip_name._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
+        )
+        return args_schema
+
+    def post_instance_update(self, instance):
+        if not has_value(instance.properties.frontend_ip_configuration.id):
+            instance.properties.frontend_ip_configuration = None
+
+
+class LBInboundNatRuleCreate(_LBInboundNatRuleCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
+        )
+        args_schema.backend_address_pool._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/backendAddressPools/{}"
+        )
+
+        # required for a public load balancer
+        args_schema.protocol._required = True
+        args_schema.backend_port._required = True
+        return args_schema
+
+    def pre_instance_create(self):
+        args = self.ctx.args
+        if not has_value(args.frontend_ip_name):
+            instance = self.ctx.vars.instance
+            frontend_ip_configurations = instance.properties.frontend_ip_configurations
+            if len(frontend_ip_configurations) == 1:
+                args.frontend_ip_name = instance.properties.frontend_ip_configurations[0].id
+            elif len(frontend_ip_configurations) > 1:
+                raise ArgumentUsageError("Multiple FrontendIpConfigurations found in loadbalancer. Specify --frontend-ip explicitly.")
+
+
+class LBInboundNatRuleUpdate(_LBInboundNatRuleUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
+        )
+        args_schema.backend_address_pool._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/backendAddressPools/{}"
+        )
+        return args_schema
+
+    def post_instance_update(self, instance):
+        if not has_value(instance.properties.frontend_ip_configuration.id):
+            instance.properties.frontend_ip_configuration = None
+        if not has_value(instance.properties.backend_address_pool.id):
+            instance.properties.backend_address_pool = None
 
 
 @register_command("network cross-region-lb show")
