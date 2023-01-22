@@ -2566,7 +2566,7 @@ def security_domain_encrypt_blob(cmd, client, hsm_name, sd_file, sd_exchange_key
             os.remove(sd_file_ek_encrypted)
         raise ex
 
-def security_domain_upload(cmd, client, hsm_name, sd_file_ek_encrypted, passwords=None,
+def security_domain_upload_blob(cmd, client, hsm_name, sd_file_ek_encrypted, passwords=None,
                            identifier=None, vault_base_url=None, no_wait=False):  # pylint: disable=unused-argument
 
     with open(sd_file_ek_encrypted, 'rb') as f:
