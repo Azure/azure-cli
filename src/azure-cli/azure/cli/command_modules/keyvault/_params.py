@@ -67,6 +67,8 @@ def load_arguments(self, _):
     class CLISecurityDomainOperation(str, Enum):
         download = "download"  #: Download operation
         upload = "upload"  #: Upload operation
+        encrypt_blob = "encrypt_blob"  #: Encrypt blob operation
+        upload_blob = "upload_blob"  #: Encrypt blob operation
 
     (KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
      NetworkRuleBypassOptions, NetworkRuleAction, PublicNetworkAccess) = self.get_models(
@@ -570,7 +572,7 @@ def load_arguments(self, _):
     # endregion
 
     # region keyvault security-domain
-    for scope in ['init-recovery', 'download', 'upload']:
+    for scope in ['init-recovery', 'download', 'upload', 'encrypt_blob', 'upload_blob']:
         with self.argument_context('keyvault security-domain {}'.format(scope), arg_group='HSM Id') as c:
             c.argument('hsm_name', hsm_url_type, required=False,
                        help='Name of the HSM. Can be omitted if --id is specified.')
@@ -589,6 +591,20 @@ def load_arguments(self, _):
         c.argument('passwords', nargs='*', help='Space-separated password list for --sd-wrapping-keys. '
                                                 'CLI will match them in order. Can be omitted if your keys are without '
                                                 'password protection.')
+
+    with self.argument_context('keyvault security-domain encrypt-blob') as c:
+        c.argument('sd_file', help='This file contains security domain encrypted using SD Exchange file downloaded '
+                                   'in security-domain init-recovery command.')
+        c.argument('sd_exchange_key', help='The exchange key for security domain.')
+        c.argument('sd_wrapping_keys', nargs='*',
+                   help='Space-separated file paths to PEM files containing private keys.')
+        c.argument('passwords', nargs='*', help='Space-separated password list for --sd-wrapping-keys. '
+                                                'CLI will match them in order. Can be omitted if your keys are without '
+                                                'password protection.')
+        c.argument('sd_file_ek_encrypted', help='Local file path to store the security domain encrypted with the exchange key.')
+
+    with self.argument_context('keyvault security-domain upload-blob') as c:
+        c.argument('sd_file_ek_encrypted', help='This file contains security domain encrypted using exchange key using command security-domain encrypt-blob command.')
 
     with self.argument_context('keyvault security-domain download') as c:
         c.argument('sd_wrapping_keys', nargs='*',
