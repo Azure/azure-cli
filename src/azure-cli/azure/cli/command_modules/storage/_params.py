@@ -12,7 +12,7 @@ from azure.cli.core.local_context import LocalContextAttribute, LocalContextActi
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           validate_entity, validate_select, validate_blob_type,
                           validate_included_datasets_validator, validate_custom_domain, validate_hns_migration_type,
-                          validate_container_public_access,
+                          validate_container_public_access, validate_allow_blob_public_access,
                           add_progress_callback, process_resource_group,
                           storage_account_key_options, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
@@ -305,6 +305,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('name', options_list=['--name', '-n'],
                    help='The name of the storage account within the specified resource group')
 
+    with self.argument_context('storage account failover') as c:
+        c.argument('failover_type', options_list=['--failover-type', '--type'], is_preview=True, default=None,
+                   help="The parameter is set to 'Planned' to indicate whether a Planned failover is requested")
+
     with self.argument_context('storage account delete') as c:
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
 
@@ -370,10 +374,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'platform managed keys for data at rest.')
         c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow or disallow public access to all blobs or containers in the storage account. '
-                   'The default value for this property is null, which is equivalent to true. When true, containers '
-                   'in the account may be configured for public access. Note that setting this property to true does '
+                   'The default value for this property is null. When true, containers in the account may '
+                   'be configured for public access. Note that setting this property to true does '
                    'not enable anonymous access to any data in the account. The additional step of configuring the '
-                   'public access setting for a container is required to enable anonymous access.')
+                   'public access setting for a container is required to enable anonymous access.',
+                   validator=validate_allow_blob_public_access)
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
@@ -519,6 +524,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        min_api='2021-01-01',
                        help='Resource identifier of the UserAssigned identity to be associated with server-side '
                             'encryption on the storage account.')
+            c.argument('federated_identity_client_id', options_list=['--key-vault-federated-client-id', '-f'],
+                       min_api='2021-08-01',
+                       help='ClientId of the multi-tenant application to be used '
+                            'in conjunction with the user-assigned identity for '
+                            'cross-tenant customer-managed-keys server-side encryption on the storage account.')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01',
@@ -535,9 +545,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('action', action_type)
 
     with self.argument_context('storage account show-connection-string') as c:
+        from ._validators import validate_key_name
         c.argument('protocol', help='The default endpoint protocol.', arg_type=get_enum_type(['http', 'https']))
         c.argument('sas_token', help='The SAS token to be used in the connection-string.')
-        c.argument('key_name', options_list=['--key'], help='The key to use.',
+        c.argument('key_name', options_list=['--key'], help='The key to use.', validator=validate_key_name,
                    arg_type=get_enum_type(list(storage_account_key_options.keys())))
         for item in ['blob', 'file', 'queue', 'table']:
             c.argument('{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
@@ -573,13 +584,25 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Change the state the encryption scope. When disabled, '
                    'all blob read/write operations using this encryption scope will fail.')
 
+    with self.argument_context('storage account encryption-scope list') as c:
+        t_encryption_scope_include = self.get_models("ListEncryptionScopesInclude",
+                                                     resource_type=ResourceType.MGMT_STORAGE)
+        c.argument('filter', help='When specified, only encryption scope names starting with the filter will be listed')
+        c.argument('include', arg_type=get_enum_type(t_encryption_scope_include),
+                   help='when specified, will list encryption scopes with the specific state')
+        c.argument('maxpagesize', type=int,
+                   help='the maximum number of encryption scopes that will be included in the list response')
+        c.argument('marker', arg_type=marker_type)
+
     with self.argument_context('storage account keys list', resource_type=ResourceType.MGMT_STORAGE) as c:
         t_expand_key_type = self.get_models('ListKeyExpand', resource_type=ResourceType.MGMT_STORAGE)
         c.argument("expand", options_list=['--expand-key-type'], help='Specify the expanded key types to be listed.',
                    arg_type=get_enum_type(t_expand_key_type), min_api='2019-04-01', is_preview=True)
 
     with self.argument_context('storage account keys renew', resource_type=ResourceType.MGMT_STORAGE) as c:
+        from ._validators import validate_key_name
         c.argument('key_name', options_list=['--key'], help='The key options to regenerate.',
+                   validator=validate_key_name,
                    arg_type=get_enum_type(list(storage_account_key_options.keys())))
         c.extra('key_type', help='The key type to regenerate. If --key-type is not specified, one of access keys will '
                 'be regenerated by default.', arg_type=get_enum_type(['kerb']), min_api='2019-04-01')
@@ -1292,6 +1315,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 help='Enforce that the service will not return a response until the copy is complete.')
         c.extra('tier', tier_type)
         c.extra('tags', tags_type)
+        c.extra('destination_blob_type', arg_type=get_enum_type(['Detect', 'BlockBlob', 'PageBlob', 'AppendBlob']),
+                help='Defines the type of blob at the destination. '
+                     'Value of "Detect" determines the type basd on source blob type.')
 
     with self.argument_context('storage blob copy start-batch', arg_group='Copy Source') as c:
         from azure.cli.command_modules.storage._validators import get_source_file_or_blob_service_client_track2
@@ -1446,6 +1472,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     for item in ['create', 'extend']:
         with self.argument_context('storage container immutability-policy {}'.format(item)) as c:
+            from ._validators import validate_allow_protected_append_writes_all
             c.argument('account_name',
                        help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
             c.argument('if_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
@@ -1469,7 +1496,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                                           " ExtendImmutabilityPolicy API. The "
                                                           "'allowProtectedAppendWrites' and "
                                                           "'allowProtectedAppendWritesAll' properties are mutually "
-                                                          "exclusive.")
+                                                          "exclusive.",
+                    validator=validate_allow_protected_append_writes_all)
             c.extra('period', type=int, help='The immutability period for the blobs in the container since the policy '
                                              'creation, in days.')
             c.ignore('parameters')
@@ -2029,7 +2057,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     with self.argument_context('storage file upload') as c:
-        t_file_content_settings = self.get_sdk('file.models#ContentSettings')
+        t_file_content_settings = self.get_sdk('_models#ContentSettings',
+                                               resource_type=ResourceType.DATA_STORAGE_FILESHARE)
 
         c.register_path_argument(default_file_param='local_file_path')
         c.register_content_settings_argument(t_file_content_settings, update=False, guess_from_file='local_file_path',
@@ -2051,6 +2080,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
 
     with self.argument_context('storage file upload-batch') as c:
+        t_file_content_settings = self.get_sdk('_models#ContentSettings',
+                                               resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         from ._validators import process_file_upload_batch_parameters
         c.argument('source', options_list=('--source', '-s'), validator=process_file_upload_batch_parameters)
         c.argument('destination', options_list=('--destination', '-d'))

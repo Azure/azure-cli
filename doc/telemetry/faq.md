@@ -9,7 +9,6 @@
 
 ## How can I filter CLI requests from ARM telemetry?
 
-[Execute in Web](https://dataexplorer.azure.com/clusters/armprod/databases/ARMProd?query=H4sIAAAAAAAAA/MoKSnwzEvOz83MSw9KLSxNLS4p5qpRKM9ILUpVCPH0dQ0OcfQNULBTSEzP1zDM0ITLlRanFjmmp+aVKCTn55UkZuYVK6g7VpUWpTr7eOob6akDFZYkZqcqGBoAAPoAVdxjAAAA)
 ```
 HttpIncomingRequests
 | where TIMESTAMP > ago(1h)

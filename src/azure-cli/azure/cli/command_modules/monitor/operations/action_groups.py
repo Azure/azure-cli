@@ -76,7 +76,7 @@ def enable_receiver(client, resource_group_name, action_group_name, receiver_nam
 
 # pylint: disable=too-many-locals
 # pylint: disable=no-else-return
-def post_notifications(client, alert_type, resource_group_name=None, action_group_name=None, add_receivers=None,
+def post_notifications(client, alert_type, resource_group_name, action_group_name, add_receivers=None,
                        no_wait=False):
     from azure.mgmt.monitor.models import NotificationRequestBody
     EmailReceivers = []
@@ -152,8 +152,3 @@ def post_notifications(client, alert_type, resource_group_name=None, action_grou
     if action_group_name:
         return sdk_no_wait(no_wait, client.begin_create_notifications_at_action_group_resource_level,
                            resource_group_name, action_group_name, notification_request)
-    elif resource_group_name:
-        return sdk_no_wait(no_wait, client.begin_create_notifications_at_resource_group_level,
-                           resource_group_name, notification_request)
-    else:
-        return sdk_no_wait(no_wait, client.begin_post_test_notifications, notification_request)

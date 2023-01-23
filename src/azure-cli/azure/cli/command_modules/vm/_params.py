@@ -42,6 +42,7 @@ def load_arguments(self, _):
     RebootSetting, VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux = self.get_models('VMGuestPatchRebootSetting', 'VMGuestPatchClassificationWindows', 'VMGuestPatchClassificationLinux')
     GallerySharingPermissionTypes = self.get_models('GallerySharingPermissionTypes', operation_group='shared_galleries')
     ReplicationMode = self.get_models('ReplicationMode', operation_group='gallery_image_versions')
+    DiskControllerTypes = self.get_models('DiskControllerTypes', operation_group='virtual_machines')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -109,8 +110,7 @@ def load_arguments(self, _):
 
     edge_zone_type = CLIArgumentType(
         help='The name of edge zone.',
-        min_api='2020-12-01',
-        is_preview=True
+        min_api='2020-12-01'
     )
 
     t_shared_to = self.get_models('SharedToValues', operation_group='shared_galleries')
@@ -133,6 +133,7 @@ def load_arguments(self, _):
     gallery_image_name_type = CLIArgumentType(options_list=['--gallery-image-definition', '-i'], help='The name of the community gallery image definition from which the image versions are to be listed.', id_part='child_name_2')
     gallery_image_name_version_type = CLIArgumentType(options_list=['--gallery-image-version', '-e'], help='The name of the gallery image version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: <MajorVersion>.<MinorVersion>.<Patch>', id_part='child_name_3')
     public_gallery_name_type = CLIArgumentType(help='The public name of community gallery.', id_part='child_name_1')
+    disk_controller_type = CLIArgumentType(help='Specify the disk controller type configured for the VM or VMSS.', arg_type=get_enum_type(DiskControllerTypes), arg_group='Storage', is_preview=True)
 
     # region MixedScopes
     for scope in ['vm', 'disk', 'snapshot', 'image', 'sig']:
@@ -210,6 +211,7 @@ def load_arguments(self, _):
                    help='Create the disk for uploading blobs. Replaced by "--upload-type Upload"')
         c.argument('upload_type', arg_type=get_enum_type(['Upload', 'UploadWithSecurityData']), min_api='2018-09-30',
                    help="Create the disk for upload scenario. 'Upload' is for Standard disk only upload. 'UploadWithSecurityData' is for OS Disk upload along with VM Guest State. Please note the 'UploadWithSecurityData' is not valid for data disk upload, it only to be used for OS Disk upload at present.")
+        c.argument('performance_plus', arg_type=get_three_state_flag(), min_api='2022-07-02', help='Set this flag to true to get a boost on the performance target of the disk deployed. This flag can only be set on disk creation time and cannot be disabled after enabled')
     # endregion
 
     # region Snapshots
@@ -297,6 +299,10 @@ def load_arguments(self, _):
         c.argument('managed_image_destinations', arg_type=ib_cutput_type)
         c.argument('shared_image_destinations', arg_type=ib_cutput_type)
         c.argument('output_name', arg_type=ib_cutput_type)
+
+    for scope in ['image builder identity assign', 'image builder identity remove']:
+        with self.argument_context(scope, min_api='2022-02-14') as c:
+            c.argument('user_assigned', arg_group='Managed Identity', nargs='*', help='Specify one user assigned identity (name or ID, space delimited) of the image template.')
 
     with self.argument_context('image builder output') as c:
         ib_sig_regions_help = "Space-separated list of regions to replicate the image version into."
@@ -457,6 +463,9 @@ def load_arguments(self, _):
         c.argument('port', help="The port or port range (ex: 80-100) to open inbound traffic to. Use '*' to allow traffic to all ports. Use comma separated values to specify more than one port or port range.")
         c.argument('priority', help='Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.', type=int)
 
+    with self.argument_context('vm list') as c:
+        c.argument('vmss', min_api='2021-11-01', help='List VM instances in a specific VMSS. Please specify the VMSS id or VMSS name')
+
     for scope in ['vm show', 'vm list']:
         with self.argument_context(scope) as c:
             c.argument('show_details', action='store_true', options_list=['--show-details', '-d'], help='show public ip address, FQDN, and power states. command will run slow')
@@ -520,7 +529,7 @@ def load_arguments(self, _):
         c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(expiration='3.0.0', hide=True))
 
     with self.argument_context('vm extension list') as c:
-        c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
+        c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'])
 
     with self.argument_context('vm extension show') as c:
         c.argument('instance_view', action='store_true', help='The instance view of a virtual machine extension.')
@@ -722,7 +731,8 @@ def load_arguments(self, _):
         c.argument('load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', options_list=['--load-balancer', '--lb'])
         c.argument('load_balancer_sku', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-08-01', options_list=['--lb-sku'], arg_type=get_enum_type(LoadBalancerSkuName),
                    help="Sku of the Load Balancer to create. Default to 'Standard' when single placement group is turned off; otherwise, default to 'Basic'. The public IP is supported to be created on edge zone only when it is 'Standard'")
-        c.argument('nat_pool_name', help='Name to use for the NAT pool when creating a new load balancer.', options_list=['--lb-nat-pool-name', '--nat-pool-name'])
+        c.argument('nat_pool_name', help='Name to use for the NAT pool when creating a new load balancer.', options_list=['--lb-nat-pool-name', '--nat-pool-name'], deprecate_info=c.deprecate(target='--nat-pool-name', redirect='--nat-rule-name', hide=True))
+        c.argument('nat_rule_name', help='Name to use for the NAT rule v2 when creating a new load balancer. (NAT rule V2 is used to replace NAT pool)', options_list=['--lb-nat-rule-name', '--nat-rule-name'])
 
     with self.argument_context('vmss create', min_api='2017-03-30', arg_group='Network') as c:
         c.argument('public_ip_per_vm', action='store_true', help="Each VM instance will have a public ip. For security, you can use '--nsg' to apply appropriate rules")
@@ -861,7 +871,7 @@ def load_arguments(self, _):
             c.argument('run_as_user', help='By default script process runs under system/root user. Specify custom user to host the process.')
             c.argument('run_as_password', help='Password if needed for using run-as-user parameter. It will be encrypted and not logged. ')
             c.argument('timeout_in_seconds', type=int, help='The timeout in seconds to execute the run command.')
-            c.argument('output_blob_uri', help='Specify the Azure storage blob where script output stream will be uploaded.')
+            c.argument('output_blob_uri', help='Specify the Azure storage blob (SAS URI) where script output stream will be uploaded.')
             c.argument('error_blob_uri', help='Specify the Azure storage blob where script error stream will be uploaded.')
 
     with self.argument_context('vm run-command delete') as c:
@@ -1138,6 +1148,7 @@ def load_arguments(self, _):
                        min_api='2021-04-01', is_preview=True)
             c.argument('v_cpus_available', type=int, min_api='2021-11-01', help='Specify the number of vCPUs available')
             c.argument('v_cpus_per_core', type=int, min_api='2021-11-01', help='Specify the ratio of vCPU to physical core. Setting this property to 1 also means that hyper-threading is disabled.')
+            c.argument('disk_controller_type', disk_controller_type)
 
     with self.argument_context('vm update') as c:
         c.argument('license_type', license_type)
@@ -1281,6 +1292,10 @@ def load_arguments(self, _):
         c.argument('target_region_cvm_encryption', nargs='+', min_api='2021-10-01', help='Space-separated list of customer managed key for Confidential VM encrypting the OS disk in the gallery artifact for each region. Format for each region: `<os_cvm_encryption_type>,<os_cvm_des>`. The valid values for os_cvm_encryption_type are EncryptedVMGuestStateOnlyWithPmk, EncryptedWithPmk, EncryptedWithCmk.')
         c.argument('virtual_machine', help='Resource id of VM source')
         c.argument('image_version', help='Resource id of gallery image version source')
+        c.argument('target_zone_encryption', nargs='+', min_api='2022-01-03',
+                   options_list=['--target-edge-zone-encryption', '--zone-encryption'],
+                   help='Space-separated list of customer managed keys for encrypting the OS and data disks in the gallery artifact for each region. '
+                        'Format for each edge zone: <edge zone>,<os_des>,<lun1>,<lun1_des>,<lun2>,<lun2_des>.')
 
     with self.argument_context('sig image-version list-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
@@ -1309,11 +1324,16 @@ def load_arguments(self, _):
                    'Format: <MajorVersion>.<MinorVersion>.<Patch>', id_part='child_name_3')
 
     for scope in ['sig image-version create', 'sig image-version update']:
-        with self.argument_context(scope) as c:
+        with self.argument_context(scope, operation_group='gallery_image_versions') as c:
             c.argument('target_regions', nargs='*',
                        help='Space-separated list of regions and their replica counts. Use `<region>[=<replica count>][=<storage account type>]` to optionally set the replica count and/or storage account type for each region. '
                             'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used')
             c.argument('replica_count', help='The default number of replicas to be created per region. To set regional replication counts, use --target-regions', type=int)
+            c.argument('target_edge_zones', nargs='*', min_api='2022-01-03',
+                       help='Space-separated list of regions, edge zones, replica counts and storage types. Use <region>=<edge zone>[=<replica count>][=<storage account type>] to optionally set the replica count and/or storage account type for each region. '
+                            'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used. '
+                            'If "--target-edge-zones None" is specified, the target extended locations will be cleared.')
+            c.argument('allow_replicated_location_deletion', arg_type=get_three_state_flag(), min_api='2022-03-03', help='Indicate whether or not removing this gallery image version from replicated regions is allowed.')
 
     with self.argument_context('sig show-community') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
@@ -1568,10 +1588,6 @@ def load_arguments(self, _):
         c.argument('expand', help='The expand expression to apply on the operation.',
                    deprecate_info=c.deprecate(hide=True))
         c.argument('instance_view', action='store_true', help='Show the instance view of a restore point.')
-
-    with self.argument_context('restore-point delete') as c:
-        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
-                   help='The name of the restore point.')
 
     with self.argument_context('restore-point wait') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],

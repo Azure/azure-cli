@@ -384,6 +384,14 @@ def cli_cosmosdb_update(client,
             default_consistency_level is not None:
         update_consistency_policy = True
 
+    if network_acl_bypass_resource_ids is not None:
+        from msrestazure.tools import is_valid_resource_id
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        for resource_id in network_acl_bypass_resource_ids:
+            if not is_valid_resource_id(resource_id):
+                raise InvalidArgumentValueError(
+                    f'{resource_id} is not a valid resource ID for --network-acl-bypass-resource-ids')
+
     if max_staleness_prefix is None:
         max_staleness_prefix = existing.consistency_policy.max_staleness_prefix
 
@@ -829,7 +837,7 @@ def _populate_gremlin_graph_definition(gremlin_graph_resource,
                                        indexing_policy,
                                        conflict_resolution_policy,
                                        analytical_storage_ttl):
-    if all(arg is None for arg in [partition_key_path, default_ttl, indexing_policy, conflict_resolution_policy]):
+    if all(arg is None for arg in [partition_key_path, default_ttl, indexing_policy, conflict_resolution_policy, analytical_storage_ttl]):
         return False
 
     if partition_key_path is not None:
@@ -1657,7 +1665,7 @@ def cli_cosmosdb_network_rule_remove(cmd,
     virtual_network_rules = []
     rule_removed = False
     for rule in existing.virtual_network_rules:
-        if rule.id != subnet:
+        if rule.id.lower() != subnet.lower():
             virtual_network_rules.append(
                 VirtualNetworkRule(id=rule.id,
                                    ignore_missing_v_net_service_endpoint=rule.ignore_missing_v_net_service_endpoint))
@@ -1765,12 +1773,14 @@ def cli_cosmosdb_restore(cmd,
     # Validate if source account is empty only for live account restores. For deleted account restores the api will not work
     if not is_source_restorable_account_deleted:
         restorable_resources = None
+        arm_location_normalized = target_restorable_account.location.lower().replace(" ", "")
+
         if target_restorable_account.api_type.lower() == "sql":
             try:
                 from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_sql_resources
                 restorable_sql_resources_client = cf_restorable_sql_resources(cmd.cli_ctx, [])
                 restorable_resources = restorable_sql_resources_client.list(
-                    target_restorable_account.location,
+                    arm_location_normalized,
                     target_restorable_account.name,
                     location,
                     restore_timestamp_datetime_utc)
@@ -1781,7 +1791,7 @@ def cli_cosmosdb_restore(cmd,
                 from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_mongodb_resources
                 restorable_mongodb_resources_client = cf_restorable_mongodb_resources(cmd.cli_ctx, [])
                 restorable_resources = restorable_mongodb_resources_client.list(
-                    target_restorable_account.location,
+                    arm_location_normalized,
                     target_restorable_account.name,
                     location,
                     restore_timestamp_datetime_utc)
