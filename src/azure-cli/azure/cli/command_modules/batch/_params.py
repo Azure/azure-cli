@@ -14,7 +14,9 @@ from azure.mgmt.batch.models import (
     PublicNetworkAccessType,
     ResourceIdentityType,
     EndpointAccessDefaultAction)
-from azure.batch.models import ComputeNodeDeallocationOption
+from azure.batch.models import (
+    ComputeNodeDeallocationOption,
+    NodeCommunicationMode)
 
 from azure.cli.core.commands.parameters import (
     tags_type,
@@ -238,6 +240,14 @@ def load_arguments(self, _):
                 help='A space separated list of DiskEncryptionTargets. current possible values include OsDisk and TemporaryDisk.', type=disk_encryption_configuration_format)
         c.extra('image', completer=load_supported_images, arg_group="Pool: Virtual Machine Configuration",
                 help="OS image reference. This can be either 'publisher:offer:sku[:version]' format, or a fully qualified ARM image id of the form '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/images/{imageName}'. If 'publisher:offer:sku[:version]' format, version is optional and if omitted latest will be used. Valid values can be retrieved via 'az batch pool supported-images list'. For example: 'MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest'")
+        c.argument('target_node_communication_mode', options_list=['--target-communication'],
+                   help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
+                   arg_type=get_enum_type(NodeCommunicationMode))
+
+    with self.argument_context('batch pool set') as c:
+        c.argument('target_node_communication_mode', options_list=['--target-communication'],
+                   help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
+                   arg_type=get_enum_type(NodeCommunicationMode))
 
     with self.argument_context('batch certificate') as c:
         c.argument('thumbprint', help='The certificate thumbprint.')

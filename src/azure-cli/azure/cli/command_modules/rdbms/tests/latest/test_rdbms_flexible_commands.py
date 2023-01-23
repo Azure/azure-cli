@@ -1565,9 +1565,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         # time.sleep(15 * 60)
 
         # remove delegations from all vnets
-        self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group_1,
-                                                                                                         subnet_name,
-                                                                                                         vnet_name))
+        self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group_1, subnet_name, vnet_name))
         # remove all vnets
         self.cmd('network vnet delete -g {} -n {}'.format(resource_group_1, vnet_name))
 
@@ -2240,19 +2238,19 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_identity_aad_admin_mgmt(self, resource_group):
-        self._test_identity_aad_admin_mgmt('mysql', resource_group)
+        self._test_identity_aad_admin_mgmt('mysql', resource_group, 'enabled')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgresql_flexible_server_identity_aad_admin_mgmt(self, resource_group):
-        self._test_identity_aad_admin_mgmt('postgres', resource_group)
+        self._test_identity_aad_admin_mgmt('postgres', resource_group, 'enabled')
 
-    def _test_identity_aad_admin_mgmt(self, database_engine, resource_group):
+    def _test_identity_aad_admin_mgmt(self, database_engine, resource_group, password_auth):
         login = 'alanenriqueo@microsoft.com'
         sid = '894ef8da-7971-4f68-972c-f561441eb329'
 
         if database_engine == 'postgres':
-            auth_args = '--password-auth enabled --active-directory-auth enabled'
+            auth_args = '--password-auth {} --active-directory-auth enabled'.format(password_auth)
             admin_id_arg = '-i {}'.format(sid) if database_engine == 'postgres' else ''
         elif database_engine == 'mysql':
             auth_args = ''
@@ -2376,10 +2374,23 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
                     checks=admin_checks)
 
         if database_engine == 'mysql':
+            # verify that aad_auth_only=OFF in primary server and all replicas
+            for server_name in [server, replica[0], replica[1]]:
+                self.cmd('{} flexible-server parameter show -g {} -s {} -n aad_auth_only'
+                         .format(database_engine, resource_group, server_name),
+                         checks=[JMESPathCheck('value', 'OFF')])
+        elif database_engine == 'postgres':
+            # verify that authConfig.activeDirectoryAuth=enabled and authConfig.passwordAuth=disabled in primary server and all replicas
+            for server_name in [server, replica[0], replica[1]]:
+                list_checks = [JMESPathCheck('authConfig.activeDirectoryAuth', 'enabled', False),
+                            JMESPathCheck('authConfig.passwordAuth', password_auth, False)]
+                self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name), checks=list_checks)
+
+        if database_engine == 'mysql':
             # set aad_auth_only=ON in primary server and replica 2
             for server_name in [server, replica[1]]:
-                self.cmd('{} flexible-server parameter set -g {} -s {} -n aad_auth_only -v ON'
-                         .format(database_engine, resource_group, server_name),
+                self.cmd('{} flexible-server parameter set -g {} -s {} -n aad_auth_only -v {}'
+                         .format(database_engine, resource_group, server_name, 'ON'),
                          checks=[JMESPathCheck('value', 'ON')])
 
             # try to remove identity 2 from primary server
@@ -2458,3 +2469,8 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
         # delete everything
         for server_name in [replica[0], replica[1], server]:
             self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgresql_flexible_server_identity_aad_admin_only_mgmt(self, resource_group):
+        self._test_identity_aad_admin_mgmt('postgres', resource_group, 'disabled')
