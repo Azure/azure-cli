@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}", "2022-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}", "2022-10-01-preview"],
         ]
     }
 
@@ -120,7 +120,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01-preview",
+                    "api-version", "2022-10-01-preview",
                     required=True,
                 ),
             }
@@ -222,6 +222,9 @@ class Wait(AAZWaitCommand):
             )
             properties.minimum_tls_version = AAZStrType(
                 serialized_name="minimumTlsVersion",
+            )
+            properties.premium_messaging_partitions = AAZIntType(
+                serialized_name="premiumMessagingPartitions",
             )
             properties.private_endpoint_connections = AAZListType(
                 serialized_name="privateEndpointConnections",

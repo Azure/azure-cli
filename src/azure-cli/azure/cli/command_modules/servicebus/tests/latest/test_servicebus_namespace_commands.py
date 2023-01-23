@@ -96,14 +96,16 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
 
         # Create premium namespace with SystemAssigned and UserAssigned Identity
         namespace = self.cmd('servicebus namespace create --resource-group {rg} --name {namespacename2} ' 
-                             '--location eastus --sku Premium --mi-system-assigned --mi-user-assigned {id1} {id2}').get_output_in_json()
+                             '--location eastus --sku Premium --mi-system-assigned --mi-user-assigned {id1} {id2} '
+                             '--capacity 2 --zone-redundant --premium-messaging-partitions 2 ').get_output_in_json()
 
-        self.assertEqual(1, namespace['sku']['capacity'])
+        self.assertEqual(2, namespace['sku']['capacity'])
         self.assertEqual('Premium', namespace['sku']['name'])
         self.assertEqual('1.2', namespace['minimumTlsVersion'])
         self.assertEqual(self.kwargs['loc'], namespace['location'])
         self.assertFalse(namespace['disableLocalAuth'])
-        self.assertFalse(namespace['zoneRedundant'])
+        self.assertTrue(namespace['zoneRedundant'])
+        self.assertEqual(2, namespace['premiumMessagingPartitions'])
         self.assertEqual(0, len(namespace['tags']))
 
         # Delete Namespace list by ResourceGroup

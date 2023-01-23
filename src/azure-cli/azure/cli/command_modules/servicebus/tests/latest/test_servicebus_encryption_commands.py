@@ -95,10 +95,11 @@ class SBNamespaceMSITesting(ScenarioTest):
         namespace = self.cmd(
             'servicebus namespace encryption add --resource-group {rg} --namespace-name {namespacename1}' +
             ' --encryption-config key-name={key1} key-vault-uri={key_uri}'
-            ' --encryption-config key-name={key2} key-vault-uri={key_uri} ').get_output_in_json()
+            ' --encryption-config key-name={key2} key-vault-uri={key_uri} --infra-encryption').get_output_in_json()
         self.assertEqual(namespace['identity']['type'], self.kwargs['system'])
         n = [i for i in namespace['encryption']['keyVaultProperties']]
         assert len(n) == 2
+        self.assertEqual(True, namespace['encryption']['requireInfrastructureEncryption'])
 
         namespace = self.cmd(
             'servicebus namespace create --resource-group {rg} --name {namespacename} --sku {sku} --location {loc} --mi-system-assigned --mi-user-assigned {id1} {id2}' +
@@ -123,7 +124,7 @@ class SBNamespaceMSITesting(ScenarioTest):
         assert len(n) == 2
 
         namespace = self.cmd('servicebus namespace encryption add --resource-group {rg} --namespace-name {namespacename}' +
-                             ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}').get_output_in_json()
+                             ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1} ').get_output_in_json()
 
         self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
         n = [i for i in namespace['identity']['userAssignedIdentities']]

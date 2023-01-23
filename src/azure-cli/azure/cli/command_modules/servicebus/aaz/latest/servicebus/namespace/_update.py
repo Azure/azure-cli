@@ -19,9 +19,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01-preview",
+        "version": "2022-10-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}", "2022-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}", "2022-10-01-preview"],
         ]
     }
 
@@ -125,6 +125,12 @@ class Update(AAZCommand):
             help="The minimum TLS version for the cluster to support, e.g. '1.2'",
             nullable=True,
             enum={"1.0": "1.0", "1.1": "1.1", "1.2": "1.2"},
+        )
+        _args_schema.premium_messaging_partitions = AAZIntArg(
+            options=["--premium-messaging-partitions"],
+            arg_group="Properties",
+            help="The number of partitions of a Service Bus namespace. This property is only applicable to Premium SKU namespaces. The default value is 1 and possible values are 1, 2 and 4",
+            nullable=True,
         )
         _args_schema.private_endpoint_connections = AAZListArg(
             options=["--private-endpoint-connections"],
@@ -234,7 +240,7 @@ class Update(AAZCommand):
         _args_schema.capacity = AAZIntArg(
             options=["--capacity"],
             arg_group="Sku",
-            help="The specified messaging units for the tier. For Premium tier, capacity are 1,2 and 4.",
+            help="Messaging units for your service bus premium namespace. Valid capacities are {1, 2, 4, 8, 16} multiples of your properties.premiumMessagingPartitions setting. For example, If properties.premiumMessagingPartitions is 1 then possible capacity values are 1, 2, 4, 8, and 16. If properties.premiumMessagingPartitions is 4 then possible capacity values are 4, 8, 16, 32 and 64",
             nullable=True,
         )
         _args_schema.sku = AAZStrArg(
@@ -330,7 +336,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01-preview",
+                    "api-version", "2022-10-01-preview",
                     required=True,
                 ),
             }
@@ -429,7 +435,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01-preview",
+                    "api-version", "2022-10-01-preview",
                     required=True,
                 ),
             }
@@ -507,6 +513,7 @@ class Update(AAZCommand):
                 properties.set_prop("disableLocalAuth", AAZBoolType, ".disable_local_auth")
                 properties.set_prop("encryption", AAZObjectType, ".encryption")
                 properties.set_prop("minimumTlsVersion", AAZStrType, ".minimum_tls_version")
+                properties.set_prop("premiumMessagingPartitions", AAZIntType, ".premium_messaging_partitions")
                 properties.set_prop("privateEndpointConnections", AAZListType, ".private_endpoint_connections")
                 properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
 
@@ -666,6 +673,9 @@ class _UpdateHelper:
         )
         properties.minimum_tls_version = AAZStrType(
             serialized_name="minimumTlsVersion",
+        )
+        properties.premium_messaging_partitions = AAZIntType(
+            serialized_name="premiumMessagingPartitions",
         )
         properties.private_endpoint_connections = AAZListType(
             serialized_name="privateEndpointConnections",

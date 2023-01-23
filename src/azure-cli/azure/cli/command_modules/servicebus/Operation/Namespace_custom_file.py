@@ -17,13 +17,12 @@ def create_keyvault_object(col):
 def create_servicebus_namespace(cmd, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
                            capacity=None, zone_redundant=None,  tier='Standard', mi_user_assigned=None, mi_system_assigned=None,
                            encryption_config=None, minimum_tls_version=None,disable_local_auth = None,alternate_name=None,
-                           public_network_access=None, require_infrastructure_encryption=None):
+                           public_network_access=None, require_infrastructure_encryption=None, premium_messaging_partitions=None):
 
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Create
     user_assigned_identity = {}
     command_args_dict = {}
     type = "None"
-
     command_args_dict = {
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
@@ -38,7 +37,8 @@ def create_servicebus_namespace(cmd, resource_group_name, namespace_name, locati
         "zone_redundant": zone_redundant,
         "disable_local_auth": disable_local_auth,
         "alternate_name": alternate_name,
-        "public_network_access": public_network_access
+        "public_network_access": public_network_access,
+        "premium_messaging_partitions": premium_messaging_partitions
     }
 
     if mi_system_assigned:
@@ -69,7 +69,6 @@ def create_servicebus_namespace(cmd, resource_group_name, namespace_name, locati
             "key_source": "Microsoft.KeyVault",
             "require_infrastructure_encryption": require_infrastructure_encryption
         }})
-
     return Create(cli_ctx=cmd.cli_ctx)(command_args=command_args_dict)
 def cli_add_encryption(cmd, resource_group_name, namespace_name, encryption_config,require_infrastructure_encryption=None):
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Update
