@@ -10,6 +10,7 @@ from azure.cli.command_modules.aro._validators import validate_cluster_resource_
 from azure.cli.command_modules.aro._validators import validate_disk_encryption_set
 from azure.cli.command_modules.aro._validators import validate_domain
 from azure.cli.command_modules.aro._validators import validate_pull_secret
+from azure.cli.command_modules.aro._validators import validate_sdn
 from azure.cli.command_modules.aro._validators import validate_subnet
 from azure.cli.command_modules.aro._validators import validate_visibility
 from azure.cli.command_modules.aro._validators import validate_vnet
@@ -17,6 +18,7 @@ from azure.cli.command_modules.aro._validators import validate_vnet_resource_gro
 from azure.cli.command_modules.aro._validators import validate_worker_count
 from azure.cli.command_modules.aro._validators import validate_worker_vm_disk_size_gb
 from azure.cli.command_modules.aro._validators import validate_refresh_cluster_credentials
+from azure.cli.command_modules.aro._validators import validate_install_version_format
 from azure.cli.core.commands.parameters import name_type
 from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag
 from azure.cli.core.commands.parameters import resource_group_name_type
@@ -54,12 +56,20 @@ def load_arguments(self, _):
                    help='Client secret of cluster service principal.',
                    validator=validate_client_secret(isCreate=True))
 
+        c.argument('install_version',
+                   help='OpenShift version to use for cluster creation.',
+                   validator=validate_install_version_format)
+
         c.argument('pod_cidr',
                    help='CIDR of pod network. Must be a minimum of /18 or larger.',
                    validator=validate_cidr('pod_cidr'))
         c.argument('service_cidr',
                    help='CIDR of service network. Must be a minimum of /18 or larger.',
                    validator=validate_cidr('service_cidr'))
+        c.argument('software_defined_network', arg_type=get_enum_type(['OVNKubernetes', 'OpenShiftSDN']),
+                   options_list=['--software-defined-network-type', '--sdn-type'],
+                   help='SDN type either "OpenShiftSDN" (default) or "OVNKubernetes"',
+                   validator=validate_sdn)
 
         c.argument('disk_encryption_set',
                    help='ResourceID of the DiskEncryptionSet to be used for master and worker VMs.',
