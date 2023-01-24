@@ -6637,13 +6637,13 @@ class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
         })
 
         # Due to long creation of geo backups, use existing MI
-        backups_list = self.cmd('sql recoverable-midb list -g {rg} --managed-instance-name {mi}').get_output_in_json()
+        backups_list = self.cmd('sql recoverable-midb list -g {rg} --mi {mi}').get_output_in_json()
         database_name = backups_list[0]['name']
         self.kwargs.update({
             'geodb': database_name
         })
 
-        recoverable_db = self.cmd('sql recoverable-midb show -g {rg} --managed-instance-name {mi} --recoverable-database-name {geodb}',
+        recoverable_db = self.cmd('sql recoverable-midb show -g {rg} --mi {mi} -n {geodb}',
                     checks=[
                         JMESPathCheck('name', database_name),
                         JMESPathCheck('resourceGroup',  ManagedInstancePreparer.group)]).get_output_in_json()
