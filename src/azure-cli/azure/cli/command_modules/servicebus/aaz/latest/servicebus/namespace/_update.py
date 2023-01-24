@@ -16,6 +16,10 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a service namespace. Once created, this namespace's resource manifest is immutable. This operation is idempotent.
+
+    :example: Updates a Service Bus Namespace
+        az servicebus namespace update --resource-group myresourcegroup --name mynamespace --tags tag=value
+        az az servicebus namespace update --name mynamespace --resource-group myresourcegroup --sku Basic
     """
 
     _aaz_info = {

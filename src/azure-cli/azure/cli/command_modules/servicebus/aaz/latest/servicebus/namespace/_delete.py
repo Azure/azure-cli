@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete an existing namespace. This operation also removes all associated resources under the namespace.
+
+    :example: Deletes the Service Bus Namespace
+        az servicebus namespace delete --resource-group myresourcegroup --name mynamespace
     """
 
     _aaz_info = {
