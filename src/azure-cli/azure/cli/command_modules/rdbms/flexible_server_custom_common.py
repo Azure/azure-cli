@@ -123,16 +123,17 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
         if operationSpecified is True:
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
         operationSpecified = True
-        r = migration_show_func(cmd, client, resource_group_name, server_name, migration_name, "Default")
+        r = migration_show_func(cmd, client, resource_group_name, server_name, migration_name)
         if r.get("properties").get("migrationMode") == "Offline":
             raise BadRequestError("Cutover is not possible for migration {} if the migration_mode set to offline. The migration will cutover automatically".format(migration_name))
-        properties = json.dumps({"properties": {"triggerCutover": "true", "DBsToTriggerCutoverMigrationOn": cutover}})
+        properties = json.dumps({"properties": {"triggerCutover": "true", "DBsToTriggerCutoverMigrationOn": r.get("properties").get("dBsToMigrate")}})
 
     if cancel is not None:
         if operationSpecified is True:
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
         operationSpecified = True
-        properties = json.dumps({"properties": {"Cancel": "true", "DBsToCancelMigrationOn": cancel}})
+        r = migration_show_func(cmd, client, resource_group_name, server_name, migration_name)
+        properties = json.dumps({"properties": {"Cancel": "true", "DBsToCancelMigrationOn": r.get("properties").get("dBsToMigrate")}})
 
     if operationSpecified is False:
         raise RequiredArgumentMissingError("Incorrect Usage: At least one update operation needs to be specified.")

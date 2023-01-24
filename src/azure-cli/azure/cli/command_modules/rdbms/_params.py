@@ -770,10 +770,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                                help='Space-separated list of DBs to migrate. Note that each additional DB affects the performance of the source server.')
                     c.argument('overwrite_dbs', options_list=['--overwrite-dbs'], action='store_true', required=False,
                                help='Allow the migration workflow to overwrite the DB on the target.')
-                    c.argument('cutover', nargs='+', options_list=['--cutover'], required=False,
-                               help='Cut-over the data migration for either all databases or few selected ones. After this is complete, subsequent updates to the selected databases will not be migrated to the target.')
-                    c.argument('cancel', nargs='+', options_list=['--cancel'], required=False,
-                               help='Cancel the data migration for either all databases or few selected ones.')
+                    c.argument('cutover', options_list=['--cutover'], required=False, action='store_true',
+                               help='Cut-over the data migration for all the databases in the migration. After this is complete, subsequent updates to all databases will not be migrated to the target.')
+                    c.argument('cancel', options_list=['--cancel'], required=False, action='store_true',
+                               help='Cancel the data migration for all the databases.')
                 elif scope == "check-name-availability":
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
