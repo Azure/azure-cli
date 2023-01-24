@@ -52,7 +52,8 @@ def load_arguments_sb(self, _):
         c.argument('public_network_access', options_list=['--public-network-access', '--public-network'],
                    arg_type=get_enum_type(['Enabled', 'Disabled']),
                    help='This determines if traffic is allowed over public network. By default it is enabled. If value is SecuredByPerimeter then Inbound and Outbound communication is controlled by the network security perimeter and profile\' access rules.')
-        c.argument('premium_messaging_partitions', type=int, help='The number of partitions of a Service Bus namespace. This property is only applicable to Premium SKU namespaces. The default value is 1 and possible values are 1, 2 and 4')
+        c.argument('premium_messaging_partitions', options_list=['--premium-messaging-partitions', '--premium-partitions'], type=int, help='The number of partitions of a Service Bus namespace. This property is only applicable to Premium SKU namespaces. The default value is 1 and possible values are 1, 2 and 4')
+
     with self.argument_context('servicebus namespace exists') as c:
         c.argument('name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
 
