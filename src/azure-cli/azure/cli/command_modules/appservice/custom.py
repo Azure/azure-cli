@@ -54,7 +54,7 @@ from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclus
 from .tunnel import TunnelServer
 
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
-from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory
+from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory, appcontainers_client_factory
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from .utils import (_normalize_sku,
                     get_sku_tier,
@@ -352,6 +352,13 @@ def _get_subnet_info(cmd, resource_group_name, vnet, subnet):
     subnet_info["subnet_subscription_id"] = subscription_id
     return subnet_info
 
+def get_managed_environment(cmd, resource_group_name, environment_name):
+    try:
+        appcontainers_client = appcontainers_client_factory(cmd.cli_ctx)
+        return appcontainers_client.managed_environments.get(resource_group_name, environment_name)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warning("Retrieving managed environment failed with an exception:'%s'", ex)
+        raise ex
 
 def validate_container_app_create_options(runtime=None, deployment_container_image_name=None,
                                           multicontainer_config_type=None, multicontainer_config_file=None):
@@ -3462,7 +3469,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        deployment_source_branch='master', deployment_local_git=None,
                        docker_registry_server_password=None, docker_registry_server_user=None,
                        deployment_container_image_name=None, tags=None, assign_identities=None,
-                       role='Contributor', scope=None, vnet=None, subnet=None, https_only=False):
+                       role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, environment=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -3628,6 +3635,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     elif not disable_app_insights and matched_runtime.app_insights:
         create_app_insights = True
+
+    if environment is not None:
+        managed_environment = get_managed_environment(cmd, resource_group_name, environment)
+        functionapp_def.managed_environment = managed_environment.id
 
     poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
