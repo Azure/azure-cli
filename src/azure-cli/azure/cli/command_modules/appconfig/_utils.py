@@ -116,16 +116,6 @@ Please specify exactly ONE (suggest connection string) in one of the following o
     if connection_string_from_args:
         return connection_string_from_args
 
-    # If neither connection nor name specified, check if connection_string exists as default config.
-    connection_string_from_env = cmd.cli_ctx.config.get(
-        'appconfig', 'connection_string', None)
-
-    if connection_string_from_env:
-        if not is_valid_connection_string(connection_string_from_env):
-            raise ValidationError(
-                "The environment variable connection string is invalid. Correct format should be Endpoint=https://example.appconfig.io;Id=xxxxx;Secret=xxxx")
-        return connection_string_from_env
-
     raise RequiredArgumentMissingError(
         'Please specify config store name or connection string(suggested).')
 
