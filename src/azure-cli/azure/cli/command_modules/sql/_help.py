@@ -1024,7 +1024,12 @@ type: command
 short-summary: Recover a managed database using geo-pair instance backup
 examples:
   - name: Recover managed database using recoverable database id
-    text: az sql midb recover -g mygroup --mi myinstance -n mymanageddb -r '/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Sql/managedInstances/myinstance/recoverableDatabases/db1'"
+    text: az sql midb recover -g mygroup --mi myinstance -n mymanageddb -r '/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Sql/managedInstances/myinstance/recoverableDatabases/db1'
+"""
+
+helps['sql recoverable-midb'] = """
+type: group
+short-summary: Recoverable managed databases command group.
 """
 
 helps['sql recoverable-midb show'] = """
@@ -1032,7 +1037,7 @@ type: command
 short-summary: Get recoverable managed database
 examples:
   - name: Get recoverable managed database 
-    text: az sql recoverable-midb show -g mygroup --mi myinstance -n mymanageddb"
+    text: az sql recoverable-midb show -g mygroup --mi myinstance -n mymanageddb
 """
 
 helps['sql recoverable-midb list'] = """
@@ -1040,7 +1045,7 @@ type: command
 short-summary: Get all recoverable managed databases for given instance name
 examples:
   - name: List all recoverable managed databases for given instance name
-    text: az sql recoverable-midb list -g mygroup --mi myinstance"
+    text: az sql recoverable-midb list -g mygroup --mi myinstance
 """
 
 helps['sql midb show'] = """

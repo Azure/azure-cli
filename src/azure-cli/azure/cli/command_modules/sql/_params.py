@@ -2231,6 +2231,16 @@ def load_arguments(self, _):
                    arg_group='Recover',
                    help='The id of recoverable database from geo-replicated instance')
 
+    with self.argument_context('sql recoverable-midb') as c:
+        c.argument('managed_instance_name',
+                    options_list=['--mi', '--instance-name'])
+
+    with self.argument_context('sql recoverable-midb show') as c:
+        c.argument('recoverable_database_name',
+                    options_list=['--database-name', '-n'],
+                    required=True,
+                    help='The id of recoverable database from geo-replicated instance')
+
 
     with self.argument_context('sql midb short-term-retention-policy set') as c:
         create_args_for_complex_type(
