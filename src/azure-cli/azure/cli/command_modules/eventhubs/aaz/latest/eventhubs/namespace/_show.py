@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get the description of the specified namespace.
+
+    :example: shows the Namespace details.
+        az eventhubs namespace show --resource-group myresourcegroup --name mynamespace
     """
 
     _aaz_info = {

@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a namespace. Once created, this namespace's resource manifest is immutable. This operation is idempotent.
+
+    :example: Update a new namespace.
+        az eventhubs namespace update --resource-group myresourcegroup --name mynamespace --tags tag=value --enable-auto-inflate True
     """
 
     _aaz_info = {

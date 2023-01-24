@@ -16,6 +16,12 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List the available Namespaces within a resource group.
+
+    :example: List the Event Hubs Namespaces by resource group.
+        az eventhubs namespace list --resource-group myresourcegroup
+
+    :example: Get the Namespaces by Subscription.
+        az eventhubs namespace list
     """
 
     _aaz_info = {

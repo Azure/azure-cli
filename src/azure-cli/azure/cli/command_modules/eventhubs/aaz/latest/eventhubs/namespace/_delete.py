@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete an existing namespace. This operation also removes all associated resources under the namespace.
+
+    :example: Delete the Namespace
+        az eventhubs namespace delete --resource-group myresourcegroup --name mynamespace
     """
 
     _aaz_info = {
