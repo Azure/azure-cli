@@ -4919,14 +4919,15 @@ def managed_db_update(
 
     return instance
 
+
 def managed_db_recover(
-    cmd,
-    client,
-    database_name,
-    managed_instance_name,
-    resource_group_name,
-    recoverable_database_id,
-    **kwargs):
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        recoverable_database_id,
+        **kwargs):
 
     kwargs['location'] = _get_managed_instance_location(
         cmd.cli_ctx,
@@ -4941,6 +4942,7 @@ def managed_db_recover(
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
         parameters=kwargs)
+
 
 def managed_db_restore(
         cmd,

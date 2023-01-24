@@ -1036,7 +1036,7 @@ helps['sql recoverable-midb show'] = """
 type: command
 short-summary: Get recoverable managed database
 examples:
-  - name: Get recoverable managed database 
+  - name: Get recoverable managed database
     text: az sql recoverable-midb show -g mygroup --mi myinstance -n mymanageddb
 """
 
