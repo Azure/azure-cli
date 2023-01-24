@@ -25,7 +25,7 @@ from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_
 
 from azure.core.exceptions import HttpResponseError
 
-from azure.cli.core.commands import cached_get, cached_put
+from azure.cli.core.commands import cached_get, cached_put, LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands.validators import get_default_location_from_resource_group, validate_tags
 from azure.cli.core.azclierror import RequiredArgumentMissingError, ResourceNotFoundError
@@ -91,6 +91,13 @@ def _require_defer(cmd):
     use_cache = cmd.cli_ctx.data.get('_cache', False)
     if not use_cache:
         raise CLIError("This command requires --defer")
+
+
+def patch_image_template(cli_ctx, resource_group_name, image_template_name, image_template_update):
+    client = image_builder_client_factory(cli_ctx, '')
+    poller = client.virtual_machine_image_templates.begin_update(resource_group_name, image_template_name,
+                                                                 image_template_update)
+    return LongRunningOperation(cli_ctx)(poller)
 
 
 def _parse_script(script_str):
@@ -517,6 +524,99 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
 
     return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=image_template,
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
+
+
+def assign_template_identity(cmd, client, resource_group_name, image_template_name, user_assigned=None):
+    from azure.mgmt.imagebuilder.models import (ImageTemplateIdentity, ImageTemplateUpdateParameters,
+                                                ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties)  # pylint: disable=line-too-long
+
+    from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
+
+    def getter():
+        return client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
+
+    def setter(image_template):
+        existing_user_identities = set()
+        if image_template.identity is not None:
+            existing_user_identities = {x.lower() for x in
+                                        list((image_template.identity.user_assigned_identities or {}).keys())}
+
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        add_user_assigned = set()
+        for ide in user_assigned:
+            if not is_valid_resource_id(ide):
+                ide = resource_id(subscription=subscription_id, resource_group=resource_group_name,
+                                  namespace='Microsoft.ManagedIdentity', type='userAssignedIdentities', name=ide)
+            add_user_assigned.add(ide.lower())
+
+        updated_user_assigned = list(existing_user_identities.union(add_user_assigned))
+
+        default_user_identity = ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties()  # pylint: disable=line-too-long
+        user_assigned_identities = dict.fromkeys(updated_user_assigned, default_user_identity)
+
+        image_template_identity = ImageTemplateIdentity(type='UserAssigned',
+                                                        user_assigned_identities=user_assigned_identities)
+        image_template_update = ImageTemplateUpdateParameters()
+        image_template_update.identity = image_template_identity
+        return patch_image_template(cmd.cli_ctx, resource_group_name, image_template_name, image_template_update)
+
+    image_template = assign_identity_helper(cmd.cli_ctx, getter, setter)
+    return image_template.identity
+
+
+def remove_template_identity(cmd, client, resource_group_name, image_template_name, user_assigned=None):
+    from azure.mgmt.imagebuilder.models import ImageTemplateUpdateParameters
+
+    def getter():
+        return client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
+
+    def setter(resource_group_name, image_template_name, image_template):
+        image_template_update = ImageTemplateUpdateParameters(identity=image_template.identity)
+        return client.virtual_machine_image_templates.begin_update(resource_group_name, image_template_name,
+                                                                   image_template_update)
+
+    return _remove_template_identity(cmd, resource_group_name, image_template_name, user_assigned, getter, setter)
+
+
+def _remove_template_identity(cmd, resource_group_name, image_template_name, user_assigned, getter, setter):
+    resource = getter()
+    if resource is None or resource.identity is None:
+        return None
+
+    user_identities_to_remove = []
+    if user_assigned is not None:
+        existing_user_identities = {x.lower() for x in list((resource.identity.user_assigned_identities or {}).keys())}
+        # all user assigned identities will be removed if the length of user_assigned is 0,
+        # otherwise the specified identity
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        user_identities_to_remove = existing_user_identities if len(user_assigned) == 0 else set()
+        for ide in user_assigned:
+            if not is_valid_resource_id(ide):
+                ide = resource_id(subscription=subscription_id, resource_group=resource_group_name,
+                                  namespace='Microsoft.ManagedIdentity', type='userAssignedIdentities', name=ide)
+            user_identities_to_remove.add(ide.lower())
+
+        non_existing = user_identities_to_remove.difference(existing_user_identities)
+        if non_existing:
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            raise InvalidArgumentValueError("'{}' are not associated with '{}', please provide existing user managed "
+                                            "identities".format(','.join(non_existing), image_template_name))
+
+        if not list(existing_user_identities - user_identities_to_remove):
+            resource.identity.type = "None"
+            resource.identity.user_assigned_identities = None
+
+    if user_identities_to_remove and resource.identity.type != "None":
+        resource.identity.user_assigned_identities = {}
+        for identity in user_identities_to_remove:
+            resource.identity.user_assigned_identities[identity] = None
+
+    result = LongRunningOperation(cmd.cli_ctx)(setter(resource_group_name, image_template_name, resource))
+    return result.identity
+
+
+def show_template_identity(client, resource_group_name, image_template_name):
+    return client.virtual_machine_image_templates.get(resource_group_name, image_template_name).identity
 
 
 def list_image_templates(client, resource_group_name=None):

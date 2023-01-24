@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=protected-access
 
-from ._arg import AAZListArg, AAZDictArg, has_value
+from ._arg import AAZListArg, AAZDictArg
+from ._base import has_value
 from ._field_value import AAZList, AAZDict
 from ._base import AAZBaseValue
 

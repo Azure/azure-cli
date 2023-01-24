@@ -302,7 +302,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None,
                         public_network_access=None, accelerated_network=None, architecture=None,
                         data_access_auth_mode=None, gallery_image_reference_type=None, security_data_uri=None,
-                        upload_type=None, secure_vm_disk_encryption_set=None):
+                        upload_type=None, secure_vm_disk_encryption_set=None, performance_plus=None):
 
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -339,6 +339,9 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         raise RequiredArgumentMissingError(
             'usage error: --upload-size-bytes should be used together with --upload-type')
 
+    log_message = 'Starting Build 2023 event, "az disk create" command will deploy Trusted Launch VM by default.' \
+                  ' To know more about Trusted Launch, please visit' \
+                  ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch'
     if image_reference is not None:
         if not is_valid_resource_id(image_reference):
             # URN or name
@@ -362,16 +365,10 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
         if hasattr(response, 'hyper_v_generation'):
             if response.hyper_v_generation == 'V1':
-                logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS image and '
-                               'Trusted Launch security type. To know more about Trusted Launch, please visit '
-                               'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+                logger.warning(log_message)
             elif response.hyper_v_generation == 'V2':
                 if hyper_v_generation == 'V1':
-                    logger.warning(
-                        'Please consider upgrading security for your VM resources by using Gen 2 OS Disk and '
-                        'Trusted Launch security type. Please use "--hyper-v-generation V2" to set the '
-                        'hypervisor generation as Gen2 for OS disk. To know more about Trusted Launch, '
-                        'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+                    logger.warning(log_message)
                 # will set default value of hyper_v_generation
                 if hasattr(response, 'features') and response.features \
                         and 'SecurityType' in response.features \
@@ -379,10 +376,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         ['TrustedLaunchSupported', 'TrustedLaunchAndConfidentialVmSupported'] \
                         and security_type != 'TrustedLaunch':
                     # will set default value of security_type
-                    logger.warning('Starting Build 2023 event, az disk create command will deploy Trusted Launch VM '
-                                   'by default. Please use "--security-type TrustedLaunch" in your scripts in advance '
-                                   'to avoid the breaking change. To know more about Trusted Launch, please visit '
-                                   'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+                    logger.warning(log_message)
 
         # image_reference is an ID now
         image_reference = {'id': response.id}
@@ -417,16 +411,10 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                                                            gallery_image_name=gallery_image_definition)
         if hasattr(gallery_image_info, 'hyper_v_generation'):
             if gallery_image_info.hyper_v_generation == 'V1':
-                logger.warning('Please consider upgrading security for your VM resources by using Gen 2 OS image and '
-                               'Trusted Launch security type. To know more about Trusted Launch, please visit '
-                               'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+                logger.warning(log_message)
             elif gallery_image_info.hyper_v_generation == 'V2':
                 if hyper_v_generation == 'V1':
-                    logger.warning(
-                        'Please consider upgrading security for your VM resources by using Gen 2 OS Disk and '
-                        'Trusted Launch security type. Please use "--hyper-v-generation V2" to set the '
-                        'hypervisor generation as Gen2 for OS disk. To know more about Trusted Launch, '
-                        'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+                    logger.warning(log_message)
                 # will set default value of hyper_v_generation
                 if hasattr(gallery_image_info, 'features') and gallery_image_info.features \
                         and 'SecurityType' in gallery_image_info.features \
@@ -434,10 +422,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         ['TrustedLaunchSupported', 'TrustedLaunch', 'TrustedLaunchAndConfidentialVmSupported'] \
                         and security_type != 'TrustedLaunch':
                     # will set default value of security_type
-                    logger.warning('Starting Build 2023 event, az disk create command will deploy Trusted Launch VM '
-                                   'by default. Please use "--security-type TrustedLaunch" in your scripts in advance '
-                                   'to avoid the breaking change. To know more about Trusted Launch, please visit '
-                                   'https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+                    logger.warning(log_message)
 
         key = gallery_image_reference_type if gallery_image_reference_type else 'id'
         gallery_image_reference = {key: gallery_image_reference}
@@ -450,7 +435,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                                  storage_account_id=source_storage_account_id,
                                  upload_size_bytes=upload_size_bytes,
                                  logical_sector_size=logical_sector_size,
-                                 security_data_uri=security_data_uri)
+                                 security_data_uri=security_data_uri,
+                                 performance_plus=performance_plus)
 
     if size_gb is None and upload_size_bytes is None:
         if option == DiskCreateOption.empty:
@@ -484,10 +470,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
     if option == DiskCreateOption.empty and os_type:
         # will set default value of hyper_v_generation and security_type
-        logger.warning('Starting Build 2023 event, az disk create command will deploy Trusted Launch VM '
-                       'by default. Please use "--security-type TrustedLaunch" and "--hyper-v-generation V2" '
-                       'in your scripts in advance to avoid the breaking change. To know more about Trusted Launch, '
-                       'please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch')
+        logger.warning(log_message)
     if hyper_v_generation:
         disk.hyper_v_generation = hyper_v_generation
 
@@ -1371,10 +1354,27 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
     return result
 
 
-def list_vm(cmd, resource_group_name=None, show_details=False):
+# pylint: disable=redefined-builtin
+def list_vm(cmd, resource_group_name=None, show_details=False, vmss=None):
+    from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
     ccf = _compute_client_factory(cmd.cli_ctx)
-    vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name) \
-        if resource_group_name else ccf.virtual_machines.list_all()
+    if vmss is not None:
+        if is_valid_resource_id(vmss):
+            filter = "'virtualMachineScaleSet/id' eq '{}'".format(vmss)
+            if resource_group_name is None:
+                resource_group_name = parse_resource_id(vmss)['resource_group']
+        else:
+            if resource_group_name is None:
+                raise RequiredArgumentMissingError(
+                    'usage error: please specify the --resource-group when listing VM instances with VMSS name')
+            vmss_id = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+                                  namespace='Microsoft.Compute', type='virtualMachineScaleSets', name=vmss)
+            filter = "'virtualMachineScaleSet/id' eq '{}'".format(vmss_id)
+        vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name, filter=filter)
+    else:
+        vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name) \
+            if resource_group_name else ccf.virtual_machines.list_all()
     if show_details:
         return [get_vm_details(cmd, _parse_rg_name(v.id)[0], v.name) for v in vm_list]
 
@@ -4539,7 +4539,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          target_region_encryption=None, os_vhd_uri=None, os_vhd_storage_account=None,
                          data_vhds_uris=None, data_vhds_luns=None, data_vhds_storage_accounts=None,
                          replication_mode=None, target_region_cvm_encryption=None, virtual_machine=None,
-                         image_version=None, allow_replicated_location_deletion=None):
+                         image_version=None, target_zone_encryption=None, target_edge_zones=None,
+                         allow_replicated_location_deletion=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -4568,6 +4569,10 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                                             end_of_life_date=end_of_life_date,
                                             target_regions=target_regions or [TargetRegion(name=location)],
                                             replica_count=replica_count, storage_account_type=storage_account_type)
+
+    if target_edge_zones:
+        profile.target_extended_locations = target_edge_zones
+
     if replication_mode is not None:
         profile.replication_mode = replication_mode
     if not cmd.supported_api_version(min_api='2022-03-03', operation_group='gallery_image_versions'):
@@ -4694,7 +4699,7 @@ def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_
 
 def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name,
                          target_regions=None, replica_count=None, allow_replicated_location_deletion=None,
-                         no_wait=False, **kwargs):
+                         target_edge_zones=None, no_wait=False, **kwargs):
     image_version = kwargs['gallery_image_version']
 
     if target_regions:
@@ -4703,6 +4708,10 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         image_version.publishing_profile.replica_count = replica_count
     if image_version.storage_profile.source is not None:
         image_version.storage_profile.os_disk_image = image_version.storage_profile.data_disk_images = None
+    # target extended locations will be updated when --target-edge-zones is specified
+    if target_edge_zones is not None:
+        image_version.publishing_profile.target_extended_locations = target_edge_zones \
+            if len(target_edge_zones) > 0 else None
     if allow_replicated_location_deletion is not None:
         image_version.safety_profile.allow_deletion_of_replicated_locations = allow_replicated_location_deletion
 
