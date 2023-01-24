@@ -103,7 +103,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.publicNetworkAccess', 'Disabled'),
         ])
 
-        # Modify an existing vault4
+        # Test vault modification
         self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --public-network-access Enable', checks=[
             self.check('properties.publicNetworkAccess', 'Enabled')
         ])
