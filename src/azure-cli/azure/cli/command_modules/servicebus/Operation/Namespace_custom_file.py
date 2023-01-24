@@ -2,11 +2,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from azure.cli.command_modules.servicebus.constants import *
+from azure.cli.command_modules.servicebus.constants import SYSTEM
+from azure.cli.command_modules.servicebus.constants import SYSTEMUSER
+from azure.cli.command_modules.servicebus.constants import USER
 
 
 def create_keyvault_object(col):
-    vault_object={}
+    vault_object = {}
     if 'userAssignedIdentity' in col['identity']:
         vault_object['user_assigned_identity'] = col['identity']['userAssignedIdentity']
 
@@ -15,13 +17,13 @@ def create_keyvault_object(col):
         "key_vault_uri": col['keyVaultUri'],
         "key_version": col['keyVersion']
     })
-    return  vault_object
+    return vault_object
 
 
 def create_servicebus_namespace(cmd, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
-                           capacity=None, zone_redundant=None,  tier='Standard', mi_user_assigned=None, mi_system_assigned=None,
-                           encryption_config=None, minimum_tls_version=None,disable_local_auth=None,alternate_name=None,
-                           public_network_access=None, require_infrastructure_encryption=None, premium_messaging_partitions=None):
+                                capacity=None, zone_redundant=None, tier='Standard', mi_user_assigned=None, mi_system_assigned=None,
+                                encryption_config=None, minimum_tls_version=None, disable_local_auth=None, alternate_name=None,
+                                public_network_access=None, require_infrastructure_encryption=None, premium_messaging_partitions=None):
 
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Create
     user_assigned_identity = {}
