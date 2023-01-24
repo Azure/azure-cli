@@ -17,8 +17,10 @@ from azure.cli.core.aaz import *
 class List(AAZCommand):
     """List the available namespaces within a resource group.
 
-    :example: List the Service Bus Namespaces
+    :example: List the Service Bus Namespaces under resourcegroup.
         az servicebus namespace list --resource-group myresourcegroup
+
+    :example: List the Service Bus Namespaces under subscription
         az servicebus namespace list
     """
 
