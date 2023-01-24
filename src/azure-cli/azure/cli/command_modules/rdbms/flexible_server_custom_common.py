@@ -62,6 +62,9 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
             request_payload = json.load(f)
             if migration_mode == "online":
                 request_payload.get("properties")['MigrationMode'] = "Online"
+            else:
+                request_payload.get("properties")['MigrationMode'] = "Offline"
+
             json_data = json.dumps(request_payload)
         except ValueError as err:
             logger.error(err)
