@@ -18,6 +18,13 @@ class Update(AAZCommand):
     """Update managed instance DTC settings.
 
     This command updates the managed instance DTC settings. All parameters are optional.
+
+    :example: Enable DTC on a managed instance
+        az sql mi dtc update -g resourceGroup1 --mi managedInstance1 --dtc-enabled true
+        az sql mi dtc update --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/ResourceGroup1/providers/Microsoft.Sql/managedInstances/ManagedInstance1/dtc/current --dtc-enabled true
+
+    :example: Allow XA transactions for managed instance DTC
+        az sql mi dtc update -g resourceGroup1 --mi managedInstance1 --xa-transactions-enabled true
     """
 
     _aaz_info = {
@@ -47,7 +54,7 @@ class Update(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.managed_instance_name = AAZStrArg(
-            options=["--managed-instance-name"],
+            options=["--mi", "--managed-instance-name"],
             help="The name of the managed instance.",
             required=True,
             id_part="name",

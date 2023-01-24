@@ -16,6 +16,14 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get managed instance DTC settings.
+
+    This command gets managed instance DTC settings.
+
+    :example: Gets the managed instance DTC
+        az sql mi show --g resourceGroup1 --managed-instance-name managedInstance1
+
+    :example: Gets the managed instance DTC with the specified resource ID
+        az sql mi show --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/ResourceGroup1/providers/Microsoft.Sql/managedInstances/ManagedInstance1/dtc/current
     """
 
     _aaz_info = {
@@ -42,7 +50,7 @@ class Show(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.managed_instance_name = AAZStrArg(
-            options=["--managed-instance-name"],
+            options=["--mi", "--managed-instance-name"],
             help="The name of the managed instance.",
             required=True,
             id_part="name",

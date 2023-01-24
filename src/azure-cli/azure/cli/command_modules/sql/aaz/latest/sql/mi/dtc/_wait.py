@@ -48,7 +48,7 @@ class Wait(AAZWaitCommand):
             enum={"current": "current"},
         )
         _args_schema.managed_instance_name = AAZStrArg(
-            options=["--managed-instance-name"],
+            options=["--mi", "--managed-instance-name"],
             help="The name of the managed instance.",
             required=True,
             id_part="name",

@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sql mi dtc",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Managed instance DTC management commands.
+    """Commands related to managed instance DTC management.
 
     The managed instance DTC object can be fetched and updated using these commands.
     """
