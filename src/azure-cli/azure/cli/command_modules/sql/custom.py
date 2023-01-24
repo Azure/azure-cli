@@ -4971,7 +4971,7 @@ def managed_db_restore(
         resource_group_name=resource_group_name)
 
     kwargs['create_mode'] = ManagedDatabaseCreateMode.POINT_IN_TIME_RESTORE
-    
+
     if deleted_time:
         kwargs['restorable_dropped_database_id'] = _get_managed_dropped_db_resource_id(
             cmd.cli_ctx,
