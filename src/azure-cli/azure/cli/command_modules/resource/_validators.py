@@ -44,6 +44,8 @@ def _validate_template_spec_out(namespace):
         raise CLIError('Please enter a valid output folder')
 
 def validate_deployment_stack_files(namespace):
+    from azure.cli.core.commands.validators import validate_tags
+    validate_tags(namespace)
     if namespace.template_file and not os.path.isfile(namespace.template_file):
         raise InvalidArgumentValueError('Please enter a valid template file path')
 

@@ -677,6 +677,7 @@ def load_arguments(self, _):
         c.argument('deny_settings_excluded_principals', arg_type=stacks_excluded_principals)
         c.argument('deny_settings_excluded_actions', arg_type=stacks_excluded_actions)
         c.argument('deny_settings_apply_to_child_scopes', arg_type=stacks_apply_to_child_scopes)
+        c.argument('tags', tags_type)
 
     with self.argument_context('stack mg show') as c:
         c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
@@ -719,6 +720,7 @@ def load_arguments(self, _):
         c.argument('deny_settings_excluded_principals', arg_type=stacks_excluded_principals)
         c.argument('deny_settings_excluded_actions', arg_type=stacks_excluded_actions)
         c.argument('deny_settings_apply_to_child_scopes', arg_type=stacks_apply_to_child_scopes)
+        c.argument('tags', tags_type)
 
     with self.argument_context('stack sub show') as c:
         c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
@@ -751,6 +753,7 @@ def load_arguments(self, _):
         c.argument('deny_settings_excluded_principals', arg_type=stacks_excluded_principals)
         c.argument('deny_settings_excluded_actions', arg_type=stacks_excluded_actions)
         c.argument('deny_settings_apply_to_child_scopes', arg_type=stacks_apply_to_child_scopes)
+        c.argument('tags', tags_type)
     
     with self.argument_context('stack group show') as c:
         c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)

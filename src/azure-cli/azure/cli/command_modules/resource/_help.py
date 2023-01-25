@@ -2778,7 +2778,7 @@ short-summary: List out all available versions of Bicep CLI.
 
 helps['stack'] = """
 type: group
-short-summary: (Version 1.8) 
+short-summary: (Version 1.9) 
 """
 
 helps['stack mg create'] = """
@@ -2787,11 +2787,11 @@ short-summary: Create or update a deployment stack at management group scope
 examples:
   - name: Create a deployment stack using template file.
     text: az stack mg create --name "StackName" --management-group-id myMg --template-file simpleTemplate.json --location "westus2" --description "description"
-  - name: Create a deployment stack with parameter file and purge resources.
+  - name: Create a deployment stack with parameter file and delete resources.
     text: az stack mg create --name "StackName" --management-group-id myMg --delete-resources --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location "westus2" --description "description"
-  - name: Create a deployment stack with template spec and purge resource groups
+  - name: Create a deployment stack with template spec and delete resource groups
     text: az stack mg create --name "StackName" --management-group-id myMg --delete-resource-groups --template-spec "TemplateSpecResourceIDWithVersion" --location "westus2" --description "description"
-  - name: Create a deployment stack using bicep file and purge all resources.
+  - name: Create a deployment stack using bicep file and delete all resources.
     text: az stack mg create --name "StackName" --management-group-id myMg --delete-all --template-file simple.bicep --location "westus2" --description "description"
   - name: Create a deployment stack using parameters from key/value pairs
     text: az stack mg create --name "StackName" --management-group-id myMg --template-file simpleTemplate.json  --location "westus" --description "description" --parameters simpleTemplateParams.json value1=foo value2=bar
@@ -2846,12 +2846,12 @@ type: command
 short-summary: Create or update a deployment stack at subscription scope
 examples:
   - name: Create a deployment stack using template file.
-    text: az stack sub create --name "StackName" c --template-file simpleTemplate.json --location "westus2" --description "description"
-  - name: Create a deployment stack with parameter file and purge resources.
+    text: az stack sub create --name "StackName" --template-file simpleTemplate.json --location "westus2" --description "description"
+  - name: Create a deployment stack with parameter file and delete resources.
     text: az stack sub create --name "StackName" --delete-resources --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location "westus2" --description "description"
-  - name: Create a deployment stack with template spec and purge resource groups
+  - name: Create a deployment stack with template spec and delete resource groups
     text: az stack sub create --name "StackName" --delete-resource-groups --template-spec "TemplateSpecResourceIDWithVersion" --location "westus2" --description "description"
-  - name: Create a deployment stack using bicep file and purge all resources.
+  - name: Create a deployment stack using bicep file and delete all resources.
     text: az stack sub create --name "StackName" --delete-all --template-file simple.bicep --location "westus2" --description "description"
   - name: Create a deployment stack at a different subscription.
     text: az stack sub create --name "StackName" --template-file simpleTemplate.json --location "westus2" --description "description --subscription "subscriptionId"
@@ -2909,11 +2909,11 @@ helps['stack group create'] = """
 type: command
 short-summary: Create or update a deployment stack at resource group scope
 examples:
-  - name: Create a deployment stack using template file and purge resources.
+  - name: Create a deployment stack using template file and delete resources.
     text: az stack group create --name "StackName" --resource-group "ResourceGroup" --delete-resources --template-file simpleTemplate.json --description "description"
-  - name: Create a deployment stack with parameter file and purge resource groups.
+  - name: Create a deployment stack with parameter file and delete resource groups.
     text: az stack group create --name "StackName" --resource-group "ResourceGroup" --delete-resource-groups --template-file simpleTemplate.json --parameters simpleTemplateParams.json --description "description"
-  - name: Create a deployment stack with template spec and purge all resources
+  - name: Create a deployment stack with template spec and delete all resources
     text: az stack group create --name "StackName" --resource-group "ResourceGroup" --delete-all --template-spec "TemplateSpecResourceIDWithVersion" --description "description"
   - name: Create a deployment stack using bicep file.
     text: az stack group create --name "StackName" --resource-group "ResourceGroup" --template-file simple.bicep --description "description"
