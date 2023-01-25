@@ -40,13 +40,6 @@ class Wait(AAZWaitCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.dtc_name = AAZStrArg(
-            options=["-n", "--name", "--dtc-name"],
-            help="The name of the managed instance DTC.",
-            required=True,
-            id_part="child_name_1",
-            enum={"current": "current"},
-        )
         _args_schema.managed_instance_name = AAZStrArg(
             options=["--mi", "--managed-instance-name"],
             help="The name of the managed instance.",
@@ -106,7 +99,7 @@ class Wait(AAZWaitCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "dtcName", self.ctx.args.dtc_name,
+                    "dtcName", "current",
                     required=True,
                 ),
                 **self.serialize_url_param(
