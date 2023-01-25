@@ -86,7 +86,7 @@ def get_sku_tier(name):  # pylint: disable=too-many-return-statements
         return 'ElasticPremium'
     if name in ['I1', 'I2', 'I3']:
         return 'Isolated'
-    if name in ['I1V2', 'I2V2', 'I3V2']:
+    if name in ['I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2']:
         return 'IsolatedV2'
     if name in ['WS1', 'WS2', 'WS3']:
         return 'WorkflowStandard'
@@ -138,6 +138,14 @@ def raise_missing_token_suggestion():
     raise RequiredArgumentMissingError("GitHub access token is required to authenticate to your repositories. "
                                        "If you need to create a Github Personal Access Token, "
                                        "please run with the '--login-with-github' flag or follow "
+                                       "the steps found at the following link:\n{0}".format(pat_documentation))
+
+
+def raise_missing_ado_token_suggestion():
+    pat_documentation = ("https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-"
+                         "tokens-to-authenticate?view=azure-devops&tabs=Windows#create-a-pat")
+    raise RequiredArgumentMissingError("If this repo is an Azure Dev Ops repo, please provide a Personal Access Token."
+                                       "Please run with the '--login-with-ado' flag or follow "
                                        "the steps found at the following link:\n{0}".format(pat_documentation))
 
 

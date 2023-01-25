@@ -709,7 +709,7 @@ short-summary: Creates an application group for an EventHub namespace
 examples:
   - name: Create an application group myAppGroup for eventhub namespace mynamespace with 2 throttling policies. Maximum allowed throttling policies is 4.
     text: |
-        az eventhubs namespace application-group create --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --client-app-group-identifier SASKeyName=keyname --throttling-policy-config name=policy1 metric-id=IncomingMessages rate-limit-threshold=10000 --throttling-policy-config name=policy2 metric-id=IncomingBytes rate-limit-threshold=20000
+        az eventhubs namespace application-group create --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --client-app-group-identifier NamespaceSASKeyName=keyname --throttling-policy-config name=policy1 metric-id=IncomingMessages rate-limit-threshold=10000 --throttling-policy-config name=policy2 metric-id=IncomingBytes rate-limit-threshold=20000
 """
 
 helps['eventhubs namespace application-group update'] = """

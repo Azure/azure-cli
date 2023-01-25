@@ -2546,7 +2546,7 @@ parameters:
   - name: --resource-id
     short-summary: The resource identifier for the entity being tagged. A resource, a resource group or a subscription may be tagged.
 examples:
-  - name: Delete a tag from the subscription.
+  - name: Delete a predefined tag from the subscription not associated with a resource or having no tag values.
     text: >
         az tag delete --name MyTag
   - name: Delete the entire set of tags on a subscription.
@@ -2555,7 +2555,7 @@ examples:
   - name: Delete the entire set of tags on a resource group.
     text: >
         az tag delete --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}
-  - name: Delete the entire set of tags on a resource.
+  - name: Delete the entire set of tags on a resource. (Even using --name along with --resource-id to specify a single tag)
     text: >
         az tag delete --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName}
 """

@@ -15,16 +15,12 @@ from knack.log import get_logger
 from knack.util import CLIError
 from urllib.request import urlretrieve
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
-from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import send_raw_request
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, FileOperationError, BadRequestError
-from azure.mgmt.rdbms import mysql_flexibleservers
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._servers_operations import ServersOperations as MySqlServersOperations
-from azure.mgmt.rdbms.mysql_flexibleservers.operations._azure_ad_administrators_operations import AzureADAdministratorsOperations as MySqlAzureADAdministratorsOperations
-from ._client_factory import cf_mysql_flexible_replica, cf_mysql_flexible_servers, cf_postgres_flexible_servers, \
-    cf_mysql_flexible_adadmin, cf_mysql_flexible_config
+from ._client_factory import cf_mysql_flexible_replica, cf_postgres_flexible_replica
 from ._flexible_server_util import run_subprocess, run_subprocess_get_output, fill_action_template, get_git_root_dir, \
     resolve_poller, GITHUB_ACTION_PATH
 from .validators import validate_public_access_server
@@ -379,16 +375,21 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
         }
         version_mapped = mysql_version_map[version]
     else:
-        # pending postgres
+        replica_operations_client = cf_postgres_flexible_replica(cmd.cli_ctx, '_')
         version_mapped = version
 
     replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
-    for replica in replicas:
-        current_replica_version = int(replica.version.split('.')[0])
-        if current_replica_version < int(version):
-            raise CLIError("Primary server version must not be greater than replica server version. "
-                           "First upgrade {} server version to {} and try again."
-                           .format(replica.name, version))
+
+    if isinstance(client, MySqlServersOperations):
+        for replica in replicas:
+            current_replica_version = int(replica.version.split('.')[0])
+            if current_replica_version < int(version):
+                raise CLIError("Primary server version must not be greater than replica server version. "
+                               "First upgrade {} server version to {} and try again."
+                               .format(replica.name, version))
+    else:
+        if 'replica' in instance.replication_role.lower() or len(list(replicas)) > 0:
+            raise CLIError("Major version upgrade is not yet supported for servers in a read replica setup.")
 
     parameters = {
         'version': version_mapped
@@ -401,249 +402,3 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
             parameters=parameters),
         cmd.cli_ctx, 'Updating server {} to major version {}'.format(server_name, version)
     )
-
-
-# Custom functions for identity
-def flexible_server_identity_assign(cmd, client, resource_group_name, server_name, identities):
-    instance = client.get(resource_group_name, server_name)
-    if instance.replication_role == 'Replica':
-        raise CLIError("Cannot assign identities to a server with replication role. Use the primary server instead.")
-
-    identities_map = {}
-    for identity in identities:
-        identities_map[identity] = {}
-
-    parameters = {
-        'identity': mysql_flexibleservers.models.Identity(
-            user_assigned_identities=identities_map,
-            type="UserAssigned")}
-
-    if isinstance(client, MySqlServersOperations):
-        replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
-    else:
-        # pending postgres
-        pass
-
-    replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
-    for replica in replicas:
-        resolve_poller(
-            client.begin_update(
-                resource_group_name=resource_group_name,
-                server_name=replica.name,
-                parameters=parameters),
-            cmd.cli_ctx, 'Adding identities to replica {}'.format(replica.name)
-        )
-
-    result = resolve_poller(
-        client.begin_update(
-            resource_group_name=resource_group_name,
-            server_name=server_name,
-            parameters=parameters),
-        cmd.cli_ctx, 'Adding identities to server {}'.format(server_name)
-    )
-
-    return result.identity
-
-
-def flexible_server_identity_remove(cmd, client, resource_group_name, server_name, identities):
-    instance = client.get(resource_group_name, server_name)
-    if instance.replication_role == 'Replica':
-        raise CLIError("Cannot remove identities from a server with replication role. Use the primary server instead.")
-
-    instance = client.get(resource_group_name, server_name)
-
-    if instance.data_encryption:
-        primary_id = instance.data_encryption.primary_user_assigned_identity_id
-        backup_id = instance.data_encryption.geo_backup_user_assigned_identity_id
-
-        if primary_id and primary_id.lower() in [identity.lower() for identity in identities]:
-            raise CLIError("Cannot remove identity {} because it's used for data encryption.".format(primary_id))
-
-        if backup_id and backup_id.lower() in [identity.lower() for identity in identities]:
-            raise CLIError("Cannot remove identity {} because it's used for data encryption.".format(backup_id))
-
-    if isinstance(client, MySqlServersOperations):
-        admin_operations_client = cf_mysql_flexible_adadmin(cmd.cli_ctx, '_')
-    else:
-        # pending postgres
-        pass
-
-    admins = admin_operations_client.list_by_server(resource_group_name, server_name)
-    common_identities = [identity for identity in identities if identity.lower() in [admin.identity_resource_id.lower() for admin in admins]]
-    if len(common_identities) > 0:
-        raise CLIError("Cannot remove identities {} because they're used for server admin.".format(common_identities))
-
-    identities_map = {}
-    for identity in identities:
-        identities_map[identity] = None
-
-    if not (instance.identity and instance.identity.user_assigned_identities) or \
-       all(key.lower() in [identity.lower() for identity in identities] for key in instance.identity.user_assigned_identities.keys()):
-        parameters = {
-            'identity': mysql_flexibleservers.models.Identity(
-                type="None")}
-    else:
-        parameters = {
-            'identity': mysql_flexibleservers.models.Identity(
-                user_assigned_identities=identities_map,
-                type="UserAssigned")}
-
-    if isinstance(client, MySqlServersOperations):
-        replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
-    else:
-        # pending postgres
-        pass
-
-    replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
-    for replica in replicas:
-        resolve_poller(
-            client.begin_update(
-                resource_group_name=resource_group_name,
-                server_name=replica.name,
-                parameters=parameters),
-            cmd.cli_ctx, 'Removing identities from replica {}'.format(replica.name)
-        )
-
-    result = resolve_poller(
-        client.begin_update(
-            resource_group_name=resource_group_name,
-            server_name=server_name,
-            parameters=parameters),
-        cmd.cli_ctx, 'Removing identities from server {}'.format(server_name)
-    )
-
-    return result.identity or mysql_flexibleservers.models.Identity()
-
-
-def flexible_server_identity_list(client, resource_group_name, server_name):
-    server = client.get(resource_group_name, server_name)
-    return server.identity or mysql_flexibleservers.models.Identity()
-
-
-def flexible_server_identity_show(client, resource_group_name, server_name, identity):
-    server = client.get(resource_group_name, server_name)
-
-    for key, value in server.identity.user_assigned_identities.items():
-        if key.lower() == identity.lower():
-            return value
-
-    raise CLIError("Identity '{}' does not exist in server {}.".format(identity, server_name))
-
-
-# Custom functions for ad-admin
-def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, login, sid, identity):
-    if isinstance(client, MySqlAzureADAdministratorsOperations):
-        server_operations_client = cf_mysql_flexible_servers(cmd.cli_ctx, '_')
-        replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
-    else:
-        server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
-        # pending postgres
-
-    instance = server_operations_client.get(resource_group_name, server_name)
-
-    if instance.replication_role == 'Replica':
-        raise CLIError("Cannot create an AD admin on a server with replication role. Use the primary server instead.")
-
-    parameters = {
-        'identity': mysql_flexibleservers.models.Identity(
-            user_assigned_identities={identity: {}},
-            type="UserAssigned")}
-
-    replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
-    for replica in replicas:
-        if not (replica.identity and replica.identity.user_assigned_identities and
-           identity.lower() in [key.lower() for key in replica.identity.user_assigned_identities.keys()]):
-            resolve_poller(
-                server_operations_client.begin_update(
-                    resource_group_name=resource_group_name,
-                    server_name=replica.name,
-                    parameters=parameters),
-                cmd.cli_ctx, 'Adding identity {} to replica {}'.format(identity, replica.name)
-            )
-
-    if not (instance.identity and instance.identity.user_assigned_identities and
-       identity.lower() in [key.lower() for key in instance.identity.user_assigned_identities.keys()]):
-        resolve_poller(
-            server_operations_client.begin_update(
-                resource_group_name=resource_group_name,
-                server_name=server_name,
-                parameters=parameters),
-            cmd.cli_ctx, 'Adding identity {} to server {}'.format(identity, server_name))
-
-    parameters = {
-        'administratorType': 'ActiveDirectory',
-        'login': login,
-        'sid': sid,
-        'tenant_id': _get_tenant_id(),
-        'identity_resource_id': identity
-    }
-
-    return client.begin_create_or_update(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        administrator_name='ActiveDirectory',
-        parameters=parameters)
-
-
-def flexible_server_ad_admin_delete(cmd, client, resource_group_name, server_name):
-    if isinstance(client, MySqlAzureADAdministratorsOperations):
-        server_operations_client = cf_mysql_flexible_servers(cmd.cli_ctx, '_')
-    else:
-        server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
-
-    instance = server_operations_client.get(resource_group_name, server_name)
-
-    if instance.replication_role == 'Replica':
-        raise CLIError("Cannot delete an AD admin on a server with replication role. Use the primary server instead.")
-
-    if isinstance(client, MySqlAzureADAdministratorsOperations):
-        replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
-        config_operations_client = cf_mysql_flexible_config(cmd.cli_ctx, '_')
-    else:
-        # pending postgres
-        pass
-
-    resolve_poller(
-        client.begin_delete(
-            resource_group_name=resource_group_name,
-            server_name=server_name,
-            administrator_name='ActiveDirectory'),
-        cmd.cli_ctx, 'Dropping AD admin in server {}'.format(server_name))
-
-    configuration_name = 'aad_auth_only'
-    parameters = mysql_flexibleservers.models.Configuration(
-        name=configuration_name,
-        value='OFF',
-        source='user-override'
-    )
-
-    replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
-    for replica in replicas:
-        if config_operations_client.get(resource_group_name, replica.name, configuration_name).value == "ON":
-            resolve_poller(
-                config_operations_client.begin_update(resource_group_name, replica.name, configuration_name, parameters),
-                cmd.cli_ctx, 'Disabling aad_auth_only in replica {}'.format(replica.name))
-
-    if config_operations_client.get(resource_group_name, server_name, configuration_name).value == "ON":
-        resolve_poller(
-            config_operations_client.begin_update(resource_group_name, server_name, configuration_name, parameters),
-            cmd.cli_ctx, 'Disabling aad_auth_only in server {}'.format(server_name))
-
-
-def flexible_server_ad_admin_list(client, resource_group_name, server_name):
-    return client.list_by_server(
-        resource_group_name=resource_group_name,
-        server_name=server_name)
-
-
-def flexible_server_ad_admin_show(client, resource_group_name, server_name):
-    return client.get(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        administrator_name='ActiveDirectory')
-
-
-def _get_tenant_id():
-    profile = Profile()
-    sub = profile.get_subscription()
-    return sub['tenantId']

@@ -77,8 +77,8 @@ class Create(AAZCommand):
             options=["--ddos-protection-plan"],
             help="The DDoS protection plan associated with the public IP. Can only be set if ProtectionMode is Enabled.",
         )
-        _args_schema.protection_mode = AAZStrArg(
-            options=["--protection-mode"],
+        _args_schema.ddos_protection_mode = AAZStrArg(
+            options=["--protection-mode", "--ddos-protection-mode"],
             help="The DDoS protection mode of the public IP",
             enum={"Disabled": "Disabled", "Enabled": "Enabled", "VirtualNetworkInherited": "VirtualNetworkInherited"},
         )
@@ -114,9 +114,12 @@ class Create(AAZCommand):
             help="IP address allocation method.",
             enum={"Dynamic": "Dynamic", "Static": "Static"},
         )
-        _args_schema.public_ip_prefix = AAZStrArg(
+        _args_schema.public_ip_prefix = AAZResourceIdArg(
             options=["--public-ip-prefix"],
             help="Name or ID of a public IP prefix.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIPPrefixes/{}",
+            ),
         )
         _args_schema.sku = AAZStrArg(
             options=["--sku"],
@@ -184,11 +187,11 @@ class Create(AAZCommand):
         yield self.PublicIPAddressesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -311,7 +314,7 @@ class Create(AAZCommand):
             ddos_settings = _builder.get(".properties.ddosSettings")
             if ddos_settings is not None:
                 ddos_settings.set_prop("ddosProtectionPlan", AAZObjectType)
-                ddos_settings.set_prop("protectionMode", AAZStrType, ".protection_mode")
+                ddos_settings.set_prop("protectionMode", AAZStrType, ".ddos_protection_mode")
 
             ddos_protection_plan = _builder.get(".properties.ddosSettings.ddosProtectionPlan")
             if ddos_protection_plan is not None:

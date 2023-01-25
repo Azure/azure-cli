@@ -28,9 +28,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2018-08-01",
+        "version": "2022-04-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}", "2018-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}", "2022-04-01-preview"],
         ]
     }
 
@@ -61,36 +61,14 @@ class Update(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+
+        # define Arg Group "DnsConfig"
+
+        _args_schema = cls._args_schema
         _args_schema.ttl = AAZIntArg(
             options=["--ttl"],
+            arg_group="DnsConfig",
             help="DNS config time-to-live in seconds.",
-            nullable=True,
-        )
-        _args_schema.max_return = AAZIntArg(
-            options=["--max-return"],
-            help="Maximum number of endpoints to be returned for MultiValue routing type.",
-            nullable=True,
-        )
-        _args_schema.status = AAZStrArg(
-            options=["--status"],
-            help="Status of the Traffic Manager profile.  Allowed values: Disabled, Enabled.",
-            nullable=True,
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
-        )
-        _args_schema.routing_method = AAZStrArg(
-            options=["--routing-method"],
-            help="Routing method.",
-            nullable=True,
-            enum={"Geographic": "Geographic", "MultiValue": "MultiValue", "Performance": "Performance", "Priority": "Priority", "Subnet": "Subnet", "Weighted": "Weighted"},
-        )
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            help="Space-separated tags: key[=value] [key[=value] ...].",
-            nullable=True,
-        )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg(
             nullable=True,
         )
 
@@ -185,14 +163,69 @@ class Update(AAZCommand):
 
         # define Arg Group "Parameters"
 
+        _args_schema = cls._args_schema
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            arg_group="Parameters",
+            help="Space-separated tags: key[=value] [key[=value] ...].",
+            nullable=True,
+        )
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg(
+            nullable=True,
+        )
+
         # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.max_return = AAZIntArg(
+            options=["--max-return"],
+            arg_group="Properties",
+            help="Maximum number of endpoints to be returned for MultiValue routing type.",
+            nullable=True,
+        )
+        _args_schema.status = AAZStrArg(
+            options=["--status"],
+            arg_group="Properties",
+            help="Status of the Traffic Manager profile.  Allowed values: Disabled, Enabled.",
+            nullable=True,
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+        _args_schema.routing_method = AAZStrArg(
+            options=["--routing-method"],
+            arg_group="Properties",
+            help="Routing method.",
+            nullable=True,
+            enum={"Geographic": "Geographic", "MultiValue": "MultiValue", "Performance": "Performance", "Priority": "Priority", "Subnet": "Subnet", "Weighted": "Weighted"},
+        )
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         self.ProfilesGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.vars.instance)
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.vars.instance)
         self.ProfilesCreateOrUpdate(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
+
+    @register_callback
+    def pre_instance_update(self, instance):
+        pass
+
+    @register_callback
+    def post_instance_update(self, instance):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -246,7 +279,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-08-01",
+                    "api-version", "2022-04-01-preview",
                     required=True,
                 ),
             }
@@ -329,7 +362,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-08-01",
+                    "api-version", "2022-04-01-preview",
                     required=True,
                 ),
             }
@@ -521,6 +554,9 @@ def _build_schema_profile_read(_schema):
     _element.type = AAZStrType()
 
     properties = _schema_profile_read.properties.endpoints.Element.properties
+    properties.always_serve = AAZStrType(
+        serialized_name="alwaysServe",
+    )
     properties.custom_headers = AAZListType(
         serialized_name="customHeaders",
     )

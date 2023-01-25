@@ -28,7 +28,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         return filepath
 
     @ResourceGroupPreparer()
-    @BatchAccountPreparer(location='northcentralus')
+    @BatchAccountPreparer(location='eastus')
     def test_batch_certificate_cmd(self, resource_group, batch_account_name):
         create_cert_file_path = self._get_test_data_file('batchtest.cer')
         self.kwargs.update({
@@ -171,7 +171,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch job delete --job-id {j_id} --yes')
 
     @ResourceGroupPreparer()
-    @BatchAccountPreparer(location='canadacentral')
+    @BatchAccountPreparer(location='eastus')
     def test_batch_task_create_cmd(self, resource_group, batch_account_name):
         self.set_account_info(batch_account_name, resource_group)
         self.kwargs.update({
@@ -217,7 +217,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.assertTrue(any([i for i in result if i['taskId'] == 'xplatTask1']))
 
     @ResourceGroupPreparer()
-    @BatchAccountPreparer(location='canadaeast')
+    @BatchAccountPreparer(location='eastus')
     def test_batch_jobs_and_tasks(self, resource_group, batch_account_name):
         self.set_account_info(batch_account_name, resource_group)
         self.kwargs.update({
@@ -305,7 +305,11 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         # test create iaas pool using parameters
         self.batch_cmd('batch pool create --id {pool_i} --vm-size Standard_A1 '
                        '--image Canonical:UbuntuServer:18.04-LTS '
-                       '--node-agent-sku-id "batch.node.ubuntu 18.04"')
+                       '--node-agent-sku-id "batch.node.ubuntu 18.04" '
+                       '--target-communication classic')
+        self.batch_cmd('batch pool show --pool-id {pool_i}').assert_with_checks([
+            self.check('targetNodeCommunicationMode', 'classic')
+        ])
 
         # test create pool with missing parameters
         with self.assertRaises(SystemExit):
@@ -399,6 +403,12 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch pool set --pool-id {pool_j} --start-task-command-line new_value')
         updated = self.batch_cmd('batch pool show --pool-id {pool_j} --select "startTask"').get_output_in_json()
         self.assertNotEqual(current['startTask']['commandLine'], updated['startTask']['commandLine'])
+
+        # test patch pool with target-node-communication-mode
+        self.batch_cmd('batch pool set --pool-id {pool_j} --target-communication classic')
+        self.batch_cmd('batch pool show --pool-id {pool_j}').assert_with_checks([
+            self.check('targetNodeCommunicationMode', 'classic')
+        ])
 
         # test list node agent skus
         self.batch_cmd('batch pool supported-images list')
