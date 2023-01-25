@@ -185,7 +185,7 @@ def load_arguments(self, _):
             c.argument(
                 'policy_assignment_id',
                 options_list=['--policy-assignment-id',
-                              '--policy-assignment-id', '-a'],
+                              '--policy-assignment', '-a'],
                 arg_group="Properties",
                 completer=get_policy_assignment_completion_list,
                 help="The resource ID of the policy assignment that the attestation is setting the state for."
@@ -231,8 +231,8 @@ def load_arguments(self, _):
                 help="The person responsible for setting the state of the resource. This value is typically an Azure Active Directory object ID."  # pylint: disable=line-too-long
             )
             c.argument(
-                'definition_ref_id',
-                options_list=["--definition-ref-id"],
+                'definition_reference_id',
+                options_list=["--definition-reference-id"],
                 arg_group="Properties",
                 help="The policy definition reference ID from a policy set definition that the attestation is setting the state for. "  # pylint: disable=line-too-long
                 "If the policy assignment assigns a policy set definition the attestation can choose a definition within the set definition with this property or omit this and set the state for the entire set definition."  # pylint: disable=line-too-long

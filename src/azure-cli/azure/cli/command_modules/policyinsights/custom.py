@@ -494,7 +494,7 @@ def create_policy_attestation(
         expires_on=None,
         metadata=None,
         owner=None,
-        definition_ref_id=None,
+        definition_reference_id=None,
         namespace=None,
         resource=None,
         resource_group_name=None,
@@ -513,7 +513,7 @@ def create_policy_attestation(
         "expires_on": expires_on,
         "metadata": metadata,
         "owner": owner,
-        "policy_definition_reference_id": definition_ref_id
+        "policy_definition_reference_id": definition_reference_id
     }
     from .aaz.latest.policy_insights.attestation import Create, CreateByRg, CreateBySubscription
 
@@ -548,7 +548,7 @@ def update_policy_attestation(
         expires_on=None,
         metadata=None,
         owner=None,
-        definition_ref_id=None,
+        definition_reference_id=None,
         namespace=None,
         resource=None,
         resource_group_name=None,
@@ -565,7 +565,7 @@ def update_policy_attestation(
         "expires_on": expires_on,
         "metadata": metadata,
         "owner": owner,
-        "policy_definition_reference_id": definition_ref_id
+        "policy_definition_reference_id": definition_reference_id
     }
     from .aaz.latest.policy_insights.attestation import Update, UpdateByRg, UpdateBySubscription
 
@@ -608,12 +608,12 @@ def delete_policy_attestation(
     from .aaz.latest.policy_insights.attestation import Delete, DeleteByRg, DeleteBySubscription
     if resource:
         scope = _build_policy_object_scope(
-        subscription=subscription_id,
-        resource_group_name=resource_group_name,
-        resource=resource,
-        resource_type_parent=resource_type_parent,
-        resource_type=resource_type,
-        namespace=namespace)
+            subscription=subscription_id,
+            resource_group_name=resource_group_name,
+            resource=resource,
+            resource_type_parent=resource_type_parent,
+            resource_type=resource_type,
+            namespace=namespace)
         attestation_args["resource_id"] = scope
         return Delete(cli_ctx=cmd.cli_ctx)(command_args=attestation_args)
     elif resource_group_name:

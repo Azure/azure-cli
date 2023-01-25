@@ -588,7 +588,7 @@ class PolicyInsightsTests(ScenarioTest):
 
             # create an attestation with all the properties at RG scope.
             self.cmd(
-                "policy attestation create --attestation-name {rn} -g {rg} -a {initiative_id} --compliance-state {compliance_state} --assessment-date '{assessment_date}' --evidence {evidence1} --evidence {evidence2} --expires-on '{expires_on}' --owner {owner} --metadata {metadata} --definition-ref-id '{ref_id}' --debug", checks=self._check_attestation_properties())
+                "policy attestation create --attestation-name {rn} -g {rg} -a {initiative_id} --compliance-state {compliance_state} --assessment-date '{assessment_date}' --evidence {evidence1} --evidence {evidence2} --expires-on '{expires_on}' --owner {owner} --metadata {metadata} --definition-reference-id '{ref_id}' --debug", checks=self._check_attestation_properties())
 
             # get the attestation at resource group scope
             self.cmd(
@@ -659,7 +659,7 @@ class PolicyInsightsTests(ScenarioTest):
             self.kwargs['pid'] = assignment['id'].lower()
 
             self.cmd(
-                "policy attestation create --attestation-name {rn} -a {initiative_id} --compliance-state {compliance_state} --assessment-date '{assessment_date}' --evidence {evidence1} --evidence {evidence2} --expires-on '{expires_on}' --owner {owner} --metadata {metadata} --definition-ref-id '{ref_id}'", checks=self._check_attestation_properties())
+                "policy attestation create --attestation-name {rn} -a {initiative_id} --compliance-state {compliance_state} --assessment-date '{assessment_date}' --evidence {evidence1} --evidence {evidence2} --expires-on '{expires_on}' --owner {owner} --metadata {metadata} --definition-reference-id '{ref_id}'", checks=self._check_attestation_properties())
 
             # get the attestation at subscription scope
             self.cmd(
@@ -741,7 +741,7 @@ class PolicyInsightsTests(ScenarioTest):
             self.kwargs['pid'] = assignment['id'].lower()
 
             # create the attestation with all the properties
-            self.cmd("policy attestation create --attestation-name {rn} --resource '{resource_id}' -a {initiative_id} --compliance-state {compliance_state} --assessment-date '{assessment_date}' --evidence {evidence1} --evidence {evidence2} --expires-on '{expires_on}' --owner {owner} --metadata {metadata} --definition-ref-id '{ref_id}'", checks=self._check_attestation_properties())
+            self.cmd("policy attestation create --attestation-name {rn} --resource '{resource_id}' -a {initiative_id} --compliance-state {compliance_state} --assessment-date '{assessment_date}' --evidence {evidence1} --evidence {evidence2} --expires-on '{expires_on}' --owner {owner} --metadata {metadata} --definition-reference-id '{ref_id}'", checks=self._check_attestation_properties())
 
             # get the attestation at resource scope.
             self.cmd(
@@ -788,7 +788,7 @@ class PolicyInsightsTests(ScenarioTest):
 
             # create a minimal attestation at resource group scope
             self.cmd(
-                'policy attestation create --attestation-name {rn_rg} -g {rg} -a {pan_rg} --definition-ref-id {ref_id}')
+                'policy attestation create --attestation-name {rn_rg} -g {rg} -a {pan_rg} --definition-reference-id {ref_id}')
 
             # region List Tests
             # list policy attestations at subscription scope
