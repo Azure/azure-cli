@@ -31,7 +31,13 @@ from azure.mgmt.sql.models import (
     ServerConnectionType,
     ServerKeyType,
     StorageKeyType,
-    TransparentDataEncryptionState
+    TransparentDataEncryptionState,
+    DatabaseIdentity,
+    DatabaseUserIdentity,
+    DatabaseIdentityType,
+    DatabaseKey,
+    RestorableDroppedDatabase,
+    RecoverableDatabase
 )
 
 from azure.cli.core.commands.parameters import (
@@ -210,6 +216,22 @@ ledger_on_param_type = CLIArgumentType(
          'All tables in the ledger database must be ledger tables. '
          'Note: the value of this property cannot be changed after the database has been created. ',
     arg_type=get_three_state_flag("Enabled", "Disabled", False, False))
+
+database_encryption_protector = CLIArgumentType(
+    options_list=['--encryption-protector'],
+    help='Specifies the Azure key vault key to be used as database encryption protector key.')
+
+database_keys = CLIArgumentType(
+    options_list=['--keys'],
+    help='The list of AKV keys for the SQL Database.')
+
+database_user_assigned_identity = CLIArgumentType(
+    options_list=['--user-assigned-identity-id'],
+    help='The list of user assigned identity for the SQL Database.')
+
+database_federated_client_id = CLIArgumentType(
+    options_list=['--federated-client-id'],
+    help='The federated client id for the SQL Database. It is used for cross tenant CMK scenario.')
 
 managed_instance_param_type = CLIArgumentType(
     options_list=['--managed-instance', '--mi'],
@@ -400,6 +422,22 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('zone_redundant',
                      arg_type=zone_redundant_param_type)
 
+    arg_ctx.argument('assign_identity',
+                    options_list=['--assign_identity', '-i'],
+                    help='Generate and assign an Azure Active Directory Identity for this database '
+                   'for use with key management services like Azure KeyVault.')
+
+    arg_ctx.argument('encryption_protector',
+                    arg_type=database_encryption_protector)
+
+    arg_ctx.argument('keys',
+                     arg_type=database_keys)
+                    
+    arg_ctx.argument('user_assigned_identity_id',
+                     arg_type=database_user_assigned_identity)
+    
+    arg_ctx.argument('federated_client_id',
+                     arg_type=database_federated_client_id)
 
 def _configure_db_dw_create_params(
         arg_ctx,
@@ -493,6 +531,11 @@ def _configure_db_dw_create_params(
             'requested_backup_storage_redundancy',
             'maintenance_configuration_id',
             'is_ledger_on',
+            'assign_identity'
+            'encryption_protector',
+            'keys',
+            'user_assigned_identity_id',
+            'federated_client_id'
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -524,6 +567,23 @@ def _configure_db_dw_create_params(
 
     arg_ctx.argument('is_ledger_on',
                      arg_type=ledger_on_param_type)
+    
+    arg_ctx.argument('assign_identity',
+                    options_list=['--assign_identity', '-i'],
+                    help='Generate and assign an Azure Active Directory Identity for this database '
+                   'for use with key management services like Azure KeyVault.')
+
+    arg_ctx.argument('encryption_protector',
+                    arg_type=database_encryption_protector)
+
+    arg_ctx.argument('keys',
+                     arg_type=database_keys)
+                    
+    arg_ctx.argument('user_assigned_identity_id',
+                     arg_type=database_user_assigned_identity)
+    
+    arg_ctx.argument('federated_client_id',
+                     arg_type=database_federated_client_id)
 
     # *** Step 3: Ignore params that are not applicable (based on engine & create mode) ***
 
@@ -560,6 +620,21 @@ def _configure_db_dw_create_params(
 
         # Family is not applicable to DataWarehouse
         arg_ctx.ignore('family')
+
+        # Identity is not applicable to DataWarehouse
+        arg_ctx.ignore('assign_identity')
+
+        # Encryption Protector is not applicable to DataWarehouse
+        arg_ctx.ignore('encryption_protector')
+
+        # Keys is not applicable to DataWarehouse
+        arg_ctx.ignore('keys')
+
+        # User Assigned Identities is not applicable to DataWarehouse
+        arg_ctx.ignore('user_assigned_identity_id')
+
+        # Federated client id is not applicable to DataWarehouse
+        arg_ctx.ignore('federated_client_id')     
 
         # Provisioning with capacity is not applicable to DataWarehouse
         arg_ctx.ignore('capacity')
@@ -1011,6 +1086,31 @@ def load_arguments(self, _):
                    required=True,
                    help='Status of the transparent data encryption.',
                    arg_type=get_enum_type(TransparentDataEncryptionState))
+
+    #####
+    #           sql db level encryption protector
+    #####
+    with self.argument_context('sql db cmk revert') as c:
+        c.argument('server_name',
+                   options_list=['--server', '-s'],
+                   required=True,
+                   help='Name of the Azure SQL Server.')
+
+        c.argument('database_name',
+                   options_list=['--database', '-d'],
+                   required=True,
+                   help='Name of the Azure SQL Database.')
+
+    with self.argument_context('sql db cmk revalidate') as c:
+        c.argument('server_name',
+                   options_list=['--server', '-s'],
+                   required=True,
+                   help='Name of the Azure SQL Server.')
+
+        c.argument('database_name',
+                   options_list=['--database', '-d'],
+                   required=True,
+                   help='Name of the Azure SQL Database.')
 
     #####
     #           sql db ledger-digest-uploads

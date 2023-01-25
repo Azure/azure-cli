@@ -70,7 +70,9 @@ from azure.mgmt.sql.models import (
     StorageKeyType,
     TransparentDataEncryptionName,
     UserIdentity,
-    VirtualNetworkRule
+    VirtualNetworkRule,
+    DatabaseUserIdentity,
+    DatabaseIdentity
 )
 
 from azure.cli.core.profiles import ResourceType
@@ -536,6 +538,30 @@ def _get__user_assigned_identity(
 
     return identityResult
 
+def _get_database_identity(
+        userAssignedIdentities):
+    '''
+    Gets the resource identity type for the database.
+    '''
+    databaseIdentity = None
+
+    if userAssignedIdentities is None:
+                raise CLIError('"The list of user assigned identity ids needs to be passed for database CMK')
+    
+    umiDict = None
+
+    for umi in userAssignedIdentities:
+        if umiDict is None:
+            umiDict = {umi: DatabaseUserIdentity()}
+        else:
+            umiDict[umi] = DatabaseUserIdentity()
+    
+    from azure.mgmt.sql.models import DatabaseIdentity
+
+    databaseIdentity = DatabaseIdentity(type=ResourceIdType.user_assigned.value,
+                                            user_assigned_identities=umiDict)
+    
+    return databaseIdentity
 
 _DEFAULT_SERVER_VERSION = "12.0"
 
@@ -955,6 +981,10 @@ def _db_dw_create(
         no_wait,
         sku=None,
         secondary_type=None,
+        assign_identity=False,
+        user_assigned_identity_id=None,
+        keys=None,
+        encryption_protector=None,
         **kwargs):
     '''
     Creates a DB (with any create mode) or DW.
@@ -1001,6 +1031,12 @@ def _db_dw_create(
         cli_ctx,
         kwargs['maintenance_configuration_id'])
 
+    # Per DB CMK params
+    if assign_identity:
+        kwargs['identity'] = _get_database_identity(user_assigned_identity_id)
+        kwargs['keys'] = keys
+        kwargs['encryption_protector'] = encryption_protector
+
     # Create
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        server_name=dest_db.server_name,
@@ -1046,6 +1082,10 @@ def db_create(
         resource_group_name,
         no_wait=False,
         yes=None,
+        assign_identity=False,
+        user_assigned_identity_id=None,
+        keys=None,
+        encryption_protector=None,
         **kwargs):
     '''
     Creates a DB (with 'Default' create mode.)
@@ -1070,6 +1110,10 @@ def db_create(
         None,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         no_wait,
+        assign_identity,
+        user_assigned_identity_id,
+        keys,
+        encryption_protector
         **kwargs)
 
 
@@ -1098,6 +1142,10 @@ def db_copy(
         dest_server_name=None,
         dest_resource_group_name=None,
         no_wait=False,
+        assign_identity=False,
+        user_assigned_identity_id=None,
+        keys=None,
+        encryption_protector=None,
         **kwargs):
     '''
     Copies a DB (i.e. create with 'Copy' create mode.)
@@ -1136,6 +1184,10 @@ def db_copy(
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         DatabaseIdentity(cmd.cli_ctx, dest_name, dest_server_name, dest_resource_group_name),
         no_wait,
+        assign_identity,
+        user_assigned_identity_id,
+        keys,
+        encryption_protector,
         **kwargs)
 
 
@@ -1150,6 +1202,10 @@ def db_create_replica(
         partner_resource_group_name=None,
         secondary_type=None,
         no_wait=False,
+        assign_identity=False,
+        user_assigned_identity_id=None,
+        keys=None,
+        encryption_protector=None,
         **kwargs):
     '''
     Creates a secondary replica DB (i.e. create with 'Secondary' create mode.)
@@ -1190,6 +1246,10 @@ def db_create_replica(
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         DatabaseIdentity(cmd.cli_ctx, partner_database_name, partner_server_name, partner_resource_group_name),
         no_wait,
+        assign_identity,
+        user_assigned_identity_id,
+        keys,
+        encryption_protector,
         secondary_type=secondary_type,
         **kwargs)
 
@@ -1235,6 +1295,10 @@ def db_restore(
         restore_point_in_time=None,
         source_database_deletion_date=None,
         no_wait=False,
+        assign_identity=False,
+        user_assigned_identity_id=None,
+        keys=None,
+        encryption_protector=None,
         **kwargs):
     '''
     Restores an existing or deleted DB (i.e. create with 'Restore'
@@ -1268,6 +1332,10 @@ def db_restore(
         # Cross-server restore is not supported. So dest server/group must be the same as source.
         DatabaseIdentity(cmd.cli_ctx, dest_name, server_name, resource_group_name),
         no_wait,
+        assign_identity,
+        user_assigned_identity_id,
+        keys,
+        encryption_protector,
         **kwargs)
 
 
@@ -1542,7 +1610,11 @@ def db_update(
         auto_pause_delay=None,
         compute_model=None,
         requested_backup_storage_redundancy=None,
-        maintenance_configuration_id=None):
+        maintenance_configuration_id=None,
+        keys=None,
+        encryption_protector=None,
+        user_assigned_identity=None,
+        federated_client_id=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
@@ -1640,6 +1712,15 @@ def db_update(
 
     if auto_pause_delay:
         instance.auto_pause_delay = auto_pause_delay
+    
+    if keys is not None:
+        instance.keys.append = keys
+    
+    if encryption_protector is not None:
+        instance.encryption_protector = encryption_protector
+
+    if federated_client_id is not None:
+        instance.federated_client_id = federated_client_id
 
     return instance
 
@@ -4157,6 +4238,25 @@ def encryption_protector_update(
                                        server_key_name=key_name,
                                        auto_rotation_enabled=auto_rotation_enabled))
 
+def encryption_protector_revalidate(
+        client,
+        resource_group_name,
+        server_name):
+    '''
+    Revalidate a server encryption protector.
+    '''
+
+    if server_name is None:
+        raise CLIError('Server name cannot be null')
+    
+    try:
+            return client.begin_revalidate(
+                resource_group_name=resource_group_name,
+                server_name=server_name,
+                encryption_protector_name=EncryptionProtectorName.CURRENT)
+    except Exception as ex:
+            raise ex   
+
 #####
 #           sql server aad-only
 #####
@@ -4775,6 +4875,25 @@ def managed_instance_encryption_protector_get(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
         encryption_protector_name=EncryptionProtectorName.CURRENT)
+
+def managed_instance_encryption_protector_revalidate(
+        client,
+        resource_group_name,
+        managed_instance_name):
+    '''
+    Revalidate a managed instance encryption protector.
+    '''
+
+    if managed_instance_name is None:
+        raise CLIError('Managed instance name cannot be null')
+    
+    try:
+            return client.begin_revalidate(
+                resource_group_name=resource_group_name,
+                managed_instance_name=managed_instance_name,
+                encryption_protector_name=EncryptionProtectorName.CURRENT)
+    except Exception as ex:
+            raise ex 
 
 
 #####

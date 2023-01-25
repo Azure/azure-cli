@@ -75,7 +75,8 @@ from ._util import (
     get_sql_virtual_clusters_operations,
     get_sql_virtual_network_rules_operations,
     get_sql_instance_failover_groups_operations,
-    get_sql_database_ledger_digest_uploads_operations
+    get_sql_database_ledger_digest_uploads_operations,
+    get_sql_database_encryption_protector_operations
 )
 
 from ._validators import (
@@ -219,6 +220,17 @@ def load_command_table(self, _):
 
         g.custom_command('set', 'transparent_data_encryptions_set')
         g.custom_show_command('show', 'transparent_data_encryptions_get')
+    
+    database_encryption_protector_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#DatabaseEncryptionProtectorOperations.{}',
+        client_factory=get_sql_database_encryption_protector_operations)
+    
+    with self.command_group('sql db cmk',
+                            database_encryption_protector_operations,
+                            client_factory=get_sql_database_encryption_protector_operations) as g:
+
+            g.custom_command('revert', 'database_encryption_protector_revert')
+            g.custom_command('revalidate', 'database_encryption_protector_revalidate')
 
     replication_links_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ReplicationLinksOperations.{}',
@@ -666,6 +678,7 @@ def load_command_table(self, _):
 
         g.custom_show_command('show', 'encryption_protector_get')
         g.custom_command('set', 'encryption_protector_update')
+        g.custom_command('revalidate', 'encryption_protector_revalidate')
 
     virtual_network_rules_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#VirtualNetworkRulesOperations.{}',
@@ -810,6 +823,7 @@ def load_command_table(self, _):
 
         g.custom_show_command('show', 'managed_instance_encryption_protector_get')
         g.custom_command('set', 'managed_instance_encryption_protector_update')
+        g.custom_command('revalidate', 'managed_instance_encryption_protector_revalidate')
 
     managed_instance_aadadmin_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceAdministratorsOperations.{}',
