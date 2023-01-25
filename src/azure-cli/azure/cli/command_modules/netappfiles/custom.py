@@ -338,7 +338,7 @@ def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, 
     if any(x is not None for x in [vault_id, backup_policy_id, backup_enabled, policy_enforced]):
         backup = VolumeBackupProperties(vault_id=vault_id, backup_enabled=backup_enabled,
                                         backup_policy_id=backup_policy_id, policy_enforced=policy_enforced)
-        logger.debug("ANF Log: backup set")                                        
+        logger.debug("ANF Log: backup set")
 
     if any(x is not None for x in [backup, snapshot]):
         snapshot = VolumeSnapshotProperties(snapshot_policy_id=snapshot_policy_id)
