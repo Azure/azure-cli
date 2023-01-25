@@ -74,7 +74,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.external_dns_suffix_search_list = AAZListArg(
-            options=["--external-dns-suffix-search-list"],
+            options=["--external-dns-suffixes", "--external-dns-suffix-search-list"],
             arg_group="Properties",
             help="External dns suffix search list of managed instance DTC.",
             nullable=True,
@@ -89,25 +89,25 @@ class Update(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.sna_lu6point2_transactions_enabled = AAZBoolArg(
-            options=["--sna-lu6point2-transactions-enabled"],
+            options=["--sna-lu-transactions", "--sna-lu6point2-transactions-enabled"],
             arg_group="SecuritySettings",
             help="Allow SNA LU 6.2 Transactions to managed instance DTC.",
             nullable=True,
         )
         _args_schema.xa_transactions_default_timeout = AAZIntArg(
-            options=["--xa-transactions-default-timeout"],
+            options=["--xa-default-timeout", "--xa-transactions-default-timeout"],
             arg_group="SecuritySettings",
             help="Default timeout for XA Transactions (in seconds).",
             nullable=True,
         )
         _args_schema.xa_transactions_enabled = AAZBoolArg(
-            options=["--xa-transactions-enabled"],
+            options=["--xa-transactions", "--xa-transactions-enabled"],
             arg_group="SecuritySettings",
             help="Allow XA Transactions to managed instance DTC.",
             nullable=True,
         )
         _args_schema.xa_transactions_maximum_timeout = AAZIntArg(
-            options=["--xa-transactions-maximum-timeout"],
+            options=["--xa-max-timeout", "--xa-transactions-maximum-timeout"],
             arg_group="SecuritySettings",
             help="Maximum timeout for XA Transactions (in seconds).",
             nullable=True,
