@@ -80,7 +80,9 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     subscription_id = '8313371e-0879-428e-b1da-6353575a9192'
     group = 'CustomerExperienceTeam_RG'
     location = 'westcentralus'
+    vnet_name = 'vnet-mi-tooling'
     subnet_name = 'ManagedInstance'
+    subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
 
     # For cross-subnet update SLO, we need a target subnet to move managed instance to.
     target_vnet_name = 'vnet-mi-tooling'
