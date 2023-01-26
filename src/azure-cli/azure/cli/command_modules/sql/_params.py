@@ -2215,6 +2215,11 @@ def load_arguments(self, _):
                    help='Name of the resource group of the managed instance to restore managed database to. '
                    'When not specified it defaults to source resource group.')
 
+        c.argument('source_subscription_id',
+                   options_list=['--source-sub', '-s'],
+                   help='Subscription id of the source database, the one restored from. '
+                   'This parameter should be used when doing cross subscription restore.')
+
         restore_point_arg_group = 'Restore Point'
 
         c.argument('restore_point_in_time',
