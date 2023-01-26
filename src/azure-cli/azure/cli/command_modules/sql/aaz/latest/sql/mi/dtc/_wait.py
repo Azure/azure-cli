@@ -138,6 +138,17 @@ class Wait(AAZWaitCommand):
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
+
+            # Due to a bug in the API, the dtcHostName is returned as the dtcHostNameDnsSuffix property. Also the dtcHostName doesn't exist as a property currently.
+            # The new API versions (with a fix) should return dtcHostName property and the correct value for dtcHostNameDnsSuffix.
+            # Currently, as a workaround we check if the dtcHostName property exist.
+            # If it doesn't exist, we create an additional field "dtcHostName" and display the "dtcHostNameDnsSuffix"
+            # from the API response as the host name. Also, the dtcHostNameDnsSuffix is corrected to display the proper value.
+            if 'dtcHostName' not in data['properties']:
+                data['properties']['dtcHostName'] = data['properties']['dtcHostNameDnsSuffix']
+
+                # Also, we extract the DNS suffix and display it properly.
+                data['properties']['dtcHostNameDnsSuffix'] = data['properties']['dtcHostNameDnsSuffix'].split('.', 1)[1]
             self.ctx.set_var(
                 "instance",
                 data,
@@ -173,6 +184,10 @@ class Wait(AAZWaitCommand):
             )
             properties.dtc_host_name_dns_suffix = AAZStrType(
                 serialized_name="dtcHostNameDnsSuffix",
+                flags={"read_only": True},
+            )
+            properties.dtc_host_name = AAZStrType(
+                serialized_name="dtcHostName",
                 flags={"read_only": True},
             )
             properties.external_dns_suffix_search_list = AAZListType(
