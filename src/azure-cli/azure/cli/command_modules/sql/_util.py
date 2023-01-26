@@ -56,10 +56,6 @@ def get_sql_database_sensitivity_labels_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).sensitivity_labels
 
 
-def get_sql_database_threat_detection_policies_operations(cli_ctx, _):
-    return get_sql_management_client(cli_ctx).database_security_alert_policies
-
-
 def get_sql_database_transparent_data_encryptions_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).transparent_data_encryptions
 

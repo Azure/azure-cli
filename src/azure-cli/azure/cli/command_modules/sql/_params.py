@@ -921,7 +921,7 @@ def load_arguments(self, _):
                    ' defaults to the first database\'s resource group.')
 
     #####
-    #           sql db audit-policy & threat-policy
+    #           sql db audit-policy
     #####
     def _configure_security_policy_storage_params(arg_ctx):
 
@@ -977,40 +977,6 @@ def load_arguments(self, _):
                    event_hub_authorization_rule_id_param_type)
 
         c.argument('event_hub', event_hub_param_type)
-
-    with self.argument_context('sql db threat-policy update') as c:
-        _configure_security_policy_storage_params(c)
-
-        policy_arg_group = 'Policy'
-        notification_arg_group = 'Notification'
-
-        c.argument('state',
-                   arg_group=policy_arg_group,
-                   help='Threat detection policy state',
-                   arg_type=get_enum_type(SecurityAlertPolicyState))
-
-        c.argument('retention_days',
-                   arg_group=policy_arg_group,
-                   help='The number of days to retain threat detection logs.')
-
-        c.argument('disabled_alerts',
-                   arg_group=policy_arg_group,
-                   options_list=['--disabled-alerts'],
-                   help='List of disabled alerts.',
-                   nargs='+')
-
-        c.argument('email_addresses',
-                   arg_group=notification_arg_group,
-                   options_list=['--email-addresses'],
-                   help='List of email addresses that alerts are sent to.',
-                   nargs='+')
-
-        c.argument('email_account_admins',
-                   arg_group=notification_arg_group,
-                   options_list=['--email-account-admins'],
-                   help='Whether the alert is sent to the account administrators.')
-
-        # TODO: use server default
 
     #####
     #           sql db transparent-data-encryption

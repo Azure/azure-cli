@@ -36,7 +36,6 @@ from ._util import (
     get_sql_database_long_term_retention_policies_operations,
     get_sql_database_sensitivity_labels_operations,
     get_sql_database_operations_operations,
-    get_sql_database_threat_detection_policies_operations,
     get_sql_database_transparent_data_encryptions_operations,
     get_sql_database_usages_operations,
     get_sql_elastic_pools_operations,
@@ -375,26 +374,6 @@ def load_command_table(self, _):
         g.command('list', 'list_recommended_by_database')
         g.command('enable', 'enable_recommendation')
         g.command('disable', 'disable_recommendation')
-
-    database_threat_detection_policies_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations#DatabaseSecurityAlertPoliciesOperations.{}',
-        client_factory=get_sql_database_threat_detection_policies_operations)
-
-    database_threat_detection_policy_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.sql.custom#{}')
-
-    with self.command_group('sql db threat-policy',
-                            database_threat_detection_policies_operations,
-                            client_factory=get_sql_database_threat_detection_policies_operations,
-                            deprecate_info=self.deprecate(redirect='sql db advanced-threat-protection-setting', hide=True, expiration='2.45.0')) as g:
-
-        g.custom_show_command('show', 'db_threat_detection_policy_get')
-        g.generic_update_command('update',
-                                 getter_name='db_threat_detection_policy_get',
-                                 getter_type=database_threat_detection_policy_update_sdk,
-                                 setter_name='db_threat_detection_policy_update_setter',
-                                 setter_type=database_threat_detection_policy_update_sdk,
-                                 custom_func_name='db_threat_detection_policy_update')
 
     database_advanced_threat_protection_settings_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#DatabaseAdvancedThreatProtectionSettingsOperations.{}',

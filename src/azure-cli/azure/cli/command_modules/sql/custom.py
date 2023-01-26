@@ -1655,7 +1655,7 @@ def db_update(
 
 
 #####
-#           sql db audit-policy & threat-policy
+#           sql db audit-policy
 #####
 
 
@@ -2988,83 +2988,6 @@ def restore_long_term_retention_backup(
         server_name=target_server_name,
         resource_group_name=target_resource_group_name,
         parameters=kwargs)
-
-
-def db_threat_detection_policy_get(
-        client,
-        resource_group_name,
-        server_name,
-        database_name):
-    '''
-    Gets a threat detection policy.
-    '''
-
-    return client.get(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        database_name=database_name,
-        security_alert_policy_name=SecurityAlertPolicyName.DEFAULT)
-
-
-def db_threat_detection_policy_update(
-        cmd,
-        instance,
-        state=None,
-        storage_account=None,
-        storage_endpoint=None,
-        storage_account_access_key=None,
-        retention_days=None,
-        email_addresses=None,
-        disabled_alerts=None,
-        email_account_admins=None):
-    '''
-    Updates a threat detection policy. Custom update function to apply parameters to instance.
-    '''
-
-    # Apply state
-    if state:
-        instance.state = SecurityAlertPolicyState[state.lower()]
-    enabled = instance.state.lower() == SecurityAlertPolicyState.ENABLED.value.lower()  # pylint: disable=no-member
-
-    # Set storage-related properties
-    _db_security_policy_update(
-        cmd.cli_ctx,
-        instance,
-        enabled,
-        storage_account,
-        storage_endpoint,
-        storage_account_access_key,
-        False)
-
-    # Set other properties
-    if retention_days:
-        instance.retention_days = retention_days
-
-    if email_addresses:
-        instance.email_addresses = email_addresses
-
-    if disabled_alerts:
-        instance.disabled_alerts = disabled_alerts
-
-    if email_account_admins:
-        instance.email_account_admins = email_account_admins
-
-    return instance
-
-
-def db_threat_detection_policy_update_setter(
-        client,
-        resource_group_name,
-        server_name,
-        database_name,
-        parameters):
-
-    return client.create_or_update(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        database_name=database_name,
-        security_alert_policy_name=SecurityAlertPolicyName.DEFAULT,
-        parameters=parameters)
 
 
 def db_advanced_threat_protection_setting_get(

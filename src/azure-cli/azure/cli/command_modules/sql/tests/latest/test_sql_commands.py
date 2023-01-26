@@ -1711,50 +1711,6 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
-        # get threat detection policy
-        self.cmd('sql db threat-policy show -g {} -s {} -n {}'
-                 .format(resource_group, server, database_name),
-                 checks=[JMESPathCheck('resourceGroup', resource_group)])
-
-        # update threat detection policy - enable
-        disabled_alerts_input = 'Sql_Injection_Vulnerability Access_Anomaly'
-        disabled_alerts_expected = ['Sql_Injection_Vulnerability', 'Access_Anomaly']
-        email_addresses_input = 'test1@example.com test2@example.com'
-        email_addresses_expected = ['test1@example.com', 'test2@example.com']
-        email_account_admins = True
-
-        self.cmd('sql db threat-policy update -g {} -s {} -n {}'
-                 ' --state {} --storage-key {} --storage-endpoint {}'
-                 ' --retention-days {} --email-addresses {} --disabled-alerts {}'
-                 ' --email-account-admins {}'
-                 .format(resource_group, server, database_name, state_enabled, key,
-                         storage_endpoint, retention_days, email_addresses_input,
-                         disabled_alerts_input, email_account_admins),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('state', state_enabled),
-                     JMESPathCheck('storageAccountAccessKey', ''),
-                     JMESPathCheck('storageEndpoint', storage_endpoint),
-                     JMESPathCheck('retentionDays', retention_days),
-                     JMESPathCheck('emailAddresses', email_addresses_expected),
-                     JMESPathCheck('disabledAlerts', disabled_alerts_expected),
-                     JMESPathCheck('emailAccountAdmins', email_account_admins)])
-
-        # update threat policy - specify storage account and resource group. use secondary key
-        key_2 = self._get_storage_key(storage_account_2, resource_group_2)
-        self.cmd('sql db threat-policy update -g {} -s {} -n {}'
-                 ' --storage-account {}'
-                 .format(resource_group, server, database_name, storage_account_2),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('state', state_enabled),
-                     JMESPathCheck('storageAccountAccessKey', ''),
-                     JMESPathCheck('storageEndpoint', storage_endpoint_2),
-                     JMESPathCheck('retentionDays', retention_days),
-                     JMESPathCheck('emailAddresses', email_addresses_expected),
-                     JMESPathCheck('disabledAlerts', disabled_alerts_expected),
-                     JMESPathCheck('emailAccountAdmins', email_account_admins)])
-
         # create log analytics workspace
         log_analytics_workspace_name = self.create_random_name("laws", 20)
 
@@ -6147,31 +6103,15 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         storage_endpoint = self._get_storage_endpoint(storage_account, resource_group)
         key = self._get_storage_key(storage_account, resource_group)
 
-        # enable ADS - (required to use data classification)
-        disabled_alerts_input = 'Sql_Injection_Vulnerability Access_Anomaly'
-        disabled_alerts_expected = ['Sql_Injection_Vulnerability', 'Access_Anomaly']
-        email_addresses_input = 'test1@example.com test2@example.com'
-        email_addresses_expected = ['test1@example.com', 'test2@example.com']
-        email_account_admins = True
+        # enable Advanced Threat Protection - (required to use data classification)
         state_enabled = 'Enabled'
-        retention_days = 30
 
-        self.cmd('sql db threat-policy update -g {} -s {} -n {}'
-                 ' --state {} --storage-key {} --storage-endpoint {}'
-                 ' --retention-days {} --email-addresses {} --disabled-alerts {}'
-                 ' --email-account-admins {}'
-                 .format(resource_group, server, database_name, state_enabled, key,
-                         storage_endpoint, retention_days, email_addresses_input,
-                         disabled_alerts_input, email_account_admins),
+        self.cmd('sql db advanced-threat-protection-setting update -g {} -s {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, server, database_name, state_enabled),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('state', state_enabled),
-                     JMESPathCheck('storageAccountAccessKey', ''),
-                     JMESPathCheck('storageEndpoint', storage_endpoint),
-                     JMESPathCheck('retentionDays', retention_days),
-                     JMESPathCheck('emailAddresses', email_addresses_expected),
-                     JMESPathCheck('disabledAlerts', disabled_alerts_expected),
-                     JMESPathCheck('emailAccountAdmins', email_account_admins)])
+                     JMESPathCheck('state', state_enabled)])
 
         # list recommended sensitivity classifications
         expected_recommended_sensitivityclassifications_count = 15

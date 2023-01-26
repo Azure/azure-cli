@@ -415,38 +415,6 @@ examples:
     crafted: true
 """
 
-helps['sql db threat-policy'] = """
-type: group
-short-summary: Manage a database's threat detection policies.
-"""
-
-helps['sql db threat-policy update'] = """
-type: command
-short-summary: Update a database's threat detection policy.
-long-summary: If the policy is being enabled, storage_account or both storage_endpoint and storage_account_access_key must be specified.
-examples:
-  - name: Enable by storage account name.
-    text: |
-        az sql db threat-policy update -g mygroup -s myserver -n mydb \\
-            --state Enabled --storage-account mystorage
-  - name: Enable by storage endpoint and key.
-    text: |
-        az sql db threat-policy update -g mygroup -s myserver -n mydb \\
-            --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net \\
-            --storage-key MYKEY==
-  - name: Disable a subset of alert types.
-    text: |
-        az sql db threat-policy update -g mygroup -s myserver -n mydb \\
-            --disabled-alerts Sql_Injection_Vulnerability Access_Anomaly
-  - name: Configure email recipients for a policy.
-    text: |
-        az sql db threat-policy update -g mygroup -s myserver -n mydb \\
-            --email-addresses me@examlee.com you@example.com \\
-            --email-account-admins Enabled
-  - name: Disable a threat policy.
-    text: az sql db threat-policy update -g mygroup -s myserver -n mydb --state Disabled
-"""
-
 helps['sql db update'] = """
 type: command
 short-summary: Update a database.
