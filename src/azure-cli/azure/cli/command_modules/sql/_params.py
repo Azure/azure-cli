@@ -27,7 +27,6 @@ from azure.mgmt.sql.models import (
     DatabaseLicenseType,
     ElasticPoolLicenseType,
     SampleName,
-    SecurityAlertPolicyState,
     ServerConnectionType,
     ServerKeyType,
     StorageKeyType,

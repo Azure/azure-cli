@@ -51,8 +51,6 @@ from azure.mgmt.sql.models import (
     PerformanceLevelUnit,
     ResourceIdentity,
     RestoreDetailsName,
-    SecurityAlertPolicyName,
-    SecurityAlertPolicyState,
     SensitivityLabel,
     SensitivityLabelSource,
     ServerAzureADOnlyAuthentication,
