@@ -19,7 +19,6 @@ from azure.cli.core.commands.template_create import get_folded_parameter_validat
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_parameter_set
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.azclierror import RequiredArgumentMissingError
 
 logger = get_logger(__name__)
 
@@ -233,17 +232,6 @@ def read_base_64_file(filename):
             return base64_data.decode('utf-8')
         except UnicodeDecodeError:
             return str(base64_data)
-
-
-def validate_cert(namespace):
-    if namespace.cert_data:
-        namespace.cert_data = read_base_64_file(namespace.cert_data)
-
-
-def validate_trusted_client_cert(namespace):
-    if namespace.client_cert_data is None or namespace.client_cert_name is None:
-        raise RequiredArgumentMissingError('To use this cmd, you must specify both name and data')
-    namespace.client_cert_data = read_base_64_file(namespace.client_cert_data)
 
 
 def validate_ssl_cert(namespace):
@@ -746,11 +734,6 @@ def process_ag_routing_rule_create_namespace(cmd, namespace):  # pylint: disable
             cmd.cli_ctx, namespace, 'backendSettingsCollection', namespace.settings)
 
 
-def process_ag_ssl_policy_set_namespace(namespace):
-    if namespace.disabled_ssl_protocols and getattr(namespace, 'clear', None):
-        raise ValueError('incorrect usage: --disabled-ssl-protocols PROTOCOL [...] | --clear')
-
-
 def process_ag_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     get_servers_validator(camel_case=True)(namespace)
@@ -799,28 +782,6 @@ def process_lb_create_namespace(cmd, namespace):
         namespace.virtual_network_name = None
 
 
-def process_lb_frontend_ip_namespace(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.subnet and namespace.public_ip_address:
-        raise ValueError(
-            'incorrect usage: --subnet NAME --vnet-name NAME | '
-            '--subnet ID | --public-ip NAME_OR_ID')
-
-    if namespace.public_ip_prefix:
-        if not is_valid_resource_id(namespace.public_ip_prefix):
-            namespace.public_ip_prefix = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=namespace.resource_group_name,
-                namespace='Microsoft.Network',
-                type='publicIpPrefixes',
-                name=namespace.public_ip_prefix)
-
-    if namespace.subnet:
-        get_subnet_validator()(cmd, namespace)
-    else:
-        get_public_ip_validator()(cmd, namespace)
-
-
 def process_cross_region_lb_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_tags(namespace)
@@ -831,21 +792,6 @@ def process_cross_region_lb_create_namespace(cmd, namespace):
     if namespace.public_ip_dns_name and namespace.public_ip_address_type != 'new':
         raise CLIError(
             'specify --public-ip-dns-name only if creating a new public IP address.')
-
-
-def process_cross_region_lb_frontend_ip_namespace(cmd, namespace):
-    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
-
-    if namespace.public_ip_prefix:
-        if not is_valid_resource_id(namespace.public_ip_prefix):
-            namespace.public_ip_prefix = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=namespace.resource_group_name,
-                namespace='Microsoft.Network',
-                type='publicIpPrefixes',
-                name=namespace.public_ip_prefix)
-
-    get_public_ip_validator()(cmd, namespace)
 
 
 def process_nic_create_namespace(cmd, namespace):

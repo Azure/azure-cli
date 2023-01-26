@@ -8,9 +8,9 @@
 
 from collections import Counter, OrderedDict
 
-from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
-
+import socket
 from knack.log import get_logger
+from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from azure.cli.core.aaz import has_value
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
@@ -28,6 +28,17 @@ from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone
 
 from .aaz.latest.network import ListUsages as _UsagesList
 from .aaz.latest.network.application_gateway import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.application_gateway.address_pool import Create as _AddressPoolCreate, \
+    Update as _AddressPoolUpdate
+from .aaz.latest.network.application_gateway.auth_cert import Create as _AuthCertCreate, Update as _AuthCertUpdate
+from .aaz.latest.network.application_gateway.client_cert import Add as _ClientCertAdd, Remove as _ClientCertRemove, \
+    Update as _ClientCertUpdate
+from .aaz.latest.network.application_gateway.frontend_ip import Create as _FrontendIPCreate, Update as _FrontendIPUpdate
+from .aaz.latest.network.application_gateway.root_cert import Create as _RootCertCreate, Update as _RootCertUpdate
+from .aaz.latest.network.application_gateway.ssl_cert import Create as _SSLCertCreate, Update as _SSLCertUpdate
+from .aaz.latest.network.application_gateway.ssl_policy import Set as _SSLPolicySet
+from .aaz.latest.network.application_gateway.ssl_profile import Add as _SSLProfileAdd, Update as _SSLProfileUpdate, \
+    Remove as _SSLProfileRemove
 from .aaz.latest.network.application_gateway.url_path_map import Create as _URLPathMapCreate, \
     Update as _URLPathMapUpdate
 from .aaz.latest.network.application_gateway.url_path_map.rule import Create as _URLPathMapRuleCreate
@@ -300,90 +311,153 @@ class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
             args.sku.tier = sku.split("_", 1)[0] if not _is_v2_sku(sku) else sku
 
 
-def create_ag_authentication_certificate(cmd, resource_group_name, application_gateway_name, item_name,
-                                         cert_data, no_wait=False):
-    AuthCert = cmd.get_models('ApplicationGatewayAuthenticationCertificate')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    new_cert = AuthCert(data=cert_data, name=item_name)
-    upsert_to_collection(ag, 'authentication_certificates', new_cert, 'name')
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, application_gateway_name, ag)
+class AuthCertCreate(_AuthCertCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.cert_file = AAZFileArg(
+            options=["--cert-file"],
+            help="Path to the certificate file.",
+            required=True,
+            fmt=AAZFileArgBase64EncodeFormat(),
+        )
+        args_schema.data._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.cert_file):
+            args.data = args.cert_file
 
 
-def update_ag_authentication_certificate(instance, parent, item_name, cert_data):
-    instance.data = cert_data
-    return parent
+class AuthCertUpdate(_AuthCertUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.cert_file = AAZFileArg(
+            options=["--cert-file"],
+            help="Path to the certificate file.",
+            required=True,
+            fmt=AAZFileArgBase64EncodeFormat(),
+            nullable=True,
+        )
+        args_schema.data._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.cert_file):
+            args.data = args.cert_file
 
 
-def create_ag_backend_address_pool(cmd, resource_group_name, application_gateway_name, item_name,
-                                   servers=None, no_wait=False):
-    ApplicationGatewayBackendAddressPool = cmd.get_models('ApplicationGatewayBackendAddressPool')
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    new_pool = ApplicationGatewayBackendAddressPool(name=item_name, backend_addresses=servers)
-    upsert_to_collection(ag, 'backend_address_pools', new_pool, 'name')
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
+class AddressPoolCreate(_AddressPoolCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.servers = AAZListArg(
+            options=["--servers"],
+            help="Space-separated list of IP addresses or DNS names corresponding to backend servers."
+        )
+        args_schema.servers.Element = AAZStrArg()
+        args_schema.backend_addresses._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+
+        def server_trans(_, server):
+            try:
+                socket.inet_aton(str(server))  # pylint:disable=no-member
+                return {"ip_address": server}
+            except socket.error:  # pylint:disable=no-member
+                return {"fqdn": server}
+
+        args.backend_addresses = assign_aaz_list_arg(
+            args.backend_addresses,
+            args.servers,
+            element_transformer=server_trans
+        )
 
 
-def update_ag_backend_address_pool(instance, parent, item_name, servers=None):
-    if servers is not None:
-        instance.backend_addresses = servers
-    return parent
+class AddressPoolUpdate(_AddressPoolUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.servers = AAZListArg(
+            options=["--servers"],
+            help="Space-separated list of IP addresses or DNS names corresponding to backend servers.",
+            nullable=True,
+        )
+        args_schema.servers.Element = AAZStrArg(
+            nullable=True,
+        )
+        args_schema.backend_addresses._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+
+        def server_trans(_, server):
+            try:
+                socket.inet_aton(str(server))  # pylint:disable=no-member
+                return {"ip_address": server}
+            except socket.error:  # pylint:disable=no-member
+                return {"fqdn": server}
+
+        args.backend_addresses = assign_aaz_list_arg(
+            args.backend_addresses,
+            args.servers,
+            element_transformer=server_trans
+        )
 
 
-def create_ag_frontend_ip_configuration(cmd, resource_group_name, application_gateway_name, item_name,
-                                        public_ip_address=None, subnet=None,
-                                        virtual_network_name=None, private_ip_address=None,
-                                        private_ip_address_allocation=None, no_wait=False):
-    ApplicationGatewayFrontendIPConfiguration, SubResource = cmd.get_models(
-        'ApplicationGatewayFrontendIPConfiguration', 'SubResource')
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    if public_ip_address:
-        new_config = ApplicationGatewayFrontendIPConfiguration(
-            name=item_name,
-            public_ip_address=SubResource(id=public_ip_address))
-    else:
-        new_config = ApplicationGatewayFrontendIPConfiguration(
-            name=item_name,
-            private_ip_address=private_ip_address if private_ip_address else None,
-            private_ip_allocation_method='Static' if private_ip_address else 'Dynamic',
-            subnet=SubResource(id=subnet))
-    upsert_to_collection(ag, 'frontend_ip_configurations', new_config, 'name')
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
+class FrontedIPCreate(_FrontendIPCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vnet_name = AAZStrArg(
+            options=["--vnet-name"],
+            help="Name of the virtual network corresponding to the subnet."
+        )
+        args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/publicIpAddresses/{}",
+        )
+        args_schema.subnet._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/virtualNetworks/{vnet_name}/subnets/{}",
+        )
+        args_schema.private_ip_allocation_method._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.private_ip_allocation_method = "Static" if has_value(args.private_ip_address) else "Dynamic"
 
 
-def update_ag_frontend_ip_configuration(cmd, instance, parent, item_name, public_ip_address=None,
-                                        subnet=None, virtual_network_name=None,
-                                        private_ip_address=None):
-    SubResource = cmd.get_models('SubResource')
-    if public_ip_address is not None:
-        instance.public_ip_address = SubResource(id=public_ip_address)
-    if subnet is not None:
-        instance.subnet = SubResource(id=subnet)
-    if private_ip_address is not None:
-        instance.private_ip_address = private_ip_address
-        instance.private_ip_allocation_method = 'Static'
-    return parent
+class FrontedIPUpdate(_FrontendIPUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vnet_name = AAZStrArg(
+            options=["--vnet-name"],
+            help="Name of the virtual network corresponding to the subnet."
+        )
+        args_schema.subnet._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/virtualNetworks/{vnet_name}/subnets/{}",
+        )
+        args_schema.private_ip_allocation_method._registered = False
+        return args_schema
 
-
-def create_ag_frontend_port(cmd, resource_group_name, application_gateway_name, item_name, port,
-                            no_wait=False):
-    ApplicationGatewayFrontendPort = cmd.get_models('ApplicationGatewayFrontendPort')
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    new_port = ApplicationGatewayFrontendPort(name=item_name, port=port)
-    upsert_to_collection(ag, 'frontend_ports', new_port, 'name')
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
-
-
-def update_ag_frontend_port(instance, parent, item_name, port=None):
-    if port is not None:
-        instance.port = port
-    return parent
+    def post_instance_update(self, instance):
+        instance.properties.private_ip_allocation_method = "Static" if has_value(instance.properties.private_ip_address) else "Dynamic"
 
 
 def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, item_name,
@@ -701,69 +775,60 @@ def remove_ag_private_link(cmd,
 
 
 # region application-gateway trusted-client-certificates
-def add_trusted_client_certificate(cmd, resource_group_name, application_gateway_name, client_cert_name,
-                                   client_cert_data, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    ApplicationGatewayTrustedClientCertificate = cmd.get_models('ApplicationGatewayTrustedClientCertificate')
-    cert = ApplicationGatewayTrustedClientCertificate(name=client_cert_name, data=client_cert_data)
-    appgw.trusted_client_certificates.append(cert)
+class ClientCertAdd(_ClientCertAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.data = AAZFileArg(
+            options=["--data"],
+            help="Path to the certificate file.",
+            required=True,
+            fmt=AAZFileArgBase64EncodeFormat(),
+        )
+        args_schema.cert_data._registered = False
+        return args_schema
 
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
-                       application_gateway_name, appgw)
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.data):
+            args.cert_data = args.data
 
-
-def update_trusted_client_certificate(cmd, resource_group_name, application_gateway_name, client_cert_name,
-                                      client_cert_data, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    for cert in appgw.trusted_client_certificates:
-        if cert.name == client_cert_name:
-            cert.data = client_cert_data
-            break
-    else:
-        raise ResourceNotFoundError(f"Trusted client certificate {client_cert_name} doesn't exist")
-
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
-                       application_gateway_name, appgw)
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def list_trusted_client_certificate(cmd, resource_group_name, application_gateway_name):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    return appgw.trusted_client_certificates
+class ClientCertRemove(_ClientCertRemove):
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def remove_trusted_client_certificate(cmd, resource_group_name, application_gateway_name, client_cert_name,
-                                      no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+class ClientCertUpdate(_ClientCertUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.data = AAZFileArg(
+            options=["--data"],
+            help="Path to the certificate file.",
+            required=True,
+            fmt=AAZFileArgBase64EncodeFormat(),
+            nullable=True,
+        )
+        args_schema.cert_data._registered = False
+        return args_schema
 
-    for cert in appgw.trusted_client_certificates:
-        if cert.name == client_cert_name:
-            appgw.trusted_client_certificates.remove(cert)
-            break
-    else:
-        raise ResourceNotFoundError(f"Trusted client certificate {client_cert_name} doesn't exist")
-
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
-                       application_gateway_name, appgw)
-
-
-def show_trusted_client_certificate(cmd, resource_group_name, application_gateway_name, client_cert_name):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    instance = None
-    for cert in appgw.trusted_client_certificates:
-        if cert.name == client_cert_name:
-            instance = cert
-            break
-    else:
-        raise ResourceNotFoundError(f"Trusted client certificate {client_cert_name} doesn't exist")
-
-    return instance
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.data):
+            args.cert_data = args.data
 
 
 def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, expand=None,
@@ -803,104 +868,94 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
 
 
 # region application-gateway ssl-profile
-def add_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name, policy_name=None,
-                    policy_type=None, min_protocol_version=None, cipher_suites=None, disabled_ssl_protocols=None,
-                    trusted_client_certificates=None, client_auth_configuration=None, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    (SubResource,
-     ApplicationGatewaySslPolicy,
-     ApplicationGatewayClientAuthConfiguration,
-     ApplicationGatewaySslProfile) = cmd.get_models('SubResource',
-                                                    'ApplicationGatewaySslPolicy',
-                                                    'ApplicationGatewayClientAuthConfiguration',
-                                                    'ApplicationGatewaySslProfile')
-    sr_trusted_client_certificates = [SubResource(id=item) for item in
-                                      trusted_client_certificates] if trusted_client_certificates else None
-    ssl_policy = ApplicationGatewaySslPolicy(policy_name=policy_name, policy_type=policy_type,
-                                             min_protocol_version=min_protocol_version,
-                                             cipher_suites=cipher_suites, disabled_ssl_protocols=disabled_ssl_protocols)
-    client_auth = ApplicationGatewayClientAuthConfiguration(
-        verify_client_cert_issuer_dn=client_auth_configuration) if client_auth_configuration else None
-    ssl_profile = ApplicationGatewaySslProfile(trusted_client_certificates=sr_trusted_client_certificates,
-                                               ssl_policy=ssl_policy, client_auth_configuration=client_auth,
-                                               name=ssl_profile_name)
-    appgw.ssl_profiles.append(ssl_profile)
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
-                       application_gateway_name, appgw)
+class SSLProfileAdd(_SSLProfileAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.client_auth_config = AAZBoolArg(
+            options=["--client-auth-configuration", "--client-auth-config"],
+            help="Client authentication configuration of the application gateway resource.",
+        )
+        args_schema.trusted_client_certs = AAZListArg(
+            options=["--trusted-client-certificates", "--trusted-client-cert"],
+            help="Array of references to application gateway trusted client certificates.",
+        )
+        args_schema.trusted_client_certs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/trustedClientCertificates/{}",
+            ),
+        )
+        args_schema.auth_configuration._registered = False
+        args_schema.client_certificates._registered = False
+        return args_schema
 
-
-def update_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name, policy_name=None,
-                       policy_type=None, min_protocol_version=None, cipher_suites=None, disabled_ssl_protocols=None,
-                       trusted_client_certificates=None, client_auth_configuration=None, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    instance = None
-    for profile in appgw.ssl_profiles:
-        if profile.name == ssl_profile_name:
-            instance = profile
-            break
-    else:
-        raise ResourceNotFoundError(f"Ssl profiles {ssl_profile_name} doesn't exist")
-
-    if policy_name is not None:
-        instance.ssl_policy.policy_name = policy_name
-    if policy_type is not None:
-        instance.ssl_policy.policy_type = policy_type
-    if min_protocol_version is not None:
-        instance.ssl_policy.min_protocol_version = min_protocol_version
-    if cipher_suites is not None:
-        instance.ssl_policy.cipher_suites = cipher_suites
-    if disabled_ssl_protocols is not None:
-        instance.ssl_policy.disabled_ssl_protocols = disabled_ssl_protocols
-    if trusted_client_certificates is not None:
-        SubResource = cmd.get_models('SubResource')
-        instance.trusted_client_certificates = [SubResource(id=item) for item in trusted_client_certificates]
-    if client_auth_configuration is not None:
-        ApplicationGatewayClientAuthConfiguration = cmd.get_models('ApplicationGatewayClientAuthConfiguration')
-        instance.client_auth_configuration = ApplicationGatewayClientAuthConfiguration(
-            verify_client_cert_issuer_dn=(client_auth_configuration == 'True')
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.client_auth_config):
+            args.auth_configuration.verify_client_cert_issuer_dn = args.client_auth_config
+        args.client_certificates = assign_aaz_list_arg(
+            args.client_certificates,
+            args.trusted_client_certs,
+            element_transformer=lambda _, cert_id: {"id": cert_id}
         )
 
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
-                       application_gateway_name, appgw)
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def list_ssl_profile(cmd, resource_group_name, application_gateway_name):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    return appgw.ssl_profiles
+class SSLProfileUpdate(_SSLProfileUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.client_auth_config = AAZBoolArg(
+            options=["--client-auth-configuration", "--client-auth-config"],
+            help="Client authentication configuration of the application gateway resource.",
+            nullable=True,
+        )
+        args_schema.trusted_client_certs = AAZListArg(
+            options=["--trusted-client-certificates", "--trusted-client-cert"],
+            help="Array of references to application gateway trusted client certificates.",
+            nullable=True,
+        )
+        args_schema.trusted_client_certs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/trustedClientCertificates/{}",
+            ),
+            nullable=True,
+        )
+        args_schema.auth_configuration._registered = False
+        args_schema.client_certificates._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.client_auth_config):
+            args.auth_configuration.verify_client_cert_issuer_dn = args.client_auth_config
+        args.client_certificates = assign_aaz_list_arg(
+            args.client_certificates,
+            args.trusted_client_certs,
+            element_transformer=lambda _, cert_id: {"id": cert_id}
+        )
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def remove_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+class SSLProfileRemove(_SSLProfileRemove):
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
 
-    for profile in appgw.ssl_profiles:
-        if profile.name == ssl_profile_name:
-            appgw.ssl_profiles.remove(profile)
-            break
-    else:
-        raise ResourceNotFoundError(f"Ssl profiles {ssl_profile_name} doesn't exist")
-
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
-                       application_gateway_name, appgw)
-
-
-def show_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name):
-    ncf = network_client_factory(cmd.cli_ctx)
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    instance = None
-    for profile in appgw.ssl_profiles:
-        if profile.name == ssl_profile_name:
-            instance = profile
-            break
-    else:
-        raise ResourceNotFoundError(f"Ssl profiles {ssl_profile_name} doesn't exist")
-    return instance
-
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 # endregion
 
 
@@ -1508,82 +1563,96 @@ def update_ag_routing_rule(cmd, instance, parent, item_name, address_pool=None,
     return parent
 
 
-def create_ag_ssl_certificate(cmd, resource_group_name, application_gateway_name, item_name, cert_data=None,
-                              cert_password=None, key_vault_secret_id=None, no_wait=False):
-    ApplicationGatewaySslCertificate = cmd.get_models('ApplicationGatewaySslCertificate')
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    new_cert = ApplicationGatewaySslCertificate(
-        name=item_name, data=cert_data, password=cert_password, key_vault_secret_id=key_vault_secret_id)
-    upsert_to_collection(ag, 'ssl_certificates', new_cert, 'name')
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
+class SSLCertCreate(_SSLCertCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.cert_file = AAZFileArg(
+            options=["--cert-file"],
+            help="Path to the pfx certificate file.",
+            fmt=AAZFileArgBase64EncodeFormat(),
+        )
+        args_schema.data._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.cert_file):
+            args.data = args.cert_file
 
 
-def update_ag_ssl_certificate(instance, parent, item_name,
-                              cert_data=None, cert_password=None, key_vault_secret_id=None):
-    if cert_data is not None:
-        instance.data = cert_data
-    if cert_password is not None:
-        instance.password = cert_password
-    if key_vault_secret_id is not None:
-        instance.key_vault_secret_id = key_vault_secret_id
-    return parent
+class SSLCertUpdate(_SSLCertUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.cert_file = AAZFileArg(
+            options=["--cert-file"],
+            help="Path to the pfx certificate file.",
+            fmt=AAZFileArgBase64EncodeFormat(),
+            nullable=True,
+        )
+        args_schema.data._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.cert_file):
+            args.data = args.cert_file
 
 
-def set_ag_ssl_policy_2017_03_01(cmd, resource_group_name, application_gateway_name, disabled_ssl_protocols=None,
-                                 clear=False, no_wait=False):
-    ApplicationGatewaySslPolicy = cmd.get_models('ApplicationGatewaySslPolicy')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    ag.ssl_policy = None if clear else ApplicationGatewaySslPolicy(
-        disabled_ssl_protocols=disabled_ssl_protocols)
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, application_gateway_name, ag)
+class SSLPolicySet(_SSLPolicySet):
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.name):
+            args.policy_type = "Predefined"
+        elif not has_value(args.policy_type) \
+                and (has_value(args.cipher_suites) or has_value(args.min_protocol_version)):
+            args.policy_type = "Custom"
 
 
-def set_ag_ssl_policy_2017_06_01(cmd, resource_group_name, application_gateway_name, policy_name=None, policy_type=None,
-                                 disabled_ssl_protocols=None, cipher_suites=None, min_protocol_version=None,
-                                 no_wait=False):
-    ApplicationGatewaySslPolicy, ApplicationGatewaySslPolicyType = cmd.get_models(
-        'ApplicationGatewaySslPolicy', 'ApplicationGatewaySslPolicyType')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    if policy_name:
-        policy_type = ApplicationGatewaySslPolicyType.predefined.value
-    elif policy_type is None and (cipher_suites or min_protocol_version):
-        policy_type = ApplicationGatewaySslPolicyType.custom.value
-    ag.ssl_policy = ApplicationGatewaySslPolicy(
-        policy_name=policy_name,
-        policy_type=policy_type,
-        disabled_ssl_protocols=disabled_ssl_protocols,
-        cipher_suites=cipher_suites,
-        min_protocol_version=min_protocol_version)
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, application_gateway_name, ag)
+class RootCertCreate(_RootCertCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.cert_file = AAZFileArg(
+            options=["--cert-file"],
+            help="Path to the certificate file.",
+            fmt=AAZFileArgBase64EncodeFormat(),
+        )
+        args_schema.data._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.cert_file):
+            args.data = args.cert_file
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def show_ag_ssl_policy(cmd, resource_group_name, application_gateway_name):
-    return network_client_factory(cmd.cli_ctx).application_gateways.get(
-        resource_group_name, application_gateway_name).ssl_policy
+class RootCertUpdate(_RootCertUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.cert_file = AAZFileArg(
+            options=["--cert-file"],
+            help="Path to the certificate file.",
+            fmt=AAZFileArgBase64EncodeFormat(),
+            nullable=True,
+        )
+        args_schema.data._registered = False
+        return args_schema
 
-
-def create_ag_trusted_root_certificate(cmd, resource_group_name, application_gateway_name, item_name, no_wait=False,
-                                       cert_data=None, keyvault_secret=None):
-    ApplicationGatewayTrustedRootCertificate = cmd.get_models('ApplicationGatewayTrustedRootCertificate')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    root_cert = ApplicationGatewayTrustedRootCertificate(name=item_name, data=cert_data,
-                                                         key_vault_secret_id=keyvault_secret)
-    upsert_to_collection(ag, 'trusted_root_certificates', root_cert, 'name')
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
-
-
-def update_ag_trusted_root_certificate(instance, parent, item_name, cert_data=None, keyvault_secret=None):
-    if cert_data is not None:
-        instance.data = cert_data
-    if keyvault_secret is not None:
-        instance.key_vault_secret_id = keyvault_secret
-    return parent
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.cert_file):
+            args.data = args.cert_file
 
 
 class URLPathMapCreate(_URLPathMapCreate):
@@ -3903,35 +3972,6 @@ def list_load_balancer_mapping(cmd, resource_group_name, load_balancer_name, bac
     return ListMapping(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
-def create_lb_inbound_nat_rule(
-        cmd, resource_group_name, load_balancer_name, item_name, protocol, backend_port, frontend_port=None,
-        frontend_ip_name=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
-        frontend_port_range_start=None, frontend_port_range_end=None, backend_pool_name=None):
-    InboundNatRule, SubResource = cmd.get_models('InboundNatRule', 'SubResource')
-    ncf = network_client_factory(cmd.cli_ctx)
-    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
-    if not frontend_ip_name:
-        frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
-    frontend_ip = get_property(lb.frontend_ip_configurations, frontend_ip_name)  # pylint: disable=no-member
-    new_rule = InboundNatRule(
-        name=item_name, protocol=protocol,
-        frontend_port=frontend_port, backend_port=backend_port,
-        frontend_ip_configuration=frontend_ip,
-        enable_floating_ip=floating_ip,
-        idle_timeout_in_minutes=idle_timeout,
-        enable_tcp_reset=enable_tcp_reset)
-    if frontend_port_range_end and cmd.supported_api_version('2021-03-01'):
-        new_rule.frontend_port_range_end = frontend_port_range_end
-    if frontend_port_range_start and cmd.supported_api_version('2021-03-01'):
-        new_rule.frontend_port_range_start = frontend_port_range_start
-    if backend_pool_name and cmd.supported_api_version('2021-03-01'):
-        backend_pool_id = get_property(lb.backend_address_pools, backend_pool_name).id
-        new_rule.backend_address_pool = SubResource(id=backend_pool_id)
-    upsert_to_collection(lb, 'inbound_nat_rules', new_rule, 'name')
-    poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
-    return get_property(poller.result().inbound_nat_rules, item_name)
-
-
 # workaround for : https://github.com/Azure/azure-cli/issues/17071
 def lb_get(client, resource_group_name, load_balancer_name):
     lb = client.get(resource_group_name, load_balancer_name)
@@ -3945,31 +3985,6 @@ def lb_get_operation(lb):
             item.zones = None
 
     return lb
-
-
-def set_lb_inbound_nat_rule(
-        cmd, instance, parent, item_name, protocol=None, frontend_port=None,
-        frontend_ip_name=None, backend_port=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
-        frontend_port_range_start=None, frontend_port_range_end=None):
-    if frontend_ip_name:
-        instance.frontend_ip_configuration = \
-            get_property(parent.frontend_ip_configurations, frontend_ip_name)
-
-    if enable_tcp_reset is not None:
-        instance.enable_tcp_reset = enable_tcp_reset
-    if frontend_port_range_start is not None and cmd.supported_api_version('2021-03-01'):
-        instance.frontend_port_range_start = frontend_port_range_start
-    if frontend_port_range_end is not None and cmd.supported_api_version('2021-03-01'):
-        instance.frontend_port_range_end = frontend_port_range_end
-
-    with cmd.update_context(instance) as c:
-        c.set_param('protocol', protocol)
-        c.set_param('frontend_port', frontend_port)
-        c.set_param('backend_port', backend_port)
-        c.set_param('idle_timeout_in_minutes', idle_timeout)
-        c.set_param('enable_floating_ip', floating_ip)
-
-    return parent
 
 
 def create_lb_inbound_nat_pool(
@@ -4018,82 +4033,6 @@ def set_lb_inbound_nat_pool(
     elif frontend_ip_name is not None:
         instance.frontend_ip_configuration = \
             get_property(parent.frontend_ip_configurations, frontend_ip_name)
-
-    return parent
-
-
-def create_lb_frontend_ip_configuration(
-        cmd, resource_group_name, load_balancer_name, item_name, public_ip_address=None,
-        public_ip_prefix=None, subnet=None, virtual_network_name=None, private_ip_address=None,
-        private_ip_address_version=None, private_ip_address_allocation=None, zone=None):
-    FrontendIPConfiguration, SubResource, Subnet = cmd.get_models(
-        'FrontendIPConfiguration', 'SubResource', 'Subnet')
-    ncf = network_client_factory(cmd.cli_ctx)
-    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
-
-    if public_ip_address is None:
-        logger.warning(
-            "Please note that the default public IP used for LB frontend will be changed from Basic to Standard "
-            "in the future."
-        )
-    if private_ip_address_allocation is None:
-        private_ip_address_allocation = 'static' if private_ip_address else 'dynamic'
-
-    new_config = FrontendIPConfiguration(
-        name=item_name,
-        private_ip_address=private_ip_address,
-        private_ip_address_version=private_ip_address_version,
-        private_ip_allocation_method=private_ip_address_allocation,
-        public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
-        public_ip_prefix=SubResource(id=public_ip_prefix) if public_ip_prefix else None,
-        subnet=Subnet(id=subnet) if subnet else None)
-
-    if zone and cmd.supported_api_version(min_api='2017-06-01'):
-        new_config.zones = zone
-
-    upsert_to_collection(lb, 'frontend_ip_configurations', new_config, 'name')
-    poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
-    return get_property(poller.result().frontend_ip_configurations, item_name)
-
-
-def update_lb_frontend_ip_configuration_setter(cmd, resource_group_name, load_balancer_name, parameters, gateway_lb):
-    aux_subscriptions = []
-    if is_valid_resource_id(gateway_lb):
-        aux_subscriptions.append(parse_resource_id(gateway_lb)['subscription'])
-    client = network_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions).load_balancers
-    return client.begin_create_or_update(resource_group_name, load_balancer_name, parameters)
-
-
-def set_lb_frontend_ip_configuration(
-        cmd, instance, parent, item_name, private_ip_address=None,
-        private_ip_address_allocation=None, public_ip_address=None,
-        subnet=None, virtual_network_name=None, public_ip_prefix=None, gateway_lb=None):
-    PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
-    if not private_ip_address:
-        instance.private_ip_allocation_method = 'dynamic'
-        instance.private_ip_address = None
-    elif private_ip_address is not None:
-        instance.private_ip_allocation_method = 'static'
-        instance.private_ip_address = private_ip_address
-
-    # Doesn't support update operation for now
-    # if cmd.supported_api_version(min_api='2019-04-01'):
-    #    instance.private_ip_address_version = private_ip_address_version
-
-    if subnet == '':
-        instance.subnet = None
-    elif subnet is not None:
-        instance.subnet = Subnet(id=subnet)
-
-    if public_ip_address == '':
-        instance.public_ip_address = None
-    elif public_ip_address is not None:
-        instance.public_ip_address = PublicIPAddress(id=public_ip_address)
-
-    if public_ip_prefix:
-        instance.public_ip_prefix = SubResource(id=public_ip_prefix)
-    if gateway_lb is not None:
-        instance.gateway_load_balancer = None if gateway_lb == '' else SubResource(id=gateway_lb)
 
     return parent
 
@@ -4400,42 +4339,6 @@ def create_cross_region_load_balancer(cmd, load_balancer_name, resource_group_na
         return client.validate(resource_group_name, deployment_name, deployment)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
-
-
-def create_cross_region_lb_frontend_ip_configuration(
-        cmd, resource_group_name, load_balancer_name, item_name, public_ip_address=None,
-        public_ip_prefix=None, zone=None):
-    FrontendIPConfiguration, SubResource = cmd.get_models(
-        'FrontendIPConfiguration', 'SubResource')
-    ncf = network_client_factory(cmd.cli_ctx)
-    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
-
-    new_config = FrontendIPConfiguration(
-        name=item_name,
-        public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
-        public_ip_prefix=SubResource(id=public_ip_prefix) if public_ip_prefix else None)
-
-    if zone and cmd.supported_api_version(min_api='2017-06-01'):
-        new_config.zones = zone
-
-    upsert_to_collection(lb, 'frontend_ip_configurations', new_config, 'name')
-    poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
-    return get_property(poller.result().frontend_ip_configurations, item_name)
-
-
-def set_cross_region_lb_frontend_ip_configuration(
-        cmd, instance, parent, item_name, public_ip_address=None, public_ip_prefix=None):
-    PublicIPAddress, SubResource = cmd.get_models('PublicIPAddress', 'SubResource')
-
-    if public_ip_address == '':
-        instance.public_ip_address = None
-    elif public_ip_address is not None:
-        instance.public_ip_address = PublicIPAddress(id=public_ip_address)
-
-    if public_ip_prefix:
-        instance.public_ip_prefix = SubResource(id=public_ip_prefix)
-
-    return parent
 
 
 def create_cross_region_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
@@ -7314,7 +7217,7 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name,
                 private_ip_allocation_method='Dynamic',
                 name='vnetGatewayConfig{}'.format(i)
             )
-        vnet_gateway.ip_configurations.append(ip_configuration)
+            vnet_gateway.ip_configurations.append(ip_configuration)
     else:
         vnet_gateway.vpn_type = None
         vnet_gateway.sku = None
