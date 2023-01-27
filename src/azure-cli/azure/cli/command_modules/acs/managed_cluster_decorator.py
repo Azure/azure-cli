@@ -2076,6 +2076,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                     else:
                         if (
                             self.get_load_balancer_managed_outbound_ip_count() or
+                            self.get_load_balancer_managed_outbound_ipv6_count() or
                             self.get_load_balancer_outbound_ips() or
                             self.get_load_balancer_outbound_ip_prefixes()
                         ):
@@ -5992,6 +5993,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             )
 
         load_balancer_managed_outbound_ip_count = self.context.get_load_balancer_managed_outbound_ip_count()
+        load_balancer_managed_outbound_ipv6_count = self.context.get_load_balancer_managed_outbound_ipv6_count()
         load_balancer_outbound_ips = self.context.get_load_balancer_outbound_ips()
         load_balancer_outbound_ip_prefixes = self.context.get_load_balancer_outbound_ip_prefixes()
         load_balancer_outbound_ports = self.context.get_load_balancer_outbound_ports()
@@ -6001,6 +6003,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         # remain unchanged.
         mc.network_profile.load_balancer_profile = _update_load_balancer_profile(
             managed_outbound_ip_count=load_balancer_managed_outbound_ip_count,
+            managed_outbound_ipv6_count=load_balancer_managed_outbound_ipv6_count,
             outbound_ips=load_balancer_outbound_ips,
             outbound_ip_prefixes=load_balancer_outbound_ip_prefixes,
             outbound_ports=load_balancer_outbound_ports,
