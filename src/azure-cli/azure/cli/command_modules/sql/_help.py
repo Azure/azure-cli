@@ -302,6 +302,11 @@ type: command
 short-summary: Place the CLI in a waiting state until a condition of the database is met.
 """
 
+helps['sql db geo-backup'] = """
+type: group
+short-summary: Manage SQL database geo redundant backups.
+"""
+
 helps['sql db geo-backup show'] = """
 type: command
 short-summary: Gets a geo backup policy.
@@ -326,7 +331,7 @@ examples:
     text: |
         az sql db geo-backup restore \\
         --dest-database targetdb --dest-server myserver --dest-resource-group mygroup \\
-        --backup-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup/providers/Microsoft.Sql/servers/myserver/databases/mydb/geoBackupPolicies/Default"
+        --geo-backup-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup/providers/Microsoft.Sql/servers/myserver/databases/mydb/geoBackupPolicies/Default"
 """
 
 helps['sql db op'] = """

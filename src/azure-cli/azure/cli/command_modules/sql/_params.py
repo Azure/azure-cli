@@ -1191,7 +1191,7 @@ def load_arguments(self, _):
                    help='Name of the resource group of the server to restore database to.')
 
         c.argument('geo_backup_resource_id',
-                   options_list=['--backup-id'],
+                   options_list=['--geo-backup-id'],
                    required=True,
                    help='The resource id of the geo-redundant backup to be restored. '
                    'Use \'az sql db geo-backup list\' or \'az sql db geo-backup show\' for backup id.')
