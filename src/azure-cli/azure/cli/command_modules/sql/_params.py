@@ -1131,6 +1131,7 @@ def load_arguments(self, _):
                     arg_type=read_replicas_param_type)
 
         c.argument('zone_redundant',
+                    required=False,
                     arg_type=zone_redundant_param_type)
 
     ###############################################
@@ -1204,6 +1205,7 @@ def load_arguments(self, _):
                     arg_type=read_replicas_param_type)
                          
         c.argument('zone_redundant',
+                    required=False,
                     arg_type=zone_redundant_param_type)
 
     ###############################################
