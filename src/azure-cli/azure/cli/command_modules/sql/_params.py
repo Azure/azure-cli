@@ -1127,12 +1127,12 @@ def load_arguments(self, _):
                    arg_type=backup_storage_redundancy_param_type)
 
         c.argument('high_availability_replica_count',
-                    required=False,
-                    arg_type=read_replicas_param_type)
+                   required=False,
+                   arg_type=read_replicas_param_type)
 
         c.argument('zone_redundant',
-                    required=False,
-                    arg_type=zone_redundant_param_type)
+                   required=False,
+                   arg_type=zone_redundant_param_type)
 
     ###############################################
     #              sql db geo-backup              #
@@ -1186,11 +1186,11 @@ def load_arguments(self, _):
                    help='Name of the server to restore database to.')
 
         c.argument('target_resource_group_name',
-                   options_list=['--dest-resource-group'],
+                   options_list=['--dest-resource-group-name'],
                    required=True,
                    help='Name of the resource group of the server to restore database to.')
 
-        c.argument('geo_backup_resource_id',
+        c.argument('geo_backup_id',
                    options_list=['--geo-backup-id'],
                    required=True,
                    help='The resource id of the geo-redundant backup to be restored. '
@@ -1201,12 +1201,12 @@ def load_arguments(self, _):
                    arg_type=backup_storage_redundancy_param_type)
 
         c.argument('high_availability_replica_count',
-                    required=False,
-                    arg_type=read_replicas_param_type)
-                         
+                   required=False,
+                   arg_type=read_replicas_param_type)
+
         c.argument('zone_redundant',
-                    required=False,
-                    arg_type=zone_redundant_param_type)
+                   required=False,
+                   arg_type=zone_redundant_param_type)
 
     ###############################################
     #                sql db str                   #

@@ -1269,7 +1269,7 @@ class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
 
         self.cmd(
             'sql db geo-backup restore --geo-backup-id {backup_id} --dest-database {dest_database_name}'
-            ' --dest-server {server_name} --dest-resource-group {rg}',
+            ' --dest-server {server_name} --dest-resource-group-name {rg}',
             checks=[
                 self.check('name', '{dest_database_name}')])
                 
