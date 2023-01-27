@@ -1239,6 +1239,43 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             checks=[NoneCheck()])
 
 
+class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
+    def test_sql_db_geo_restore(
+            self):
+        self.kwargs.update({
+            'rg': 'CustomerExperienceTeam_RG',
+            'loc': 'westcentralus',
+            'server_name': 'mi-tooling-server',
+            'database_name': 'a-reneamoso-qpi-testing'
+        })
+
+        # test list geo backups for database
+        self.cmd(
+            'sql db geo-backup list -g {rg} -s {server_name} -d {database_name}',
+            checks=[
+                self.greater_than('length(@)', 0)])
+
+        # setup for test show geo backup
+        backup = self.cmd(
+            'sql db geo-backup show -s {server_name} -d {database_name} -g {rg}').get_output_in_json()
+        
+        id = backup[0]['id']
+        backup_id = id.split("/geoBackupPolicies")[0].replace("/databases/", "/recoverableDatabases/")
+
+        self.kwargs.update({
+            'backup_id': backup_id,
+            'dest_database_name': "cli-georestore"
+        })
+
+        self.cmd(
+            'sql db geo-backup restore --geo-backup-id {backup_id} --dest-database {dest_database_name}'
+            ' --dest-server {server_name} --dest-resource-group {rg}',
+            checks=[
+                self.check('name', '{dest_database_name}')])
+                
+        self.cmd('sql db delete -g {rg} -s {server_name} -n {dest_database_name} --yes')
+
+
 class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
     @ManagedInstancePreparer()

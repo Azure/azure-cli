@@ -244,7 +244,7 @@ storage_param_type = CLIArgumentType(
 backup_storage_redundancy_param_type = CLIArgumentType(
     options_list=['--backup-storage-redundancy', '--bsr'],
     type=get_internal_backup_storage_redundancy,
-    help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo.',
+    help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo, GeoZone.',
     validator=validate_backup_storage_redundancy)
 
 backup_storage_redundancy_param_type_mi = CLIArgumentType(
@@ -1125,6 +1125,86 @@ def load_arguments(self, _):
         c.argument('requested_backup_storage_redundancy',
                    required=False,
                    arg_type=backup_storage_redundancy_param_type)
+
+        c.argument('high_availability_replica_count',
+                    required=False,
+                    arg_type=read_replicas_param_type)
+
+        c.argument('zone_redundant',
+                    arg_type=zone_redundant_param_type)
+
+    ###############################################
+    #              sql db geo-backup              #
+    ###############################################
+    with self.argument_context('sql db geo-backup show') as c:
+        c.argument('database_name',
+                   options_list=['--database-name', '--database', '-d'],
+                   required=True,
+                   help='retrieves a requested geo-redundant backup under this database.')
+
+        c.argument('server_name',
+                   options_list=['--server-name', '--server', '-s'],
+                   required=True,
+                   help='Retrieves a requested geo-redundant backup under this server.')
+
+        c.argument('resource_group_name',
+                   options_list=['--resource-group', '-g'],
+                   required=True,
+                   help='Retrieves a requested geo-redundant backup under this resource group.')
+
+        c.argument('geo_backup_policy_name',
+                   options_list=['--geo-backup-policy-name'],
+                   required=True,
+                   help='The name of the geo backup policy.')
+
+    with self.argument_context('sql db geo-backup list') as c:
+        c.argument('database_name',
+                   options_list=['--database-name', '--database', '-d'],
+                   required=True,
+                   help='Retrieves all requested geo-redundant backups under this database.')
+
+        c.argument('server_name',
+                   options_list=['--server-name', '--server', '-s'],
+                   required=True,
+                   help='Retrieves all requested geo-redundant backups under this server.')
+
+        c.argument('resource_group_name',
+                   options_list=['--resource-group', '-g'],
+                   required=True,
+                   help='Retrieves all requested geo-redundant backups under this resource group.')
+
+    with self.argument_context('sql db geo-backup restore') as c:
+        c.argument('target_database_name',
+                   options_list=['--dest-database'],
+                   required=True,
+                   help='Name of the database that will be created as the restore destination.')
+
+        c.argument('target_server_name',
+                   options_list=['--dest-server'],
+                   required=True,
+                   help='Name of the server to restore database to.')
+
+        c.argument('target_resource_group_name',
+                   options_list=['--dest-resource-group'],
+                   required=True,
+                   help='Name of the resource group of the server to restore database to.')
+
+        c.argument('geo_backup_resource_id',
+                   options_list=['--backup-id'],
+                   required=True,
+                   help='The resource id of the geo-redundant backup to be restored. '
+                   'Use \'az sql db geo-backup list\' or \'az sql db geo-backup show\' for backup id.')
+
+        c.argument('requested_backup_storage_redundancy',
+                   required=False,
+                   arg_type=backup_storage_redundancy_param_type)
+
+        c.argument('high_availability_replica_count',
+                    required=False,
+                    arg_type=read_replicas_param_type)
+                         
+        c.argument('zone_redundant',
+                    arg_type=zone_redundant_param_type)
 
     ###############################################
     #                sql db str                   #
