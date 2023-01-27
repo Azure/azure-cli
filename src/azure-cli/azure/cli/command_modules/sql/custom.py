@@ -689,7 +689,12 @@ def _get_server_dns_suffx(cli_ctx):
     return getenv('_AZURE_CLI_SQL_DNS_SUFFIX', default=cli_ctx.cloud.suffixes.sql_server_hostname)
 
 
-def _get_managed_db_resource_id(cli_ctx, resource_group_name, managed_instance_name, database_name, subscription_id=None):
+def _get_managed_db_resource_id(
+        cli_ctx,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        subscription_id=None):
     '''
     Gets the Managed db resource id in this Azure environment.
     '''
@@ -760,7 +765,6 @@ def _get_managed_instance_resource_id(
     Gets managed instance resource id in this Azure environment.
     '''
 
-    from urllib.parse import quote
     from azure.cli.core.commands.client_factory import get_subscription_id
     from msrestazure.tools import resource_id
 
