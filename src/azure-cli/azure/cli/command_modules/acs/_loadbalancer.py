@@ -45,11 +45,11 @@ def create_load_balancer_profile(managed_outbound_ip_count, managed_outbound_ipv
         ManagedClusterLoadBalancerProfile = models.get("ManagedClusterLoadBalancerProfile")
     profile = ManagedClusterLoadBalancerProfile()
     return configure_load_balancer_profile(managed_outbound_ip_count, managed_outbound_ipv6_count, outbound_ips,
-                                            outbound_ip_prefixes, outbound_ports, idle_timeout, profile, models)
+                                           outbound_ip_prefixes, outbound_ports, idle_timeout, profile, models)
 
 
-def configure_load_balancer_profile(managed_outbound_ip_count, managed_outbound_ipv6_count, outbound_ips, outbound_ip_prefixes, outbound_ports,
-                                    idle_timeout, profile, models):
+def configure_load_balancer_profile(managed_outbound_ip_count, managed_outbound_ipv6_count, outbound_ips,
+                                    outbound_ip_prefixes, outbound_ports, idle_timeout, profile, models):
     """configure a load balancer with customer supplied values"""
     if not profile:
         return profile
