@@ -4938,26 +4938,6 @@ def list_lb_backend_address_pool_tunnel_interface(cmd, resource_group_name, load
 # endregion
 
 
-# region LocalGateways
-def _validate_bgp_peering(cmd, instance, asn, bgp_peering_address, peer_weight):
-    if any([asn, bgp_peering_address, peer_weight]):
-        if instance.bgp_settings is not None:
-            # update existing parameters selectively
-            if asn is not None:
-                instance.bgp_settings.asn = asn
-            if peer_weight is not None:
-                instance.bgp_settings.peer_weight = peer_weight
-            if bgp_peering_address is not None:
-                instance.bgp_settings.bgp_peering_address = bgp_peering_address
-        elif asn:
-            BgpSettings = cmd.get_models('BgpSettings')
-            instance.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
-        else:
-            raise CLIError(
-                'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP]')
-# endregion
-
-
 # region NetworkInterfaces (NIC)
 def create_nic(cmd, resource_group_name, network_interface_name, subnet, location=None, tags=None,
                internal_dns_name_label=None, dns_servers=None, enable_ip_forwarding=False,
@@ -7349,7 +7329,6 @@ class VnetGatewayCreate(_VnetGatewayCreate):
         if args.gateway_type != "LocalGateway":
             if has_value(args.public_ip_addresses):
                 public_ip_addresses = args.public_ip_addresses.to_serialized_data()
-                args.ip_configurations = []
                 ip_configuration = {}
                 for i, public_ip in enumerate(public_ip_addresses):
                     ip_configuration[i] = {'subnet': subnet, 'public_ip_address': public_ip,
@@ -7414,24 +7393,27 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
             AAZFileArgBase64EncodeFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.public_ip_addresses = AAZListArg(options=['--public-ip-addresses', '--public-ip-address'],
-                                                     help="Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.")
+                                                     help="Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.",
+                                                     nullable=True)
         args_schema.public_ip_addresses.Element = AAZResourceIdArg(
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIPAddresses/{}"
-            )
+            ),
+            nullable=True,
         )
         args_schema.vnet = AAZResourceIdArg(
             options=['--vnet'],
             help="Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'.",
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
-            )
+            ),
+            nullable=True
         )
         args_schema.root_cert_data = AAZFileArg(options=['--root-cert-data'], arg_group="Root Cert Authentication",
                                                 help="Base64 contents of the root certificate file or file path.",
-                                                fmt=AAZFileArgBase64EncodeFormat())
+                                                fmt=AAZFileArgBase64EncodeFormat(), nullable=True)
         args_schema.root_cert_name = AAZStrArg(options=['--root-cert-name'], arg_group="Root Cert Authentication",
-                                               help="Root certificate name.")
+                                               help="Root certificate name.", nullable=True,)
         args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
         )
