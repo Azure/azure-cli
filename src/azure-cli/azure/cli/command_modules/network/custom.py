@@ -53,7 +53,8 @@ from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
 from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdate
 from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
 from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update as _VNetSubnetUpdate
-from .aaz.latest.network.vnet_gateway import Create as _VnetGatewayCreate, Update as _VnetGatewayUpdate
+from .aaz.latest.network.vnet_gateway import Create as _VnetGatewayCreate, Update as _VnetGatewayUpdate, \
+    DisconnectVpnConnections as _VnetGatewayVpnConnectionsDisconnect
 
 logger = get_logger(__name__)
 
@@ -7287,12 +7288,10 @@ class VnetGatewayCreate(_VnetGatewayCreate):
             options=["external-mappings"],
             help="Required.The private IP address external mapping for NAT.",
         )
-        # args_schema.nat_rules.Element.external_mappings.Element = AAZStrArg()
         args_schema.nat_rules.Element.internal_mappings = AAZStrArg(
             options=["internal-mappings"],
             help="Required.The private IP address internal mapping for NAT.",
         )
-        # args_schema.nat_rules.Element.internal_mappings.Element = AAZStrArg()
         args_schema.root_cert_data = AAZFileArg(options=['--root-cert-data'], arg_group="Root Cert Authentication",
                                                 help="Base64 contents of the root certificate file or file path.",
                                                 fmt=AAZFileArgBase64EncodeFormat(),)
@@ -7567,9 +7566,6 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
                                                 fmt=AAZFileArgBase64EncodeFormat())
         args_schema.root_cert_name = AAZStrArg(options=['--root-cert-name'], arg_group="Root Cert Authentication",
                                                help="Root certificate name.")
-        # args_schema.custom_routes = AAZListArg(options=['--custom-routes'],
-        #                                        help="Space-separated list of CIDR prefixes representing the custom routes address space specified by the customer for VpnClient.")
-        # args_schema.custom_routes.Element = AAZStrArg()
         args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
         )
@@ -7577,7 +7573,6 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
         args_schema.active._registered = False
         args_schema.vpn_client_root_certificates._registered = False
         args_schema.sku_tier._registered = False
-        args_schema.enable_bgp._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -7594,14 +7589,14 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
     def pre_instance_update(self, instance):
         args = self.ctx.args
         if has_value(args.root_cert_data):
-            collection = instance.properties.vpnClientConfiguration.vpnClientRootCertificates.to_serialized_data()
+            collection = instance.properties.vpn_client_configuration.vpn_client_root_certificates.to_serialized_data()
             root_certificate = [{'name': args.root_cert_name, 'public_cert_data': args.root_cert_data}]
-            # value = args.root_cert_name.to_serialized_data()
-            # match = next((x for x in collection if getattr(x, 'name', None) == value), None)
-            # if match:
-            #     collection.remove(match)
-            # collection.append(root_certificate)
-            args.vpn_client_root_certificates = root_certificate
+            value = args.root_cert_name.to_serialized_data()
+            match = next((x for x in collection if getattr(x, 'name', None) == value), None)
+            if match:
+                collection.remove(match)
+            collection.append(root_certificate)
+            args.vpn_client_root_certificates = collection
 
         subnet_id = '{}/subnets/GatewaySubnet'.format(args.vnet) if has_value(args.vnet) else \
             instance.properties.ip_configurations[0].properties.subnet.id
@@ -7678,6 +7673,18 @@ def set_vpn_client_ipsec_policy(cmd, client, resource_group_name, virtual_networ
                                                       pfs_group=pfs_group)
     return sdk_no_wait(no_wait, client.begin_set_vpnclient_ipsec_parameters, resource_group_name,
                        virtual_network_gateway_name, vpnclient_ipsec_params)
+
+
+class VnetGatewayVpnConnectionsDisconnect(_VnetGatewayVpnConnectionsDisconnect):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vpn_connections.Element._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/connections/{}"
+        )
+
+        return args_schema
 
 
 def disconnect_vnet_gateway_vpn_connections(cmd, client, resource_group_name, virtual_network_gateway_name,

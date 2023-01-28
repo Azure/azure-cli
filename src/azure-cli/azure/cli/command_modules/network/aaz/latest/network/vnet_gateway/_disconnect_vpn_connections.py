@@ -59,14 +59,14 @@ class DisconnectVpnConnections(AAZCommand):
         # define Arg Group "Request"
 
         _args_schema = cls._args_schema
-        _args_schema.vpn_connection_ids = AAZListArg(
-            options=["--vpn-connection-ids"],
+        _args_schema.vpn_connections = AAZListArg(
+            options=["--vpn-connections"],
             arg_group="Request",
             help="List of Name or ID of VPN connections.",
         )
 
-        vpn_connection_ids = cls._args_schema.vpn_connection_ids
-        vpn_connection_ids.Element = AAZStrArg()
+        vpn_connections = cls._args_schema.vpn_connections
+        vpn_connections.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
@@ -168,7 +168,7 @@ class DisconnectVpnConnections(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("vpnConnectionIds", AAZListType, ".vpn_connection_ids")
+            _builder.set_prop("vpnConnectionIds", AAZListType, ".vpn_connections")
 
             vpn_connection_ids = _builder.get(".vpnConnectionIds")
             if vpn_connection_ids is not None:

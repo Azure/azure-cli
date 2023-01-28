@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "network vnet-gateway reset",
 )
 class Reset(AAZCommand):
-    """Resets the primary of the virtual network gateway in the specified resource group.
+    """Reset a virtual network gateway.
 
     :example: Reset a virtual network gateway.
         az network vnet-gateway reset -g MyResourceGroup -n MyVnetGateway

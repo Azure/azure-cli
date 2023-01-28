@@ -59,13 +59,6 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
         )
-        _args_schema.location = AAZResourceLocationArg(
-            help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
-            nullable=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
-        )
         _args_schema.gateway_default_site = AAZStrArg(
             options=["--gateway-default-site"],
             help="Name or ID of a local network gateway representing a local network site with default routes.",
@@ -584,7 +577,6 @@ class Update(AAZCommand):
                 typ=AAZObjectType
             )
             _builder.set_prop("extendedLocation", AAZObjectType)
-            _builder.set_prop("location", AAZStrType, ".location")
             _builder.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 

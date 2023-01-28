@@ -56,7 +56,7 @@ class ListBgpPeerStatus(AAZCommand):
         )
         _args_schema.peer = AAZStrArg(
             options=["--peer"],
-            help="The IP address of the peer.",
+            help="The IP address of the peer to retrieve the status of. Default value is None.",
         )
         return cls._args_schema
 
