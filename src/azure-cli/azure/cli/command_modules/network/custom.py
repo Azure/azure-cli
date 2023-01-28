@@ -7471,7 +7471,7 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
                 for config in instance.properties.ip_configurations:
                     config.properties.subnet.id = subnet_id
 
-        if has_value(args.public_ip_address):
+        if has_value(args.public_ip_addresses):
             instance.properties.ip_configurations = []
             public_ip_addresses = args.public_ip_addresses.to_serialized_data()
             args.ip_configurations = []
