@@ -33,7 +33,11 @@ from .aaz.latest.network.application_gateway.address_pool import Create as _Addr
 from .aaz.latest.network.application_gateway.auth_cert import Create as _AuthCertCreate, Update as _AuthCertUpdate
 from .aaz.latest.network.application_gateway.client_cert import Add as _ClientCertAdd, Remove as _ClientCertRemove, \
     Update as _ClientCertUpdate
+from .aaz.latest.network.application_gateway.identity import Assign as _IdentityAssign
 from .aaz.latest.network.application_gateway.frontend_ip import Create as _FrontendIPCreate, Update as _FrontendIPUpdate
+from .aaz.latest.network.application_gateway.probe import Create as _ProbeCreate, Update as _ProbeUpdate
+from .aaz.latest.network.application_gateway.redirect_config import Create as _RedirectConfigCreate, \
+    Update as _RedirectConfigUpdate
 from .aaz.latest.network.application_gateway.root_cert import Create as _RootCertCreate, Update as _RootCertUpdate
 from .aaz.latest.network.application_gateway.ssl_cert import Create as _SSLCertCreate, Update as _SSLCertUpdate
 from .aaz.latest.network.application_gateway.ssl_policy import Set as _SSLPolicySet
@@ -566,44 +570,47 @@ def update_ag_listener(cmd, instance, parent, item_name, frontend_ip=None, front
     return parent
 
 
-def assign_ag_identity(cmd, resource_group_name, application_gateway_name,
-                       user_assigned_identity, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    ManagedServiceIdentity, ManagedServiceIdentityUserAssignedIdentitiesValue = \
-        cmd.get_models('ManagedServiceIdentity',
-                       'Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
-    user_assigned_indentity_instance = ManagedServiceIdentityUserAssignedIdentitiesValue()
+class IdentityAssign(_IdentityAssign):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.identity = AAZResourceIdArg(
+            options=["--identity"],
+            help="Name or ID of the ManagedIdentity Resource.",
+            required=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ManagedIdentity"
+                         "/userAssignedIdentities/{}",
+            ),
+        )
+        args_schema.type._registered = False
+        args_schema.user_assigned_identities._registered = False
+        return args_schema
 
-    user_assigned_identities_instance = dict()
+    def pre_operations(self):
+        args = self.ctx.args
+        args.type = "UserAssigned"
+        args.user_assigned_identities = {args.identity.to_serialized_data(): {}}
 
-    user_assigned_identities_instance[user_assigned_identity] = user_assigned_indentity_instance
-
-    identity_instance = ManagedServiceIdentity(
-        type="UserAssigned",
-        user_assigned_identities=user_assigned_identities_instance
-    )
-    ag.identity = identity_instance
-
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, application_gateway_name, ag)
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
 def remove_ag_identity(cmd, resource_group_name, application_gateway_name, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    if ag.identity is None:
-        logger.warning("This command will be ignored. The identity doesn't exist.")
-    ag.identity = None
+    class IdentityRemove(_ApplicationGatewayUpdate):
+        def pre_operations(self):
+            args = self.ctx.args
+            args.no_wait = no_wait
 
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, application_gateway_name, ag)
+        def pre_instance_update(self, instance):
+            instance.identity = None
 
-
-def show_ag_identity(cmd, resource_group_name, application_gateway_name):
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    if ag.identity is None:
-        raise CLIError("Please first use 'az network application-gateway identity assign` to init the identity.")
-    return ag.identity
+    return IdentityRemove(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": application_gateway_name,
+        "resource_group": resource_group_name
+    })
 
 
 def add_ag_private_link(cmd,
@@ -1214,41 +1221,33 @@ def update_ag_backend_settings_collection(cmd, instance, parent, item_name, port
     return parent
 
 
-def create_ag_redirect_configuration(cmd, resource_group_name, application_gateway_name, item_name, redirect_type,
-                                     target_listener=None, target_url=None, include_path=None,
-                                     include_query_string=None, no_wait=False):
-    ApplicationGatewayRedirectConfiguration, SubResource = cmd.get_models(
-        'ApplicationGatewayRedirectConfiguration', 'SubResource')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    new_config = ApplicationGatewayRedirectConfiguration(
-        name=item_name,
-        redirect_type=redirect_type,
-        target_listener=SubResource(id=target_listener) if target_listener else None,
-        target_url=target_url,
-        include_path=include_path,
-        include_query_string=include_query_string)
-    upsert_to_collection(ag, 'redirect_configurations', new_config, 'name')
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, application_gateway_name, ag)
+class RedirectConfigCreate(_RedirectConfigCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.target_listener._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/httpListeners/{}",
+        )
+        args_schema.type._required = True
+        return args_schema
 
 
-def update_ag_redirect_configuration(cmd, instance, parent, item_name, redirect_type=None,
-                                     target_listener=None, target_url=None, include_path=None,
-                                     include_query_string=None, raw=False):
-    SubResource = cmd.get_models('SubResource')
-    if redirect_type:
-        instance.redirect_type = redirect_type
-    if target_listener:
-        instance.target_listener = SubResource(id=target_listener)
-        instance.target_url = None
-    if target_url:
-        instance.target_listener = None
-        instance.target_url = target_url
-    if include_path is not None:
-        instance.include_path = include_path
-    if include_query_string is not None:
-        instance.include_query_string = include_query_string
-    return parent
+class RedirectConfigUpdate(_RedirectConfigUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.target_listener._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/httpListeners/{}",
+        )
+        return args_schema
+
+    def post_instance_update(self, instance):
+        if not has_value(instance.properties.target_listener.id):
+            instance.properties.target_listener = None
 
 
 def create_ag_rewrite_rule_set(cmd, resource_group_name, application_gateway_name, item_name, no_wait=False):
@@ -1402,67 +1401,59 @@ def delete_ag_rewrite_rule_condition(cmd, resource_group_name, application_gatew
     sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, application_gateway_name, gateway)
 
 
-def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_name, protocol, host, path, interval=30,
-                    timeout=120, threshold=8, no_wait=False, host_name_from_http_settings=None, min_servers=None,
-                    match_body=None, match_status_codes=None, host_name_from_settings=None, port=None):
-    ApplicationGatewayProbe, ProbeMatchCriteria = cmd.get_models(
-        'ApplicationGatewayProbe', 'ApplicationGatewayProbeHealthResponseMatch')
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    new_probe = ApplicationGatewayProbe(
-        name=item_name,
-        protocol=protocol,
-        host=host,
-        path=path,
-        interval=interval,
-        timeout=timeout,
-        unhealthy_threshold=threshold)
-    if cmd.supported_api_version(min_api='2017-06-01'):
-        new_probe.pick_host_name_from_backend_http_settings = host_name_from_http_settings
-        new_probe.min_servers = min_servers
-        new_probe.match = ProbeMatchCriteria(body=match_body, status_codes=match_status_codes)
-    if cmd.supported_api_version(min_api='2019-04-01'):
-        new_probe.port = port
-    if cmd.supported_api_version(min_api='2021-08-01'):
-        new_probe.pick_host_name_from_backend_settings = host_name_from_settings
+class ProbeCreate(_ProbeCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.match_body = AAZStrArg(
+            options=["--match-body"],
+            help="Body that must be contained in the health response.",
+        )
+        args_schema.match_status_codes = AAZListArg(
+            options=["--match-status-codes"],
+            help="Space-separated list of allowed ranges of healthy status codes for the health response.",
+        )
+        args_schema.match_status_codes.Element = AAZStrArg()
+        args_schema.protocol._required = True
+        args_schema.match._registered = False
+        return args_schema
 
-    upsert_to_collection(ag, 'probes', new_probe, 'name')
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.match_body):
+            args.match.body = args.match_body
+        if has_value(args.match_status_codes):
+            args.match.status_codes = args.match_status_codes
 
 
-def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, path=None,
-                    interval=None, timeout=None, threshold=None, host_name_from_http_settings=None, min_servers=None,
-                    match_body=None, match_status_codes=None, host_name_from_settings=None, port=None):
-    if protocol is not None:
-        instance.protocol = protocol
-    if host is not None:
-        instance.host = host
-    if path is not None:
-        instance.path = path
-    if interval is not None:
-        instance.interval = interval
-    if timeout is not None:
-        instance.timeout = timeout
-    if threshold is not None:
-        instance.unhealthy_threshold = threshold
-    if host_name_from_http_settings is not None:
-        instance.pick_host_name_from_backend_http_settings = host_name_from_http_settings
-    if host_name_from_settings is not None:
-        instance.pick_host_name_from_backend_settings = host_name_from_settings
-    if min_servers is not None:
-        instance.min_servers = min_servers
-    if match_body is not None or match_status_codes is not None:
-        ProbeMatchCriteria = \
-            cmd.get_models('ApplicationGatewayProbeHealthResponseMatch')
-        instance.match = instance.match or ProbeMatchCriteria()
-        if match_body is not None:
-            instance.match.body = match_body
-        if match_status_codes is not None:
-            instance.match.status_codes = match_status_codes
-    if port is not None:
-        instance.port = port
-    return parent
+class ProbeUpdate(_ProbeUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.match_body = AAZStrArg(
+            options=["--match-body"],
+            help="Body that must be contained in the health response.",
+            nullable=True,
+        )
+        args_schema.match_status_codes = AAZListArg(
+            options=["--match-status-codes"],
+            help="Space-separated list of allowed ranges of healthy status codes for the health response.",
+            nullable=True,
+        )
+        args_schema.match_status_codes.Element = AAZStrArg(
+            nullable=True,
+        )
+        args_schema.match._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.match_body):
+            args.match.body = args.match_body
+        if has_value(args.match_status_codes):
+            args.match.status_codes = args.match_status_codes
 
 
 def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway_name, item_name, address_pool=None,

@@ -212,7 +212,6 @@ def load_command_table(self, _):
         {'prop': 'backend_http_settings_collection', 'name': 'http-settings', 'validator': process_ag_http_settings_create_namespace},
         {'prop': 'http_listeners', 'name': 'http-listener', 'validator': process_ag_http_listener_create_namespace},
         {'prop': 'request_routing_rules', 'name': 'rule', 'validator': process_ag_rule_create_namespace},
-        {'prop': 'probes', 'name': 'probe'},
         {'prop': 'rewrite_rule_sets', 'name': 'rewrite-rule set'}
     ]
     if self.supported_api_version(min_api='2021-08-01'):
@@ -294,17 +293,10 @@ def load_command_table(self, _):
                                  child_collection_key='name.name.variable',
                                  child_arg_name='rule_set_name.rule_name.variable')
 
-    with self.command_group('network application-gateway redirect-config', network_util, min_api='2017-06-01') as g:
-        subresource = 'redirect_configurations'
-        g.command('list', list_network_resource_property('application_gateways', subresource))
-        g.show_command('show', get_network_resource_property_entry('application_gateways', subresource))
-        g.command('delete', delete_network_resource_property_entry('application_gateways', subresource), supports_no_wait=True)
-        g.custom_command('create', 'create_ag_{}'.format(_make_singular(subresource)), supports_no_wait=True, doc_string_source='ApplicationGatewayRedirectConfiguration')
-        g.generic_update_command('update', command_type=network_ag_sdk,
-                                 client_factory=cf_application_gateways, supports_no_wait=True,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='update_ag_{}'.format(_make_singular(subresource)),
-                                 child_collection_prop_name=subresource, doc_string_source='ApplicationGatewayRedirectConfiguration')
+    with self.command_group("network application-gateway redirect-config"):
+        from .custom import RedirectConfigCreate, RedirectConfigUpdate
+        self.command_table["network application-gateway redirect-config create"] = RedirectConfigCreate(loader=self)
+        self.command_table["network application-gateway redirect-config update"] = RedirectConfigUpdate(loader=self)
 
     with self.command_group('network application-gateway rewrite-rule', network_ag_sdk, min_api='2018-12-01') as g:
         g.command('condition list-server-variables', 'list_available_server_variables')
@@ -332,15 +324,20 @@ def load_command_table(self, _):
         self.command_table["network application-gateway url-path-map update"] = URLPathMapUpdate(loader=self)
         self.command_table["network application-gateway url-path-map rule create"] = URLPathMapRuleCreate(loader=self)
 
+    with self.command_group("network application-gateway identity") as g:
+        from .custom import IdentityAssign
+        self.command_table["network application-gateway identity assign"] = IdentityAssign(loader=self)
+        g.custom_command("remove", "remove_ag_identity", supports_no_wait=True)
+
+    with self.command_group("network application-gateway probe"):
+        from .custom import ProbeCreate, ProbeUpdate
+        self.command_table["network application-gateway probe create"] = ProbeCreate(loader=self)
+        self.command_table["network application-gateway probe update"] = ProbeUpdate(loader=self)
+
     with self.command_group("network application-gateway waf-config") as g:
         g.custom_command("list-rule-sets", "list_ag_waf_rule_sets", table_transformer=transform_waf_rule_sets_table_output)
         g.custom_command("set", "set_ag_waf_config", supports_no_wait=True)
         g.custom_show_command("show", "show_ag_waf_config")
-
-    with self.command_group('network application-gateway identity', command_type=network_ag_sdk, min_api='2018-12-01') as g:
-        g.custom_command('assign', 'assign_ag_identity', supports_no_wait=True)
-        g.custom_command('remove', 'remove_ag_identity', supports_no_wait=True)
-        g.custom_show_command('show', 'show_ag_identity')
 
     with self.command_group('network application-gateway private-link',
                             command_type=network_ag_sdk,

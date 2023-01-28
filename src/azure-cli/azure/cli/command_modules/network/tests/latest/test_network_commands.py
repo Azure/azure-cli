@@ -1601,13 +1601,15 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             'rg': resource_group,
             'gateway_ip': 'gateway_ip',
             'ag': 'ag1',
-            'name': 'myprobe'
+            'name': 'myprobe',
+            'waf': 'waf1',
         })
 
         self.cmd('network public-ip create -g {rg} -n {gateway_ip} --sku Standard')
+        self.cmd('network application-gateway waf-policy create -n {waf} -g {rg}')
         self.cmd('network application-gateway create -g {rg} -n {ag} '
                  '--sku WAF_v2 --priority 1001 '
-                 '--public-ip-address {gateway_ip} ')
+                 '--public-ip-address {gateway_ip} --waf-policy {waf}')
 
         self.cmd('network application-gateway probe create -g {rg} --gateway-name {ag} -n {name} --no-wait '
                  '--path /test '

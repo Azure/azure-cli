@@ -571,19 +571,6 @@ def validate_subresource_list(cmd, namespace):
         namespace.target_resources = subresources
 
 
-def validate_target_listener(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.target_listener and not is_valid_resource_id(namespace.target_listener):
-        namespace.target_listener = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            name=namespace.application_gateway_name,
-            namespace='Microsoft.Network',
-            type='applicationGateways',
-            child_type_1='httpListeners',
-            child_name_1=namespace.target_listener)
-
-
 def validate_private_dns_zone(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     if namespace.private_dns_zone and not is_valid_resource_id(namespace.private_dns_zone):
