@@ -272,6 +272,11 @@ def load_command_table(self, _):
         self.command_table["network application-gateway http-settings create"] = HTTPSettingsCreate(loader=self)
         self.command_table["network application-gateway http-settings update"] = HTTPSettingsUpdate(loader=self)
 
+    with self.command_group("network application-gateway identity") as g:
+        from .custom import IdentityAssign
+        self.command_table["network application-gateway identity assign"] = IdentityAssign(loader=self)
+        g.custom_command("remove", "remove_ag_identity", supports_no_wait=True)
+
     with self.command_group("network application-gateway frontend-ip"):
         from .custom import FrontedIPCreate, FrontedIPUpdate
         self.command_table["network application-gateway frontend-ip create"] = FrontedIPCreate(loader=self)
@@ -301,15 +306,20 @@ def load_command_table(self, _):
                                  child_collection_key='name.name.variable',
                                  child_arg_name='rule_set_name.rule_name.variable')
 
-    with self.command_group("network application-gateway redirect-config"):
-        from .custom import RedirectConfigCreate, RedirectConfigUpdate
-        self.command_table["network application-gateway redirect-config create"] = RedirectConfigCreate(loader=self)
-        self.command_table["network application-gateway redirect-config update"] = RedirectConfigUpdate(loader=self)
-
     with self.command_group('network application-gateway rewrite-rule', network_ag_sdk, min_api='2018-12-01') as g:
         g.command('condition list-server-variables', 'list_available_server_variables')
         g.command('list-request-headers', 'list_available_request_headers')
         g.command('list-response-headers', 'list_available_response_headers')
+
+    with self.command_group("network application-gateway probe"):
+        from .custom import ProbeCreate, ProbeUpdate
+        self.command_table["network application-gateway probe create"] = ProbeCreate(loader=self)
+        self.command_table["network application-gateway probe update"] = ProbeUpdate(loader=self)
+
+    with self.command_group("network application-gateway redirect-config"):
+        from .custom import RedirectConfigCreate, RedirectConfigUpdate
+        self.command_table["network application-gateway redirect-config create"] = RedirectConfigCreate(loader=self)
+        self.command_table["network application-gateway redirect-config update"] = RedirectConfigUpdate(loader=self)
 
     with self.command_group("network application-gateway ssl-cert"):
         from .custom import SSLCertCreate, SSLCertUpdate
@@ -331,16 +341,6 @@ def load_command_table(self, _):
         self.command_table["network application-gateway url-path-map create"] = URLPathMapCreate(loader=self)
         self.command_table["network application-gateway url-path-map update"] = URLPathMapUpdate(loader=self)
         self.command_table["network application-gateway url-path-map rule create"] = URLPathMapRuleCreate(loader=self)
-
-    with self.command_group("network application-gateway identity") as g:
-        from .custom import IdentityAssign
-        self.command_table["network application-gateway identity assign"] = IdentityAssign(loader=self)
-        g.custom_command("remove", "remove_ag_identity", supports_no_wait=True)
-
-    with self.command_group("network application-gateway probe"):
-        from .custom import ProbeCreate, ProbeUpdate
-        self.command_table["network application-gateway probe create"] = ProbeCreate(loader=self)
-        self.command_table["network application-gateway probe update"] = ProbeUpdate(loader=self)
 
     with self.command_group("network application-gateway waf-config") as g:
         g.custom_command("list-rule-sets", "list_ag_waf_rule_sets", table_transformer=transform_waf_rule_sets_table_output)

@@ -206,10 +206,6 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway create') as c:
         c.argument('connection_draining_timeout', min_api='2016-12-01', type=int, help='The time in seconds after a backend server is removed during which on open connection remains active. Range: 0 (disabled) to 3600', arg_group='Gateway')
 
-    for item in ['http-settings', 'settings', 'probe']:
-        with self.argument_context('network application-gateway {}'.format(item)) as c:
-            c.argument('protocol', http_protocol_type, help='The settings protocol.')
-
     for item in ['http-listener', 'listener']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
             c.argument('frontend_ip', help='The name or ID of the frontend IP configuration.', completer=get_ag_subresource_completion_list('frontend_ip_configurations'))
