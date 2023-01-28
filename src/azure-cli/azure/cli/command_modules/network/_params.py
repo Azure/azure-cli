@@ -16,8 +16,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 from azure.cli.command_modules.network._validators import (
-    dns_zone_name_type,
-    validate_ssl_cert, validate_cert, validate_inbound_nat_rule_id_list,
+    dns_zone_name_type, validate_inbound_nat_rule_id_list,
     validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
     validate_address_pool_name_or_id, load_cert_file, validate_metadata,
     validate_dns_record_type, validate_target_listener,
@@ -30,12 +29,11 @@ from azure.cli.command_modules.network._validators import (
     validate_custom_headers, validate_status_code_ranges, validate_subnet_ranges,
     WafConfigExclusionAction,
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
-    validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs,
+    validate_waf_policy,
     validate_user_assigned_identity, validate_virtul_network_gateway,
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument,
-    validate_vpn_connection_name_or_id,
-    process_vnet_name_or_id, validate_trusted_client_cert)
+    validate_vpn_connection_name_or_id, process_vnet_name_or_id)
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
     ag_url_map_rule_completion_list, tm_endpoint_completion_list, get_sdk_completer)
@@ -181,12 +179,6 @@ def load_arguments(self, _):
         c.argument('capacity', help='The number of instances to use with the application gateway.', type=int)
 
     ag_subresources = [
-        {'name': 'auth-cert', 'display': 'authentication certificate', 'ref': 'authentication_certificates'},
-        {'name': 'ssl-cert', 'display': 'SSL certificate', 'ref': 'ssl_certificates'},
-        {'name': 'frontend-ip', 'display': 'frontend IP configuration', 'ref': 'frontend_ip_configurations'},
-        {'name': 'frontend-port', 'display': 'frontend port', 'ref': 'frontend_ports'},
-        {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
-        {'name': 'http-settings', 'display': 'backed HTTP settings', 'ref': 'backend_http_settings_collection'},
         {'name': 'http-listener', 'display': 'HTTP listener', 'ref': 'http_listeners'},
         {'name': 'rule', 'display': 'request routing rule', 'ref': 'request_routing_rules'},
         {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
@@ -194,12 +186,9 @@ def load_arguments(self, _):
         {'name': 'redirect-config', 'display': 'redirect configuration', 'ref': 'redirect_configurations'},
         {'name': 'private-link', 'display': 'private link', 'ref': 'private_link_configurations'}
     ]
-    if self.supported_api_version(min_api='2018-08-01'):
-        ag_subresources.append({'name': 'root-cert', 'display': 'trusted root certificate', 'ref': 'trusted_root_certificates'})
     if self.supported_api_version(min_api='2018-12-01'):
         ag_subresources.append({'name': 'rewrite-rule set', 'display': 'rewrite rule set', 'ref': 'rewrite_rule_sets'})
     if self.supported_api_version(min_api='2021-08-01'):
-        ag_subresources.append({'name': 'settings', 'display': 'backed settings', 'ref': 'backend_settings_collection'})
         ag_subresources.append({'name': 'listener', 'display': 'listener', 'ref': 'listeners'})
         ag_subresources.append({'name': 'routing-rule', 'display': 'routing rule', 'ref': 'routing_rules'})
 
@@ -217,34 +206,8 @@ def load_arguments(self, _):
         with self.argument_context('network application-gateway {} list'.format(item['name'])) as c:
             c.argument('resource_name', options_list=['--gateway-name'], id_part=None)
 
-    for item in ['create', 'http-settings']:
-        with self.argument_context('network application-gateway {}'.format(item)) as c:
-            c.argument('connection_draining_timeout', min_api='2016-12-01', type=int, help='The time in seconds after a backend server is removed during which on open connection remains active. Range: 0 (disabled) to 3600', arg_group='Gateway' if item == 'create' else None)
-
-    with self.argument_context('network application-gateway address-pool') as c:
-        c.argument('servers', ag_servers_type, arg_group=None)
-
-    for scope in ['auth-cert', 'root-cert']:
-        with self.argument_context('network application-gateway {}'.format(scope)) as c:
-            c.argument('cert_data', options_list='--cert-file', help='Certificate file path.', type=file_type, completer=FilesCompleter(), validator=validate_cert)
-
-    with self.argument_context('network application-gateway root-cert') as c:
-        c.argument('keyvault_secret', help='KeyVault secret ID.')
-
-    with self.argument_context('network application-gateway frontend-ip create') as c:
-        c.argument('public_ip_address', validator=get_public_ip_validator(), help='The name or ID of the public IP address.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
-
-    for item in ['create', 'update']:
-        with self.argument_context('network application-gateway frontend-ip {}'.format(item)) as c:
-            c.argument('subnet', validator=get_subnet_validator(), help='The name or ID of the subnet.')
-            c.argument('virtual_network_name', help='The name of the virtual network corresponding to the subnet.', id_part=None, arg_group=None)
-
-    with self.argument_context('network application-gateway frontend-ip update') as c:
-        c.argument('public_ip_address', validator=get_public_ip_validator(), help='The name or ID of the public IP address.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), deprecate_info=c.deprecate(hide=True))
-
-    for item in ['frontend-port', 'http-settings', 'settings']:
-        with self.argument_context('network application-gateway {}'.format(item)) as c:
-            c.argument('port', help='The port number.', type=int)
+    with self.argument_context('network application-gateway create') as c:
+        c.argument('connection_draining_timeout', min_api='2016-12-01', type=int, help='The time in seconds after a backend server is removed during which on open connection remains active. Range: 0 (disabled) to 3600', arg_group='Gateway')
 
     for item in ['http-settings', 'settings', 'probe']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
@@ -320,21 +283,6 @@ def load_arguments(self, _):
         with self.argument_context('network application-gateway {}'.format(scope)) as c:
             c.argument('application_gateway_name', app_gateway_name_type, id_part=None)
 
-    with self.argument_context('network application-gateway http-settings') as c:
-        c.argument('cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable cookie-based affinity.')
-        c.argument('timeout', help='Request timeout in seconds.')
-        c.argument('probe', help='Name or ID of the probe to associate with the HTTP settings.', completer=get_ag_subresource_completion_list('probes'))
-        c.argument('auth_certs', nargs='+', min_api='2016-09-01', help='Space-separated list of authentication certificates (names or IDs) to associate with the HTTP settings.')
-        c.argument('root_certs', nargs='+', min_api='2019-04-01', help='Space-separated list of trusted root certificates (names or IDs) to associate with the HTTP settings. --host-name or --host-name-from-backend-pool is required when this field is set.')
-
-    with self.argument_context('network application-gateway settings') as c:
-        c.argument('timeout', help='Request timeout in seconds.')
-        c.argument('probe', help='Name or ID of the probe to associate with the settings.', completer=get_ag_subresource_completion_list('probes'))
-        c.argument('root_certs', nargs='+', help='Space-separated list of trusted root certificates (names or IDs) to associate with the settings. --host-name or --host-name-from-backend-pool is required when this field is set.')
-        c.argument('host_name', help='Host header sent to the backend servers.')
-        c.argument('host_name_from_backend_pool', options_list=['--backend-pool-host-name'], help='Use host name of the backend server as the host header.', arg_type=get_three_state_flag())
-        c.argument('path', help='Path that will prefix all requests.')
-
     with self.argument_context('network application-gateway probe') as c:
         c.argument('host', help='The name of the host to send the probe.')
         c.argument('path', required=False, help='The relative path of the probe. Valid paths start from "/"')
@@ -364,11 +312,6 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway routing-rule') as c:
         c.argument('listener', help='The name or ID of the listener.', completer=get_ag_subresource_completion_list('listeners'))
         c.argument('settings', help='The name or ID of the settings.', completer=get_ag_subresource_completion_list('backend_settings_collection'))
-
-    with self.argument_context('network application-gateway ssl-cert') as c:
-        c.argument('cert_data', options_list='--cert-file', type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_ssl_cert)
-        c.argument('cert_password', help='Certificate password.')
-        c.argument('key_vault_secret_id', help="Secret Id of (base-64 encoded unencrypted pfx) 'Secret' or 'Certificate' object stored in Azure KeyVault.")
 
     with self.argument_context('network application-gateway ssl-policy') as c:
         c.argument('clear', action='store_true', help='Clear SSL policy.')
@@ -439,13 +382,6 @@ def load_arguments(self, _):
         c.argument('min_protocol_version', help='Minimum version of SSL protocol to be supported on application gateway.')
         c.argument('disabled_ssl_protocols', nargs='+', help='Space-separated list of protocols to disable.')
 
-    with self.argument_context('network application-gateway http-settings', min_api='2017-06-01') as c:
-        c.argument('host_name', help='Host header sent to the backend servers.')
-        c.argument('host_name_from_backend_pool', help='Use host name of the backend server as the host header.', arg_type=get_three_state_flag())
-        c.argument('affinity_cookie_name', help='Name used for the affinity cookie.')
-        c.argument('enable_probe', help='Whether the probe is enabled.', arg_type=get_three_state_flag())
-        c.argument('path', help='Path that will prefix all HTTP requests.')
-
     with self.argument_context('network application-gateway probe', min_api='2017-06-01') as c:
         c.argument('host', default=None, required=False, help='The name of the host to send the probe.')
         c.argument('host_name_from_http_settings', help='Use host header from HTTP settings.', arg_type=get_three_state_flag())
@@ -462,27 +398,6 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway identity', min_api='2019-04-01') as c:
         c.argument('application_gateway_name', app_gateway_name_type)
-
-    with self.argument_context('network application-gateway client-cert', min_api='2020-06-01', id_part=None) as c:
-        c.argument('application_gateway_name', app_gateway_name_type)
-        c.argument('client_cert_name', options_list='--name', help='Name of the trusted client certificate that is unique within an Application Gateway')
-
-    with self.argument_context('network application-gateway client-cert add', min_api='2020-06-01') as c:
-        c.argument('client_cert_data', options_list='--data', type=file_type, completer=FilesCompleter(), help='Certificate public data.', validator=validate_trusted_client_cert)
-
-    with self.argument_context('network application-gateway client-cert update', min_api='2020-06-01') as c:
-        c.argument('client_cert_data', options_list='--data', type=file_type, completer=FilesCompleter(), help='Certificate public data.', validator=validate_trusted_client_cert)
-
-    with self.argument_context('network application-gateway ssl-profile', min_api='2020-06-01', id_part=None) as c:
-        c.argument('application_gateway_name', app_gateway_name_type)
-        c.argument('ssl_profile_name', options_list='--name', help='Name of the SSL profile that is unique within an Application Gateway.')
-        c.argument('policy_name', help='Name of Ssl Policy.')
-        c.argument('policy_type', help='Type of Ssl Policy.', choices=['Custom', 'Predefined', 'CustomV2'])
-        c.argument('min_protocol_version', help='Minimum version of Ssl protocol to be supported on application gateway.')
-        c.argument('cipher_suites', nargs='*', help='Ssl cipher suites to be enabled in the specified order to application gateway.')
-        c.argument('disabled_ssl_protocols', options_list=['--disabled-ssl-protocols', '--disabled-protocols'], nargs='+', help='Space-separated list of protocols to disable.')
-        c.argument('trusted_client_certificates', options_list=['--trusted-client-certificates', '--trusted-client-cert'], nargs='+', help='Array of references to application gateway trusted client certificates.')
-        c.argument('client_auth_configuration', options_list=['--client-auth-configuration', '--client-auth-config'], help='Client authentication configuration of the application gateway resource.', choices=['True', 'False'])
 
     with self.argument_context('network application-gateway show-backend-health') as c:
         c.argument('expand', help='Expands BackendAddressPool and BackendHttpSettings referenced in backend health.')
@@ -757,33 +672,6 @@ def load_arguments(self, _):
 
     # region PrivateLinkService
     service_name = CLIArgumentType(options_list='--service-name', id_part='name', help='Name of the private link service.', completer=get_resource_name_completion_list('Microsoft.Network/privateLinkServices'))
-    with self.argument_context('network private-link-service') as c:
-        c.argument('service_name', service_name, options_list=['--name', '-n'])
-        c.argument('auto_approval', nargs='+', help='Space-separated list of subscription IDs to auto-approve.', validator=get_subscription_list_validator('auto_approval', 'PrivateLinkServicePropertiesAutoApproval'))
-        c.argument('visibility', nargs='+', help='Space-separated list of subscription IDs for which the private link service is visible.', validator=get_subscription_list_validator('visibility', 'PrivateLinkServicePropertiesVisibility'))
-        c.argument('frontend_ip_configurations', nargs='+', options_list='--lb-frontend-ip-configs', help='Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.', validator=validate_frontend_ip_configs)
-        c.argument('load_balancer_name', options_list='--lb-name', help='Name of the load balancer to retrieve frontend IP configs from. Ignored if a frontend IP configuration ID is supplied.')
-        c.argument('private_endpoint_connections', nargs='+', help='Space-separated list of private endpoint connections.')
-        c.argument('fqdns', nargs='+', help='Space-separated list of FQDNs.')
-        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        c.argument('enable_proxy_protocol', help='Enable proxy protocol for private link service.', arg_type=get_three_state_flag(), min_api='2019-09-01')
-        c.argument('edge_zone', edge_zone)
-
-    with self.argument_context('network private-link-service', arg_group='IP Configuration') as c:
-        c.argument('private_ip_address', private_ip_address_type)
-        c.argument('private_ip_allocation_method', help='Private IP address allocation method', arg_type=get_enum_type(IPAllocationMethod))
-        c.argument('private_ip_address_version', help='IP version of the private IP address.', arg_type=get_enum_type(IPVersion, 'ipv4'))
-        c.argument('public_ip_address', help='Name or ID of the a public IP address to use.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), validator=get_public_ip_validator())
-        c.argument('subnet', help='Name or ID of subnet to use. If name provided, also supply `--vnet-name`.', validator=get_subnet_validator())
-        c.argument('virtual_network_name', options_list='--vnet-name')
-
-    with self.argument_context('network private-link-service connection') as c:
-        c.argument('service_name', service_name, id_part=None)
-        c.argument('pe_connection_name', help='Name of the private endpoint connection. List them by using "az network private-link-service show".', options_list=['--name', '-n'])
-        c.argument('action_required', help='A message indicating if changes on the service provider require any updates on the consumer.')
-        c.argument('description', help='The reason for approval/rejection of the connection.')
-        c.argument('connection_status', help='Indicates whether the connection has been Approved/Rejected/Removed by the owner of the service.', arg_type=get_enum_type(['Approved', 'Rejected', 'Removed']))
-
     with self.argument_context('network private-link-service ip-configs') as c:
         c.argument('service_name', service_name)
         c.argument('ip_config_name', help='Name of the ip configuration.', options_list=['--name', '-n'])
@@ -801,9 +689,7 @@ def load_arguments(self, _):
 
     lb_subresources = [
         {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
-        {'name': 'frontend-ip', 'display': 'frontend IP configuration', 'ref': 'frontend_ip_configurations'},
         {'name': 'inbound-nat-rule', 'display': 'inbound NAT rule', 'ref': 'inbound_nat_rules'},
-        {'name': 'inbound-nat-pool', 'display': 'inbound NAT pool', 'ref': 'inbound_nat_pools'},
         {'name': 'rule', 'display': 'load balancing rule', 'ref': 'load_balancing_rules'},
         {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
         {'name': 'outbound-rule', 'display': 'outbound rule', 'ref': 'outbound_rules'},
