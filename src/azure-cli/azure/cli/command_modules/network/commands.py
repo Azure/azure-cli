@@ -820,8 +820,10 @@ def load_command_table(self, _):
     public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Address:ipAddress, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
     public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ' if self.supported_api_version(min_api='2017-06-01') else ' ')
 
-    with self.command_group('network public-ip', network_public_ip_sdk) as g:
+    with self.command_group('network public-ip') as g:
         from .aaz.latest.network.public_ip import List, Show
+        from .custom import PublicIPUpdate
+        self.command_table['network public-ip update'] = PublicIPUpdate(loader=self)
         self.command_table['network public-ip list'] = List(loader=self, table_transformer='[].' + public_ip_show_table_transform)
         self.command_table['network public-ip show'] = Show(loader=self, table_transformer=public_ip_show_table_transform)
         g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
