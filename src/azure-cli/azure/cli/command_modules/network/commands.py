@@ -904,12 +904,6 @@ def load_command_table(self, _):
         self.command_table['network vnet-gateway list-bgp-peer-status'] = ListBgpPeerStatus(loader=self, table_transformer=transform_vnet_gateway_bgp_peer_table)
         self.command_table['network vnet-gateway list-advertised-routes'] = ListAdvertisedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
         self.command_table['network vnet-gateway list-learned-routes'] = ListLearnedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
-        # g.custom_command('create', 'create_vnet_gateway', supports_no_wait=True, transform=transform_vnet_gateway_create_output, validator=process_vnet_gateway_create_namespace)
-        # g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vnet_gateway', supports_no_wait=True, validator=process_vnet_gateway_update_namespace)
-        # g.command('list-bgp-peer-status', 'begin_get_bgp_peer_status', table_transformer=transform_vnet_gateway_bgp_peer_table)
-        # g.command('list-advertised-routes', 'begin_get_advertised_routes', table_transformer=transform_vnet_gateway_routes_table)
-        # g.command('list-learned-routes', 'begin_get_learned_routes', table_transformer=transform_vnet_gateway_routes_table)
-        # g.custom_command('disconnect-vpn-connections', 'disconnect_vnet_gateway_vpn_connections', client_factory=cf_virtual_network_gateways, supports_no_wait=True, is_preview=True, min_api='2019-11-01')
 
     with self.command_group('network vnet-gateway packet-capture', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2019-07-01') as g:
         g.custom_command('start', 'start_vnet_gateway_package_capture', supports_no_wait=True)

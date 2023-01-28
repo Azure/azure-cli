@@ -4912,26 +4912,6 @@ def list_lb_backend_address_pool_tunnel_interface(cmd, resource_group_name, load
 # endregion
 
 
-# region LocalGateways
-def _validate_bgp_peering(cmd, instance, asn, bgp_peering_address, peer_weight):
-    if any([asn, bgp_peering_address, peer_weight]):
-        if instance.bgp_settings is not None:
-            # update existing parameters selectively
-            if asn is not None:
-                instance.bgp_settings.asn = asn
-            if peer_weight is not None:
-                instance.bgp_settings.peer_weight = peer_weight
-            if bgp_peering_address is not None:
-                instance.bgp_settings.bgp_peering_address = bgp_peering_address
-        elif asn:
-            BgpSettings = cmd.get_models('BgpSettings')
-            instance.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
-        else:
-            raise CLIError(
-                'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP]')
-# endregion
-
-
 # region NetworkInterfaces (NIC)
 def create_nic(cmd, resource_group_name, network_interface_name, subnet, location=None, tags=None,
                internal_dns_name_label=None, dns_servers=None, enable_ip_forwarding=False,
@@ -7378,169 +7358,6 @@ class VnetGatewayCreate(_VnetGatewayCreate):
         return {'vnetGateway': result}
 
 
-def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name,
-                        virtual_network, public_ip_address=None, location=None, tags=None,
-                        no_wait=False, gateway_type=None, sku=None, vpn_type=None, vpn_gateway_generation=None,
-                        asn=None, bgp_peering_address=None, peer_weight=None,
-                        address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
-                        gateway_default_site=None, custom_routes=None, aad_tenant=None, aad_audience=None,
-                        aad_issuer=None, root_cert_data=None, root_cert_name=None, vpn_auth_type=None, edge_zone=None,
-                        nat_rule=None, edge_zone_vnet_id=None):
-    (VirtualNetworkGateway, BgpSettings, SubResource, VirtualNetworkGatewayIPConfiguration, VirtualNetworkGatewaySku,
-     VpnClientConfiguration, AddressSpace, VpnClientRootCertificate, VirtualNetworkGatewayNatRule,
-     VpnNatRuleMapping) = cmd.get_models(
-         'VirtualNetworkGateway', 'BgpSettings', 'SubResource', 'VirtualNetworkGatewayIPConfiguration',
-         'VirtualNetworkGatewaySku', 'VpnClientConfiguration', 'AddressSpace', 'VpnClientRootCertificate',
-         'VirtualNetworkGatewayNatRule', 'VpnNatRuleMapping')
-
-    client = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    subnet = virtual_network + '/subnets/GatewaySubnet'
-    active = True
-    if gateway_type != "LocalGateway":
-        active = len(public_ip_address) == 2
-    else:
-        active = False
-    vnet_gateway = VirtualNetworkGateway(
-        gateway_type=gateway_type, vpn_gateway_generation=vpn_gateway_generation, location=location,
-        tags=tags, active=active, vpn_type=vpn_type, sku=VirtualNetworkGatewaySku(name=sku, tier=sku),
-        ip_configurations=[], gateway_default_site=SubResource(id=gateway_default_site) if gateway_default_site else None)
-    if gateway_type != "LocalGateway":
-        for i, public_ip in enumerate(public_ip_address):
-            ip_configuration = VirtualNetworkGatewayIPConfiguration(
-                subnet=SubResource(id=subnet),
-                public_ip_address=SubResource(id=public_ip),
-                private_ip_allocation_method='Dynamic',
-                name='vnetGatewayConfig{}'.format(i)
-            )
-        vnet_gateway.ip_configurations.append(ip_configuration)
-    else:
-        vnet_gateway.vpn_type = None
-        vnet_gateway.sku = None
-    if asn or bgp_peering_address or peer_weight:
-        vnet_gateway.enable_bgp = True
-        vnet_gateway.bgp_settings = BgpSettings(asn=asn, bgp_peering_address=bgp_peering_address,
-                                                peer_weight=peer_weight)
-
-    if any((address_prefixes, client_protocol)):
-        vnet_gateway.vpn_client_configuration = VpnClientConfiguration()
-        vnet_gateway.vpn_client_configuration.vpn_client_address_pool = AddressSpace()
-        vnet_gateway.vpn_client_configuration.vpn_client_address_pool.address_prefixes = address_prefixes
-        vnet_gateway.vpn_client_configuration.vpn_client_protocols = client_protocol
-        if any((radius_secret, radius_server)) and cmd.supported_api_version(min_api='2017-06-01'):
-            vnet_gateway.vpn_client_configuration.radius_server_address = radius_server
-            vnet_gateway.vpn_client_configuration.radius_server_secret = radius_secret
-
-        # multi authentication
-        if cmd.supported_api_version(min_api='2020-11-01'):
-            vnet_gateway.vpn_client_configuration.vpn_authentication_types = vpn_auth_type
-            vnet_gateway.vpn_client_configuration.aad_tenant = aad_tenant
-            vnet_gateway.vpn_client_configuration.aad_issuer = aad_issuer
-            vnet_gateway.vpn_client_configuration.aad_audience = aad_audience
-            vnet_gateway.vpn_client_configuration.vpn_client_root_certificates = [
-                VpnClientRootCertificate(name=root_cert_name,
-                                         public_cert_data=root_cert_data)] if root_cert_data else None
-
-    if custom_routes and cmd.supported_api_version(min_api='2019-02-01'):
-        vnet_gateway.custom_routes = AddressSpace()
-        vnet_gateway.custom_routes.address_prefixes = custom_routes
-
-    if edge_zone:
-        vnet_gateway.extended_location = _edge_zone_model(cmd, edge_zone)
-    if edge_zone_vnet_id:
-        vnet_gateway.v_net_extended_location_resource_id = edge_zone_vnet_id
-    if nat_rule:
-        vnet_gateway.nat_rules = [
-            VirtualNetworkGatewayNatRule(type_properties_type=rule.get('type'), mode=rule.get('mode'), name=rule.get('name'),
-                                         internal_mappings=[VpnNatRuleMapping(address_space=i_map) for i_map in rule.get('internal_mappings')] if rule.get('internal_mappings') else None,
-                                         external_mappings=[VpnNatRuleMapping(address_space=i_map) for i_map in rule.get('external_mappings')] if rule.get('external_mappings') else None,
-                                         ip_configuration_id=rule.get('ip_config_id')) for rule in nat_rule]
-
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, virtual_network_gateway_name, vnet_gateway)
-
-
-def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
-                        public_ip_address=None, gateway_type=None, enable_bgp=None,
-                        asn=None, bgp_peering_address=None, peer_weight=None, virtual_network=None,
-                        address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
-                        gateway_default_site=None, custom_routes=None, aad_tenant=None, aad_audience=None,
-                        aad_issuer=None, root_cert_data=None, root_cert_name=None, vpn_auth_type=None):
-    (AddressSpace, SubResource, VirtualNetworkGatewayIPConfiguration, VpnClientConfiguration,
-     VpnClientRootCertificate) = cmd.get_models('AddressSpace', 'SubResource', 'VirtualNetworkGatewayIPConfiguration',
-                                                'VpnClientConfiguration', 'VpnClientRootCertificate')
-
-    if any((address_prefixes, radius_server, radius_secret, client_protocol)) and not instance.vpn_client_configuration:
-        instance.vpn_client_configuration = VpnClientConfiguration()
-
-    if address_prefixes is not None:
-        if not instance.vpn_client_configuration.vpn_client_address_pool:
-            instance.vpn_client_configuration.vpn_client_address_pool = AddressSpace()
-        if not instance.vpn_client_configuration.vpn_client_address_pool.address_prefixes:
-            instance.vpn_client_configuration.vpn_client_address_pool.address_prefixes = []
-        instance.vpn_client_configuration.vpn_client_address_pool.address_prefixes = address_prefixes
-
-    with cmd.update_context(instance.vpn_client_configuration) as c:
-        c.set_param('vpn_client_protocols', client_protocol)
-        c.set_param('radius_server_address', radius_server)
-        c.set_param('radius_server_secret', radius_secret)
-        if cmd.supported_api_version(min_api='2020-11-01'):
-            c.set_param('aad_tenant', aad_tenant)
-            c.set_param('aad_audience', aad_audience)
-            c.set_param('aad_issuer', aad_issuer)
-            c.set_param('vpn_authentication_types', vpn_auth_type)
-
-    if root_cert_data and cmd.supported_api_version(min_api='2020-11-01'):
-        upsert_to_collection(instance.vpn_client_configuration, 'vpn_client_root_certificates',
-                             VpnClientRootCertificate(name=root_cert_name, public_cert_data=root_cert_data), 'name')
-
-    with cmd.update_context(instance.sku) as c:
-        c.set_param('name', sku)
-        c.set_param('tier', sku)
-
-    with cmd.update_context(instance) as c:
-        c.set_param('gateway_default_site', SubResource(id=gateway_default_site) if gateway_default_site else None)
-        c.set_param('vpn_type', vpn_type)
-        c.set_param('tags', tags)
-
-    subnet_id = '{}/subnets/GatewaySubnet'.format(virtual_network) if virtual_network else \
-        instance.ip_configurations[0].subnet.id
-    if virtual_network is not None:
-        for config in instance.ip_configurations:
-            config.subnet.id = subnet_id
-
-    if public_ip_address is not None:
-        instance.ip_configurations = []
-        for i, public_ip in enumerate(public_ip_address):
-            ip_configuration = VirtualNetworkGatewayIPConfiguration(
-                subnet=SubResource(id=subnet_id),
-                public_ip_address=SubResource(id=public_ip),
-                private_ip_allocation_method='Dynamic', name='vnetGatewayConfig{}'.format(i))
-            instance.ip_configurations.append(ip_configuration)
-
-        # Update active-active/active-standby status
-        active = len(public_ip_address) == 2
-        if instance.active and not active:
-            logger.info('Placing gateway in active-standby mode.')
-        elif not instance.active and active:
-            logger.info('Placing gateway in active-active mode.')
-        instance.active = active
-
-    if gateway_type is not None:
-        instance.gateway_type = gateway_type
-
-    if enable_bgp is not None:
-        instance.enable_bgp = enable_bgp.lower() == 'true'
-
-    if custom_routes and cmd.supported_api_version(min_api='2019-02-01'):
-        if not instance.custom_routes:
-            instance.custom_routes = AddressSpace()
-        instance.custom_routes.address_prefixes = custom_routes
-
-    _validate_bgp_peering(cmd, instance, asn, bgp_peering_address, peer_weight)
-
-    return instance
-
-
 class VnetGatewayUpdate(_VnetGatewayUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -7590,7 +7407,7 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
         args = self.ctx.args
         if has_value(args.root_cert_data):
             collection = instance.properties.vpn_client_configuration.vpn_client_root_certificates.to_serialized_data()
-            root_certificate = [{'name': args.root_cert_name, 'public_cert_data': args.root_cert_data}]
+            root_certificate = {'name': args.root_cert_name, 'public_cert_data': args.root_cert_data}
             value = args.root_cert_name.to_serialized_data()
             match = next((x for x in collection if getattr(x, 'name', None) == value), None)
             if match:
@@ -7685,15 +7502,6 @@ class VnetGatewayVpnConnectionsDisconnect(_VnetGatewayVpnConnectionsDisconnect):
         )
 
         return args_schema
-
-
-def disconnect_vnet_gateway_vpn_connections(cmd, client, resource_group_name, virtual_network_gateway_name,
-                                            vpn_connection_ids, no_wait=False):
-    P2SVpnConnectionRequest = cmd.get_models('P2SVpnConnectionRequest')
-    request = P2SVpnConnectionRequest(vpn_connection_ids=vpn_connection_ids)
-    return sdk_no_wait(no_wait, client.begin_disconnect_virtual_network_gateway_vpn_connections,
-                       resource_group_name, virtual_network_gateway_name, request)
-
 # endregion
 
 
