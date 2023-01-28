@@ -48,6 +48,7 @@ from ._util import (
     get_sql_outbound_firewall_rules_operations,
     get_sql_instance_pools_operations,
     get_sql_managed_databases_operations,
+    get_sql_recoverable_managed_databases_operations,
     get_sql_managed_database_advanced_threat_protection_settings_operations,
     get_sql_managed_database_restore_details_operations,
     get_sql_managed_backup_short_term_retention_policies_operations,
@@ -844,6 +845,14 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#ManagedDatabasesOperations.{}',
         client_factory=get_sql_managed_databases_operations)
 
+    recoverable_managed_databases_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#RecoverableManagedDatabasesOperations.{}',
+        client_factory=get_sql_recoverable_managed_databases_operations)
+
+    with self.command_group('sql recoverable-midb', recoverable_managed_databases_operations) as g:
+        g.show_command('show')
+        g.command('list', 'list_by_instance')
+
     with self.command_group('sql midb',
                             managed_databases_operations,
                             client_factory=get_sql_managed_databases_operations) as g:
@@ -854,6 +863,7 @@ def load_command_table(self, _):
                                  custom_func_name='managed_db_update',
                                  supports_no_wait=True)
         g.custom_command('restore', 'managed_db_restore', supports_no_wait=True)
+        g.custom_command('recover', 'managed_db_recover', supports_no_wait=True)
         g.show_command('show', 'get')
         g.command('list', 'list_by_instance')
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)

@@ -38,6 +38,7 @@ from azure.mgmt.sql.models import (
     IPv6FirewallRule,
     LedgerDigestUploadsName,
     LongTermRetentionPolicyName,
+    ManagedDatabaseCreateMode,
     ManagedInstanceAzureADOnlyAuthentication,
     ManagedInstanceEncryptionProtector,
     ManagedInstanceExternalAdministrator,
@@ -4919,6 +4920,30 @@ def managed_db_update(
     return instance
 
 
+def managed_db_recover(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        recoverable_database_id,
+        **kwargs):
+
+    kwargs['location'] = _get_managed_instance_location(
+        cmd.cli_ctx,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name)
+
+    kwargs['create_mode'] = ManagedDatabaseCreateMode.RECOVERY
+    kwargs['recoverable_database_id'] = recoverable_database_id
+
+    return client.begin_create_or_update(
+        database_name=database_name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
+
 def managed_db_restore(
         cmd,
         client,
@@ -4947,7 +4972,7 @@ def managed_db_restore(
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name)
 
-    kwargs['create_mode'] = CreateMode.POINT_IN_TIME_RESTORE
+    kwargs['create_mode'] = ManagedDatabaseCreateMode.POINT_IN_TIME_RESTORE
 
     if deleted_time:
         kwargs['restorable_dropped_database_id'] = _get_managed_dropped_db_resource_id(

@@ -298,6 +298,11 @@ def load_command_table(self, _):
         g.custom_command('show-runs', 'show_build_output')
         g.command('cancel', 'begin_cancel')
 
+    with self.command_group('image builder identity', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
+        g.custom_command('assign', 'assign_template_identity', supports_local_cache=True)
+        g.custom_command('remove', 'remove_template_identity', supports_local_cache=True, confirmation=True)
+        g.custom_show_command('show', 'show_template_identity', supports_local_cache=True)
+
     with self.command_group('image builder customizer', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('add', 'add_template_customizer', supports_local_cache=True, validator=process_img_tmpl_customizer_add_namespace)
         g.custom_command('remove', 'remove_template_customizer', supports_local_cache=True)
