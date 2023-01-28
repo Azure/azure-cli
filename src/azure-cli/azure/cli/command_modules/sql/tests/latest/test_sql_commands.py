@@ -78,6 +78,7 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     subscription_id = '8313371e-0879-428e-b1da-6353575a9192'
+    existing_mi_name = 'autobot-managed-instance'
     group = 'CustomerExperienceTeam_RG'
     location = 'westcentralus'
     vnet_name = 'vnet-mi-tooling'
@@ -6627,3 +6628,28 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
         # list 0 instance links
         self.cmd('sql mi link list -g {rg} --instance-name {mi}',
                     checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+
+class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
+    def test_sql_midb_recover(self):
+        self.kwargs.update({
+            'rg': ManagedInstancePreparer.group,
+            'mi': ManagedInstancePreparer.existing_mi_name
+        })
+
+        # Due to long creation of geo backups, use existing MI
+        backups_list = self.cmd('sql recoverable-midb list -g {rg} --mi {mi}').get_output_in_json()
+        database_name = backups_list[0]['name']
+        self.kwargs.update({
+            'geodb': database_name
+        })
+
+        recoverable_db = self.cmd('sql recoverable-midb show -g {rg} --mi {mi} -n {geodb}',
+                    checks=[
+                        JMESPathCheck('name', database_name),
+                        JMESPathCheck('resourceGroup',  ManagedInstancePreparer.group)]).get_output_in_json()
+        self.kwargs.update({
+            'recoverable_db': recoverable_db['id']
+        })
+        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db -r {recoverable_db}',
+                checks=[
+                    JMESPathCheck('name', "recovered_db")])
