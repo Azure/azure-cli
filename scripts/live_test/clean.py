@@ -6,11 +6,10 @@
 # Azure Killer
 # version 0.1
 # Clean Azure resources automatically
-# Feiyue Yu
-
-import os
-import json
 import datetime
+import json
+import os
+import subprocess
 
 # Please set parameters
 
@@ -28,14 +27,15 @@ def main():
     print('Azure Killer, version 0.1')
     print('Configuration:')
     print('    Subscription: ' + subscription)
-    # print('    Resource group prefix: ' + str(prefixes))
+    print('    Resource group prefix: ' + str(prefixes))
     # print('    Maximum survival time: %d days' % TTL)
     print()
     cmd = 'az group list --subscription %s --query [].name'
     result = os.popen(cmd % subscription).read()
     rgs = json.loads(result)
     for rg in rgs:
-        clean_rg(rg)
+        if target_rg(rg):
+            clean_rg(rg)
 
 
 def clean_rg(rg):
@@ -45,9 +45,15 @@ def clean_rg(rg):
     :return:
     """
     print('Processing resource group: ' + rg)
-    cmd = 'az group delete -y -g %s --subscription %s' % (rg, subscription)
+    cmd = ["az", "group", "delete", "-y", "-g", rg, "--subscription", subscription]
     print(cmd)
-    os.popen(cmd)
+    try:
+        subprocess.run(cmd, timeout=300)
+    except subprocess.TimeoutExpired:
+        print("Exec command %s timed out" % cmd)
+    except Exception as e:
+        print("Exec command %s failed" % cmd)
+        print(e)
 
 
 def old_enough(dates):

@@ -84,7 +84,10 @@ def get_container_name():
     :return:
     """
     logger.warning('Enter get_container_name()')
-    name = USER_TARGET + '-' + BUILD_ID
+    if USER_TARGET:
+        name = USER_TARGET + '-' + BUILD_ID
+    else:
+        name = 'all-' + BUILD_ID
     logger.warning('Exit get_container_name()')
     return name
 
