@@ -330,7 +330,7 @@ examples:
   - name: Restore Geo-redundant backup.
     text: |
         az sql db geo-backup restore \\
-        --dest-database targetdb --dest-server myserver --dest-resource-group mygroup \\
+        --dest-database targetdb --dest-server myserver --resource-group mygroup \\
         --geo-backup-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup/providers/Microsoft.Sql/servers/myserver/databases/mydb/geoBackupPolicies/Default"
 """
 

@@ -1243,10 +1243,10 @@ class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
     def test_sql_db_geo_restore(
             self):
         self.kwargs.update({
-            'rg': 'testrg',
-            'loc': 'southeastasia',
-            'server_name': 'ayang-stage-seas',
-            'database_name': 'rebeccaxuRAGZRSTest'
+            'rg': 'CustomerExperienceTeam_RG',
+            'loc': 'westcentralus',
+            'server_name': 'mi-tooling-server',
+            'database_name': 'a-reneamoso-qpi-testing',
         })
 
         # test list geo backups for database
@@ -1269,7 +1269,7 @@ class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
 
         self.cmd(
             'sql db geo-backup restore --geo-backup-id {backup_id} --dest-database {dest_database_name}'
-            ' --dest-server {server_name} --dest-resource-group-name {rg}',
+            ' --dest-server {server_name} --resource-group {rg}',
             checks=[
                 self.check('name', '{dest_database_name}')])
                 

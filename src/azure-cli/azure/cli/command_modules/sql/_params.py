@@ -1186,9 +1186,9 @@ def load_arguments(self, _):
                    help='Name of the server to restore database to.')
 
         c.argument('target_resource_group_name',
-                   options_list=['--dest-resource-group-name'],
+                   options_list=['--resource-group'],
                    required=True,
-                   help='Name of the resource group of the server to restore database to.')
+                   help='Name of the target resource group of the server to restore database to.')
 
         c.argument('geo_backup_id',
                    options_list=['--geo-backup-id'],
