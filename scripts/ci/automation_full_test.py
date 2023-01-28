@@ -288,7 +288,7 @@ def git_push(message, modules=[]):
             module_name = '_'.join(modules)
             branch_name = f"regression_test_{build_id}_{module_name}"
             run_command(["git", "checkout", "-b", branch_name])
-            run_command(["git", "push", "azclibot", branch_name], check_return_code=True)
+            run_command(["git", "push", "--set-upstream", "azclibot", branch_name], check_return_code=True)
         run_command(["git", "add", "src/*"], check_return_code=True)
         run_command(["git", "commit", "-m", message], check_return_code=True)
     except RuntimeError as ex:
