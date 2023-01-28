@@ -35,10 +35,13 @@ from .aaz.latest.network.application_gateway.client_cert import Add as _ClientCe
     Update as _ClientCertUpdate
 from .aaz.latest.network.application_gateway.identity import Assign as _IdentityAssign
 from .aaz.latest.network.application_gateway.frontend_ip import Create as _FrontendIPCreate, Update as _FrontendIPUpdate
+from .aaz.latest.network.application_gateway.http_settings import Create as _HTTPSettingsCreate, \
+    Update as _HTTPSettingsUpdate
 from .aaz.latest.network.application_gateway.probe import Create as _ProbeCreate, Update as _ProbeUpdate
 from .aaz.latest.network.application_gateway.redirect_config import Create as _RedirectConfigCreate, \
     Update as _RedirectConfigUpdate
 from .aaz.latest.network.application_gateway.root_cert import Create as _RootCertCreate, Update as _RootCertUpdate
+from .aaz.latest.network.application_gateway.settings import Create as _SettingsCreate, Update as _SettingsUpdate
 from .aaz.latest.network.application_gateway.ssl_cert import Create as _SSLCertCreate, Update as _SSLCertUpdate
 from .aaz.latest.network.application_gateway.ssl_policy import Set as _SSLPolicySet
 from .aaz.latest.network.application_gateway.ssl_profile import Add as _SSLProfileAdd, Update as _SSLProfileUpdate, \
@@ -1092,133 +1095,234 @@ def remove_ag_private_link_ip(cmd,
                        appgw)
 
 
-def create_ag_backend_http_settings_collection(cmd, resource_group_name, application_gateway_name, item_name, port,
-                                               probe=None, protocol='http', cookie_based_affinity=None, timeout=None,
-                                               no_wait=False, connection_draining_timeout=0,
-                                               host_name=None, host_name_from_backend_pool=None,
-                                               affinity_cookie_name=None, enable_probe=None, path=None,
-                                               auth_certs=None, root_certs=None):
-    ApplicationGatewayBackendHttpSettings, ApplicationGatewayConnectionDraining, SubResource = cmd.get_models(
-        'ApplicationGatewayBackendHttpSettings', 'ApplicationGatewayConnectionDraining', 'SubResource')
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    new_settings = ApplicationGatewayBackendHttpSettings(
-        port=port,
-        protocol=protocol,
-        cookie_based_affinity=cookie_based_affinity or 'Disabled',
-        request_timeout=timeout,
-        probe=SubResource(id=probe) if probe else None,
-        name=item_name)
-    if cmd.supported_api_version(min_api='2016-09-01'):
-        new_settings.authentication_certificates = [SubResource(id=x) for x in auth_certs or []]
-    if cmd.supported_api_version(min_api='2016-12-01'):
-        new_settings.connection_draining = \
-            ApplicationGatewayConnectionDraining(
-                enabled=bool(connection_draining_timeout), drain_timeout_in_sec=connection_draining_timeout or 1)
-    if cmd.supported_api_version(min_api='2017-06-01'):
-        new_settings.host_name = host_name
-        new_settings.pick_host_name_from_backend_address = host_name_from_backend_pool
-        new_settings.affinity_cookie_name = affinity_cookie_name
-        new_settings.probe_enabled = enable_probe
-        new_settings.path = path
-    if cmd.supported_api_version(min_api='2019-04-01'):
-        new_settings.trusted_root_certificates = [SubResource(id=x) for x in root_certs or []]
-    upsert_to_collection(ag, 'backend_http_settings_collection', new_settings, 'name')
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
+class HTTPSettingsCreate(_HTTPSettingsCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZIntArg, AAZIntArgFormat, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.auth_certs = AAZListArg(
+            options=["--auth-certs"],
+            help="Space-separated list of authentication certificates (Names and IDs) to associate with the HTTP settings.",
+        )
+        args_schema.auth_certs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/authenticationCertificates/{}",
+            ),
+        )
+        args_schema.root_certs = AAZListArg(
+            options=["--root-certs"],
+            help="Space-separated list of trusted root certificates (Names and IDs) to associate with the HTTP settings. "
+                 "`--host-name` or `--host-name-from-backend-pool` is required when this field is set.",
+        )
+        args_schema.root_certs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/trustedRootCertificates/{}",
+            ),
+        )
+        args_schema.connection_draining_timeout = AAZIntArg(
+            options=["--connection-draining-timeout"],
+            help="Time in seconds after a backend server is removed during which on open connection remains active. "
+                 "Range from 0 (Disabled) to 3600.",
+            default=0,
+            fmt=AAZIntArgFormat(
+                maximum=3600,
+                minimum=0,
+            ),
+        )
+        args_schema.probe._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/probes/{}",
+        )
+        args_schema.cookie_based_affinity._blank = "Enabled"
+        args_schema.port._required = True
+        args_schema.authentication_certificates._registered = False
+        args_schema.trusted_root_certificates._registered = False
+        args_schema.connection_draining._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.authentication_certificates = assign_aaz_list_arg(
+            args.authentication_certificates,
+            args.auth_certs,
+            element_transformer=lambda _, auth_cert_id: {"id": auth_cert_id}
+        )
+        args.trusted_root_certificates = assign_aaz_list_arg(
+            args.trusted_root_certificates,
+            args.root_certs,
+            element_transformer=lambda _, root_cert_id: {"id": root_cert_id}
+        )
+        timeout = args.connection_draining_timeout.to_serialized_data()
+        args.connection_draining.enabled = bool(timeout)
+        args.connection_draining.drain_timeout_in_sec = timeout or 1
 
 
-def update_ag_backend_http_settings_collection(cmd, instance, parent, item_name, port=None, probe=None, protocol=None,
-                                               cookie_based_affinity=None, timeout=None,
-                                               connection_draining_timeout=None,
-                                               host_name=None, host_name_from_backend_pool=None,
-                                               affinity_cookie_name=None, enable_probe=None, path=None,
-                                               auth_certs=None, root_certs=None):
-    SubResource = cmd.get_models('SubResource')
-    if auth_certs == "":
-        instance.authentication_certificates = None
-    elif auth_certs is not None:
-        instance.authentication_certificates = [SubResource(id=x) for x in auth_certs]
-    if root_certs == "":
-        instance.trusted_root_certificates = None
-    elif root_certs is not None:
-        instance.trusted_root_certificates = [SubResource(id=x) for x in root_certs]
-    if port is not None:
-        instance.port = port
-    if probe is not None:
-        instance.probe = SubResource(id=probe)
-    if protocol is not None:
-        instance.protocol = protocol
-    if cookie_based_affinity is not None:
-        instance.cookie_based_affinity = cookie_based_affinity
-    if timeout is not None:
-        instance.request_timeout = timeout
-    if connection_draining_timeout is not None:
-        instance.connection_draining = {
-            'enabled': bool(connection_draining_timeout),
-            'drain_timeout_in_sec': connection_draining_timeout or 1
-        }
-    if host_name is not None:
-        instance.host_name = host_name
-    if host_name_from_backend_pool is not None:
-        instance.pick_host_name_from_backend_address = host_name_from_backend_pool
-    if affinity_cookie_name is not None:
-        instance.affinity_cookie_name = affinity_cookie_name
-    if enable_probe is not None:
-        instance.probe_enabled = enable_probe
-    if path is not None:
-        instance.path = path
-    return parent
+class HTTPSettingsUpdate(_HTTPSettingsUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZListArgFormat, AAZIntArg, AAZIntArgFormat, AAZResourceIdArg, AAZResourceIdArgFormat
+
+        class EmptyListArgFormat(AAZListArgFormat):
+            def __call__(self, ctx, value):
+                if value.to_serialized_data() == [""]:
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.auth_certs = AAZListArg(
+            options=["--auth-certs"],
+            help="Space-separated list of authentication certificates (Names and IDs) to associate with the HTTP settings.",
+            fmt=EmptyListArgFormat(),
+            nullable=True,
+        )
+        args_schema.auth_certs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/authenticationCertificates/{}",
+            ),
+            nullable=True,
+        )
+        args_schema.root_certs = AAZListArg(
+            options=["--root-certs"],
+            help="Space-separated list of trusted root certificates (Names and IDs) to associate with the HTTP settings. "
+                 "`--host-name` or `--host-name-from-backend-pool` is required when this field is set.",
+            fmt=EmptyListArgFormat(),
+            nullable=True,
+        )
+        args_schema.root_certs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/trustedRootCertificates/{}",
+            ),
+            nullable=True,
+        )
+        args_schema.connection_draining_timeout = AAZIntArg(
+            options=["--connection-draining-timeout"],
+            help="Time in seconds after a backend server is removed during which on open connection remains active. "
+                 "Range from 0 (Disabled) to 3600.",
+            fmt=AAZIntArgFormat(
+                maximum=3600,
+                minimum=0,
+            ),
+            nullable=True,
+        )
+        args_schema.probe._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/probes/{}",
+        )
+        args_schema.cookie_based_affinity._blank = "Enabled"
+        args_schema.authentication_certificates._registered = False
+        args_schema.trusted_root_certificates._registered = False
+        args_schema.connection_draining._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.authentication_certificates = assign_aaz_list_arg(
+            args.authentication_certificates,
+            args.auth_certs,
+            element_transformer=lambda _, auth_cert_id: {"id": auth_cert_id}
+        )
+        args.trusted_root_certificates = assign_aaz_list_arg(
+            args.trusted_root_certificates,
+            args.root_certs,
+            element_transformer=lambda _, root_cert_id: {"id": root_cert_id}
+        )
+        if has_value(args.connection_draining_timeout):
+            timeout = args.connection_draining_timeout.to_serialized_data()
+            args.connection_draining.enabled = bool(timeout)
+            args.connection_draining.drain_timeout_in_sec = timeout or 1
+
+    def post_instance_update(self, instance):
+        if not has_value(instance.properties.probe.id):
+            instance.properties.probe = None
 
 
-def create_ag_backend_settings_collection(cmd, resource_group_name, application_gateway_name, item_name, port,
-                                          probe=None, protocol='tcp', timeout=None,
-                                          no_wait=False,
-                                          host_name=None, host_name_from_backend_pool=None,
-                                          path=None, root_certs=None):
-    ApplicationGatewayBackendSettings, SubResource = cmd.get_models(
-        'ApplicationGatewayBackendSettings', 'SubResource')
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    new_settings = ApplicationGatewayBackendSettings(
-        port=port,
-        protocol=protocol,
-        timeout=timeout,
-        probe=SubResource(id=probe) if probe else None,
-        name=item_name)
-    new_settings.host_name = host_name
-    new_settings.pick_host_name_from_backend_address = host_name_from_backend_pool
-    new_settings.path = path
-    new_settings.trusted_root_certificates = [SubResource(id=x) for x in root_certs or []]
-    upsert_to_collection(ag, 'backend_settings_collection', new_settings, 'name')
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
+class SettingsCreate(_SettingsCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.root_certs = AAZListArg(
+            options=["--root-certs"],
+            help="Space-separated list of trusted root certificates (Names and IDs) to associate with the HTTP settings. "
+                 "`--host-name` or `--backend-pool-host-name` is required when this field is set.",
+        )
+        args_schema.root_certs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/trustedRootCertificates/{}",
+            ),
+        )
+        args_schema.probe._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/probes/{}",
+        )
+        args_schema.port._required = True
+        args_schema.trusted_root_certificates._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.trusted_root_certificates = assign_aaz_list_arg(
+            args.trusted_root_certificates,
+            args.root_certs,
+            element_transformer=lambda _, root_cert_id: {"id": root_cert_id}
+        )
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def update_ag_backend_settings_collection(cmd, instance, parent, item_name, port=None, probe=None, protocol=None,
-                                          timeout=None,
-                                          host_name=None, host_name_from_backend_pool=None,
-                                          path=None, root_certs=None):
-    SubResource = cmd.get_models('SubResource')
-    if root_certs == "":
-        instance.trusted_root_certificates = None
-    elif root_certs is not None:
-        instance.trusted_root_certificates = [SubResource(id=x) for x in root_certs]
-    if port is not None:
-        instance.port = port
-    if probe is not None:
-        instance.probe = SubResource(id=probe)
-    if protocol is not None:
-        instance.protocol = protocol
-    if timeout is not None:
-        instance.timeout = timeout
-    if host_name is not None:
-        instance.host_name = host_name
-    if host_name_from_backend_pool is not None:
-        instance.pick_host_name_from_backend_address = host_name_from_backend_pool
-    if path is not None:
-        instance.path = path
-    return parent
+class SettingsUpdate(_SettingsUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZListArgFormat, AAZResourceIdArg, AAZResourceIdArgFormat
+
+        class EmptyListArgFormat(AAZListArgFormat):
+            def __call__(self, ctx, value):
+                if value.to_serialized_data() == [""]:
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.root_certs = AAZListArg(
+            options=["--root-certs"],
+            help="Space-separated list of trusted root certificates (Names and IDs) to associate with the HTTP settings. "
+                 "`--host-name` or `--backend-pool-host-name` is required when this field is set.",
+            fmt=EmptyListArgFormat(),
+            nullable=True,
+        )
+        args_schema.root_certs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/trustedRootCertificates/{}",
+            ),
+            nullable=True,
+        )
+        args_schema.probe._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/probes/{}",
+        )
+        args_schema.trusted_root_certificates._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.trusted_root_certificates = assign_aaz_list_arg(
+            args.trusted_root_certificates,
+            args.root_certs,
+            element_transformer=lambda _, root_cert_id: {"id": root_cert_id}
+        )
+
+    def post_instance_update(self, instance):
+        if not has_value(instance.properties.probe.id):
+            instance.properties.probe = None
 
 
 class RedirectConfigCreate(_RedirectConfigCreate):
@@ -2594,7 +2698,8 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
                 target_resource_id = record_set.target_resource.id
                 record_obj.update({'target-resource-id': record_type.upper() + " " + target_resource_id})
                 record_type = 'alias'
-                zone_obj[record_set_name][record_type] = []
+                if record_type not in zone_obj[record_set_name]:
+                    zone_obj[record_set_name][record_type] = []
             elif record_type == 'aaaa' or record_type == 'a':
                 record_obj.update({'ip': ''})
             elif record_type == 'cname':
