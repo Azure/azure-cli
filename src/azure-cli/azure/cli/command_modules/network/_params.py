@@ -46,7 +46,7 @@ from azure.cli.core.profiles import ResourceType
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
 def load_arguments(self, _):
 
-    (ApplicationGatewayProtocol, ApplicationGatewayRedirectType,
+    (ApplicationGatewayProtocol,
      ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySkuName, ApplicationGatewaySslProtocol, AuthenticationMethod,
      Direction, VpnAuthenticationType,
      FlowLogFormatType, HTTPMethod, IPAllocationMethod,
@@ -56,7 +56,7 @@ def load_arguments(self, _):
      ConnectionMonitorEndpointFilterType, ConnectionMonitorTestConfigurationProtocol,
      PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType, GatewayLoadBalancerTunnelProtocol,
      GatewayLoadBalancerTunnelInterfaceType, VpnNatRuleType, VpnNatRuleMode, LoadBalancerBackendAddressAdminState, PacketCaptureTargetType) = self.get_models(
-         'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
+         'ApplicationGatewayProtocol',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol', 'AuthenticationMethod',
          'Direction', 'VpnAuthenticationType',
          'FlowLogFormatType', 'HTTPMethod', 'IPAllocationMethod',

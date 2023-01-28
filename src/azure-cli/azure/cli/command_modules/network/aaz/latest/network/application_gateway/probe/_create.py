@@ -77,11 +77,11 @@ class Create(AAZCommand):
             help="Relative path of probe. Valid path starts from \"/\". Probe is sent to <Protocol>://<host>:<port><path>.",
         )
         _args_schema.host_name_from_http_settings = AAZBoolArg(
-            options=["--host-name-from-http-settings"],
+            options=["--from-http-settings", "--host-name-from-http-settings"],
             help="Whether to use host header from HTTP settings.",
         )
         _args_schema.host_name_from_settings = AAZBoolArg(
-            options=["--host-name-from-settings"],
+            options=["--from-settings", "--host-name-from-settings"],
             help="Whether to use host header from settings. Pick hostname from settings is currently not supported, now only support false.",
         )
         _args_schema.port = AAZIntArg(
