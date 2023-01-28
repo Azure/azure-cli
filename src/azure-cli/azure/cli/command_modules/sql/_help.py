@@ -881,6 +881,8 @@ examples:
     text: az sql mi list
   - name: List all managed instances in a resource group.
     text: az sql mi list -g mygroup
+  - name: List the names and hostnames of all sql managed instances in the subscription
+    text: az sql mi list  -otsv --query "[].{Name:name, HostName:fullyQualifiedDomainName}"
 """
 
 helps['sql mi op'] = """
