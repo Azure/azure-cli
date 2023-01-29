@@ -300,6 +300,10 @@ def load_arguments(self, _):
         c.argument('shared_image_destinations', arg_type=ib_cutput_type)
         c.argument('output_name', arg_type=ib_cutput_type)
 
+    for scope in ['image builder identity assign', 'image builder identity remove']:
+        with self.argument_context(scope, min_api='2022-02-14') as c:
+            c.argument('user_assigned', arg_group='Managed Identity', nargs='*', help='Specify one user assigned identity (name or ID, space delimited) of the image template.')
+
     with self.argument_context('image builder output') as c:
         ib_sig_regions_help = "Space-separated list of regions to replicate the image version into."
         ib_img_location_help = "Location where the customized image will be created."
@@ -1288,6 +1292,10 @@ def load_arguments(self, _):
         c.argument('target_region_cvm_encryption', nargs='+', min_api='2021-10-01', help='Space-separated list of customer managed key for Confidential VM encrypting the OS disk in the gallery artifact for each region. Format for each region: `<os_cvm_encryption_type>,<os_cvm_des>`. The valid values for os_cvm_encryption_type are EncryptedVMGuestStateOnlyWithPmk, EncryptedWithPmk, EncryptedWithCmk.')
         c.argument('virtual_machine', help='Resource id of VM source')
         c.argument('image_version', help='Resource id of gallery image version source')
+        c.argument('target_zone_encryption', nargs='+', min_api='2022-01-03',
+                   options_list=['--target-edge-zone-encryption', '--zone-encryption'],
+                   help='Space-separated list of customer managed keys for encrypting the OS and data disks in the gallery artifact for each region. '
+                        'Format for each edge zone: <edge zone>,<os_des>,<lun1>,<lun1_des>,<lun2>,<lun2_des>.')
 
     with self.argument_context('sig image-version list-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
@@ -1321,6 +1329,10 @@ def load_arguments(self, _):
                        help='Space-separated list of regions and their replica counts. Use `<region>[=<replica count>][=<storage account type>]` to optionally set the replica count and/or storage account type for each region. '
                             'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used')
             c.argument('replica_count', help='The default number of replicas to be created per region. To set regional replication counts, use --target-regions', type=int)
+            c.argument('target_edge_zones', nargs='*', min_api='2022-01-03',
+                       help='Space-separated list of regions, edge zones, replica counts and storage types. Use <region>=<edge zone>[=<replica count>][=<storage account type>] to optionally set the replica count and/or storage account type for each region. '
+                            'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used. '
+                            'If "--target-edge-zones None" is specified, the target extended locations will be cleared.')
             c.argument('allow_replicated_location_deletion', arg_type=get_three_state_flag(), min_api='2022-03-03', help='Indicate whether or not removing this gallery image version from replicated regions is allowed.')
 
     with self.argument_context('sig show-community') as c:

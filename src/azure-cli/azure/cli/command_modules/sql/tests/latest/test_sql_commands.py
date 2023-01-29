@@ -28,6 +28,7 @@ from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
 from azure.cli.command_modules.sql.custom import (
+    AlwaysEncryptedEnclaveType,
     ClientAuthenticationType,
     ClientType,
     ComputeModelType,
@@ -77,6 +78,7 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     subscription_id = '8313371e-0879-428e-b1da-6353575a9192'
+    existing_mi_name = 'autobot-managed-instance'
     group = 'CustomerExperienceTeam_RG'
     location = 'westcentralus'
     vnet_name = 'vnet-mi-tooling'
@@ -916,6 +918,48 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('ledgerOn', True)])
 
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
+    def test_sql_db_preferred_enclave_type(self, resource_group, resource_group_location, server):
+        database_name_one = "cliautomationdb01"
+        database_name_two = "cliautomationdb02"
+        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default
+        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs
+
+        # test sql db is created with default enclave type
+        self.cmd('sql db create -g {} --server {} --name {} --preferred-enclave-type {} --yes'
+                 .format(resource_group, server, database_name_one, preferred_enclave_type_default),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server, database_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
+        # test sql db is created with vbs enclave type
+        self.cmd('sql db create -g {} --server {} --name {} --preferred-enclave-type {} --yes'
+                 .format(resource_group, server, database_name_two, preferred_enclave_type_vbs),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)])
+
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server, database_name_two),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)])
+
 
 class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westeurope')
@@ -1462,12 +1506,13 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
                  .format(resource_group, server, elastic_pool))
 
         # Create database and wait for first backup to exist
-        _create_db_wait_for_first_backup(self, resource_group, server, database_name)
+        db = _create_db_wait_for_first_backup(self, resource_group, server, database_name)
+        timestamp = _get_earliest_restore_date(db)
 
         # Restore to standalone db
         self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
                  ' --service-objective {} --edition {}'
-                 .format(resource_group, server, database_name, datetime.utcnow().isoformat(),
+                 .format(resource_group, server, database_name, timestamp.isoformat(),
                          restore_standalone_database_name, restore_service_objective,
                          restore_edition),
                  checks=[
@@ -1481,7 +1526,7 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
         # in transform func which only runs after `show`/`list` commands.
         self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
                  ' --elastic-pool {}'
-                 .format(resource_group, server, database_name, datetime.utcnow().isoformat(),
+                 .format(resource_group, server, database_name, timestamp.isoformat(),
                          restore_pool_database_name, elastic_pool),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -1500,7 +1545,7 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
         bsr_database = 'bsr_database'
         backup_storage_redundancy = 'geo'
         self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {} --backup-storage-redundancy {}'
-                 .format(resource_group, server, database_name, datetime.utcnow().isoformat(),
+                 .format(resource_group, server, database_name, timestamp.isoformat(),
                          bsr_database, backup_storage_redundancy),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -6583,3 +6628,28 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
         # list 0 instance links
         self.cmd('sql mi link list -g {rg} --instance-name {mi}',
                     checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+
+class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
+    def test_sql_midb_recover(self):
+        self.kwargs.update({
+            'rg': ManagedInstancePreparer.group,
+            'mi': ManagedInstancePreparer.existing_mi_name
+        })
+
+        # Due to long creation of geo backups, use existing MI
+        backups_list = self.cmd('sql recoverable-midb list -g {rg} --mi {mi}').get_output_in_json()
+        database_name = backups_list[0]['name']
+        self.kwargs.update({
+            'geodb': database_name
+        })
+
+        recoverable_db = self.cmd('sql recoverable-midb show -g {rg} --mi {mi} -n {geodb}',
+                    checks=[
+                        JMESPathCheck('name', database_name),
+                        JMESPathCheck('resourceGroup',  ManagedInstancePreparer.group)]).get_output_in_json()
+        self.kwargs.update({
+            'recoverable_db': recoverable_db['id']
+        })
+        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db -r {recoverable_db}',
+                checks=[
+                    JMESPathCheck('name', "recovered_db")])
