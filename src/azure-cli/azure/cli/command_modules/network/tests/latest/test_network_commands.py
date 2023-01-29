@@ -2824,25 +2824,28 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'ip1': 'pubipddos',
+            'ddos': 'ddos1',
         })
 
-        # self.kwargs['ddos_id'] = self.cmd('network ddos-protection create -g {rg} -n {ddos}').get_output_in_json()['id']
+        self.kwargs['ddos_id'] = self.cmd('network ddos-protection create -g {rg} -n {ddos}').get_output_in_json()['id']
 
         self.cmd(
-            'network public-ip create -g {rg} -n {ip1} --protection-mode Enabled --sku Standard',
+            'network public-ip create -g {rg} -n {ip1} --protection-mode Enabled --sku Standard --ddos-protection-plan {ddos}',
             checks=[
                 self.check('publicIp.ddosSettings.protectionMode', 'Enabled'),
+                self.check('publicIp.ddosSettings.ddosProtectionPlan.id', '{ddos_id}'),
                 self.check('publicIp.name', '{ip1}'),
                 self.check('publicIp.provisioningState', 'Succeeded')
             ])
 
-        self.cmd('network public-ip update -g {rg} -n {ip1} --protection-mode Disabled',
+        self.cmd('network public-ip update -g {rg} -n {ip1} --protection-mode Disabled --ddos-protection-plan null',
                  checks=[
                      self.check('ddosSettings.protectionMode', 'Disabled'),
+                     self.check('ddosSettings.ddosProtectionPlan', None),
                      self.check('name', '{ip1}'),
                      self.check('provisioningState', 'Succeeded')
                  ])
-        # self.cmd('network ddos-protection delete -g {rg} -n {ddos}')
+        self.cmd('network ddos-protection delete -g {rg} -n {ddos}')
 
         self.cmd('network public-ip delete -g {rg} -n {ip1}')
         self.cmd('network public-ip list -g {rg}',

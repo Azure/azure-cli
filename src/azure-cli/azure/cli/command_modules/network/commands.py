@@ -18,7 +18,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_public_ip_addresses, cf_connection_monitor,
+    cf_connection_monitor,
     cf_dns_references,
     cf_app_gateway_waf_policy,
     cf_virtual_router, cf_virtual_router_peering, cf_flow_logs,
@@ -108,11 +108,6 @@ def load_command_table(self, _):
     network_nic_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#NetworkInterfacesOperations.{}',
         client_factory=cf_network_interfaces
-    )
-
-    network_public_ip_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#PublicIPAddressesOperations.{}',
-        client_factory=cf_public_ip_addresses
     )
 
     network_vgw_sdk = CliCommandType(
@@ -818,8 +813,10 @@ def load_command_table(self, _):
     public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Address:ipAddress, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
     public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ' if self.supported_api_version(min_api='2017-06-01') else ' ')
 
-    with self.command_group('network public-ip', network_public_ip_sdk) as g:
+    with self.command_group('network public-ip') as g:
         from .aaz.latest.network.public_ip import List, Show
+        from .custom import PublicIPUpdate
+        self.command_table['network public-ip update'] = PublicIPUpdate(loader=self)
         self.command_table['network public-ip list'] = List(loader=self, table_transformer='[].' + public_ip_show_table_transform)
         self.command_table['network public-ip show'] = Show(loader=self, table_transformer=public_ip_show_table_transform)
         g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)

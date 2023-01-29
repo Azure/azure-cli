@@ -1446,6 +1446,7 @@ def load_arguments(self, _):
         c.argument('version', min_api='2016-09-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
         c.argument('protection_mode', options_list=['--ddos-protection-mode', '--protection-mode'],
                    min_api='2022-01-01', help='The DDoS protection mode of the public IP', arg_type=get_enum_type(['Enabled', 'Disabled', 'VirtualNetworkInherited']))
+        c.argument('ddos_protection_plan', help='Name or ID of a DDoS protection plan associated with the public IP. Can only be set if `--protection-mode` is Enabled.')
 
     for scope in ['public-ip', 'lb frontend-ip', 'cross-region-lb frontend-ip']:
         with self.argument_context('network {}'.format(scope), min_api='2018-07-01') as c:

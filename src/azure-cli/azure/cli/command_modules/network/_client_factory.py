@@ -64,10 +64,6 @@ def cf_private_access(cli_ctx, _):
     return network_client_factory(cli_ctx).available_private_access_services
 
 
-def cf_public_ip_addresses(cli_ctx, _):
-    return network_client_factory(cli_ctx).public_ip_addresses
-
-
 def cf_virtual_network_gateway_connections(cli_ctx, _):
     return network_client_factory(cli_ctx).virtual_network_gateway_connections
 

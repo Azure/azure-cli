@@ -60,6 +60,7 @@ from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRo
 from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
 from .aaz.latest.network.nsg import Create as _NSGCreate
 from .aaz.latest.network.nsg.rule import Create as _NSGRuleCreate, Update as _NSGRuleUpdate
+from .aaz.latest.network.public_ip import Create as _PublicIPCreate, Update as _PublicIPUpdate
 from .aaz.latest.network.private_endpoint import Create as _PrivateEndpointCreate, Update as _PrivateEndpointUpdate
 from .aaz.latest.network.private_endpoint.asg import Add as _PrivateEndpointAsgAdd, Remove as _PrivateEndpointAsgRemove
 from .aaz.latest.network.private_endpoint.dns_zone_group import Create as _PrivateEndpointPrivateDnsZoneGroupCreate, \
@@ -6477,8 +6478,8 @@ def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, 
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
-                     public_ip_prefix=None, edge_zone=None, ip_address=None, protection_mode=None):
-
+                     public_ip_prefix=None, edge_zone=None, ip_address=None,
+                     protection_mode=None, ddos_protection_plan=None):
     public_ip_args = {
         'name': public_ip_address_name,
         "resource_group": resource_group_name,
@@ -6535,9 +6536,46 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         public_ip_args['type'] = 'EdgeZone'
     if protection_mode:
         public_ip_args['ddos_protection_mode'] = protection_mode
+    if ddos_protection_plan:
+        public_ip_args['ddos_protection_plan'] = ddos_protection_plan
 
-    from .aaz.latest.network.public_ip import Create
-    return Create(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
+    return PublicIPCreate(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
+
+
+class PublicIPCreate(_PublicIPCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.public_ip_prefix._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/publicIPPrefixes/{}",
+        )
+        args_schema.ddos_protection_plan._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/ddosProtectionPlans/{}",
+        )
+        return args_schema
+
+
+class PublicIPUpdate(_PublicIPUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.public_ip_prefix._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/publicIPPrefixes/{}",
+        )
+        args_schema.ddos_protection_plan._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/ddosProtectionPlans/{}",
+        )
+        return args_schema
+
+    def post_instance_update(self, instance):
+        if not has_value(instance.properties.ddos_settings.ddos_protection_plan.id):
+            instance.properties.ddos_settings.ddos_protection_plan = None
 
 
 class PublicIpPrefixCreate(_PublicIpPrefixCreate):
