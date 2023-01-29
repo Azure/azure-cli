@@ -879,7 +879,7 @@ def load_command_table(self, _):
     # endregion
 
     # region VirtualNetworkGateways
-    with self.command_group('network vnet-gateway', network_vgw_sdk, min_api='2016-09-01') as g:
+    with self.command_group('network vnet-gateway'):
         from .custom import VnetGatewayCreate, VnetGatewayUpdate, VnetGatewayVpnConnectionsDisconnect
         from .aaz.latest.network.vnet_gateway import ListBgpPeerStatus, ListAdvertisedRoutes, ListLearnedRoutes
         self.command_table['network vnet-gateway create'] = VnetGatewayCreate(loader=self, transform=transform_vnet_gateway_create_output)
