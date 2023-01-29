@@ -32,6 +32,7 @@ DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
 MINIMUM_IOPS = 300
 RESOURCE_PROVIDER = 'Microsoft.DBforMySQL'
 
+
 # region create without args
 # pylint: disable=too-many-locals, too-many-statements, raise-missing-from
 def flexible_server_create(cmd, client,
@@ -445,6 +446,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
     if storage_gb:
         instance.storage.storage_size_gb = storage_gb
 
+    if auto_scale_iops:
+        instance.storage.auto_io_scaling = auto_scale_iops
+
     if not iops:
         iops = instance.storage.iops
     instance.storage.iops = _determine_iops(storage_gb=instance.storage.storage_size_gb,
@@ -455,9 +459,6 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     if auto_grow:
         instance.storage.storage_autogrow = auto_grow
-
-    if auto_scale_iops:
-        instance.storage.auto_io_scaling = auto_scale_iops
 
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
