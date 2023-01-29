@@ -111,7 +111,7 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
         raise CLIError('Unable to determine extension name from {}. Is the file name correct?'.format(source))
     if extension_exists(extension_name, ext_type=WheelExtension):
         raise CLIError('The extension {} already exists.'.format(extension_name))
-    if extension_name == 'rdbms-connect':
+    if extension_name == 'rdbms-connect' or extension_name == 'serviceconnector-passwordless':
         _install_deps_for_psycopg2()
     ext_file = None
     if is_url:

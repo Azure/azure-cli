@@ -1344,7 +1344,7 @@ type: command
 short-summary: Update the firewall configuration of a web application.
 long-summary: >
     This command is only applicable to application gateways with an SKU type of WAF. To learn
-    more, visit https://docs.microsoft.com/azure/application-gateway/application-gateway-web-application-firewall-cli
+    more, visit https://learn.microsoft.com/en-us/azure/web-application-firewall/ag/tutorial-restrict-web-traffic-cli.
 parameters:
   - name: --rule-set-type
     short-summary: Rule set type.
@@ -1371,20 +1371,13 @@ parameters:
 examples:
   - name: Configure WAF on an application gateway in detection mode with default values
     text: |
-        az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway \\
-            --enabled true --firewall-mode Detection --rule-set-version 3.0
+        az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway --enabled true --firewall-mode Detection --rule-set-version 3.0
   - name: Disable rules for validation of request body parsing and SQL injection.
     text: |
-        az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway \\
-            --enabled true --rule-set-type OWASP --rule-set-version 3.0 \\
-            --disabled-rule-groups REQUEST-942-APPLICATION-ATTACK-SQLI \\
-            --disabled-rules 920130 920140
+        az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway --enabled true --rule-set-type OWASP --rule-set-version 3.0 --disabled-rule-groups REQUEST-942-APPLICATION-ATTACK-SQLI --disabled-rules 920130 920140
   - name: Configure WAF on an application gateway with exclusions.
     text: |
-        az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway \\
-            --enabled true --firewall-mode Detection --rule-set-version 3.0 \\
-            --exclusion "RequestHeaderNames StartsWith x-header" \\
-            --exclusion "RequestArgNames Equals IgnoreThis"
+        az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway --enabled true --firewall-mode Detection --rule-set-version 3.0 --exclusion "RequestHeaderNames StartsWith x-header" --exclusion "RequestArgNames Equals IgnoreThis"
 """
 
 helps['network application-gateway waf-config show'] = """
@@ -4459,30 +4452,6 @@ type: group
 short-summary: Manage private endpoints.
 """
 
-helps['network private-endpoint create'] = """
-type: command
-short-summary: Create a private endpoint.
-
-parameters:
-  - name: --ip-config
-    short-summary: The private endpoint ip configurations.
-    long-summary: |
-        Usage: --ip-config name=MyIPConfig group-id=MyGroup member-name=MyMember private-ip-address=MyPrivateIPAddress
-        Multiple ip configurations can be specified by using more than one `--ip-config` argument.
-  - name: --asg
-    short-summary: The private endpoint application security groups.
-    long-summary: |
-        Usage: --asg id=MyApplicationSecurityGroupId
-        Multiple application security groups can be specified by using more than one `--asg` argument.
-
-examples:
-  - name: Create a private endpoint.
-    text: az network private-endpoint create -g MyResourceGroup -n MyPE --vnet-name MyVnetName --subnet MySubnet --private-connection-resource-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/privateLinkServices/MyPLS" --connection-name tttt -l centralus
-  - name: Create a private endpoint with ASGs.
-    text: |
-        az network private-endpoint create -n MyPE -g MyResourceGroup --vnet-name MyVnetName --subnet MySubnet --connection-name MyConnectionName --group-id MyGroupId --private-connection-resource-id MyResourceId --asg id=MyAsgId --asg id=MyAsgId
-"""
-
 helps['network private-endpoint delete'] = """
 type: command
 short-summary: Delete a private endpoint.
@@ -5102,20 +5071,6 @@ long-summary: >
 helps['network vnet-gateway create'] = """
 type: command
 short-summary: Create a virtual network gateway.
-parameters:
-  - name: --nat-rule
-    short-summary: VirtualNetworkGatewayNatRule Resource.
-    long-summary: |
-        Usage: --nat-rule name=rule type=Static mode=EgressSnat internal-mappings=10.4.0.0/24 external-mappings=192.168.21.0/24 ip-config-id=/subscriptions/subid/resourceGroups/rg1/providers/Microsoft.Network/virtualNetworkGateways/gateway1/ipConfigurations/default
-
-        name: Required.The name of the resource that is unique within a resource group. This name can be used to access the resource.
-        internal-mappings: Required.The private IP address internal mapping for NAT.
-        external-mappings: Required.The private IP address external mapping for NAT.
-        type: The type of NAT rule for VPN NAT.
-        mode: The Source NAT direction of a VPN NAT.
-        ip-config-id: The IP Configuration ID this NAT rule applies to.
-
-        Multiple nat rules can be specified by using more than one `--nat-rule` argument.
 examples:
   - name: Create a basic virtual network gateway for site-to-site connectivity.
     text: |
@@ -6589,95 +6544,4 @@ examples:
         az network watcher troubleshooting start -g MyResourceGroup --resource MyVPNConnection \\
             --resource-type vpnConnection --storage-account MyStorageAccount \\
             --storage-path https://{storageAccountName}.blob.core.windows.net/{containerName}
-"""
-
-helps['network bastion'] = """
-type: group
-short-summary: Manage Azure Bastion host.
-"""
-
-helps['network bastion create'] = """
-type: command
-short-summary: Create a Azure Bastion host machine.
-examples:
-  - name: Create a Azure Bastion host machine. (autogenerated)
-    text: |
-        az network bastion create --location westus2 --name MyBastionHost --public-ip-address MyPublicIpAddress --resource-group MyResourceGroup --vnet-name MyVnet
-    crafted: true
-"""
-
-helps['network bastion update'] = """
-type: command
-short-summary: Update a Azure Bastion host machine.
-examples:
-  - name: Update a Azure Bastion host machine to enable native client support
-    text: |
-        az network bastion update --name MyBastionHost --resource-group MyResourceGroup --enable-tunneling
-    crafted: true
-"""
-
-helps['network bastion delete'] = """
-type: command
-short-summary: Delete a Azure Bastion host machine.
-examples:
-  - name: Delete a Azure Bastion host machine. (autogenerated)
-    text: |
-        az network bastion delete --name MyBastionHost --resource-group MyResourceGroup
-    crafted: true
-"""
-
-helps['network bastion list'] = """
-type: command
-short-summary: List all Azure Bastion host machines.
-"""
-
-helps['network bastion show'] = """
-type: command
-short-summary: Show a Azure Bastion host machine.
-examples:
-  - name: Show a Azure Bastion host machine.
-    text: |
-        az network bastion show --name MyBastionHost --resource-group MyResourceGroup
-    crafted: true
-"""
-
-helps['network bastion ssh'] = """
-type: command
-short-summary: SSH to a virtual machine using Tunneling from Azure Bastion.
-examples:
-  - name: SSH to virtual machine using Azure Bastion using password.
-    text: |
-        az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type password --username xyz
-  - name: SSH to virtual machine using Azure Bastion using ssh key file.
-    text: |
-        az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type ssh-key --username xyz --ssh-key C:/filepath/sshkey.pem
-  - name: SSH to virtual machine using Azure Bastion using AAD.
-    text: |
-        az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type AAD
-"""
-
-helps['network bastion rdp'] = """
-type: command
-short-summary: RDP to target Virtual Machine using Tunneling from Azure Bastion.
-examples:
-  - name: RDP to virtual machine using Azure Bastion.
-    text: |
-        az network bastion rdp --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId
-"""
-
-helps['network bastion tunnel'] = """
-type: command
-short-summary: Open a tunnel through Azure Bastion to a target virtual machine.
-examples:
-  - name: Open a tunnel through Azure Bastion to a target virtual machine.
-    text: |
-        az network bastion tunnel --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --resource-port 22 --port 50022
-"""
-
-helps['network bastion wait'] = """
-type: command
-short-summary: Place the CLI in a waiting state until a condition of the Azure Bastion host machine is met.
-examples:
-  - name: Place the CLI in a waiting state until the Azure Bastion host machine is created.
-    text: az network bastion wait --resource-group MyResourceGroup --name MyBastionHost --created
 """

@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command_group(
     "network route-filter rule",
+    is_preview=True,
 )
 class __CMDGroup(AAZCommandGroup):
     """Manage rules in a route filter.

@@ -322,7 +322,14 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
             if self._schema.singular_options and option_string in self._schema.singular_options:
                 # if singular option is used then parsed values by element action
                 action = self._schema.Element._build_cmd_action()
-                action.setup_operations(dest_ops, values, prefix_keys=[_ELEMENT_APPEND_KEY])
+                if isinstance(values, list) and len(values) > 1:
+                    # append element
+                    action.setup_operations(dest_ops, values[:1], prefix_keys=[_ELEMENT_APPEND_KEY])
+                    # apply on the last element
+                    action.setup_operations(dest_ops, values[1:], prefix_keys=[-1])
+                else:
+                    # append element
+                    action.setup_operations(dest_ops, values, prefix_keys=[_ELEMENT_APPEND_KEY])
             else:
                 self.setup_operations(dest_ops, values)
         except (ValueError, KeyError) as ex:
