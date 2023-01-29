@@ -12,22 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network application-gateway update",
+    "network application-gateway probe update",
 )
 class Update(AAZCommand):
-    """Update an application gateway.
+    """Update a probe.
 
-    :example: Update an application gateway.
-        az network application-gateway update --name MyApplicationGateway --resource-group MyResourceGroup --set sku.tier=WAF_v2
-
-    :example: Enable client cert revocation via OCSP.
-        az network application-gateway update -n MyApplicationGateway --ssl-profiles [0].client-auth-configuration.verify-client-revocation=OCSP
+    :example: Update an application gateway probe with a timeout of 60 seconds.
+        az network application-gateway probe update -g MyResourceGroup --gateway-name MyAppGateway -n MyProbe --timeout 60
     """
 
     _aaz_info = {
         "version": "2022-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2022-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2022-05-01", "properties.probes[]"],
         ]
     }
 
@@ -37,6 +34,7 @@ class Update(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
+        self.SubresourceSelector(ctx=self.ctx, name="subresource")
         return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
@@ -50,305 +48,100 @@ class Update(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
+        _args_schema.gateway_name = AAZStrArg(
+            options=["--gateway-name"],
             help="Name of the application gateway.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.identity = AAZObjectArg(
-            options=["--identity"],
-            help="Identity of the application gateway, if configured.",
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
+            help="Name of the probe.",
+            required=True,
+        )
+        _args_schema.host = AAZStrArg(
+            options=["--host"],
+            help="Name of the host to send the probe.",
             nullable=True,
         )
-        _args_schema.max_capacity = AAZIntArg(
-            options=["--max-capacity"],
-            help="Upper bound on the number of application gateway instances.",
+        _args_schema.interval = AAZIntArg(
+            options=["--interval"],
+            help="Time interval in seconds between consecutive probes.",
+            nullable=True,
+        )
+        _args_schema.match_body = AAZStrArg(
+            options=["--match-body"],
+            help="Body that must be contained in the health response.",
+            nullable=True,
+        )
+        _args_schema.match_status_codes = AAZListArg(
+            options=["--match-status-codes"],
+            help="Space-separated list of allowed ranges of healthy status codes for the health response.",
+            nullable=True,
+        )
+        _args_schema.min_servers = AAZIntArg(
+            options=["--min-servers"],
+            help="Minimum number of servers that are always marked healthy.",
+            nullable=True,
+        )
+        _args_schema.path = AAZStrArg(
+            options=["--path"],
+            help="Relative path of probe. Valid path starts from \"/\". Probe is sent to <Protocol>://<host>:<port><path>.",
+            nullable=True,
+        )
+        _args_schema.host_name_from_http_settings = AAZBoolArg(
+            options=["--from-http-settings", "--host-name-from-http-settings"],
+            help="Whether to use host header from HTTP settings.",
+            nullable=True,
+        )
+        _args_schema.host_name_from_settings = AAZBoolArg(
+            options=["--from-settings", "--host-name-from-settings"],
+            help="Whether to use host header from settings. Pick hostname from settings is currently not supported, now only support false.",
+            nullable=True,
+        )
+        _args_schema.port = AAZIntArg(
+            options=["--port"],
+            help="Custom port which will be used for probing the backend servers. The valid value ranges from 1 to 65535. In case not set, port from http settings will be used. This property is valid for Standard_v2 and WAF_v2 only.",
             nullable=True,
             fmt=AAZIntArgFormat(
-                minimum=2,
+                maximum=65535,
+                minimum=1,
             ),
         )
-        _args_schema.min_capacity = AAZIntArg(
-            options=["--min-capacity"],
-            help="Lower bound on the number of application gateway instances.",
-            fmt=AAZIntArgFormat(
-                minimum=0,
-            ),
+        _args_schema.protocol = AAZStrArg(
+            options=["--protocol"],
+            help="Protocol used for the probe.",
+            nullable=True,
+            enum={"Http": "Http", "Https": "Https", "Tcp": "Tcp", "Tls": "Tls"},
         )
-        _args_schema.custom_error_configurations = AAZListArg(
-            options=["--custom-error-configurations"],
-            help="Custom error configurations of the application gateway resource.",
+        _args_schema.timeout = AAZIntArg(
+            options=["--timeout"],
+            help="Probe timeout in seconds.",
             nullable=True,
         )
-        _args_schema.http2 = AAZBoolArg(
-            options=["--http2"],
-            help="Use HTTP2 for the application gateway",
-            nullable=True,
-        )
-        _args_schema.capacity = AAZIntArg(
-            options=["--capacity"],
-            help="Number of instances to use with the application gateway.",
-            nullable=True,
-        )
-        _args_schema.sku = AAZStrArg(
-            options=["--sku"],
-            help="Name of an application gateway SKU.",
-            nullable=True,
-            enum={"Standard_Large": "Standard_Large", "Standard_Medium": "Standard_Medium", "Standard_Small": "Standard_Small", "Standard_v2": "Standard_v2", "WAF_Large": "WAF_Large", "WAF_Medium": "WAF_Medium", "WAF_v2": "WAF_v2"},
-        )
-        _args_schema.ssl_profiles = AAZListArg(
-            options=["--ssl-profiles"],
-            help="SSL profiles of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
-            nullable=True,
-        )
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            help="Space-separated tags: key[=value] [key[=value] ...].",
+        _args_schema.threshold = AAZIntArg(
+            options=["--threshold"],
+            help="Number of failed probes after which the back end server is marked down.",
             nullable=True,
         )
 
-        identity = cls._args_schema.identity
-        identity.type = AAZStrArg(
-            options=["type"],
-            help="The type of identity used for the resource. The type 'SystemAssigned, UserAssigned' includes both an implicitly created identity and a set of user assigned identities. The type 'None' will remove any identities from the virtual machine.",
-            nullable=True,
-            enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned", "UserAssigned": "UserAssigned"},
-        )
-        identity.user_assigned_identities = AAZDictArg(
-            options=["user-assigned-identities"],
-            help="The list of user identities associated with resource. The user identity dictionary key references will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}'.",
+        match_status_codes = cls._args_schema.match_status_codes
+        match_status_codes.Element = AAZStrArg(
             nullable=True,
         )
 
-        user_assigned_identities = cls._args_schema.identity.user_assigned_identities
-        user_assigned_identities.Element = AAZObjectArg(
-            nullable=True,
-            blank={},
-        )
-
-        custom_error_configurations = cls._args_schema.custom_error_configurations
-        custom_error_configurations.Element = AAZObjectArg(
-            nullable=True,
-        )
-        cls._build_args_application_gateway_custom_error_update(custom_error_configurations.Element)
-
-        ssl_profiles = cls._args_schema.ssl_profiles
-        ssl_profiles.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.ssl_profiles.Element
-        _element.id = AAZStrArg(
-            options=["id"],
-            help="Resource ID.",
-            nullable=True,
-        )
-        _element.name = AAZStrArg(
-            options=["name"],
-            help="Name of the SSL profile that is unique within an Application Gateway.",
-            nullable=True,
-        )
-        _element.client_auth_configuration = AAZObjectArg(
-            options=["client-auth-configuration"],
-            help="Client authentication configuration of the application gateway resource.",
-            nullable=True,
-        )
-        _element.ssl_policy = AAZObjectArg(
-            options=["ssl-policy"],
-            help="SSL policy of the application gateway resource.",
-            nullable=True,
-        )
-        cls._build_args_application_gateway_ssl_policy_update(_element.ssl_policy)
-        _element.trusted_client_certificates = AAZListArg(
-            options=["trusted-client-certificates"],
-            help="Array of references to application gateway trusted client certificates.",
-            nullable=True,
-        )
-
-        client_auth_configuration = cls._args_schema.ssl_profiles.Element.client_auth_configuration
-        client_auth_configuration.verify_client_cert_issuer_dn = AAZBoolArg(
-            options=["verify-client-cert-issuer-dn"],
-            help="Verify client certificate issuer name on the application gateway.",
-            nullable=True,
-        )
-        client_auth_configuration.verify_client_revocation = AAZStrArg(
-            options=["verify-client-revocation"],
-            help="Verify client certificate revocation status.",
-            nullable=True,
-            enum={"None": "None", "OCSP": "OCSP"},
-        )
-
-        trusted_client_certificates = cls._args_schema.ssl_profiles.Element.trusted_client_certificates
-        trusted_client_certificates.Element = AAZObjectArg(
-            nullable=True,
-        )
-        cls._build_args_sub_resource_update(trusted_client_certificates.Element)
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg(
-            nullable=True,
-        )
-
-        # define Arg Group "Parameters"
-
-        # define Arg Group "Properties"
-
-        # define Arg Group "Sku"
+        # define Arg Group "Parameters.properties.probes[]"
         return cls._args_schema
-
-    _args_application_gateway_custom_error_update = None
-
-    @classmethod
-    def _build_args_application_gateway_custom_error_update(cls, _schema):
-        if cls._args_application_gateway_custom_error_update is not None:
-            _schema.custom_error_page_url = cls._args_application_gateway_custom_error_update.custom_error_page_url
-            _schema.status_code = cls._args_application_gateway_custom_error_update.status_code
-            return
-
-        cls._args_application_gateway_custom_error_update = AAZObjectArg(
-            nullable=True,
-        )
-
-        application_gateway_custom_error_update = cls._args_application_gateway_custom_error_update
-        application_gateway_custom_error_update.custom_error_page_url = AAZStrArg(
-            options=["custom-error-page-url"],
-            help="Error page URL of the application gateway customer error.",
-            nullable=True,
-        )
-        application_gateway_custom_error_update.status_code = AAZStrArg(
-            options=["status-code"],
-            help="Status code of the application gateway customer error.",
-            nullable=True,
-            enum={"HttpStatus403": "HttpStatus403", "HttpStatus502": "HttpStatus502"},
-        )
-
-        _schema.custom_error_page_url = cls._args_application_gateway_custom_error_update.custom_error_page_url
-        _schema.status_code = cls._args_application_gateway_custom_error_update.status_code
-
-    _args_application_gateway_header_configuration_update = None
-
-    @classmethod
-    def _build_args_application_gateway_header_configuration_update(cls, _schema):
-        if cls._args_application_gateway_header_configuration_update is not None:
-            _schema.header_name = cls._args_application_gateway_header_configuration_update.header_name
-            _schema.header_value = cls._args_application_gateway_header_configuration_update.header_value
-            return
-
-        cls._args_application_gateway_header_configuration_update = AAZObjectArg(
-            nullable=True,
-        )
-
-        application_gateway_header_configuration_update = cls._args_application_gateway_header_configuration_update
-        application_gateway_header_configuration_update.header_name = AAZStrArg(
-            options=["header-name"],
-            help="Header name of the header configuration.",
-            nullable=True,
-        )
-        application_gateway_header_configuration_update.header_value = AAZStrArg(
-            options=["header-value"],
-            help="Header value of the header configuration.",
-            nullable=True,
-        )
-
-        _schema.header_name = cls._args_application_gateway_header_configuration_update.header_name
-        _schema.header_value = cls._args_application_gateway_header_configuration_update.header_value
-
-    _args_application_gateway_ssl_policy_update = None
-
-    @classmethod
-    def _build_args_application_gateway_ssl_policy_update(cls, _schema):
-        if cls._args_application_gateway_ssl_policy_update is not None:
-            _schema.cipher_suites = cls._args_application_gateway_ssl_policy_update.cipher_suites
-            _schema.disabled_ssl_protocols = cls._args_application_gateway_ssl_policy_update.disabled_ssl_protocols
-            _schema.min_protocol_version = cls._args_application_gateway_ssl_policy_update.min_protocol_version
-            _schema.policy_name = cls._args_application_gateway_ssl_policy_update.policy_name
-            _schema.policy_type = cls._args_application_gateway_ssl_policy_update.policy_type
-            return
-
-        cls._args_application_gateway_ssl_policy_update = AAZObjectArg(
-            nullable=True,
-        )
-
-        application_gateway_ssl_policy_update = cls._args_application_gateway_ssl_policy_update
-        application_gateway_ssl_policy_update.cipher_suites = AAZListArg(
-            options=["cipher-suites"],
-            help="Ssl cipher suites to be enabled in the specified order to application gateway.",
-            nullable=True,
-        )
-        application_gateway_ssl_policy_update.disabled_ssl_protocols = AAZListArg(
-            options=["disabled-ssl-protocols"],
-            help="Ssl protocols to be disabled on application gateway.",
-            nullable=True,
-        )
-        application_gateway_ssl_policy_update.min_protocol_version = AAZStrArg(
-            options=["min-protocol-version"],
-            help="Minimum version of Ssl protocol to be supported on application gateway.",
-            nullable=True,
-            enum={"TLSv1_0": "TLSv1_0", "TLSv1_1": "TLSv1_1", "TLSv1_2": "TLSv1_2", "TLSv1_3": "TLSv1_3"},
-        )
-        application_gateway_ssl_policy_update.policy_name = AAZStrArg(
-            options=["policy-name"],
-            help="Name of Ssl predefined policy.",
-            nullable=True,
-            enum={"AppGwSslPolicy20150501": "AppGwSslPolicy20150501", "AppGwSslPolicy20170401": "AppGwSslPolicy20170401", "AppGwSslPolicy20170401S": "AppGwSslPolicy20170401S", "AppGwSslPolicy20220101": "AppGwSslPolicy20220101", "AppGwSslPolicy20220101S": "AppGwSslPolicy20220101S"},
-        )
-        application_gateway_ssl_policy_update.policy_type = AAZStrArg(
-            options=["policy-type"],
-            help="Type of Ssl Policy.",
-            nullable=True,
-            enum={"Custom": "Custom", "CustomV2": "CustomV2", "Predefined": "Predefined"},
-        )
-
-        cipher_suites = cls._args_application_gateway_ssl_policy_update.cipher_suites
-        cipher_suites.Element = AAZStrArg(
-            nullable=True,
-            enum={"TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA": "TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA", "TLS_DHE_DSS_WITH_AES_128_CBC_SHA": "TLS_DHE_DSS_WITH_AES_128_CBC_SHA", "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256": "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256", "TLS_DHE_DSS_WITH_AES_256_CBC_SHA": "TLS_DHE_DSS_WITH_AES_256_CBC_SHA", "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256": "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA": "TLS_DHE_RSA_WITH_AES_128_CBC_SHA", "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256": "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_DHE_RSA_WITH_AES_256_CBC_SHA": "TLS_DHE_RSA_WITH_AES_256_CBC_SHA", "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384": "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA": "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256": "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA": "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA", "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384": "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384": "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA": "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256": "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA": "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384": "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_3DES_EDE_CBC_SHA": "TLS_RSA_WITH_3DES_EDE_CBC_SHA", "TLS_RSA_WITH_AES_128_CBC_SHA": "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_128_CBC_SHA256": "TLS_RSA_WITH_AES_128_CBC_SHA256", "TLS_RSA_WITH_AES_128_GCM_SHA256": "TLS_RSA_WITH_AES_128_GCM_SHA256", "TLS_RSA_WITH_AES_256_CBC_SHA": "TLS_RSA_WITH_AES_256_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA256": "TLS_RSA_WITH_AES_256_CBC_SHA256", "TLS_RSA_WITH_AES_256_GCM_SHA384": "TLS_RSA_WITH_AES_256_GCM_SHA384"},
-        )
-
-        disabled_ssl_protocols = cls._args_application_gateway_ssl_policy_update.disabled_ssl_protocols
-        disabled_ssl_protocols.Element = AAZStrArg(
-            nullable=True,
-            enum={"TLSv1_0": "TLSv1_0", "TLSv1_1": "TLSv1_1", "TLSv1_2": "TLSv1_2", "TLSv1_3": "TLSv1_3"},
-        )
-
-        _schema.cipher_suites = cls._args_application_gateway_ssl_policy_update.cipher_suites
-        _schema.disabled_ssl_protocols = cls._args_application_gateway_ssl_policy_update.disabled_ssl_protocols
-        _schema.min_protocol_version = cls._args_application_gateway_ssl_policy_update.min_protocol_version
-        _schema.policy_name = cls._args_application_gateway_ssl_policy_update.policy_name
-        _schema.policy_type = cls._args_application_gateway_ssl_policy_update.policy_type
-
-    _args_sub_resource_update = None
-
-    @classmethod
-    def _build_args_sub_resource_update(cls, _schema):
-        if cls._args_sub_resource_update is not None:
-            _schema.id = cls._args_sub_resource_update.id
-            return
-
-        cls._args_sub_resource_update = AAZObjectArg(
-            nullable=True,
-        )
-
-        sub_resource_update = cls._args_sub_resource_update
-        sub_resource_update.id = AAZStrArg(
-            options=["id"],
-            help="Resource ID.",
-            nullable=True,
-        )
-
-        _schema.id = cls._args_sub_resource_update.id
 
     def _execute_operations(self):
         self.pre_operations()
         self.ApplicationGatewaysGet(ctx=self.ctx)()
-        self.pre_instance_update(self.ctx.vars.instance)
+        self.pre_instance_update(self.ctx.selectors.subresource.required())
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.InstanceUpdateByGeneric(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.vars.instance)
+        self.post_instance_update(self.ctx.selectors.subresource.required())
         yield self.ApplicationGatewaysCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -369,8 +162,33 @@ class Update(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
         return result
+
+    class SubresourceSelector(AAZJsonSelector):
+
+        def _get(self):
+            result = self.ctx.vars.instance
+            result = result.properties.probes
+            filters = enumerate(result)
+            filters = filter(
+                lambda e: e[1].name == self.ctx.args.name,
+                filters
+            )
+            idx = next(filters)[0]
+            return result[idx]
+
+        def _set(self, value):
+            result = self.ctx.vars.instance
+            result = result.properties.probes
+            filters = enumerate(result)
+            filters = filter(
+                lambda e: e[1].name == self.ctx.args.name,
+                filters
+            )
+            idx = next(filters, [len(result)])[0]
+            result[idx] = value
+            return
 
     class ApplicationGatewaysGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -402,7 +220,7 @@ class Update(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "applicationGatewayName", self.ctx.args.name,
+                    "applicationGatewayName", self.ctx.args.gateway_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -501,7 +319,7 @@ class Update(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "applicationGatewayName", self.ctx.args.name,
+                    "applicationGatewayName", self.ctx.args.gateway_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -569,7 +387,7 @@ class Update(AAZCommand):
     class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
         def __call__(self, *args, **kwargs):
-            self._update_instance(self.ctx.vars.instance)
+            self._update_instance(self.ctx.selectors.subresource.required())
 
         def _update_instance(self, instance):
             _instance_value, _builder = self.new_content_builder(
@@ -577,69 +395,31 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("identity", AAZObjectType, ".identity")
+            _builder.set_prop("name", AAZStrType, ".name")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _builder.set_prop("tags", AAZDictType, ".tags")
-
-            identity = _builder.get(".identity")
-            if identity is not None:
-                identity.set_prop("type", AAZStrType, ".type")
-                identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned_identities")
-
-            user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
-            if user_assigned_identities is not None:
-                user_assigned_identities.set_elements(AAZObjectType, ".")
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("autoscaleConfiguration", AAZObjectType)
-                properties.set_prop("customErrorConfigurations", AAZListType, ".custom_error_configurations")
-                properties.set_prop("enableHttp2", AAZBoolType, ".http2")
-                properties.set_prop("sku", AAZObjectType)
-                properties.set_prop("sslProfiles", AAZListType, ".ssl_profiles")
+                properties.set_prop("host", AAZStrType, ".host")
+                properties.set_prop("interval", AAZIntType, ".interval")
+                properties.set_prop("match", AAZObjectType)
+                properties.set_prop("minServers", AAZIntType, ".min_servers")
+                properties.set_prop("path", AAZStrType, ".path")
+                properties.set_prop("pickHostNameFromBackendHttpSettings", AAZBoolType, ".host_name_from_http_settings")
+                properties.set_prop("pickHostNameFromBackendSettings", AAZBoolType, ".host_name_from_settings")
+                properties.set_prop("port", AAZIntType, ".port")
+                properties.set_prop("protocol", AAZStrType, ".protocol")
+                properties.set_prop("timeout", AAZIntType, ".timeout")
+                properties.set_prop("unhealthyThreshold", AAZIntType, ".threshold")
 
-            autoscale_configuration = _builder.get(".properties.autoscaleConfiguration")
-            if autoscale_configuration is not None:
-                autoscale_configuration.set_prop("maxCapacity", AAZIntType, ".max_capacity")
-                autoscale_configuration.set_prop("minCapacity", AAZIntType, ".min_capacity", typ_kwargs={"flags": {"required": True}})
+            match = _builder.get(".properties.match")
+            if match is not None:
+                match.set_prop("body", AAZStrType, ".match_body")
+                match.set_prop("statusCodes", AAZListType, ".match_status_codes")
 
-            custom_error_configurations = _builder.get(".properties.customErrorConfigurations")
-            if custom_error_configurations is not None:
-                _UpdateHelper._build_schema_application_gateway_custom_error_update(custom_error_configurations.set_elements(AAZObjectType, "."))
-
-            sku = _builder.get(".properties.sku")
-            if sku is not None:
-                sku.set_prop("capacity", AAZIntType, ".capacity")
-                sku.set_prop("name", AAZStrType, ".sku")
-
-            ssl_profiles = _builder.get(".properties.sslProfiles")
-            if ssl_profiles is not None:
-                ssl_profiles.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.sslProfiles[]")
-            if _elements is not None:
-                _elements.set_prop("id", AAZStrType, ".id")
-                _elements.set_prop("name", AAZStrType, ".name")
-                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-
-            properties = _builder.get(".properties.sslProfiles[].properties")
-            if properties is not None:
-                properties.set_prop("clientAuthConfiguration", AAZObjectType, ".client_auth_configuration")
-                _UpdateHelper._build_schema_application_gateway_ssl_policy_update(properties.set_prop("sslPolicy", AAZObjectType, ".ssl_policy"))
-                properties.set_prop("trustedClientCertificates", AAZListType, ".trusted_client_certificates")
-
-            client_auth_configuration = _builder.get(".properties.sslProfiles[].properties.clientAuthConfiguration")
-            if client_auth_configuration is not None:
-                client_auth_configuration.set_prop("verifyClientCertIssuerDN", AAZBoolType, ".verify_client_cert_issuer_dn")
-                client_auth_configuration.set_prop("verifyClientRevocation", AAZStrType, ".verify_client_revocation")
-
-            trusted_client_certificates = _builder.get(".properties.sslProfiles[].properties.trustedClientCertificates")
-            if trusted_client_certificates is not None:
-                _UpdateHelper._build_schema_sub_resource_update(trusted_client_certificates.set_elements(AAZObjectType, "."))
-
-            tags = _builder.get(".tags")
-            if tags is not None:
-                tags.set_elements(AAZStrType, ".")
+            status_codes = _builder.get(".properties.match.statusCodes")
+            if status_codes is not None:
+                status_codes.set_elements(AAZStrType, ".")
 
             return _instance_value
 
@@ -647,51 +427,13 @@ class Update(AAZCommand):
 
         def __call__(self, *args, **kwargs):
             self._update_instance_by_generic(
-                self.ctx.vars.instance,
+                self.ctx.selectors.subresource.required(),
                 self.ctx.generic_update_args
             )
 
 
 class _UpdateHelper:
     """Helper class for Update"""
-
-    @classmethod
-    def _build_schema_application_gateway_custom_error_update(cls, _builder):
-        if _builder is None:
-            return
-        _builder.set_prop("customErrorPageUrl", AAZStrType, ".custom_error_page_url")
-        _builder.set_prop("statusCode", AAZStrType, ".status_code")
-
-    @classmethod
-    def _build_schema_application_gateway_header_configuration_update(cls, _builder):
-        if _builder is None:
-            return
-        _builder.set_prop("headerName", AAZStrType, ".header_name")
-        _builder.set_prop("headerValue", AAZStrType, ".header_value")
-
-    @classmethod
-    def _build_schema_application_gateway_ssl_policy_update(cls, _builder):
-        if _builder is None:
-            return
-        _builder.set_prop("cipherSuites", AAZListType, ".cipher_suites")
-        _builder.set_prop("disabledSslProtocols", AAZListType, ".disabled_ssl_protocols")
-        _builder.set_prop("minProtocolVersion", AAZStrType, ".min_protocol_version")
-        _builder.set_prop("policyName", AAZStrType, ".policy_name")
-        _builder.set_prop("policyType", AAZStrType, ".policy_type")
-
-        cipher_suites = _builder.get(".cipherSuites")
-        if cipher_suites is not None:
-            cipher_suites.set_elements(AAZStrType, ".")
-
-        disabled_ssl_protocols = _builder.get(".disabledSslProtocols")
-        if disabled_ssl_protocols is not None:
-            disabled_ssl_protocols.set_elements(AAZStrType, ".")
-
-    @classmethod
-    def _build_schema_sub_resource_update(cls, _builder):
-        if _builder is None:
-            return
-        _builder.set_prop("id", AAZStrType, ".id")
 
     _schema_application_gateway_backend_address_pool_read = None
 
