@@ -112,11 +112,6 @@ def load_command_table(self, _):
         client_factory=cf_network_interfaces
     )
 
-    network_public_ip_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#PublicIPAddressesOperations.{}',
-        client_factory=cf_public_ip_addresses
-    )
-
     network_vgw_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#VirtualNetworkGatewaysOperations.{}',
         client_factory=cf_virtual_network_gateways
