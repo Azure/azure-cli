@@ -799,45 +799,6 @@ def _validate_cert(namespace, param_name):
         setattr(namespace, param_name, read_base_64_file(attr))
 
 
-def process_vnet_gateway_create_namespace(cmd, namespace):
-    ns = namespace
-    get_default_location_from_resource_group(cmd, ns)
-    validate_tags(ns)
-
-    _validate_vpn_gateway_generation(ns)
-
-    get_virtual_network_validator()(cmd, ns)
-
-    get_public_ip_validator()(cmd, ns)
-    public_ip_count = len(ns.public_ip_address or [])
-    if public_ip_count > 2:
-        raise CLIError('Specify a single public IP to create an active-standby gateway or two '
-                       'public IPs to create an active-active gateway.')
-
-    validate_local_gateway(cmd, ns)
-
-    enable_bgp = any([ns.asn, ns.bgp_peering_address, ns.peer_weight])
-    if enable_bgp and not ns.asn:
-        raise ValueError(
-            'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP ]')
-
-    if cmd.supported_api_version(min_api='2020-11-01'):
-        _validate_cert(namespace, 'root_cert_data')
-
-
-def process_vnet_gateway_update_namespace(cmd, namespace):
-    ns = namespace
-    get_virtual_network_validator()(cmd, ns)
-    get_public_ip_validator()(cmd, ns)
-    validate_tags(ns)
-    if cmd.supported_api_version(min_api='2020-11-01'):
-        _validate_cert(namespace, 'root_cert_data')
-    public_ip_count = len(ns.public_ip_address or [])
-    if public_ip_count > 2:
-        raise CLIError('Specify a single public IP to create an active-standby gateway or two '
-                       'public IPs to create an active-active gateway.')
-
-
 def process_vpn_connection_create_namespace(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     get_default_location_from_resource_group(cmd, namespace)
