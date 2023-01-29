@@ -878,7 +878,9 @@ def load_command_table(self, _):
         self.command_table['network vnet-gateway list-learned-routes'] = ListLearnedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
 
     with self.command_group('network vnet-gateway packet-capture', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2019-07-01') as g:
-        g.custom_command('start', 'start_vnet_gateway_package_capture', supports_no_wait=True)
+        # g.custom_command('start', 'start_vnet_gateway_package_capture', supports_no_wait=True)
+        from .custom import VnetGatewayPackageCaptureStart
+        self.command_table['network vnet-gateway packet-capture start'] = VnetGatewayPackageCaptureStart(loader=self)
         g.custom_command('stop', 'stop_vnet_gateway_package_capture', supports_no_wait=True)
         g.wait_command('wait')
 

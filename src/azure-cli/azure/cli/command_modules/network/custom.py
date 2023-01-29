@@ -76,6 +76,7 @@ from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
 from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update as _VNetSubnetUpdate
 from .aaz.latest.network.vnet_gateway import Create as _VnetGatewayCreate, Update as _VnetGatewayUpdate, \
     DisconnectVpnConnections as _VnetGatewayVpnConnectionsDisconnect
+from .aaz.latest.network.vnet_gateway.packet_capture import Start as _VnetGatewayPackageCaptureStart
 
 logger = get_logger(__name__)
 
@@ -7457,6 +7458,15 @@ def start_vnet_gateway_package_capture(cmd, client, resource_group_name, virtual
     return sdk_no_wait(no_wait, client.begin_start_packet_capture, resource_group_name,
                        virtual_network_gateway_name, parameters=parameters)
 
+
+class VnetGatewayPackageCaptureStart(_VnetGatewayPackageCaptureStart):
+
+    def pre_operations(self):
+        from azure.cli.core.aaz import AAZStrArg
+        args = self.ctx.args
+        if not has_value(args.filter):
+            args.filter = str()
+        print(args.filter)
 
 def stop_vnet_gateway_package_capture(cmd, client, resource_group_name, virtual_network_gateway_name,
                                       sas_url, no_wait=False):
