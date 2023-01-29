@@ -311,11 +311,6 @@ def load_command_table(self, _):
         g.command('list-request-headers', 'list_available_request_headers')
         g.command('list-response-headers', 'list_available_response_headers')
 
-    with self.command_group("network application-gateway probe"):
-        from .custom import ProbeCreate, ProbeUpdate
-        self.command_table["network application-gateway probe create"] = ProbeCreate(loader=self)
-        self.command_table["network application-gateway probe update"] = ProbeUpdate(loader=self)
-
     with self.command_group("network application-gateway redirect-config"):
         from .custom import RedirectConfigCreate, RedirectConfigUpdate
         self.command_table["network application-gateway redirect-config create"] = RedirectConfigCreate(loader=self)

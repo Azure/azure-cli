@@ -37,7 +37,6 @@ from .aaz.latest.network.application_gateway.identity import Assign as _Identity
 from .aaz.latest.network.application_gateway.frontend_ip import Create as _FrontendIPCreate, Update as _FrontendIPUpdate
 from .aaz.latest.network.application_gateway.http_settings import Create as _HTTPSettingsCreate, \
     Update as _HTTPSettingsUpdate
-from .aaz.latest.network.application_gateway.probe import Create as _ProbeCreate, Update as _ProbeUpdate
 from .aaz.latest.network.application_gateway.redirect_config import Create as _RedirectConfigCreate, \
     Update as _RedirectConfigUpdate
 from .aaz.latest.network.application_gateway.root_cert import Create as _RootCertCreate, Update as _RootCertUpdate
@@ -1352,6 +1351,10 @@ class RedirectConfigUpdate(_RedirectConfigUpdate):
     def post_instance_update(self, instance):
         if not has_value(instance.properties.target_listener.id):
             instance.properties.target_listener = None
+        if has_value(instance.properties.target_listener):
+            instance.properties.target_url = None
+        if has_value(instance.properties.target_url):
+            instance.properties.target_listener = None
 
 
 def create_ag_rewrite_rule_set(cmd, resource_group_name, application_gateway_name, item_name, no_wait=False):
@@ -1503,61 +1506,6 @@ def delete_ag_rewrite_rule_condition(cmd, resource_group_name, application_gatew
     condition = find_child_item(rule, variable, path='conditions', key_path='variable')
     rule.conditions.remove(condition)
     sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, application_gateway_name, gateway)
-
-
-class ProbeCreate(_ProbeCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.match_body = AAZStrArg(
-            options=["--match-body"],
-            help="Body that must be contained in the health response.",
-        )
-        args_schema.match_status_codes = AAZListArg(
-            options=["--match-status-codes"],
-            help="Space-separated list of allowed ranges of healthy status codes for the health response.",
-        )
-        args_schema.match_status_codes.Element = AAZStrArg()
-        args_schema.protocol._required = True
-        args_schema.match._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.match_body):
-            args.match.body = args.match_body
-        if has_value(args.match_status_codes):
-            args.match.status_codes = args.match_status_codes
-
-
-class ProbeUpdate(_ProbeUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.match_body = AAZStrArg(
-            options=["--match-body"],
-            help="Body that must be contained in the health response.",
-            nullable=True,
-        )
-        args_schema.match_status_codes = AAZListArg(
-            options=["--match-status-codes"],
-            help="Space-separated list of allowed ranges of healthy status codes for the health response.",
-            nullable=True,
-        )
-        args_schema.match_status_codes.Element = AAZStrArg(
-            nullable=True,
-        )
-        args_schema.match._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.match_body):
-            args.match.body = args.match_body
-        if has_value(args.match_status_codes):
-            args.match.status_codes = args.match_status_codes
 
 
 def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway_name, item_name, address_pool=None,

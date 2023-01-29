@@ -68,6 +68,14 @@ class Create(AAZCommand):
             help="Time interval in seconds between consecutive probes.",
             default=30,
         )
+        _args_schema.match_body = AAZStrArg(
+            options=["--match-body"],
+            help="Body that must be contained in the health response.",
+        )
+        _args_schema.match_status_codes = AAZListArg(
+            options=["--match-status-codes"],
+            help="Space-separated list of allowed ranges of healthy status codes for the health response.",
+        )
         _args_schema.min_servers = AAZIntArg(
             options=["--min-servers"],
             help="Minimum number of servers that are always marked healthy.",
@@ -108,29 +116,10 @@ class Create(AAZCommand):
             default=8,
         )
 
+        match_status_codes = cls._args_schema.match_status_codes
+        match_status_codes.Element = AAZStrArg()
+
         # define Arg Group "Parameters.properties.probes[]"
-
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.match = AAZObjectArg(
-            options=["--match"],
-            arg_group="Properties",
-            help="Criterion for classifying a healthy probe response.",
-        )
-
-        match = cls._args_schema.match
-        match.body = AAZStrArg(
-            options=["body"],
-            help="Body that must be contained in the health response. Default value is empty.",
-        )
-        match.status_codes = AAZListArg(
-            options=["status-codes"],
-            help="Allowed ranges of healthy status codes. Default range of healthy status codes is 200-399.",
-        )
-
-        status_codes = cls._args_schema.match.status_codes
-        status_codes.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
@@ -398,7 +387,7 @@ class Create(AAZCommand):
             if properties is not None:
                 properties.set_prop("host", AAZStrType, ".host")
                 properties.set_prop("interval", AAZIntType, ".interval")
-                properties.set_prop("match", AAZObjectType, ".match")
+                properties.set_prop("match", AAZObjectType)
                 properties.set_prop("minServers", AAZIntType, ".min_servers")
                 properties.set_prop("path", AAZStrType, ".path")
                 properties.set_prop("pickHostNameFromBackendHttpSettings", AAZBoolType, ".host_name_from_http_settings")
@@ -410,8 +399,8 @@ class Create(AAZCommand):
 
             match = _builder.get(".properties.match")
             if match is not None:
-                match.set_prop("body", AAZStrType, ".body")
-                match.set_prop("statusCodes", AAZListType, ".status_codes")
+                match.set_prop("body", AAZStrType, ".match_body")
+                match.set_prop("statusCodes", AAZListType, ".match_status_codes")
 
             status_codes = _builder.get(".properties.match.statusCodes")
             if status_codes is not None:
