@@ -18,7 +18,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_public_ip_addresses, cf_connection_monitor,
+    cf_connection_monitor,
     cf_dns_references,
     cf_app_gateway_waf_policy,
     cf_virtual_router, cf_virtual_router_peering, cf_flow_logs,
