@@ -199,11 +199,6 @@ def load_command_table(self, _):
                          validator=process_ag_create_namespace,
                          exception_handler=handle_template_based_exception)
 
-    with self.command_group("network application-gateway rewrite-rule"):
-        from .custom import AGRewriteRuleCreate, AGRewriteRuleUpdate
-        self.command_table["network application-gateway rewrite-rule create"] = AGRewriteRuleCreate(loader=self)
-        self.command_table["network application-gateway rewrite-rule update"] = AGRewriteRuleUpdate(loader=self)
-
     subresource_properties = [
         {'prop': 'http_listeners', 'name': 'http-listener', 'validator': process_ag_http_listener_create_namespace},
         {'prop': 'request_routing_rules', 'name': 'rule', 'validator': process_ag_rule_create_namespace},
@@ -257,6 +252,11 @@ def load_command_table(self, _):
         self.command_table["network application-gateway client-cert remove"] = ClientCertRemove(loader=self)
         self.command_table["network application-gateway client-cert update"] = ClientCertUpdate(loader=self)
 
+    with self.command_group("network application-gateway frontend-ip"):
+        from .custom import FrontedIPCreate, FrontedIPUpdate
+        self.command_table["network application-gateway frontend-ip create"] = FrontedIPCreate(loader=self)
+        self.command_table["network application-gateway frontend-ip update"] = FrontedIPUpdate(loader=self)
+
     with self.command_group("network application-gateway settings"):
         from .custom import SettingsCreate, SettingsUpdate
         self.command_table["network application-gateway settings create"] = SettingsCreate(loader=self)
@@ -272,14 +272,15 @@ def load_command_table(self, _):
         self.command_table["network application-gateway identity assign"] = IdentityAssign(loader=self)
         g.custom_command("remove", "remove_ag_identity", supports_no_wait=True)
 
-    with self.command_group("network application-gateway frontend-ip"):
-        from .custom import FrontedIPCreate, FrontedIPUpdate
-        self.command_table["network application-gateway frontend-ip create"] = FrontedIPCreate(loader=self)
-        self.command_table["network application-gateway frontend-ip update"] = FrontedIPUpdate(loader=self)
     with self.command_group("network application-gateway redirect-config"):
         from .custom import RedirectConfigCreate, RedirectConfigUpdate
         self.command_table["network application-gateway redirect-config create"] = RedirectConfigCreate(loader=self)
         self.command_table["network application-gateway redirect-config update"] = RedirectConfigUpdate(loader=self)
+
+    with self.command_group("network application-gateway rewrite-rule"):
+        from .custom import AGRewriteRuleCreate, AGRewriteRuleUpdate
+        self.command_table["network application-gateway rewrite-rule create"] = AGRewriteRuleCreate(loader=self)
+        self.command_table["network application-gateway rewrite-rule update"] = AGRewriteRuleUpdate(loader=self)
 
     with self.command_group("network application-gateway ssl-cert"):
         from .custom import SSLCertCreate, SSLCertUpdate
@@ -353,6 +354,8 @@ def load_command_table(self, _):
         g.custom_command("update", "update_waf_managed_rule_set", validator=process_appgw_waf_policy_update)
 
     with self.command_group("network application-gateway waf-policy policy-setting") as g:
+        from .custom import WAFPolicySettingUpdate
+        self.command_table["network application-gateway waf-policy policy-setting update"] = WAFPolicySettingUpdate(loader=self)
         g.custom_command("list", "list_waf_policy_setting")
     # endregion
 

@@ -33,10 +33,10 @@ from .aaz.latest.network.application_gateway.address_pool import Create as _Addr
 from .aaz.latest.network.application_gateway.auth_cert import Create as _AuthCertCreate, Update as _AuthCertUpdate
 from .aaz.latest.network.application_gateway.client_cert import Add as _ClientCertAdd, Remove as _ClientCertRemove, \
     Update as _ClientCertUpdate
-from .aaz.latest.network.application_gateway.identity import Assign as _IdentityAssign
 from .aaz.latest.network.application_gateway.frontend_ip import Create as _FrontendIPCreate, Update as _FrontendIPUpdate
 from .aaz.latest.network.application_gateway.http_settings import Create as _HTTPSettingsCreate, \
     Update as _HTTPSettingsUpdate
+from .aaz.latest.network.application_gateway.identity import Assign as _IdentityAssign
 from .aaz.latest.network.application_gateway.redirect_config import Create as _RedirectConfigCreate, \
     Update as _RedirectConfigUpdate
 from .aaz.latest.network.application_gateway.rewrite_rule import Create as _AGRewriteRuleCreate, \
@@ -53,6 +53,7 @@ from .aaz.latest.network.application_gateway.url_path_map.rule import Create as 
 from .aaz.latest.network.application_gateway.waf_policy import Create as _WAFCreate
 from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condition import \
     Add as _WAFCustomRuleMatchConditionAdd
+from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
 from .aaz.latest.network.express_route.gateway.connection import Create as _ExpressRouteConnectionCreate, \
     Update as _ExpressRouteConnectionUpdate
@@ -1963,6 +1964,12 @@ class WAFCustomRuleMatchConditionAdd(_WAFCustomRuleMatchConditionAdd):
             raise ArgumentUsageError("Any operator does not require --match-values.")
         if str(args.operator).lower() != "any" and not has_value(args.values):
             raise ArgumentUsageError("Non-any operator requires --match-values.")
+
+
+class WAFPolicySettingUpdate(_WAFPolicySettingUpdate):
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 # endregion
 
 
@@ -2138,7 +2145,7 @@ def list_waf_managed_rules(cmd, resource_group_name, policy_name):
 
 
 # region ApplicationGatewayWAFPolicy ManagedRule OwaspCrsExclusionEntry
-# pylint: disable=too-many-nested-blocks, line-too-long
+# pylint: disable=too-many-nested-blocks
 def remove_waf_managed_rule_exclusion(cmd, resource_group_name, policy_name):
     from .aaz.latest.network.application_gateway.waf_policy import Update
 
@@ -4043,7 +4050,7 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
                                    vnet=None, backend_addresses=None, backend_addresses_config_file=None,
                                    admin_state=None, drain_period=None):
     if backend_addresses and backend_addresses_config_file:
-        raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')  # pylint: disable=line-too-long
+        raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')
     if backend_addresses_config_file:
         if not isinstance(backend_addresses_config_file, list):
             raise CLIError('Config file must be a list. Please see example as a reference.')
@@ -4077,7 +4084,6 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
         if 'virtual_network' not in addr and vnet:
             addr['virtual_network'] = vnet
 
-    # pylint: disable=line-too-long
     if cmd.supported_api_version(min_api='2020-11-01'):  # pylint: disable=too-many-nested-blocks
         try:
             if addresses_pool:
@@ -4148,7 +4154,7 @@ def set_lb_backend_address_pool(cmd, instance, resource_group_name, vnet=None, b
                                 backend_addresses_config_file=None, admin_state=None, drain_period=None):
 
     if backend_addresses and backend_addresses_config_file:
-        raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')  # pylint: disable=line-too-long
+        raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')
     if backend_addresses_config_file:
         if not isinstance(backend_addresses_config_file, list):
             raise CLIError('Config file must be a list. Please see example as a reference.')
@@ -4171,7 +4177,6 @@ def set_lb_backend_address_pool(cmd, instance, resource_group_name, vnet=None, b
         if 'virtual_network' not in addr and vnet:
             addr['virtual_network'] = vnet
 
-    # pylint: disable=line-too-long
     if cmd.supported_api_version(min_api='2020-11-01'):  # pylint: disable=too-many-nested-blocks
         try:
             if addresses_pool:
@@ -4324,7 +4329,7 @@ def create_cross_region_load_balancer(cmd, load_balancer_name, resource_group_na
 def create_cross_region_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
                                                 backend_addresses=None, backend_addresses_config_file=None):
     if backend_addresses and backend_addresses_config_file:
-        raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')  # pylint: disable=line-too-long
+        raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')
     if backend_addresses_config_file:
         if not isinstance(backend_addresses_config_file, list):
             raise CLIError('Config file must be a list. Please see example as a reference.')
@@ -4344,7 +4349,6 @@ def create_cross_region_lb_backend_address_pool(cmd, resource_group_name, load_b
     if backend_addresses_config_file:
         addresses_pool.extend(backend_addresses_config_file)
 
-    # pylint: disable=line-too-long
     try:
         new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
                                                     load_balancer_frontend_ip_configuration=FrontendIPConfiguration(id=addr['frontend_ip_address'])) for addr in addresses_pool] if addresses_pool else None
@@ -4358,7 +4362,7 @@ def create_cross_region_lb_backend_address_pool(cmd, resource_group_name, load_b
                                                                           new_pool)
 
 
-def delete_cross_region_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name):  # pylint: disable=line-too-long
+def delete_cross_region_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name):
     ncf = network_client_factory(cmd.cli_ctx)
 
     return ncf.load_balancer_backend_address_pools.begin_delete(resource_group_name,
@@ -4370,7 +4374,6 @@ def add_cross_region_lb_backend_address_pool_address(cmd, resource_group_name, l
                                                      backend_address_pool_name, address_name, frontend_ip_address):
     client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
     address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
-    # pylint: disable=line-too-long
     (LoadBalancerBackendAddress, FrontendIPConfiguration) = cmd.get_models('LoadBalancerBackendAddress', 'FrontendIPConfiguration')
     new_address = LoadBalancerBackendAddress(name=address_name,
                                              load_balancer_frontend_ip_configuration=FrontendIPConfiguration(id=frontend_ip_address) if frontend_ip_address else None)
@@ -4451,7 +4454,6 @@ def set_cross_region_lb_rule(
 # endregion
 
 
-# pylint: disable=line-too-long
 def add_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
                                         address_name, ip_address, vnet=None, subnet=None, admin_state=None):
     client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
@@ -6192,7 +6194,6 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
                 }
             }
         else:
-            # pylint: disable=line-too-long
             with cmd.update_context(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
                 # update object
                 c.set_param('enabled', traffic_analytics_enabled)
@@ -8077,7 +8078,7 @@ def reset_shared_key(cmd, client, virtual_network_gateway_connection_name, key_l
     ConnectionResetSharedKey = cmd.get_models('ConnectionResetSharedKey')
     shared_key = ConnectionResetSharedKey(key_length=key_length)
     return client.begin_reset_shared_key(resource_group_name=resource_group_name,
-                                         virtual_network_gateway_connection_name=virtual_network_gateway_connection_name,  # pylint: disable=line-too-long
+                                         virtual_network_gateway_connection_name=virtual_network_gateway_connection_name,
                                          parameters=shared_key)
 
 
