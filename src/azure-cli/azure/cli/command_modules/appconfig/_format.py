@@ -154,6 +154,7 @@ def _snapshot_output_format_group(item):
         ('STATUS', _get_value(item, 'status')),
         ('STATUS CODE', _get_value_by_names(item, ['statusCode', 'status_code'])),
         ('ITEMS COUNT', _get_value_by_names(item, ['itemsCount', 'items_count'])),
+        ('ITEMS LINK', _get_value_by_names(item, ['itemsLink', 'items_link'])),
         ('TAGS', _get_value(item, 'tags')),
     ])
 
