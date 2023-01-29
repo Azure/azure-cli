@@ -5071,20 +5071,6 @@ long-summary: >
 helps['network vnet-gateway create'] = """
 type: command
 short-summary: Create a virtual network gateway.
-parameters:
-  - name: --nat-rule
-    short-summary: VirtualNetworkGatewayNatRule Resource.
-    long-summary: |
-        Usage: --nat-rule name=rule type=Static mode=EgressSnat internal-mappings=10.4.0.0/24 external-mappings=192.168.21.0/24 ip-config-id=/subscriptions/subid/resourceGroups/rg1/providers/Microsoft.Network/virtualNetworkGateways/gateway1/ipConfigurations/default
-
-        name: Required.The name of the resource that is unique within a resource group. This name can be used to access the resource.
-        internal-mappings: Required.The private IP address internal mapping for NAT.
-        external-mappings: Required.The private IP address external mapping for NAT.
-        type: The type of NAT rule for VPN NAT.
-        mode: The Source NAT direction of a VPN NAT.
-        ip-config-id: The IP Configuration ID this NAT rule applies to.
-
-        Multiple nat rules can be specified by using more than one `--nat-rule` argument.
 examples:
   - name: Create a basic virtual network gateway for site-to-site connectivity.
     text: |
