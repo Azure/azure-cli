@@ -263,12 +263,12 @@ class MysqlFlexibleHandler(TargetHandler):
                         logger.warning(
                             "Query %s, error: %s", q, str(e))
         except pymysql.Error as e:
-            raise AzureConnectionError("Fail to connect mysql. ") from e
+            raise AzureConnectionError("Fail to connect mysql. " + str(e)) from e
         if cursor is not None:
             try:
                 cursor.close()
             except Exception as e:  # pylint: disable=broad-except
-                raise CLIInternalError("connection close failed.") from e
+                raise CLIInternalError("connection close failed." + str(e)) from e
 
     def get_connection_string(self):
         password = run_cli_cmd(
@@ -391,7 +391,7 @@ class SqlHandler(TargetHandler):
                             logger.warning(e)
                         conn.commit()
         except pyodbc.Error as e:
-            raise AzureConnectionError("Fail to connect sql.") from e
+            raise AzureConnectionError("Fail to connect sql." + str(e)) from e
 
     def get_connection_string(self):
         token_bytes = run_cli_cmd(
@@ -502,13 +502,13 @@ class PostgresFlexHandler(TargetHandler):
             conn = psycopg2.connect(conn_string)
         except (psycopg2.Error, psycopg2.OperationalError) as e:
             import re
-            logger.warning(e)
+            # logger.warning(e)
             search_ip = re.search(
                 'no pg_hba.conf entry for host "(.*)", user ', str(e))
             if search_ip is not None:
                 self.ip = search_ip.group(1)
             raise AzureConnectionError(
-                "Fail to connect to postgresql.") from e
+                "Fail to connect to postgresql. " + str(e)) from e
 
         conn.autocommit = True
         cursor = conn.cursor()
