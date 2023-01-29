@@ -31,7 +31,6 @@ from azure.cli.command_modules.network._format import (
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
     transform_public_ip_create_output,
     transform_traffic_manager_create_output, transform_nic_create_output,
-    transform_vnet_gateway_create_output,
     transform_vpn_connection, transform_vpn_connection_list,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
@@ -882,7 +881,7 @@ def load_command_table(self, _):
     with self.command_group('network vnet-gateway'):
         from .custom import VnetGatewayCreate, VnetGatewayUpdate, VnetGatewayVpnConnectionsDisconnect
         from .aaz.latest.network.vnet_gateway import ListBgpPeerStatus, ListAdvertisedRoutes, ListLearnedRoutes
-        self.command_table['network vnet-gateway create'] = VnetGatewayCreate(loader=self, transform=transform_vnet_gateway_create_output)
+        self.command_table['network vnet-gateway create'] = VnetGatewayCreate(loader=self)
         self.command_table['network vnet-gateway update'] = VnetGatewayUpdate(loader=self)
         self.command_table['network vnet-gateway disconnect-vpn-connections'] = VnetGatewayVpnConnectionsDisconnect(loader=self)
         self.command_table['network vnet-gateway list-bgp-peer-status'] = ListBgpPeerStatus(loader=self, table_transformer=transform_vnet_gateway_bgp_peer_table)
