@@ -202,7 +202,6 @@ def load_command_table(self, _):
         self.command_table["network application-gateway update"] = ApplicationGatewayUpdate(loader=self)
 
     subresource_properties = [
-        {'prop': 'http_listeners', 'name': 'http-listener', 'validator': process_ag_http_listener_create_namespace},
         {'prop': 'request_routing_rules', 'name': 'rule', 'validator': process_ag_rule_create_namespace},
         {'prop': 'rewrite_rule_sets', 'name': 'rewrite-rule set'}
     ]
@@ -268,6 +267,11 @@ def load_command_table(self, _):
         from .custom import ListenerCreate, ListenerUpdate
         self.command_table["network application-gateway listener create"] = ListenerCreate(loader=self)
         self.command_table["network application-gateway listener update"] = ListenerUpdate(loader=self)
+
+    with self.command_group("network application-gateway http-listener"):
+        from .custom import HTTPListenerCreate, HTTPListenerUpdate
+        self.command_table["network application-gateway http-listener create"] = HTTPListenerCreate(loader=self)
+        self.command_table["network application-gateway http-listener update"] = HTTPListenerUpdate(loader=self)
 
     with self.command_group("network application-gateway identity") as g:
         from .custom import IdentityAssign

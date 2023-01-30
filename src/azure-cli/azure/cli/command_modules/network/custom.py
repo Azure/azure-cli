@@ -35,6 +35,8 @@ from .aaz.latest.network.application_gateway.client_cert import Add as _ClientCe
     Update as _ClientCertUpdate
 from .aaz.latest.network.application_gateway.identity import Assign as _IdentityAssign
 from .aaz.latest.network.application_gateway.frontend_ip import Create as _FrontendIPCreate, Update as _FrontendIPUpdate
+from .aaz.latest.network.application_gateway.http_listener import Create as _HTTPListenerCreate, \
+    Update as _HTTPListenerUpdate
 from .aaz.latest.network.application_gateway.http_settings import Create as _HTTPSettingsCreate, \
     Update as _HTTPSettingsUpdate
 from .aaz.latest.network.application_gateway.listener import Create as _ListenerCreate, Update as _ListenerUpdate
@@ -470,66 +472,99 @@ class FrontedIPUpdate(_FrontendIPUpdate):
         instance.properties.private_ip_allocation_method = "Static" if has_value(instance.properties.private_ip_address) else "Dynamic"
 
 
-def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, item_name,
-                            frontend_port, frontend_ip=None, host_name=None, ssl_cert=None,
-                            ssl_profile_id=None, firewall_policy=None, no_wait=False, host_names=None):
-    ApplicationGatewayHttpListener, SubResource = cmd.get_models('ApplicationGatewayHttpListener', 'SubResource')
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    if not frontend_ip:
-        frontend_ip = _get_default_id(ag, 'frontend_ip_configurations', '--frontend-ip')
-    new_listener = ApplicationGatewayHttpListener(
-        name=item_name,
-        frontend_ip_configuration=SubResource(id=frontend_ip),
-        frontend_port=SubResource(id=frontend_port),
-        host_name=host_name,
-        require_server_name_indication=True if ssl_cert and host_name else None,
-        protocol='https' if ssl_cert else 'http',
-        ssl_certificate=SubResource(id=ssl_cert) if ssl_cert else None,
-        host_names=host_names
-    )
+class HTTPListenerCreate(_HTTPListenerCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.frontend_ip._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/frontendIPConfigurations/{}",
+        )
+        args_schema.frontend_port._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/frontendPorts/{}",
+        )
+        args_schema.ssl_cert._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/sslCertificates/{}",
+        )
+        args_schema.ssl_profile_id._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/sslProfiles/{}",
+        )
+        args_schema.waf_policy._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/ApplicationGatewayWebApplicationFirewallPolicies/{}",
+        )
+        args_schema.frontend_port._required = True
+        args_schema.protocol._registered = False
+        args_schema.require_server_name_indication._registered = False
+        return args_schema
 
-    if cmd.supported_api_version(min_api='2019-09-01'):
-        new_listener.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
-
-    if cmd.supported_api_version(min_api='2020-06-01'):
-        new_listener.ssl_profile = SubResource(id=ssl_profile_id) if ssl_profile_id else None
-
-    upsert_to_collection(ag, 'http_listeners', new_listener, 'name')
-    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
-                       resource_group_name, application_gateway_name, ag)
-
-
-def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, frontend_port=None,
-                            host_name=None, ssl_cert=None, ssl_profile_id=None, firewall_policy=None, host_names=None):
-    SubResource = cmd.get_models('SubResource')
-    if frontend_ip is not None:
-        instance.frontend_ip_configuration = SubResource(id=frontend_ip)
-    if frontend_port is not None:
-        instance.frontend_port = SubResource(id=frontend_port)
-    if ssl_cert is not None:
-        if ssl_cert:
-            instance.ssl_certificate = SubResource(id=ssl_cert)
-            instance.protocol = 'Https'
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.ssl_cert):
+            args.protocol = "Https"
+            args.require_server_name_indication = True if has_value(args.host_name) else None
         else:
-            instance.ssl_certificate = None
-            instance.protocol = 'Http'
-    if host_name is not None:
-        instance.host_name = host_name or None
+            args.protocol = "Http"
 
-    if cmd.supported_api_version(min_api='2019-09-01'):
-        if firewall_policy is not None:
-            instance.firewall_policy = SubResource(id=firewall_policy)
+    def pre_instance_create(self):
+        args = self.ctx.args
+        if not has_value(args.frontend_ip):
+            instance = self.ctx.vars.instance
+            frontend_ip_configurations = instance.properties.frontend_ip_configurations
+            if len(frontend_ip_configurations) == 1:
+                args.frontend_ip = instance.properties.frontend_ip_configurations[0].id
+            elif len(frontend_ip_configurations) > 1:
+                err_msg = "Multiple frontend IP configurations found. Specify --frontend-ip explicitly."
+                raise ArgumentUsageError(err_msg)
 
-    if cmd.supported_api_version(min_api='2020-06-01'):
-        if ssl_profile_id is not None:
-            instance.ssl_profile = SubResource(id=ssl_profile_id)
 
-    if host_names is not None:
-        instance.host_names = host_names or None
+class HTTPListenerUpdate(_HTTPListenerUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.frontend_ip._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/frontendIPConfigurations/{}",
+        )
+        args_schema.frontend_port._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/frontendPorts/{}",
+        )
+        args_schema.ssl_cert._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/sslCertificates/{}",
+        )
+        args_schema.ssl_profile_id._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/sslProfiles/{}",
+        )
+        args_schema.waf_policy._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/ApplicationGatewayWebApplicationFirewallPolicies/{}",
+        )
+        args_schema.frontend_port._nullable = False
+        args_schema.protocol._registered = False
+        args_schema.require_server_name_indication._registered = False
+        return args_schema
 
-    instance.require_server_name_indication = instance.host_name and instance.protocol.lower() == 'https'
-    return parent
+    def post_instance_update(self, instance):
+        instance.properties.protocol = "Https" if has_value(instance.properties.ssl_certificate) else "Http"
+        cond1 = instance.properties.host_name
+        cond2 = instance.properties.protocol.to_serialized_data().lower() == "https"
+        instance.properties.require_server_name_indication = cond1 and cond2
+        if not has_value(instance.properties.frontend_ip_configuration.id):
+            instance.properties.frontend_ip_configuration = None
+        if not has_value(instance.properties.ssl_certificate.id):
+            instance.properties.ssl_certificate = None
+        if not has_value(instance.properties.ssl_profile.id):
+            instance.properties.ssl_profile = None
+        if not has_value(instance.properties.firewall_policy.id):
+            instance.properties.firewall_policy = None
 
 
 class ListenerCreate(_ListenerCreate):
@@ -599,7 +634,7 @@ class ListenerUpdate(_ListenerUpdate):
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/applicationGateways/{gateway_name}/sslProfiles/{}",
         )
-        args_schema.frontend_port._nullable = True
+        args_schema.frontend_port._nullable = False
         args_schema.protocol._registered = False
         return args_schema
 
