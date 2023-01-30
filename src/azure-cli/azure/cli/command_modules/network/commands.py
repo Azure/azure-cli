@@ -207,7 +207,6 @@ def load_command_table(self, _):
         {'prop': 'rewrite_rule_sets', 'name': 'rewrite-rule set'}
     ]
     if self.supported_api_version(min_api='2021-08-01'):
-        subresource_properties.append({'prop': 'listeners', 'name': 'listener', 'validator': process_ag_listener_create_namespace})
         subresource_properties.append({'prop': 'routing_rules', 'name': 'routing-rule', 'validator': process_ag_routing_rule_create_namespace})
 
     def _make_singular(value):
@@ -264,6 +263,11 @@ def load_command_table(self, _):
         from .custom import HTTPSettingsCreate, HTTPSettingsUpdate
         self.command_table["network application-gateway http-settings create"] = HTTPSettingsCreate(loader=self)
         self.command_table["network application-gateway http-settings update"] = HTTPSettingsUpdate(loader=self)
+
+    with self.command_group("network application-gateway listener"):
+        from .custom import ListenerCreate, ListenerUpdate
+        self.command_table["network application-gateway listener create"] = ListenerCreate(loader=self)
+        self.command_table["network application-gateway listener update"] = ListenerUpdate(loader=self)
 
     with self.command_group("network application-gateway identity") as g:
         from .custom import IdentityAssign

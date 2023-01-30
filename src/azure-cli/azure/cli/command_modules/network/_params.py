@@ -186,7 +186,6 @@ def load_arguments(self, _):
     if self.supported_api_version(min_api='2018-12-01'):
         ag_subresources.append({'name': 'rewrite-rule set', 'display': 'rewrite rule set', 'ref': 'rewrite_rule_sets'})
     if self.supported_api_version(min_api='2021-08-01'):
-        ag_subresources.append({'name': 'listener', 'display': 'listener', 'ref': 'listeners'})
         ag_subresources.append({'name': 'routing-rule', 'display': 'routing rule', 'ref': 'routing_rules'})
 
     for item in ag_subresources:
