@@ -940,7 +940,7 @@ examples:
               --identity-type UserAssigned --pid /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi
   - name: Move managed instance to another subnet
     text: az sql mi update -g myResourceGroup -n myServer -i \\
-              --subnet /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi \\
+              --subnet /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet \\
   - name: Update mi backup storage redundancy
     text: az sql mi update -g mygroup -n myinstance --bsr Local
 """
