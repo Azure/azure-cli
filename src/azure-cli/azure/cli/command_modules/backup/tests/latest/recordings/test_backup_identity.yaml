@@ -1,8 +1,53 @@
 interactions:
 - request:
-    body: '{"location": "westus", "properties": {"monitoringSettings": {"azureMonitorAlertSettings":
-      {"alertsForAllJobFailures": "Enabled"}, "classicAlertSettings": {"alertsForCriticalOperations":
-      "Enabled"}}}, "sku": {"name": "Standard"}}'
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --location
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.RecoveryServices/vaults/clitest-vault000002''
+        under resource group ''clitest.rg000001'' was not found. For more details
+        please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '241'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 08:59:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"location": "westus", "properties": {"publicNetworkAccess": "Enabled",
+      "monitoringSettings": {"azureMonitorAlertSettings": {"alertsForAllJobFailures":
+      "Enabled"}, "classicAlertSettings": {"alertsForCriticalOperations": "Enabled"}}},
+      "sku": {"name": "Standard"}}'
     headers:
       Accept:
       - application/json
@@ -13,42 +58,41 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '228'
+      - '262'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --location
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A35%3A49.748054Z''\"","properties":{"provisioningState":"Provisioning","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T08%3A59%3A05.2213307Z''\"","properties":{"provisioningState":"Provisioning","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/MjA0Nzs4NTgxY2VlOC1hODFjLTRmNmItOWQyMi0zNDMwYjNiZDQxYzY=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/MjA0NztmZjBkMGEzZi1iMTAyLTRjMDQtODZiOC1kOWY3MTZlZGVjZTY=?api-version=2022-10-01
       cache-control:
       - no-cache
       content-length:
-      - '619'
+      - '670'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:35:50 GMT
+      - Sat, 28 Jan 2023 08:59:05 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '209'
+      - '298'
     status:
       code: 201
       message: Created
@@ -66,30 +110,33 @@ interactions:
       ParameterSetName:
       - -n -g --location
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/MjA0Nzs4NTgxY2VlOC1hODFjLTRmNmItOWQyMi0zNDMwYjNiZDQxYzY=?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/MjA0NztmZjBkMGEzZi1iMTAyLTRjMDQtODZiOC1kOWY3MTZlZGVjZTY=?api-version=2022-10-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/MjA0Nzs4NTgxY2VlOC1hODFjLTRmNmItOWQyMi0zNDMwYjNiZDQxYzY=\",\r\n
-        \ \"name\": \"MjA0Nzs4NTgxY2VlOC1hODFjLTRmNmItOWQyMi0zNDMwYjNiZDQxYzY=\",\r\n
-        \ \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/MjA0NztmZjBkMGEzZi1iMTAyLTRjMDQtODZiOC1kOWY3MTZlZGVjZTY=\"\
+        ,\r\n  \"name\": \"MjA0NztmZjBkMGEzZi1iMTAyLTRjMDQtODZiOC1kOWY3MTZlZGVjZTY=\"\
+        ,\r\n  \"status\": \"InProgress\",\r\n  \"percentComplete\": 0.0\r\n}"
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/MjA0NztmZjBkMGEzZi1iMTAyLTRjMDQtODZiOC1kOWY3MTZlZGVjZTY=?api-version=2022-10-01
       cache-control:
       - no-cache
       content-length:
-      - '360'
+      - '361'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:36:53 GMT
+      - Sat, 28 Jan 2023 09:00:06 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/MjA0NztmZjBkMGEzZi1iMTAyLTRjMDQtODZiOC1kOWY3MTZlZGVjZTY=?api-version=2022-10-01
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -115,28 +162,75 @@ interactions:
       ParameterSetName:
       - -n -g --location
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/MjA0NztmZjBkMGEzZi1iMTAyLTRjMDQtODZiOC1kOWY3MTZlZGVjZTY=?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A35%3A50.7851201Z''\"","properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/MjA0NztmZjBkMGEzZi1iMTAyLTRjMDQtODZiOC1kOWY3MTZlZGVjZTY=\"\
+        ,\r\n  \"name\": \"MjA0NztmZjBkMGEzZi1iMTAyLTRjMDQtODZiOC1kOWY3MTZlZGVjZTY=\"\
+        ,\r\n  \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '616'
+      - '360'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:36:53 GMT
+      - Sat, 28 Jan 2023 09:01:06 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --location
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A00%3A07.4234503Z''\"","properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '667'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 09:01:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -162,13 +256,12 @@ interactions:
       ParameterSetName:
       - -n -g --query
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-08-24T15:35:34Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-01-28T08:58:59Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -177,7 +270,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:36:53 GMT
+      - Sat, 28 Jan 2023 09:01:08 GMT
       expires:
       - '-1'
       pragma:
@@ -209,12 +302,12 @@ interactions:
       ParameterSetName:
       - -n -g --query
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-azure-mgmt-msi/6.0.1 Python/3.8.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-msi/6.1.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003?api-version=2022-01-31-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003","name":"clitest-identity000003","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"722d44d8-992f-406c-9fcd-8e3dc6217795","clientId":"32ac2365-77c9-4363-8583-76fecbef0529"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003","name":"clitest-identity000003","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"44a475e0-75ef-442d-8580-0d843ada9ec9","clientId":"248acf0b-8087-4c19-91ca-b9ec4c85c9f9"}}'
     headers:
       cache-control:
       - no-cache
@@ -223,7 +316,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:37:03 GMT
+      - Sat, 28 Jan 2023 09:01:12 GMT
       expires:
       - '-1'
       location:
@@ -235,7 +328,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1175'
     status:
       code: 201
       message: Created
@@ -253,13 +346,12 @@ interactions:
       ParameterSetName:
       - -n -g --query
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-08-24T15:35:34Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-01-28T08:58:59Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -268,7 +360,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:37:03 GMT
+      - Sat, 28 Jan 2023 09:01:14 GMT
       expires:
       - '-1'
       pragma:
@@ -300,12 +392,12 @@ interactions:
       ParameterSetName:
       - -n -g --query
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-azure-mgmt-msi/6.0.1 Python/3.8.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-msi/6.1.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004?api-version=2022-01-31-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004","name":"clitest-identity000004","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"4e2e048d-8814-4594-ae3d-b3f2716e883b","clientId":"75c4962e-014c-4f82-ad05-a2cca46687cb"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004","name":"clitest-identity000004","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"16ae7017-2e21-4572-a8d8-0e52e3abde31","clientId":"602b0c63-b5e0-4290-a5e9-44b83b2b269e"}}'
     headers:
       cache-control:
       - no-cache
@@ -314,7 +406,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:37:12 GMT
+      - Sat, 28 Jan 2023 09:01:17 GMT
       expires:
       - '-1'
       location:
@@ -326,7 +418,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1181'
     status:
       code: 201
       message: Created
@@ -344,13 +436,12 @@ interactions:
       ParameterSetName:
       - -n -g --query
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-08-24T15:35:34Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-01-28T08:58:59Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -359,7 +450,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:37:13 GMT
+      - Sat, 28 Jan 2023 09:01:17 GMT
       expires:
       - '-1'
       pragma:
@@ -391,12 +482,12 @@ interactions:
       ParameterSetName:
       - -n -g --query
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-azure-mgmt-msi/6.0.1 Python/3.8.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-msi/6.1.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005?api-version=2022-01-31-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005","name":"clitest-identity000005","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"08be6a8e-5a56-45d5-8306-70c6227a852e","clientId":"248c3a4e-53f8-4281-bf23-71cc72a16a0d"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005","name":"clitest-identity000005","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"e57be20f-8567-44e7-b2df-9a9e1fbcd07e","clientId":"b4ca39c5-103e-4929-968f-924c406093b3"}}'
     headers:
       cache-control:
       - no-cache
@@ -405,7 +496,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:37:24 GMT
+      - Sat, 28 Jan 2023 09:01:21 GMT
       expires:
       - '-1'
       location:
@@ -417,7 +508,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1192'
+      - '1179'
     status:
       code: 201
       message: Created
@@ -435,22 +526,21 @@ interactions:
       ParameterSetName:
       - --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A35%3A50.7851201Z''\"","properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A00%3A07.4234503Z''\"","properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '616'
+      - '667'
       content-type:
       - application/json
       date:
-      - Wed, 24 Aug 2022 15:37:27 GMT
+      - Sat, 28 Jan 2023 09:01:23 GMT
       expires:
       - '-1'
       pragma:
@@ -488,26 +578,25 @@ interactions:
       ParameterSetName:
       - --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs2Y2RhYWExMS1iYTUyLTQwOGEtOWYxMi05NDEwZWNhNTgwM2I=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthMmE5ZjUwNi1iNzg0LTRiNmUtYjNiZi1jODE5M2EzOTdhMDg=?api-version=2022-10-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Wed, 24 Aug 2022 15:37:33 GMT
+      - Sat, 28 Jan 2023 09:01:24 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTs2Y2RhYWExMS1iYTUyLTQwOGEtOWYxMi05NDEwZWNhNTgwM2I=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTthMmE5ZjUwNi1iNzg0LTRiNmUtYjNiZi1jODE5M2EzOTdhMDg=?api-version=2022-10-01
       pragma:
       - no-cache
       strict-transport-security:
@@ -515,7 +604,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '208'
+      - '295'
     status:
       code: 202
       message: Accepted
@@ -533,15 +622,66 @@ interactions:
       ParameterSetName:
       - --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs2Y2RhYWExMS1iYTUyLTQwOGEtOWYxMi05NDEwZWNhNTgwM2I=?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthMmE5ZjUwNi1iNzg0LTRiNmUtYjNiZi1jODE5M2EzOTdhMDg=?api-version=2022-10-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs2Y2RhYWExMS1iYTUyLTQwOGEtOWYxMi05NDEwZWNhNTgwM2I=\",\r\n
-        \ \"name\": \"NDA5NTs2Y2RhYWExMS1iYTUyLTQwOGEtOWYxMi05NDEwZWNhNTgwM2I=\",\r\n
-        \ \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthMmE5ZjUwNi1iNzg0LTRiNmUtYjNiZi1jODE5M2EzOTdhMDg=\"\
+        ,\r\n  \"name\": \"NDA5NTthMmE5ZjUwNi1iNzg0LTRiNmUtYjNiZi1jODE5M2EzOTdhMDg=\"\
+        ,\r\n  \"status\": \"InProgress\",\r\n  \"percentComplete\": 0.0\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthMmE5ZjUwNi1iNzg0LTRiNmUtYjNiZi1jODE5M2EzOTdhMDg=?api-version=2022-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '361'
+      content-type:
+      - application/json
+      date:
+      - Sat, 28 Jan 2023 09:02:24 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTthMmE5ZjUwNi1iNzg0LTRiNmUtYjNiZi1jODE5M2EzOTdhMDg=?api-version=2022-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault identity assign
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --user-assigned -g -n
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthMmE5ZjUwNi1iNzg0LTRiNmUtYjNiZi1jODE5M2EzOTdhMDg=?api-version=2022-10-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthMmE5ZjUwNi1iNzg0LTRiNmUtYjNiZi1jODE5M2EzOTdhMDg=\"\
+        ,\r\n  \"name\": \"NDA5NTthMmE5ZjUwNi1iNzg0LTRiNmUtYjNiZi1jODE5M2EzOTdhMDg=\"\
+        ,\r\n  \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -550,7 +690,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 24 Aug 2022 15:38:35 GMT
+      - Sat, 28 Jan 2023 09:03:25 GMT
       expires:
       - '-1'
       pragma:
@@ -582,22 +722,21 @@ interactions:
       ParameterSetName:
       - --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A38%3A35.8192371Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"32ac2365-77c9-4363-8583-76fecbef0529","principalId":"722d44d8-992f-406c-9fcd-8e3dc6217795"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"75c4962e-014c-4f82-ad05-a2cca46687cb","principalId":"4e2e048d-8814-4594-ae3d-b3f2716e883b"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A02%3A25.4538055Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"248acf0b-8087-4c19-91ca-b9ec4c85c9f9","principalId":"44a475e0-75ef-442d-8580-0d843ada9ec9"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"602b0c63-b5e0-4290-a5e9-44b83b2b269e","principalId":"16ae7017-2e21-4572-a8d8-0e52e3abde31"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1275'
+      - '1325'
       content-type:
       - application/json
       date:
-      - Wed, 24 Aug 2022 15:38:35 GMT
+      - Sat, 28 Jan 2023 09:03:25 GMT
       expires:
       - '-1'
       pragma:
@@ -629,28 +768,27 @@ interactions:
       ParameterSetName:
       - --system-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A38%3A35.8192371Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"32ac2365-77c9-4363-8583-76fecbef0529","principalId":"722d44d8-992f-406c-9fcd-8e3dc6217795"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"75c4962e-014c-4f82-ad05-a2cca46687cb","principalId":"4e2e048d-8814-4594-ae3d-b3f2716e883b"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A02%3A25.4538055Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"248acf0b-8087-4c19-91ca-b9ec4c85c9f9","principalId":"44a475e0-75ef-442d-8580-0d843ada9ec9"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"602b0c63-b5e0-4290-a5e9-44b83b2b269e","principalId":"16ae7017-2e21-4572-a8d8-0e52e3abde31"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1275'
+      - '1325'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:38:40 GMT
+      - Sat, 28 Jan 2023 09:03:27 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -680,34 +818,35 @@ interactions:
       ParameterSetName:
       - --system-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTswOGQ5NzNlYi04Yjk0LTQ1NWMtOWE4Yy1iZjEzZTViZjcxZDI=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs3OTAyYjlmZC00MTk3LTRhMGUtYjI5MS00MzFlNTEzMDAzNzk=?api-version=2022-10-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Wed, 24 Aug 2022 15:38:46 GMT
+      - Sat, 28 Jan 2023 09:03:29 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTswOGQ5NzNlYi04Yjk0LTQ1NWMtOWE4Yy1iZjEzZTViZjcxZDI=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTs3OTAyYjlmZC00MTk3LTRhMGUtYjI5MS00MzFlNTEzMDAzNzk=?api-version=2022-10-01
       pragma:
       - no-cache
+      server:
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '209'
+      - '296'
     status:
       code: 202
       message: Accepted
@@ -725,30 +864,33 @@ interactions:
       ParameterSetName:
       - --system-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTswOGQ5NzNlYi04Yjk0LTQ1NWMtOWE4Yy1iZjEzZTViZjcxZDI=?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs3OTAyYjlmZC00MTk3LTRhMGUtYjI5MS00MzFlNTEzMDAzNzk=?api-version=2022-10-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTswOGQ5NzNlYi04Yjk0LTQ1NWMtOWE4Yy1iZjEzZTViZjcxZDI=\",\r\n
-        \ \"name\": \"NDA5NTswOGQ5NzNlYi04Yjk0LTQ1NWMtOWE4Yy1iZjEzZTViZjcxZDI=\",\r\n
-        \ \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs3OTAyYjlmZC00MTk3LTRhMGUtYjI5MS00MzFlNTEzMDAzNzk=\"\
+        ,\r\n  \"name\": \"NDA5NTs3OTAyYjlmZC00MTk3LTRhMGUtYjI5MS00MzFlNTEzMDAzNzk=\"\
+        ,\r\n  \"status\": \"InProgress\",\r\n  \"percentComplete\": 0.0\r\n}"
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs3OTAyYjlmZC00MTk3LTRhMGUtYjI5MS00MzFlNTEzMDAzNzk=?api-version=2022-10-01
       cache-control:
       - no-cache
       content-length:
-      - '360'
+      - '361'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:39:48 GMT
+      - Sat, 28 Jan 2023 09:04:30 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTs3OTAyYjlmZC00MTk3LTRhMGUtYjI5MS00MzFlNTEzMDAzNzk=?api-version=2022-10-01
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -774,29 +916,76 @@ interactions:
       ParameterSetName:
       - --system-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs3OTAyYjlmZC00MTk3LTRhMGUtYjI5MS00MzFlNTEzMDAzNzk=?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A39%3A48.596828Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"80f3bba1-b39a-4872-98dd-c1e4b1f7b6a6","type":"SystemAssigned,
-        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"32ac2365-77c9-4363-8583-76fecbef0529","principalId":"722d44d8-992f-406c-9fcd-8e3dc6217795"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"75c4962e-014c-4f82-ad05-a2cca46687cb","principalId":"4e2e048d-8814-4594-ae3d-b3f2716e883b"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs3OTAyYjlmZC00MTk3LTRhMGUtYjI5MS00MzFlNTEzMDAzNzk=\"\
+        ,\r\n  \"name\": \"NDA5NTs3OTAyYjlmZC00MTk3LTRhMGUtYjI5MS00MzFlNTEzMDAzNzk=\"\
+        ,\r\n  \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1343'
+      - '360'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:39:49 GMT
+      - Sat, 28 Jan 2023 09:05:30 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault identity assign
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --system-assigned -g -n
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A04%3A30.6273727Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"70957ad0-bc3f-402a-b1bb-7b1acb7ce94b","type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"248acf0b-8087-4c19-91ca-b9ec4c85c9f9","principalId":"44a475e0-75ef-442d-8580-0d843ada9ec9"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"602b0c63-b5e0-4290-a5e9-44b83b2b269e","principalId":"16ae7017-2e21-4572-a8d8-0e52e3abde31"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1394'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 09:05:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -822,23 +1011,22 @@ interactions:
       ParameterSetName:
       - --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A39%3A48.596828Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"80f3bba1-b39a-4872-98dd-c1e4b1f7b6a6","type":"SystemAssigned,
-        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"32ac2365-77c9-4363-8583-76fecbef0529","principalId":"722d44d8-992f-406c-9fcd-8e3dc6217795"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"75c4962e-014c-4f82-ad05-a2cca46687cb","principalId":"4e2e048d-8814-4594-ae3d-b3f2716e883b"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A04%3A30.6273727Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"70957ad0-bc3f-402a-b1bb-7b1acb7ce94b","type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"248acf0b-8087-4c19-91ca-b9ec4c85c9f9","principalId":"44a475e0-75ef-442d-8580-0d843ada9ec9"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"602b0c63-b5e0-4290-a5e9-44b83b2b269e","principalId":"16ae7017-2e21-4572-a8d8-0e52e3abde31"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1343'
+      - '1394'
       content-type:
       - application/json
       date:
-      - Wed, 24 Aug 2022 15:39:50 GMT
+      - Sat, 28 Jan 2023 09:05:32 GMT
       expires:
       - '-1'
       pragma:
@@ -876,26 +1064,25 @@ interactions:
       ParameterSetName:
       - --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs5NjhkZWMyNi04NDg3LTQwNTQtYmJiNS05NDRiMDgwODUwMTc=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs5NWY2YTEyNy0wZWE3LTRiZDQtOGZmZi03ZmY3NDM0NzJiOWI=?api-version=2022-10-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Wed, 24 Aug 2022 15:39:55 GMT
+      - Sat, 28 Jan 2023 09:05:33 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTs5NjhkZWMyNi04NDg3LTQwNTQtYmJiNS05NDRiMDgwODUwMTc=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTs5NWY2YTEyNy0wZWE3LTRiZDQtOGZmZi03ZmY3NDM0NzJiOWI=?api-version=2022-10-01
       pragma:
       - no-cache
       strict-transport-security:
@@ -903,7 +1090,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '205'
+      - '293'
     status:
       code: 202
       message: Accepted
@@ -921,18 +1108,17 @@ interactions:
       ParameterSetName:
       - --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs5NjhkZWMyNi04NDg3LTQwNTQtYmJiNS05NDRiMDgwODUwMTc=?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs5NWY2YTEyNy0wZWE3LTRiZDQtOGZmZi03ZmY3NDM0NzJiOWI=?api-version=2022-10-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs5NjhkZWMyNi04NDg3LTQwNTQtYmJiNS05NDRiMDgwODUwMTc=\",\r\n
-        \ \"name\": \"NDA5NTs5NjhkZWMyNi04NDg3LTQwNTQtYmJiNS05NDRiMDgwODUwMTc=\",\r\n
-        \ \"status\": \"InProgress\",\r\n  \"percentComplete\": 0.0\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs5NWY2YTEyNy0wZWE3LTRiZDQtOGZmZi03ZmY3NDM0NzJiOWI=\"\
+        ,\r\n  \"name\": \"NDA5NTs5NWY2YTEyNy0wZWE3LTRiZDQtOGZmZi03ZmY3NDM0NzJiOWI=\"\
+        ,\r\n  \"status\": \"InProgress\",\r\n  \"percentComplete\": 0.0\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs5NjhkZWMyNi04NDg3LTQwNTQtYmJiNS05NDRiMDgwODUwMTc=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs5NWY2YTEyNy0wZWE3LTRiZDQtOGZmZi03ZmY3NDM0NzJiOWI=?api-version=2022-10-01
       cache-control:
       - no-cache
       content-length:
@@ -940,11 +1126,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 24 Aug 2022 15:40:55 GMT
+      - Sat, 28 Jan 2023 09:06:34 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTs5NjhkZWMyNi04NDg3LTQwNTQtYmJiNS05NDRiMDgwODUwMTc=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTs5NWY2YTEyNy0wZWE3LTRiZDQtOGZmZi03ZmY3NDM0NzJiOWI=?api-version=2022-10-01
       pragma:
       - no-cache
       server:
@@ -974,15 +1160,14 @@ interactions:
       ParameterSetName:
       - --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs5NjhkZWMyNi04NDg3LTQwNTQtYmJiNS05NDRiMDgwODUwMTc=?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs5NWY2YTEyNy0wZWE3LTRiZDQtOGZmZi03ZmY3NDM0NzJiOWI=?api-version=2022-10-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs5NjhkZWMyNi04NDg3LTQwNTQtYmJiNS05NDRiMDgwODUwMTc=\",\r\n
-        \ \"name\": \"NDA5NTs5NjhkZWMyNi04NDg3LTQwNTQtYmJiNS05NDRiMDgwODUwMTc=\",\r\n
-        \ \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs5NWY2YTEyNy0wZWE3LTRiZDQtOGZmZi03ZmY3NDM0NzJiOWI=\"\
+        ,\r\n  \"name\": \"NDA5NTs5NWY2YTEyNy0wZWE3LTRiZDQtOGZmZi03ZmY3NDM0NzJiOWI=\"\
+        ,\r\n  \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -991,7 +1176,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 24 Aug 2022 15:41:58 GMT
+      - Sat, 28 Jan 2023 09:07:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1023,23 +1208,22 @@ interactions:
       ParameterSetName:
       - --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A40%3A57.4926202Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"80f3bba1-b39a-4872-98dd-c1e4b1f7b6a6","type":"SystemAssigned,
-        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"32ac2365-77c9-4363-8583-76fecbef0529","principalId":"722d44d8-992f-406c-9fcd-8e3dc6217795"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"75c4962e-014c-4f82-ad05-a2cca46687cb","principalId":"4e2e048d-8814-4594-ae3d-b3f2716e883b"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":{"clientId":"248c3a4e-53f8-4281-bf23-71cc72a16a0d","principalId":"08be6a8e-5a56-45d5-8306-70c6227a852e"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A06%3A35.2651811Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"70957ad0-bc3f-402a-b1bb-7b1acb7ce94b","type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"248acf0b-8087-4c19-91ca-b9ec4c85c9f9","principalId":"44a475e0-75ef-442d-8580-0d843ada9ec9"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"602b0c63-b5e0-4290-a5e9-44b83b2b269e","principalId":"16ae7017-2e21-4572-a8d8-0e52e3abde31"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":{"clientId":"b4ca39c5-103e-4929-968f-924c406093b3","principalId":"e57be20f-8567-44e7-b2df-9a9e1fbcd07e"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1617'
+      - '1667'
       content-type:
       - application/json
       date:
-      - Wed, 24 Aug 2022 15:41:58 GMT
+      - Sat, 28 Jan 2023 09:07:35 GMT
       expires:
       - '-1'
       pragma:
@@ -1071,23 +1255,22 @@ interactions:
       ParameterSetName:
       - --system-assigned --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A40%3A57.4926202Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"80f3bba1-b39a-4872-98dd-c1e4b1f7b6a6","type":"SystemAssigned,
-        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"32ac2365-77c9-4363-8583-76fecbef0529","principalId":"722d44d8-992f-406c-9fcd-8e3dc6217795"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"75c4962e-014c-4f82-ad05-a2cca46687cb","principalId":"4e2e048d-8814-4594-ae3d-b3f2716e883b"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":{"clientId":"248c3a4e-53f8-4281-bf23-71cc72a16a0d","principalId":"08be6a8e-5a56-45d5-8306-70c6227a852e"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A06%3A35.2651811Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"70957ad0-bc3f-402a-b1bb-7b1acb7ce94b","type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"248acf0b-8087-4c19-91ca-b9ec4c85c9f9","principalId":"44a475e0-75ef-442d-8580-0d843ada9ec9"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"602b0c63-b5e0-4290-a5e9-44b83b2b269e","principalId":"16ae7017-2e21-4572-a8d8-0e52e3abde31"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":{"clientId":"b4ca39c5-103e-4929-968f-924c406093b3","principalId":"e57be20f-8567-44e7-b2df-9a9e1fbcd07e"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1617'
+      - '1667'
       content-type:
       - application/json
       date:
-      - Wed, 24 Aug 2022 15:42:02 GMT
+      - Sat, 28 Jan 2023 09:07:37 GMT
       expires:
       - '-1'
       pragma:
@@ -1124,26 +1307,25 @@ interactions:
       ParameterSetName:
       - --system-assigned --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs5NTY3ZTY4MS04ZDQ0LTQ1NGItYmQwZi0yOWI2OTg4NGMyMzU=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthMDNlZmNjOS05NzlhLTQyZTEtYjQ3Yy04MjU2YWMyNGQzYTk=?api-version=2022-10-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Wed, 24 Aug 2022 15:42:08 GMT
+      - Sat, 28 Jan 2023 09:07:39 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTs5NTY3ZTY4MS04ZDQ0LTQ1NGItYmQwZi0yOWI2OTg4NGMyMzU=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTthMDNlZmNjOS05NzlhLTQyZTEtYjQ3Yy04MjU2YWMyNGQzYTk=?api-version=2022-10-01
       pragma:
       - no-cache
       strict-transport-security:
@@ -1151,7 +1333,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '209'
+      - '294'
     status:
       code: 202
       message: Accepted
@@ -1169,34 +1351,33 @@ interactions:
       ParameterSetName:
       - --system-assigned --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs5NTY3ZTY4MS04ZDQ0LTQ1NGItYmQwZi0yOWI2OTg4NGMyMzU=?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthMDNlZmNjOS05NzlhLTQyZTEtYjQ3Yy04MjU2YWMyNGQzYTk=?api-version=2022-10-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs5NTY3ZTY4MS04ZDQ0LTQ1NGItYmQwZi0yOWI2OTg4NGMyMzU=\",\r\n
-        \ \"name\": \"NDA5NTs5NTY3ZTY4MS04ZDQ0LTQ1NGItYmQwZi0yOWI2OTg4NGMyMzU=\",\r\n
-        \ \"status\": \"InProgress\",\r\n  \"percentComplete\": 0.0\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthMDNlZmNjOS05NzlhLTQyZTEtYjQ3Yy04MjU2YWMyNGQzYTk=\"\
+        ,\r\n  \"name\": \"NDA5NTthMDNlZmNjOS05NzlhLTQyZTEtYjQ3Yy04MjU2YWMyNGQzYTk=\"\
+        ,\r\n  \"status\": \"InProgress\",\r\n  \"percentComplete\": 0.0\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs5NTY3ZTY4MS04ZDQ0LTQ1NGItYmQwZi0yOWI2OTg4NGMyMzU=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthMDNlZmNjOS05NzlhLTQyZTEtYjQ3Yy04MjU2YWMyNGQzYTk=?api-version=2022-10-01
       cache-control:
       - no-cache
       content-length:
       - '361'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:43:08 GMT
+      - Sat, 28 Jan 2023 09:08:39 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTs5NTY3ZTY4MS04ZDQ0LTQ1NGItYmQwZi0yOWI2OTg4NGMyMzU=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTthMDNlZmNjOS05NzlhLTQyZTEtYjQ3Yy04MjU2YWMyNGQzYTk=?api-version=2022-10-01
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1222,30 +1403,29 @@ interactions:
       ParameterSetName:
       - --system-assigned --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs5NTY3ZTY4MS04ZDQ0LTQ1NGItYmQwZi0yOWI2OTg4NGMyMzU=?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthMDNlZmNjOS05NzlhLTQyZTEtYjQ3Yy04MjU2YWMyNGQzYTk=?api-version=2022-10-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs5NTY3ZTY4MS04ZDQ0LTQ1NGItYmQwZi0yOWI2OTg4NGMyMzU=\",\r\n
-        \ \"name\": \"NDA5NTs5NTY3ZTY4MS04ZDQ0LTQ1NGItYmQwZi0yOWI2OTg4NGMyMzU=\",\r\n
-        \ \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthMDNlZmNjOS05NzlhLTQyZTEtYjQ3Yy04MjU2YWMyNGQzYTk=\"\
+        ,\r\n  \"name\": \"NDA5NTthMDNlZmNjOS05NzlhLTQyZTEtYjQ3Yy04MjU2YWMyNGQzYTk=\"\
+        ,\r\n  \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
       - '360'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:44:10 GMT
+      - Sat, 28 Jan 2023 09:09:40 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1271,28 +1451,27 @@ interactions:
       ParameterSetName:
       - --system-assigned --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A43%3A10.1311615Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"75c4962e-014c-4f82-ad05-a2cca46687cb","principalId":"4e2e048d-8814-4594-ae3d-b3f2716e883b"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":{"clientId":"248c3a4e-53f8-4281-bf23-71cc72a16a0d","principalId":"08be6a8e-5a56-45d5-8306-70c6227a852e"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A08%3A41.0173132Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"602b0c63-b5e0-4290-a5e9-44b83b2b269e","principalId":"16ae7017-2e21-4572-a8d8-0e52e3abde31"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":{"clientId":"b4ca39c5-103e-4929-968f-924c406093b3","principalId":"e57be20f-8567-44e7-b2df-9a9e1fbcd07e"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1275'
+      - '1325'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:44:10 GMT
+      - Sat, 28 Jan 2023 09:09:40 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1318,28 +1497,27 @@ interactions:
       ParameterSetName:
       - --system-assigned --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A43%3A10.1311615Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"75c4962e-014c-4f82-ad05-a2cca46687cb","principalId":"4e2e048d-8814-4594-ae3d-b3f2716e883b"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":{"clientId":"248c3a4e-53f8-4281-bf23-71cc72a16a0d","principalId":"08be6a8e-5a56-45d5-8306-70c6227a852e"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A08%3A41.0173132Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"602b0c63-b5e0-4290-a5e9-44b83b2b269e","principalId":"16ae7017-2e21-4572-a8d8-0e52e3abde31"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":{"clientId":"b4ca39c5-103e-4929-968f-924c406093b3","principalId":"e57be20f-8567-44e7-b2df-9a9e1fbcd07e"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1275'
+      - '1325'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:44:13 GMT
+      - Sat, 28 Jan 2023 09:09:42 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1371,34 +1549,35 @@ interactions:
       ParameterSetName:
       - --system-assigned --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTsxZjA4YzRkNy1mNmZjLTRhMjQtOWYzNS05YzExZTBhODYxMDg=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs4NThiN2IxYS1iOWRmLTQyNmItYmZiMi01OTUwOTE2YmNiODc=?api-version=2022-10-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Wed, 24 Aug 2022 15:44:20 GMT
+      - Sat, 28 Jan 2023 09:09:44 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTsxZjA4YzRkNy1mNmZjLTRhMjQtOWYzNS05YzExZTBhODYxMDg=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTs4NThiN2IxYS1iOWRmLTQyNmItYmZiMi01OTUwOTE2YmNiODc=?api-version=2022-10-01
       pragma:
       - no-cache
+      server:
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '209'
+      - '295'
     status:
       code: 202
       message: Accepted
@@ -1416,30 +1595,33 @@ interactions:
       ParameterSetName:
       - --system-assigned --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTsxZjA4YzRkNy1mNmZjLTRhMjQtOWYzNS05YzExZTBhODYxMDg=?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs4NThiN2IxYS1iOWRmLTQyNmItYmZiMi01OTUwOTE2YmNiODc=?api-version=2022-10-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTsxZjA4YzRkNy1mNmZjLTRhMjQtOWYzNS05YzExZTBhODYxMDg=\",\r\n
-        \ \"name\": \"NDA5NTsxZjA4YzRkNy1mNmZjLTRhMjQtOWYzNS05YzExZTBhODYxMDg=\",\r\n
-        \ \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs4NThiN2IxYS1iOWRmLTQyNmItYmZiMi01OTUwOTE2YmNiODc=\"\
+        ,\r\n  \"name\": \"NDA5NTs4NThiN2IxYS1iOWRmLTQyNmItYmZiMi01OTUwOTE2YmNiODc=\"\
+        ,\r\n  \"status\": \"InProgress\",\r\n  \"percentComplete\": 0.0\r\n}"
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs4NThiN2IxYS1iOWRmLTQyNmItYmZiMi01OTUwOTE2YmNiODc=?api-version=2022-10-01
       cache-control:
       - no-cache
       content-length:
-      - '360'
+      - '361'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:45:22 GMT
+      - Sat, 28 Jan 2023 09:10:44 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTs4NThiN2IxYS1iOWRmLTQyNmItYmZiMi01OTUwOTE2YmNiODc=?api-version=2022-10-01
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1465,29 +1647,76 @@ interactions:
       ParameterSetName:
       - --system-assigned --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs4NThiN2IxYS1iOWRmLTQyNmItYmZiMi01OTUwOTE2YmNiODc=?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A45%3A21.9101838Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"af144ef1-983c-42fc-9644-5abfe1e6722a","type":"SystemAssigned,
-        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"75c4962e-014c-4f82-ad05-a2cca46687cb","principalId":"4e2e048d-8814-4594-ae3d-b3f2716e883b"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":{"clientId":"248c3a4e-53f8-4281-bf23-71cc72a16a0d","principalId":"08be6a8e-5a56-45d5-8306-70c6227a852e"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"32ac2365-77c9-4363-8583-76fecbef0529","principalId":"722d44d8-992f-406c-9fcd-8e3dc6217795"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTs4NThiN2IxYS1iOWRmLTQyNmItYmZiMi01OTUwOTE2YmNiODc=\"\
+        ,\r\n  \"name\": \"NDA5NTs4NThiN2IxYS1iOWRmLTQyNmItYmZiMi01OTUwOTE2YmNiODc=\"\
+        ,\r\n  \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1617'
+      - '360'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:45:23 GMT
+      - Sat, 28 Jan 2023 09:11:44 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault identity assign
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --system-assigned --user-assigned -g -n
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A10%3A45.7929785Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"5d35ebfa-d8d2-49f7-aa2f-d2d348dc38c8","type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"602b0c63-b5e0-4290-a5e9-44b83b2b269e","principalId":"16ae7017-2e21-4572-a8d8-0e52e3abde31"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":{"clientId":"b4ca39c5-103e-4929-968f-924c406093b3","principalId":"e57be20f-8567-44e7-b2df-9a9e1fbcd07e"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"248acf0b-8087-4c19-91ca-b9ec4c85c9f9","principalId":"44a475e0-75ef-442d-8580-0d843ada9ec9"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1667'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 09:11:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1513,29 +1742,28 @@ interactions:
       ParameterSetName:
       - --system-assigned --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A45%3A21.9101838Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"af144ef1-983c-42fc-9644-5abfe1e6722a","type":"SystemAssigned,
-        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"75c4962e-014c-4f82-ad05-a2cca46687cb","principalId":"4e2e048d-8814-4594-ae3d-b3f2716e883b"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":{"clientId":"248c3a4e-53f8-4281-bf23-71cc72a16a0d","principalId":"08be6a8e-5a56-45d5-8306-70c6227a852e"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"32ac2365-77c9-4363-8583-76fecbef0529","principalId":"722d44d8-992f-406c-9fcd-8e3dc6217795"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A10%3A45.7929785Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"5d35ebfa-d8d2-49f7-aa2f-d2d348dc38c8","type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"602b0c63-b5e0-4290-a5e9-44b83b2b269e","principalId":"16ae7017-2e21-4572-a8d8-0e52e3abde31"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000005":{"clientId":"b4ca39c5-103e-4929-968f-924c406093b3","principalId":"e57be20f-8567-44e7-b2df-9a9e1fbcd07e"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"248acf0b-8087-4c19-91ca-b9ec4c85c9f9","principalId":"44a475e0-75ef-442d-8580-0d843ada9ec9"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1617'
+      - '1667'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:45:25 GMT
+      - Sat, 28 Jan 2023 09:11:46 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1565,28 +1793,27 @@ interactions:
       ParameterSetName:
       - --system-assigned --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A45%3A31.0909594Z''\"","identity":{"type":"None"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A11%3A49.1997238Z''\"","identity":{"type":"None"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '644'
+      - '694'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:45:33 GMT
+      - Sat, 28 Jan 2023 09:11:49 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1596,7 +1823,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '209'
+      - '293'
     status:
       code: 200
       message: OK
@@ -1614,28 +1841,27 @@ interactions:
       ParameterSetName:
       - --system-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A45%3A31.0909594Z''\"","identity":{"type":"None"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A11%3A49.1997238Z''\"","identity":{"type":"None"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '644'
+      - '694'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:45:36 GMT
+      - Sat, 28 Jan 2023 09:11:51 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1665,28 +1891,27 @@ interactions:
       ParameterSetName:
       - --system-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A45%3A43.6528107Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"e4538b89-05e0-4fd9-8b84-28a299cea090","type":"SystemAssigned"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A11%3A52.4118871Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"9a4fce68-5721-4bac-8f36-3c1a474e3781","type":"SystemAssigned"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '757'
+      - '807'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:45:46 GMT
+      - Sat, 28 Jan 2023 09:11:52 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1696,7 +1921,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '209'
+      - '292'
     status:
       code: 200
       message: OK
@@ -1714,28 +1939,27 @@ interactions:
       ParameterSetName:
       - --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A45%3A43.6528107Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"e4538b89-05e0-4fd9-8b84-28a299cea090","type":"SystemAssigned"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A11%3A52.4118871Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"9a4fce68-5721-4bac-8f36-3c1a474e3781","type":"SystemAssigned"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '757'
+      - '807'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:45:49 GMT
+      - Sat, 28 Jan 2023 09:11:53 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1768,34 +1992,35 @@ interactions:
       ParameterSetName:
       - --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtjMmE1ZDA1NS0yODkzLTQxOTctOGU0Ny1jOGFkNWU3NTNhNGE=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthZjJjYzY4ZS0wNzFmLTRjMzktOTk0MC02NWRkN2Q1OTM5MDM=?api-version=2022-10-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Wed, 24 Aug 2022 15:45:53 GMT
+      - Sat, 28 Jan 2023 09:11:54 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTtjMmE1ZDA1NS0yODkzLTQxOTctOGU0Ny1jOGFkNWU3NTNhNGE=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTthZjJjYzY4ZS0wNzFmLTRjMzktOTk0MC02NWRkN2Q1OTM5MDM=?api-version=2022-10-01
       pragma:
       - no-cache
+      server:
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '208'
+      - '292'
     status:
       code: 202
       message: Accepted
@@ -1813,34 +2038,33 @@ interactions:
       ParameterSetName:
       - --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtjMmE1ZDA1NS0yODkzLTQxOTctOGU0Ny1jOGFkNWU3NTNhNGE=?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthZjJjYzY4ZS0wNzFmLTRjMzktOTk0MC02NWRkN2Q1OTM5MDM=?api-version=2022-10-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtjMmE1ZDA1NS0yODkzLTQxOTctOGU0Ny1jOGFkNWU3NTNhNGE=\",\r\n
-        \ \"name\": \"NDA5NTtjMmE1ZDA1NS0yODkzLTQxOTctOGU0Ny1jOGFkNWU3NTNhNGE=\",\r\n
-        \ \"status\": \"InProgress\",\r\n  \"percentComplete\": 0.0\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthZjJjYzY4ZS0wNzFmLTRjMzktOTk0MC02NWRkN2Q1OTM5MDM=\"\
+        ,\r\n  \"name\": \"NDA5NTthZjJjYzY4ZS0wNzFmLTRjMzktOTk0MC02NWRkN2Q1OTM5MDM=\"\
+        ,\r\n  \"status\": \"InProgress\",\r\n  \"percentComplete\": 0.0\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtjMmE1ZDA1NS0yODkzLTQxOTctOGU0Ny1jOGFkNWU3NTNhNGE=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthZjJjYzY4ZS0wNzFmLTRjMzktOTk0MC02NWRkN2Q1OTM5MDM=?api-version=2022-10-01
       cache-control:
       - no-cache
       content-length:
       - '361'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:46:55 GMT
+      - Sat, 28 Jan 2023 09:12:54 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTtjMmE1ZDA1NS0yODkzLTQxOTctOGU0Ny1jOGFkNWU3NTNhNGE=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTthZjJjYzY4ZS0wNzFmLTRjMzktOTk0MC02NWRkN2Q1OTM5MDM=?api-version=2022-10-01
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1866,30 +2090,29 @@ interactions:
       ParameterSetName:
       - --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtjMmE1ZDA1NS0yODkzLTQxOTctOGU0Ny1jOGFkNWU3NTNhNGE=?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthZjJjYzY4ZS0wNzFmLTRjMzktOTk0MC02NWRkN2Q1OTM5MDM=?api-version=2022-10-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtjMmE1ZDA1NS0yODkzLTQxOTctOGU0Ny1jOGFkNWU3NTNhNGE=\",\r\n
-        \ \"name\": \"NDA5NTtjMmE1ZDA1NS0yODkzLTQxOTctOGU0Ny1jOGFkNWU3NTNhNGE=\",\r\n
-        \ \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTthZjJjYzY4ZS0wNzFmLTRjMzktOTk0MC02NWRkN2Q1OTM5MDM=\"\
+        ,\r\n  \"name\": \"NDA5NTthZjJjYzY4ZS0wNzFmLTRjMzktOTk0MC02NWRkN2Q1OTM5MDM=\"\
+        ,\r\n  \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
       - '360'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:47:57 GMT
+      - Sat, 28 Jan 2023 09:13:55 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1915,29 +2138,28 @@ interactions:
       ParameterSetName:
       - --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A46%3A56.7272208Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"e4538b89-05e0-4fd9-8b84-28a299cea090","type":"SystemAssigned,
-        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"32ac2365-77c9-4363-8583-76fecbef0529","principalId":"722d44d8-992f-406c-9fcd-8e3dc6217795"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"75c4962e-014c-4f82-ad05-a2cca46687cb","principalId":"4e2e048d-8814-4594-ae3d-b3f2716e883b"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A12%3A56.7321046Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"9a4fce68-5721-4bac-8f36-3c1a474e3781","type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"248acf0b-8087-4c19-91ca-b9ec4c85c9f9","principalId":"44a475e0-75ef-442d-8580-0d843ada9ec9"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"602b0c63-b5e0-4290-a5e9-44b83b2b269e","principalId":"16ae7017-2e21-4572-a8d8-0e52e3abde31"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1344'
+      - '1394'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:47:58 GMT
+      - Sat, 28 Jan 2023 09:13:55 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1963,29 +2185,28 @@ interactions:
       ParameterSetName:
       - --system-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A46%3A56.7272208Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"e4538b89-05e0-4fd9-8b84-28a299cea090","type":"SystemAssigned,
-        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"32ac2365-77c9-4363-8583-76fecbef0529","principalId":"722d44d8-992f-406c-9fcd-8e3dc6217795"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"75c4962e-014c-4f82-ad05-a2cca46687cb","principalId":"4e2e048d-8814-4594-ae3d-b3f2716e883b"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A12%3A56.7321046Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"9a4fce68-5721-4bac-8f36-3c1a474e3781","type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"248acf0b-8087-4c19-91ca-b9ec4c85c9f9","principalId":"44a475e0-75ef-442d-8580-0d843ada9ec9"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"602b0c63-b5e0-4290-a5e9-44b83b2b269e","principalId":"16ae7017-2e21-4572-a8d8-0e52e3abde31"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1344'
+      - '1394'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:48:00 GMT
+      - Sat, 28 Jan 2023 09:13:58 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -2015,34 +2236,35 @@ interactions:
       ParameterSetName:
       - --system-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtjMzlhMDZhMC00OGM2LTQ5ODgtYTM2ZC0zYTEwZjE3MmMzNTU=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtmNGI2YzJiNS04MTA3LTQzYmYtYjM1MS1jMWQ2NmI0NWE0NWI=?api-version=2022-10-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Wed, 24 Aug 2022 15:48:04 GMT
+      - Sat, 28 Jan 2023 09:14:00 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTtjMzlhMDZhMC00OGM2LTQ5ODgtYTM2ZC0zYTEwZjE3MmMzNTU=?api-version=2022-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTtmNGI2YzJiNS04MTA3LTQzYmYtYjM1MS1jMWQ2NmI0NWE0NWI=?api-version=2022-10-01
       pragma:
       - no-cache
+      server:
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '205'
+      - '291'
     status:
       code: 202
       message: Accepted
@@ -2060,30 +2282,33 @@ interactions:
       ParameterSetName:
       - --system-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtjMzlhMDZhMC00OGM2LTQ5ODgtYTM2ZC0zYTEwZjE3MmMzNTU=?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtmNGI2YzJiNS04MTA3LTQzYmYtYjM1MS1jMWQ2NmI0NWE0NWI=?api-version=2022-10-01
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtjMzlhMDZhMC00OGM2LTQ5ODgtYTM2ZC0zYTEwZjE3MmMzNTU=\",\r\n
-        \ \"name\": \"NDA5NTtjMzlhMDZhMC00OGM2LTQ5ODgtYTM2ZC0zYTEwZjE3MmMzNTU=\",\r\n
-        \ \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtmNGI2YzJiNS04MTA3LTQzYmYtYjM1MS1jMWQ2NmI0NWE0NWI=\"\
+        ,\r\n  \"name\": \"NDA5NTtmNGI2YzJiNS04MTA3LTQzYmYtYjM1MS1jMWQ2NmI0NWE0NWI=\"\
+        ,\r\n  \"status\": \"InProgress\",\r\n  \"percentComplete\": 0.0\r\n}"
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtmNGI2YzJiNS04MTA3LTQzYmYtYjM1MS1jMWQ2NmI0NWE0NWI=?api-version=2022-10-01
       cache-control:
       - no-cache
       content-length:
-      - '360'
+      - '361'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:49:04 GMT
+      - Sat, 28 Jan 2023 09:14:59 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationResults/NDA5NTtmNGI2YzJiNS04MTA3LTQzYmYtYjM1MS1jMWQ2NmI0NWE0NWI=?api-version=2022-10-01
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -2109,28 +2334,75 @@ interactions:
       ParameterSetName:
       - --system-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtmNGI2YzJiNS04MTA3LTQzYmYtYjM1MS1jMWQ2NmI0NWE0NWI=?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A48%3A05.6050134Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"32ac2365-77c9-4363-8583-76fecbef0529","principalId":"722d44d8-992f-406c-9fcd-8e3dc6217795"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"75c4962e-014c-4f82-ad05-a2cca46687cb","principalId":"4e2e048d-8814-4594-ae3d-b3f2716e883b"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/operationStatus/NDA5NTtmNGI2YzJiNS04MTA3LTQzYmYtYjM1MS1jMWQ2NmI0NWE0NWI=\"\
+        ,\r\n  \"name\": \"NDA5NTtmNGI2YzJiNS04MTA3LTQzYmYtYjM1MS1jMWQ2NmI0NWE0NWI=\"\
+        ,\r\n  \"status\": \"Succeeded\",\r\n  \"percentComplete\": 0.0\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1275'
+      - '360'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 24 Aug 2022 15:49:05 GMT
+      - Sat, 28 Jan 2023 09:16:00 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/10.0
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault identity remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --system-assigned -g -n
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
+  response:
+    body:
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A15%3A01.365829Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"248acf0b-8087-4c19-91ca-b9ec4c85c9f9","principalId":"44a475e0-75ef-442d-8580-0d843ada9ec9"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"602b0c63-b5e0-4290-a5e9-44b83b2b269e","principalId":"16ae7017-2e21-4572-a8d8-0e52e3abde31"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1324'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 09:16:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -2156,22 +2428,21 @@ interactions:
       ParameterSetName:
       - --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A48%3A05.6050134Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"32ac2365-77c9-4363-8583-76fecbef0529","principalId":"722d44d8-992f-406c-9fcd-8e3dc6217795"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"75c4962e-014c-4f82-ad05-a2cca46687cb","principalId":"4e2e048d-8814-4594-ae3d-b3f2716e883b"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A15%3A01.365829Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000003":{"clientId":"248acf0b-8087-4c19-91ca-b9ec4c85c9f9","principalId":"44a475e0-75ef-442d-8580-0d843ada9ec9"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-identity000004":{"clientId":"602b0c63-b5e0-4290-a5e9-44b83b2b269e","principalId":"16ae7017-2e21-4572-a8d8-0e52e3abde31"}}},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1275'
+      - '1324'
       content-type:
       - application/json
       date:
-      - Wed, 24 Aug 2022 15:49:10 GMT
+      - Sat, 28 Jan 2023 09:16:03 GMT
       expires:
       - '-1'
       pragma:
@@ -2207,22 +2478,21 @@ interactions:
       ParameterSetName:
       - --user-assigned -g -n
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
-      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2022-08-24T15%3A49%3A19.3340433Z''\"","identity":{"type":"None"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
+      string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2023-01-28T09%3A16%3A04.2659086Z''\"","identity":{"type":"None"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","encryption":null,"monitoringSettings":{"azureMonitorAlertSettings":{"alertsForAllJobFailures":"Enabled"},"classicAlertSettings":{"alertsForCriticalOperations":"Enabled"}},"publicNetworkAccess":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '644'
+      - '694'
       content-type:
       - application/json
       date:
-      - Wed, 24 Aug 2022 15:49:22 GMT
+      - Sat, 28 Jan 2023 09:16:05 GMT
       expires:
       - '-1'
       pragma:
@@ -2238,7 +2508,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '209'
+      - '291'
     status:
       code: 200
       message: OK
@@ -2256,8 +2526,8 @@ interactions:
       ParameterSetName:
       - --backup-management-type -v -g --query
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+        (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectionContainers?api-version=2022-06-01-preview&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+status+eq+%27Registered%27
   response:
@@ -2271,13 +2541,14 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 24 Aug 2022 15:49:25 GMT
+      - Sat, 28 Jan 2023 09:16:07 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
       - Microsoft-IIS/10.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -2287,9 +2558,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '149'
-      x-powered-by:
-      - ASP.NET
+      - '284'
     status:
       code: 200
       message: OK
@@ -2309,10 +2578,9 @@ interactions:
       ParameterSetName:
       - -n -g --yes
       User-Agent:
-      - AZURECLI/2.39.0 (MSI) azsdk-python-mgmt-recoveryservices/2.1.0 Python/3.8.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 azsdk-python-mgmt-recoveryservices/2.2.0 Python/3.10.7 (Windows-10-10.0.22621-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2022-10-01
   response:
     body:
       string: ''
@@ -2322,17 +2590,19 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 24 Aug 2022 15:49:36 GMT
+      - Sat, 28 Jan 2023 09:16:11 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '8'
+      - '45'
     status:
       code: 200
       message: OK
