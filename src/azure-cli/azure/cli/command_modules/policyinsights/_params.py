@@ -241,7 +241,7 @@ def load_arguments(self, _):
                 'metadata',
                 options_list='--metadata',
                 arg_group='Properties',
-                help='Additional metadata in space-separated key=value pairs for an attestation. This overwrites any existing metadata for the attestation. ',  # pylint: disable=line-too-long
+                help='Additional metadata in space-separated key=value pairs for an attestation. This overwrites any existing metadata for the attestation.',  # pylint: disable=line-too-long
                 nargs='*',
                 validator=validate_metadata
             )
