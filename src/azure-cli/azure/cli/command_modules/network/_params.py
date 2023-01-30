@@ -831,10 +831,6 @@ def load_arguments(self, _):
         c.argument('port', help='The port to interrogate.')
         c.argument('protocol', help='The protocol to probe.', arg_type=get_enum_type(ProbeProtocol))
         c.argument('threshold', help='The number of consecutive probe failures before an instance is deemed unhealthy.')
-
-    with self.argument_context('network cross-region-lb rule') as c:
-        c.argument('load_distribution', help='Affinity rule settings.', arg_type=get_enum_type(LoadDistribution))
-        c.argument('probe_name', help='Name of an existing probe to associate with this rule.')
     # endregion
 
     # region VnetGateway
