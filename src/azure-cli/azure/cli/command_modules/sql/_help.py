@@ -309,18 +309,18 @@ short-summary: Manage SQL database geo redundant backups.
 
 helps['sql db geo-backup show'] = """
 type: command
-short-summary: Gets a geo backup policy.
+short-summary: Gets a recoverable database, which is a resource representing a database's geo backup.
 examples:
-  - name: Get a geo backup policy.
-    text: az sql db geo-backup show --server myserver --database mydb --resource-group mygroup --geo-backup-policy-name "Default"
+  - name: Gets a recoverable database, which represents a database's geo backup.
+    text: az sql db geo-backup show --server myserver --database mydb --resource-group mygroup
 """
 
 helps['sql db geo-backup list'] = """
 type: command
-short-summary: List the geo-redundant backup for a database.
+short-summary: Gets a list of recoverable databases.
 examples:
-  - name: List geo-redundant backup for a database.
-    text: az sql db geo-backup list -s myserver -d mydb
+  - name: Gets a list of recoverable databases.
+    text: az sql db geo-backup list -s myserver -g mygroup
 """
 
 helps['sql db geo-backup restore'] = """

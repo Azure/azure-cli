@@ -1243,24 +1243,23 @@ class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
     def test_sql_db_geo_restore(
             self):
         self.kwargs.update({
-            'rg': 'CustomerExperienceTeam_RG',
-            'loc': 'westcentralus',
-            'server_name': 'mi-tooling-server',
-            'database_name': 'a-reneamoso-qpi-testing',
+            'rg': 'rebeccaxu-test',
+            'loc': 'eastus',
+            'server_name': 'rebeccaxu-eastus-svr',
+            'database_name': 'cli-test-hs',
         })
 
         # test list geo backups for database
         self.cmd(
-            'sql db geo-backup list -g {rg} -s {server_name} -d {database_name}',
+            'sql db geo-backup list -g {rg} -s {server_name}',
             checks=[
                 self.greater_than('length(@)', 0)])
 
         # setup for test show geo backup
         backup = self.cmd(
-            'sql db geo-backup show -s {server_name} -d {database_name} -g {rg} --geo-backup-policy-name "Default"').get_output_in_json()
+            'sql db geo-backup show -s {server_name} -d {database_name} -g {rg}').get_output_in_json()
         
-        id = backup['id']
-        backup_id = id.split("/geoBackupPolicies")[0].replace("/databases/", "/recoverableDatabases/")
+        backup_id = backup['id']
 
         self.kwargs.update({
             'backup_id': backup_id,

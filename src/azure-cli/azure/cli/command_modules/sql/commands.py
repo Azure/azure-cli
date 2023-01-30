@@ -32,7 +32,7 @@ from ._util import (
     get_sql_database_blob_auditing_policies_operations,
     get_sql_server_blob_auditing_policies_operations,
     get_sql_server_dev_ops_audit_settings_operations,
-    get_sql_database_geo_backups_operations,
+    get_sql_database_recoverable_databases_operations,
     get_sql_database_long_term_retention_backups_operations,
     get_sql_database_long_term_retention_policies_operations,
     get_sql_database_sensitivity_labels_operations,
@@ -344,12 +344,12 @@ def load_command_table(self, _):
         g.wait_command('wait')
 
     database_geo_backups_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations#GeoBackupPoliciesOperations.{}',
-        client_factory=get_sql_database_geo_backups_operations)
+        operations_tmpl='azure.mgmt.sql.operations#RecoverableDatabasesOperations.{}',
+        client_factory=get_sql_database_recoverable_databases_operations)
 
     with self.command_group('sql db geo-backup',
                             database_geo_backups_operations,
-                            client_factory=get_sql_database_geo_backups_operations,
+                            client_factory=get_sql_database_recoverable_databases_operations,
                             is_preview=True) as g:
 
         g.show_command('show', 'get')

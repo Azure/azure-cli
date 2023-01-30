@@ -2996,16 +2996,14 @@ def restore_long_term_retention_backup(
 
 def list_geo_backups(
         client,
-        database_name,
         server_name,
         resource_group_name):
     '''
-    Gets the geo redundant backups for a Database
+    Gets the geo redundant backups for a server
     '''
-    return client.list_by_database(
+    return client.list_by_server(
         resource_group_name=resource_group_name,
-        server_name=server_name,
-        database_name=database_name)
+        server_name=server_name)
 
 
 def restore_geo_backup(

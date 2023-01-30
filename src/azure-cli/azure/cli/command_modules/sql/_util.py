@@ -240,5 +240,5 @@ def get_sql_database_ledger_digest_uploads_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).ledger_digest_uploads
 
 
-def get_sql_database_geo_backups_operations(cli_ctx, _):
-    return get_sql_management_client(cli_ctx).geo_backup_policies
+def get_sql_database_recoverable_databases_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).recoverable_databases

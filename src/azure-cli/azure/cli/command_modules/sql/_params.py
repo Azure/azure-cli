@@ -1153,17 +1153,7 @@ def load_arguments(self, _):
                    required=True,
                    help='Retrieves a requested geo-redundant backup under this resource group.')
 
-        c.argument('geo_backup_policy_name',
-                   options_list=['--geo-backup-policy-name'],
-                   required=True,
-                   help='The name of the geo backup policy.')
-
     with self.argument_context('sql db geo-backup list') as c:
-        c.argument('database_name',
-                   options_list=['--database-name', '--database', '-d'],
-                   required=True,
-                   help='Retrieves all requested geo-redundant backups under this database.')
-
         c.argument('server_name',
                    options_list=['--server-name', '--server', '-s'],
                    required=True,
