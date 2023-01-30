@@ -3151,6 +3151,8 @@ def restore_long_term_retention_backup(
         target_server_name,
         target_resource_group_name,
         requested_backup_storage_redundancy,
+        high_availability_replica_count,
+        zone_redundant,
         assign_identity=False,
         user_assigned_identity_id=None,
         keys=None,
@@ -3177,6 +3179,68 @@ def restore_long_term_retention_backup(
     kwargs['create_mode'] = CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
     kwargs['requested_backup_storage_redundancy'] = requested_backup_storage_redundancy
+    kwargs['high_availability_replica_count'] = high_availability_replica_count
+    kwargs['zone_redundant'] = zone_redundant
+
+    # Check backup storage redundancy configurations
+    if _should_show_backup_storage_redundancy_warnings(kwargs['location']):
+        if not kwargs['requested_backup_storage_redundancy']:
+            _backup_storage_redundancy_take_source_warning()
+        if kwargs['requested_backup_storage_redundancy'] == 'Geo':
+            _backup_storage_redundancy_specify_geo_warning()
+
+    return client.begin_create_or_update(
+        database_name=target_database_name,
+        server_name=target_server_name,
+        resource_group_name=target_resource_group_name,
+        parameters=kwargs)
+
+
+def list_geo_backups(
+        client,
+        server_name,
+        resource_group_name):
+    '''
+    Gets the geo redundant backups for a server
+    '''
+    return client.list_by_server(
+        resource_group_name=resource_group_name,
+        server_name=server_name)
+
+
+def restore_geo_backup(
+        cmd,
+        client,
+        geo_backup_id,
+        target_database_name,
+        target_server_name,
+        target_resource_group_name,
+        requested_backup_storage_redundancy,
+        high_availability_replica_count,
+        zone_redundant,
+        **kwargs):
+    '''
+    Restores an existing database (i.e. create with 'RestoreGeoBackup' create mode.)
+    '''
+
+    if not target_resource_group_name or not target_server_name or not target_database_name:
+        raise CLIError('Please specify target resource(s). '
+                       'Target resource group, target server, and target database '
+                       'are all required to restore Geo-redundant backup.')
+
+    if not geo_backup_id:
+        raise CLIError('Please specify a geo redundant backup.')
+
+    kwargs['location'] = _get_server_location(
+        cmd.cli_ctx,
+        server_name=target_server_name,
+        resource_group_name=target_resource_group_name)
+
+    kwargs['create_mode'] = CreateMode.RECOVERY
+    kwargs['recoverableDatabaseId'] = geo_backup_id
+    kwargs['requested_backup_storage_redundancy'] = requested_backup_storage_redundancy
+    kwargs['high_availability_replica_count'] = high_availability_replica_count
+    kwargs['zone_redundant'] = zone_redundant
 
     # Check backup storage redundancy configurations
     if _should_show_backup_storage_redundancy_warnings(kwargs['location']):

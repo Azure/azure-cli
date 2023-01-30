@@ -1235,6 +1235,45 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             checks=[NoneCheck()])
 
 
+class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
+    @record_only()
+    # using fixed resources because of long time preperation for geo-redundant backup
+    # need to change resources for others who want to rerecord this test
+    def test_sql_db_geo_restore(
+            self):
+        self.kwargs.update({
+            'rg': 'rebeccaxu-test',
+            'loc': 'eastus',
+            'server_name': 'rebeccaxu-eastus-svr',
+            'database_name': 'cli-test-hs',
+        })
+
+        # test list geo backups for database
+        self.cmd(
+            'sql db geo-backup list -g {rg} -s {server_name}',
+            checks=[
+                self.greater_than('length(@)', 0)])
+
+        # setup for test show geo backup
+        backup = self.cmd(
+            'sql db geo-backup show -s {server_name} -d {database_name} -g {rg}').get_output_in_json()
+        
+        backup_id = backup['id']
+
+        self.kwargs.update({
+            'backup_id': backup_id,
+            'dest_database_name': "cli-georestore"
+        })
+
+        self.cmd(
+            'sql db geo-backup restore --geo-backup-id {backup_id} --dest-database {dest_database_name}'
+            ' --dest-server {server_name} --resource-group {rg}',
+            checks=[
+                self.check('name', '{dest_database_name}')])
+                
+        self.cmd('sql db delete -g {rg} -s {server_name} -n {dest_database_name} --yes')
+
+
 class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
     @ManagedInstancePreparer()
