@@ -3420,7 +3420,7 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
         self.cmd('network cross-region-lb rule update -g {rg} --lb-name {lb} -n rule1 --floating-ip true --idle-timeout 20 --load-distribution sourceip --protocol udp')
         self.cmd('network cross-region-lb rule update -g {rg} --lb-name {lb} -n rule2 --backend-pool-name bap2 --load-distribution sourceipprotocol')
         self.cmd('network cross-region-lb rule show -g {rg} --lb-name {lb} -n rule1', checks=[
-            self.check('enableFloatingIp', True),
+            self.check('enableFloatingIP', True),
             self.check('idleTimeoutInMinutes', 20),
             self.check('loadDistribution', 'SourceIP'),
             self.check('protocol', 'Udp')
@@ -3851,7 +3851,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb rule update -g {rg} --lb-name {lb} -n rule1 --floating-ip true --idle-timeout 20 --load-distribution sourceip --protocol udp')
         self.cmd('network lb rule update -g {rg} --lb-name {lb} -n rule2 --backend-pool-name bap2 --load-distribution sourceipprotocol')
         self.cmd('network lb rule show -g {rg} --lb-name {lb} -n rule1', checks=[
-            self.check('enableFloatingIp', True),
+            self.check('enableFloatingIP', True),
             self.check('idleTimeoutInMinutes', 20),
             self.check('loadDistribution', 'SourceIP'),
             self.check('protocol', 'Udp')
@@ -4273,7 +4273,7 @@ class NetworkExtendedNSGScenarioTest(ScenarioTest):
             'rule': 'rule1'
         })
         self.cmd('network nsg create --name {nsg} -g {rg}')
-        self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefixes * -n {rule} --source-port-ranges 700-900 1000-1100 --priority 1000', checks=[
+        self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} -g {rg} --source-address-prefixes * -n {rule} --source-port-ranges 700-900 1000-1100 --priority 1000', checks=[
             self.check('length(destinationAddressPrefixes)', 2),
             self.check('destinationAddressPrefix', None),
             self.check('length(sourceAddressPrefixes)', 0),

@@ -529,15 +529,6 @@ def load_command_table(self, _):
                          exception_handler=handle_template_based_exception)
         g.custom_command('list-mapping', 'list_load_balancer_mapping')
 
-    property_map = {
-        'load_balancing_rules': 'rule'
-    }
-    for subresource, alias in property_map.items():
-        with self.command_group('network lb {}'.format(alias), network_util) as g:
-            g.command('list', list_network_resource_property('load_balancers', subresource))
-            g.show_command('show', get_network_resource_property_entry('load_balancers', subresource))
-            g.command('delete', delete_lb_resource_property_entry('load_balancers', subresource))
-
     from .operations.load_balancer import LBFrontendIPCreate, LBFrontendIPUpdate
     self.command_table["network lb frontend-ip create"] = LBFrontendIPCreate(loader=self)
     self.command_table["network lb frontend-ip update"] = LBFrontendIPUpdate(loader=self)
@@ -549,6 +540,10 @@ def load_command_table(self, _):
     from .operations.load_balancer import LBInboundNatPoolCreate, LBInboundNatPoolUpdate
     self.command_table["network lb inbound-nat-pool create"] = LBInboundNatPoolCreate(loader=self)
     self.command_table["network lb inbound-nat-pool update"] = LBInboundNatPoolUpdate(loader=self)
+
+    from .operations.load_balancer import LBRuleCreate, LBRuleUpdate
+    self.command_table["network lb rule create"] = LBRuleCreate(loader=self)
+    self.command_table["network lb rule update"] = LBRuleUpdate(loader=self)
 
     with self.command_group('network lb outbound-rule', network_lb_sdk, min_api='2018-07-01') as g:
         g.custom_command('create', 'create_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
@@ -562,14 +557,6 @@ def load_command_table(self, _):
         g.command('list', list_network_resource_property('load_balancers', 'outbound_rules'))
         g.show_command('show', get_network_resource_property_entry('load_balancers', 'outbound_rules'))
         g.command('delete', delete_lb_resource_property_entry('load_balancers', 'outbound_rules'))
-
-    with self.command_group('network lb rule', network_lb_sdk) as g:
-        g.custom_command('create', 'create_lb_rule')
-        g.generic_update_command('update', child_collection_prop_name='load_balancing_rules',
-                                 getter_name='lb_get',
-                                 getter_type=network_load_balancers_custom,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_lb_rule')
 
     with self.command_group("network lb probe") as g:
         g.custom_command("create", "create_lb_probe")
@@ -619,8 +606,15 @@ def load_command_table(self, _):
         self.command_table['network cross-region-lb frontend-ip create'] = CrossRegionLoadBalancerFrontendIPCreate(loader=self)
         self.command_table['network cross-region-lb frontend-ip update'] = CrossRegionLoadBalancerFrontendIPUpdate(loader=self)
 
+    with self.command_group('network cross-region-lb rule') as g:
+        from .operations.load_balancer import CrossRegionLoadBalancerRuleShow, CrossRegionLoadBalancerRuleDelete, CrossRegionLoadBalancerRuleList, CrossRegionLoadBalancerRuleCreate, CrossRegionLoadBalancerRuleUpdate
+        self.command_table['network cross-region-lb rule show'] = CrossRegionLoadBalancerRuleShow(loader=self)
+        self.command_table['network cross-region-lb rule delete'] = CrossRegionLoadBalancerRuleDelete(loader=self)
+        self.command_table['network cross-region-lb rule list'] = CrossRegionLoadBalancerRuleList(loader=self)
+        self.command_table['network cross-region-lb rule create'] = CrossRegionLoadBalancerRuleCreate(loader=self)
+        self.command_table['network cross-region-lb rule update'] = CrossRegionLoadBalancerRuleUpdate(loader=self)
+
     cross_region_lb_property_map = {
-        'load_balancing_rules': 'rule',
         'probes': 'probe',
     }
 
@@ -640,12 +634,6 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_cross_region_lb_backend_address_pool_address')
         g.custom_command('remove', 'remove_lb_backend_address_pool_address')
         g.custom_command('list', 'list_lb_backend_address_pool_address')
-
-    with self.command_group('network cross-region-lb rule', network_lb_sdk) as g:
-        g.custom_command('create', 'create_cross_region_lb_rule')
-        g.generic_update_command('update', child_collection_prop_name='load_balancing_rules',
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_cross_region_lb_rule')
 
     with self.command_group('network cross-region-lb probe', network_lb_sdk) as g:
         g.custom_command('create', 'create_cross_lb_probe')
