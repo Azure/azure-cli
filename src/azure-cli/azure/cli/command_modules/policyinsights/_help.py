@@ -337,7 +337,7 @@ examples:
 
 helps['policy attestation show'] = """
 type: command
-short-summary: Gets a policy attestation.
+short-summary: Get a policy attestation.
 examples:
   - name: Show an attestation at subscription.
     text: >
