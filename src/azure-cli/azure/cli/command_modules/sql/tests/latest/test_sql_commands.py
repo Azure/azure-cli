@@ -6734,5 +6734,3 @@ class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
         self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db -r {recoverable_db}',
                 checks=[
                     JMESPathCheck('name', "recovered_db")])
-
-
