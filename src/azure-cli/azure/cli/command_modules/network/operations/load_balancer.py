@@ -562,7 +562,7 @@ class CrossRegionLoadBalancerRuleUpdate(_LBRuleUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg
+        from azure.cli.core.aaz import AAZResourceIdArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
