@@ -361,7 +361,8 @@ class LBOutboundRuleCreate(_LBOutboundRuleCreate):
             element_transformer=lambda _, id: {"id": id}
         )
 
-class LBOutboundRuleUpdte(_LBOutboundRuleUpdate):
+
+class LBOutboundRuleUpdate(_LBOutboundRuleUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):

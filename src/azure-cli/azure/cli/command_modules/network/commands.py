@@ -49,7 +49,7 @@ from azure.cli.command_modules.network._validators import (
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
     process_public_ip_create_namespace,
     process_vpn_connection_create_namespace,
-    process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace,
+    process_nw_config_diagnostic_namespace,
     process_appgw_waf_policy_update, process_cross_region_lb_create_namespace)
 
 NETWORK_VROUTER_DEPRECATION_INFO = 'network routeserver'
@@ -545,9 +545,9 @@ def load_command_table(self, _):
     self.command_table["network lb rule create"] = LBRuleCreate(loader=self)
     self.command_table["network lb rule update"] = LBRuleUpdate(loader=self)
 
-    from .operations.load_balancer import LBOutboundRuleCreate, LBOutboundRuleUpdte
+    from .operations.load_balancer import LBOutboundRuleCreate, LBOutboundRuleUpdate
     self.command_table["network lb outbound-rule create"] = LBOutboundRuleCreate(loader=self)
-    self.command_table["network lb outbound-rule update"] = LBOutboundRuleUpdte(loader=self)
+    self.command_table["network lb outbound-rule update"] = LBOutboundRuleUpdate(loader=self)
 
     with self.command_group("network lb probe") as g:
         g.custom_command("create", "create_lb_probe")
