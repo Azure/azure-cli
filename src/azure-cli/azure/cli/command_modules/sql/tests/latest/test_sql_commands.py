@@ -1239,6 +1239,7 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             checks=[NoneCheck()])
 
 
+@record_only()
 class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
     def test_sql_db_geo_restore(
             self):
