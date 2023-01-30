@@ -7104,6 +7104,19 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
                      self.check(update_not_before_timeout_key, 'PT5M')
                  ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_os_iamge_notification_')
+    def test_vmss_os_image_notification(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --enable-osimage-notification true', checks=[
+             self.check('vmss.virtualMachineProfile.scheduledEventsProfile.osImageNotificationProfile.enable', True)
+        ])
+
+        self.cmd('vmss update -g {rg} -n {vmss} --enable-osimage-notification false', checks=[
+            self.check('virtualMachineProfile.scheduledEventsProfile.osImageNotificationProfile', None)
+        ])
+
 
 class VMPriorityEvictionBillingTest(ScenarioTest):
 
