@@ -645,18 +645,8 @@ def load_arguments(self, _):
     # endregion
 
     # region LoadBalancers
-    with self.argument_context('network lb rule create') as c:
-        c.argument('backend_address_pool_name', help='The name of the backend address pool. {}'.format(default_existing))
-        c.argument('frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
-
-    for item in ['rule', 'pool']:
-        with self.argument_context('network lb inbound-nat-{} create'.format(item)) as c:
-            c.argument('frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
-
     lb_subresources = [
         {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
-        {'name': 'inbound-nat-rule', 'display': 'inbound NAT rule', 'ref': 'inbound_nat_rules'},
-        {'name': 'rule', 'display': 'load balancing rule', 'ref': 'load_balancing_rules'},
         {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
         {'name': 'outbound-rule', 'display': 'outbound rule', 'ref': 'outbound_rules'},
     ]
