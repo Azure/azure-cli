@@ -753,24 +753,12 @@ def load_arguments(self, _):
         c.argument('frontend_ip_configurations', options_list='--frontend-ip-configs', help='Space-separated list of frontend IP configuration names or IDs.', nargs='+')
         c.argument('protocol', arg_type=get_enum_type(TransportProtocol), help='Network transport protocol.')
         c.argument('outbound_ports', type=int, help='The number of outbound ports to be used for NAT.')
-
-    with self.argument_context('network lb rule') as c:
-        c.argument('load_distribution', help='Affinity rule settings.', arg_type=get_enum_type(LoadDistribution))
-        c.argument('probe_name', help='Name of an existing probe to associate with this rule.')
-        c.argument('disable_outbound_snat', min_api='2018-08-01', help='Configures SNAT for the VMs in the backend pool to use the publicIP address specified in the frontend of the load balancing rule.', arg_type=get_three_state_flag())
-        c.argument('backend_pools_name', nargs='+', help='List of name of the backend address pool', min_api='2021-02-01', is_preview=True)
     # endregion
 
     # region cross-region load balancer
-    with self.argument_context('network cross-region-lb rule create') as c:
-        c.argument('backend_address_pool_name',
-                   help='The name of the backend address pool. {}'.format(default_existing))
-        c.argument('frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
-
     cross_region_lb_subresources = [
         {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
         {'name': 'frontend-ip', 'display': 'frontend IP configuration', 'ref': 'frontend_ip_configurations'},
-        {'name': 'rule', 'display': 'load balancing rule', 'ref': 'load_balancing_rules'},
         {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
     ]
     for item in cross_region_lb_subresources:
@@ -847,7 +835,6 @@ def load_arguments(self, _):
     with self.argument_context('network cross-region-lb rule') as c:
         c.argument('load_distribution', help='Affinity rule settings.', arg_type=get_enum_type(LoadDistribution))
         c.argument('probe_name', help='Name of an existing probe to associate with this rule.')
-        c.argument('backend_pools_name', nargs='+', help='List of name of the backend address pool', min_api='2021-02-01', is_preview=True)
     # endregion
 
     # region VnetGateway
