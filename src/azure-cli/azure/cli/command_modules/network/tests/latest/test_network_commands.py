@@ -1601,13 +1601,15 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             'rg': resource_group,
             'gateway_ip': 'gateway_ip',
             'ag': 'ag1',
-            'name': 'myprobe'
+            'name': 'myprobe',
+            'waf': 'waf1',
         })
 
         self.cmd('network public-ip create -g {rg} -n {gateway_ip} --sku Standard')
+        self.cmd('network application-gateway waf-policy create -n {waf} -g {rg}')
         self.cmd('network application-gateway create -g {rg} -n {ag} '
                  '--sku WAF_v2 --priority 1001 '
-                 '--public-ip-address {gateway_ip} ')
+                 '--public-ip-address {gateway_ip} --waf-policy {waf}')
 
         self.cmd('network application-gateway probe create -g {rg} --gateway-name {ag} -n {name} --no-wait '
                  '--path /test '
@@ -2822,25 +2824,28 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'ip1': 'pubipddos',
+            'ddos': 'ddos1',
         })
 
-        # self.kwargs['ddos_id'] = self.cmd('network ddos-protection create -g {rg} -n {ddos}').get_output_in_json()['id']
+        self.kwargs['ddos_id'] = self.cmd('network ddos-protection create -g {rg} -n {ddos}').get_output_in_json()['id']
 
         self.cmd(
-            'network public-ip create -g {rg} -n {ip1} --protection-mode Enabled --sku Standard',
+            'network public-ip create -g {rg} -n {ip1} --protection-mode Enabled --sku Standard --ddos-protection-plan {ddos}',
             checks=[
                 self.check('publicIp.ddosSettings.protectionMode', 'Enabled'),
+                self.check('publicIp.ddosSettings.ddosProtectionPlan.id', '{ddos_id}'),
                 self.check('publicIp.name', '{ip1}'),
                 self.check('publicIp.provisioningState', 'Succeeded')
             ])
 
-        self.cmd('network public-ip update -g {rg} -n {ip1} --protection-mode Disabled',
+        self.cmd('network public-ip update -g {rg} -n {ip1} --protection-mode Disabled --ddos-protection-plan null',
                  checks=[
                      self.check('ddosSettings.protectionMode', 'Disabled'),
+                     self.check('ddosSettings.ddosProtectionPlan', None),
                      self.check('name', '{ip1}'),
                      self.check('provisioningState', 'Succeeded')
                  ])
-        # self.cmd('network ddos-protection delete -g {rg} -n {ddos}')
+        self.cmd('network ddos-protection delete -g {rg} -n {ddos}')
 
         self.cmd('network public-ip delete -g {rg} -n {ip1}')
         self.cmd('network public-ip list -g {rg}',
@@ -3415,7 +3420,7 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
         self.cmd('network cross-region-lb rule update -g {rg} --lb-name {lb} -n rule1 --floating-ip true --idle-timeout 20 --load-distribution sourceip --protocol udp')
         self.cmd('network cross-region-lb rule update -g {rg} --lb-name {lb} -n rule2 --backend-pool-name bap2 --load-distribution sourceipprotocol')
         self.cmd('network cross-region-lb rule show -g {rg} --lb-name {lb} -n rule1', checks=[
-            self.check('enableFloatingIp', True),
+            self.check('enableFloatingIP', True),
             self.check('idleTimeoutInMinutes', 20),
             self.check('loadDistribution', 'SourceIP'),
             self.check('protocol', 'Udp')
@@ -3846,7 +3851,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb rule update -g {rg} --lb-name {lb} -n rule1 --floating-ip true --idle-timeout 20 --load-distribution sourceip --protocol udp')
         self.cmd('network lb rule update -g {rg} --lb-name {lb} -n rule2 --backend-pool-name bap2 --load-distribution sourceipprotocol')
         self.cmd('network lb rule show -g {rg} --lb-name {lb} -n rule1', checks=[
-            self.check('enableFloatingIp', True),
+            self.check('enableFloatingIP', True),
             self.check('idleTimeoutInMinutes', 20),
             self.check('loadDistribution', 'SourceIP'),
             self.check('protocol', 'Udp')
@@ -4268,7 +4273,7 @@ class NetworkExtendedNSGScenarioTest(ScenarioTest):
             'rule': 'rule1'
         })
         self.cmd('network nsg create --name {nsg} -g {rg}')
-        self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefixes * -n {rule} --source-port-ranges 700-900 1000-1100 --priority 1000', checks=[
+        self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} -g {rg} --source-address-prefixes * -n {rule} --source-port-ranges 700-900 1000-1100 --priority 1000', checks=[
             self.check('length(destinationAddressPrefixes)', 2),
             self.check('destinationAddressPrefix', None),
             self.check('length(sourceAddressPrefixes)', 0),
@@ -4841,7 +4846,6 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
         self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
 
 
-
 class NetworkVpnConnectionNatRule(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='test_network_vpn_connection_nat_rule')
@@ -4929,7 +4933,6 @@ class NetworkVnetGatewayMultiAuth(ScenarioTest):
             'root_cert_name': 'root-cert',
             'root_cert_data': os.path.join(TEST_DIR, 'test-root-cert.cer'),
         })
-
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
         self.cmd('network public-ip create -g {rg} -n {ip}')
         self.cmd('network vnet-gateway create -g {rg} -n {gw} --public-ip-address {ip} --vnet {vnet} --sku {gw_sku} '
@@ -4961,7 +4964,7 @@ class NetworkVnetGatewayMultiAuth(ScenarioTest):
         self.cmd('network vnet-gateway update -g {rg} -n {gw} --vpn-auth-type AAD Certificate Radius '
                  '--aad-audience {aad_audience} --aad-issuer {aad_issuer} --aad-tenant {aad_tenant} '
                  '--root-cert-name {root_cert_name} --root-cert-data "{root_cert_data}" '
-                 '--radius-secret 111_aaa --radius-server 30.1.1.15 ',
+                 '--radius-secret 111_aaa --radius-server 30.1.1.15',
                  checks=[self.check('length(vpnClientConfiguration.vpnAuthenticationTypes)', 3)])
 
 
@@ -5423,11 +5426,11 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             'vnet2_id': '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet2}'.format(**self.kwargs)
         })
 
-        with self.assertRaisesRegex(CLIError, 'vpn_gateway_generation should not be provided if gateway_type is not Vpn.'):
+        with self.assertRaisesRegex(HttpResponseError, 'InvalidGatewaySkuSpecifiedForGatewayDeploymentType'):
             self.cmd(
                 'network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --gateway-type ExpressRoute --vpn-gateway-generation Generation1')
 
-        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --vpn-gateway-generation Generation1 --custom-routes {custom_routes1} --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --vpn-gateway-generation Generation1 --custom-routes {custom_routes1} --sku Standard --no-wait')
         self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2_id} --public-ip-address {ip2} --no-wait')
         self.cmd('network vnet-gateway create -g {rg} -n {gw3} --vnet {vnet3} --public-ip-address {ip3} --no-wait --sku standard --asn 12345 --bgp-peering-address 10.2.250.250 --peer-weight 50')
 
@@ -5438,14 +5441,14 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vnet-gateway show -g {rg} -n {gw1}', checks=[
             self.check('gatewayType', 'Vpn'),
             self.check('sku.capacity', 2),
-            self.check('sku.name', 'Basic'),
+            self.check('sku.name', 'Standard'),
             self.check('vpnType', 'RouteBased'),
             self.check('vpnGatewayGeneration', 'Generation1'),
             self.check('enableBgp', False),
             self.check('customRoutes.addressPrefixes[0]', self.kwargs['custom_routes1'])
         ])
 
-        self.cmd('network vnet-gateway update -g {rg} -n {gw1} --sku Standard --custom-routes {custom_routes1} {custom_routes2}', checks=[
+        self.cmd('network vnet-gateway update -g {rg} -n {gw1} --custom-routes {custom_routes1} {custom_routes2}', checks=[
             self.check('length(customRoutes.addressPrefixes)', 2)
         ])
 
@@ -6306,7 +6309,7 @@ class NetworkExtendedLocation(ScenarioTest):
         self.kwargs.update({
             'rg': resource_group,
             'vnet': 'vnet',
-            'gateway_type' : 'LocalGateway',
+            'gateway_type': 'LocalGateway',
             'edge_name': 'microsoftrrdclab3',
         })
         self.cmd('az network vnet create -g {rg} -n {vnet} --location eastus2euap --address-prefix 10.30.0.0/16 --edge-zone {edge_name}')
