@@ -475,7 +475,7 @@ def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_nam
                      action_sql_expression=None, action_compatibility_level=None, action_requires_preprocessing=None,
                      filter_sql_expression=None, filter_requires_preprocessing=None, correlation_id=None,
                      message_id=None, to=None, reply_to=None, label=None, session_id=None, reply_to_session_id=None,
-                     content_type=None, requires_preprocessing=None, filter_type=None):
+                     content_type=None, requires_preprocessing=None, filter_type=None, tags=None):
 
     Rule = cmd.get_models('Rule', resource_type=ResourceType.MGMT_SERVICEBUS)
     Action = cmd.get_models('Action', resource_type=ResourceType.MGMT_SERVICEBUS)
@@ -493,6 +493,7 @@ def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_nam
 
     if filter_type == 'CorrelationFilter':
         parameters.correlation_filter = CorrelationFilter(
+            properties=tags,
             correlation_id=correlation_id,
             to=to,
             message_id=message_id,
@@ -509,7 +510,6 @@ def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_nam
             compatibility_level=action_compatibility_level,
             requires_preprocessing=action_requires_preprocessing
         )
-
     return client.create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
@@ -524,7 +524,7 @@ def cli_rules_update(cmd, instance,
                      action_sql_expression=None, action_compatibility_level=None, action_requires_preprocessing=None,
                      filter_sql_expression=None, filter_requires_preprocessing=None, correlation_id=None,
                      message_id=None, to=None, reply_to=None, label=None, session_id=None, reply_to_session_id=None,
-                     content_type=None, requires_preprocessing=None):
+                     content_type=None, requires_preprocessing=None, tags=None):
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
         if action_sql_expression:
@@ -544,6 +544,9 @@ def cli_rules_update(cmd, instance,
 
     if correlation_id:
         instance.correlation_filter.correlation_id = correlation_id
+
+    if tags:
+        instance.correlation_filter.properties = tags
 
     if to:
         instance.correlation_filter.to = to

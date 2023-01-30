@@ -538,12 +538,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             min_api='2018-02-01') as g:
         from azure.cli.command_modules.storage._transformers import transform_immutability_policy
 
-        from ._validators import validate_allow_protected_append_writes_all
-
         g.show_command('show', 'get_immutability_policy',
                        transform=transform_immutability_policy)
-        g.custom_command('create', 'create_or_update_immutability_policy',
-                         validator=validate_allow_protected_append_writes_all)
+        g.custom_command('create', 'create_or_update_immutability_policy')
         g.command('delete', 'delete_immutability_policy',
                   transform=lambda x: None)
         g.command('lock', 'lock_immutability_policy')
