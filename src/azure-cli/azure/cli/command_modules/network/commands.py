@@ -545,18 +545,9 @@ def load_command_table(self, _):
     self.command_table["network lb rule create"] = LBRuleCreate(loader=self)
     self.command_table["network lb rule update"] = LBRuleUpdate(loader=self)
 
-    with self.command_group('network lb outbound-rule', network_lb_sdk, min_api='2018-07-01') as g:
-        g.custom_command('create', 'create_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
-        g.generic_update_command('update', child_collection_prop_name='outbound_rules',
-                                 getter_name='lb_get',
-                                 getter_type=network_load_balancers_custom,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
-
-    with self.command_group('network lb outbound-rule', network_util, min_api='2018-07-01') as g:
-        g.command('list', list_network_resource_property('load_balancers', 'outbound_rules'))
-        g.show_command('show', get_network_resource_property_entry('load_balancers', 'outbound_rules'))
-        g.command('delete', delete_lb_resource_property_entry('load_balancers', 'outbound_rules'))
+    from .operations.load_balancer import LBOutboundRuleCreate, LBOutboundRuleUpdte
+    self.command_table["network lb outbound-rule create"] = LBOutboundRuleCreate(loader=self)
+    self.command_table["network lb outbound-rule update"] = LBOutboundRuleUpdte(loader=self)
 
     with self.command_group("network lb probe") as g:
         g.custom_command("create", "create_lb_probe")
