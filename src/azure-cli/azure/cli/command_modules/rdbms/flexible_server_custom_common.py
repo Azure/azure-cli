@@ -16,6 +16,7 @@ from knack.util import CLIError
 from urllib.request import urlretrieve
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.util import send_raw_request
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, FileOperationError, BadRequestError
@@ -34,11 +35,11 @@ def flexible_server_update_get(client, resource_group_name, server_name):
     return client.get(resource_group_name, server_name)
 
 
-def flexible_server_stop(client, resource_group_name=None, server_name=None):
+def flexible_server_stop(client, resource_group_name=None, server_name=None, no_wait=False):
     days = 30 if isinstance(client, MySqlServersOperations) else 7
     logger.warning("Server will be automatically started after %d days "
                    "if you do not perform a manual start operation", days)
-    return client.begin_stop(resource_group_name, server_name)
+    return sdk_no_wait(no_wait, client.begin_stop, resource_group_name, server_name)
 
 
 def flexible_server_update_set(client, resource_group_name, server_name, parameters):
