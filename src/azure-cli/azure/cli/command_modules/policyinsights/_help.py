@@ -328,7 +328,7 @@ examples:
 
 helps['policy attestation update'] = """
 type: command
-short-summary: Updates an existing policy attestation.
+short-summary: Update an existing policy attestation.
 examples:
   - name: Update an attestation at resource scope
     text: >
