@@ -7,8 +7,7 @@ from msrestazure.tools import is_valid_resource_id, resource_id
 
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import sdk_no_wait
-
-from knack.util import CLIError
+from azure.cli.core.azclierror import ResourceNotFoundError, ArgumentUsageError
 
 
 def list_policy_events(
@@ -743,9 +742,9 @@ def _get_policy_assignment_id(cmd, policy_assignment):
         policy_assignment_ids = [
             p.id for p in policy_assignments if p.name.lower() == policy_assignment.lower()]
         if not policy_assignment_ids:
-            raise CLIError(
+            raise ResourceNotFoundError(
                 "No policy assignment with the name '{}' found.".format(policy_assignment))
         if len(policy_assignment_ids) > 1:
-            raise CLIError("Multiple policy assignment with the name '{}' found. "
+            raise ArgumentUsageError("Multiple policy assignment with the name '{}' found. "
                            "Specify the policy assignment ID.".format(policy_assignment))
         return policy_assignment_ids[0]
