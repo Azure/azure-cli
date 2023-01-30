@@ -1239,8 +1239,10 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             checks=[NoneCheck()])
 
 
-@record_only()
 class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
+    @record_only()
+    # using fixed resources because of long time preperation for geo-redundant backup
+    # need to change resources for others who want to rerecord this test
     def test_sql_db_geo_restore(
             self):
         self.kwargs.update({
