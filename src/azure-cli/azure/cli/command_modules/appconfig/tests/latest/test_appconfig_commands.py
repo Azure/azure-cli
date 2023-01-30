@@ -17,7 +17,7 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPrep
 from azure.cli.testsdk.checkers import NoneCheck
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles, AppServiceConstants
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.core.exceptions import ResourceNotFoundError
+from azure.cli.core.azclierror import ResourceNotFoundError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -2985,6 +2985,20 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
                                              self.check('status', 'ready'),
                                              self.check('expires', None)])
         
+        # Test listing snapshot kvs
+        kvs = self.cmd('appconfig kv list --connection-string {connection_string} --snapshot {snapshot_name}').get_output_in_json()
+        assert len(kvs) == 2
+
+        # Test error returned for listing kvs in non-existent snapshot
+        non_existent_snapshot_name = "non_existent_snapshot"
+
+        self.kwargs.update({
+            'snapshot_name': non_existent_snapshot_name
+        })
+
+        with self.assertRaisesRegex(ResourceNotFoundError, f'No snapshot with name \'{non_existent_snapshot_name}\' was found.'):
+            self.cmd('appconfig kv list --connection-string {connection_string} --snapshot {snapshot_name}')
+
 
 def _create_config_store(test, kwargs):
     if 'retention_days' not in kwargs:

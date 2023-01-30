@@ -75,7 +75,7 @@ def show_snapshot(cmd,
 
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.NOT_FOUND:
-            raise ResourceNotFoundError("No snapshot with name {} was found.".format(snapshot_name))
+            raise ResourceNotFoundError("No snapshot with name '{}' was found.".format(snapshot_name))
 
         raise AzureResponseError(str(exception))
 
@@ -163,7 +163,7 @@ def archive_snapshot(cmd,
 
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.NOT_FOUND:
-            raise ResourceNotFoundError("No snapshot with name {} was found.".format(snapshot_name))
+            raise ResourceNotFoundError("No snapshot with name '{}' was found.".format(snapshot_name))
 
         raise AzureResponseError(str(exception))
 
@@ -185,7 +185,7 @@ def recover_snapshot(cmd,
 
     except HttpResponseError as exception:
         if exception.status_code == StatusCodes.NOT_FOUND:
-            raise ResourceNotFoundError("No snapshot with name {} was found.".format(snapshot_name))
+            raise ResourceNotFoundError("No snapshot with name '{}' was found.".format(snapshot_name))
 
         raise AzureResponseError(str(exception))
 

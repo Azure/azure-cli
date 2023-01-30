@@ -343,8 +343,6 @@ def __read_kv_from_config_store(azconfig_client,
                                                                                                fields=query_fields)
 
         except HttpResponseError as exception:
-            if exception.status_code == StatusCodes.NOT_FOUND:
-                raise ResourceNotFoundError('No snapshot with name {} was found.'.format(snapshot))
             raise AzureResponseError('Failed to read key-values(s) from snapshot {}. '.format(snapshot) + str(exception))
 
     else:
@@ -397,6 +395,17 @@ def __read_kv_from_config_store(azconfig_client,
         count += 1
         if count >= top:
             return retrieved_kvs
+
+    # A request to list kvs of a non-existent snapshot returns an empty result.
+    # We first check if the snapshot exists before returning an empty result.
+    if snapshot and len(retrieved_kvs) == 0:
+        try:
+            _ = AppConfigSnapshotClient(azconfig_client).get_snapshot(name=snapshot)
+
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.NOT_FOUND:
+                raise ResourceNotFoundError("No snapshot with name '{}' was found.".format(snapshot))
+
     return retrieved_kvs
 
 

@@ -135,6 +135,26 @@ def build_list_snapshots_request(
     )
 
 
+def build_list_snapshot_kvs_request(
+    name,
+    select=None,
+    sync_token=None,
+    **kwargs
+):
+    _params = {"snapshot": name}
+
+    if select is not None:
+        _params["$Select"] = Serializer().query("select", select, "[str]", div=",")
+
+    return _build_request(
+        "/kv",
+        RequestMethod.GET,
+        sync_token=sync_token,
+        params=_params,
+        **kwargs
+    )
+
+
 def build_status_update_request(
     name,
     archive_snapshot,
@@ -437,20 +457,17 @@ class AppConfigSnapshotClient:
 
         _headers = kwargs.pop("headers", {}) or {}
 
-        items_link = self.get_snapshot(name=name).items_link
-
         _params = {}
 
         if fields is not None:
             _params["$Select"] = Serializer().query("select", fields, "[str]", div=",")
 
-        initial_request = _build_request(
-            items_link,
-            RequestMethod.GET,
+        initial_request = build_list_snapshot_kvs_request(
+            name,
+            select=fields,
             sync_token=self._sync_token,
-            params=_params,
-            headers=_headers,
-            **kwargs)
+            headers=_headers
+        )
 
         # Returns an iterable that converts returned items to Configuration Settings
         def _to_configurationsetting_iter(kv_items=None):
