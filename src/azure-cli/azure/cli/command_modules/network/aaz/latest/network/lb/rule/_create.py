@@ -18,13 +18,13 @@ class Create(AAZCommand):
     """Create a load balancing rule.
 
     :example: Create a load balancing rule that assigns a front-facing IP configuration and port to an address pool and port.
-        az network lb rule create -g MyResourceGroup --lb-name MyLb -n MyLbRule --protocol Tcp --frontend-ip MyFrontEndIp --frontend-port 80 --backend-pools-name MyAddressPool --backend-port 80
+        az network lb rule create -g MyResourceGroup --lb-name MyLb -n MyLbRule --protocol Tcp --frontend-ip MyFrontEndIp --frontend-port 80 --backend-pool-name MyAddressPool --backend-port 80
 
     :example: Create a load balancing rule that assigns a front-facing IP configuration and port to an address pool and port with the floating ip feature.
-        az network lb rule create -g MyResourceGroup --lb-name MyLb -n MyLbRule --protocol Tcp --frontend-ip MyFrontEndIp --backend-pools-name MyAddressPool --floating-ip true --frontend-port 80 --backend-port 80
+        az network lb rule create -g MyResourceGroup --lb-name MyLb -n MyLbRule --protocol Tcp --frontend-ip MyFrontEndIp --backend-pool-name MyAddressPool --floating-ip true --frontend-port 80 --backend-port 80
 
     :example: Create an HA ports load balancing rule that assigns a frontend IP and port to use all available backend IPs in a pool on the same port.
-        az network lb rule create -g MyResourceGroup --lb-name MyLb -n MyHAPortsRule --protocol All --frontend-port 0 --backend-port 0 --frontend-ip MyFrontendIp --backend-pools-name MyAddressPool
+        az network lb rule create -g MyResourceGroup --lb-name MyLb -n MyHAPortsRule --protocol All --frontend-port 0 --backend-port 0 --frontend-ip MyFrontendIp --backend-pool-name MyAddressPool
     """
 
     _aaz_info = {
