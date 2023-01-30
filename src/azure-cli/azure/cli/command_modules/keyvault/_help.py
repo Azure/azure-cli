@@ -776,9 +776,9 @@ examples:
 
 helps['keyvault security-domain restore-blob'] = """
 type: command
-short-summary: Enables to decrypt and encrypt security domain file as blob. Can be run in offline environment, before file is uploaded to HSM using security-domain upload.
+short-summary: Enable to decrypt and encrypt security domain file as blob. Can be run in offline environment, before file is uploaded to HSM using security-domain upload.
 examples:
-  - name: Security domain restore blob).
+  - name: Security domain restore blob.
     text: |
         az keyvault security-domain restore-blob --sd-file "{SD_TRANSFER_FILE}" --sd-exchange-key "{PEM_FILE_NAME}" --sd-wrapping-keys "{PEM_PRIVATE_KEY1_FILE_NAME}" "{PEM_PRIVATE_KEY2_FILE_NAME}" --sd-file-restore-blob "{SD_TRANSFER_FILE_RESTORE_BLOB}"
 
