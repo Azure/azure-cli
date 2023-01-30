@@ -298,7 +298,7 @@ short-summary: Manage resource policy attestations.
 
 helps['policy attestation create'] = """
 type: command
-short-summary: Creates a policy attestation.
+short-summary: Create a policy attestation.
 examples:
   - name: Create an attestation at resource group scope for a policy assignment
     text: >
