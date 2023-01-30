@@ -274,6 +274,7 @@ class LBRuleCreate(_LBRuleCreate):
             element_transformer=lambda _, id: {"id": id}
         )
 
+
 class LBRuleUpdate(_LBRuleUpdate):
 
     @classmethod
@@ -465,6 +466,7 @@ class CrossRegionLoadBalancerRuleShow(_LBRuleShow):
         az network cross-region-lb rule show -g MyResourceGroup --lb-name MyLb -n MyLbRule
     """
 
+
 @register_command("network cross-region-lb rule delete")
 class CrossRegionLoadBalancerRuleDelete(_LBRuleDelete):
     """Delete a load balancing rule.
@@ -481,6 +483,7 @@ class CrossRegionLoadBalancerRuleList(_LBRuleList):
     :example: List load balancing rules.
         az network cross-region-lb rule list -g MyResourceGroup --lb-name MyLb -o table
     """
+
 
 @register_command("network cross-region-lb rule create")
 class CrossRegionLoadBalancerRuleCreate(_LBRuleCreate):
@@ -514,7 +517,7 @@ class CrossRegionLoadBalancerRuleCreate(_LBRuleCreate):
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/backendAddressPools/{}"
             ),
             arg_group="Properties",
-            help = "ID or name of the backend address pools. If only one exists, omit to use as default."
+            help="ID or name of the backend address pools. If only one exists, omit to use as default."
         )
 
         args_schema.protocol._required = True
@@ -575,7 +578,7 @@ class CrossRegionLoadBalancerRuleUpdate(_LBRuleUpdate):
             ),
             arg_group="Properties",
             nullable=True,
-            help = "ID or name of the backend address pools. If only one exists, omit to use as default."
+            help="ID or name of the backend address pools. If only one exists, omit to use as default."
         )
 
         args_schema.protocol._nullable = False
