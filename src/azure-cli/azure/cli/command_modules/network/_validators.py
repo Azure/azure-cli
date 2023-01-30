@@ -571,19 +571,6 @@ def validate_subresource_list(cmd, namespace):
         namespace.target_resources = subresources
 
 
-def validate_target_listener(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.target_listener and not is_valid_resource_id(namespace.target_listener):
-        namespace.target_listener = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            name=namespace.application_gateway_name,
-            namespace='Microsoft.Network',
-            type='applicationGateways',
-            child_type_1='httpListeners',
-            child_name_1=namespace.target_listener)
-
-
 def validate_private_dns_zone(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     if namespace.private_dns_zone and not is_valid_resource_id(namespace.private_dns_zone):
@@ -658,38 +645,6 @@ def process_ag_listener_create_namespace(cmd, namespace):  # pylint: disable=unu
     if namespace.ssl_cert and not is_valid_resource_id(namespace.ssl_cert):
         namespace.ssl_cert = _generate_ag_subproperty_id(
             cmd.cli_ctx, namespace, 'sslCertificates', namespace.ssl_cert)
-
-
-def process_ag_http_settings_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
-    from msrestazure.tools import is_valid_resource_id
-    if namespace.probe and not is_valid_resource_id(namespace.probe):
-        namespace.probe = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'probes', namespace.probe)
-    if namespace.auth_certs:
-        def _validate_name_or_id(val):
-            return val if is_valid_resource_id(val) else _generate_ag_subproperty_id(
-                cmd.cli_ctx, namespace, 'authenticationCertificates', val)
-
-        namespace.auth_certs = [_validate_name_or_id(x) for x in namespace.auth_certs]
-    if namespace.root_certs:
-        def _validate_name_or_id(val):
-            return val if is_valid_resource_id(val) else _generate_ag_subproperty_id(
-                cmd.cli_ctx, namespace, 'trustedRootCertificates', val)
-
-        namespace.root_certs = [_validate_name_or_id(x) for x in namespace.root_certs]
-
-
-def process_ag_settings_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
-    from msrestazure.tools import is_valid_resource_id
-    if namespace.probe and not is_valid_resource_id(namespace.probe):
-        namespace.probe = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'probes', namespace.probe)
-    if namespace.root_certs:
-        def _validate_name_or_id(val):
-            return val if is_valid_resource_id(val) else _generate_ag_subproperty_id(
-                cmd.cli_ctx, namespace, 'trustedRootCertificates', val)
-
-        namespace.root_certs = [_validate_name_or_id(x) for x in namespace.root_certs]
 
 
 def process_ag_rule_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
@@ -829,45 +784,6 @@ def _validate_cert(namespace, param_name):
     attr = getattr(namespace, param_name)
     if attr and os.path.isfile(attr):
         setattr(namespace, param_name, read_base_64_file(attr))
-
-
-def process_vnet_gateway_create_namespace(cmd, namespace):
-    ns = namespace
-    get_default_location_from_resource_group(cmd, ns)
-    validate_tags(ns)
-
-    _validate_vpn_gateway_generation(ns)
-
-    get_virtual_network_validator()(cmd, ns)
-
-    get_public_ip_validator()(cmd, ns)
-    public_ip_count = len(ns.public_ip_address or [])
-    if public_ip_count > 2:
-        raise CLIError('Specify a single public IP to create an active-standby gateway or two '
-                       'public IPs to create an active-active gateway.')
-
-    validate_local_gateway(cmd, ns)
-
-    enable_bgp = any([ns.asn, ns.bgp_peering_address, ns.peer_weight])
-    if enable_bgp and not ns.asn:
-        raise ValueError(
-            'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP ]')
-
-    if cmd.supported_api_version(min_api='2020-11-01'):
-        _validate_cert(namespace, 'root_cert_data')
-
-
-def process_vnet_gateway_update_namespace(cmd, namespace):
-    ns = namespace
-    get_virtual_network_validator()(cmd, ns)
-    get_public_ip_validator()(cmd, ns)
-    validate_tags(ns)
-    if cmd.supported_api_version(min_api='2020-11-01'):
-        _validate_cert(namespace, 'root_cert_data')
-    public_ip_count = len(ns.public_ip_address or [])
-    if public_ip_count > 2:
-        raise CLIError('Specify a single public IP to create an active-standby gateway or two '
-                       'public IPs to create an active-active gateway.')
 
 
 def process_vpn_connection_create_namespace(cmd, namespace):

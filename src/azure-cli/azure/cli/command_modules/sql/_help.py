@@ -1023,6 +1023,35 @@ examples:
     text: az sql midb restore -s sourcesubscriptionid -g sourcegroup --mi sourceinstance -n sourcemanageddb --dest-name targetmidb --dest-mi targetmi --time "2018-05-20T05:34:22" --deleted-time "2018-05-20T05:34:22"
 """
 
+helps['sql midb recover'] = """
+type: command
+short-summary: Recover a managed database using geo-pair instance backup
+examples:
+  - name: Recover managed database using recoverable database id
+    text: az sql midb recover -g mygroup --mi myinstance -n mymanageddb -r '/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Sql/managedInstances/myinstance/recoverableDatabases/db1'
+"""
+
+helps['sql recoverable-midb'] = """
+type: group
+short-summary: Recoverable managed databases command group.
+"""
+
+helps['sql recoverable-midb show'] = """
+type: command
+short-summary: Get recoverable managed database
+examples:
+  - name: Get recoverable managed database
+    text: az sql recoverable-midb show -g mygroup --mi myinstance -n mymanageddb
+"""
+
+helps['sql recoverable-midb list'] = """
+type: command
+short-summary: Get all recoverable managed databases for given instance name
+examples:
+  - name: List all recoverable managed databases for given instance name
+    text: az sql recoverable-midb list -g mygroup --mi myinstance
+"""
+
 helps['sql midb show'] = """
 type: command
 short-summary: Get the details for a managed database.

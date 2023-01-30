@@ -19,8 +19,7 @@ from azure.cli.command_modules.network._validators import (
     dns_zone_name_type, validate_inbound_nat_rule_id_list,
     validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
     validate_address_pool_name_or_id, load_cert_file, validate_metadata,
-    validate_dns_record_type, validate_target_listener,
-    validate_private_ip_address,
+    validate_dns_record_type, validate_private_ip_address,
     get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
     get_network_watcher_from_vm, get_network_watcher_for_pcap_creation, get_network_watcher_from_location, validate_capture_size_and_limit,
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
@@ -47,7 +46,7 @@ from azure.cli.core.profiles import ResourceType
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
 def load_arguments(self, _):
 
-    (ApplicationGatewayProtocol, ApplicationGatewayRedirectType,
+    (ApplicationGatewayProtocol,
      ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySkuName, ApplicationGatewaySslProtocol, AuthenticationMethod,
      Direction, VpnAuthenticationType,
      FlowLogFormatType, HTTPMethod, IPAllocationMethod,
@@ -57,7 +56,7 @@ def load_arguments(self, _):
      ConnectionMonitorEndpointFilterType, ConnectionMonitorTestConfigurationProtocol,
      PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType, GatewayLoadBalancerTunnelProtocol,
      GatewayLoadBalancerTunnelInterfaceType, VpnNatRuleType, VpnNatRuleMode, LoadBalancerBackendAddressAdminState, PacketCaptureTargetType) = self.get_models(
-         'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
+         'ApplicationGatewayProtocol',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol', 'AuthenticationMethod',
          'Direction', 'VpnAuthenticationType',
          'FlowLogFormatType', 'HTTPMethod', 'IPAllocationMethod',
@@ -179,18 +178,14 @@ def load_arguments(self, _):
         c.argument('capacity', help='The number of instances to use with the application gateway.', type=int)
 
     ag_subresources = [
-        {'name': 'http-settings', 'display': 'backed HTTP settings', 'ref': 'backend_http_settings_collection'},
         {'name': 'http-listener', 'display': 'HTTP listener', 'ref': 'http_listeners'},
         {'name': 'rule', 'display': 'request routing rule', 'ref': 'request_routing_rules'},
-        {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
         {'name': 'url-path-map', 'display': 'URL path map', 'ref': 'url_path_maps'},
-        {'name': 'redirect-config', 'display': 'redirect configuration', 'ref': 'redirect_configurations'},
         {'name': 'private-link', 'display': 'private link', 'ref': 'private_link_configurations'}
     ]
     if self.supported_api_version(min_api='2018-12-01'):
         ag_subresources.append({'name': 'rewrite-rule set', 'display': 'rewrite rule set', 'ref': 'rewrite_rule_sets'})
     if self.supported_api_version(min_api='2021-08-01'):
-        ag_subresources.append({'name': 'settings', 'display': 'backed settings', 'ref': 'backend_settings_collection'})
         ag_subresources.append({'name': 'listener', 'display': 'listener', 'ref': 'listeners'})
         ag_subresources.append({'name': 'routing-rule', 'display': 'routing rule', 'ref': 'routing_rules'})
 
@@ -208,17 +203,8 @@ def load_arguments(self, _):
         with self.argument_context('network application-gateway {} list'.format(item['name'])) as c:
             c.argument('resource_name', options_list=['--gateway-name'], id_part=None)
 
-    for item in ['create', 'http-settings']:
-        with self.argument_context('network application-gateway {}'.format(item)) as c:
-            c.argument('connection_draining_timeout', min_api='2016-12-01', type=int, help='The time in seconds after a backend server is removed during which on open connection remains active. Range: 0 (disabled) to 3600', arg_group='Gateway' if item == 'create' else None)
-
-    for item in ['frontend-port', 'http-settings', 'settings']:
-        with self.argument_context('network application-gateway {}'.format(item)) as c:
-            c.argument('port', help='The port number.', type=int)
-
-    for item in ['http-settings', 'settings', 'probe']:
-        with self.argument_context('network application-gateway {}'.format(item)) as c:
-            c.argument('protocol', http_protocol_type, help='The settings protocol.')
+    with self.argument_context('network application-gateway create') as c:
+        c.argument('connection_draining_timeout', min_api='2016-12-01', type=int, help='The time in seconds after a backend server is removed during which on open connection remains active. Range: 0 (disabled) to 3600', arg_group='Gateway')
 
     for item in ['http-listener', 'listener']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
@@ -290,34 +276,6 @@ def load_arguments(self, _):
         with self.argument_context('network application-gateway {}'.format(scope)) as c:
             c.argument('application_gateway_name', app_gateway_name_type, id_part=None)
 
-    with self.argument_context('network application-gateway http-settings') as c:
-        c.argument('cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable cookie-based affinity.')
-        c.argument('timeout', help='Request timeout in seconds.')
-        c.argument('probe', help='Name or ID of the probe to associate with the HTTP settings.', completer=get_ag_subresource_completion_list('probes'))
-        c.argument('auth_certs', nargs='+', min_api='2016-09-01', help='Space-separated list of authentication certificates (names or IDs) to associate with the HTTP settings.')
-        c.argument('root_certs', nargs='+', min_api='2019-04-01', help='Space-separated list of trusted root certificates (names or IDs) to associate with the HTTP settings. --host-name or --host-name-from-backend-pool is required when this field is set.')
-
-    with self.argument_context('network application-gateway settings') as c:
-        c.argument('timeout', help='Request timeout in seconds.')
-        c.argument('probe', help='Name or ID of the probe to associate with the settings.', completer=get_ag_subresource_completion_list('probes'))
-        c.argument('root_certs', nargs='+', help='Space-separated list of trusted root certificates (names or IDs) to associate with the settings. --host-name or --host-name-from-backend-pool is required when this field is set.')
-        c.argument('host_name', help='Host header sent to the backend servers.')
-        c.argument('host_name_from_backend_pool', options_list=['--backend-pool-host-name'], help='Use host name of the backend server as the host header.', arg_type=get_three_state_flag())
-        c.argument('path', help='Path that will prefix all requests.')
-
-    with self.argument_context('network application-gateway probe') as c:
-        c.argument('host', help='The name of the host to send the probe.')
-        c.argument('path', required=False, help='The relative path of the probe. Valid paths start from "/"')
-        c.argument('interval', help='The time interval in seconds between consecutive probes.')
-        c.argument('threshold', help='The number of failed probes after which the back end server is marked down.')
-        c.argument('timeout', help='The probe timeout in seconds.')
-        c.argument('port', type=int, min_api='2019-04-01',
-                   help='Custom port which will be used for probing the backend servers. '
-                        'The valid value ranges from 1 to 65535. '
-                        'In case not set, port from http settings will be used. '
-                        'This property is valid for Standard_v2 and WAF_v2 only.')
-        c.argument('host_name_from_settings', min_api='2021-08-01', options_list=['--host-name-from-settings', '-s'], help='Use host header from settings. Pick hostname from settings is currently not supported, now only support false', arg_type=get_three_state_flag())
-
     for scope in ['rule', 'routing-rule']:
         with self.argument_context('network application-gateway {}'.format(scope)) as c:
             c.argument('address_pool', help='The name or ID of the backend address pool.',
@@ -387,13 +345,6 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway waf-config list-rule-sets') as c:
         c.argument('_type', options_list=['--type'])
 
-    with self.argument_context('network application-gateway redirect-config', min_api='2017-06-01') as c:
-        c.argument('redirect_type', options_list=['--type', '-t'], help='HTTP redirection type', arg_type=get_enum_type(ApplicationGatewayRedirectType))
-        c.argument('include_path', arg_type=get_three_state_flag(), help='Include path in the redirected url.')
-        c.argument('include_query_string', arg_type=get_three_state_flag(), help='Include query string in the redirected url.')
-        c.argument('target_listener', validator=validate_target_listener, help='Name or ID of the HTTP listener to redirect the request to.')
-        c.argument('target_url', help='URL to redirect the request to.')
-
     with self.argument_context('network application-gateway ssl-policy predefined', min_api='2017-06-01') as c:
         c.argument('predefined_policy_name', name_arg_type)
 
@@ -403,20 +354,6 @@ def load_arguments(self, _):
         c.argument('cipher_suites', nargs='*', help='SSL cipher suites to be enabled in the specified order to application gateway.')
         c.argument('min_protocol_version', help='Minimum version of SSL protocol to be supported on application gateway.')
         c.argument('disabled_ssl_protocols', nargs='+', help='Space-separated list of protocols to disable.')
-
-    with self.argument_context('network application-gateway http-settings', min_api='2017-06-01') as c:
-        c.argument('host_name', help='Host header sent to the backend servers.')
-        c.argument('host_name_from_backend_pool', help='Use host name of the backend server as the host header.', arg_type=get_three_state_flag())
-        c.argument('affinity_cookie_name', help='Name used for the affinity cookie.')
-        c.argument('enable_probe', help='Whether the probe is enabled.', arg_type=get_three_state_flag())
-        c.argument('path', help='Path that will prefix all HTTP requests.')
-
-    with self.argument_context('network application-gateway probe', min_api='2017-06-01') as c:
-        c.argument('host', default=None, required=False, help='The name of the host to send the probe.')
-        c.argument('host_name_from_http_settings', help='Use host header from HTTP settings.', arg_type=get_three_state_flag())
-        c.argument('min_servers', type=int, help='Minimum number of servers that are always marked healthy.')
-        c.argument('match_body', help='Body that must be contained in the health response.')
-        c.argument('match_status_codes', nargs='+', help='Space-separated list of allowed ranges of healthy status codes for the health response.')
 
     with self.argument_context('network application-gateway url-path-map', min_api='2017-06-01') as c:
         c.argument('default_redirect_config', help='The name or ID of the default redirect configuration.')
@@ -1509,6 +1446,7 @@ def load_arguments(self, _):
         c.argument('version', min_api='2016-09-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
         c.argument('protection_mode', options_list=['--ddos-protection-mode', '--protection-mode'],
                    min_api='2022-01-01', help='The DDoS protection mode of the public IP', arg_type=get_enum_type(['Enabled', 'Disabled', 'VirtualNetworkInherited']))
+        c.argument('ddos_protection_plan', help='Name or ID of a DDoS protection plan associated with the public IP. Can only be set if `--protection-mode` is Enabled.')
 
     for scope in ['public-ip', 'lb frontend-ip', 'cross-region-lb frontend-ip']:
         with self.argument_context('network {}'.format(scope), min_api='2018-07-01') as c:
