@@ -319,7 +319,7 @@ examples:
 
 helps['policy attestation delete'] = """
 type: command
-short-summary: Deletes an existing policy attestation.
+short-summary: Delete an existing policy attestation.
 examples:
   - name: Delete an attestation at resource group scope
     text: >
