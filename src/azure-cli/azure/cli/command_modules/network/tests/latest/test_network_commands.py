@@ -4273,7 +4273,7 @@ class NetworkExtendedNSGScenarioTest(ScenarioTest):
             'rule': 'rule1'
         })
         self.cmd('network nsg create --name {nsg} -g {rg}')
-        self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefixes * -n {rule} --source-port-ranges 700-900 1000-1100 --priority 1000', checks=[
+        self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} -g {rg} --source-address-prefixes * -n {rule} --source-port-ranges 700-900 1000-1100 --priority 1000', checks=[
             self.check('length(destinationAddressPrefixes)', 2),
             self.check('destinationAddressPrefix', None),
             self.check('length(sourceAddressPrefixes)', 0),
