@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class List(AAZCommand):
     """List dedicated host groups.
 
-    Lists dedicated host groups by subscription. If resource group is specified, lists dedicated host groups by resource group.
+    List dedicated host groups by subscription. If resource group is specified, lists dedicated host groups by resource group.
     """
 
     _aaz_info = {

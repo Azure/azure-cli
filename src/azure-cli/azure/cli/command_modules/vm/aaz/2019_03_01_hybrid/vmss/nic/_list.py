@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "vmss nic list",
 )
 class List(AAZCommand):
-    """Gets all network interfaces in a virtual machine scale set.
+    """Get all network interfaces in a virtual machine scale set.
     """
 
     _aaz_info = {
