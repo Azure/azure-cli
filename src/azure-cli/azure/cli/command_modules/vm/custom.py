@@ -10,7 +10,8 @@
 # Generation mode: Incremental
 # --------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-lines,no-else-return
+# pylint: disable=no-self-use, too-many-lines, no-else-return
+# pylint: disable=protected-access
 import json
 import os
 

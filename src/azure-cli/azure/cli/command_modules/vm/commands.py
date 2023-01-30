@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, cf_ni,
+from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set,
                                                           cf_vm_ext, cf_vm_ext_image,
                                                           cf_vm_image, cf_vm_image_term, cf_usage,
                                                           cf_vmss, cf_vmss_vm,
