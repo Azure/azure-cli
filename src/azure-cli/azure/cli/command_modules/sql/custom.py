@@ -17,6 +17,8 @@ from azure.cli.core.util import (
 from azure.mgmt.sql.models import (
     AdministratorName,
     AdministratorType,
+    AdvancedThreatProtectionName,
+    AdvancedThreatProtectionState,
     AuthenticationName,
     BlobAuditingPolicyState,
     CapabilityGroup,
@@ -33,8 +35,10 @@ from azure.mgmt.sql.models import (
     InstanceFailoverGroup,
     InstanceFailoverGroupReadOnlyEndpoint,
     InstanceFailoverGroupReadWriteEndpoint,
+    IPv6FirewallRule,
     LedgerDigestUploadsName,
     LongTermRetentionPolicyName,
+    ManagedDatabaseCreateMode,
     ManagedInstanceAzureADOnlyAuthentication,
     ManagedInstanceEncryptionProtector,
     ManagedInstanceExternalAdministrator,
@@ -644,6 +648,12 @@ class ComputeModelType(str, Enum):
 
     provisioned = "Provisioned"
     serverless = "Serverless"
+
+
+class AlwaysEncryptedEnclaveType(str, Enum):
+
+    default = "Default"
+    vbs = "VBS"
 
 
 class DatabaseEdition(str, Enum):
@@ -1426,7 +1436,7 @@ def db_delete_replica_link(
         # No link exists, nothing to be done
         return
 
-    return client.delete(
+    return client.begin_delete(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -1539,7 +1549,8 @@ def db_update(
         auto_pause_delay=None,
         compute_model=None,
         requested_backup_storage_redundancy=None,
-        maintenance_configuration_id=None):
+        maintenance_configuration_id=None,
+        preferred_enclave_type=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
@@ -1619,6 +1630,9 @@ def db_update(
 
     if high_availability_replica_count is not None:
         instance.high_availability_replica_count = high_availability_replica_count
+
+    if preferred_enclave_type is not None:
+        instance.preferred_enclave_type = preferred_enclave_type
 
     # Set storage_account_type even if storage_acount_type is None
     # Otherwise, empty value defaults to current storage_account_type
@@ -2941,6 +2955,8 @@ def restore_long_term_retention_backup(
         target_server_name,
         target_resource_group_name,
         requested_backup_storage_redundancy,
+        high_availability_replica_count,
+        zone_redundant,
         **kwargs):
     '''
     Restores an existing database (i.e. create with 'RestoreLongTermRetentionBackup' create mode.)
@@ -2962,6 +2978,68 @@ def restore_long_term_retention_backup(
     kwargs['create_mode'] = CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
     kwargs['requested_backup_storage_redundancy'] = requested_backup_storage_redundancy
+    kwargs['high_availability_replica_count'] = high_availability_replica_count
+    kwargs['zone_redundant'] = zone_redundant
+
+    # Check backup storage redundancy configurations
+    if _should_show_backup_storage_redundancy_warnings(kwargs['location']):
+        if not kwargs['requested_backup_storage_redundancy']:
+            _backup_storage_redundancy_take_source_warning()
+        if kwargs['requested_backup_storage_redundancy'] == 'Geo':
+            _backup_storage_redundancy_specify_geo_warning()
+
+    return client.begin_create_or_update(
+        database_name=target_database_name,
+        server_name=target_server_name,
+        resource_group_name=target_resource_group_name,
+        parameters=kwargs)
+
+
+def list_geo_backups(
+        client,
+        server_name,
+        resource_group_name):
+    '''
+    Gets the geo redundant backups for a server
+    '''
+    return client.list_by_server(
+        resource_group_name=resource_group_name,
+        server_name=server_name)
+
+
+def restore_geo_backup(
+        cmd,
+        client,
+        geo_backup_id,
+        target_database_name,
+        target_server_name,
+        target_resource_group_name,
+        requested_backup_storage_redundancy,
+        high_availability_replica_count,
+        zone_redundant,
+        **kwargs):
+    '''
+    Restores an existing database (i.e. create with 'RestoreGeoBackup' create mode.)
+    '''
+
+    if not target_resource_group_name or not target_server_name or not target_database_name:
+        raise CLIError('Please specify target resource(s). '
+                       'Target resource group, target server, and target database '
+                       'are all required to restore Geo-redundant backup.')
+
+    if not geo_backup_id:
+        raise CLIError('Please specify a geo redundant backup.')
+
+    kwargs['location'] = _get_server_location(
+        cmd.cli_ctx,
+        server_name=target_server_name,
+        resource_group_name=target_resource_group_name)
+
+    kwargs['create_mode'] = CreateMode.RECOVERY
+    kwargs['recoverableDatabaseId'] = geo_backup_id
+    kwargs['requested_backup_storage_redundancy'] = requested_backup_storage_redundancy
+    kwargs['high_availability_replica_count'] = high_availability_replica_count
+    kwargs['zone_redundant'] = zone_redundant
 
     # Check backup storage redundancy configurations
     if _should_show_backup_storage_redundancy_warnings(kwargs['location']):
@@ -3051,6 +3129,53 @@ def db_threat_detection_policy_update_setter(
         server_name=server_name,
         database_name=database_name,
         security_alert_policy_name=SecurityAlertPolicyName.DEFAULT,
+        parameters=parameters)
+
+
+def db_advanced_threat_protection_setting_get(
+        client,
+        resource_group_name,
+        server_name,
+        database_name):
+    '''
+    Gets an advanced threat protection setting.
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name,
+        advanced_threat_protection_name=AdvancedThreatProtectionName.DEFAULT)
+
+
+def db_advanced_threat_protection_setting_update(
+        cmd,
+        instance,
+        state=None):
+    # pylint: disable=unused-argument
+    '''
+    Updates an advanced threat protection setting. Custom update function to apply parameters to instance.
+    '''
+
+    # Apply state
+    if state:
+        instance.state = AdvancedThreatProtectionState[state.lower()]
+
+    return instance
+
+
+def db_advanced_threat_protection_setting_update_setter(
+        client,
+        resource_group_name,
+        server_name,
+        database_name,
+        parameters):
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name,
+        advanced_threat_protection_name=AdvancedThreatProtectionName.DEFAULT,
         parameters=parameters)
 
 
@@ -3875,6 +4000,55 @@ def firewall_rule_create(
 
 
 #########################################################
+#            sql server ipv6-firewall-rule              #
+#########################################################
+
+
+def ipv6_firewall_rule_update(
+        client,
+        firewall_rule_name,
+        server_name,
+        resource_group_name,
+        start_ipv6_address=None,
+        end_ipv6_address=None):
+    '''
+    Updates an ipv6 firewall rule.
+    '''
+
+    # Get existing instance
+    instance = client.get(
+        firewall_rule_name=firewall_rule_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name)
+
+    # Send update
+    return client.create_or_update(
+        firewall_rule_name=firewall_rule_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        parameters=IPv6FirewallRule(start_i_pv6_address=start_ipv6_address or instance.start_ipv6_address,
+                                    end_i_pv6_address=end_ipv6_address or instance.end_ipv6_address))
+
+
+def ipv6_firewall_rule_create(
+        client,
+        firewall_rule_name,
+        server_name,
+        resource_group_name,
+        start_ipv6_address=None,
+        end_ipv6_address=None):
+    '''
+    Creates an ipv6 firewall rule.
+    '''
+    return client.create_or_update(
+        firewall_rule_name=firewall_rule_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        parameters=IPv6FirewallRule(start_i_pv6_address=start_ipv6_address,
+                                    end_i_pv6_address=end_ipv6_address))
+
+
+#########################################################
 #           sql server outbound-firewall-rule           #
 #########################################################
 
@@ -4227,6 +4401,54 @@ def server_trust_group_list(
     return client.list_by_location(resource_group_name=resource_group_name, location_name=location)
 
 
+################################################################
+#        sql server advanced-threat-protection-setting         #
+################################################################
+
+
+def server_advanced_threat_protection_setting_get(
+        client,
+        resource_group_name,
+        server_name):
+    '''
+    Gets an advanced threat protection setting.
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        advanced_threat_protection_name=AdvancedThreatProtectionName.DEFAULT)
+
+
+def server_advanced_threat_protection_setting_update(
+        cmd,
+        instance,
+        state=None):
+    # pylint: disable=unused-argument
+    '''
+    Updates an advanced threat protection setting. Custom update function to apply parameters to instance.
+    '''
+
+    # Apply state
+    if state:
+        instance.state = AdvancedThreatProtectionState[state.lower()]
+
+    return instance
+
+
+def server_advanced_threat_protection_setting_update_setter(
+        client,
+        resource_group_name,
+        server_name,
+        parameters):
+
+    return client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        advanced_threat_protection_name=AdvancedThreatProtectionName.DEFAULT,
+        parameters=parameters)
+
+
 ###############################################
 #                sql managed instance         #
 ###############################################
@@ -4477,6 +4699,54 @@ def managed_instance_update(
 
 
 #####
+#           sql managed instance advanced-threat-protection-setting
+#####
+
+
+def managed_instance_advanced_threat_protection_setting_get(
+        client,
+        resource_group_name,
+        managed_instance_name):
+    '''
+    Gets an advanced threat protection setting.
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        advanced_threat_protection_name=AdvancedThreatProtectionName.DEFAULT)
+
+
+def managed_instance_advanced_threat_protection_setting_update(
+        cmd,
+        instance,
+        state=None):
+    # pylint: disable=unused-argument
+    '''
+    Updates an advanced threat protection setting. Custom update function to apply parameters to instance.
+    '''
+
+    # Apply state
+    if state:
+        instance.state = AdvancedThreatProtectionState[state.lower()]
+
+    return instance
+
+
+def managed_instance_advanced_threat_protection_setting_update_setter(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        parameters):
+
+    return client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        advanced_threat_protection_name=AdvancedThreatProtectionName.DEFAULT,
+        parameters=parameters)
+
+
+#####
 #           sql managed instance key
 #####
 
@@ -4714,6 +4984,30 @@ def managed_db_update(
     return instance
 
 
+def managed_db_recover(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        recoverable_database_id,
+        **kwargs):
+
+    kwargs['location'] = _get_managed_instance_location(
+        cmd.cli_ctx,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name)
+
+    kwargs['create_mode'] = ManagedDatabaseCreateMode.RECOVERY
+    kwargs['recoverable_database_id'] = recoverable_database_id
+
+    return client.begin_create_or_update(
+        database_name=database_name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
+
 def managed_db_restore(
         cmd,
         client,
@@ -4742,7 +5036,7 @@ def managed_db_restore(
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name)
 
-    kwargs['create_mode'] = CreateMode.POINT_IN_TIME_RESTORE
+    kwargs['create_mode'] = ManagedDatabaseCreateMode.POINT_IN_TIME_RESTORE
 
     if deleted_time:
         kwargs['restorable_dropped_database_id'] = _get_managed_dropped_db_resource_id(
@@ -4763,6 +5057,53 @@ def managed_db_restore(
         managed_instance_name=target_managed_instance_name,
         resource_group_name=target_resource_group_name,
         parameters=kwargs)
+
+
+def midb_advanced_threat_protection_setting_get(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name):
+    '''
+    Gets an advanced threat protection setting.
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        database_name=database_name,
+        advanced_threat_protection_name=AdvancedThreatProtectionName.DEFAULT)
+
+
+def midb_advanced_threat_protection_setting_update(
+        cmd,
+        instance,
+        state=None):
+    # pylint: disable=unused-argument
+    '''
+    Updates an advanced threat protection setting. Custom update function to apply parameters to instance.
+    '''
+
+    # Apply state
+    if state:
+        instance.state = AdvancedThreatProtectionState[state.lower()]
+
+    return instance
+
+
+def midb_advanced_threat_protection_setting_update_setter(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        parameters):
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        database_name=database_name,
+        advanced_threat_protection_name=AdvancedThreatProtectionName.DEFAULT,
+        parameters=parameters)
 
 
 def update_short_term_retention_mi(

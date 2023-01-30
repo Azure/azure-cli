@@ -2591,4 +2591,10 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
         return polling_ret
 
     _save_to_local_file(security_domain_file, ret)
+
+
+def check_name_availability(cmd, client, name, resource_type='hsm'):
+    CheckNameAvailabilityParameters = cmd.get_models('CheckMhsmNameAvailabilityParameters')
+    check_name = CheckNameAvailabilityParameters(name=name)
+    return client.check_mhsm_name_availability(check_name)
 # endregion

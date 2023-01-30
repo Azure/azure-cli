@@ -11,7 +11,8 @@ from ._resource_config import (
     SOURCE_RESOURCES_PARAMS,
     TARGET_RESOURCES,
     TARGET_RESOURCES_PARAMS,
-    SUPPORTED_AUTH_TYPE
+    SUPPORTED_AUTH_TYPE,
+    LOCAL_CONNECTION_PARAMS
 )
 
 from ._utils import should_load_source
@@ -19,7 +20,10 @@ from ._addon_factory import AddonFactory
 
 
 def get_source_resource_params(resource):
-    params = SOURCE_RESOURCES_PARAMS.get(resource).values()
+    if resource == RESOURCE.Local:
+        params = LOCAL_CONNECTION_PARAMS
+    else:
+        params = SOURCE_RESOURCES_PARAMS.get(resource).values()
 
     param_str = ''
     for param in params:
@@ -48,7 +52,8 @@ def get_auth_info_params(auth_type):
         AUTH_TYPE.SecretAuto: '--secret',
         AUTH_TYPE.SystemIdentity: '--system-identity',
         AUTH_TYPE.ServicePrincipalSecret: '--service-principal client-id=XX object-id=XX secret=XX',
-        AUTH_TYPE.UserIdentity: '--user-identity client-id=XX subs-id=XX'
+        AUTH_TYPE.UserIdentity: '--user-identity client-id=XX subs-id=XX',
+        AUTH_TYPE.UserAccount: '--user-account',
     }
 
     return auth_params_map.get(auth_type)
@@ -397,3 +402,296 @@ for source in SOURCE_RESOURCES:
                server_params=server_params,
                registry_params=registry_params,
                source_display_name=source_display_name)
+
+
+source = RESOURCE.Local
+connection_id = (
+    '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/'
+    'providers/Microsoft.ServiceLinker/locations/{location}/connectors/{connectorName}')
+source_display_name = 'Service Connector'
+helps['connection'] = """
+    type: group
+    short-summary: Commands to manage {} local connections which allow local environment to connect Azure Resource. If you want to manage connection for compute service, please run 'az webapp/containerapp/spring connection'
+""".format(source_display_name)
+
+helps['connection list-support-types'] = """
+    type: command
+    short-summary: List client types and auth types supported by local connections.
+    examples:
+      - name: List all supported target resource types and auth types
+        text: |-
+              az connection list-support-types -o table
+      - name: List supported auth types for a specific target resource type
+        text: |-
+              az connection list-support-types --target-type storage-blob -o table
+"""
+
+helps['connection list'] = """
+  type: command
+  short-summary: List local connections of {source_display_name}.
+  examples:
+    - name: List connections by resource group
+      text: |-
+              az connection list -g resource_group
+    - name: List connections by source resource group and location
+      text: |-
+              az connection list -g resource_group --location eastus
+""".format(
+    source_display_name=source_display_name)
+
+helps['connection delete'] = """
+  type: command
+  short-summary: Delete a {source_display_name} local connection.
+  examples:
+    - name: Delete a local connection interactively
+      text: |-
+              az connection delete
+    - name: Delete a local connection by connection name
+      text: |-
+              az connection delete -g resourceGroup --connection MyConnection
+    - name: Delete a local connection by connection id
+      text: |-
+              az connection delete --id {connection_id}
+""".format(
+    connection_id=connection_id,
+    source_display_name=source_display_name)
+
+helps['connection generate-configuration'] = """
+  type: command
+  short-summary: Generate configurations of a {source_display_name} local connection. The result should be put to application configuration file or set as environment variables.
+  examples:
+    - name: Generate a connection's local configurations by connection name
+      text: |-
+              az connection generate-configuration -g resource_group --connection MyConnection
+    - name: Generate a connection's local configurations by connection id
+      text: |-
+              az connection generate-configuration --id {connection_id}
+""".format(
+    connection_id=connection_id,
+    source_display_name=source_display_name)
+
+helps['connection validate'] = """
+  type: command
+  short-summary: Validate a {source_display_name} local connection.
+  examples:
+    - name: Validate a connection interactively
+      text: |-
+              az connection validate
+    - name: Validate a connection by connection name
+      text: |-
+              az connection validate -g resourceGroup --connection MyConnection
+    - name: Validate a connection by connection id
+      text: |-
+              az connection validate --id {connection_id}
+""".format(
+    connection_id=connection_id,
+    source_display_name=source_display_name)
+
+helps['connection wait'] = """
+  type: command
+  short-summary: Place the CLI in a waiting state until a condition of the connection is met.
+  examples:
+      - name: Wait until the connection is successfully created.
+        text: |-
+                az connection wait --id {connection_id} --created
+""".format(connection_id=connection_id)
+
+helps['connection show'] = """
+  type: command
+  short-summary: Get the details of a {source_display_name} local connection.
+  examples:
+      - name: Get a connection interactively
+        text: |-
+                az connection show
+      - name: Get a connection by connection name
+        text: |-
+                az connection show -g resourceGroup --connection MyConnection
+      - name: Get a connection by connection id
+        text: |-
+                az connection show --id {connection_id}
+""".format(
+    connection_id=connection_id,
+    source_display_name=source_display_name)
+
+helps['connection create'] = """
+  type: group
+  short-summary: Create a connection from local to a target resource
+"""
+
+helps['connection update'] = """
+  type: group
+  short-summary: Update a {source_display_name} local connection
+""".format(source_display_name=source_display_name)
+
+helps['connection preview-configuration'] = """
+  type: group
+  short-summary: Preview the expected configurations of local connection.
+"""
+
+
+# use SUPPORTED_AUTH_TYPE to decide target resource, as some
+# target resources are not avialable for certain source resource
+supported_target_resources = list(SUPPORTED_AUTH_TYPE.get(source).keys())
+supported_target_resources.remove(RESOURCE.ConfluentKafka)
+for target in supported_target_resources:
+    target_id = TARGET_RESOURCES.get(target)
+
+    # target resource params
+    target_params = get_target_resource_params(target)
+
+    # auth info params
+    auth_types = SUPPORTED_AUTH_TYPE.get(source).get(target)
+    auth_params = get_auth_info_params(auth_types[0])
+
+    # auth info params in help message
+    secret_param = '''
+        - name: --secret
+          short-summary: The secret auth info
+          long-summary: |
+            Usage: --secret name=XX secret=XX
+                    --secret name=XX secret-uri=XX
+                    --secret name=XX secret-name=XX
+
+            name    : Required. Username or account name for secret auth.
+            secret  : Required. Password or account key for secret auth.
+    ''' if AUTH_TYPE.Secret in auth_types else ''
+    secret_auto_param = '''
+        - name: --secret
+          short-summary: The secret auth info
+          long-summary: |
+            Usage: --secret
+
+    ''' if AUTH_TYPE.SecretAuto in auth_types else ''
+    user_account_param = ''
+    if AUTH_TYPE.UserAccount in auth_types:
+        if target in {RESOURCE.MysqlFlexible}:
+            user_account_param = '''
+        - name: --user-account
+          short-summary: The user account auth info
+          long-summary: |
+            Usage: --user-account mysql-identity-id=xx object-id=XX
+
+            object-id              : Optional. Object id of current login user. It will be set automatically if not provided.
+            mysql-identity-id      : Optional. ID of identity used for MySQL flexible server AAD Authentication. Ignore it if you are the server AAD administrator.
+        '''
+        else:
+            user_account_param = '''
+        - name: --user-account
+          short-summary: The user account auth info
+          long-summary: |
+            Usage: --user-account object-id=XX
+
+            object-id              : Optional. Object id of current login user. It will be set automatically if not provided.
+        '''
+    service_principal_param = '''
+        - name: --service-principal
+          short-summary: The service principal auth info
+          long-summary: |
+            Usage: --service-principal client-id=XX secret=XX
+
+            client-id      : Required. Client id of the service principal.
+            object-id      : Optional. Object id of the service principal (Enterprise Application).
+            secret         : Required. Secret of the service principal.
+    ''' if AUTH_TYPE.ServicePrincipalSecret in auth_types else ''
+
+    helps['connection create {target}'.format(target=target.value)] = """
+      type: command
+      short-summary: Create a {source_display_name} local connection to {target}.
+      parameters:
+        {secret_param}
+        {secret_auto_param}
+        {user_account_param}
+        {service_principal_param}
+      examples:
+        - name: Create a connection from local to {target} interactively
+          text: |-
+                  az connection create {target} -g resourceGroup
+        - name: Create a connection from local to {target} with resource name
+          text: |-
+                  az connection create {target} -g resourceGroup {target_params} {auth_params}
+        - name: Create a connection from local to {target} with resource id
+          text: |-
+                  az connection create {target} -g resourceGroup --target-id {target_id} {auth_params}
+    """.format(
+        target=target.value,
+        target_id=target_id,
+        secret_param=secret_param,
+        secret_auto_param=secret_auto_param,
+        user_account_param=user_account_param,
+        service_principal_param=service_principal_param,
+        target_params=target_params,
+        auth_params=auth_params,
+        source_display_name=source_display_name)
+
+    helps['connection update {target}'.format(target=target.value)] = """
+      type: command
+      short-summary: Update a local to {target} connection.
+      parameters:
+        {secret_param}
+        {secret_auto_param}
+        {user_account_param}
+        {service_principal_param}
+      examples:
+        - name: Update the client type of a connection with resource name
+          text: |-
+                  az connection update {target} -g resourceGroup --connection MyConnection --client-type dotnet
+        - name: Update the client type of a connection with resource id
+          text: |-
+                  az connection update {target} --id {connection_id} --client-type dotnet
+    """.format(
+        target=target.value,
+        secret_param=secret_param,
+        secret_auto_param=secret_auto_param,
+        user_account_param=user_account_param,
+        service_principal_param=service_principal_param,
+        connection_id=connection_id)
+
+    helps['connection preview-configuration {target}'.format(target=target.value)] = """
+      type: command
+      short-summary: Preview the expected configurations of local connection to {target}.
+    """.format(
+        target=target.value)
+
+
+# special target resource, independent implementation
+target = RESOURCE.ConfluentKafka
+server_params = ('--bootstrap-server xxx.eastus.azure.confluent.cloud:9092 '
+                 '--kafka-key Name --kafka-secret Secret')
+registry_params = ('--schema-registry https://xxx.eastus.azure.confluent.cloud '
+                   '--schema-key Name --schema-secret Secret')
+
+helps['connection create {target}'.format(target=target.value)] = """
+  type: command
+  short-summary: Create a local connection to {target}.
+  examples:
+    - name: Create a connection form local to {target}
+      text: |-
+              az connection create {target} -g resourceGroup --connection myConnection {server_params} {registry_params}
+""".format(target=target.value,
+           server_params=server_params,
+           registry_params=registry_params)
+
+helps['connection update {target}'.format(target=target.value)] = """
+  type: command
+  short-summary: Update a local connection to {target}.
+  examples:
+    - name: Update the client-type of a bootstrap server connection
+      text: |-
+              az connection update {target} -g resourceGroup --connection MyConnection --client python
+    - name: Update the auth configurations of a bootstrap server connection
+      text: |-
+              az connection update {target} -g resourceGroup --connection MyConnection {server_params}
+    - name: Update the client-type of a schema registry connection
+      text: |-
+              az connection update {target} -g resourceGroup --connection MyConnection_schema --client python
+    - name: Update the auth configurations of a schema registry connection
+      text: |-
+              az connection update {target} -g resourceGroup --connection MyConnection_schema {registry_params}
+""".format(target=target.value,
+           server_params=server_params,
+           registry_params=registry_params,
+           )
+helps['connection preview-configuration {target}'.format(target=target.value)] = """
+      type: command
+      short-summary: Preview the expected configurations of local connection to {target}.
+    """.format(target=target.value)

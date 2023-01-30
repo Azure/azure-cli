@@ -50,6 +50,7 @@ from azure.cli.core.commands.validators import (
 from knack.arguments import CLIArgumentType, ignore_type
 
 from .custom import (
+    AlwaysEncryptedEnclaveType,
     ClientAuthenticationType,
     ClientType,
     ComputeModelType,
@@ -211,6 +212,11 @@ ledger_on_param_type = CLIArgumentType(
          'Note: the value of this property cannot be changed after the database has been created. ',
     arg_type=get_three_state_flag("Enabled", "Disabled", False, False))
 
+preferred_enclave_param_type = CLIArgumentType(
+    options_list=['--preferred-enclave-type'],
+    help='Create a database configured with Default or VBS preferred enclave type. ',
+    arg_type=get_enum_type(AlwaysEncryptedEnclaveType))
+
 managed_instance_param_type = CLIArgumentType(
     options_list=['--managed-instance', '--mi'],
     help='Name of the Azure SQL managed instance.')
@@ -238,7 +244,7 @@ storage_param_type = CLIArgumentType(
 backup_storage_redundancy_param_type = CLIArgumentType(
     options_list=['--backup-storage-redundancy', '--bsr'],
     type=get_internal_backup_storage_redundancy,
-    help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo.',
+    help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo, GeoZone.',
     validator=validate_backup_storage_redundancy)
 
 backup_storage_redundancy_param_type_mi = CLIArgumentType(
@@ -400,6 +406,9 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('zone_redundant',
                      arg_type=zone_redundant_param_type)
 
+    arg_ctx.argument('preferred_enclave_type',
+                     arg_type=preferred_enclave_param_type)
+
 
 def _configure_db_dw_create_params(
         arg_ctx,
@@ -493,6 +502,7 @@ def _configure_db_dw_create_params(
             'requested_backup_storage_redundancy',
             'maintenance_configuration_id',
             'is_ledger_on',
+            'preferred_enclave_type',
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -524,6 +534,9 @@ def _configure_db_dw_create_params(
 
     arg_ctx.argument('is_ledger_on',
                      arg_type=ledger_on_param_type)
+
+    arg_ctx.argument('preferred_enclave_type',
+                     arg_type=preferred_enclave_param_type)
 
     # *** Step 3: Ignore params that are not applicable (based on engine & create mode) ***
 
@@ -557,6 +570,9 @@ def _configure_db_dw_create_params(
 
         # License types do not yet exist for DataWarehouse
         arg_ctx.ignore('license_type')
+
+        # Preferred enclave types do not yet exist for DataWarehouse
+        arg_ctx.ignore('preferred_enclave_type')
 
         # Family is not applicable to DataWarehouse
         arg_ctx.ignore('family')
@@ -640,7 +656,7 @@ def load_arguments(self, _):
 
         c.argument('dest_resource_group_name',
                    options_list=['--dest-resource-group'],
-                   help='Name of the resouce group to create the copy in.'
+                   help='Name of the resource group to create the copy in.'
                    ' If unspecified, defaults to the origin resource group.')
 
         c.argument('dest_server_name',
@@ -1109,6 +1125,78 @@ def load_arguments(self, _):
         c.argument('requested_backup_storage_redundancy',
                    required=False,
                    arg_type=backup_storage_redundancy_param_type)
+
+        c.argument('high_availability_replica_count',
+                   required=False,
+                   arg_type=read_replicas_param_type)
+
+        c.argument('zone_redundant',
+                   required=False,
+                   arg_type=zone_redundant_param_type)
+
+    ###############################################
+    #              sql db geo-backup              #
+    ###############################################
+    with self.argument_context('sql db geo-backup show') as c:
+        c.argument('database_name',
+                   options_list=['--database-name', '--database', '-d'],
+                   required=True,
+                   help='retrieves a requested geo-redundant backup under this database.')
+
+        c.argument('server_name',
+                   options_list=['--server-name', '--server', '-s'],
+                   required=True,
+                   help='Retrieves a requested geo-redundant backup under this server.')
+
+        c.argument('resource_group_name',
+                   options_list=['--resource-group', '-g'],
+                   required=True,
+                   help='Retrieves a requested geo-redundant backup under this resource group.')
+
+    with self.argument_context('sql db geo-backup list') as c:
+        c.argument('server_name',
+                   options_list=['--server-name', '--server', '-s'],
+                   required=True,
+                   help='Retrieves all requested geo-redundant backups under this server.')
+
+        c.argument('resource_group_name',
+                   options_list=['--resource-group', '-g'],
+                   required=True,
+                   help='Retrieves all requested geo-redundant backups under this resource group.')
+
+    with self.argument_context('sql db geo-backup restore') as c:
+        c.argument('target_database_name',
+                   options_list=['--dest-database'],
+                   required=True,
+                   help='Name of the database that will be created as the restore destination.')
+
+        c.argument('target_server_name',
+                   options_list=['--dest-server'],
+                   required=True,
+                   help='Name of the server to restore database to.')
+
+        c.argument('target_resource_group_name',
+                   options_list=['--resource-group'],
+                   required=True,
+                   help='Name of the target resource group of the server to restore database to.')
+
+        c.argument('geo_backup_id',
+                   options_list=['--geo-backup-id'],
+                   required=True,
+                   help='The resource id of the geo-redundant backup to be restored. '
+                   'Use \'az sql db geo-backup list\' or \'az sql db geo-backup show\' for backup id.')
+
+        c.argument('requested_backup_storage_redundancy',
+                   required=False,
+                   arg_type=backup_storage_redundancy_param_type)
+
+        c.argument('high_availability_replica_count',
+                   required=False,
+                   arg_type=read_replicas_param_type)
+
+        c.argument('zone_redundant',
+                   required=False,
+                   arg_type=zone_redundant_param_type)
 
     ###############################################
     #                sql db str                   #
@@ -2209,6 +2297,25 @@ def load_arguments(self, _):
                    ' new database. Must be greater than or equal to the source database\'s'
                    ' earliestRestoreDate value. ' + time_format_help)
 
+    with self.argument_context('sql midb recover') as c:
+        c.argument(
+            'recoverable_database_id',
+            options_list=['--recoverable-database-id', '-r'],
+            arg_group='Recover',
+            help='The id of recoverable database from geo-replicated instance')
+
+    with self.argument_context('sql recoverable-midb') as c:
+        c.argument(
+            'managed_instance_name',
+            options_list=['--mi', '--instance-name'])
+
+    with self.argument_context('sql recoverable-midb show') as c:
+        c.argument(
+            'recoverable_database_name',
+            options_list=['--database-name', '-n'],
+            required=True,
+            help='The id of recoverable database from geo-replicated instance')
+
     with self.argument_context('sql midb short-term-retention-policy set') as c:
         create_args_for_complex_type(
             c, 'parameters', ManagedDatabase, [
@@ -2458,3 +2565,27 @@ def load_arguments(self, _):
 
     with self.argument_context('sql db classification recommendation list') as c:
         c.ignore('skip_token')
+
+###################################################
+#           sql server ipv6-firewall-rule
+###################################################
+    with self.argument_context('sql server ipv6-firewall-rule') as c:
+        # Help text needs to be specified because 'sql server ipv6-firewall-rule update' is a custom
+        # command.
+        c.argument('server_name',
+                   options_list=['--server', '-s'],
+                   arg_type=server_param_type)
+
+        c.argument('firewall_rule_name',
+                   options_list=['--name', '-n'],
+                   help='The name of the IPv6 firewall rule.',
+                   # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
+                   id_part='child_name_1')
+
+        c.argument('start_ipv6_address',
+                   options_list=['--start-ipv6-address'],
+                   help='The start IPv6 address of the firewall rule. Must be IPv6 format.')
+
+        c.argument('end_ipv6_address',
+                   options_list=['--end-ipv6-address'],
+                   help='The end IPv6 address of the firewall rule. Must be IPv6 format.')
