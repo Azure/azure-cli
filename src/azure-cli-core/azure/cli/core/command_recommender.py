@@ -345,7 +345,6 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
         """
 
         from azure.cli.core.cloud import CLOUDS_FORBIDDING_ALADDIN_REQUEST
-        from azure.cli.core.util import is_autocomplete
 
         # CLI is not started well
         if not self.cli_ctx or not self.cli_ctx.cloud:
@@ -359,7 +358,7 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
         if self.cli_ctx.__class__.__name__ == 'DummyCli':
             return True
 
-        if is_autocomplete():
+        if self.cli_ctx.data['completer_active']:
             return True
 
         return False
