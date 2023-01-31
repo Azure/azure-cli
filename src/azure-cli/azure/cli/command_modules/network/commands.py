@@ -169,12 +169,6 @@ def load_command_table(self, _):
         min_api='2019-08-01'
     )
 
-    network_load_balancers_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
-        client_factory=cf_load_balancers,
-        min_api='2020-08-01'
-    )
-
     network_nic_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.network.custom#{}',
         client_factory=cf_network_interfaces
