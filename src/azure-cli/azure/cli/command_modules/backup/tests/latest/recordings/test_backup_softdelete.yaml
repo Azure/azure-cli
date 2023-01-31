@@ -1452,10 +1452,10 @@ interactions:
       ParameterSetName:
       - -g -v --vm -p
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/DefaultPolicy?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/DefaultPolicy?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/DefaultPolicy","name":"DefaultPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2023-01-31T22:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2023-01-31T22:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"instantRpRetentionRangeInDays":2,"timeZone":"UTC","protectedItemsCount":0}}'
@@ -1501,10 +1501,10 @@ interactions:
       ParameterSetName:
       - -g -v --vm -p
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectableItems?api-version=2022-06-01-preview&%24filter=backupManagementType+eq+%27AzureIaasVM%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectableItems?api-version=2023-01-01&%24filter=backupManagementType+eq+%27AzureIaasVM%27
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;akkanasecmk;akkanasedessanity/protectableItems/vm;iaasvmcontainerv2;akkanasecmk;akkanasedessanity","name":"iaasvmcontainerv2;akkanasecmk;akkanasedessanity","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akkanaseCMK/providers/Microsoft.Compute/virtualMachines/akkanasedessanity","virtualMachineVersion":"Compute","resourceGroup":"akkanaseCMK","backupManagementType":"AzureIaasVM","protectableItemType":"Microsoft.Compute/virtualMachines","friendlyName":"akkanasedessanity","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;akkanasecmk;test/protectableItems/vm;iaasvmcontainerv2;akkanasecmk;test","name":"iaasvmcontainerv2;akkanasecmk;test","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akkanaseCMK/providers/Microsoft.Compute/virtualMachines/test","virtualMachineVersion":"Compute","resourceGroup":"akkanaseCMK","backupManagementType":"AzureIaasVM","protectableItemType":"Microsoft.Compute/virtualMachines","friendlyName":"test","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;hiagarg;akkanasetest1/protectableItems/vm;iaasvmcontainerv2;hiagarg;akkanasetest1","name":"iaasvmcontainerv2;hiagarg;akkanasetest1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hiagarg/providers/Microsoft.Compute/virtualMachines/akkanaseTest1","virtualMachineVersion":"Compute","resourceGroup":"hiagarg","backupManagementType":"AzureIaasVM","protectableItemType":"Microsoft.Compute/virtualMachines","friendlyName":"akkanaseTest1","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;hiagarg;hiagarestore1/protectableItems/vm;iaasvmcontainerv2;hiagarg;hiagarestore1","name":"iaasvmcontainerv2;hiagarg;hiagarestore1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hiagarg/providers/Microsoft.Compute/virtualMachines/hiagarestore1","virtualMachineVersion":"Compute","resourceGroup":"hiagarg","backupManagementType":"AzureIaasVM","protectableItemType":"Microsoft.Compute/virtualMachines","friendlyName":"hiagarestore1","protectionState":"NotProtected"}}]}'
@@ -1552,10 +1552,10 @@ interactions:
       ParameterSetName:
       - -g -v --vm -p
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/refreshContainers?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/refreshContainers?api-version=2023-01-01
   response:
     body:
       string: ''
@@ -1571,7 +1571,7 @@ interactions:
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/operationResults/91c3da50-5c95-4f41-9825-cbf8f50e17fb?api-version=2022-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/operationResults/91c3da50-5c95-4f41-9825-cbf8f50e17fb?api-version=2023-01-01
       pragma:
       - no-cache
       server:
@@ -1599,10 +1599,10 @@ interactions:
       ParameterSetName:
       - -g -v --vm -p
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/operationResults/91c3da50-5c95-4f41-9825-cbf8f50e17fb?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/operationResults/91c3da50-5c95-4f41-9825-cbf8f50e17fb?api-version=2023-01-01
   response:
     body:
       string: ''
@@ -1616,7 +1616,7 @@ interactions:
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/operationResults/91c3da50-5c95-4f41-9825-cbf8f50e17fb?api-version=2022-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/operationResults/91c3da50-5c95-4f41-9825-cbf8f50e17fb?api-version=2023-01-01
       pragma:
       - no-cache
       server:
@@ -1644,10 +1644,10 @@ interactions:
       ParameterSetName:
       - -g -v --vm -p
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/operationResults/91c3da50-5c95-4f41-9825-cbf8f50e17fb?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/operationResults/91c3da50-5c95-4f41-9825-cbf8f50e17fb?api-version=2023-01-01
   response:
     body:
       string: ''
@@ -1661,7 +1661,7 @@ interactions:
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/operationResults/91c3da50-5c95-4f41-9825-cbf8f50e17fb?api-version=2022-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/operationResults/91c3da50-5c95-4f41-9825-cbf8f50e17fb?api-version=2023-01-01
       pragma:
       - no-cache
       server:
@@ -1689,10 +1689,10 @@ interactions:
       ParameterSetName:
       - -g -v --vm -p
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/operationResults/91c3da50-5c95-4f41-9825-cbf8f50e17fb?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/operationResults/91c3da50-5c95-4f41-9825-cbf8f50e17fb?api-version=2023-01-01
   response:
     body:
       string: ''
@@ -1730,10 +1730,10 @@ interactions:
       ParameterSetName:
       - -g -v --vm -p
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectableItems?api-version=2022-06-01-preview&%24filter=backupManagementType+eq+%27AzureIaasVM%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectableItems?api-version=2023-01-01&%24filter=backupManagementType+eq+%27AzureIaasVM%27
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;akkanasecmk;akkanasedessanity/protectableItems/vm;iaasvmcontainerv2;akkanasecmk;akkanasedessanity","name":"iaasvmcontainerv2;akkanasecmk;akkanasedessanity","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akkanaseCMK/providers/Microsoft.Compute/virtualMachines/akkanasedessanity","virtualMachineVersion":"Compute","resourceGroup":"akkanaseCMK","backupManagementType":"AzureIaasVM","protectableItemType":"Microsoft.Compute/virtualMachines","friendlyName":"akkanasedessanity","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;akkanasecmk;test/protectableItems/vm;iaasvmcontainerv2;akkanasecmk;test","name":"iaasvmcontainerv2;akkanasecmk;test","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/akkanaseCMK/providers/Microsoft.Compute/virtualMachines/test","virtualMachineVersion":"Compute","resourceGroup":"akkanaseCMK","backupManagementType":"AzureIaasVM","protectableItemType":"Microsoft.Compute/virtualMachines","friendlyName":"test","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectableItems/vm;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","name":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","virtualMachineVersion":"Compute","resourceGroup":"clitest.rg000001","backupManagementType":"AzureIaasVM","protectableItemType":"Microsoft.Compute/virtualMachines","friendlyName":"clitest-vm000003","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;hiagarg;akkanasetest1/protectableItems/vm;iaasvmcontainerv2;hiagarg;akkanasetest1","name":"iaasvmcontainerv2;hiagarg;akkanasetest1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hiagarg/providers/Microsoft.Compute/virtualMachines/akkanaseTest1","virtualMachineVersion":"Compute","resourceGroup":"hiagarg","backupManagementType":"AzureIaasVM","protectableItemType":"Microsoft.Compute/virtualMachines","friendlyName":"akkanaseTest1","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;hiagarg;hiagarestore1/protectableItems/vm;iaasvmcontainerv2;hiagarg;hiagarestore1","name":"iaasvmcontainerv2;hiagarg;hiagarestore1","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hiagarg/providers/Microsoft.Compute/virtualMachines/hiagarestore1","virtualMachineVersion":"Compute","resourceGroup":"hiagarg","backupManagementType":"AzureIaasVM","protectableItemType":"Microsoft.Compute/virtualMachines","friendlyName":"hiagarestore1","protectionState":"NotProtected"}}]}'
@@ -1785,16 +1785,16 @@ interactions:
       ParameterSetName:
       - -g -v --vm -p
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/vm%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/vm%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003?api-version=2023-01-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/vm;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/operationsStatus/6e245c8a-36f5-4781-aa66-5defe77e1ffb?api-version=2022-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/vm;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/operationsStatus/6e245c8a-36f5-4781-aa66-5defe77e1ffb?api-version=2023-01-01
       cache-control:
       - no-cache
       content-length:
@@ -1804,7 +1804,7 @@ interactions:
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/vm;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/operationResults/6e245c8a-36f5-4781-aa66-5defe77e1ffb?api-version=2022-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/vm;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/operationResults/6e245c8a-36f5-4781-aa66-5defe77e1ffb?api-version=2023-01-01
       pragma:
       - no-cache
       server:
@@ -1832,10 +1832,10 @@ interactions:
       ParameterSetName:
       - -g -v --vm -p
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/6e245c8a-36f5-4781-aa66-5defe77e1ffb?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/6e245c8a-36f5-4781-aa66-5defe77e1ffb?api-version=2023-01-01
   response:
     body:
       string: '{"id":"6e245c8a-36f5-4781-aa66-5defe77e1ffb","name":"6e245c8a-36f5-4781-aa66-5defe77e1ffb","status":"InProgress","startTime":"2023-01-31T12:11:04.354421Z","endTime":"0001-01-01T00:00:00"}'
@@ -1881,10 +1881,10 @@ interactions:
       ParameterSetName:
       - -g -v --vm -p
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/6e245c8a-36f5-4781-aa66-5defe77e1ffb?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/6e245c8a-36f5-4781-aa66-5defe77e1ffb?api-version=2023-01-01
   response:
     body:
       string: '{"id":"6e245c8a-36f5-4781-aa66-5defe77e1ffb","name":"6e245c8a-36f5-4781-aa66-5defe77e1ffb","status":"InProgress","startTime":"2023-01-31T12:11:04.354421Z","endTime":"0001-01-01T00:00:00"}'
@@ -1930,10 +1930,10 @@ interactions:
       ParameterSetName:
       - -g -v --vm -p
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/6e245c8a-36f5-4781-aa66-5defe77e1ffb?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/6e245c8a-36f5-4781-aa66-5defe77e1ffb?api-version=2023-01-01
   response:
     body:
       string: '{"id":"6e245c8a-36f5-4781-aa66-5defe77e1ffb","name":"6e245c8a-36f5-4781-aa66-5defe77e1ffb","status":"InProgress","startTime":"2023-01-31T12:11:04.354421Z","endTime":"0001-01-01T00:00:00"}'
@@ -1979,10 +1979,10 @@ interactions:
       ParameterSetName:
       - -g -v --vm -p
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/6e245c8a-36f5-4781-aa66-5defe77e1ffb?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/6e245c8a-36f5-4781-aa66-5defe77e1ffb?api-version=2023-01-01
   response:
     body:
       string: '{"id":"6e245c8a-36f5-4781-aa66-5defe77e1ffb","name":"6e245c8a-36f5-4781-aa66-5defe77e1ffb","status":"InProgress","startTime":"2023-01-31T12:11:04.354421Z","endTime":"0001-01-01T00:00:00"}'
@@ -2028,10 +2028,10 @@ interactions:
       ParameterSetName:
       - -g -v --vm -p
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/6e245c8a-36f5-4781-aa66-5defe77e1ffb?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/6e245c8a-36f5-4781-aa66-5defe77e1ffb?api-version=2023-01-01
   response:
     body:
       string: '{"id":"6e245c8a-36f5-4781-aa66-5defe77e1ffb","name":"6e245c8a-36f5-4781-aa66-5defe77e1ffb","status":"InProgress","startTime":"2023-01-31T12:11:04.354421Z","endTime":"0001-01-01T00:00:00"}'
@@ -2077,10 +2077,10 @@ interactions:
       ParameterSetName:
       - -g -v --vm -p
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/6e245c8a-36f5-4781-aa66-5defe77e1ffb?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/6e245c8a-36f5-4781-aa66-5defe77e1ffb?api-version=2023-01-01
   response:
     body:
       string: '{"id":"6e245c8a-36f5-4781-aa66-5defe77e1ffb","name":"6e245c8a-36f5-4781-aa66-5defe77e1ffb","status":"InProgress","startTime":"2023-01-31T12:11:04.354421Z","endTime":"0001-01-01T00:00:00"}'
@@ -2126,10 +2126,10 @@ interactions:
       ParameterSetName:
       - -g -v --vm -p
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/6e245c8a-36f5-4781-aa66-5defe77e1ffb?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/6e245c8a-36f5-4781-aa66-5defe77e1ffb?api-version=2023-01-01
   response:
     body:
       string: '{"id":"6e245c8a-36f5-4781-aa66-5defe77e1ffb","name":"6e245c8a-36f5-4781-aa66-5defe77e1ffb","status":"Succeeded","startTime":"2023-01-31T12:11:04.354421Z","endTime":"2023-01-31T12:11:04.354421Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"fd7d86ac-e4c4-4eac-be47-5827c22bd87a"}}'
@@ -2175,10 +2175,10 @@ interactions:
       ParameterSetName:
       - -g -v --vm -p
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/fd7d86ac-e4c4-4eac-be47-5827c22bd87a?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/fd7d86ac-e4c4-4eac-be47-5827c22bd87a?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/fd7d86ac-e4c4-4eac-be47-5827c22bd87a","name":"fd7d86ac-e4c4-4eac-be47-5827c22bd87a","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureIaaSVMJob","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","duration":"PT32.5713597S","virtualMachineVersion":"Compute","extendedInfo":{"tasksList":[],"propertyBag":{"VM
@@ -2226,10 +2226,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2022-06-01-preview&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+itemType+eq+%27VM%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2023-01-01&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+itemType+eq+%27VM%27
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","name":"VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"clitest-vm000003","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","protectionStatus":"Healthy","protectionState":"IRPending","healthStatus":"Passed","lastBackupStatus":"","lastBackupTime":"2001-01-01T00:00:00Z","protectedItemDataId":"70370450313882","ConfiguredRPGenerationFrequency":"00:00:00","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/DefaultPolicy","policyName":"DefaultPolicy","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}]}'
@@ -2276,10 +2276,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupResourceGuardProxies?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupResourceGuardProxies?api-version=2023-01-01
   response:
     body:
       string: '{"value":[]}'
@@ -2326,16 +2326,16 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/VM%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/VM%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003?api-version=2023-01-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/e20126a4-e3ba-4c02-8d8f-dc032dd21ea6?api-version=2022-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/e20126a4-e3ba-4c02-8d8f-dc032dd21ea6?api-version=2023-01-01
       cache-control:
       - no-cache
       content-length:
@@ -2345,7 +2345,7 @@ interactions:
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperationResults/e20126a4-e3ba-4c02-8d8f-dc032dd21ea6?api-version=2022-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperationResults/e20126a4-e3ba-4c02-8d8f-dc032dd21ea6?api-version=2023-01-01
       pragma:
       - no-cache
       server:
@@ -2374,10 +2374,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/e20126a4-e3ba-4c02-8d8f-dc032dd21ea6?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/e20126a4-e3ba-4c02-8d8f-dc032dd21ea6?api-version=2023-01-01
   response:
     body:
       string: '{"id":"e20126a4-e3ba-4c02-8d8f-dc032dd21ea6","name":"e20126a4-e3ba-4c02-8d8f-dc032dd21ea6","status":"InProgress","startTime":"2023-01-31T12:11:43.9164727Z","endTime":"0001-01-01T00:00:00"}'
@@ -2424,10 +2424,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/e20126a4-e3ba-4c02-8d8f-dc032dd21ea6?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/e20126a4-e3ba-4c02-8d8f-dc032dd21ea6?api-version=2023-01-01
   response:
     body:
       string: '{"id":"e20126a4-e3ba-4c02-8d8f-dc032dd21ea6","name":"e20126a4-e3ba-4c02-8d8f-dc032dd21ea6","status":"InProgress","startTime":"2023-01-31T12:11:43.9164727Z","endTime":"0001-01-01T00:00:00"}'
@@ -2474,10 +2474,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/e20126a4-e3ba-4c02-8d8f-dc032dd21ea6?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/e20126a4-e3ba-4c02-8d8f-dc032dd21ea6?api-version=2023-01-01
   response:
     body:
       string: '{"id":"e20126a4-e3ba-4c02-8d8f-dc032dd21ea6","name":"e20126a4-e3ba-4c02-8d8f-dc032dd21ea6","status":"InProgress","startTime":"2023-01-31T12:11:43.9164727Z","endTime":"0001-01-01T00:00:00"}'
@@ -2524,10 +2524,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/e20126a4-e3ba-4c02-8d8f-dc032dd21ea6?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/e20126a4-e3ba-4c02-8d8f-dc032dd21ea6?api-version=2023-01-01
   response:
     body:
       string: '{"id":"e20126a4-e3ba-4c02-8d8f-dc032dd21ea6","name":"e20126a4-e3ba-4c02-8d8f-dc032dd21ea6","status":"Succeeded","startTime":"2023-01-31T12:11:43.9164727Z","endTime":"2023-01-31T12:11:43.9164727Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"e3ca76e6-02ed-45c2-b8bc-344da46681c8"}}'
@@ -2574,10 +2574,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/e3ca76e6-02ed-45c2-b8bc-344da46681c8?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/e3ca76e6-02ed-45c2-b8bc-344da46681c8?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/e3ca76e6-02ed-45c2-b8bc-344da46681c8","name":"e3ca76e6-02ed-45c2-b8bc-344da46681c8","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureIaaSVMJob","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","duration":"PT12.3995505S","virtualMachineVersion":"Compute","extendedInfo":{"tasksList":[],"propertyBag":{"VM
@@ -2624,10 +2624,10 @@ interactions:
       ParameterSetName:
       - --backup-management-type --workload-type -g -v -c -n
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2022-06-01-preview&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+itemType+eq+%27VM%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2023-01-01&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+itemType+eq+%27VM%27
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","name":"VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"clitest-vm000003","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","protectionStatus":"Healthy","protectionState":"ProtectionStopped","healthStatus":"Passed","lastBackupStatus":"","lastBackupTime":"2001-01-01T00:00:00Z","protectedItemDataId":"70370450313882","ConfiguredRPGenerationFrequency":"00:00:00","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","policyId":"","policyName":"","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","deferredDeleteTimeInUTC":"2023-01-31T12:11:43.9164727Z","isScheduledForDeferredDelete":true,"deferredDeleteTimeRemaining":"13.23:59:39.6406801","isArchiveEnabled":false,"softDeleteRetentionPeriod":14}}]}'
@@ -2673,10 +2673,10 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type --backup-management-type
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2022-06-01-preview&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+itemType+eq+%27VM%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2023-01-01&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+itemType+eq+%27VM%27
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","name":"VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"clitest-vm000003","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","protectionStatus":"Healthy","protectionState":"ProtectionStopped","healthStatus":"Passed","lastBackupStatus":"","lastBackupTime":"2001-01-01T00:00:00Z","protectedItemDataId":"70370450313882","ConfiguredRPGenerationFrequency":"00:00:00","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","policyId":"","policyName":"","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","deferredDeleteTimeInUTC":"2023-01-31T12:11:43.9164727Z","isScheduledForDeferredDelete":true,"deferredDeleteTimeRemaining":"13.23:59:38.3151315","isArchiveEnabled":false,"softDeleteRetentionPeriod":14}}]}'
@@ -2728,16 +2728,16 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type --backup-management-type
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/VM%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/VM%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003?api-version=2023-01-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/operationsStatus/2ca0b71a-8d54-4550-be52-b221115d2120?api-version=2022-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/operationsStatus/2ca0b71a-8d54-4550-be52-b221115d2120?api-version=2023-01-01
       cache-control:
       - no-cache
       content-length:
@@ -2747,7 +2747,7 @@ interactions:
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/operationResults/2ca0b71a-8d54-4550-be52-b221115d2120?api-version=2022-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/operationResults/2ca0b71a-8d54-4550-be52-b221115d2120?api-version=2023-01-01
       pragma:
       - no-cache
       server:
@@ -2775,10 +2775,10 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type --backup-management-type
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/2ca0b71a-8d54-4550-be52-b221115d2120?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/2ca0b71a-8d54-4550-be52-b221115d2120?api-version=2023-01-01
   response:
     body:
       string: '{"id":"2ca0b71a-8d54-4550-be52-b221115d2120","name":"2ca0b71a-8d54-4550-be52-b221115d2120","status":"InProgress","startTime":"2023-01-31T12:12:07.2941292Z","endTime":"0001-01-01T00:00:00"}'
@@ -2824,10 +2824,10 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type --backup-management-type
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/2ca0b71a-8d54-4550-be52-b221115d2120?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/2ca0b71a-8d54-4550-be52-b221115d2120?api-version=2023-01-01
   response:
     body:
       string: '{"id":"2ca0b71a-8d54-4550-be52-b221115d2120","name":"2ca0b71a-8d54-4550-be52-b221115d2120","status":"InProgress","startTime":"2023-01-31T12:12:07.2941292Z","endTime":"0001-01-01T00:00:00"}'
@@ -2873,10 +2873,10 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type --backup-management-type
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/2ca0b71a-8d54-4550-be52-b221115d2120?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/2ca0b71a-8d54-4550-be52-b221115d2120?api-version=2023-01-01
   response:
     body:
       string: '{"id":"2ca0b71a-8d54-4550-be52-b221115d2120","name":"2ca0b71a-8d54-4550-be52-b221115d2120","status":"Succeeded","startTime":"2023-01-31T12:12:07.2941292Z","endTime":"2023-01-31T12:12:07.2941292Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"a1e9f73f-5525-4ddd-b4b8-c6d5b8af316a"}}'
@@ -2922,10 +2922,10 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type --backup-management-type
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/a1e9f73f-5525-4ddd-b4b8-c6d5b8af316a?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/a1e9f73f-5525-4ddd-b4b8-c6d5b8af316a?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/a1e9f73f-5525-4ddd-b4b8-c6d5b8af316a","name":"a1e9f73f-5525-4ddd-b4b8-c6d5b8af316a","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureIaaSVMJob","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","duration":"PT12.2473505S","virtualMachineVersion":"Compute","extendedInfo":{"tasksList":[],"propertyBag":{"VM
@@ -2972,10 +2972,10 @@ interactions:
       ParameterSetName:
       - -g -n --soft-delete-feature-state
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupconfig/vaultconfig?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupconfig/vaultconfig?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupconfig/vaultconfig","name":"vaultconfig","type":"Microsoft.RecoveryServices/vaults/backupconfig","properties":{"enhancedSecurityState":"Enabled","softDeleteFeatureState":"Enabled","softDeleteRetentionPeriodInDays":14,"isSoftDeleteFeatureStateEditable":true}}'
@@ -3021,10 +3021,10 @@ interactions:
       ParameterSetName:
       - -g -n --soft-delete-feature-state
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupResourceGuardProxies?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupResourceGuardProxies?api-version=2023-01-01
   response:
     body:
       string: '{"value":[]}'
@@ -3073,10 +3073,10 @@ interactions:
       ParameterSetName:
       - -g -n --soft-delete-feature-state
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupconfig/vaultconfig?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupconfig/vaultconfig?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupconfig/vaultconfig","name":"vaultconfig","type":"Microsoft.RecoveryServices/vaults/backupconfig","properties":{"enhancedSecurityState":"Enabled","softDeleteFeatureState":"Disabled","softDeleteRetentionPeriodInDays":14,"isSoftDeleteFeatureStateEditable":true}}'
@@ -3122,10 +3122,10 @@ interactions:
       ParameterSetName:
       - --backup-management-type --workload-type -g -v -c -n
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2022-06-01-preview&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+itemType+eq+%27VM%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2023-01-01&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+itemType+eq+%27VM%27
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","name":"VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"clitest-vm000003","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","protectionStatus":"Healthy","protectionState":"ProtectionStopped","healthStatus":"Passed","lastBackupStatus":"","lastBackupTime":"2001-01-01T00:00:00Z","protectedItemDataId":"70370450313882","ConfiguredRPGenerationFrequency":"00:00:00","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","policyId":"","policyName":"","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}]}'
@@ -3171,10 +3171,10 @@ interactions:
       ParameterSetName:
       - --backup-management-type -v -g --query
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectionContainers?api-version=2022-06-01-preview&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+status+eq+%27Registered%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectionContainers?api-version=2023-01-01&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+status+eq+%27Registered%27
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","name":"IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","virtualMachineVersion":"Compute","resourceGroup":"clitest.rg000001","friendlyName":"clitest-vm000003","backupManagementType":"AzureIaasVM","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"Microsoft.Compute/virtualMachines","protectableObjectType":"Microsoft.Compute/virtualMachines"}}]}'
@@ -3220,10 +3220,10 @@ interactions:
       ParameterSetName:
       - --backup-management-type --workload-type -g -v -c --query
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2022-06-01-preview&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+itemType+eq+%27VM%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2023-01-01&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+itemType+eq+%27VM%27
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","name":"VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"clitest-vm000003","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","protectionStatus":"Healthy","protectionState":"ProtectionStopped","healthStatus":"Passed","lastBackupStatus":"","lastBackupTime":"2001-01-01T00:00:00Z","protectedItemDataId":"70370450313882","ConfiguredRPGenerationFrequency":"00:00:00","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","policyId":"","policyName":"","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}]}'
@@ -3270,10 +3270,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2022-06-01-preview&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+itemType+eq+%27VM%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2023-01-01&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+itemType+eq+%27VM%27
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","name":"VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"kpisHealths":{},"friendlyName":"clitest-vm000003","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","protectionStatus":"Healthy","protectionState":"ProtectionStopped","healthStatus":"Passed","lastBackupStatus":"","lastBackupTime":"2001-01-01T00:00:00Z","protectedItemDataId":"70370450313882","ConfiguredRPGenerationFrequency":"00:00:00","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","policyId":"","policyName":"","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}]}'
@@ -3320,10 +3320,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupResourceGuardProxies?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupResourceGuardProxies?api-version=2023-01-01
   response:
     body:
       string: '{"value":[]}'
@@ -3370,16 +3370,16 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/VM%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/VM%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003?api-version=2023-01-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
       cache-control:
       - no-cache
       content-length:
@@ -3389,7 +3389,7 @@ interactions:
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperationResults/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperationResults/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
       pragma:
       - no-cache
       server:
@@ -3418,10 +3418,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -3468,10 +3468,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -3518,10 +3518,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -3568,10 +3568,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -3618,10 +3618,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -3668,10 +3668,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -3718,10 +3718,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -3768,10 +3768,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -3818,10 +3818,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -3868,10 +3868,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -3918,10 +3918,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -3968,10 +3968,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -4018,10 +4018,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -4068,10 +4068,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -4118,10 +4118,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -4168,10 +4168,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -4218,10 +4218,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -4268,10 +4268,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -4318,10 +4318,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -4368,10 +4368,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"InProgress","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"0001-01-01T00:00:00"}'
@@ -4418,10 +4418,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupOperations/4bda8a40-e55c-4748-9810-23aef77dfa32?api-version=2023-01-01
   response:
     body:
       string: '{"id":"4bda8a40-e55c-4748-9810-23aef77dfa32","name":"4bda8a40-e55c-4748-9810-23aef77dfa32","status":"Succeeded","startTime":"2023-01-31T12:12:32.8661053Z","endTime":"2023-01-31T12:12:32.8661053Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"55cf1fa4-710a-4ec1-8c14-2de7238aedba"}}'
@@ -4468,10 +4468,10 @@ interactions:
       - --backup-management-type --workload-type -g -v -c -i --delete-backup-data
         --yes
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/1.0.0b1 Python/3.10.7
+      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
         (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/55cf1fa4-710a-4ec1-8c14-2de7238aedba?api-version=2022-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/55cf1fa4-710a-4ec1-8c14-2de7238aedba?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/55cf1fa4-710a-4ec1-8c14-2de7238aedba","name":"55cf1fa4-710a-4ec1-8c14-2de7238aedba","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureIaaSVMJob","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","duration":"PT1M45.6460349S","virtualMachineVersion":"Compute","extendedInfo":{"tasksList":[],"propertyBag":{"VM
