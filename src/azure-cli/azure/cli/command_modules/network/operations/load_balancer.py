@@ -15,6 +15,7 @@ from ..aaz.latest.network.lb.inbound_nat_rule import Create as _LBInboundNatRule
     Update as _LBInboundNatRuleUpdate
 from ..aaz.latest.network.lb.rule import Create as _LBRuleCreate, Update as _LBRuleUpdate, Show as _LBRuleShow, \
     Delete as _LBRuleDelete, List as _LBRuleList
+from ..aaz.latest.network.lb.outbound_rule import Create as _LBOutboundRuleCreate, Update as _LBOutboundRuleUpdate
 
 
 logger = get_logger(__name__)
@@ -323,6 +324,79 @@ class LBRuleUpdate(_LBRuleUpdate):
             instance.properties.probe = None
         # always remove backend_address_pool in update request, service will fill this property based on backend_address_pools property.
         instance.properties.backend_address_pool = None
+
+
+class LBOutboundRuleCreate(_LBOutboundRuleCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.backend_address_pool._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/backendAddressPools/{}"
+        )
+        args_schema.frontend_ip_configs = AAZListArg(
+            options=["--frontend-ip-configs"],
+            arg_group="Properties",
+            help="The List of frontend IP configuration IDs or names.",
+        )
+        args_schema.frontend_ip_configs.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
+            )
+        )
+
+        args_schema.protocol._required = True
+        args_schema.backend_address_pool._required = True
+        args_schema.frontend_ip_configurations._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        from azure.cli.core.aaz.utils import assign_aaz_list_arg
+        args = self.ctx.args
+        args.frontend_ip_configurations = assign_aaz_list_arg(
+            args.frontend_ip_configurations,
+            args.frontend_ip_configs,
+            element_transformer=lambda _, id: {"id": id}
+        )
+
+
+class LBOutboundRuleUpdate(_LBOutboundRuleUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.backend_address_pool._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/backendAddressPools/{}"
+        )
+        args_schema.frontend_ip_configs = AAZListArg(
+            options=["--frontend-ip-configs"],
+            arg_group="Properties",
+            help="The List of frontend IP configuration IDs or names.",
+        )
+        args_schema.frontend_ip_configs.Element = AAZResourceIdArg(
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
+            )
+        )
+
+        args_schema.protocol._nullable = False
+        args_schema.backend_address_pool._nullable = False
+        args_schema.frontend_ip_configurations._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        from azure.cli.core.aaz.utils import assign_aaz_list_arg
+        args = self.ctx.args
+        args.frontend_ip_configurations = assign_aaz_list_arg(
+            args.frontend_ip_configurations,
+            args.frontend_ip_configs,
+            element_transformer=lambda _, id: {"id": id}
+        )
 
 
 # cross-region-lb commands

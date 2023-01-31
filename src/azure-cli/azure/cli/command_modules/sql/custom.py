@@ -690,7 +690,12 @@ def _get_server_dns_suffx(cli_ctx):
     return getenv('_AZURE_CLI_SQL_DNS_SUFFIX', default=cli_ctx.cloud.suffixes.sql_server_hostname)
 
 
-def _get_managed_db_resource_id(cli_ctx, resource_group_name, managed_instance_name, database_name):
+def _get_managed_db_resource_id(
+        cli_ctx,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        subscription_id=None):
     '''
     Gets the Managed db resource id in this Azure environment.
     '''
@@ -698,7 +703,7 @@ def _get_managed_db_resource_id(cli_ctx, resource_group_name, managed_instance_n
     from msrestazure.tools import resource_id
 
     return resource_id(
-        subscription=get_subscription_id(cli_ctx),
+        subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
         resource_group=resource_group_name,
         namespace='Microsoft.Sql', type='managedInstances',
         name=managed_instance_name,
@@ -731,7 +736,8 @@ def _get_managed_dropped_db_resource_id(
         resource_group_name,
         managed_instance_name,
         database_name,
-        deleted_time):
+        deleted_time,
+        subscription_id=None):
     '''
     Gets the Managed db resource id in this Azure environment.
     '''
@@ -741,7 +747,7 @@ def _get_managed_dropped_db_resource_id(
     from msrestazure.tools import resource_id
 
     return (resource_id(
-        subscription=get_subscription_id(cli_ctx),
+        subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
         resource_group=resource_group_name,
         namespace='Microsoft.Sql', type='managedInstances',
         name=managed_instance_name,
@@ -749,6 +755,25 @@ def _get_managed_dropped_db_resource_id(
         child_name_1='{},{}'.format(
             quote(database_name),
             _to_filetimeutc(deleted_time))))
+
+
+def _get_managed_instance_resource_id(
+        cli_ctx,
+        resource_group_name,
+        managed_instance_name,
+        subscription_id=None):
+    '''
+    Gets managed instance resource id in this Azure environment.
+    '''
+
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import resource_id
+
+    return (resource_id(
+        subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Sql', type='managedInstances',
+        name=managed_instance_name))
 
 
 def db_show_conn_str(
@@ -5018,6 +5043,7 @@ def managed_db_restore(
         target_managed_instance_name=None,
         target_resource_group_name=None,
         deleted_time=None,
+        source_subscription_id=None,
         **kwargs):
     '''
     Restores an existing managed DB (i.e. create with 'PointInTimeRestore' create mode.)
@@ -5033,24 +5059,45 @@ def managed_db_restore(
 
     kwargs['location'] = _get_managed_instance_location(
         cmd.cli_ctx,
-        managed_instance_name=managed_instance_name,
-        resource_group_name=resource_group_name)
+        managed_instance_name=target_managed_instance_name,
+        resource_group_name=target_resource_group_name)
 
     kwargs['create_mode'] = ManagedDatabaseCreateMode.POINT_IN_TIME_RESTORE
 
-    if deleted_time:
-        kwargs['restorable_dropped_database_id'] = _get_managed_dropped_db_resource_id(
+    if source_subscription_id:
+        kwargs['cross_subscription_target_managed_instance_id'] = _get_managed_instance_resource_id(
             cmd.cli_ctx,
-            resource_group_name,
-            managed_instance_name,
-            database_name,
-            deleted_time)
+            target_resource_group_name,
+            target_managed_instance_name)
+        if deleted_time:
+            kwargs['cross_subscription_restorable_dropped_database_id'] = _get_managed_dropped_db_resource_id(
+                cmd.cli_ctx,
+                resource_group_name,
+                managed_instance_name,
+                database_name,
+                deleted_time,
+                source_subscription_id)
+        else:
+            kwargs['cross_subscription_source_database_id'] = _get_managed_db_resource_id(
+                cmd.cli_ctx,
+                resource_group_name,
+                managed_instance_name,
+                database_name,
+                source_subscription_id)
     else:
-        kwargs['source_database_id'] = _get_managed_db_resource_id(
-            cmd.cli_ctx,
-            resource_group_name,
-            managed_instance_name,
-            database_name)
+        if deleted_time:
+            kwargs['restorable_dropped_database_id'] = _get_managed_dropped_db_resource_id(
+                cmd.cli_ctx,
+                resource_group_name,
+                managed_instance_name,
+                database_name,
+                deleted_time)
+        else:
+            kwargs['source_database_id'] = _get_managed_db_resource_id(
+                cmd.cli_ctx,
+                resource_group_name,
+                managed_instance_name,
+                database_name)
 
     return client.begin_create_or_update(
         database_name=target_managed_database_name,
