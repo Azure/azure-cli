@@ -236,6 +236,7 @@ def load_arguments_sb(self, _):
             c.argument('reply_to_session_id', help='Session identifier to reply to.')
             c.argument('content_type', help='Content type of message.')
             c.argument('requires_preprocessing', options_list=['--enable-correlation-preprocessing'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether the rule action requires preprocessing.')
+            c.argument('tags', options_list=['--correlation-filter-property', '--correlation-filter'], arg_type=tags_type, help='dictionary object for custom filters')
 
     with self.argument_context('servicebus topic subscription rule list') as c:
         c.argument('subscription_name', options_list=['--subscription-name'], id_part=None, help='Name of Subscription')
