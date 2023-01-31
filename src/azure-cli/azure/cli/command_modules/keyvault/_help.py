@@ -793,7 +793,7 @@ examples:
         az keyvault security-domain upload --hsm-name MyHSM --sd-file "{SD_TRANSFER_FILE}" --sd-exchange-key "{PEM_FILE_NAME}" --sd-wrapping-keys "{PEM_PRIVATE_KEY1_FILE_NAME}" "{PEM_PRIVATE_KEY2_FILE_NAME}"
   - name: Security domain upload, in which sd_file is already restored using keyvault security-domain restore-blob command
     text: |
-        az keyvault security-domain upload --hsm-name MyHSM --sd-file "{SD_TRANSFER_FILE}" --restore-blob"
+        az keyvault security-domain upload --hsm-name MyHSM --sd-file "{SD_TRANSFER_FILE}" --restore-blob
 """
 
 helps['keyvault security-domain download'] = """
