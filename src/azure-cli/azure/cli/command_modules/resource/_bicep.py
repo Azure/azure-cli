@@ -57,9 +57,28 @@ def validate_bicep_target_scope(template_schema, deployment_scope):
         )
 
 
-def run_bicep_command(args, auto_install=True, check_version=True):
+def run_bicep_command(cli_ctx, args, auto_install=True):
+    if _use_binary_from_path(cli_ctx):
+        from shutil import which
+
+        if which("bicep") is None:
+            raise ValidationError(
+                'Could not find the "bicep" executable on PATH. To install Bicep via Azure CLI, set the "bicep.use_binary_from_path" configuration to False and run "az bicep install".'  # pylint: disable=line-too-long
+            )
+
+        bicep_version_message = _run_command("bicep", ["--version"])
+
+        _logger.debug("Using Bicep CLI from PATH. %s", bicep_version_message)
+
+        return _run_command("bicep", args)
+
     installation_path = _get_bicep_installation_path(platform.system())
+    _logger.debug("Bicep CLI installation path: %s", installation_path)
+
     installed = os.path.isfile(installation_path)
+    _logger.debug("Bicep CLI installed: %s.", installed)
+
+    check_version = cli_ctx.config.getboolean("bicep", "check_version", True)
 
     if not installed:
         if auto_install:
@@ -175,6 +194,43 @@ def supports_bicep_publish():
     installation_path = _get_bicep_installation_path(system)
     installed_version = _get_bicep_installed_version(installation_path)
     return semver.compare(installed_version, "0.4.1008") >= 0
+
+
+def _bicep_installed_in_ci():
+    if "GITHUB_ACTIONS" in os.environ or "TF_BUILD" in os.environ:
+        from shutil import which
+        installed = which("bicep") is not None
+
+        _logger.debug("Running in a CI environment. Bicep CLI available on PATH: %s.", installed)
+
+        return installed
+    return False
+
+
+def _use_binary_from_path(cli_ctx):
+    use_binary_from_path = cli_ctx.config.get("bicep", "use_binary_from_path", "if_found_in_ci").lower()
+
+    _logger.debug('Current value of "use_binary_from_path": %s.', use_binary_from_path)
+
+    if use_binary_from_path == "if_found_in_ci":
+        # With if_found_in_ci, GitHub Actions and Azure Pipeline users may expect some delay (usually a few days)
+        # in getting the latest version of Bicep CLI, since the az bicep commands will use the pre-installed Bicep CLI
+        # on the build agents, but the build agents has a different release cycle. The benefit is that the az bicep
+        # commands will not download the Bicep CLI on each pipeline run.
+        return _bicep_installed_in_ci()
+    if use_binary_from_path in ["1", "yes", "true", "on"]:
+        # Setting the config True forces the az bicep commands to use the Bicep executable added to PATH, which
+        # indicates that the user is intended to manage the Bicep CLI, and version checks will be disabled.
+        return True
+    if use_binary_from_path in ["0", "no", "false", "off"]:
+        return False
+
+    _logger.warning(
+        'The configuration value of bicep.use_binary_from_path is invalid: "%s". Possible values include "if_found_in_ci" (default) and Booleans.',  # pylint: disable=line-too-long
+        use_binary_from_path,
+    )
+
+    return False
 
 
 def _load_bicep_version_check_result_from_cache():
