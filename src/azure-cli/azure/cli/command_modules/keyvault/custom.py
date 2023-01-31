@@ -2469,11 +2469,11 @@ def _security_domain_gen_blob(sd_exchange_key, share_arrays, enc_data, required)
 
 
 def _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, passwords=None):
-    
-    if sd_exchange_key == None:
-        raise RequiredArgumentMissingError('Please specify --sd_exchange_key')
-    if sd_wrapping_keys == None:
-        raise RequiredArgumentMissingError('Please specify --sd_wrapping_keys')
+
+    if not sd_exchange_key:
+        raise RequiredArgumentMissingError('Please specify --sd-exchange-key')
+    if not sd_wrapping_keys:
+        raise RequiredArgumentMissingError('Please specify --sd-wrapping-keys')
 
     resource_paths = [sd_file, sd_exchange_key]
     for p in resource_paths:
