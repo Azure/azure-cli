@@ -2597,7 +2597,6 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
 
         certificates.append(sd_jwk)
 
-
     # save security-domain backup value to local file
     def _save_to_local_file(file_path, security_domain):
         try:
