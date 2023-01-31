@@ -203,7 +203,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
                         break
                 if not is_singular:
                     raise err
-        return valid_key_items, schema
+        return tuple(valid_key_items), schema
 
     @classmethod
     def _decode_value(cls, schema, value):  # pylint: disable=unused-argument
