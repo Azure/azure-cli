@@ -20,7 +20,6 @@ from knack.experimental import ExperimentalItem
 from knack.util import CLIError
 from knack.arguments import ArgumentsContext, CaseInsensitiveList  # pylint: disable=unused-import
 from .local_context import AzCLILocalContext, LocalContextAction
-from azure.cli.core.util import is_autocomplete
 
 logger = get_logger(__name__)
 
@@ -450,7 +449,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 if raw_cmd in self.command_group_table:
                     logger.debug("Found a match in the command group table for '%s'.", raw_cmd)
                     return self.command_table
-                if is_autocomplete():
+                if self.cli_ctx.data['completer_active']:
                     # If the command is not complete in autocomplete mode, we should match shorter command.
                     # For example, `account sho` should match `account`.
                     logger.debug("Could not find a match in the command or command group table for '%s'", raw_cmd)
@@ -550,6 +549,8 @@ class CommandIndex:
         """
         # If the command index version or cloud profile doesn't match those of the current command,
         # invalidate the command index.
+        from azure.cli.core.util import is_autocomplete
+
         index_version = self.INDEX[self._COMMAND_INDEX_VERSION]
         cloud_profile = self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE]
         if not (index_version and index_version == self.version and
