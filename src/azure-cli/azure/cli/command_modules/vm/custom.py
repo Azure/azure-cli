@@ -3849,8 +3849,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
     if enable_osimage_notification is not None:
         if vmss.virtual_machine_profile.scheduled_events_profile is None:
-            ScheduledEventsProfile = cmd.get_models('ScheduledEventsProfile')
-            vmss.virtual_machine_profile.scheduled_events_profile = ScheduledEventsProfile()
+            vmss.virtual_machine_profile.scheduled_events_profile = cmd.get_models('ScheduledEventsProfile')()
         OSImageNotificationProfile = cmd.get_models('OSImageNotificationProfile')
         vmss.virtual_machine_profile.scheduled_events_profile.os_image_notification_profile = \
             OSImageNotificationProfile(enable=enable_osimage_notification)
