@@ -1341,26 +1341,23 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if proximity_placement_group:
         vmss_properties['proximityPlacementGroup'] = {'id': proximity_placement_group}
 
+    scheduled_events_profile = {}
     if terminate_notification_time is not None:
-        scheduled_events_profile = {
+        scheduled_events_profile.update({
             'terminateNotificationProfile': {
                 'notBeforeTimeout': terminate_notification_time,
                 'enable': 'true'
             }
-        }
+        })
         virtual_machine_profile['scheduledEventsProfile'] = scheduled_events_profile
 
     if enable_osimage_notification is not None:
-        os_image_notification_profile = {
+        scheduled_events_profile.update({
             'osImageNotificationProfile': {
                 'enable': enable_osimage_notification
             }
-        }
-        if terminate_notification_time is not None:
-            scheduled_events_profile.update(os_image_notification_profile)
-            virtual_machine_profile['scheduledEventsProfile'] = scheduled_events_profile
-        else:
-            virtual_machine_profile['scheduledEventsProfile'] = os_image_notification_profile
+        })
+        virtual_machine_profile['scheduledEventsProfile'] = scheduled_events_profile
 
     if automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
         automatic_repairs_policy = {
