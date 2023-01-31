@@ -114,14 +114,14 @@ class SBRulesCRUDScenarioTest(ScenarioTest):
 
         # Delete create rule
         self.cmd(
-            'servicebus topic subscription rule delete --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --subscription-name {subscriptionname} --name {rulename}')
+            'servicebus topic subscription rule delete --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --subscription-name {subscriptionname} --name {rulename} --yes')
 
         # Delete create Subscription
         self.cmd(
-            'servicebus topic subscription delete --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {subscriptionname}')
+            'servicebus topic subscription delete --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {subscriptionname} --yes')
 
         # Delete Topic
-        self.cmd('servicebus topic delete --resource-group {rg} --namespace-name {namespacename} --name {topicname}')
+        self.cmd('servicebus topic delete --resource-group {rg} --namespace-name {namespacename} --name {topicname} --yes')
 
         # Delete Namespace
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')
