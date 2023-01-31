@@ -21,7 +21,7 @@ def create_keyvault_object(col):
 
 
 def create_servicebus_namespace(cmd, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
-                                capacity=None, zone_redundant=None, tier='Standard', mi_user_assigned=None,
+                                capacity=None, zone_redundant=None, mi_user_assigned=None,
                                 mi_system_assigned=None, encryption_config=None, minimum_tls_version=None,
                                 disable_local_auth=None, alternate_name=None, public_network_access=None,
                                 require_infrastructure_encryption=None, premium_messaging_partitions=None):
@@ -82,7 +82,6 @@ def create_servicebus_namespace(cmd, resource_group_name, namespace_name, locati
 def cli_add_encryption(cmd, resource_group_name, namespace_name, encryption_config,
                        require_infrastructure_encryption=None):
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Update
-    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Create
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Show
 
     servicebusnm = Show(cli_ctx=cmd.cli_ctx)(command_args={
@@ -115,7 +114,6 @@ def cli_add_encryption(cmd, resource_group_name, namespace_name, encryption_conf
 def cli_remove_encryption(cmd, resource_group_name, namespace_name, encryption_config):
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Update
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Show
-    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Create
 
     servicebusnm = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
@@ -144,14 +142,12 @@ def cli_remove_encryption(cmd, resource_group_name, namespace_name, encryption_c
 def cli_add_identity(cmd, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Update
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Show
-    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Create
 
     servicebusnm = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "namespace_name": namespace_name
     })
 
-    from azure.cli.core import CLIError
     if 'identity' not in servicebusnm:
         servicebusnm['identity'] = {
             "type": "None",
