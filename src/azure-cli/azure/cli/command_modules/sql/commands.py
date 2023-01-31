@@ -28,6 +28,7 @@ from ._util import (
     get_sql_server_azure_ad_administrators_operations,
     get_sql_capabilities_operations,
     get_sql_databases_operations,
+    get_sql_database_advanced_threat_protection_settings_operations,
     get_sql_database_blob_auditing_policies_operations,
     get_sql_server_blob_auditing_policies_operations,
     get_sql_server_dev_ops_audit_settings_operations,
@@ -47,16 +48,19 @@ from ._util import (
     get_sql_outbound_firewall_rules_operations,
     get_sql_instance_pools_operations,
     get_sql_managed_databases_operations,
+    get_sql_managed_database_advanced_threat_protection_settings_operations,
     get_sql_managed_database_restore_details_operations,
     get_sql_managed_backup_short_term_retention_policies_operations,
     get_sql_managed_database_long_term_retention_policies_operations,
     get_sql_managed_database_long_term_retention_backups_operations,
+    get_sql_managed_instance_advanced_threat_protection_settings_operations,
     get_sql_managed_instance_azure_ad_administrators_operations,
     get_sql_managed_instance_azure_ad_only_operations,
     get_sql_managed_instance_encryption_protectors_operations,
     get_sql_managed_instance_keys_operations,
     get_sql_managed_instance_operations_operations,
     get_sql_managed_instances_operations,
+    get_sql_server_advanced_threat_protection_settings_operations,
     get_sql_server_trust_groups_operations,
     get_sql_replication_links_operations,
     get_sql_restorable_dropped_databases_operations,
@@ -381,7 +385,8 @@ def load_command_table(self, _):
 
     with self.command_group('sql db threat-policy',
                             database_threat_detection_policies_operations,
-                            client_factory=get_sql_database_threat_detection_policies_operations) as g:
+                            client_factory=get_sql_database_threat_detection_policies_operations,
+                            deprecate_info=self.deprecate(redirect='sql db advanced-threat-protection-setting', hide=True, expiration='2.45.0')) as g:
 
         g.custom_show_command('show', 'db_threat_detection_policy_get')
         g.generic_update_command('update',
@@ -390,6 +395,25 @@ def load_command_table(self, _):
                                  setter_name='db_threat_detection_policy_update_setter',
                                  setter_type=database_threat_detection_policy_update_sdk,
                                  custom_func_name='db_threat_detection_policy_update')
+
+    database_advanced_threat_protection_settings_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#DatabaseAdvancedThreatProtectionSettingsOperations.{}',
+        client_factory=get_sql_database_advanced_threat_protection_settings_operations)
+
+    database_advanced_threat_protection_setting_update_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.sql.custom#{}')
+
+    with self.command_group('sql db advanced-threat-protection-setting',
+                            database_advanced_threat_protection_settings_operations,
+                            client_factory=get_sql_database_advanced_threat_protection_settings_operations) as g:
+
+        g.custom_show_command('show', 'db_advanced_threat_protection_setting_get')
+        g.generic_update_command('update',
+                                 getter_name='db_advanced_threat_protection_setting_get',
+                                 getter_type=database_advanced_threat_protection_setting_update_sdk,
+                                 setter_name='db_advanced_threat_protection_setting_update_setter',
+                                 setter_type=database_advanced_threat_protection_setting_update_sdk,
+                                 custom_func_name='db_advanced_threat_protection_setting_update')
 
     database_usages_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#DatabaseUsagesOperations.{}',
@@ -527,6 +551,26 @@ def load_command_table(self, _):
 
     with self.command_group('sql server', server_usages_operations) as g:
         g.command('list-usages', 'list_by_server')
+
+    server_advanced_threat_protection_settings_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ServerAdvancedThreatProtectionSettingsOperations.{}',
+        client_factory=get_sql_server_advanced_threat_protection_settings_operations)
+
+    server_advanced_threat_protection_setting_update_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.sql.custom#{}')
+
+    with self.command_group('sql server advanced-threat-protection-setting',
+                            server_advanced_threat_protection_settings_operations,
+                            client_factory=get_sql_server_advanced_threat_protection_settings_operations) as g:
+
+        g.custom_show_command('show', 'server_advanced_threat_protection_setting_get')
+        g.generic_update_command('update',
+                                 getter_name='server_advanced_threat_protection_setting_get',
+                                 getter_type=server_advanced_threat_protection_setting_update_sdk,
+                                 setter_name='server_advanced_threat_protection_setting_update_setter',
+                                 setter_type=server_advanced_threat_protection_setting_update_sdk,
+                                 custom_func_name='server_advanced_threat_protection_setting_update',
+                                 supports_no_wait=True)
 
     firewall_rules_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#FirewallRulesOperations.{}',
@@ -723,6 +767,26 @@ def load_command_table(self, _):
                                  supports_no_wait=True)
         g.command('failover', 'begin_failover', supports_no_wait=True)
 
+    managed_instance_advanced_threat_protection_settings_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceAdvancedThreatProtectionSettingsOperations.{}',
+        client_factory=get_sql_managed_instance_advanced_threat_protection_settings_operations)
+
+    managed_instance_advanced_threat_protection_setting_update_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.sql.custom#{}')
+
+    with self.command_group('sql mi advanced-threat-protection-setting',
+                            managed_instance_advanced_threat_protection_settings_operations,
+                            client_factory=get_sql_managed_instance_advanced_threat_protection_settings_operations) as g:
+
+        g.custom_show_command('show', 'managed_instance_advanced_threat_protection_setting_get')
+        g.generic_update_command('update',
+                                 getter_name='managed_instance_advanced_threat_protection_setting_get',
+                                 getter_type=managed_instance_advanced_threat_protection_setting_update_sdk,
+                                 setter_name='managed_instance_advanced_threat_protection_setting_update_setter',
+                                 setter_type=managed_instance_advanced_threat_protection_setting_update_sdk,
+                                 custom_func_name='managed_instance_advanced_threat_protection_setting_update',
+                                 supports_no_wait=True)
+
     managed_instance_keys_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceKeysOperations.{}',
         client_factory=get_sql_managed_instance_keys_operations)
@@ -793,6 +857,25 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list_by_instance')
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
+
+    managed_database_advanced_threat_protection_settings_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ManagedDatabaseAdvancedThreatProtectionSettingsOperations.{}',
+        client_factory=get_sql_managed_database_advanced_threat_protection_settings_operations)
+
+    managed_database_advanced_threat_protection_setting_update_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.sql.custom#{}')
+
+    with self.command_group('sql midb advanced-threat-protection-setting',
+                            managed_database_advanced_threat_protection_settings_operations,
+                            client_factory=get_sql_managed_database_advanced_threat_protection_settings_operations) as g:
+
+        g.custom_show_command('show', 'midb_advanced_threat_protection_setting_get')
+        g.generic_update_command('update',
+                                 getter_name='midb_advanced_threat_protection_setting_get',
+                                 getter_type=managed_database_advanced_threat_protection_setting_update_sdk,
+                                 setter_name='midb_advanced_threat_protection_setting_update_setter',
+                                 setter_type=managed_database_advanced_threat_protection_setting_update_sdk,
+                                 custom_func_name='midb_advanced_threat_protection_setting_update')
 
     managed_backup_short_term_retention_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ManagedBackupShortTermRetentionPoliciesOperations.{}',

@@ -23,7 +23,6 @@ from azure.cli.testsdk.checkers import StringCheck, StringContainCheck, StringCo
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.acs.tests.latest.mocks import MockCLI, MockCmd
 from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
-from azure.cli.command_modules.acs.addonconfiguration import getRegionCodeForAzureRegion, sanitize_dcr_name
 from knack.util import CLIError
 # flake8: noqa
 
@@ -6933,11 +6932,18 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_monitoring_aad_auth_msi_with_datacollectionsettings(self, resource_group, resource_group_location,):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.create_new_cluster_with_monitoring_aad_auth(resource_group, resource_group_location, aks_name, user_assigned_identity=False, syslog_enabled=False, data_collection_settings=get_test_data_file_path('datacollectionsettings.json'))
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_with_monitoring_aad_auth_uai_with_syslog(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         self.create_new_cluster_with_monitoring_aad_auth(resource_group, resource_group_location, aks_name, user_assigned_identity=True, syslog_enabled=True)
 
-    def create_new_cluster_with_monitoring_aad_auth(self, resource_group, resource_group_location, aks_name, user_assigned_identity=False, syslog_enabled=False):
+    def create_new_cluster_with_monitoring_aad_auth(self, resource_group, resource_group_location, aks_name, user_assigned_identity=False, syslog_enabled=False, data_collection_settings=None):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
@@ -6962,6 +6968,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--ssh-key-value={ssh_key_value} '
         create_cmd += f'--assign-identity {identity_id} ' if user_assigned_identity else ''
         create_cmd += f'--enable-syslog' if syslog_enabled else ''
+        create_cmd += f'--data-collection-settings {data_collection_settings} ' if data_collection_settings else ''
 
         response = self.cmd(create_cmd, checks=[
             self.check('addonProfiles.omsagent.enabled', True),
@@ -6973,8 +6980,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         workspace_resource_id = response["addonProfiles"]["omsagent"]["config"]["logAnalyticsWorkspaceResourceID"]
 
         # check that the DCR was created
-        region_code = getRegionCodeForAzureRegion(MockCmd(MockCLI()), resource_group_location)
-        dataCollectionRuleName = sanitize_dcr_name(f"MSCI-{region_code}-{aks_name}")
+        location = resource_group_location
+        dataCollectionRuleName = f"MSCI-{location}-{aks_name}"
+        dataCollectionRuleName = dataCollectionRuleName[0:64]
         dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
         get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
         self.cmd(get_cmd, checks=[
@@ -6984,6 +6992,20 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         if syslog_enabled:
             self.cmd(get_cmd, checks=[
                 self.check('properties.dataSources.syslog[0].streams[0]', f'Microsoft-Syslog')
+            ])
+
+        if data_collection_settings:
+             self.cmd(get_cmd, checks=[
+                self.check('properties.dataSources.extensions[0].name', f'ContainerInsightsExtension')
+            ])
+             self.cmd(get_cmd, checks=[
+                self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.interval', f'1m')
+            ])
+             self.cmd(get_cmd, checks=[
+                self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.namespaceFilteringMode', f'Include')
+            ])
+             self.cmd(get_cmd, checks=[
+                self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.namespaces[0]', f'kube-system')
             ])
 
         # check that the DCR-A was created
@@ -7068,8 +7090,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         workspace_resource_group = workspace_resource_id.split("/")[4]
 
         # check that the DCR was created
-        region_code = getRegionCodeForAzureRegion(MockCmd(MockCLI()), resource_group_location)
-        dataCollectionRuleName = sanitize_dcr_name(f"MSCI-{region_code}-{aks_name}")
+        location = resource_group_location
+        dataCollectionRuleName = f"MSCI-{location}-{aks_name}"
         dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
         get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
         self.cmd(get_cmd, checks=[
@@ -7128,8 +7150,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         try:
             # check that the DCR was created
-            region_code = getRegionCodeForAzureRegion(MockCmd(MockCLI()), resource_group_location)
-            dataCollectionRuleName = sanitize_dcr_name(f"MSCI-{region_code}-{aks_name}")
+            location = resource_group_location
+            dataCollectionRuleName = f"MSCI-{location}-{aks_name}"
+            dataCollectionRuleName = dataCollectionRuleName[0:64]
             dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
             get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
             self.cmd(get_cmd, checks=[
@@ -7916,3 +7939,74 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    # The fix on the rp side has not been released yet
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_keda(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create: enable-keda
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} --ssh-key-value={ssh_key_value} --output=json ' \
+                     '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-KedaPreview ' \
+                     '--enable-keda'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('workloadAutoScalerProfile.keda.enabled', True),
+        ])
+
+        # delete
+        delete_cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(delete_cmd, checks=[
+            self.is_empty(),
+        ])
+
+    # The fix on the rp side has not been released yet
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_update_with_keda(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create: without enable-keda
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} --ssh-key-value={ssh_key_value} --output=json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.not_exists('workloadAutoScalerProfile.keda'),
+        ])
+
+        # update: enable-keda
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
+                     '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-KedaPreview ' \
+                     '--enable-keda'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('workloadAutoScalerProfile.keda.enabled', True),
+        ])
+
+        # update: disable-keda
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
+                     '--disable-keda'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('workloadAutoScalerProfile.keda.enabled', False),
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])

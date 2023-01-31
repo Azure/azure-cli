@@ -21,6 +21,8 @@ except ImportError:
 
 import uuid
 import re
+from urllib.parse import urlparse
+
 from azure.cli.command_modules.apim._params import ImportFormat
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import (RequiredArgumentMissingError, MutuallyExclusiveArgumentError,
@@ -300,6 +302,19 @@ def apim_api_create(client, resource_group_name, service_name, api_id, descripti
     else:
         authentication_settings = None
 
+    parsed_url = urlparse(service_url)
+    if protocols is None:
+        if parsed_url.scheme in (Protocol.WS.value, Protocol.WSS.value):
+            protocols = [Protocol.WSS.value]
+        else:
+            protocols = [Protocol.HTTPS.value]
+
+    if api_type is None:
+        if parsed_url.scheme in (Protocol.WS.value, Protocol.WSS.value):
+            api_type = ApiType.WEBSOCKET.value
+        else:
+            api_type = ApiType.HTTP.value
+
     parameters = ApiContract(
         api_id=api_id,
         description=description,
@@ -309,10 +324,9 @@ def apim_api_create(client, resource_group_name, service_name, api_id, descripti
             subscription_key_header_name),
         display_name=display_name,
         service_url=service_url,
-        protocols=protocols if protocols is not None else [
-            Protocol.https.value],
+        protocols=protocols,
         path=path,
-        api_type=api_type if api_type is not None else ApiType.http.value,
+        api_type=api_type,
         subscription_required=subscription_required
     )
 
