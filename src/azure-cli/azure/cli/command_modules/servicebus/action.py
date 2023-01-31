@@ -8,19 +8,18 @@
 # pylint: disable=line-too-long
 
 import argparse
-import json
-import collections
+
 
 class AlertAddEncryption(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
         super(AlertAddEncryption, self).__call__(parser, namespace, action, option_string)
 
-    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+    def get_action(self, values, option_string):
         from azure.cli.core.azclierror import InvalidArgumentValueError
         from azure.cli.core import CLIError
 
-        keyVaultObject={}
+        keyVaultObject = {}
         for (k, v) in (x.split('=', 1) for x in values):
             if k == 'key-name':
                 keyVaultObject["key_name"] = v
@@ -31,7 +30,7 @@ class AlertAddEncryption(argparse._AppendAction):
             elif k == 'key-version':
                 keyVaultObject["key_version"] = v
             elif k == 'user-assigned-identity':
-                keyVaultObject["user_assigned_identity"]=v
+                keyVaultObject["user_assigned_identity"] = v
                 if keyVaultObject["user_assigned_identity"].endswith('/'):
                     keyVaultObject["user_assigned_identity"] = keyVaultObject["user_assigned_identity"][:-1]
             else:

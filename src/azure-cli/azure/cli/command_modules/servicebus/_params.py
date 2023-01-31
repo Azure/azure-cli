@@ -39,7 +39,7 @@ def load_arguments_sb(self, _):
         c.argument('disable_local_auth', options_list=['--disable-local-auth'], is_preview=True, arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether SAS authentication is enabled/disabled for the Service Bus')
         c.argument('capacity', type=int, choices=[1, 2, 4, 8, 16], help='Number of message units. This property is only applicable to namespaces of Premium SKU', validator=validate_premiumsku_capacity)
-        c.argument('mi_system_assigned', arg_group='Managed Identity',arg_type=get_three_state_flag(),
+        c.argument('mi_system_assigned', arg_group='Managed Identity', arg_type=get_three_state_flag(),
                    help='Enable System Assigned Identity')
         c.argument('mi_user_assigned', arg_group='Managed Identity', nargs='+', help='List of User Assigned Identity ids.')
         c.argument('encryption_config', action=AlertAddEncryption, nargs='+',

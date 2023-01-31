@@ -21,7 +21,6 @@ def load_command_table(self, _):
                                                                       private_endpoint_connections_mgmt_client_factory,
                                                                       private_link_mgmt_client_factory)
 
-    #from ._exception_handler import exception_handler
     sb_namespace_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicebus.operations#NamespacesOperations.{}',
         client_factory=namespaces_mgmt_client_factory,
@@ -192,11 +191,10 @@ def load_command_table(self, _):
 
 # Identity Region
     with self.command_group('servicebus namespace identity', custom_command_type=sb_namespace_custom, is_preview=True) as g:
-        g.custom_command('assign', 'cli_add_identity', supports_no_wait=True)
-        g.custom_command('remove', 'cli_remove_identity', supports_no_wait=True)
+        g.custom_command('assign', 'cli_add_identity')
+        g.custom_command('remove', 'cli_remove_identity')
 
 # Encryption Region
     with self.command_group('servicebus namespace encryption', custom_command_type=sb_namespace_custom, is_preview=True) as g:
-        g.custom_command('add', 'cli_add_encryption', supports_no_wait=True)
-        g.custom_command('remove', 'cli_remove_encryption', supports_no_wait=True)
-
+        g.custom_command('add', 'cli_add_encryption')
+        g.custom_command('remove', 'cli_remove_encryption')

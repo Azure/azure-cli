@@ -131,13 +131,13 @@ class Update(AAZCommand):
             enum={"1.0": "1.0", "1.1": "1.1", "1.2": "1.2"},
         )
         _args_schema.premium_messaging_partitions = AAZIntArg(
-            options=["--premium-messaging-partitions"],
+            options=["--premium-partitions", "--premium-messaging-partitions"],
             arg_group="Properties",
             help="The number of partitions of a Service Bus namespace. This property is only applicable to Premium SKU namespaces. The default value is 1 and possible values are 1, 2 and 4",
             nullable=True,
         )
         _args_schema.private_endpoint_connections = AAZListArg(
-            options=["--private-endpoint-connections"],
+            options=["--connections", "--private-endpoint-connections"],
             arg_group="Properties",
             help="List of private endpoint connections.",
             nullable=True,
