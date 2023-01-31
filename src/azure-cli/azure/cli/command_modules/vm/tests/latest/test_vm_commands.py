@@ -6448,13 +6448,13 @@ class VMGalleryApplication(ScenarioTest):
         ])
         self.cmd('sig gallery-application list -r {gallery} -g {rg}', checks=[
             self.check('[0].name', '{app_name}'),
-            self.check('[0].supportedOsType', 'Windows'),
+            self.check('[0].supportedOSType', 'Windows'),
             self.check('[0].description', 'test'),
             self.check('[0].tags', {'tag': 'test'})
             ])
         self.cmd('sig gallery-application show -n {app_name} -r {gallery} -g {rg}', checks=[
             self.check('name', '{app_name}'),
-            self.check('supportedOsType', 'Windows'),
+            self.check('supportedOSType', 'Windows'),
             self.check('description', 'test'),
             self.check('tags', {'tag': 'test'})
         ])
@@ -6739,7 +6739,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host_', location='westeurope')
-    @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host2_', location='centraluseuap', key='rg2')
+    @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host2_', location='eastus', key='rg2')
     def test_dedicated_host_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
             'host-group': 'my-host-group',
