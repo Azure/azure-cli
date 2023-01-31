@@ -69,7 +69,7 @@ class AAZArgAction(Action):
             except AAZShowHelp as aaz_help:
                 # show help message
                 aaz_help.keys = (option_string, *aaz_help.keys)
-                self.show_aaz_help(parser, aaz_help) # may raise AAZUnknownFieldError
+                self.show_aaz_help(parser, aaz_help)  # may raise AAZUnknownFieldError
         except (ValueError, KeyError) as ex:
             raise azclierror.InvalidArgumentValueError(f"Failed to parse '{option_string}' argument: {ex}") from ex
 
