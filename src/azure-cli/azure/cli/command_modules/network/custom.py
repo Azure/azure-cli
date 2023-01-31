@@ -1428,15 +1428,21 @@ class AGRewriteRuleUpdate(_AGRewriteRuleUpdate):
     def pre_operations(self):
         args = self.ctx.args
         if has_value(args.request_headers):
-            configurations = []
-            for k, v in args.request_headers.items():
-                configurations.append({"header_name": k, "header_value": v})
-            args.request_header_configurations = configurations
+            if args.request_headers.to_serialized_data() is None:
+                args.request_header_configurations = None
+            else:
+                configurations = []
+                for k, v in args.request_headers.items():
+                    configurations.append({"header_name": k, "header_value": v})
+                args.request_header_configurations = configurations
         if has_value(args.response_headers):
-            configurations = []
-            for k, v in args.response_headers.items():
-                configurations.append({"header_name": k, "header_value": v})
-            args.response_header_configurations = configurations
+            if args.response_headers.to_serialized_data() is None:
+                args.response_header_configurations = None
+            else:
+                configurations = []
+                for k, v in args.response_headers.items():
+                    configurations.append({"header_name": k, "header_value": v})
+                args.response_header_configurations = configurations
 
 
 def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway_name, item_name, address_pool=None,
