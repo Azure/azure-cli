@@ -6671,6 +6671,32 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                     checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
 
 
+class SqlManagedInstanceRestoreCrossSubscriptionScenarioTest(ScenarioTest):
+    @ManagedInstancePreparer()
+    def test_sql_managed_deleted_cross_subscription_restore(self, mi, rg):
+        from datetime import datetime, timezone, timedelta
+        resource_prefix = 'MIRestoreCrossSubDB'
+
+        self.kwargs.update({
+            'rg': rg,
+            'managed_instance_name': mi,
+            'database_name': self.create_random_name(resource_prefix, 50),
+            'source_sub': "62e48210-5e43-423e-889b-c277f3e08c39",
+            'source_rg': "gen4-testing-RG",
+            'source_mi': "filiptanic-gen4-on-gen7-different-subnet",
+            'source_db': "cross-sub-restored",
+            'pit': (datetime.now(timezone.utc) + timedelta(minutes=-15)).isoformat()
+        })
+
+        # test restore deleted database
+        self.cmd(
+            'sql midb restore --dest-name {database_name} --dest-mi {managed_instance_name} --dest-resource-group {rg} --source-sub {source_sub} --mi {source_mi} -g {source_rg} -n {source_db} --time {pit}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('name', '{database_name}'),
+                self.check('status', 'Online')])
+
+
 class SqlManagedInstanceDtcScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ManagedInstancePreparer(parameter_name = 'mi', vnet_name='vnet-managed-instance-v2')
