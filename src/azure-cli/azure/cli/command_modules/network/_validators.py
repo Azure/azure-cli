@@ -1607,24 +1607,6 @@ class WafConfigExclusionAction(argparse.Action):
         })
 
 
-def get_header_configuration_validator(dest):
-    def validator(namespace):
-        values = getattr(namespace, dest, None)
-        if not values:
-            return
-
-        results = []
-        for item in values:
-            key, value = item.split('=', 1)
-            results.append({
-                'header_name': key,
-                'header_value': value
-            })
-        setattr(namespace, dest, results)
-
-    return validator
-
-
 def process_private_link_resource_id_argument(cmd, namespace):
     if all([namespace.resource_group_name,
             namespace.name,
