@@ -3569,12 +3569,12 @@ class NetworkLoadBalancerOutboundRulesScenarioTest(ScenarioTest):
             self.check('protocol', 'Tcp'),
             self.check('allocatedOutboundPorts', 512),
             self.check("contains(backendAddressPool.id, '{backend}')", True),
-            self.check("contains(frontendIpConfigurations[0].id, '{frontend1}')", True)
+            self.check("contains(frontendIPConfigurations[0].id, '{frontend1}')", True)
         ])
         self.cmd('network lb outbound-rule create -g {rg} --lb-name {lb} -n {rule2} --address-pool {backend} --frontend-ip-configs {frontend2} --idle-timeout 20 --protocol all', checks=[
             self.check('idleTimeoutInMinutes', 20),
             self.check("contains(backendAddressPool.id, '{backend}')", True),
-            self.check("contains(frontendIpConfigurations[0].id, '{frontend2}')", True)
+            self.check("contains(frontendIPConfigurations[0].id, '{frontend2}')", True)
         ])
         self.cmd('network lb outbound-rule update -g {rg} --lb-name {lb} -n {rule2} --idle-timeout 25',
                  checks=self.check('idleTimeoutInMinutes', 25))
@@ -3585,7 +3585,7 @@ class NetworkLoadBalancerOutboundRulesScenarioTest(ScenarioTest):
             self.check('protocol', 'Tcp'),
             self.check('allocatedOutboundPorts', 512),
             self.check("contains(backendAddressPool.id, '{backend}')", True),
-            self.check("contains(frontendIpConfigurations[0].id, '{frontend1}')", True)
+            self.check("contains(frontendIPConfigurations[0].id, '{frontend1}')", True)
         ])
         self.cmd('network lb outbound-rule delete -g {rg} --lb-name {lb} -n {rule1}')
         self.cmd('network lb outbound-rule list -g {rg} --lb-name {lb}',

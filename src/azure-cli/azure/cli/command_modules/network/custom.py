@@ -4515,39 +4515,6 @@ def list_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer
     return address_pool.load_balancer_backend_addresses
 
 
-def create_lb_outbound_rule(cmd, resource_group_name, load_balancer_name, item_name,
-                            backend_address_pool, frontend_ip_configurations, protocol,
-                            outbound_ports=None, enable_tcp_reset=None, idle_timeout=None):
-    OutboundRule, SubResource = cmd.get_models('OutboundRule', 'SubResource')
-    client = network_client_factory(cmd.cli_ctx).load_balancers
-    lb = lb_get(client, resource_group_name, load_balancer_name)
-    rule = OutboundRule(
-        protocol=protocol, enable_tcp_reset=enable_tcp_reset, idle_timeout_in_minutes=idle_timeout,
-        backend_address_pool=SubResource(id=backend_address_pool),
-        frontend_ip_configurations=[SubResource(id=x) for x in frontend_ip_configurations]
-        if frontend_ip_configurations else None,
-        allocated_outbound_ports=outbound_ports, name=item_name)
-    upsert_to_collection(lb, 'outbound_rules', rule, 'name')
-    poller = client.begin_create_or_update(resource_group_name, load_balancer_name, lb)
-    return get_property(poller.result().outbound_rules, item_name)
-
-
-def set_lb_outbound_rule(instance, cmd, parent, item_name, protocol=None, outbound_ports=None,
-                         idle_timeout=None, frontend_ip_configurations=None, enable_tcp_reset=None,
-                         backend_address_pool=None):
-    SubResource = cmd.get_models('SubResource')
-    with cmd.update_context(instance) as c:
-        c.set_param('protocol', protocol)
-        c.set_param('allocated_outbound_ports', outbound_ports)
-        c.set_param('idle_timeout_in_minutes', idle_timeout)
-        c.set_param('enable_tcp_reset', enable_tcp_reset)
-        c.set_param('backend_address_pool', SubResource(id=backend_address_pool)
-                    if backend_address_pool else None)
-        c.set_param('frontend_ip_configurations',
-                    [SubResource(id=x) for x in frontend_ip_configurations] if frontend_ip_configurations else None)
-    return parent
-
-
 def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol, port,
                     path=None, interval=None, threshold=None, probe_threshold=None):
     if probe_threshold is not None:

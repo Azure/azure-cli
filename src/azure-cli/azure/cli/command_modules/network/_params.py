@@ -648,7 +648,6 @@ def load_arguments(self, _):
     lb_subresources = [
         {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
         {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
-        {'name': 'outbound-rule', 'display': 'outbound rule', 'ref': 'outbound_rules'},
     ]
     for item in lb_subresources:
         with self.argument_context('network lb {}'.format(item['name'])) as c:
@@ -748,11 +747,6 @@ def load_arguments(self, _):
         c.argument('probe_threshold', type=int, help='The number of consecutive successful or failed probes in order '
                                                      'to allow or deny traffic from being delivered to this endpoint.')
 
-    with self.argument_context('network lb outbound-rule') as c:
-        c.argument('backend_address_pool', options_list='--address-pool', help='Name or ID of the backend address pool.')
-        c.argument('frontend_ip_configurations', options_list='--frontend-ip-configs', help='Space-separated list of frontend IP configuration names or IDs.', nargs='+')
-        c.argument('protocol', arg_type=get_enum_type(TransportProtocol), help='Network transport protocol.')
-        c.argument('outbound_ports', type=int, help='The number of outbound ports to be used for NAT.')
     # endregion
 
     # region cross-region load balancer
