@@ -209,7 +209,7 @@ def _bicep_installed_in_ci():
 
 def _use_binary_from_path(cli_ctx):
     use_binary_from_path = cli_ctx.config.get("bicep", "use_binary_from_path", "if_found_in_ci").lower()
-    
+
     _logger.debug('Current value of "use_binary_from_path": %s.', use_binary_from_path)
 
     if use_binary_from_path == "if_found_in_ci":

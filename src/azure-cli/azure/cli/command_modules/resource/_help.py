@@ -2694,11 +2694,13 @@ helps['bicep'] = """
 type: group
 short-summary: Bicep CLI command group.
 long-summary: |
-  Bicep CLI command group. There are two configurations that can be set for the command group, including bicep.check_version and bicep.use_binary_from_path.
+  Bicep CLI command group. There are two configurations that can be set for the command group, including bicep.check_version and bicep.use_binary_from_path:
 
-  bicep.check_version accepts Boolean values and defaults to True. If set to False, version checks for Bicep CLI installed via Azure CLI will be disabled.
+  [1] az config set bicep.version_check=True/False
+      Turn on/off Bicep CLI version check when executing az bicep commands.
 
-  The possible values of bicep.use_binary_from_path are if_found_in_ci and Booleans. The default value is if_found_in_ci.
+  [2] az config set bicep.use_binary_from_path=True/False/if_found_in_ci
+      Specify whether to use Bicep CLI from PATH or not. The default value is if_found_in_ci.
 """
 
 helps['bicep install'] = """
