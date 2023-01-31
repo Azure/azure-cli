@@ -600,7 +600,6 @@ class ListenerCreate(_ListenerCreate):
         args = self.ctx.args
         args.protocol = "Tls" if has_value(args.ssl_cert) else "Tcp"
 
-
     def pre_instance_create(self):
         args = self.ctx.args
         if not has_value(args.frontend_ip):
