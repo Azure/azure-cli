@@ -584,7 +584,7 @@ def load_arguments(self, _):
     with self.argument_context('keyvault security-domain upload') as c:
         c.argument('sd_file', help='This file contains security domain encrypted using SD Exchange file downloaded '
                                    'in security-domain init-recovery command.')
-        c.argument('restore_blob', help='Indicator if blob is already restored.')   
+        c.argument('restore_blob', help='Indicator if blob is already restored.')
         c.argument('sd_exchange_key', help='The exchange key for security domain.')
         c.argument('sd_wrapping_keys', nargs='*',
                    help='Space-separated file paths to PEM files containing private keys.')
