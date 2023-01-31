@@ -49,7 +49,7 @@ from azure.cli.command_modules.network._validators import (
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
     process_public_ip_create_namespace,
     process_vpn_connection_create_namespace,
-    process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace,
+    process_nw_config_diagnostic_namespace,
     process_appgw_waf_policy_update, process_cross_region_lb_create_namespace)
 
 NETWORK_VROUTER_DEPRECATION_INFO = 'network routeserver'
@@ -167,12 +167,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.cli.command_modules.network.custom#{}',
         client_factory=cf_virtual_router_peering,
         min_api='2019-08-01'
-    )
-
-    network_load_balancers_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
-        client_factory=cf_load_balancers,
-        min_api='2020-08-01'
     )
 
     network_nic_custom = CliCommandType(
@@ -545,18 +539,9 @@ def load_command_table(self, _):
     self.command_table["network lb rule create"] = LBRuleCreate(loader=self)
     self.command_table["network lb rule update"] = LBRuleUpdate(loader=self)
 
-    with self.command_group('network lb outbound-rule', network_lb_sdk, min_api='2018-07-01') as g:
-        g.custom_command('create', 'create_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
-        g.generic_update_command('update', child_collection_prop_name='outbound_rules',
-                                 getter_name='lb_get',
-                                 getter_type=network_load_balancers_custom,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
-
-    with self.command_group('network lb outbound-rule', network_util, min_api='2018-07-01') as g:
-        g.command('list', list_network_resource_property('load_balancers', 'outbound_rules'))
-        g.show_command('show', get_network_resource_property_entry('load_balancers', 'outbound_rules'))
-        g.command('delete', delete_lb_resource_property_entry('load_balancers', 'outbound_rules'))
+    from .operations.load_balancer import LBOutboundRuleCreate, LBOutboundRuleUpdate
+    self.command_table["network lb outbound-rule create"] = LBOutboundRuleCreate(loader=self)
+    self.command_table["network lb outbound-rule update"] = LBOutboundRuleUpdate(loader=self)
 
     with self.command_group("network lb probe") as g:
         g.custom_command("create", "create_lb_probe")
