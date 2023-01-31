@@ -746,5 +746,5 @@ def _get_policy_assignment_id(cmd, policy_assignment):
                 "No policy assignment with the name '{}' found.".format(policy_assignment))
         if len(policy_assignment_ids) > 1:
             raise ArgumentUsageError("Multiple policy assignment with the name '{}' found. "
-                           "Specify the policy assignment ID.".format(policy_assignment))
+                                     "Specify the policy assignment ID.".format(policy_assignment))
         return policy_assignment_ids[0]
