@@ -3636,6 +3636,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     elif not disable_app_insights and matched_runtime.app_insights:
         create_app_insights = True
 
+# TODO use managed-environment field on ASP model when we the latest SDK is avaliable. 
     if environment is not None:
         managed_environment = get_managed_environment(cmd, resource_group_name, environment)
         functionapp_def.enable_additional_properties_sending()
