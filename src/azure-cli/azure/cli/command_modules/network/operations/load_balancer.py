@@ -13,6 +13,8 @@ from ..aaz.latest.network.lb.inbound_nat_pool import Create as _LBInboundNatPool
     Update as _LBInboundNatPoolUpdate
 from ..aaz.latest.network.lb.inbound_nat_rule import Create as _LBInboundNatRuleCreate, \
     Update as _LBInboundNatRuleUpdate
+from ..aaz.latest.network.lb.rule import Create as _LBRuleCreate, Update as _LBRuleUpdate, Show as _LBRuleShow, \
+    Delete as _LBRuleDelete, List as _LBRuleList
 
 
 logger = get_logger(__name__)
@@ -217,6 +219,113 @@ class LBInboundNatRuleUpdate(_LBInboundNatRuleUpdate):
             instance.properties.backend_address_pool = None
 
 
+class LBRuleCreate(_LBRuleCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
+        )
+        args_schema.probe_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/probes/{}"
+        )
+        # list argument accept one element: `--backend-pool-name PoolName`
+        args_schema.backend_pools = AAZListArg(
+            options=["--backend-pools-name", "--backend-pool-name"],
+            arg_group="Properties",
+            help="List of ID or name of the backend address pools. Multiple pools are only supported by Gateway SKU load balancer. If only one exists, omit to use as default."
+        )
+        args_schema.backend_pools.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/backendAddressPools/{}"
+            )
+        )
+
+        args_schema.protocol._required = True
+        args_schema.frontend_port._required = True
+        args_schema.backend_port._required = True
+        args_schema.backend_address_pools._registered = False
+        return args_schema
+
+    def pre_instance_create(self):
+        from azure.cli.core.aaz.utils import assign_aaz_list_arg
+        args = self.ctx.args
+        if not has_value(args.frontend_ip_name):
+            instance = self.ctx.vars.instance
+            frontend_ip_configurations = instance.properties.frontend_ip_configurations
+            if len(frontend_ip_configurations) == 1:
+                args.frontend_ip_name = instance.properties.frontend_ip_configurations[0].id
+            elif len(frontend_ip_configurations) > 1:
+                raise ArgumentUsageError(
+                    "Multiple FrontendIpConfigurations found in loadbalancer. Specify --frontend-ip explicitly.")
+        if not has_value(args.backend_pools):
+            instance = self.ctx.vars.instance
+            backend_address_pools = instance.properties.backend_address_pools
+            if len(backend_address_pools) == 1:
+                args.backend_pools = [instance.properties.backend_address_pools[0].id]
+            elif len(backend_address_pools) > 1:
+                raise ArgumentUsageError(
+                    "Multiple BackendAddressPools found in loadbalancer. Specify --backend-pool-name explicitly.")
+        args.backend_address_pools = assign_aaz_list_arg(
+            args.backend_address_pools, args.backend_pools,
+            element_transformer=lambda _, id: {"id": id}
+        )
+
+
+class LBRuleUpdate(_LBRuleUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
+        )
+        args_schema.probe_name._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/probes/{}"
+        )
+
+        args_schema.backend_pools = AAZListArg(
+            options=["--backend-pools-name", "--backend-pool-name"],
+            nullable=True,
+            arg_group="Properties",
+            help="List of ID or name of the backend address pools. Multiple pools are only supported by Gateway SKU load balancer."
+        )
+
+        args_schema.backend_pools.Element = AAZResourceIdArg(
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/backendAddressPools/{}"
+            )
+        )
+
+        args_schema.protocol._nullable = False
+        args_schema.frontend_port._nullable = False
+        args_schema.backend_port._nullable = False
+        args_schema.backend_address_pools._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        from azure.cli.core.aaz.utils import assign_aaz_list_arg
+        args = self.ctx.args
+        args.backend_address_pools = assign_aaz_list_arg(
+            args.backend_address_pools, args.backend_pools,
+            element_transformer=lambda _, id: {"id": id}
+        )
+
+    def post_instance_update(self, instance):
+        if not has_value(instance.properties.frontend_ip_configuration.id):
+            instance.properties.frontend_ip_configuration = None
+        if not has_value(instance.properties.probe.id):
+            instance.properties.probe = None
+        # always remove backend_address_pool in update request, service will fill this property based on backend_address_pools property.
+        instance.properties.backend_address_pool = None
+
+
+# cross-region-lb commands
 @register_command("network cross-region-lb show")
 class CrossRegionLoadBalancerShow(_LBShow):
     """Get the details of a load balancer.
@@ -347,3 +456,151 @@ class CrossRegionLoadBalancerFrontendIPUpdate(_LBFrontendIPUpdate):
         args_schema.subnet._registered = False
         args_schema.gateway_lb._registered = False
         return args_schema
+
+
+@register_command("network cross-region-lb rule show")
+class CrossRegionLoadBalancerRuleShow(_LBRuleShow):
+    """Get the details of a load balancing rule.
+
+    :example: Get the details of a load balancing rule.
+        az network cross-region-lb rule show -g MyResourceGroup --lb-name MyLb -n MyLbRule
+    """
+
+
+@register_command("network cross-region-lb rule delete")
+class CrossRegionLoadBalancerRuleDelete(_LBRuleDelete):
+    """Delete a load balancing rule.
+
+    :example: Delete a load balancing rule.
+        az network cross-region-lb rule delete -g MyResourceGroup --lb-name MyLb -n MyLbRule
+    """
+
+
+@register_command("network cross-region-lb rule list")
+class CrossRegionLoadBalancerRuleList(_LBRuleList):
+    """List load balancing rules.
+
+    :example: List load balancing rules.
+        az network cross-region-lb rule list -g MyResourceGroup --lb-name MyLb -o table
+    """
+
+
+@register_command("network cross-region-lb rule create")
+class CrossRegionLoadBalancerRuleCreate(_LBRuleCreate):
+    """Create a load balancing rule.
+
+    :example: Create a load balancing rule that assigns a front-facing IP configuration and port to an address pool and port.
+        az network cross-region-lb rule create -g MyResourceGroup --lb-name MyLb -n MyLbRule --protocol Tcp --frontend-ip-name MyFrontEndIp --frontend-port 80 --backend-pool-name MyAddressPool --backend-port 80
+
+    :example: Create a load balancing rule that assigns a front-facing IP configuration and port to an address pool and port with the floating ip feature.
+        az network cross-region-lb rule create -g MyResourceGroup --lb-name MyLb -n MyLbRule --protocol Tcp --frontend-ip-name MyFrontEndIp --frontend-port 80 --backend-pool-name MyAddressPool --backend-port 80 --floating-ip true
+
+    :example: Create an HA ports load balancing rule that assigns a frontend IP and port to use all available backend IPs in a pool on the same port.
+        az network cross-region-lb rule create -g MyResourceGroup --lb-name MyLb -n MyHAPortsRule --protocol All --frontend-port 0 --backend-port 0 --frontend-ip-name MyFrontendIp --backend-pool-name MyAddressPool
+    """
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
+        )
+        args_schema.probe_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/probes/{}"
+        )
+        # not support multi backend pools because the loadbalance SKU is not Gateway
+        args_schema.backend_pool = AAZResourceIdArg(
+            options=["--backend-pool-name"],
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/backendAddressPools/{}"
+            ),
+            arg_group="Properties",
+            help="ID or name of the backend address pools. If only one exists, omit to use as default."
+        )
+
+        args_schema.protocol._required = True
+        args_schema.frontend_port._required = True
+        args_schema.backend_port._required = True
+        args_schema.backend_address_pools._registered = False
+        args_schema.disable_outbound_snat._registered = False   # it's not required for cross-region-lb
+        return args_schema
+
+    def pre_instance_create(self):
+        args = self.ctx.args
+        if not has_value(args.frontend_ip_name):
+            instance = self.ctx.vars.instance
+            frontend_ip_configurations = instance.properties.frontend_ip_configurations
+            if len(frontend_ip_configurations) == 1:
+                args.frontend_ip_name = instance.properties.frontend_ip_configurations[0].id
+            elif len(frontend_ip_configurations) > 1:
+                raise ArgumentUsageError(
+                    "Multiple FrontendIpConfigurations found in loadbalancer. Specify --frontend-ip explicitly.")
+        if not has_value(args.backend_pool):
+            instance = self.ctx.vars.instance
+            backend_address_pools = instance.properties.backend_address_pools
+            if len(backend_address_pools) == 1:
+                args.backend_pool = instance.properties.backend_address_pools[0].id
+            elif len(backend_address_pools) > 1:
+                raise ArgumentUsageError(
+                    "Multiple BackendAddressPools found in loadbalancer. Specify --backend-pool-name explicitly.")
+        if has_value(args.backend_pool):
+            args.backend_address_pools = [{"id": args.backend_pool.to_serialized_data()}]
+
+
+@register_command("network cross-region-lb rule update")
+class CrossRegionLoadBalancerRuleUpdate(_LBRuleUpdate):
+    """Update a load balancing rule.
+
+    :example:  Update a load balancing rule to change the protocol to UDP.
+        az network cross-region-lb rule update -g MyResourceGroup --lb-name MyLb -n MyLbRule --protocol Udp
+
+    :example: Update a load balancing rule to support HA ports.
+        az network cross-region-lb rule update -g MyResourceGroup --lb-name MyLb -n MyLbRule --protocol All --frontend-port 0 --backend-port 0
+    """
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
+        )
+        args_schema.probe_name._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/probes/{}"
+        )
+        # not support multi backend pools because the loadbalance SKU is not Gateway
+        args_schema.backend_pool = AAZResourceIdArg(
+            options=["--backend-pool-name"],
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/backendAddressPools/{}"
+            ),
+            arg_group="Properties",
+            nullable=True,
+            help="ID or name of the backend address pools. If only one exists, omit to use as default."
+        )
+
+        args_schema.protocol._nullable = False
+        args_schema.frontend_port._nullable = False
+        args_schema.backend_port._nullable = False
+        args_schema.backend_address_pools._registered = False
+        args_schema.disable_outbound_snat._registered = False   # it's not required for cross-region-lb
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.backend_pool):
+            backend_pool = args.backend_pool.to_serialized_data()
+            if backend_pool is None:
+                args.backend_address_pools = []  # remove backend pool
+            else:
+                args.backend_address_pools = [{"id": backend_pool}]
+
+    def post_instance_update(self, instance):
+        if not has_value(instance.properties.frontend_ip_configuration.id):
+            instance.properties.frontend_ip_configuration = None
+        if not has_value(instance.properties.probe.id):
+            instance.properties.probe = None
+        # always remove backend_address_pool in update request, service will fill this property based on backend_address_pools property.
+        instance.properties.backend_address_pool = None

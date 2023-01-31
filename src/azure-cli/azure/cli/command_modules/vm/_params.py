@@ -820,14 +820,6 @@ def load_arguments(self, _):
         c.argument('extension_name', name_arg_type, help='Name of the extension.')
         c.argument('vmss_name', vmss_name_type, options_list=['--vmss-name'], id_part=None)
 
-    with self.argument_context('vmss nic') as c:
-        c.argument('virtual_machine_scale_set_name', options_list=['--vmss-name'], help='Scale set name.', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
-        c.argument('virtualmachine_index', options_list=['--instance-id'], id_part='child_name_1')
-        c.argument('network_interface_name', options_list=['--name', '-n'], metavar='NIC_NAME', help='The network interface (NIC).', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'), id_part='child_name_2')
-
-    with self.argument_context('vmss nic list') as c:
-        c.argument('virtual_machine_scale_set_name', arg_type=vmss_name_type, options_list=['--vmss-name'], id_part=None)
-
     with self.argument_context('vmss set-orchestration-service-state') as c:
         c.argument('service_name', arg_type=get_enum_type(OrchestrationServiceNames), help='The name of the orchestration service.')
         c.argument('action', arg_type=get_enum_type(OrchestrationServiceStateAction), help='The action to be performed.')
