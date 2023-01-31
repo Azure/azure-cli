@@ -2514,7 +2514,8 @@ def _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, pa
     return restore_blob_value
 
 
-def _security_domain_upload_blob(cmd, client, hsm_name, restore_blob_value, identifier=None, vault_base_url=None, no_wait=False):
+def _security_domain_upload_blob(cmd, client, hsm_name, restore_blob_value, identifier=None,
+                                 vault_base_url=None, no_wait=False):
     SecurityDomainObject = cmd.get_models('SecurityDomainObject', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
     security_domain = SecurityDomainObject(value=restore_blob_value)
     retval = client.upload(vault_base_url=hsm_name or vault_base_url, security_domain=security_domain)
@@ -2529,8 +2530,9 @@ def _security_domain_upload_blob(cmd, client, hsm_name, restore_blob_value, iden
     return retval
 
 
-def security_domain_upload(cmd, client, hsm_name, sd_file, restore_blob=False, sd_exchange_key=None, sd_wrapping_keys=None, passwords=None,
-                           identifier=None, vault_base_url=None, no_wait=False):  # pylint: disable=unused-argument
+def security_domain_upload(cmd, client, hsm_name, sd_file, restore_blob=False, sd_exchange_key=None,
+                           sd_wrapping_keys=None, passwords=None, identifier=None, vault_base_url=None,
+                           no_wait=False):  # pylint: disable=unused-argument
     if not restore_blob:
         restore_blob_value = _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys)
     else:
@@ -2542,7 +2544,8 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, restore_blob=False, s
     return retval
 
 
-def security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, sd_file_restore_blob, passwords=None):  # pylint: disable=unused-argument
+def security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, sd_file_restore_blob,
+                                 passwords=None):  # pylint: disable=unused-argument
     restore_blob_value = _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, passwords)
     try:
         with open(sd_file_restore_blob, 'w') as f:
