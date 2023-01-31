@@ -27,6 +27,7 @@ WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
 WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
+FUNCTIONAPP_EUAP_LOCATION = 'centraluseuap'
 WINDOWS_ASP_LOCATION_CHINACLOUD_WEBAPP = 'chinaeast'
 
 
@@ -525,6 +526,28 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
 
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node')])
+
+    @ResourceGroupPreparer(location=FUNCTIONAPP_EUAP_LOCATION)
+    @StorageAccountPreparer()
+    def test_functionapp_create_with_appcontainer_managed_environment(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappwindowsruntime', 40)
+        managed_environment_name = self.create_random_name(
+            'containerappmanagedenvironment', 40
+        )
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location {}'
+        .format(managed_environment_name, resource_group, FUNCTIONAPP_EUAP_LOCATION)).assert_with_checks([
+                     JMESPathCheck('name', managed_environment_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('location', FUNCTIONAPP_EUAP_LOCATION)])
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --environment {} --os-type Windows --functions-version 4'
+                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account, managed_environment_name)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()

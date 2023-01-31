@@ -3638,7 +3638,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     if environment is not None:
         managed_environment = get_managed_environment(cmd, resource_group_name, environment)
-        functionapp_def.managed_environment = managed_environment.id
+        functionapp_def.enable_additional_properties_sending()
+        existing_properties = functionapp_def.serialize()["properties"]
+        functionapp_def.additional_properties["properties"] = existing_properties
+        functionapp_def.additional_properties["properties"]["managedEnvironment"] = managed_environment.id
 
     poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
