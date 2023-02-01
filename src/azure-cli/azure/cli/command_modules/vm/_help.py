@@ -1997,7 +1997,7 @@ examples:
   - name: Find the available versions for the Docker extension.
     text: >
         az vm extension image list-versions --publisher Microsoft.Azure.Extensions \\
-            -l westus -n DockerExtension -otable
+            -l westus -n DockerExtension -o table
 """
 
 helps['vm extension image show'] = """
