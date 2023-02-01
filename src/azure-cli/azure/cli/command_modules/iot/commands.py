@@ -36,6 +36,9 @@ class RouteUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-f
 class HubDeleteResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
         from azure.cli.core.util import CLIError
+        # if no wait, return right away
+        if not poller:
+            return
         try:
             super(HubDeleteResultTransform, self).__call__(poller)
         except CLIError as e:
