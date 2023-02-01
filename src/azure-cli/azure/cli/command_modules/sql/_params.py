@@ -517,7 +517,7 @@ def _configure_db_dw_create_params(
     # *** Step 2: Apply customizations specific to create (as opposed to update) ***
 
     arg_ctx.argument('name',  # Note: this is sku name, not database name
-                     options_list=['--service-objective'],
+                     options_list=['--service-objective', '--service-level-objective'],
                      arg_group=sku_arg_group,
                      required=False,
                      help='The service objective for the new database. For example: ' +
@@ -1134,6 +1134,12 @@ def load_arguments(self, _):
                    required=False,
                    arg_type=zone_redundant_param_type)
 
+        c.argument('service_objective',
+                   options_list=['--service-objective', '--service-level-objective'],
+                   required=False,
+                   arg_group=sku_arg_group,
+                   help='The name of the new service objective.')
+
     ###############################################
     #              sql db geo-backup              #
     ###############################################
@@ -1197,6 +1203,12 @@ def load_arguments(self, _):
         c.argument('zone_redundant',
                    required=False,
                    arg_type=zone_redundant_param_type)
+                
+        c.argument('service_objective',
+                   options_list=['--service-objective', '--service-level-objective'],
+                   required=False,
+                   arg_group=sku_arg_group,
+                   help='The name of the new service objective.')
 
     ###############################################
     #                sql db str                   #
