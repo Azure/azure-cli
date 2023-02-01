@@ -177,7 +177,7 @@ def load_command_table(self, _):
         g.custom_command('start', 'cli_migration_start')
         g.custom_show_command('show', 'cli_migration_show')
         g.custom_command('complete', 'cli_migration_complete')
-        g.command('abort', 'revert')
+        g.custom_command('abort', 'revert')
 
 # NetwrokRuleSet Region
     with self.command_group('servicebus namespace network-rule', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
