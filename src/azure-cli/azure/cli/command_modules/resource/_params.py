@@ -670,10 +670,10 @@ def load_arguments(self, _):
         c.argument('outdir', arg_type=bicep_outdir_type)
         c.argument('outfile', arg_type=bicep_outfile_type)
         c.argument('stdout', arg_type=bicep_stdout_type)
-        c.argument('indent_kind', arg_type=bicep_indentkind_type, help="Set indentation kind. Valid values are ( Space | Tab ).")
-        c.argument('indent_size', arg_type=bicep_indentsize_type, help="Number of spaces to indent with (Only valid with --indent-kind set to Space).")
-        c.argument('insert_final_newline', arg_type=bicep_insertfinalnewline_type, help="Insert a final newline.")
-        c.argument('newline', arg_type=bicep_newline_type, help="Set newline char. Valid values are ( Auto | LF | CRLF | CR ).")
+        c.argument('indent_kind', arg_type=bicep_indentkind_type)
+        c.argument('indent_size', arg_type=bicep_indentsize_type)
+        c.argument('insert_final_newline', arg_type=bicep_insertfinalnewline_type)
+        c.argument('newline', arg_type=bicep_newline_type)
 
     with self.argument_context('bicep decompile') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the ARM template to decompile in the file system.")
