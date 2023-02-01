@@ -412,6 +412,7 @@ def load_command_table(self, _):
     with self.command_group('functionapp function') as g:
         g.custom_command('show', 'show_function')  # pylint: disable=show-command
         g.custom_command('delete', 'delete_function')
+        g.custom_command('list', 'list_functions')
 
     with self.command_group('functionapp function keys') as g:
         g.custom_command('set', 'update_function_key')

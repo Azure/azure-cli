@@ -5018,6 +5018,11 @@ def delete_host_key(cmd, resource_group_name, name, key_type, key_name, slot=Non
     return client.web_apps.delete_host_secret(resource_group_name, name, key_type, key_name)
 
 
+def list_functions(cmd, resource_group_name, name):
+    client = web_client_factory(cmd.cli_ctx)
+    return client.web_apps.list_functions(resource_group_name, name)
+
+
 def show_function(cmd, resource_group_name, name, function_name):
     client = web_client_factory(cmd.cli_ctx)
     result = client.web_apps.get_function(resource_group_name, name, function_name)
