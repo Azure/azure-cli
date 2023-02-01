@@ -11,6 +11,9 @@
 from azure.cli.core.aaz import *
 
 
+@register_command_group(
+    "policy-insights attestation",
+)
 class __CMDGroup(AAZCommandGroup):
     """Manage resource policy attestation.
 

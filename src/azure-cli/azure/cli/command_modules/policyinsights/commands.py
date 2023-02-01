@@ -67,3 +67,6 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_policy_attestation')
         g.custom_command('delete', 'delete_policy_attestation')
         g.custom_show_command('show', 'show_policy_attestation')
+
+        from .operations.AttestationList import List
+        self.command_table['policy attestation list'] = List(loader=self)

@@ -15,6 +15,7 @@ from ._create_by_subscription import *
 from ._delete import *
 from ._delete_by_rg import *
 from ._delete_by_subscription import *
+from ._list import *
 from ._show import *
 from ._show_by_rg import *
 from ._show_by_subscription import *

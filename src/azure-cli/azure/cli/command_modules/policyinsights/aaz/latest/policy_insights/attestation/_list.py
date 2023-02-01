@@ -10,10 +10,6 @@
 
 from azure.cli.core.aaz import *
 
-
-@register_command(
-    "policy attestation list",
-)
 class List(AAZCommand):
     """List all attestations for a resource.
 
@@ -53,7 +49,7 @@ class List(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.resource_group = AAZResourceGroupNameArg()
         _args_schema.resource_id = AAZStrArg(
-            options=["--resource-id", "--resource"],
+            options=["--resource-id"],
             help="Resource ID.",
         )
         _args_schema.filter = AAZStrArg(
@@ -73,11 +69,12 @@ class List(AAZCommand):
         self.pre_operations()
         condition_0 = has_value(self.ctx.args.resource_id)
         condition_1 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
+        condition_2 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
         if condition_0:
             self.AttestationsListForResource(ctx=self.ctx)()
-        elif condition_1:
+        if condition_1:
             self.AttestationsListForResourceGroup(ctx=self.ctx)()
-        else:
+        if condition_2:
             self.AttestationsListForSubscription(ctx=self.ctx)()
         self.post_operations()
 

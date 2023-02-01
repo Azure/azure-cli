@@ -39,17 +39,6 @@ class PolicyInsightsCommandsLoader(AzCommandsLoader):
                 args=args
             )
 
-        try:
-            from . import aaz_custom
-        except ImportError:
-            aaz_custom = None
-        if aaz_custom:
-            load_aaz_command_table(
-                loader=self,
-                aaz_pkg_name=aaz_custom.__name__,
-                args=args
-            )
-
         load_command_table(self, args)
         return self.command_table
 
