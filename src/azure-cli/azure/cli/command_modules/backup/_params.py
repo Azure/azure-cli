@@ -99,6 +99,7 @@ def load_arguments(self, _):
     with self.argument_context('backup vault create') as c:
         c.argument('tags', arg_type=tags_type)
         c.argument('classic_alerts', arg_type=get_enum_type(['Enable', 'Disable']), help='Use this property to specify whether backup alerts from the classic solution should be received.')
+        c.argument('public_network_access', arg_type=get_enum_type(['Enable', 'Disable']), help='Use this property to specify whether public network access for the vault should be enabled or disabled. It is enabled by default. For setting up private endpoints, it has to be disabled.')
         c.argument('azure_monitor_alerts_for_job_failures', options_list=['--job-failure-alerts'], arg_type=get_enum_type(['Enable', 'Disable']), help='Use this property to specify whether built-in Azure Monitor alerts should be received for every job failure.')
 
     with self.argument_context('backup vault backup-properties set') as c:
