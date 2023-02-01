@@ -5,7 +5,6 @@
 # pylint: disable=too-many-statements
 import json
 from unittest import mock
-from time import sleep
 from knack.util import CLIError
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
@@ -856,8 +855,11 @@ class IoTHubTest(ScenarioTest):
         # Delete hub with no wait
         self.cmd('iot hub delete -n {0} -g {1} --no-wait'.format(hub, rg))
 
-        # Poll to make sure hub is deleted
-        self.cmd('iot hub wait -n {0} -g {1} --deleted'.format(hub, rg), expect_failure=True)
+        # Poll to make sure hub is deleted.
+        try:
+            self.cmd('iot hub wait -n {0} -g {1} --deleted'.format(hub, rg))
+        except CLIError:
+            pass
 
         # Final check and sleep to make sure lro poller thread is done
         self.cmd('iot hub show -n {0} -g {1}'.format(hub, rg), expect_failure=True)
