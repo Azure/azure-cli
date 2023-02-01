@@ -38,7 +38,7 @@ from azure.cli.command_modules.network._format import (
     transform_vnet_gateway_routes_table, transform_vnet_gateway_bgp_peer_table)
 from azure.cli.command_modules.network._validators import (
     get_network_watcher_from_location,
-    process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace,
+    process_ag_create_namespace,
     process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_nic_create_namespace,
     process_lb_create_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
@@ -189,11 +189,9 @@ def load_command_table(self, _):
                          exception_handler=handle_template_based_exception)
 
     subresource_properties = [
-        {'prop': 'http_listeners', 'name': 'http-listener', 'validator': process_ag_http_listener_create_namespace},
         {'prop': 'request_routing_rules', 'name': 'rule', 'validator': process_ag_rule_create_namespace},
     ]
     if self.supported_api_version(min_api='2021-08-01'):
-        subresource_properties.append({'prop': 'listeners', 'name': 'listener', 'validator': process_ag_listener_create_namespace})
         subresource_properties.append({'prop': 'routing_rules', 'name': 'routing-rule', 'validator': process_ag_routing_rule_create_namespace})
 
     def _make_singular(value):
@@ -255,6 +253,16 @@ def load_command_table(self, _):
         from .custom import HTTPSettingsCreate, HTTPSettingsUpdate
         self.command_table["network application-gateway http-settings create"] = HTTPSettingsCreate(loader=self)
         self.command_table["network application-gateway http-settings update"] = HTTPSettingsUpdate(loader=self)
+
+    with self.command_group("network application-gateway listener"):
+        from .custom import ListenerCreate, ListenerUpdate
+        self.command_table["network application-gateway listener create"] = ListenerCreate(loader=self)
+        self.command_table["network application-gateway listener update"] = ListenerUpdate(loader=self)
+
+    with self.command_group("network application-gateway http-listener"):
+        from .custom import HTTPListenerCreate, HTTPListenerUpdate
+        self.command_table["network application-gateway http-listener create"] = HTTPListenerCreate(loader=self)
+        self.command_table["network application-gateway http-listener update"] = HTTPListenerUpdate(loader=self)
 
     with self.command_group("network application-gateway identity") as g:
         from .custom import IdentityAssign

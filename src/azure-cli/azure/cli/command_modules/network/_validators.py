@@ -607,46 +607,6 @@ def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_
 
 
 # COMMAND NAMESPACE VALIDATORS
-
-def process_ag_http_listener_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.frontend_ip and not is_valid_resource_id(namespace.frontend_ip):
-        namespace.frontend_ip = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'frontendIpConfigurations', namespace.frontend_ip)
-
-    if namespace.frontend_port and not is_valid_resource_id(namespace.frontend_port):
-        namespace.frontend_port = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'frontendPorts', namespace.frontend_port)
-
-    if namespace.ssl_cert and not is_valid_resource_id(namespace.ssl_cert):
-        namespace.ssl_cert = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'sslCertificates', namespace.ssl_cert)
-
-    if namespace.firewall_policy and not is_valid_resource_id(namespace.firewall_policy):
-        namespace.firewall_policy = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='ApplicationGatewayWebApplicationFirewallPolicies',
-            name=namespace.firewall_policy
-        )
-
-
-def process_ag_listener_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
-    from msrestazure.tools import is_valid_resource_id
-    if namespace.frontend_ip and not is_valid_resource_id(namespace.frontend_ip):
-        namespace.frontend_ip = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'frontendIpConfigurations', namespace.frontend_ip)
-
-    if namespace.frontend_port and not is_valid_resource_id(namespace.frontend_port):
-        namespace.frontend_port = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'frontendPorts', namespace.frontend_port)
-
-    if namespace.ssl_cert and not is_valid_resource_id(namespace.ssl_cert):
-        namespace.ssl_cert = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'sslCertificates', namespace.ssl_cert)
-
-
 def process_ag_rule_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
     from msrestazure.tools import is_valid_resource_id
     if namespace.address_pool and not is_valid_resource_id(namespace.address_pool):
