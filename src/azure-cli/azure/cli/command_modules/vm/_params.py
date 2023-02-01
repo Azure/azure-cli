@@ -676,6 +676,9 @@ def load_arguments(self, _):
             for dest in scaleset_name_aliases:
                 c.argument(dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
 
+    with self.argument_context('vmss reimage') as c:
+        c.argument('instance_id', nargs='+', help='Space-separated list of VM instance ID. If missing, reimage all instances.')
+
     with self.argument_context('vmss create', operation_group='virtual_machine_scale_sets') as c:
         VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)
 
@@ -818,14 +821,6 @@ def load_arguments(self, _):
     with self.argument_context('vmss extension') as c:
         c.argument('extension_name', name_arg_type, help='Name of the extension.')
         c.argument('vmss_name', vmss_name_type, options_list=['--vmss-name'], id_part=None)
-
-    with self.argument_context('vmss nic') as c:
-        c.argument('virtual_machine_scale_set_name', options_list=['--vmss-name'], help='Scale set name.', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
-        c.argument('virtualmachine_index', options_list=['--instance-id'], id_part='child_name_1')
-        c.argument('network_interface_name', options_list=['--name', '-n'], metavar='NIC_NAME', help='The network interface (NIC).', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'), id_part='child_name_2')
-
-    with self.argument_context('vmss nic list') as c:
-        c.argument('virtual_machine_scale_set_name', arg_type=vmss_name_type, options_list=['--vmss-name'], id_part=None)
 
     with self.argument_context('vmss set-orchestration-service-state') as c:
         c.argument('service_name', arg_type=get_enum_type(OrchestrationServiceNames), help='The name of the orchestration service.')

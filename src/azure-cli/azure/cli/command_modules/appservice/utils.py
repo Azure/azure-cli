@@ -78,8 +78,12 @@ def get_sku_tier(name):  # pylint: disable=too-many-return-statements
         return 'PREMIUM'
     if name in ['P1V2', 'P2V2', 'P3V2']:
         return 'PREMIUMV2'
+    if name in ['P0V3']:
+        return 'PREMIUM0V3'
     if name in ['P1V3', 'P2V3', 'P3V3']:
         return 'PREMIUMV3'
+    if name in ['P1MV3', 'P2MV3', 'P3MV3', 'P4MV3', 'P5MV3']:
+        return 'PREMIUMMV3'
     if name in ['PC2', 'PC3', 'PC4']:
         return 'PremiumContainer'
     if name in ['EP1', 'EP2', 'EP3']:

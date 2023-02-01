@@ -150,11 +150,6 @@ def transform_nsg_rule_table_output(result):
     return item
 
 
-def transform_vnet_gateway_create_output(result):
-    result = {'vnetGateway': result.result()} if result else result
-    return result
-
-
 def transform_geographic_hierachy_table_output(result):
     transformed = []
 
