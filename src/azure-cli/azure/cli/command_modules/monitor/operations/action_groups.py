@@ -6,6 +6,8 @@
 from ..aaz.latest.monitor.action_group import Show as _ActionGroupShow
 from ..aaz.latest.monitor.action_group import Create as _ActionGroupCreate
 from ..aaz.latest.monitor.action_group import Update as _ActionGroupUpdate
+from ..aaz.latest.monitor.action_group import List as _ActionGroupList
+from ..aaz.latest.monitor.action_group import EnableReceiver as _ActionGroupEnableReceiver
 
 class ActionGroupCreate(_ActionGroupCreate):
     @classmethod
@@ -79,6 +81,24 @@ class ActionGroupUpdate(_ActionGroupUpdate):
         if not has_value(rg):
             rg = parse_resource_id(args.resource.to_serialized_data())['resource_group']
             args.resource_group_name = rg
+
+class ActionGroupList(_ActionGroupList):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        arg_schema = super()._build_arguments_schema(*args, **kwargs)
+        return arg_schema
+
+    def pre_operations(self):
+        pass
+
+class ActionGroupEnableReceiver(_ActionGroupEnableReceiver):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        arg_schema = super()._build_arguments_schema(*args, **kwargs)
+        return arg_schema
+
+    def pre_operations(self):
+        pass
 
 
 def list_action_groups(client, resource_group_name=None):
