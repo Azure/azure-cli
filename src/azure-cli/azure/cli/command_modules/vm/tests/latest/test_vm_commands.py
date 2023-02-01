@@ -8714,6 +8714,14 @@ class VMSSReimageScenarioTest(ScenarioTest):
         self.cmd('vmss reimage -g {rg} -n vmss1 --instance-id 1')
         self.cmd('vmss reimage -g {rg} -n vmss1')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_reimage_instance_id')
+    def test_vmss_reimage_instance_id(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10)
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --instance-count 2')
+        self.cmd('vmss reimage -g {rg} -n {vmss} --instance-id 0 1')
+
 
 class VMSSHKeyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_ssh_key_')
