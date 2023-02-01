@@ -655,16 +655,12 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
     from azure.cli.core._profile import Profile
     from azure.cli.command_modules.role import graph_client_factory, GraphError
 
-    VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
-                                                   resource_type=ResourceType.MGMT_KEYVAULT)
     Permissions = cmd.get_models('Permissions', resource_type=ResourceType.MGMT_KEYVAULT)
     KeyPermissions = cmd.get_models('KeyPermissions', resource_type=ResourceType.MGMT_KEYVAULT)
     SecretPermissions = cmd.get_models('SecretPermissions', resource_type=ResourceType.MGMT_KEYVAULT)
     CertificatePermissions = cmd.get_models('CertificatePermissions', resource_type=ResourceType.MGMT_KEYVAULT)
     StoragePermissions = cmd.get_models('StoragePermissions', resource_type=ResourceType.MGMT_KEYVAULT)
     AccessPolicyEntry = cmd.get_models('AccessPolicyEntry', resource_type=ResourceType.MGMT_KEYVAULT)
-    Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_KEYVAULT)
-    VaultProperties = cmd.get_models('VaultProperties', resource_type=ResourceType.MGMT_KEYVAULT)
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials(
@@ -672,15 +668,6 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
 
     graph_client = graph_client_factory(cmd.cli_ctx)
     subscription = profile.get_subscription()
-
-    # if bypass or default_action was specified create a NetworkRuleSet
-    # if neither were specified we will parse it from parameter `--network-acls`
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2018-02-14'):
-        if network_acls or network_acls_ips or network_acls_vnets:
-            network_acls = _parse_network_acls(
-                cmd, resource_group_name, network_acls, network_acls_ips, network_acls_vnets, bypass, default_action)
-        else:
-            network_acls = _create_network_rule_set(cmd, bypass, default_action)
 
     if no_self_perms or enable_rbac_authorization:
         access_policies = []
@@ -794,32 +781,22 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
     deployment = Deployment(properties=properties)
 
     from azure.cli.core.util import random_string
-    return deploy_client.begin_create_or_update(resource_group_name, 'keyvault_deploy_' + random_string(32), deployment)
+    from azure.cli.core.commands import LongRunningOperation
+    from azure.cli.core.commands.progress import IndeterminateProgressBar
 
-    properties = VaultProperties(tenant_id=tenant_id,
-                                 sku=Sku(name=sku, family='A'),
-                                 access_policies=access_policies,
-                                 vault_uri=None,
-                                 enabled_for_deployment=enabled_for_deployment,
-                                 enabled_for_disk_encryption=enabled_for_disk_encryption,
-                                 enabled_for_template_deployment=enabled_for_template_deployment,
-                                 enable_rbac_authorization=enable_rbac_authorization,
-                                 enable_purge_protection=enable_purge_protection,
-                                 soft_delete_retention_in_days=int(retention_days),
-                                 public_network_access=public_network_access)
-    if hasattr(properties, 'network_acls'):
-        properties.network_acls = network_acls
-    parameters = VaultCreateOrUpdateParameters(location=location,
-                                               tags=tags,
-                                               properties=properties)
+    deployment_name = 'keyvault_deploy_' + random_string(32)
+    validation_progress_bar = IndeterminateProgressBar(cmd.cli_ctx, message='validating')
 
-    return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                resource_type=ResourceType.MGMT_KEYVAULT,
-                                min_api_version='2018-02-14',
-                                resource_group_name=resource_group_name,
-                                vault_name=vault_name,
-                                parameters=parameters,
-                                no_wait=no_wait)
+    validation_poller = deploy_client.begin_validate(resource_group_name, deployment_name, deployment)
+    LongRunningOperation(cmd.cli_ctx, validation_progress_bar)(validation_poller)
+
+    if no_wait:
+        return sdk_no_wait(no_wait, deploy_client.begin_create_or_update, resource_group_name, deployment_name, deployment)
+
+    deployment_poller = deploy_client.begin_create_or_update(resource_group_name, deployment_name, deployment)
+    LongRunningOperation(cmd.cli_ctx)(deployment_poller)
+
+    return client.get(resource_group_name=resource_group_name, vault_name=vault_name)
 
 
 def update_vault_setter(cmd, client, parameters, resource_group_name, vault_name, no_wait=False):
