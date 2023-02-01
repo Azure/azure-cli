@@ -440,13 +440,12 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                                  security_data_uri=security_data_uri,
                                  performance_plus=performance_plus)
 
-    if size_gb is None and upload_size_bytes is None:
-        if option == DiskCreateOption.empty:
-            raise RequiredArgumentMissingError(
-                'usage error: --size-gb or --upload-size-bytes required to create an empty disk')
-        if upload_type:
-            raise RequiredArgumentMissingError(
-                'usage error: --size-gb or --upload-size-bytes required to create a disk for upload')
+    if size_gb is None and option == DiskCreateOption.empty:
+        raise RequiredArgumentMissingError(
+            'usage error: --size-gb is required to create an empty disk')
+    if upload_size_bytes is None and upload_type:
+        raise RequiredArgumentMissingError(
+            'usage error: --upload-size-bytes is required to create a disk for upload')
 
     if disk_encryption_set is not None and not is_valid_resource_id(disk_encryption_set):
         disk_encryption_set = resource_id(
