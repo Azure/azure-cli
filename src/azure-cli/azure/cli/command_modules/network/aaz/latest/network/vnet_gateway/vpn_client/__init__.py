@@ -10,5 +10,6 @@
 
 from .__cmd_group import *
 from ._generate import *
+from ._generate_vpn_profile import *
 from ._show_health import *
 from ._show_url import *

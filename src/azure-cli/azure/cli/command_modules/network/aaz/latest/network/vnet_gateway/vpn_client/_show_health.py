@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network vnet-gateway vpn-client show-health",
+    is_preview=True,
 )
 class ShowHealth(AAZCommand):
     """Get the VPN client connection health detail per P2S client connection of the virtual network gateway.

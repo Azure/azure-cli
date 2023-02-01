@@ -11,13 +11,8 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network vnet-gateway vpn-client generate",
-)
 class Generate(AAZCommand):
     """Generate VPN client configuration.
-
-    The command outputs a URL to a zip file for the generated VPN client configuration.
 
     :example: Create the VPN client configuration for RADIUS with EAP-MSCHAV2 authentication.
         az network vnet-gateway vpn-client generate -g MyResourceGroup -n MyVnetGateway --authentication-method EAPMSCHAPv2

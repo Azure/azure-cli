@@ -19,7 +19,7 @@ class Stop(AAZCommand):
     """Stop packet capture on a virtual network gateway.
 
     :example: Stop packet capture on a virtual network gateway.
-        az network vnet-gateway packet-capture stop -g MyResourceGroup -n MyVnetGateway --sas-url ht tps://myStorageAct.blob.azure.com/artifacts?st=2019-04-10T22%3A12Z&se=2019-04-11T09%3A12Z&sp=rl&sv=2018-03-28&sr=c&sig=0000000000
+        az network vnet-gateway packet-capture stop -g MyResourceGroup -n MyVnetGateway --sas-url https://myStorageAct.blob.azure.com/artifacts?st=2019-04-10T22%3A12Z&se=2019-04-11T09%3A12Z&sp=rl&sv=2018-03-28&sr=c&sig=0000000000
     """
 
     _aaz_info = {

@@ -11,20 +11,14 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network vnet-gateway packet-capture start",
-)
-class Start(AAZCommand):
-    """Start packet capture on a virtual network gateway.
-
-    :example: Start packet capture on a virtual network gateway.
-        az network vnet-gateway packet-capture start -g MyResourceGroup -n MyVnetGateway
+class GenerateVpnProfile(AAZCommand):
+    """Generates VPN profile for P2S client of the virtual network gateway in the specified resource group. Used for IKEV2 and radius based authentication.
     """
 
     _aaz_info = {
         "version": "2022-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}/startpacketcapture", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}/generatevpnprofile", "2022-01-01"],
         ]
     }
 
@@ -54,15 +48,40 @@ class Start(AAZCommand):
             required=True,
             id_part="name",
         )
-        _args_schema.filter = AAZStrArg(
-            options=["--filter"],
-            help="Data filter.",
+
+        # define Arg Group "Parameters"
+
+        _args_schema = cls._args_schema
+        _args_schema.authentication_method = AAZStrArg(
+            options=["--authentication-method"],
+            arg_group="Parameters",
+            help="VPN client authentication method.",
+            enum={"EAPMSCHAPv2": "EAPMSCHAPv2", "EAPTLS": "EAPTLS"},
         )
+        _args_schema.client_root_certificates = AAZListArg(
+            options=["--client-root-certificates"],
+            arg_group="Parameters",
+            help="A list of client root certificates public certificate data encoded as Base-64 strings. Optional parameter for external radius based authentication with EAPTLS.",
+        )
+        _args_schema.processor_architecture = AAZStrArg(
+            options=["--processor-architecture"],
+            arg_group="Parameters",
+            help="VPN client Processor Architecture.",
+            enum={"Amd64": "Amd64", "X86": "X86"},
+        )
+        _args_schema.radius_server_auth_certificate = AAZStrArg(
+            options=["--radius-server-auth-certificate"],
+            arg_group="Parameters",
+            help="The public certificate data for the radius server authentication certificate as a Base-64 encoded string. Required only if external radius authentication has been configured with EAPTLS authentication.",
+        )
+
+        client_root_certificates = cls._args_schema.client_root_certificates
+        client_root_certificates.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.VirtualNetworkGatewaysStartPacketCapture(ctx=self.ctx)()
+        yield self.VirtualNetworkGatewaysGenerateVpnProfile(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -77,7 +96,7 @@ class Start(AAZCommand):
         result = None
         return result
 
-    class VirtualNetworkGatewaysStartPacketCapture(AAZHttpOperation):
+    class VirtualNetworkGatewaysGenerateVpnProfile(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -107,7 +126,7 @@ class Start(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkGateways/{virtualNetworkGatewayName}/startPacketCapture",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkGateways/{virtualNetworkGatewayName}/generatevpnprofile",
                 **self.url_parameters
             )
 
@@ -166,7 +185,14 @@ class Start(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("filterData", AAZStrType, ".filter")
+            _builder.set_prop("authenticationMethod", AAZStrType, ".authentication_method")
+            _builder.set_prop("clientRootCertificates", AAZListType, ".client_root_certificates")
+            _builder.set_prop("processorArchitecture", AAZStrType, ".processor_architecture")
+            _builder.set_prop("radiusServerAuthCertificate", AAZStrType, ".radius_server_auth_certificate")
+
+            client_root_certificates = _builder.get(".clientRootCertificates")
+            if client_root_certificates is not None:
+                client_root_certificates.set_elements(AAZStrType, ".")
 
             return self.serialize_content(_content_value)
 
@@ -190,8 +216,8 @@ class Start(AAZCommand):
             return cls._schema_on_200
 
 
-class _StartHelper:
-    """Helper class for Start"""
+class _GenerateVpnProfileHelper:
+    """Helper class for GenerateVpnProfile"""
 
 
-__all__ = ["Start"]
+__all__ = ["GenerateVpnProfile"]
