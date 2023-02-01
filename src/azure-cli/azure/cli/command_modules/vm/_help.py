@@ -85,10 +85,10 @@ examples:
         az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --security-data-uri GuestStateDiskVhdUri --security-type TrustedLaunch --hyper-v-generation V2
   - name: Create a standard disk for uploading blobs.
     text: >
-        az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --upload-type Upload
+        az disk create -g MyResourceGroup -n MyDisk --upload-size-bytes 20972032 --upload-type Upload
   - name: Create an OS disk for uploading along with VM guest state.
     text: >
-        az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --upload-type UploadWithSecurityData --security-type TrustedLaunch --hyper-v-generation V2
+        az disk create -g MyResourceGroup -n MyDisk --upload-size-bytes 20972032 --upload-type UploadWithSecurityData --security-type TrustedLaunch --hyper-v-generation V2
 """
 
 helps['disk delete'] = """
