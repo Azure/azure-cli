@@ -338,6 +338,7 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
             1. CLI context is missing
             2. In air-gapped clouds
             3. In testing environments
+            4. In autocomplete mode
 
         :return: whether Aladdin service need to be disabled or not
         :type: bool
@@ -355,6 +356,9 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
 
         # for testing environments
         if self.cli_ctx.__class__.__name__ == 'DummyCli':
+            return True
+
+        if self.cli_ctx.data['completer_active']:
             return True
 
         return False
