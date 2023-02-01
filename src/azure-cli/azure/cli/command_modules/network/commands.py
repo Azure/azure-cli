@@ -572,6 +572,12 @@ def load_command_table(self, _):
         self.command_table['network cross-region-lb address-pool create'] = CrossRegionLoadBalancerAddressPoolCreate(loader=self)
         self.command_table['network cross-region-lb address-pool update'] = CrossRegionLoadBalancerAddressPoolUpdate(loader=self)
 
+    with self.command_group('network cross-region-lb address-pool address') as g:
+        from .operations.load_balancer import CrossRegionLoadBalancerAddressPoolAddressAdd, CrossRegionLoadBalancerAddressPoolAddressUpdate, CrossRegionLoadBalancerAddressPoolAddressRemove
+        self.command_table['network cross-region-lb address-pool address add'] = CrossRegionLoadBalancerAddressPoolAddressAdd(loader=self)
+        self.command_table['network cross-region-lb address-pool address remove'] = CrossRegionLoadBalancerAddressPoolAddressRemove(loader=self)
+        self.command_table['network cross-region-lb address-pool address update'] = CrossRegionLoadBalancerAddressPoolAddressUpdate(loader=self)
+
     cross_region_lb_property_map = {
         'probes': 'probe',
     }
@@ -581,11 +587,6 @@ def load_command_table(self, _):
             g.command('list', list_network_resource_property('load_balancers', subresource))
             g.show_command('show', get_network_resource_property_entry('load_balancers', subresource))
             g.command('delete', delete_lb_resource_property_entry('load_balancers', subresource))
-
-    with self.command_group('network cross-region-lb address-pool address', network_lb_backend_pool_sdk, is_preview=True) as g:
-        g.custom_command('add', 'add_cross_region_lb_backend_address_pool_address')
-        g.custom_command('remove', 'remove_lb_backend_address_pool_address')
-        g.custom_command('list', 'list_lb_backend_address_pool_address')
 
     with self.command_group('network cross-region-lb probe', network_lb_sdk) as g:
         g.custom_command('create', 'create_cross_lb_probe')

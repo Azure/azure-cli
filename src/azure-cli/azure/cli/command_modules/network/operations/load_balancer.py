@@ -21,6 +21,8 @@ from ..aaz.latest.network.lb.outbound_rule import Create as _LBOutboundRuleCreat
 
 from ..aaz.latest.network.cross_region_lb.address_pool import Create as _CrossRegionLoadBalancerAddressPoolCreate, \
     Update as _CrossRegionLoadBalancerAddressPoolUpdate
+from ..aaz.latest.network.cross_region_lb.address_pool.address import Add as _CrossRegionLoadBalancerAddressPoolAddressAdd, \
+    Update as _CrossRegionLoadBalancerAddressPoolAddressUpdate, Remove as _CrossRegionLoadBalancerAddressPoolAddressRemove
 
 
 logger = get_logger(__name__)
@@ -715,3 +717,51 @@ class CrossRegionLoadBalancerAddressPoolUpdate(_CrossRegionLoadBalancerAddressPo
         args_schema.backend_addresses.Element.name._nullable = False
         args_schema.backend_addresses.Element.frontend_ip_address._nullable = False
         return args_schema
+
+
+class CrossRegionLoadBalancerAddressPoolAddressAdd(_CrossRegionLoadBalancerAddressPoolAddressAdd):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.frontend_ip_address._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}"
+        )
+
+        args_schema.frontend_ip_address._required = True
+        return args_schema
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class CrossRegionLoadBalancerAddressPoolAddressRemove(_CrossRegionLoadBalancerAddressPoolAddressRemove):
+
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class CrossRegionLoadBalancerAddressPoolAddressUpdate(_CrossRegionLoadBalancerAddressPoolAddressUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.frontend_ip_address._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}"
+        )
+
+        args_schema.frontend_ip_address._nullable = False
+        return args_schema
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result

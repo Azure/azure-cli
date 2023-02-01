@@ -4403,20 +4403,6 @@ def create_cross_region_load_balancer(cmd, load_balancer_name, resource_group_na
         return client.validate(resource_group_name, deployment_name, deployment)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
-
-
-def add_cross_region_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name,
-                                                     backend_address_pool_name, address_name, frontend_ip_address):
-    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
-    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
-    (LoadBalancerBackendAddress, FrontendIPConfiguration) = cmd.get_models('LoadBalancerBackendAddress', 'FrontendIPConfiguration')
-    new_address = LoadBalancerBackendAddress(name=address_name,
-                                             load_balancer_frontend_ip_configuration=FrontendIPConfiguration(id=frontend_ip_address) if frontend_ip_address else None)
-    if address_pool.load_balancer_backend_addresses is None:
-        address_pool.load_balancer_backend_addresses = []
-    address_pool.load_balancer_backend_addresses.append(new_address)
-    return client.begin_create_or_update(resource_group_name, load_balancer_name,
-                                         backend_address_pool_name, address_pool)
 # endregion
 
 
