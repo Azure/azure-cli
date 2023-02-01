@@ -16,6 +16,11 @@ from ..aaz.latest.network.lb.inbound_nat_rule import Create as _LBInboundNatRule
 from ..aaz.latest.network.lb.rule import Create as _LBRuleCreate, Update as _LBRuleUpdate, Show as _LBRuleShow, \
     Delete as _LBRuleDelete, List as _LBRuleList
 from ..aaz.latest.network.lb.outbound_rule import Create as _LBOutboundRuleCreate, Update as _LBOutboundRuleUpdate
+# from ..aaz.latest.network.lb.address_pool import Create as _LBAddressPoolCreate, Update as _LBAddressPoolUpdate, \
+#     Show as _LBAddressPoolShow, List as _LBAddressPoolList, Delete as _LBAddressPoolDelete
+
+from ..aaz.latest.network.cross_region_lb.address_pool import Create as _CrossRegionLoadBalancerAddressPoolCreate, \
+    Update as _CrossRegionLoadBalancerAddressPoolUpdate
 
 
 logger = get_logger(__name__)
@@ -678,3 +683,35 @@ class CrossRegionLoadBalancerRuleUpdate(_LBRuleUpdate):
             instance.properties.probe = None
         # always remove backend_address_pool in update request, service will fill this property based on backend_address_pools property.
         instance.properties.backend_address_pool = None
+
+
+class CrossRegionLoadBalancerAddressPoolCreate(_CrossRegionLoadBalancerAddressPoolCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        # not support name, the frontend id should belong to a regional load balance
+        args_schema.backend_addresses.Element.frontend_ip_address._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}"
+        )
+        args_schema.backend_addresses.Element.name._required = True
+        args_schema.backend_addresses.Element.frontend_ip_address._required = True
+        return args_schema
+
+
+class CrossRegionLoadBalancerAddressPoolUpdate(_CrossRegionLoadBalancerAddressPoolUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        # not support name, the frontend id should belong to a regional load balance
+        args_schema.backend_addresses.Element.frontend_ip_address._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}"
+        )
+        args_schema.backend_addresses.Element.name._nullable = False
+        args_schema.backend_addresses.Element.frontend_ip_address._nullable = False
+        return args_schema
