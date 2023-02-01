@@ -95,15 +95,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         self.kwargs['vault4'] = self.create_random_name('clitest-vault', 50)
-        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --public-network-access Disable', checks=[
+        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --public-network-access Disable --immutability-state Unlocked', checks=[
             self.check('name', '{vault4}'),
             self.check('resourceGroup', '{rg}'),
             self.check('location', '{loc}'),
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('properties.publicNetworkAccess', 'Disabled'),
+            self.check('properties.securitySettings.immutabilitySettings.state', 'Unlocked'),
         ])
 
-        # Modify an existing vault4
         self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --public-network-access Enable', checks=[
             self.check('properties.publicNetworkAccess', 'Enabled')
         ])
@@ -165,6 +165,32 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.monitoringSettings.azureMonitorAlertSettings.alertsForAllJobFailures', 'Disabled'),
             self.check('properties.monitoringSettings.classicAlertSettings.alertsForCriticalOperations', 'Disabled')
         ])
+
+        self.kwargs['policy_json'] = self.cmd('backup policy show -g {rg} -v {vault4} -n DefaultPolicy', checks=[
+            self.check('name', 'DefaultPolicy'),
+            self.check('resourceGroup', '{rg}')
+        ]).get_output_in_json()
+        self.kwargs['policy_json']['properties']["retentionPolicy"] = {}
+        self.kwargs['policy_json']['properties']['retentionPolicy']['dailySchedule'] = {}
+        self.kwargs['policy_json']['properties']['retentionPolicy']['dailySchedule']['retentionDuration'] = {"count": 20, "durationType": "Days"}
+
+        # Immutable vault testing.
+        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --immutability-state Disabled', checks=[
+            self.check('properties.securitySettings.immutabilitySettings.state', 'Disabled')
+        ])
+
+        self.cmd('backup policy set -g {rg} -v {vault4} --policy {policy_json}', checks=[
+            self.check('properties.retentionPolicy.dailySchedule.retentionDuration.count', 20)
+        ])
+
+        self.kwargs['policy_json']['properties']['retentionPolicy']['dailySchedule']['retentionDuration']['count'] = 10
+
+
+        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --immutability-state Unlocked', checks=[
+            self.check('properties.securitySettings.immutabilitySettings.state', 'Unlocked')
+        ])
+
+        self.cmd('backup policy set -g {rg} -v {vault4} --policy {policy_json}', expect_failure=True)
 
         self.cmd('backup vault delete -n {vault4} -g {rg} -y')
 

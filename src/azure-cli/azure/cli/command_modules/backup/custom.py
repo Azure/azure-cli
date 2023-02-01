@@ -127,17 +127,27 @@ def create_vault(client, vault_name, resource_group_name, location, tags=None,
             public_network_access = existing_vault_public_network_access[:-1]
         except CoreResourceNotFoundError:
             public_network_access = 'Enable'
-    vault_properties = VaultProperties(
-        monitoring_settings=MonitoringSettings(
-            azure_monitor_alert_settings=AzureMonitorAlertSettings(
-                alerts_for_all_job_failures=azure_monitor_alerts_for_job_failures + 'd'),
-            classic_alert_settings=ClassicAlertSettings(alerts_for_critical_operations=classic_alerts + 'd')),
-        public_network_access=public_network_access + 'd',
-        security_settings=SecuritySettings(
-            immutability_settings=ImmutabilitySettings(
-                state=immutability_state
-            )
-        ))
+
+    # TODO Refactor
+    if immutability_state is None:
+        vault_properties = VaultProperties(
+            monitoring_settings=MonitoringSettings(
+                azure_monitor_alert_settings=AzureMonitorAlertSettings(
+                    alerts_for_all_job_failures=azure_monitor_alerts_for_job_failures + 'd'),
+                classic_alert_settings=ClassicAlertSettings(alerts_for_critical_operations=classic_alerts + 'd')),
+            public_network_access=public_network_access + 'd')
+    else:
+        vault_properties = VaultProperties(
+            monitoring_settings=MonitoringSettings(
+                azure_monitor_alert_settings=AzureMonitorAlertSettings(
+                    alerts_for_all_job_failures=azure_monitor_alerts_for_job_failures + 'd'),
+                classic_alert_settings=ClassicAlertSettings(alerts_for_critical_operations=classic_alerts + 'd')),
+            public_network_access=public_network_access + 'd',
+            security_settings=SecuritySettings(
+                immutability_settings=ImmutabilitySettings(
+                    state=immutability_state
+                )
+            ))
     vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
     return client.begin_create_or_update(resource_group_name, vault_name, vault)
 
