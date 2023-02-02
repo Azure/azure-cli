@@ -178,11 +178,8 @@ def load_arguments(self, _):
         c.argument('capacity', help='The number of instances to use with the application gateway.', type=int)
 
     ag_subresources = [
-        {'name': 'rule', 'display': 'request routing rule', 'ref': 'request_routing_rules'},
         {'name': 'private-link', 'display': 'private link', 'ref': 'private_link_configurations'}
     ]
-    if self.supported_api_version(min_api='2021-08-01'):
-        ag_subresources.append({'name': 'routing-rule', 'display': 'routing rule', 'ref': 'routing_rules'})
 
     for item in ag_subresources:
         with self.argument_context('network application-gateway {}'.format(item['name'])) as c:
@@ -218,37 +215,6 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway private-link ip-config list', arg_group=None) as c:
         c.argument('application_gateway_name', id_part=None)
-
-    with self.argument_context('network application-gateway rule create') as c:
-        c.argument('address_pool', help='The name or ID of the backend address pool. {}'.format(default_existing))
-        c.argument('http_settings', help='The name or ID of the HTTP settings. {}'.format(default_existing))
-        c.argument('http_listener', help='The name or ID of the HTTP listener. {}'.format(default_existing))
-
-    with self.argument_context('network application-gateway routing-rule create') as c:
-        c.argument('address_pool', help='The name or ID of the backend address pool. {}'.format(default_existing))
-        c.argument('settings', help='The name or ID of the settings. {}'.format(default_existing))
-        c.argument('listener', help='The name or ID of the listener. {}'.format(default_existing))
-
-    for scope in ['rewrite-rule list', 'rewrite-rule condition list']:
-        with self.argument_context('network application-gateway {}'.format(scope)) as c:
-            c.argument('application_gateway_name', app_gateway_name_type, id_part=None)
-
-    for scope in ['rule', 'routing-rule']:
-        with self.argument_context('network application-gateway {}'.format(scope)) as c:
-            c.argument('address_pool', help='The name or ID of the backend address pool.',
-                       completer=get_ag_subresource_completion_list('backend_address_pools'))
-            c.argument('rule_type', help='The rule type (Basic, PathBasedRouting).')
-            c.argument('priority', type=int, help='Priority of the rule. Supported SKU tiers are Standard_v2, WAF_v2.')
-
-    with self.argument_context('network application-gateway rule') as c:
-        c.argument('http_listener', help='The name or ID of the HTTP listener.', completer=get_ag_subresource_completion_list('http_listeners'))
-        c.argument('http_settings', help='The name or ID of the backend HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
-        c.argument('url_path_map', help='The name or ID of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'))
-        c.argument('rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the rewrite rule set.')
-
-    with self.argument_context('network application-gateway routing-rule') as c:
-        c.argument('listener', help='The name or ID of the listener.', completer=get_ag_subresource_completion_list('listeners'))
-        c.argument('settings', help='The name or ID of the settings.', completer=get_ag_subresource_completion_list('backend_settings_collection'))
 
     with self.argument_context('network application-gateway ssl-policy') as c:
         c.argument('clear', action='store_true', help='Clear SSL policy.')
