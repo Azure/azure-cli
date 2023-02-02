@@ -1203,7 +1203,7 @@ def load_arguments(self, _):
         c.argument('zone_redundant',
                    required=False,
                    arg_type=zone_redundant_param_type)
-                
+
         c.argument('service_objective',
                    options_list=['--service-objective', '--service-level-objective'],
                    required=False,
