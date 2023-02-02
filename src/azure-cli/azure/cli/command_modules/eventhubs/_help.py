@@ -372,8 +372,6 @@ short-summary: Lists the EventHubs Namespaces
 examples:
   - name: List the Event Hubs Namespaces by resource group.
     text: az eventhubs namespace list --resource-group myresourcegroup
-  - name: Get the Namespaces by Subscription.
-    text: az eventhubs namespace list
 """
 
 helps['eventhubs namespace network-rule'] = """
