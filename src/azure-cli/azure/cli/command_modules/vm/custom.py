@@ -5116,7 +5116,7 @@ def list_generator(pages, num_results=50):
 
         # handle num results
         if num_results is not None:
-            if num_results == len(result):
+            if num_results >= len(result):
                 break
 
         page = list(next(pages))
