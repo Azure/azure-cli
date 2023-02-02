@@ -1336,7 +1336,7 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 # pylint: disable=unused-argument
 def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_workers=None, linux_fx_version=None,
                         windows_fx_version=None, pre_warmed_instance_count=None, php_version=None,
-                        python_version=None, net_framework_version=None,
+                        python_version=None, net_framework_version=None, power_shell_version=None,
                         java_version=None, java_container=None, java_container_version=None,
                         remote_debugging_enabled=None, web_sockets_enabled=None,
                         always_on=None, auto_heal_enabled=None,
