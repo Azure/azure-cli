@@ -607,48 +607,6 @@ def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_
 
 
 # COMMAND NAMESPACE VALIDATORS
-def process_ag_rule_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
-    from msrestazure.tools import is_valid_resource_id
-    if namespace.address_pool and not is_valid_resource_id(namespace.address_pool):
-        namespace.address_pool = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'backendAddressPools', namespace.address_pool)
-
-    if namespace.http_listener and not is_valid_resource_id(namespace.http_listener):
-        namespace.http_listener = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'httpListeners', namespace.http_listener)
-
-    if namespace.http_settings and not is_valid_resource_id(namespace.http_settings):
-        namespace.http_settings = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'backendHttpSettingsCollection', namespace.http_settings)
-
-    if namespace.url_path_map and not is_valid_resource_id(namespace.url_path_map):
-        namespace.url_path_map = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'urlPathMaps', namespace.url_path_map)
-
-    if namespace.redirect_config and not is_valid_resource_id(namespace.redirect_config):
-        namespace.redirect_config = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'redirectConfigurations', namespace.redirect_config)
-
-    if namespace.rewrite_rule_set and not is_valid_resource_id(namespace.rewrite_rule_set):
-        namespace.rewrite_rule_set = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'rewriteRuleSets', namespace.rewrite_rule_set)
-
-
-def process_ag_routing_rule_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
-    from msrestazure.tools import is_valid_resource_id
-    if namespace.address_pool and not is_valid_resource_id(namespace.address_pool):
-        namespace.address_pool = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'backendAddressPools', namespace.address_pool)
-
-    if namespace.listener and not is_valid_resource_id(namespace.listener):
-        namespace.listener = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'listeners', namespace.listener)
-
-    if namespace.settings and not is_valid_resource_id(namespace.settings):
-        namespace.settings = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'backendSettingsCollection', namespace.settings)
-
-
 def process_ag_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     get_servers_validator(camel_case=True)(namespace)
