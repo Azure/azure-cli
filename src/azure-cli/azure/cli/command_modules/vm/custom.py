@@ -10,7 +10,8 @@
 # Generation mode: Incremental
 # --------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-lines,no-else-return
+# pylint: disable=no-self-use, too-many-lines, no-else-return
+# pylint: disable=protected-access
 import json
 import os
 
@@ -45,6 +46,7 @@ from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_
                        load_images_thru_services, _get_latest_image_version)
 from ._client_factory import (_compute_client_factory, cf_public_ip_addresses, cf_vm_image_term,
                               _dev_test_labs_client_factory)
+from .aaz.latest.vmss.nic import List as _VMSSNICList, ListVmNics as _VMSSNICListVMNICs, Show as _VMSSNICShow
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
@@ -438,13 +440,12 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                                  security_data_uri=security_data_uri,
                                  performance_plus=performance_plus)
 
-    if size_gb is None and upload_size_bytes is None:
-        if option == DiskCreateOption.empty:
-            raise RequiredArgumentMissingError(
-                'usage error: --size-gb or --upload-size-bytes required to create an empty disk')
-        if upload_type:
-            raise RequiredArgumentMissingError(
-                'usage error: --size-gb or --upload-size-bytes required to create a disk for upload')
+    if size_gb is None and option == DiskCreateOption.empty:
+        raise RequiredArgumentMissingError(
+            'usage error: --size-gb is required to create an empty disk')
+    if upload_size_bytes is None and upload_type:
+        raise RequiredArgumentMissingError(
+            'usage error: --upload-size-bytes is required to create a disk for upload')
 
     if disk_encryption_set is not None and not is_valid_resource_id(disk_encryption_set):
         disk_encryption_set = resource_id(
@@ -3703,8 +3704,9 @@ def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
 def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_id=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_reimage,
-                           resource_group_name, vm_scale_set_name, instance_id)
+        for instance in instance_id:
+            sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_reimage,
+                        resource_group_name, vm_scale_set_name, instance)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage, resource_group_name, vm_scale_set_name)
 
 
@@ -4778,12 +4780,6 @@ def create_dedicated_host_group(cmd, client, host_group_name, resource_group_nam
     return client.create_or_update(resource_group_name, host_group_name, parameters=host_group_params)
 
 
-def list_dedicated_host_groups(cmd, client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list_by_subscription()
-
-
 def get_dedicated_host_group_instance_view(client, host_group_name, resource_group_name):
     return client.get(resource_group_name, host_group_name, expand="instanceView")
 
@@ -5651,3 +5647,50 @@ def sig_community_image_version_list(client, location, public_gallery_name, gall
                             gallery_image_name=gallery_image_name)
     return get_page_result(generator, marker, show_next_marker)
 # endRegion
+
+
+# Region VMSS
+class VMSSNICList(_VMSSNICList):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.virtual_machine_scale_set_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/"
+                     "Microsoft.Compute/virtualMachineScaleSets/{}"
+        )
+
+        return args_schema
+
+
+class VMSSNICListVMNICs(_VMSSNICListVMNICs):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.virtual_machine_scale_set_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/"
+                     "Microsoft.Compute/virtualMachineScaleSets/{}"
+        )
+
+        return args_schema
+
+
+class VMSSNICShow(_VMSSNICShow):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.virtual_machine_scale_set_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/"
+                     "Microsoft.Compute/virtualMachineScaleSets/{}"
+        )
+        args_schema.network_interface_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/"
+                     "Microsoft.Network/networkInterfaces/{}"
+        )
+
+        return args_schema

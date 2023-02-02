@@ -89,16 +89,23 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('resourceGroup', '{rg}'),
             self.check('location', '{loc}'),
             self.check('properties.provisioningState', 'Succeeded'),
+            self.check('properties.publicNetworkAccess', 'Enabled'),
             self.check('properties.monitoringSettings.azureMonitorAlertSettings.alertsForAllJobFailures', 'Enabled'),
             self.check('properties.monitoringSettings.classicAlertSettings.alertsForCriticalOperations', 'Enabled')
         ])
 
         self.kwargs['vault4'] = self.create_random_name('clitest-vault', 50)
-        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc}', checks=[
+        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --public-network-access Disable', checks=[
             self.check('name', '{vault4}'),
             self.check('resourceGroup', '{rg}'),
             self.check('location', '{loc}'),
-            self.check('properties.provisioningState', 'Succeeded')
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('properties.publicNetworkAccess', 'Disabled'),
+        ])
+
+        # Test vault modification
+        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --public-network-access Enable', checks=[
+            self.check('properties.publicNetworkAccess', 'Enabled')
         ])
 
         number_of_test_vaults = 4
@@ -1332,7 +1339,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-    #@unittest.skip('ServiceResourceNotEmptyWithBackendMessage: Recovery Services vault cannot be deleted as there are backup items still present in soft delete state. Visit the following link for the steps to permanently delete soft deleted items: https://aka.ms/undeletesoftdeleteditems.  : clitest-vm000003. Please ensure all containers have been unregistered from the vault and all private endpoints associated with the vault have been deleted, and retry operation.')
     @ResourceGroupPreparer(location="centraluseuap")
     @VaultPreparer(soft_delete=False)
     @VMPreparer(parameter_name='vm1')
