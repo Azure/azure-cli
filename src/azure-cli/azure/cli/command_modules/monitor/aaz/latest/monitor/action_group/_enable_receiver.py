@@ -52,7 +52,7 @@ class EnableReceiver(AAZCommand):
             required=True,
         )
         _args_schema.receiver_name = AAZStrArg(
-            options=["--receiver-name"],
+            options=["-n", "--name", "--receiver-name"],
             help="The name of the receiver to resubscribe.",
             required=True,
         )

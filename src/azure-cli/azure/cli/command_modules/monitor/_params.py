@@ -291,31 +291,31 @@ def load_arguments(self, _):
     # endregion
 
     # region ActionGroup
-    # with self.argument_context('monitor action-group') as c:
-    #     c.argument('action_group_name', options_list=['--name', '-n'], id_part='name')
-    #     c.argument('location', get_location_type(self.cli_ctx), validator=None)
+    with self.argument_context('monitor action-group') as c:
+        c.argument('action_group_name', options_list=['--name', '-n'], id_part='name')
+        c.argument('location', get_location_type(self.cli_ctx), validator=None)
 
-    # with self.argument_context('monitor action-group create') as c:
-    #     from .actions import ActionGroupReceiverParameterAction
-    #     c.extra('receivers', options_list=['--action', '-a'], nargs='+', arg_group='Actions', action=ActionGroupReceiverParameterAction)
-    #     c.extra('short_name')
-    #     c.extra('tags')
-    #     c.extra('location', get_location_type(self.cli_ctx))
-    #     c.ignore('action_group')
+    with self.argument_context('monitor action-group create') as c:
+        from .actions import ActionGroupReceiverParameterAction
+        c.extra('receivers', options_list=['--action', '-a'], nargs='+', arg_group='Actions', action=ActionGroupReceiverParameterAction)
+        c.extra('short_name')
+        c.extra('tags')
+        c.extra('location', get_location_type(self.cli_ctx))
+        c.ignore('action_group')
 
-    # with self.argument_context('monitor action-group update', arg_group='Actions') as c:
-    #     c.extra('add_receivers', options_list=['--add-action', '-a'], nargs='+', action=ActionGroupReceiverParameterAction)
-    #     c.extra('remove_receivers', options_list=['--remove-action', '-r'], nargs='+')
-    #     c.ignore('action_group')
-    #
+    with self.argument_context('monitor action-group update', arg_group='Actions') as c:
+        c.extra('add_receivers', options_list=['--add-action', '-a'], nargs='+', action=ActionGroupReceiverParameterAction)
+        c.extra('remove_receivers', options_list=['--remove-action', '-r'], nargs='+')
+        c.ignore('action_group')
+
     # with self.argument_context('monitor action-group enable-receiver') as c:
     #     c.argument('receiver_name', options_list=['--name', '-n'], help='The name of the receiver to resubscribe.')
     #     c.argument('action_group_name', options_list=['--action-group'], help='The name of the action group.')
     #
-    # with self.argument_context('monitor action-group test-notifications create') as c:
-    #     c.argument('add_receivers', options_list=['--add-action', '-a'], nargs='+', action=ActionGroupReceiverParameterAction)
-    #     c.argument('alert_type', type=str, help='The name of the supported alert type.')
-    #     c.argument('action_group_name', options_list=['--action-group'], help='The name of the action group.')
+    with self.argument_context('monitor action-group test-notifications create') as c:
+        c.argument('add_receivers', options_list=['--add-action', '-a'], nargs='+', action=ActionGroupReceiverParameterAction)
+        c.argument('alert_type', type=str, help='The name of the supported alert type.')
+        c.argument('action_group_name', options_list=['--action-group'], help='The name of the action group.')
     # endregion
 
     # region ActivityLog Alerts
