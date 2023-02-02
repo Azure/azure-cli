@@ -30,6 +30,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.eventhub.operations#ClustersOperations.{}',
         client_factory=cluster_mgmt_client_factory,
         resource_type=ResourceType.MGMT_EVENTHUB)
+
     eh_namespace_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file#{}',
     )
@@ -74,7 +75,6 @@ def load_command_table(self, _):
 
 
 # Namespace Region
-    from azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file import create_eventhub_namespace
     with self.command_group('eventhubs namespace', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
         g.custom_command('create', 'create_eventhub_namespace')

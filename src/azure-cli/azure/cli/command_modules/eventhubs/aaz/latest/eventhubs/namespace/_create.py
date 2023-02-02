@@ -172,7 +172,7 @@ class Create(AAZCommand):
             enum={"1.0": "1.0", "1.1": "1.1", "1.2": "1.2"},
         )
         _args_schema.private_endpoint_connections = AAZListArg(
-            options=["--private-endpoint-connections"],
+            options=["--endpoint-connections", "--private-endpoint-connections"],
             arg_group="Properties",
             help="List of private endpoint connections.",
         )
