@@ -476,7 +476,7 @@ def _valid_range(addr_range):
 def firewall_rule_name_validator(ns):
     if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{1,126}[_a-zA-Z0-9]$', ns.firewall_rule_name):
         raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\' "
-                              "and the name cannot exceed 126 characters. ")
+                              "and the name must be at least 3 characters and at most 126 characters. ")
 
 
 def validate_server_name(db_context, server_name, type_):
