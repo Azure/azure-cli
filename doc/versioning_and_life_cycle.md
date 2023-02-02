@@ -40,7 +40,7 @@ At present, CLI sets the api-version according to the Resource Provider granular
 
 - For the private preview api-version, we usually do not recommend releasing those private features in the core CLI/CLI extension, so as to avoid premature exposure of private features. It is suggested to use [edge build](https://github.com/Azure/azure-cli/blob/dev/doc/try_new_features_before_release.md) to build the private packages to meet the urgent needs of some customers first.
 
-Since the release states of api-version and CLI commands may be inconsistent, we hope that customers only need to pay attention to the release states *(`is_preview` flag)* of the command itself, rather than the api-version used behind it, which will be easier for customers to understand and use it.
+Since the release states of api-version and CLI commands may be inconsistent, our intent is for customers to only have to pay attention to the release states *(`is_preview` flag)* of the command itself, rather than the api-version used behind it. This will be easier for customers to understand.
 
 ## Breaking Changes
 
