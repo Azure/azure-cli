@@ -139,12 +139,6 @@ class SBNamespaceMSITesting(ScenarioTest):
         namespace = self.cmd('servicebus namespace identity remove --resource-group {rg} --namespace-name {namespacename} --user-assigned {id1}').get_output_in_json()
         self.assertEqual('identity' in namespace, False)
 
-        # Create Namespace
-        #self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename1} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits} --cluster-arm-id {clusterarmid}')
-
-        # Get Created Namespace
-        #principal_id = self.cmd('eventhubs namespace show --resource-group {rg} --name {namespacename}').get_output_in_json().get("identity").get("principalId")
-
         # Delete Namespace list by ResourceGroup
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename1}')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename} --yes')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename1} --yes')

@@ -157,9 +157,9 @@ def cli_add_identity(cmd, resource_group_name, namespace_name, system_assigned=N
     identity_type = servicebusnm['identity']['type']
     if system_assigned:
         if identity_type == USER:
-            type = SYSTEMUSER
+            identity_type = SYSTEMUSER
         elif identity_type == "None":
-            type = SYSTEM
+            identity_type = SYSTEM
 
     if user_assigned:
         if identity_type == SYSTEM:
@@ -200,9 +200,6 @@ def cli_remove_identity(cmd, resource_group_name, namespace_name, system_assigne
         "namespace_name": namespace_name
     })
 
-    if servicebusnm['identity'] is None:
-        raise CLIError('The namespace does not have identity enabled')
-
     identity_type = servicebusnm['identity']['type']
     if system_assigned:
         if identity_type == SYSTEM:
@@ -218,7 +215,7 @@ def cli_remove_identity(cmd, resource_group_name, namespace_name, system_assigne
                 if len(servicebusnm['identity']['userAssignedIdentities']) == 0:
                     identity_type = "None"
                     servicebusnm['identity']['userAssignedIdentities'] = None
-            if type == SYSTEMUSER:
+            if identity_type == SYSTEMUSER:
                 if len(servicebusnm['identity']['userAssignedIdentities']) == 0:
                     identity_type = "SystemAssigned"
                     servicebusnm['identity']['userAssignedIdentities'] = None
