@@ -691,7 +691,6 @@ class CrossRegionLoadBalancerAddressPoolCreate(_CrossRegionLoadBalancerAddressPo
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         # not support name, the frontend id should belong to a regional load balance
@@ -707,7 +706,6 @@ class CrossRegionLoadBalancerAddressPoolUpdate(_CrossRegionLoadBalancerAddressPo
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         # not support name, the frontend id should belong to a regional load balance
@@ -723,7 +721,6 @@ class CrossRegionLoadBalancerAddressPoolAddressAdd(_CrossRegionLoadBalancerAddre
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.frontend_ip_address._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}"
@@ -744,7 +741,7 @@ class CrossRegionLoadBalancerAddressPoolAddressRemove(_CrossRegionLoadBalancerAd
         lro_poller._result_callback = self._output
         return lro_poller
 
-    def _output(self, *args, **kwargs):
+    def _output(self, *args, **kwargs):  # pylint: disable=unused-argument
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
@@ -753,7 +750,6 @@ class CrossRegionLoadBalancerAddressPoolAddressUpdate(_CrossRegionLoadBalancerAd
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.frontend_ip_address._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}"
