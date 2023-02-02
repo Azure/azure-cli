@@ -55,6 +55,7 @@ class Show(AAZCommand):
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
+            help="The resourceGroup name",
             required=True,
         )
         return cls._args_schema

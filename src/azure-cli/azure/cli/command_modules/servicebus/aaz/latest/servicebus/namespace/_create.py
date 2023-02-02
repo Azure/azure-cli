@@ -54,6 +54,7 @@ class Create(AAZCommand):
             required=True,
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
+            help="The resourceGroup name",
             required=True,
         )
 

@@ -29,7 +29,7 @@ def create_servicebus_namespace(cmd, resource_group_name, namespace_name, locati
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Create
     user_assigned_identity = {}
     command_args_dict = {}
-    type = "None"
+    identity_type = "None"
     command_args_dict = {
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
@@ -49,23 +49,23 @@ def create_servicebus_namespace(cmd, resource_group_name, namespace_name, locati
     }
 
     if mi_system_assigned:
-        type = SYSTEM
+        identity_type = SYSTEM
 
     if mi_user_assigned:
         if mi_system_assigned:
-            type = SYSTEMUSER
+            identity_type = SYSTEMUSER
         else:
-            type = USER
+            identity_type = USER
         for val in mi_user_assigned:
             user_assigned_identity[val] = {}
         command_args_dict.update({"identity": {
-            "type": type,
+            "type": identity_type,
             "user_assigned_identities": user_assigned_identity
         }})
     else:
         command_args_dict.update({
             "identity": {
-                "type": type,
+                "type": identity_type,
                 "user_assigned_identities": None
             }
         })
@@ -94,9 +94,9 @@ def cli_add_encryption(cmd, resource_group_name, namespace_name, encryption_conf
 
     if 'encryption' in servicebusnm:
         for col in servicebusnm['encryption']['keyVaultProperties']:
-            object = create_keyvault_object(col)
-            if object not in key_vault_object:
-                key_vault_object.append(object)
+            vault_object = create_keyvault_object(col)
+            if vault_object not in key_vault_object:
+                key_vault_object.append(vault_object)
         if require_infrastructure_encryption is None:
             require_infrastructure_encryption = servicebusnm['encryption']['requireInfrastructureEncryption']
 
@@ -123,8 +123,8 @@ def cli_remove_encryption(cmd, resource_group_name, namespace_name, encryption_c
     key_vault_object = []
 
     for col in servicebusnm['encryption']['keyVaultProperties']:
-        object = create_keyvault_object(col)
-        key_vault_object.append(object)
+        vault_object = create_keyvault_object(col)
+        key_vault_object.append(vault_object)
     for col in encryption_config:
         if col in key_vault_object:
             key_vault_object.remove(col)
@@ -154,18 +154,18 @@ def cli_add_identity(cmd, resource_group_name, namespace_name, system_assigned=N
             "userAssignedIdentities": None
         }
 
-    type = servicebusnm['identity']['type']
+    identity_type = servicebusnm['identity']['type']
     if system_assigned:
-        if type == USER:
+        if identity_type == USER:
             type = SYSTEMUSER
-        elif type == "None":
+        elif identity_type == "None":
             type = SYSTEM
 
     if user_assigned:
-        if type == SYSTEM:
-            type = SYSTEMUSER
+        if identity_type == SYSTEM:
+            identity_type = SYSTEMUSER
         else:
-            type = USER
+            identity_type = USER
         user_assigned_identity = {}
         for col in user_assigned:
             user_assigned_identity[col] = {}
@@ -178,13 +178,13 @@ def cli_add_identity(cmd, resource_group_name, namespace_name, system_assigned=N
         else:
             servicebusnm['identity'] = {
                 'userAssignedIdentities': user_assigned_identity,
-                'type': type
+                'type': identity_type
             }
     return Update(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
         "identity": {
-            "type": type,
+            "type": identity_type,
             "user_assigned_identities": servicebusnm['identity']['userAssignedIdentities']
         }
     })
@@ -203,31 +203,31 @@ def cli_remove_identity(cmd, resource_group_name, namespace_name, system_assigne
     if servicebusnm['identity'] is None:
         raise CLIError('The namespace does not have identity enabled')
 
-    type = servicebusnm['identity']['type']
+    identity_type = servicebusnm['identity']['type']
     if system_assigned:
-        if type == SYSTEM:
-            type = "None"
-        if type == SYSTEMUSER:
-            type = USER
+        if identity_type == SYSTEM:
+            identity_type = "None"
+        if identity_type == SYSTEMUSER:
+            identity_type = USER
 
     if user_assigned:
         if servicebusnm['identity']['userAssignedIdentities']:
             for x in user_assigned:
                 servicebusnm['identity']['userAssignedIdentities'].pop(x)
-            if type == USER:
+            if identity_type == USER:
                 if len(servicebusnm['identity']['userAssignedIdentities']) == 0:
-                    type = "None"
+                    identity_type = "None"
                     servicebusnm['identity']['userAssignedIdentities'] = None
             if type == SYSTEMUSER:
                 if len(servicebusnm['identity']['userAssignedIdentities']) == 0:
-                    type = "SystemAssigned"
+                    identity_type = "SystemAssigned"
                     servicebusnm['identity']['userAssignedIdentities'] = None
 
     command_args = {
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
         "identity": {
-            "type": type
+            "type": identity_type
         }
     }
 
