@@ -46,7 +46,7 @@ Since the release states of api-version and CLI commands may be inconsistent, ou
 
 ### What is a breaking change
 
-A breaking change is any update to Azure CLI, including core CLI and CLI extensions, that causes a customer's script or automation written in a previous version to fail.
+A breaking change is any update to Azure CLI, including core CLI and CLI extensions, that causes a customer's script or automation, written in a previous version, to fail.
 Common examples of breaking changes include:
 - Modifying names of parameters/commands.
 - Modifying input logic of parameters.
