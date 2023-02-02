@@ -193,7 +193,6 @@ def cli_add_identity(cmd, resource_group_name, namespace_name, system_assigned=N
 def cli_remove_identity(cmd, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Update
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Show
-    from azure.cli.core import CLIError
 
     servicebusnm = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
