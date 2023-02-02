@@ -23,6 +23,10 @@ parameters:
   displayName: Run test for specific module
   type: string
   default: ''
+- name: ext_module
+  displayName: Run test for specific extension module
+  type: string
+  default: ''
 
 steps:
   - task: UsePythonVersion@0
@@ -54,6 +58,18 @@ steps:
           echo "Running in parallels"
           azdev test --no-exitfirst --verbose $module --pytest-args "--durations=10"
         fi
+        exit 0
+      fi
+
+      # Test specific extension module
+      ext_module="${{ parameters.ext_module }}"
+      if [[ -n $ext_module ]]; then
+        echo "Installing extension '$ext_module'"
+        azdev extension add $ext_module
+        echo "Running test for extension '$ext_module'"
+        azdev test $ext_module --no-exitfirst --pytest-args "--durations=0"
+        echo "Uninstalling extension '$ext_module'"
+        azdev extension remove $ext_module
         exit 0
       fi
 
