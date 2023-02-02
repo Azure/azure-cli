@@ -3,6 +3,111 @@
 Release History
 ===============
 
+2.44.1
+++++++
+
+**Network**
+
+* Hotfix: Fix #25086: `az network lb probe`: Expose parameter `--probes` (#25093)
+
+2.44.0
+++++++
+
+**ACR**
+
+* `az acr manifest`: Support oci artifact manifest (#24977)
+
+**AKS**
+
+* `az aks create`: Add new parameter `--data-collection-settings` to support for AKS Monitoring Addon in MSI auth mode (#24777)
+* `az aks install-cli`: Automatically add the installation directories to system path on windows (#24986)
+* `az aks create/update`: Add support for KEDA workload auto-scaler (#25007)
+
+**APIM**
+
+* `az apim api create`: Parse URL to detect Protocol and API type (#24775)
+
+**App Service**
+
+* Fix #23488: `az appservice plan create`: Fix zone redundant ASP creation fails for ASEv3 (#24899)
+* Fix #24858: Support for new isolated v2 (I4v2, I5v2, I6v2) SKUs (#24877)
+* `az appservice ase upgrade/send-test-notification`: Add new commands for ASE to support ASE upgrade and sending test notifications (#24881)
+* `az appservice ase update`: Add `--allow-incoming-ftp-connections` to allow incoming FTP connections (#24882)
+* `az appservice ase update`: Add `--allow-remote-debugging` to allow remote debugging (#24882)
+* Fix #19893: `az appservice plan create`: Fix the bug that cannot create app plan in a different subscription for ASEv3 (#24917)
+* Fix #16478: `az functionapp cors credentials`: Add enable/disable CORS creds commands (#24958)
+* Fix #22934: `az functionapp delete`: Add new parameter `--keep-empty-plan` to support keeping empty app service plan (#24890)
+* Fix #19469: `az functionapp vnet-integration add`: Add consumption plan validation (#24912)
+* `az staticwebapp functions link`: Add new parameter `--environment-name` to support setting the environment name of static site (#23894)
+
+**ARM**
+
+* Fix #24810: Support ARM64 architecture for Bicep installation (#24847)
+
+**Batch**
+
+* `az batch pool create/set`: Add new parameter `--target-communication` to support setting the desired node communication mode for the pool (#24795)
+
+**Compute**
+
+* Fix #24896: `az vm create`: Fix the bug that the VM cannot be created from ACG image to other resource group (#24948)
+* `az disk create`: Add new parameter `--performance-plus` to support boosting the performance target (#24913)
+* `az vm list`: Add new paramter `--vmss` to support querying VM instances in a specific VMSS (#24813)
+* `az sig image-version create/update`: Add parameters `--target-edge-zone-encryption` and `--target-edge-zones` to support edge zones (#24202)
+
+**Container**
+
+* `az container export`: Fix export when identity is set (#24833)
+
+**Key Vault**
+
+* `az keyvault key create`: Support OKP key and Ed25519 curve (#24880)
+
+**Monitor**
+
+* [BREAKING CHANGE] `az monitor action-group test-notifications create`: Remove notification in resource group and subscription level (#24965)
+* `az monitor diagnostic-settings create`: Create with resource id and export without workspace (#24875)
+
+**NetAppFiles**
+
+* `az volumes qouta-rule create`: Add volume quota rule create command (#24956)
+* `az volumes qouta-rule show`: Add volume quota rule show command (#24956)
+* `az volumes qouta-rule list`: Add volume quota rule list command (#24956)
+* `az volumes qouta-rule update`: Add volume quota rule update command (#24956)
+* `az volumes qouta-rule delete`: Add volume quota rule delete command (#24956)
+
+**Network**
+
+* `az network vnet-gateway create`: Add parameter `--edge-zone-vnet-id` for local gateway (#24642)
+* Fix #24853: `az network nsg rule create`: `--destination-asgs` and `--source-asgs` cannot be used (#24894)
+* Fix #24883: `az network application-gateway stop/start`: Add missed parameter `--ids` (#24924)
+* `az network watcher packet-capture create`: Resolve local path issue for Linux VM (#24936)
+* `az network lb update`: Expose parameter `--tags` (#25035)
+
+**Redis**
+
+* `az redis import/export`: Add new optional parameter `--preferred-data-archive-method` (#24979)
+* `az redis server-link`: Linked server has two new properties: `geoReplicatedPrimaryHostName` and `primaryHostName` (#24979)
+
+**Security**
+
+* `az security alert update`: `--status` now support `resolve` and `inprogress` (#24878)
+
+**Service Connector**
+
+* `az connection`: Support local connection which allows local environment to connect Azure resource (#24905)
+* Fix #24806: `az webapp connection create mysql-flexible`: Fix mysql connection command with `--system-identity` (#24825)
+
+**SQL**
+
+* `az sql server/db/mi/midb advanced-threat-protection-setting show/update`: Support `advanced-threat-protection-setting` commands (#24953)
+* `az sql db threat-policy`: Declare deprecation of this command group in version 2.45.0 (#24962)
+* `az sql db`: Add `--preferred-enclave-type` argument (#25002)
+
+**Storage**
+
+* `az storage blob copy start`: Fix `--tier` to support setting blob tier when copying (#24951)
+
 2.43.0
 ++++++
 

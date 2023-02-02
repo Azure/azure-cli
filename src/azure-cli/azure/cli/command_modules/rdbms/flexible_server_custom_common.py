@@ -16,6 +16,7 @@ from knack.util import CLIError
 from urllib.request import urlretrieve
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.util import send_raw_request
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, FileOperationError, BadRequestError
@@ -34,11 +35,11 @@ def flexible_server_update_get(client, resource_group_name, server_name):
     return client.get(resource_group_name, server_name)
 
 
-def flexible_server_stop(client, resource_group_name=None, server_name=None):
+def flexible_server_stop(client, resource_group_name=None, server_name=None, no_wait=False):
     days = 30 if isinstance(client, MySqlServersOperations) else 7
     logger.warning("Server will be automatically started after %d days "
                    "if you do not perform a manual start operation", days)
-    return client.begin_stop(resource_group_name, server_name)
+    return sdk_no_wait(no_wait, client.begin_stop, resource_group_name, server_name)
 
 
 def flexible_server_update_set(client, resource_group_name, server_name, parameters):
@@ -62,6 +63,9 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
             request_payload = json.load(f)
             if migration_mode == "online":
                 request_payload.get("properties")['MigrationMode'] = "Online"
+            else:
+                request_payload.get("properties")['MigrationMode'] = "Offline"
+
             json_data = json.dumps(request_payload)
         except ValueError as err:
             logger.error(err)
@@ -120,16 +124,17 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
         if operationSpecified is True:
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
         operationSpecified = True
-        r = migration_show_func(cmd, client, resource_group_name, server_name, migration_name, "Default")
+        r = migration_show_func(cmd, client, resource_group_name, server_name, migration_name)
         if r.get("properties").get("migrationMode") == "Offline":
             raise BadRequestError("Cutover is not possible for migration {} if the migration_mode set to offline. The migration will cutover automatically".format(migration_name))
-        properties = json.dumps({"properties": {"triggerCutover": "true", "DBsToTriggerCutoverMigrationOn": cutover}})
+        properties = json.dumps({"properties": {"triggerCutover": "true", "DBsToTriggerCutoverMigrationOn": r.get("properties").get("dBsToMigrate")}})
 
     if cancel is not None:
         if operationSpecified is True:
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
         operationSpecified = True
-        properties = json.dumps({"properties": {"Cancel": "true", "DBsToCancelMigrationOn": cancel}})
+        r = migration_show_func(cmd, client, resource_group_name, server_name, migration_name)
+        properties = json.dumps({"properties": {"Cancel": "true", "DBsToCancelMigrationOn": r.get("properties").get("dBsToMigrate")}})
 
     if operationSpecified is False:
         raise RequiredArgumentMissingError("Incorrect Usage: At least one update operation needs to be specified.")

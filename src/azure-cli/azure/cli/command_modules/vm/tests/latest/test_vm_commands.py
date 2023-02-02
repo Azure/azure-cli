@@ -3476,6 +3476,17 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('upgradePolicy.rollingUpgradePolicy.prioritizeUnhealthyInstances', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_with_max_surge')
+    def test_vmss_with_max_surge(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10)
+        })
+        self.cmd(
+            'vmss create -n {vmss} -g {rg} --image ubuntults --upgrade-policy-mode Manual --max-surge true --disable-overprovision',
+            checks=[
+                self.check('vmss.upgradePolicy.rollingUpgradePolicy.maxSurge', True)
+            ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_ephemeral_os_disk')
     def test_vmss_create_ephemeral_os_disk(self, resource_group):
 
@@ -5876,6 +5887,146 @@ class VMGalleryImage(ScenarioTest):
             self.check('safetyProfile.allowDeletionOfReplicatedLocations', False)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_target_extended_locations', location='southcentralus')
+    def test_image_version_with_target_extended_locations(self):
+        self.kwargs.update({
+            'gallery': self.create_random_name(prefix='gallery_', length=20),
+            'image': 'image1',
+            'version': '1.0.0',
+            'disk': 'disk',
+            'region1': 'southcentralus',
+            'edge_zone1': 'attdallas1',
+            'region2': 'westus',
+            'edge_zone2': 'microsoftlosangeles1',
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
+
+        time.sleep(15)
+
+        self.cmd(
+            'sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type windows -p publisher1 -f offer1 -s sku1',
+            checks=[
+                self.check('name', self.kwargs['image'])
+            ])
+
+        disk_id = self.cmd('disk create -n {disk} -g {rg} --size-gb 10').get_output_in_json()['id']
+        self.kwargs.update({
+            'disk_id': disk_id
+        })
+
+        # Creates an image version and replicates it to the first edge zone
+        self.cmd(
+            'sig image-version create --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image}'
+            ' --gallery-image-version {version} --os-snapshot {disk_id} --target-edge-zones "{region1}={edge_zone1}=1"',
+            checks=[
+                self.check('length(publishingProfile.targetExtendedLocations)', 1),
+                self.check('publishingProfile.targetExtendedLocations[0].name', 'South Central US'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone1}'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.type', 'EdgeZone'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
+            ])
+
+        # Replicate to two edge zones with different storage types
+        self.cmd(
+            'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image} '
+            '--gallery-image-version {version} --target-edge-zones "{region1}={edge_zone1}=1=standardssd_lrs" "{region2}={edge_zone2}=1=premium_lrs"',
+            checks=[
+                self.check('length(publishingProfile.targetExtendedLocations)', 2),
+                self.check('publishingProfile.targetExtendedLocations[0].name', 'South Central US'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone1}'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
+                self.check('publishingProfile.targetExtendedLocations[0].storageAccountType', 'StandardSSD_LRS'),
+                self.check('publishingProfile.targetExtendedLocations[1].name', 'West US'),
+                self.check('publishingProfile.targetExtendedLocations[1].extendedLocation.name', '{edge_zone2}'),
+                self.check('publishingProfile.targetExtendedLocations[1].extendedLocationReplicaCount', 1),
+                self.check('publishingProfile.targetExtendedLocations[1].storageAccountType', 'Premium_LRS'),
+            ])
+
+        # Target extended locations will not be updated if --target-edge-zones is not specified
+        self.cmd(
+            'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}',
+            checks=[
+                self.check('length(publishingProfile.targetExtendedLocations)', 2),
+                self.check('publishingProfile.targetExtendedLocations[0].name', 'South Central US'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone1}'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
+                self.check('publishingProfile.targetExtendedLocations[0].storageAccountType', 'StandardSSD_LRS'),
+                self.check('publishingProfile.targetExtendedLocations[1].name', 'West US'),
+                self.check('publishingProfile.targetExtendedLocations[1].extendedLocation.name', '{edge_zone2}'),
+                self.check('publishingProfile.targetExtendedLocations[1].extendedLocationReplicaCount', 1),
+                self.check('publishingProfile.targetExtendedLocations[1].storageAccountType', 'Premium_LRS'),
+            ])
+
+        # Target extended locations will be updated to None if '--target-edge-zones None' is specified
+        self.cmd(
+            'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-edge-zones None --allow-replicated-location-deletion true',
+            checks=[
+                self.check('publishingProfile.targetExtendedLocations', None),
+            ])
+
+        # Deleting the image version before performing encryption test
+        self.cmd(
+            'sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_target_extended_locations_encryption', location='westus')
+    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='westus', additional_params='--enable-purge-protection')
+    def test_image_version_with_target_extended_locations_encryption(self, resource_group, key_vault ):
+        self.kwargs.update({
+            'gallery': self.create_random_name(prefix='gallery_', length=20),
+            'image': 'image1',
+            'version': '1.0.0',
+            'key': self.create_random_name(prefix='key-', length=20),
+            'des1': self.create_random_name(prefix='des1-', length=20),
+            'disk': 'disk',
+            'region1': 'westus',
+            'edge_zone1': 'microsoftlosangeles1',
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
+
+        time.sleep(15)
+
+        self.cmd(
+            'sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type windows -p publisher1 -f offer1 -s sku1',
+            checks=[
+                self.check('name', self.kwargs['image'])
+            ])
+
+        disk_id = self.cmd('disk create -n {disk} -g {rg} --size-gb 10').get_output_in_json()['id']
+        self.kwargs.update({
+            'disk_id': disk_id
+        })
+
+        # Create disk encryption set
+        kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software').get_output_in_json()['key']['kid']
+        self.kwargs.update({
+            'kid': kid
+        })
+
+        self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault} --location {region1}')
+        des1_json = self.cmd('disk-encryption-set show -g {rg} -n {des1}').get_output_in_json()
+        des1_sp_id = des1_json['identity']['principalId']
+        self.kwargs.update({
+            'des1_sp_id': des1_sp_id
+        })
+
+        self.cmd('keyvault set-policy -n {vault} --object-id {des1_sp_id} --key-permissions wrapKey unwrapKey get')
+
+        # Create Image Version using a DES, the DES must have the correct key management permissions and be in the same region as the edge zone
+        self.cmd(
+            'sig image-version create --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image} '
+            '--gallery-image-version {version} --os-snapshot {disk_id} --target-regions "{region1}=1" --target-region-encryption "{des1},0,{des1}" '
+            '--target-edge-zones "{region1}={edge_zone1}=1" --target-edge-zone-encryption "{edge_zone1},{des1},0,{des1}"',
+            checks=[
+                self.check('length(publishingProfile.targetExtendedLocations)', 1),
+                self.check('publishingProfile.targetExtendedLocations[0].name', 'West US'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone1}'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.type', 'EdgeZone'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
+            ])
+
     @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
     def test_create_image_version_with_region_cvm_encryption_pmk(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -6308,13 +6459,13 @@ class VMGalleryApplication(ScenarioTest):
         ])
         self.cmd('sig gallery-application list -r {gallery} -g {rg}', checks=[
             self.check('[0].name', '{app_name}'),
-            self.check('[0].supportedOsType', 'Windows'),
+            self.check('[0].supportedOSType', 'Windows'),
             self.check('[0].description', 'test'),
             self.check('[0].tags', {'tag': 'test'})
             ])
         self.cmd('sig gallery-application show -n {app_name} -r {gallery} -g {rg}', checks=[
             self.check('name', '{app_name}'),
-            self.check('supportedOsType', 'Windows'),
+            self.check('supportedOSType', 'Windows'),
             self.check('description', 'test'),
             self.check('tags', {'tag': 'test'})
         ])
@@ -6599,7 +6750,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host_', location='westeurope')
-    @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host2_', location='centraluseuap', key='rg2')
+    @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host2_', location='eastus', key='rg2')
     def test_dedicated_host_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
             'host-group': 'my-host-group',
@@ -6963,6 +7114,19 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
                      self.check(update_enable_key, True),
                      self.check(update_not_before_timeout_key, 'PT5M')
                  ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_os_iamge_notification_')
+    def test_vmss_os_image_notification(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --enable-osimage-notification true', checks=[
+             self.check('vmss.virtualMachineProfile.scheduledEventsProfile.osImageNotificationProfile.enable', True)
+        ])
+
+        self.cmd('vmss update -g {rg} -n {vmss} --enable-osimage-notification false', checks=[
+            self.check('virtualMachineProfile.scheduledEventsProfile.osImageNotificationProfile', None)
+        ])
 
 
 class VMPriorityEvictionBillingTest(ScenarioTest):
@@ -8561,6 +8725,14 @@ class VMSSReimageScenarioTest(ScenarioTest):
         self.cmd('vmss reimage -g {rg} -n vmss1 --instance-id 1')
         self.cmd('vmss reimage -g {rg} -n vmss1')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_reimage_instance_id')
+    def test_vmss_reimage_instance_id(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10)
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --instance-count 2')
+        self.cmd('vmss reimage -g {rg} -n {vmss} --instance-id 0 1')
+
 
 class VMSSHKeyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_ssh_key_')
@@ -8726,6 +8898,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         message = "Please specify --hyper-v-generation as 'V2'  the value of --upload-type is 'UploadWithSecurityData'"
         with self.assertRaisesRegex(ArgumentUsageError, message):
             self.cmd('disk create -n {disk2} -g {rg} --os-type Windows --hyper-v-generation v1 --security-type TrustedLaunch --upload-type UploadWithSecurityData --upload-size-bytes 34359738880 --sku standard_lrs')
+
+        message = "usage error: --upload-size-bytes is required to create a disk for upload"
+        with self.assertRaisesRegex(RequiredArgumentMissingError, message):
+            self.cmd('disk create -n {disk2} -g {rg} --upload-type Upload --size-gb 10')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_trusted_launch_', location='southcentralus')
     def test_vmss_trusted(self, resource_group):

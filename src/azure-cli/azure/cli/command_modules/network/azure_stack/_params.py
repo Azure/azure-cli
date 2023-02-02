@@ -36,7 +36,7 @@ from azure.cli.command_modules.network.azure_stack._validators import (
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument,
     validate_vpn_connection_name_or_id,
-    process_vnet_name_or_id, validate_trusted_client_cert, validate_scale_unit_ranges)
+    process_vnet_name_or_id, validate_trusted_client_cert)
 from azure.cli.command_modules.network.azure_stack._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
     ag_url_map_rule_completion_list, tm_endpoint_completion_list, get_sdk_completer)
@@ -102,7 +102,6 @@ def load_arguments(self, _):
     http_protocol_type = CLIArgumentType(get_enum_type(ApplicationGatewayProtocol))
     ag_servers_type = CLIArgumentType(nargs='+', help='Space-separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
     app_gateway_name_type = CLIArgumentType(help='Name of the application gateway.', options_list='--gateway-name', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
-    bastion_host_name_type = CLIArgumentType(help='Name of the bastion host.', options_list='--bastion-host-name', completer=get_resource_name_completion_list('Microsoft.Network/bastionHosts'), id_part='name')
     express_route_link_macsec_cipher_type = CLIArgumentType(get_enum_type(ExpressRouteLinkMacSecCipher))
     zone_compatible_type = CLIArgumentType(
         options_list=['--zone', '-z'],
@@ -2132,37 +2131,6 @@ def load_arguments(self, _):
 
     with self.argument_context('network traffic-manager endpoint list') as c:
         c.argument('profile_name', id_part=None)
-    # endregion
-
-    # region Bastion
-    with self.argument_context('network bastion') as c:
-        c.argument('bastion_host_name', bastion_host_name_type, options_list=['--name', '-n'])
-        c.argument('public_ip_address', help='Name or ID of the Azure public IP. The SKU of the public IP must be Standard.', validator=get_public_ip_validator())
-        c.argument('virtual_network_name', options_list=['--vnet-name'], help='Name of the virtual network. It must have a subnet called AzureBastionSubnet.', validator=get_subnet_validator())
-        c.argument('resource_port', help='Resource port of the target VM to which the bastion will connect.', options_list=['--resource-port'])
-        c.argument('target_resource_id', help='ResourceId of the target Virtual Machine.', options_list=['--target-resource-id'])
-        c.argument('scale_units', type=int, min_api='2021-03-01', options_list=['--scale-units'],
-                   validator=validate_scale_unit_ranges,
-                   help='The scale units for the Bastion Host resource, which minimum is 2 and maximum is 50.')
-        c.argument('sku', arg_type=get_enum_type(['Basic', 'Standard']), min_api='2021-03-01',
-                   options_list=['--sku'], help='The SKU of this Bastion Host.')
-        c.ignore('subnet')
-    with self.argument_context('network bastion create') as c:
-        c.argument('sku', default='Standard')
-    for scope in ['create', 'update']:
-        with self.argument_context('network bastion {}'.format(scope)) as c:
-            c.argument('disable_copy_paste', help='Disable copy and paste for all sessions on this Azure Bastion resource', arg_type=get_three_state_flag())
-            c.argument('enable_tunneling', help='Enable Native Client Support on this Azure Bastion resource', arg_type=get_three_state_flag())
-            c.argument('enable_ip_connect', help='Enable IP-based Connections on this Azure Bastion resource', arg_type=get_three_state_flag())
-    with self.argument_context('network bastion ssh') as c:
-        c.argument('auth_type', help='Auth type to use for SSH connections.', options_list=['--auth-type'])
-        c.argument('username', help='User name for SSH connections.', options_list=['--username'])
-        c.argument('ssh_key', help='SSH key file location for SSH connections.', options_list=['--ssh-key'])
-    with self.argument_context('network bastion rdp') as c:
-        c.argument('disable_gateway', arg_type=get_three_state_flag(), help='Flag to disable access through RD gateway.')
-    with self.argument_context('network bastion tunnel') as c:
-        c.argument('port', help='Local port to use for the tunneling.', options_list=['--port'])
-        c.argument('timeout', help='Timeout for connection to bastion host tunnel.', options_list=['--timeout'])
     # endregion
 
     # region PrivateLinkResource and PrivateEndpointConnection

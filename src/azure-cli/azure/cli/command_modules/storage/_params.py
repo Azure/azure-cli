@@ -12,7 +12,7 @@ from azure.cli.core.local_context import LocalContextAttribute, LocalContextActi
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           validate_entity, validate_select, validate_blob_type,
                           validate_included_datasets_validator, validate_custom_domain, validate_hns_migration_type,
-                          validate_container_public_access,
+                          validate_container_public_access, validate_allow_blob_public_access,
                           add_progress_callback, process_resource_group,
                           storage_account_key_options, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
@@ -374,10 +374,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'platform managed keys for data at rest.')
         c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow or disallow public access to all blobs or containers in the storage account. '
-                   'The default value for this property is null, which is equivalent to true. When true, containers '
-                   'in the account may be configured for public access. Note that setting this property to true does '
+                   'The default value for this property is null. When true, containers in the account may '
+                   'be configured for public access. Note that setting this property to true does '
                    'not enable anonymous access to any data in the account. The additional step of configuring the '
-                   'public access setting for a container is required to enable anonymous access.')
+                   'public access setting for a container is required to enable anonymous access.',
+                   validator=validate_allow_blob_public_access)
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
@@ -1471,6 +1472,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     for item in ['create', 'extend']:
         with self.argument_context('storage container immutability-policy {}'.format(item)) as c:
+            from ._validators import validate_allow_protected_append_writes_all
             c.argument('account_name',
                        help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
             c.argument('if_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
@@ -1494,7 +1496,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                                           " ExtendImmutabilityPolicy API. The "
                                                           "'allowProtectedAppendWrites' and "
                                                           "'allowProtectedAppendWritesAll' properties are mutually "
-                                                          "exclusive.")
+                                                          "exclusive.",
+                    validator=validate_allow_protected_append_writes_all)
             c.extra('period', type=int, help='The immutability period for the blobs in the container since the policy '
                                              'creation, in days.')
             c.ignore('parameters')
