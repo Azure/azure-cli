@@ -72,6 +72,7 @@ class Create(AAZCommand):
         _args_schema.rule_type = AAZStrArg(
             options=["--rule-type"],
             help="Type of the routing rule.",
+            default="Basic",
             enum={"Basic": "Basic", "PathBasedRouting": "PathBasedRouting"},
         )
 
