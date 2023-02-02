@@ -2856,7 +2856,7 @@ examples:
   - name: Create a deployment stack at a different subscription.
     text: az stack sub create --name "StackName" --template-file simpleTemplate.json --location "westus2" --description "description --subscription "subscriptionId"
   - name: Create a deployment stack and deploy at the resource group scope.
-    text: az stack sub create --name "StackName" --template-file simpleTemplate.json  --location "westus" --resource-group "ResourceGroup" --description "description"
+    text: az stack sub create --name "StackName" --template-file simpleTemplate.json  --location "westus" --deployment-resource-group "ResourceGroup" --description "description"
   - name: Create a deployment stack using parameters from key/value pairs
     text: az stack sub create --name "StackName" --template-file simpleTemplate.json  --location "westus" --description "description" --parameters simpleTemplateParams.json value1=foo value2=bar
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.

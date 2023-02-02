@@ -101,6 +101,8 @@ def load_arguments(self, _):
     stacks_description_type = CLIArgumentType(options_list=['--description'], help='The description of deployment stack.')
     stacks_stack_type = CLIArgumentType(help='The deployment stack resource id.')
     stacks_stack_name_type = CLIArgumentType(help='The deployment stack name')
+    stacks_stack_deployment_resource_group = CLIArgumentType(help='[Optional] The scope at which the initial deployment should be created. If a scope is not specified, it will default to the scope of the deployment stack.')
+    stacks_stack_deployment_subscription = CLIArgumentType(help='[Optional] The scope at which the initial deployment should be created. If a scope is not specified, it will default to the scope of the deployment stack.')
     stacks_delete_resources_type = CLIArgumentType(options_list=['--delete-resources'], help='Flag to indicate delete rather than detach for the resources.')
     stacks_delete_resource_groups_type = CLIArgumentType(options_list=['--delete-resource-groups'], help='Flag to indicate delete rather than detach for the resource groups.')
     stacks_delete_all_type = CLIArgumentType(options_list=['--delete-all'], help='Flag to indicate delete rather than detach for the resources and resource groups.')
@@ -668,6 +670,9 @@ def load_arguments(self, _):
     with self.argument_context('ts list') as c:
         c.argument('resource_group', arg_type=resource_group_name_type)
     
+    with self.argument_context('stack mg') as c:
+        c.argument('management_group_id', arg_type=management_group_id_type, help='The management group id to create stack at.')
+    
     with self.argument_context('stack mg create') as c:
         c.argument('name', options_list=['--name', '-n'], arg_type=stacks_name_type)
         c.argument('location', options_list=['--location', '-l'], help='The location to store deployment stack.')
@@ -676,11 +681,10 @@ def load_arguments(self, _):
         c.argument('template_uri', arg_type=deployment_template_uri_type)
         c.argument('parameters', arg_type=deployment_parameters_type, help='Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.')
         c.argument('description', arg_type=stacks_description_type)
-        c.argument('subscription', arg_type=subscription_type)
+        c.argument('deployment_subscription', arg_type=stacks_stack_deployment_subscription)
         c.argument('delete_resources', arg_type=stacks_delete_resources_type)
         c.argument('delete_resource_groups', arg_type=stacks_delete_resource_groups_type)
         c.argument('delete_all', arg_type=stacks_delete_all_type)
-        c.argument('management-group-id', arg_type=management_group_name_type)
         c.argument('deny_settings_mode', arg_type=stacks_deny_settings_mode)
         c.argument('deny_settings_excluded_principals', arg_type=stacks_excluded_principals)
         c.argument('deny_settings_excluded_actions', arg_type=stacks_excluded_actions)
@@ -691,29 +695,23 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
         c.argument('id', arg_type=stacks_stack_type)
         c.argument('subscription', arg_type=subscription_type)
-        c.argument('management-group-id', arg_type=management_group_name_type)
-
     
     with self.argument_context('stack mg delete') as c:
         c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
         c.argument('id', arg_type=stacks_stack_type)
         c.argument('subscription', arg_type=subscription_type)
-        c.argument('management-group-id', arg_type=management_group_name_type)
-
     
     with self.argument_context('stack mg export') as c:
         c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
         c.argument('id', arg_type=stacks_stack_type)
         c.argument('subscription', arg_type=subscription_type)
-        c.argument('management-group-id', arg_type=management_group_name_type)
-    
+
     with self.argument_context('stack mg list') as c:
         c.argument('subscription', arg_type=subscription_type)
-        c.argument('management-group-id', arg_type=management_group_name_type)
     
     with self.argument_context('stack sub create') as c:
         c.argument('name', options_list=['--name', '-n'], arg_type=stacks_name_type)
-        c.argument('resource_group', arg_type=resource_group_name_type, help='[Optional] The scope at which the initial deployment should be created. If a scope is not specified, it will default to the scope of the deployment stack.')
+        c.argument('deployment_resource_group', arg_type=stacks_stack_deployment_resource_group)
         c.argument('location', options_list=['--location', '-l'], help='The location to store deployment stack.')
         c.argument('template_file', arg_type=deployment_template_file_type)
         c.argument('template_spec', arg_type=deployment_template_spec_type)
@@ -769,7 +767,6 @@ def load_arguments(self, _):
         c.argument('id', arg_type=stacks_stack_type)
         c.argument('subscription', arg_type=subscription_type)
         
-    
     with self.argument_context('stack group list') as c:
         c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
         c.argument('subscription', arg_type=subscription_type)

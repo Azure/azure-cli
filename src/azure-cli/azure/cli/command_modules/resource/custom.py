@@ -2058,7 +2058,7 @@ def list_template_specs(cmd, resource_group_name=None, name=None):
         return rcf.template_specs.list_by_resource_group(resource_group_name)
     return rcf.template_specs.list_by_subscription()
 
-def create_deployment_stack_at_subscription(cmd, name, location, delete_resources=False, delete_resource_groups=False, delete_all=False, resource_group=None, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_apply_to_child_scopes = False, tags=None, yes=False):
+def create_deployment_stack_at_subscription(cmd, name, location, delete_resources=False, delete_resource_groups=False, delete_all=False, deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_apply_to_child_scopes = False, tags=None, yes=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
     delete_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
@@ -2103,31 +2103,32 @@ def create_deployment_stack_at_subscription(cmd, name, location, delete_resource
             #bypass if yes flag is true
             if not yes:
                 from knack.prompting import prompt_y_n
-                build_confirmation_string = "The DeploymentStack {} you're trying to create already exists in the current subscription. Do you want to overwrite it with the following actions: ".format(name)
+                build_confirmation_string = "The DeploymentStack {} you're trying to create already exists in the current subscription.\n".format(name)
+                build_confirmation_string += "The following actions will be applied to any resources the are no longer managed by the deployment stack after the template is applied:\n"
                 #first case we have only detach
                 if delete_resources_enum == detach_model and delete_resource_groups_enum == detach_model:
-                    build_confirmation_string += "\nDetach: resources and resource groups"
+                    build_confirmation_string += "\nDetach: resources and resource groups\n"
                 #second case we only have delete
                 elif delete_resources_enum == delete_model and delete_resource_groups_enum == delete_model:
-                    build_confirmation_string += "\nDelete: resources and resource groups"
+                    build_confirmation_string += "\nDeleting: resources and resource groups\n"
                 else:
                     if delete_resources_enum == detach_model:
-                        build_confirmation_string += "\nDetach: resources"
-                        build_confirmation_string += "\nDelete: resource groups"
+                        build_confirmation_string += "\nDetach: resources\n"
+                        build_confirmation_string += "\nDeleting: resource groups\n"
                     else:
-                        build_confirmation_string += "\nDetach: resource groups"
-                        build_confirmation_string += "\nDelete: resources"
-                confirmation = prompt_y_n(build_confirmation_string)
+                        build_confirmation_string += "\nDetach: resource groups\n"
+                        build_confirmation_string += "\nDeleting: resources\n"
+                confirmation = prompt_y_n(build_confirmation_string + "\n")
                 if not confirmation:
                     return None
                 pass
     except:
         pass
 
-    if not resource_group:
+    if not deployment_resource_group:
         deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx)
     else:
-        deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx) + "/resourceGroups/" + resource_group
+        deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx) + "/resourceGroups/" + deployment_resource_group
     
     t_spec, t_uri = None, None
     template_obj = None
@@ -2285,21 +2286,22 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, delete_
         if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
             if not yes:
                 from knack.prompting import prompt_y_n
-                build_confirmation_string = "The DeploymentStack {} you're trying to create already exists in the current subscription. Do you want to overwrite it with the following actions: ".format(name)
+                build_confirmation_string = "The DeploymentStack {} you're trying to create already exists in the current subscription.\n".format(name)
+                build_confirmation_string += "The following actions will be applied to any resources the are no longer managed by the deployment stack after the template is applied:\n"
                 #first case we have only detach
                 if delete_resources_enum == detach_model and delete_resource_groups_enum == detach_model:
-                    build_confirmation_string += "\nDetach: resources and resource groups"
+                    build_confirmation_string += "\nDetach: resources and resource groups\n"
                 #second case we only have delete
                 elif delete_resources_enum == delete_model and delete_resource_groups_enum == delete_model:
-                    build_confirmation_string += "\nDelete: resources and resource groups"
+                    build_confirmation_string += "\nDeleting: resources and resource groups\n"
                 else:
                     if delete_resources_enum == detach_model:
-                        build_confirmation_string += "\nDetach: resources"
-                        build_confirmation_string += "\nDelete: resource groups"
+                        build_confirmation_string += "\nDetach: resources\n"
+                        build_confirmation_string += "\nDeleting: resource groups\n"
                     else:
-                        build_confirmation_string += "\nDetach: resource groups"
-                        build_confirmation_string += "\nDelete: resources"
-                confirmation = prompt_y_n(build_confirmation_string)
+                        build_confirmation_string += "\nDetach: resource groups\n"
+                        build_confirmation_string += "\nDeleting: resources\n"
+                confirmation = prompt_y_n(build_confirmation_string + "\n")
                 if not confirmation:
                     return None
                 pass
@@ -2434,7 +2436,7 @@ def export_template_deployment_stack_at_resource_group(cmd, name=None, resource_
         return rcf.deployment_stacks.export_template_at_resource_group(stack_arr[4], stack_arr[-1])
     raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
-def create_deployment_stack_at_management_group(cmd, management_group_id, name, location, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_apply_to_child_scopes = False, yes=False, tags=None):
+def create_deployment_stack_at_management_group(cmd, management_group_id, name, location, deployment_subscription=None, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_apply_to_child_scopes = False, yes=False, tags=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
@@ -2470,33 +2472,36 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
     if [template_file, template_spec, template_uri].count(None) != 2:
         raise InvalidArgumentValueError("Please enter only one of the following: template file, template spec, or template url")
     try:
-        get_subscription_response = rcf.deployment_stacks.get_at_subscription(name)
-        if get_subscription_response:
-            if get_subscription_response.location != location:
-                raise CLIError("Cannot change location of an already existing stack at subscription scope.")
-            from knack.prompting import prompt_y_n
-            build_confirmation_string = "The DeploymentStack {} you're trying to create already exists in the current subscription. Do you want to overwrite it with the following actions: ".format(name)
-            #first case we have only detach
-            if delete_resources_enum == detach_model and delete_resource_groups_enum == detach_model:
-                build_confirmation_string += "\nDetach: resources and resource groups"
-            #second case we only have delete
-            elif delete_resources_enum == delete_model and delete_resource_groups_enum == delete_model:
-                build_confirmation_string += "\nDelete: resources and resource groups"
-            else:
-                if delete_resources_enum == detach_model:
-                    build_confirmation_string += "\nDetach: resources"
-                    build_confirmation_string += "\nDelete: resource groups"
+        get_mg_response = rcf.deployment_stacks.get_at_management_group(management_group_id, name)
+        if get_mg_response:
+            if not yes:
+                from knack.prompting import prompt_y_n
+                build_confirmation_string = "The DeploymentStack {} you're trying to create already exists in the current subscription.\n".format(name)
+                build_confirmation_string += "The following actions will be applied to any resources the are no longer managed by the deployment stack after the template is applied:\n"
+                #first case we have only detach
+                if delete_resources_enum == detach_model and delete_resource_groups_enum == detach_model:
+                    build_confirmation_string += "\nDetach: resources and resource groups\n"
+                #second case we only have delete
+                elif delete_resources_enum == delete_model and delete_resource_groups_enum == delete_model:
+                    build_confirmation_string += "\nDeleting: resources and resource groups\n"
                 else:
-                    build_confirmation_string += "\nDetach: resource groups"
-                    build_confirmation_string += "\nDelete: resources"
-            confirmation = prompt_y_n(build_confirmation_string)
-            if not confirmation:
-                return None
-            pass
+                    if delete_resources_enum == detach_model:
+                        build_confirmation_string += "\nDetach: resources\n"
+                        build_confirmation_string += "\nDeleting: resource groups\n"
+                    else:
+                        build_confirmation_string += "\nDetach: resource groups\n"
+                        build_confirmation_string += "\nDeleting: resources\n"
+                confirmation = prompt_y_n(build_confirmation_string + "\n")
+                if not confirmation:
+                    return None
+                pass
     except:
         pass
 
-    deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx)
+    if not deployment_subscription:
+        deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx)
+    else:
+        deployment_scope = "/subscriptions/" + deployment_subscription
     
     t_spec, t_uri = None, None
     template_obj = None

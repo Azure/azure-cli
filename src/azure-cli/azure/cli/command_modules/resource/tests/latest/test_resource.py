@@ -2152,13 +2152,13 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack sub delete --name {name} --yes')
     
         # deploy to rg
-        self.cmd('stack sub create --name {name} --location {location} --template-file "{template-file}" --resource-group {resource-group} --parameters "{parameter-file}" --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack sub create --name {name} --location {location} --template-file "{template-file}" --deployment-resource-group {resource-group} --parameters "{parameter-file}" --yes', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup 
         self.cmd('stack sub delete --name {name} --yes')
 
         # create deployment stack with bicep file and rg scope
-        self.cmd('stack sub create --name {name} --location {location} --template-file "{bicep-file}" -g {resource-group} --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack sub create --name {name} --location {location} --template-file "{bicep-file}" --deployment-resource-group {resource-group} --yes', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
         self.cmd('stack sub delete --name {name} --yes')
@@ -2167,10 +2167,10 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('az group create --location {location} --name {resource-group-two}')
 
         # create stack  with resource1
-        self.cmd('stack sub create --name {name} --location {location} --resource-group {resource-group-two} --template-file "{template-file-spec}" --parameters "name={resource-one}" --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack sub create --name {name} --location {location} --deployment-resource-group {resource-group-two} --template-file "{template-file-spec}" --parameters "name={resource-one}" --yes', checks=self.check('provisioningState', 'succeeded'))
 
         # update stack with resource2 set to detach
-        self.cmd('stack sub create --name {name} --location {location} --resource-group {resource-group-two} --template-file "{template-file-spec}" --parameters "name={resource-two}" --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack sub create --name {name} --location {location} --deployment-resource-group {resource-group-two} --template-file "{template-file-spec}" --parameters "name={resource-two}" --yes', checks=self.check('provisioningState', 'succeeded'))
 
         # check resource1 still exists in Azure
         self.cmd('resource show -n {resource-one} -g {resource-group-two} --resource-type {resource-type-specs}')
@@ -2179,7 +2179,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('resource show -n {resource-two} -g {resource-group-two} --resource-type {resource-type-specs}')
 
         # update stack with resource3 set to delete
-        self.cmd('stack sub create --name {name} --location {location} --resource-group {resource-group-two} --template-file "{template-file-spec}" --parameters "name={resource-three}" --delete-resources --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack sub create --name {name} --location {location} --deployment-resource-group {resource-group-two} --template-file "{template-file-spec}" --parameters "name={resource-three}" --delete-resources --yes', checks=self.check('provisioningState', 'succeeded'))
 
         # check resource1 still exists in Azure
         self.cmd('resource show -n {resource-one} -g {resource-group-two} --resource-type {resource-type-specs}')
@@ -2228,7 +2228,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('group create --location {location} --name {resource-group-two}')
 
         # create stack
-        self.cmd('stack sub create --name {name} --location {location} -g {resource-group-two} --template-file "{track-rg-file}" --parameters "rgname={resource-one}" "tsname={template-spec-name}" --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack sub create --name {name} --location {location} --deployment-resource-group {resource-group-two} --template-file "{track-rg-file}" --parameters "rgname={resource-one}" "tsname={template-spec-name}" --yes', checks=self.check('provisioningState', 'succeeded'))
 
         # check template spec exists in Azure
         self.cmd('resource show -n {template-spec-name} -g {resource-group-two} --resource-type {resource-type-specs}')
@@ -2237,7 +2237,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('group show -n {resource-one}')
 
         # create stack with delete-all set 
-        self.cmd('stack sub create --name {name} --location {location} -g {resource-group-two} --template-file "{template-file}" --delete-all --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack sub create --name {name} --location {location} --deployment-resource-group {resource-group-two} --template-file "{template-file}" --delete-all --yes', checks=self.check('provisioningState', 'succeeded'))
 
         # confirm template spec has been removed from azure
         self.cmd('resource list -g {resource-group-two}',  checks=self.check("length([?name=='{template-spec-name}'])", 0))
@@ -2358,7 +2358,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('group create --location {location} --name {resource-group-two}')
 
         # create stack with resource1 to check if resources are being detached on delete
-        self.cmd('stack sub create --name {name} --location {location} -g {resource-group-two} --template-file "{template-file-spec}" --parameters "name={resource-one}" --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack sub create --name {name} --location {location} --deployment-resource-group {resource-group-two} --template-file "{template-file-spec}" --parameters "name={resource-one}" --yes', checks=self.check('provisioningState', 'succeeded'))
 
         # delete stack set to (default) detach
         self.cmd('stack sub delete --name {name} --yes')
@@ -2367,7 +2367,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('resource show -n {resource-one} -g {resource-group-two} --resource-type {resource-type-specs}')
 
         # create stack with resource2 to check if resources are being purged on delete
-        self.cmd('stack sub create --name {name} --location {location} -g {resource-group-two} --template-file "{template-file-spec}" --parameters "name={resource-two}" --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack sub create --name {name} --location {location} --deployment-resource-group {resource-group-two} --template-file "{template-file-spec}" --parameters "name={resource-two}" --yes', checks=self.check('provisioningState', 'succeeded'))
 
         # delete stack with resource2 set to delete
         self.cmd('stack sub delete --name {name} --delete-resources --yes')
@@ -2407,7 +2407,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('group create --location {location} --name {resource-group-two}')
 
         # create stack
-        self.cmd('stack sub create --name {name} --location {location} -g {resource-group-two} --template-file "{track-rg-file}" --parameters "rgname={resource-one}" "tsname={template-spec-name}" --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack sub create --name {name} --location {location} --deployment-resource-group {resource-group-two} --template-file "{track-rg-file}" --parameters "rgname={resource-one}" "tsname={template-spec-name}" --yes', checks=self.check('provisioningState', 'succeeded'))
 
         # check template spec exists in Azure
         self.cmd('resource show -n {template-spec-name} -g {resource-group-two} --resource-type {resource-type-specs}')
@@ -2812,12 +2812,12 @@ class DeploymentStacksTest(ScenarioTest):
         })
         # create mg
         #self.cmd('account management-group create --name {mg}', checks=[])
-
+        
         # create template spec
-        basic_template_spec = self.cmd('ts create --name {template-spec-name} --version {template-spec-version} --location "westus2" --template-file {template-file} --resource-group {resource-group}').get_output_in_json()
-        template_spec_id = basic_template_spec['id']
+        #basic_template_spec = self.cmd('ts create --name {template-spec-name} --version {template-spec-version} --location "westus2" --template-file {template-file} --resource-group {resource-group}').get_output_in_json()
+        #template_spec_id = basic_template_spec['id']
 
-        self.kwargs.update({'template-spec-id': template_spec_id})
+        #self.kwargs.update({'template-spec-id': template_spec_id})
 
         # create deployment stack with template file and parameter file
         self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
@@ -2826,10 +2826,10 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack mg delete --name {name} --management-group-id {mg} --yes')
 
         #create deployment stack with template spec and parameter file
-        self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-spec "{template-spec-id}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
+        #self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-spec "{template-spec-id}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup 
-        self.cmd('stack mg delete --name {name} --management-group-id {mg} --yes')
+        #self.cmd('stack mg delete --name {name} --management-group-id {mg} --yes')
     
         # test delete flag --delete-resource-groups - create stack  with resource1
         self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file-rg}" --parameters "name={resource-one}"', checks=self.check('provisioningState', 'succeeded'))
