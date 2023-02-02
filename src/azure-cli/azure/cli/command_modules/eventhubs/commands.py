@@ -172,16 +172,12 @@ def load_command_table(self, _):
         g.custom_command('update', 'cli_networkrule_update')
 
 # Identity Region
-    from azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file import cli_add_identity
-    from azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file import cli_remove_identity
     with self.command_group('eventhubs namespace identity', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
         g.custom_command('assign', 'cli_add_identity')
         g.custom_command('remove', 'cli_remove_identity')
 
 # Encryption Region
-    from azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file import cli_add_encryption
-    from azure.cli.command_modules.eventhubs.Operation.Namespace_custom_file import cli_remove_encryption
     with self.command_group('eventhubs namespace encryption', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
         g.custom_command('add', 'cli_add_encryption')
