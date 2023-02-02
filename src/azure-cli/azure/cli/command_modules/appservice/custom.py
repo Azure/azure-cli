@@ -353,13 +353,16 @@ def _get_subnet_info(cmd, resource_group_name, vnet, subnet):
     subnet_info["subnet_subscription_id"] = subscription_id
     return subnet_info
 
+
 def get_managed_environment(cmd, resource_group_name, environment_name):
     try:
         appcontainers_client = appcontainers_client_factory(cmd.cli_ctx)
         return appcontainers_client.managed_environments.get(resource_group_name, environment_name)
     except Exception as ex:  # pylint: disable=broad-except
-        logger.warning("Retrieving managed environment failed with an exception:'%s'", ex)
-        raise ex
+        error_message="Retrieving managed environment failed with an exception: {}".format(ex)
+        recommendation_message="Please verify the managed environment is valid"
+        raise ResourceNotFoundError(error_message, recommendation_message)
+
 
 def validate_container_app_create_options(runtime=None, deployment_container_image_name=None,
                                           multicontainer_config_type=None, multicontainer_config_file=None):
@@ -3639,7 +3642,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     elif not disable_app_insights and matched_runtime.app_insights:
         create_app_insights = True
 
-# TODO use managed-environment field on ASP model when we the latest SDK is avaliable. 
+# TODO use managed-environment field on ASP model when we the latest SDK is avaliable.
     if environment is not None:
         managed_environment = get_managed_environment(cmd, resource_group_name, environment)
         functionapp_def.enable_additional_properties_sending()
