@@ -305,9 +305,10 @@ class WebappQuickCreateTest(ScenarioTest):
         ])
 
 
-class BackupWithName(ScenarioTest):
+class BackupRestoreTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @StorageAccountPreparer(allow_blob_public_access=True)
     def test_backup_with_name(self, resource_group):
         plan = self.create_random_name(prefix='plan-backup', length=24)
         self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan))
@@ -341,7 +342,7 @@ class BackupWithName(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer(name_prefix='backup', length=24, location=WINDOWS_ASP_LOCATION_WEBAPP, sku='Standard_LRS')
+    @StorageAccountPreparer(name_prefix='backup', length=24, location=WINDOWS_ASP_LOCATION_WEBAPP, sku='Standard_LRS', allow_blob_public_access=True)
     def test_config_backup_restore(self, resource_group, storage_account_info):
         plan = self.create_random_name(prefix='plan-backup', length=24)
         webapp = self.create_random_name(prefix='backup-webapp', length=24)
