@@ -132,12 +132,15 @@ parameters:
   - name: --aad-client-app-id
     type: string
     short-summary: The ID of an Azure Active Directory client application of type "Native". This application is for user login via kubectl.
+    long-summary: --aad-client-app-id is deprecated. See https://aka.ms/aks/aad-legacy for details.
   - name: --aad-server-app-id
     type: string
     short-summary: The ID of an Azure Active Directory server application of type "Web app/API". This application represents the managed cluster's apiserver (Server application).
+    long-summary: --aad-server-app-id is deprecated. See https://aka.ms/aks/aad-legacy for details.
   - name: --aad-server-app-secret
     type: string
     short-summary: The secret of an Azure Active Directory server application.
+    long-summary: --aad-server-app-secret is deprecated. See https://aka.ms/aks/aad-legacy for details.
   - name: --aad-tenant-id
     type: string
     short-summary: The ID of an Azure Active Directory tenant.
@@ -1233,15 +1236,19 @@ parameters:
   - name: --reset-aad
     type: string
     short-summary: Reset Azure Active Directory configuration for a managed cluster.
+    long-summary: --reset-aad is deprecated. See https://aka.ms/aks/aad-legacy for details.
   - name: --aad-server-app-id
     type: string
     short-summary: The ID of an Azure Active Directory server application. This argument is required if `--reset-aad` is specified.
+    long-summary: --aad-server-app-id is deprecated. See https://aka.ms/aks/aad-legacy for details.
   - name: --aad-server-app-secret
     type: string
     short-summary: The secret of an Azure Active Directory server application. This argument is required if `--reset-aad` is specified.
+    long-summary: --aad-server-app-secret is deprecated. See https://aka.ms/aks/aad-legacy for details.
   - name: --aad-client-app-id
     type: string
     short-summary: The ID of an Azure Active Directory client application. This argument is required if `--reset-aad` is specified.
+    long-summary: --aad-client-app-id is deprecated. See https://aka.ms/aks/aad-legacy for details.
   - name: --aad-tenant-id
     type: string
     short-summary: Tenant ID associated with Azure Active Directory.
@@ -1249,8 +1256,6 @@ parameters:
 examples:
   - name: Update an existing Kubernetes cluster with new service principal.
     text: az aks update-credentials -g MyResourceGroup -n MyManagedCluster --reset-service-principal --service-principal MyNewServicePrincipalID --client-secret MyNewServicePrincipalSecret
-  - name: Update an existing Azure Active Directory Kubernetes cluster with new server app secret key.
-    text: az aks update-credentials -g MyResourceGroup -n MyManagedCluster --reset-aad --aad-server-app-id MyExistingAADServerAppID --aad-server-app-secret MyNewAADServerAppSecret --aad-client-app-id MyExistingAADClientAppID --aad-tenant-id MyAADTenantID
 """
 
 helps['aks upgrade'] = """

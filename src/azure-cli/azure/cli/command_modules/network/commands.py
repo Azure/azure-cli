@@ -39,7 +39,7 @@ from azure.cli.command_modules.network._format import (
 from azure.cli.command_modules.network._validators import (
     get_network_watcher_from_location,
     process_ag_create_namespace,
-    process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_nic_create_namespace,
+    process_nic_create_namespace,
     process_lb_create_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
@@ -188,36 +188,6 @@ def load_command_table(self, _):
                          validator=process_ag_create_namespace,
                          exception_handler=handle_template_based_exception)
 
-    subresource_properties = [
-        {'prop': 'request_routing_rules', 'name': 'rule', 'validator': process_ag_rule_create_namespace},
-    ]
-    if self.supported_api_version(min_api='2021-08-01'):
-        subresource_properties.append({'prop': 'routing_rules', 'name': 'routing-rule', 'validator': process_ag_routing_rule_create_namespace})
-
-    def _make_singular(value):
-        try:
-            if value.endswith('ies'):
-                value = value[:-3] + 'y'
-            elif value.endswith('s'):
-                value = value[:-1]
-            return value
-        except AttributeError:
-            return value
-
-    for kwargs in subresource_properties:
-        alias = kwargs['name']
-        subresource = kwargs['prop']
-        create_validator = kwargs.get('validator', None)
-        with self.command_group('network application-gateway {}'.format(alias), network_util) as g:
-            g.command('list', list_network_resource_property('application_gateways', subresource))
-            g.show_command('show', get_network_resource_property_entry('application_gateways', subresource))
-            g.command('delete', delete_network_resource_property_entry('application_gateways', subresource), supports_no_wait=True)
-            g.custom_command('create', 'create_ag_{}'.format(_make_singular(subresource)), supports_no_wait=True, validator=create_validator)
-            g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
-                                     setter_name='begin_create_or_update',
-                                     custom_func_name='update_ag_{}'.format(_make_singular(subresource)),
-                                     child_collection_prop_name=subresource, validator=create_validator)
-
     with self.command_group("network application-gateway address-pool"):
         from .custom import AddressPoolCreate, AddressPoolUpdate
         self.command_table["network application-gateway address-pool create"] = AddressPoolCreate(loader=self)
@@ -278,6 +248,16 @@ def load_command_table(self, _):
         from .custom import AGRewriteRuleCreate, AGRewriteRuleUpdate
         self.command_table["network application-gateway rewrite-rule create"] = AGRewriteRuleCreate(loader=self)
         self.command_table["network application-gateway rewrite-rule update"] = AGRewriteRuleUpdate(loader=self)
+
+    with self.command_group("network application-gateway routing-rule"):
+        from .custom import RoutingRuleCreate, RoutingRuleUpdate
+        self.command_table["network application-gateway routing-rule create"] = RoutingRuleCreate(loader=self)
+        self.command_table["network application-gateway routing-rule update"] = RoutingRuleUpdate(loader=self)
+
+    with self.command_group("network application-gateway rule"):
+        from .custom import RuleCreate, RuleUpdate
+        self.command_table["network application-gateway rule create"] = RuleCreate(loader=self)
+        self.command_table["network application-gateway rule update"] = RuleUpdate(loader=self)
 
     with self.command_group("network application-gateway ssl-cert"):
         from .custom import SSLCertCreate, SSLCertUpdate
@@ -567,6 +547,17 @@ def load_command_table(self, _):
         self.command_table['network cross-region-lb rule create'] = CrossRegionLoadBalancerRuleCreate(loader=self)
         self.command_table['network cross-region-lb rule update'] = CrossRegionLoadBalancerRuleUpdate(loader=self)
 
+    with self.command_group('network cross-region-lb address-pool') as g:
+        from .operations.load_balancer import CrossRegionLoadBalancerAddressPoolCreate, CrossRegionLoadBalancerAddressPoolUpdate
+        self.command_table['network cross-region-lb address-pool create'] = CrossRegionLoadBalancerAddressPoolCreate(loader=self)
+        self.command_table['network cross-region-lb address-pool update'] = CrossRegionLoadBalancerAddressPoolUpdate(loader=self)
+
+    with self.command_group('network cross-region-lb address-pool address') as g:
+        from .operations.load_balancer import CrossRegionLoadBalancerAddressPoolAddressAdd, CrossRegionLoadBalancerAddressPoolAddressUpdate, CrossRegionLoadBalancerAddressPoolAddressRemove
+        self.command_table['network cross-region-lb address-pool address add'] = CrossRegionLoadBalancerAddressPoolAddressAdd(loader=self)
+        self.command_table['network cross-region-lb address-pool address remove'] = CrossRegionLoadBalancerAddressPoolAddressRemove(loader=self)
+        self.command_table['network cross-region-lb address-pool address update'] = CrossRegionLoadBalancerAddressPoolAddressUpdate(loader=self)
+
     cross_region_lb_property_map = {
         'probes': 'probe',
     }
@@ -576,17 +567,6 @@ def load_command_table(self, _):
             g.command('list', list_network_resource_property('load_balancers', subresource))
             g.show_command('show', get_network_resource_property_entry('load_balancers', subresource))
             g.command('delete', delete_lb_resource_property_entry('load_balancers', subresource))
-
-    with self.command_group('network cross-region-lb address-pool', network_lb_backend_pool_sdk) as g:
-        g.custom_command('create', 'create_cross_region_lb_backend_address_pool')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.custom_command('delete', 'delete_cross_region_lb_backend_address_pool')
-
-    with self.command_group('network cross-region-lb address-pool address', network_lb_backend_pool_sdk, is_preview=True) as g:
-        g.custom_command('add', 'add_cross_region_lb_backend_address_pool_address')
-        g.custom_command('remove', 'remove_lb_backend_address_pool_address')
-        g.custom_command('list', 'list_lb_backend_address_pool_address')
 
     with self.command_group('network cross-region-lb probe', network_lb_sdk) as g:
         g.custom_command('create', 'create_cross_lb_probe')

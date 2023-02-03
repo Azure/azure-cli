@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.44.1"
+VERSION = "2.45.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.

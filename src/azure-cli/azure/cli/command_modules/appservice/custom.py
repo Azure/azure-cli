@@ -406,7 +406,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                     for t in temp:
                         if 'slotSetting' in t.keys():
                             slot_result[t['name']] = t['slotSetting']
-                        if setting_type == "SlotSettings":
+                        elif setting_type == "SlotSettings":
                             slot_result[t['name']] = True
                         result[t['name']] = t['value']
                 else:
@@ -1347,7 +1347,7 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 # pylint: disable=unused-argument
 def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_workers=None, linux_fx_version=None,
                         windows_fx_version=None, pre_warmed_instance_count=None, php_version=None,
-                        python_version=None, net_framework_version=None,
+                        python_version=None, net_framework_version=None, power_shell_version=None,
                         java_version=None, java_container=None, java_container_version=None,
                         remote_debugging_enabled=None, web_sockets_enabled=None,
                         always_on=None, auto_heal_enabled=None,
@@ -2174,6 +2174,13 @@ def restore_backup(cmd, resource_group_name, webapp_name, storage_account_url, b
         return client.web_apps.begin_restore_slot(resource_group_name, webapp_name, 0, slot, restore_request)
 
     return client.web_apps.begin_restore(resource_group_name, webapp_name, 0, restore_request)
+
+
+def delete_backup(cmd, resource_group_name, webapp_name, backup_id, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.delete_backup_slot(resource_group_name, webapp_name, backup_id, slot)
+    return client.web_apps.delete_backup(resource_group_name, webapp_name, backup_id)
 
 
 def list_snapshots(cmd, resource_group_name, name, slot=None):

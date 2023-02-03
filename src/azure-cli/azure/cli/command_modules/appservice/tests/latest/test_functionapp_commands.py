@@ -1984,6 +1984,26 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
                                                                                functionapp_name, plan, vnet_name,
                                                                                subnet_name, storage_account), expect_failure=True)
 
+class FunctionAppConfigTest(ScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_powershell_version(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'powershellfunctionapp', 40)
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime powershell --runtime-version 7.2'
+                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
+            JMESPathCheck('powerShellVersion', '7.2')
+        ])
+        self.cmd('functionapp config set -g {} -n {} --powershell-version 7.0'
+                 .format(resource_group, functionapp_name)).assert_with_checks([
+                     JMESPathCheck('powerShellVersion', '7.0')])
+        self.cmd(
+            'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 if __name__ == '__main__':
     unittest.main()

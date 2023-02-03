@@ -18,8 +18,9 @@ def get_acr_service_client(cli_ctx, api_version=None):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_CONTAINERREGISTRY, api_version=api_version)
 
 
+# The function is used in Azure and Edge and hybrid profile is used to support the different API versions.
 def cf_acr_registries(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2022_02_01_PREVIEW).registries
+    return get_acr_service_client(cli_ctx).registries
 
 
 def cf_acr_network_rules(cli_ctx, *_):

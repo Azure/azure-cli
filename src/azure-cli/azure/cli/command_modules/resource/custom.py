@@ -3482,7 +3482,7 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         need_patch_service = ['Microsoft.RecoveryServices/vaults', 'Microsoft.Resources/resourceGroups',
                               'Microsoft.ContainerRegistry/registries/webhooks',
                               'Microsoft.ContainerInstance/containerGroups',
-                              'Microsoft.Network/publicIPAddresses']
+                              'Microsoft.Network/publicIPAddresses', 'Microsoft.insights/workbooks']
 
         if resource is not None and resource.type in need_patch_service:
             parameters = GenericResource(tags=tags)

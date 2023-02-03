@@ -54,3 +54,19 @@ def load_command_table(self, _):
     with self.command_group('policy metadata', policy_metadata_sdk, client_factory=policy_metadata_operations) as g:
         g.custom_command('list', 'list_policy_metadata')
         g.custom_show_command('show', 'show_policy_metadata')
+
+    with self.command_group('policy attestation') as g:
+        # Note(slakhotia): The recommended way to generate cli now is through using aaz-dev-tools.
+        # As of 1/25/2023, this tool (aaz) does not support different scopes (Ex. Sub, RG, and Resource)
+        # for an individual command and is instead divided into different commands based on the scope.
+        # (Ex. create, create-by-rg, create-by-subscription).Only the 'list' command supports combining them.
+        # Until that scenario is supported for other commands like create, update, delete, etc,
+        # we will need to continue using custom commands to call those individual commands
+        # based on the scope.
+        g.custom_command('create', 'create_policy_attestation')
+        g.custom_command('update', 'update_policy_attestation')
+        g.custom_command('delete', 'delete_policy_attestation')
+        g.custom_show_command('show', 'show_policy_attestation')
+
+        from .operations.AttestationList import List
+        self.command_table['policy attestation list'] = List(loader=self)
