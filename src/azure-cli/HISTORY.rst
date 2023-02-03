@@ -108,7 +108,7 @@ Release History
 * `az network dns zone export`: Fix the export to emit all ALIAS records for a particular record set name (#25236)
 * `az network public-ip create`: Add parameter `--ddos-protection-plan` (#25264)
 * Fix #25181: `az network nsg rule create`: Use `*` as default value for protocol (#25274)
-* `az network cross-region-lb address-pool update`: New command to update an address-pool (#25317)
+* `az network cross-region-lb address-pool update`: Add new command to update an address-pool (#25317)
 
 **Packaging**
 
