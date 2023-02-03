@@ -84,7 +84,8 @@ from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update 
 from .aaz.latest.network.vnet_gateway import Create as _VnetGatewayCreate, Update as _VnetGatewayUpdate, \
     DisconnectVpnConnections as _VnetGatewayVpnConnectionsDisconnect
 from .aaz.latest.network.vnet_gateway.ipsec_policy import Add as _VnetGatewayIpsecPolicyAdd
-from .aaz.latest.network.vnet_gateway.nat_rule import Add as _VnetGatewayNatRuleAdd
+from .aaz.latest.network.vnet_gateway.nat_rule import Add as _VnetGatewayNatRuleAdd, List as _VnetGatewayNatRuleShow, \
+    Remove as _VnetGatewayNatRuleRemove
 from .aaz.latest.network.vnet_gateway.revoked_cert import Create as _VnetGatewayRevokedCertCreate
 from .aaz.latest.network.vnet_gateway.root_cert import Create as _VnetGatewayRootCertCreate
 
@@ -7057,6 +7058,7 @@ class VnetGatewayRootCertCreate(_VnetGatewayRootCertCreate):
                                                   help="Base64 contents of the root certificate file or file path.",
                                                   required=True,
                                                   fmt=AAZFileArgBase64EncodeFormat())
+        args_schema.root_cert_data._required = False
         args_schema.root_cert_data._registered = False
         return args_schema
 
@@ -7710,6 +7712,17 @@ class VnetGatewayNatRuleAdd(_VnetGatewayNatRuleAdd):
                 element_transformer=lambda _, internal_mapping: {"address_space": internal_mapping}
             )
 
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined
+        if has_value(self.ctx.vars.instance.properties.nat_rules):
+            nat_rules = self.ctx.vars.instance.properties.natRules.to_serialized_data()
+            for nat_rule in nat_rules:
+                if 'type' in nat_rule['properties']:
+                    nat_rule['properties']['type'] = AAZUndefined
+            self.ctx.vars.instance.properties.nat_rules = nat_rules
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
 
 def add_vnet_gateway_nat_rule(cmd, resource_group_name, gateway_name, name, internal_mappings, external_mappings,
                               rule_type=None, mode=None, ip_config_id=None, no_wait=False):
@@ -7727,11 +7740,43 @@ def add_vnet_gateway_nat_rule(cmd, resource_group_name, gateway_name, name, inte
     return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
 
 
+class VnetGatewayNatRuleShow(_VnetGatewayNatRuleShow):
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined
+        if has_value(self.ctx.vars.instance.properties.nat_rules):
+            nat_rules = self.ctx.vars.instance.properties.natRules.to_serialized_data()
+            for nat_rule in nat_rules:
+                if 'type' in nat_rule['properties']:
+                    nat_rule['properties']['type'] = AAZUndefined
+            self.ctx.vars.instance.properties.nat_rules = nat_rules
+        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
+        return result
+
+
 def show_vnet_gateway_nat_rule(cmd, resource_group_name, gateway_name):
     ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
     gateway = ncf.get(resource_group_name, gateway_name)
 
     return gateway.nat_rules
+
+
+class VnetGatewayNatRuleRemove(_VnetGatewayNatRuleRemove):
+
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined
+        if has_value(self.ctx.vars.instance.properties.nat_rules):
+            nat_rules = self.ctx.vars.instance.properties.natRules.to_serialized_data()
+            for nat_rule in nat_rules:
+                if 'type' in nat_rule['properties']:
+                    nat_rule['properties']['type'] = AAZUndefined
+            self.ctx.vars.instance.properties.nat_rules = nat_rules
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
 def remove_vnet_gateway_nat_rule(cmd, resource_group_name, gateway_name, name, no_wait=False):
