@@ -102,7 +102,7 @@ Release History
 * [BREAKING CHANGE] `az network lb outbound-rule`: Rename output property `frontendIpConfigurations` to `frontendIPConfigurations` to keep consistent with the name in API (#25281)
 * [BREAKING CHANGE] `az network cross-region-lb address-pool`: Rename output property `loadBalancerFrontendIpConfiguration` to `loadBalancerFrontendIPConfiguration` to keep consistent with the name in API (#25317)
 * [BREAKING CHANGE] `az network cross-region-lb address-pool create`: Replace preview argument `--backend-addresses-config-file --config-file` by `--backend-addresses` which supports Json, files and shorthand syntax formats (#25317)
-* `az bastion`: Move Azure Bastion to Azure CLI Extension (#25064)
+* [BREAKING CHANGE] `az bastion`: Move Azure Bastion to Azure CLI Extension `bastion` (#25064)
 * Fix #25130: `az network list-usages`: `-o table` cannot be used (#25134)
 * Fix #25124: `az network vnet-gateway create`: Active-Active gateway fails with insufficient IP configurations (#25156)
 * `az network dns zone export`: Fix the export to emit all ALIAS records for a particular record set name (#25236)
