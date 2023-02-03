@@ -110,10 +110,6 @@ Release History
 * Fix #25181: `az network nsg rule create`: Use `*` as default value for protocol (#25274)
 * `az network cross-region-lb address-pool update`: Add new command to update an address-pool (#25317)
 
-**Packaging**
-
-* Fix #24788: Add `-I` in entrypoint on MacOS (#24796)
-
 **PolicyInsights**
 
 * `az policy attestation`: Add new command groups to manage resource policy attestation (#25230)
