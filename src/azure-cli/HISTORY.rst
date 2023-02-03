@@ -47,7 +47,7 @@ Release History
 
 **Batch**
 
-* Fix #24007: `az batch pool create`: Fix bug that caused error when parameter `--encryption-key-identifier` is used (#25034)
+* Fix #24007: `az batch pool create`: Fix bug that caused 'MissingRequiredProperty' error when parameter `--encryption-key-identifier` is used (#25034)
 
 **Compute**
 
