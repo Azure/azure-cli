@@ -217,19 +217,30 @@ ledger_on_param_type = CLIArgumentType(
          'Note: the value of this property cannot be changed after the database has been created. ',
     arg_type=get_three_state_flag("Enabled", "Disabled", False, False))
 
-database_encryption_protector = CLIArgumentType(
+database_assign_identity_param_type = CLIArgumentType(
+    options_list=['--assign-identity', '-ai'],
+    help='Assign identity for database.',
+    arg_type=get_three_state_flag())
+
+database_expand_keys_param_type = CLIArgumentType(
+    options_list=['--expand-keys', '-e'],
+    help='Flag to use to expand all keys in the db show.',
+    arg_type=get_three_state_flag())
+
+database_encryption_protector_param_type = CLIArgumentType(
     options_list=['--encryption-protector'],
     help='Specifies the Azure key vault key to be used as database encryption protector key.')
 
-database_keys = CLIArgumentType(
+database_keys_param_type = CLIArgumentType(
     options_list=['--keys'],
     help='The list of AKV keys for the SQL Database.')
 
-database_user_assigned_identity = CLIArgumentType(
+database_user_assigned_identity_param_type = CLIArgumentType(
     options_list=['--user-assigned-identity-id'],
+    nargs='+',
     help='The list of user assigned identity for the SQL Database.')
 
-database_federated_client_id = CLIArgumentType(
+database_federated_client_id_param_type = CLIArgumentType(
     options_list=['--federated-client-id'],
     help='The federated client id for the SQL Database. It is used for cross tenant CMK scenario.')
 
@@ -421,23 +432,24 @@ def _configure_db_dw_params(arg_ctx):
 
     arg_ctx.argument('zone_redundant',
                      arg_type=zone_redundant_param_type)
-
+    
     arg_ctx.argument('assign_identity',
-                    options_list=['--assign_identity', '-i'],
-                    help='Generate and assign an Azure Active Directory Identity for this database '
-                   'for use with key management services like Azure KeyVault.')
+                     arg_type=database_assign_identity_param_type)
 
     arg_ctx.argument('encryption_protector',
-                    arg_type=database_encryption_protector)
+                     arg_type=database_encryption_protector_param_type)
 
     arg_ctx.argument('keys',
-                     arg_type=database_keys)
+                     arg_type=database_keys_param_type)
                     
     arg_ctx.argument('user_assigned_identity_id',
-                     arg_type=database_user_assigned_identity)
+                     arg_type=database_user_assigned_identity_param_type)
     
     arg_ctx.argument('federated_client_id',
-                     arg_type=database_federated_client_id)
+                     arg_type=database_federated_client_id_param_type)
+    
+    arg_ctx.argument('expand_keys',
+                     arg_type=database_expand_keys_param_type)
 
 def _configure_db_dw_create_params(
         arg_ctx,
@@ -531,7 +543,7 @@ def _configure_db_dw_create_params(
             'requested_backup_storage_redundancy',
             'maintenance_configuration_id',
             'is_ledger_on',
-            'assign_identity'
+            'assign_identity',
             'encryption_protector',
             'keys',
             'user_assigned_identity_id',
@@ -569,21 +581,19 @@ def _configure_db_dw_create_params(
                      arg_type=ledger_on_param_type)
     
     arg_ctx.argument('assign_identity',
-                    options_list=['--assign_identity', '-i'],
-                    help='Generate and assign an Azure Active Directory Identity for this database '
-                   'for use with key management services like Azure KeyVault.')
+                     arg_type=database_assign_identity_param_type)
 
     arg_ctx.argument('encryption_protector',
-                    arg_type=database_encryption_protector)
+                    arg_type=database_encryption_protector_param_type)
 
     arg_ctx.argument('keys',
-                     arg_type=database_keys)
+                     arg_type=database_keys_param_type)
                     
     arg_ctx.argument('user_assigned_identity_id',
-                     arg_type=database_user_assigned_identity)
+                     arg_type=database_user_assigned_identity_param_type)
     
     arg_ctx.argument('federated_client_id',
-                     arg_type=database_federated_client_id)
+                     arg_type=database_federated_client_id_param_type)
 
     # *** Step 3: Ignore params that are not applicable (based on engine & create mode) ***
 
@@ -754,7 +764,18 @@ def load_arguments(self, _):
     with self.argument_context('sql db show') as c:
         # Service tier advisors and transparent data encryption are not included in the first batch
         # of GA commands.
-        c.ignore('expand')
+        c.argument('expand_keys',
+                    options_list=['--expand-keys'],
+                    help='Expand the AKV keys for the database.')
+
+        c.argument('keys_filter',
+                    options_list=['--keys-filter'],
+                    help='Expand the AKV keys for the database.')
+    
+    with self.argument_context('sql server show') as c:
+        c.argument('expand_ad_admin',
+                   options_list=['--expand-ad-admin'],
+                   help='Expand the Active Directory Administrator for the server.')
 
     with self.argument_context('sql db list') as c:
         c.argument('elastic_pool_name',
@@ -1090,7 +1111,7 @@ def load_arguments(self, _):
     #####
     #           sql db level encryption protector
     #####
-    with self.argument_context('sql db cmk revert') as c:
+    with self.argument_context('sql db sql db tde key revert') as c:
         c.argument('server_name',
                    options_list=['--server', '-s'],
                    required=True,
@@ -1101,7 +1122,7 @@ def load_arguments(self, _):
                    required=True,
                    help='Name of the Azure SQL Database.')
 
-    with self.argument_context('sql db cmk revalidate') as c:
+    with self.argument_context('sql db sql db tde key revalidate') as c:
         c.argument('server_name',
                    options_list=['--server', '-s'],
                    required=True,

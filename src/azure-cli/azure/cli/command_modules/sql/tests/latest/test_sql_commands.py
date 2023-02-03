@@ -916,6 +916,45 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('ledgerOn', True)])
 
+    def test_sql_per_db_cmk(self):
+        server = "pstestsvr"
+        resource_group = "pstest"
+        database_name_one = "cliautomationdb01"
+        database_name_two = "cliautomationdb02"
+        encryption_protector = "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"
+        encryption_protector2 = "https://pstestkv.vault.azure.net/keys/testkey1/6218d117492a42eda0b6a9334c9a989d"
+        umi = "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
+
+        # test sql db is created with db level encryption protector and umi
+
+        # az sql db create -g pstest -ai --server pstestsvr --name clidbwithcmk --encryption-protector "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"  
+        # --user-assigned-identity-id "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi" --yes
+        self.cmd('sql db create -g {} --server {} --name {} -ai --encryption-protector {} --user-assigned-identity-id {} --yes'
+                 .format(resource_group, server, database_name_one, encryption_protector, umi),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one)])
+
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server, database_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('encryptionProtector', encryption_protector)])
+
+        self.cmd('sql db update -g {} --server {} --name {} -ai --encryption-protector {}'
+                 .format(resource_group, server, database_name_one, encryption_protector2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one)])
+
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server, database_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('encryptionProtector', encryption_protector2)])
+
 
 class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westeurope')
@@ -1391,6 +1430,47 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_copy_name),
                      JMESPathCheck('elasticPoolName', pool_name)
                  ])
+
+        
+
+    @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
+    @ResourceGroupPreparer(parameter_name='resource_group_2', location='westeurope')
+    @SqlServerPreparer(parameter_name='server1', resource_group_parameter_name='resource_group_1',
+                       location='eastus2euap')
+    @SqlServerPreparer(parameter_name='server2', resource_group_parameter_name='resource_group_2',
+                       location='eastus2euap')
+    @AllowLargeResponse()
+    def test_sql_db_copy_with_perdb_cmk(self, resource_group_1, resource_group_2,
+                         resource_group_location,
+                         server1, server2):
+        database_name = "perdbcmkdb"
+        database_copy_name = "perdbcmkdb_copy"
+        service_objective = 'GP_Gen5_8'
+
+        # copy db with per db cmk Enabled
+        encryption_protector = "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"
+        umi = "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
+
+        # create db with db level encryption protector and umi
+
+        # az sql db create -g pstest -ai --server pstestsvr --name clidbwithcmk --encryption-protector "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"  
+        # --user-assigned-identity-id "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi" --yes
+        self.cmd('sql db create -g {} --server {} --name {} -ai --encryption-protector {} --user-assigned-identity-id {} --yes'
+                 .format(resource_group_1, server1, database_name, encryption_protector, umi),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('name', database_name)])
+
+        self.cmd('sql db copy -g {} --server {} --name {} '
+                 '--dest-name {} --dest-resource-group {} --dest-server {} '
+                 '-ai --encryption-protector {} --user-assigned-identity-id {}'
+                 .format(resource_group_1, server1, database_name, database_copy_name,
+                         resource_group_2, server2, encryption_protector, umi),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group_2),
+                     JMESPathCheck('encryptionProtector', encryption_protector)
+                 ])
+
 
 
 def _get_earliest_restore_date(db):

@@ -554,7 +554,7 @@ def _get_database_identity(
         if umiDict is None:
             umiDict = {umi: DatabaseUserIdentity()}
         else:
-            umiDict[umi] = DatabaseUserIdentity()
+            umiDict[umi] = DatabaseUserIdentity() # pylint: disable=unsupported-assignment-operation
     
     from azure.mgmt.sql.models import DatabaseIdentity
 
@@ -972,6 +972,26 @@ def _validate_elastic_pool_id(
 
     return elastic_pool_id
 
+def db_get(
+    client,
+    database_name,
+    server_name,
+    resource_group_name,
+    expand_keys=False,
+    keys_filter=None):
+    '''
+    Gets a database
+    '''
+
+    # String.Format("keys($filter=pointInTime('{0}'))", KeysFilter);
+    # weekly_retention = 'P%sD' % weekly_retention
+    expand = None
+    if expand_keys and keys_filter is not None:
+        expand = "keys($filter=pointInTime('%s'))" % keys_filter
+    elif expand_keys:
+        expand = 'keys'
+    
+    return client.get(resource_group_name, server_name, database_name, expand)
 
 def _db_dw_create(
         cli_ctx,
@@ -1034,8 +1054,9 @@ def _db_dw_create(
     # Per DB CMK params
     if assign_identity:
         kwargs['identity'] = _get_database_identity(user_assigned_identity_id)
-        kwargs['keys'] = keys
-        kwargs['encryption_protector'] = encryption_protector
+    
+    kwargs['keys'] = keys
+    kwargs['encryption_protector'] = encryption_protector
 
     # Create
     return sdk_no_wait(no_wait, client.begin_create_or_update,
@@ -1110,10 +1131,10 @@ def db_create(
         None,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         no_wait,
-        assign_identity,
-        user_assigned_identity_id,
-        keys,
-        encryption_protector
+        assign_identity=assign_identity,
+        user_assigned_identity_id=user_assigned_identity_id,
+        keys=keys,
+        encryption_protector=encryption_protector,
         **kwargs)
 
 
@@ -1184,10 +1205,10 @@ def db_copy(
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         DatabaseIdentity(cmd.cli_ctx, dest_name, dest_server_name, dest_resource_group_name),
         no_wait,
-        assign_identity,
-        user_assigned_identity_id,
-        keys,
-        encryption_protector,
+        assign_identity=assign_identity,
+        user_assigned_identity_id=user_assigned_identity_id,
+        keys=keys,
+        encryption_protector=encryption_protector,
         **kwargs)
 
 
@@ -1332,10 +1353,10 @@ def db_restore(
         # Cross-server restore is not supported. So dest server/group must be the same as source.
         DatabaseIdentity(cmd.cli_ctx, dest_name, server_name, resource_group_name),
         no_wait,
-        assign_identity,
-        user_assigned_identity_id,
-        keys,
-        encryption_protector,
+        assign_identity=assign_identity,
+        user_assigned_identity_id=user_assigned_identity_id,
+        keys=keys,
+        encryption_protector=encryption_protector,
         **kwargs)
 
 
@@ -1611,9 +1632,10 @@ def db_update(
         compute_model=None,
         requested_backup_storage_redundancy=None,
         maintenance_configuration_id=None,
+        assign_identity=False,
+        user_assigned_identity_id=None,
         keys=None,
         encryption_protector=None,
-        user_assigned_identity=None,
         federated_client_id=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
@@ -1713,17 +1735,37 @@ def db_update(
     if auto_pause_delay:
         instance.auto_pause_delay = auto_pause_delay
     
-    if keys is not None:
-        instance.keys.append = keys
+    #####
+    # Per DB CMK properties
+    #####
+    if assign_identity:
+        if keys is not None:
+            instance.keys.append = keys
     
-    if encryption_protector is not None:
-        instance.encryption_protector = encryption_protector
+        if encryption_protector is not None:
+            instance.encryption_protector = encryption_protector
+        
+        if user_assigned_identity_id is not None:
+            _get_database_identity_for_update(instance.identity, user_assigned_identity_id)
 
     if federated_client_id is not None:
         instance.federated_client_id = federated_client_id
 
     return instance
 
+def _get_database_identity_for_update(existingIdentity, userAssignedIdentities):
+    
+    databaseIdentity = None
+
+    if existingIdentity is not None and existingIdentity.user_assigned_identities is not None:
+        for umi in userAssignedIdentities:
+            existingIdentity.user_assigned_identities.update({umi: DatabaseUserIdentity()})
+        
+        databaseIdentity = existingIdentity
+    else:
+        databaseIdentity = _get_database_identity(userAssignedIdentities)
+    
+    return databaseIdentity
 
 #####
 #           sql db audit-policy & threat-policy
@@ -4254,8 +4296,59 @@ def encryption_protector_revalidate(
                 resource_group_name=resource_group_name,
                 server_name=server_name,
                 encryption_protector_name=EncryptionProtectorName.CURRENT)
+
     except Exception as ex:
-            raise ex   
+            raise ex
+
+def database_encryption_protector_revalidate(
+    client,
+    resource_group_name,
+    server_name,
+    database_name):
+    '''
+    Revalidate a database encryption protector.
+    '''
+
+    if server_name is None:
+        raise CLIError('Server name cannot be null')
+    
+    if database_name is None:
+        raise CLIError('Database name cannot be null')
+
+    try:
+            return client.begin_revalidate(
+                resource_group_name=resource_group_name,
+                server_name=server_name,
+                database_name=database_name,
+                encryption_protector_name=EncryptionProtectorName.CURRENT)
+
+    except Exception as ex:
+            raise ex
+
+def database_encryption_protector_revert(
+    client,
+    resource_group_name,
+    server_name,
+    database_name):
+    '''
+    Reverts a database encryption protector.
+    '''
+
+    if server_name is None:
+        raise CLIError('Server name cannot be null')
+    
+    if database_name is None:
+        raise CLIError('Database name cannot be null')
+
+    try:
+            return client.begin_revert(
+                resource_group_name=resource_group_name,
+                server_name=server_name,
+                database_name=database_name,
+                encryption_protector_name=EncryptionProtectorName.CURRENT)
+
+    except Exception as ex:
+            raise ex
 
 #####
 #           sql server aad-only
