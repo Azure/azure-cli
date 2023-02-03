@@ -22,10 +22,10 @@ Release History
 
 * `az webapp create-remote-connection`: Update the host address of SSH tunnel from 0.0.0.0 to 127.0.0.1 (#25141)
 * Add support to create ASPs with Memory Optimized Workers (#25198)
-* Fix#17720: `az functionapp function`: Add new command to list functions in a function app (#24901)
+* Fix #17720: `az functionapp function`: Add new command to list functions in a function app (#24901)
 * Fix #24285: `az webapp config access-restriction add`: Fix the bug that it does not support more than one Front Door ID in X-Azure-FDID (#25031)
 * Fix #23603: `az functionapp config set`: Add new parameter to set PowerShell version (#25197)
-* `az webapp config appsettings` settings are registered as Deployment slot setting anytime when using `--slot-settings` (#24985)
+* `az webapp config appsettings`: settings are registered as Deployment slot setting anytime when using `--slot-settings` (#24985)
 * `az webapp config backup delete`: Add new command to delete a backup of the webapp (#25171)
 
 **ARM**
