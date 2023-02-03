@@ -33,7 +33,7 @@ Release History
 * `az bicep`: Add configuration `bicep.use_binary_from_path`. Possible values include `if_running_in_ci` (default) and Booleans (#25033)
 * `az bicep`: Add configuration `bicep.check_version` that accepts Boolean values. If set to `False`, version checks for Bicep CLI will be disabled (#25033)
 * `az deployment what-if`: Fix an issue where formatting nested array changes throws an exception (#25152)
-* Fix #25022: `az resource tag`: Fix updating tag for Microsoft.insights/workbooks issue (#25142)
+* Fix #25022: `az resource tag`: Fix the issue of `the serializedData field is missing or null` when updating tag for Microsoft.insights/workbooks (#25142)
 
 **ARO**
 
