@@ -2982,6 +2982,7 @@ def restore_long_term_retention_backup(
         requested_backup_storage_redundancy,
         high_availability_replica_count,
         zone_redundant,
+        service_objective,
         **kwargs):
     '''
     Restores an existing database (i.e. create with 'RestoreLongTermRetentionBackup' create mode.)
@@ -3005,6 +3006,7 @@ def restore_long_term_retention_backup(
     kwargs['requested_backup_storage_redundancy'] = requested_backup_storage_redundancy
     kwargs['high_availability_replica_count'] = high_availability_replica_count
     kwargs['zone_redundant'] = zone_redundant
+    kwargs['service_objective'] = service_objective
 
     # Check backup storage redundancy configurations
     if _should_show_backup_storage_redundancy_warnings(kwargs['location']):
@@ -3042,6 +3044,7 @@ def restore_geo_backup(
         requested_backup_storage_redundancy,
         high_availability_replica_count,
         zone_redundant,
+        service_objective,
         **kwargs):
     '''
     Restores an existing database (i.e. create with 'RestoreGeoBackup' create mode.)
@@ -3065,6 +3068,7 @@ def restore_geo_backup(
     kwargs['requested_backup_storage_redundancy'] = requested_backup_storage_redundancy
     kwargs['high_availability_replica_count'] = high_availability_replica_count
     kwargs['zone_redundant'] = zone_redundant
+    kwargs['service_objective'] = service_objective
 
     # Check backup storage redundancy configurations
     if _should_show_backup_storage_redundancy_warnings(kwargs['location']):
