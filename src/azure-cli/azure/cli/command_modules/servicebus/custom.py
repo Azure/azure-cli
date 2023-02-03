@@ -10,7 +10,10 @@
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-return-statements
 import re
+from knack.log import get_logger
 from azure.cli.core.profiles import ResourceType
+
+logger = get_logger(__name__)
 
 
 # Namespace Region
@@ -638,7 +641,6 @@ def return_valid_duration(update_value, current_value=None):
     from isodate import Duration
     from azure.cli.core.azclierror import InvalidArgumentValueError
     from azure.cli.command_modules.servicebus.constants import DURATION_SECS, DURATION_MIN, DURATION_DAYS
-    from argcomplete import warn
     if update_value is not None:
         value_toreturn = update_value
     else:
@@ -662,7 +664,7 @@ def return_valid_duration(update_value, current_value=None):
         return value_toreturn
 
     if timedeltapattern.match(value_toreturn):
-        warn('Please use ISO8601 duration for timespan inputs. Timespan inputs of format (days:min:seconds) would be deprecated from version 2.45.0.')
+        logger.warning('Please use ISO8601 duration for timespan inputs. Timespan inputs of format (days:min:seconds) would be deprecated from version 2.49.0.')
         day, minute, seconds = value_toreturn.split(":")
         if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) <= timedelta(days=DURATION_DAYS,
                                                                                             minutes=DURATION_MIN,
@@ -678,7 +680,6 @@ def return_valid_duration_create(update_value):
     from datetime import timedelta
     from isodate import parse_duration
     from knack.util import CLIError
-    import warnings
     from azure.cli.command_modules.servicebus.constants import DURATION_SECS, DURATION_MIN, DURATION_DAYS
     if update_value is not None:
         if iso8601pattern.match(update_value):
@@ -687,7 +688,7 @@ def return_valid_duration_create(update_value):
                     'duration value should be less than (days:min:secs) 10675199:10085:477581')
 
         if timedeltapattern.match(update_value):
-            warnings.warn('Please use ISO8601 duration for timespan inputs. Timespan inputs of format (days:min:seconds) would be deprecated from version 2.45.0.')
+            logger.warning('Please use ISO8601 duration for timespan inputs. Timespan inputs of format (days:min:seconds) would be deprecated from version 2.49.0.')
             day, minute, seconds = update_value.split(":")
             if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
                 update_value = timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
