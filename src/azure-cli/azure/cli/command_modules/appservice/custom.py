@@ -395,7 +395,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                     for t in temp:
                         if 'slotSetting' in t.keys():
                             slot_result[t['name']] = t['slotSetting']
-                        if setting_type == "SlotSettings":
+                        elif setting_type == "SlotSettings":
                             slot_result[t['name']] = True
                         result[t['name']] = t['value']
                 else:
