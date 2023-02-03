@@ -359,8 +359,8 @@ def get_managed_environment(cmd, resource_group_name, environment_name):
         appcontainers_client = appcontainers_client_factory(cmd.cli_ctx)
         return appcontainers_client.managed_environments.get(resource_group_name, environment_name)
     except Exception as ex:  # pylint: disable=broad-except
-        error_message="Retrieving managed environment failed with an exception: {}".format(ex)
-        recommendation_message="Please verify the managed environment is valid"
+        error_message = "Retrieving managed environment failed with an exception: {}".format(ex)
+        recommendation_message = "Please verify the managed environment is valid"
         raise ResourceNotFoundError(error_message, recommendation_message)
 
 
