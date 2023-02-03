@@ -371,6 +371,7 @@ class BackupWithName(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @StorageAccountPreparer(allow_blob_public_access=True)
     def test_config_backup_delete(self, resource_group):
         plan = self.create_random_name(prefix='plan-backup', length=24)
         self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan))
