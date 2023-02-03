@@ -83,6 +83,10 @@ from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
 from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update as _VNetSubnetUpdate
 from .aaz.latest.network.vnet_gateway import Create as _VnetGatewayCreate, Update as _VnetGatewayUpdate, \
     DisconnectVpnConnections as _VnetGatewayVpnConnectionsDisconnect
+from .aaz.latest.network.vnet_gateway.ipsec_policy import Add as _VnetGatewayIpsecPolicyAdd
+from .aaz.latest.network.vnet_gateway.nat_rule import Add as _VnetGatewayNatRuleAdd
+from .aaz.latest.network.vnet_gateway.revoked_cert import Create as _VnetGatewayRevokedCertCreate
+from .aaz.latest.network.vnet_gateway.root_cert import Create as _VnetGatewayRootCertCreate
 
 logger = get_logger(__name__)
 
@@ -7043,6 +7047,29 @@ def create_vnet_gateway_root_cert(cmd, resource_group_name, gateway_name, public
     return ncf.begin_create_or_update(resource_group_name, gateway_name, gateway)
 
 
+class VnetGatewayRootCertCreate(_VnetGatewayRootCertCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.public_cert_data = AAZFileArg(options=['--public-cert-data'],
+                                                  help="Base64 contents of the root certificate file or file path.",
+                                                  required=True,
+                                                  fmt=AAZFileArgBase64EncodeFormat())
+        args_schema.root_cert_data._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.public_cert_data):
+            import os
+            path = os.path.expanduser(args.public_cert_data.to_serialized_data())
+        else:
+            path = None
+        args.root_cert_data = path
+
+
 def delete_vnet_gateway_root_cert(cmd, resource_group_name, gateway_name, cert_name):
     ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
     gateway = ncf.get(resource_group_name, gateway_name)
@@ -7055,6 +7082,16 @@ def delete_vnet_gateway_root_cert(cmd, resource_group_name, gateway_name, cert_n
     config.vpn_client_root_certificates.remove(cert)
 
     return ncf.begin_create_or_update(resource_group_name, gateway_name, gateway)
+
+
+class VnetGatewayRevokedCertCreate(_VnetGatewayRevokedCertCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.thumbprint._required = True
+
+        return args_schema
 
 
 def create_vnet_gateway_revoked_cert(cmd, resource_group_name, gateway_name, thumbprint, cert_name):
@@ -7251,6 +7288,7 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
         args_schema.active._registered = False
         args_schema.vpn_client_root_certificates._registered = False
         args_schema.sku_tier._registered = False
+        args_schema.vpn_client_ipsec_policies._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -7515,19 +7553,35 @@ def add_vnet_gateway_ipsec_policy(cmd, resource_group_name, gateway_name,
     return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
 
 
-def clear_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
-    try:
-        gateway.vpn_client_configuration.vpn_client_ipsec_policies = None
-    except AttributeError:
-        raise CLIError('VPN client configuration must first be set through `az network vnet-gateway create/update`.')
-    if no_wait:
-        return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
+class VnetGatewayIpsecPolicyAdd(_VnetGatewayIpsecPolicyAdd):
 
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vpn_client_ipsec_policy_index._registered = False
+
+        return args_schema
+
+
+def clear_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name):
+    args = {"resource_group": resource_group_name,
+            "name": gateway_name,
+            "vpn_client_ipsec_policies": None}
     from azure.cli.core.commands import LongRunningOperation
-    poller = sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
-    return LongRunningOperation(cmd.cli_ctx)(poller).vpn_client_configuration.vpn_client_ipsec_policies
+    poller = _VnetGatewayUpdate(cli_ctx=cmd.cli_ctx)(command_args=args)
+    return LongRunningOperation(cmd.cli_ctx)(poller)['vpnClientConfiguration']['vpnClientIpsecPolicies']
+    # ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+    # gateway = ncf.get(resource_group_name, gateway_name)
+    # try:
+    #     gateway.vpn_client_configuration.vpn_client_ipsec_policies = None
+    # except AttributeError:
+    #     raise CLIError('VPN client configuration must first be set through `az network vnet-gateway create/update`.')
+    # if no_wait:
+    #     return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
+#
+    # from azure.cli.core.commands import LongRunningOperation
+    # poller = sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
+    # return LongRunningOperation(cmd.cli_ctx)(poller).vpn_client_configuration.vpn_client_ipsec_policies
 
 
 def list_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name):
@@ -7615,6 +7669,46 @@ def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name, no_wait=Fals
         gateway.vpn_client_configuration.vpn_authentication_types = None
 
     return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
+
+
+class VnetGatewayNatRuleAdd(_VnetGatewayNatRuleAdd):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.external_mappings = AAZListArg(
+            options=["--external-mappings"],
+            help="The private IP address external mapping for NAT.",
+            required=True
+        )
+        args_schema.external_mappings.Element = AAZStrArg()
+        args_schema.internal_mappings = AAZListArg(
+            options=["--internal-mappings"],
+            help="The private IP address internal mapping for NAT.",
+            required=True
+        )
+        args_schema.internal_mappings.Element = AAZStrArg()
+
+        args_schema.external_mappings_ip._registered = False
+        args_schema.internal_mappings_ip._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.external_mappings):
+            args.external_mappings_ip = assign_aaz_list_arg(
+                args.external_mappings_ip,
+                args.external_mappings,
+                element_transformer=lambda _, external_mapping: {"address_space": external_mapping}
+            )
+
+        if has_value(args.internal_mappings):
+            args.internal_mappings_ip = assign_aaz_list_arg(
+                args.internal_mappings_ip,
+                args.internal_mappings,
+                element_transformer=lambda _, internal_mapping: {"address_space": internal_mapping}
+            )
 
 
 def add_vnet_gateway_nat_rule(cmd, resource_group_name, gateway_name, name, internal_mappings, external_mappings,

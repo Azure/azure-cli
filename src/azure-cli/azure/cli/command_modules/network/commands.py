@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 # pylint: disable=line-too-long,too-many-lines
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation
@@ -834,17 +833,23 @@ def load_command_table(self, _):
         g.wait_command('wait')
 
     with self.command_group('network vnet-gateway revoked-cert', network_vgw_sdk) as g:
-        g.custom_command('create', 'create_vnet_gateway_revoked_cert')
-        g.custom_command('delete', 'delete_vnet_gateway_revoked_cert')
+        from .custom import VnetGatewayRevokedCertCreate
+        self.command_table['network vnet-gateway revoked-cert create'] = VnetGatewayRevokedCertCreate(loader=self)
+        # g.custom_command('create', 'create_vnet_gateway_revoked_cert')
+        # g.custom_command('delete', 'delete_vnet_gateway_revoked_cert')
 
     with self.command_group('network vnet-gateway root-cert', network_vgw_sdk) as g:
-        g.custom_command('create', 'create_vnet_gateway_root_cert')
-        g.custom_command('delete', 'delete_vnet_gateway_root_cert')
+        from .custom import VnetGatewayRootCertCreate
+        self.command_table['network vnet-gateway root-cert create'] = VnetGatewayRootCertCreate(loader=self)
+        # g.custom_command('create', 'create_vnet_gateway_root_cert')
+        # g.custom_command('delete', 'delete_vnet_gateway_root_cert')
 
     with self.command_group('network vnet-gateway ipsec-policy', network_vgw_sdk, min_api='2018-02-01') as g:
-        g.custom_command('add', 'add_vnet_gateway_ipsec_policy', supports_no_wait=True, doc_string_source='IpsecPolicy')
-        g.custom_command('list', 'list_vnet_gateway_ipsec_policies')
+        from .custom import VnetGatewayIpsecPolicyAdd
+        self.command_table['network vnet-gateway ipsec-policy add'] = VnetGatewayIpsecPolicyAdd(loader=self)
         g.custom_command('clear', 'clear_vnet_gateway_ipsec_policies', supports_no_wait=True)
+        # g.custom_command('add', 'add_vnet_gateway_ipsec_policy', supports_no_wait=True, doc_string_source='IpsecPolicy')
+        # g.custom_command('list', 'list_vnet_gateway_ipsec_policies')
 
     with self.command_group('network vnet-gateway aad', network_vgw_sdk, min_api='2019-04-01') as g:
         g.custom_command('assign', 'assign_vnet_gateway_aad', supports_no_wait=True)
@@ -852,10 +857,12 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_vnet_gateway_aad', supports_no_wait=True)
 
     with self.command_group('network vnet-gateway nat-rule', network_vgw_sdk, min_api='2021-02-01', is_preview=True) as g:
-        g.custom_command('add', 'add_vnet_gateway_nat_rule', supports_no_wait=True)
-        g.custom_show_command('list', 'show_vnet_gateway_nat_rule')
-        g.custom_command('remove', 'remove_vnet_gateway_nat_rule', supports_no_wait=True)
-        g.wait_command('wait')
+        from .custom import VnetGatewayNatRuleAdd
+        self.command_table['network vnet-gateway nat-rule add'] = VnetGatewayNatRuleAdd(loader=self)
+        # g.custom_command('add', 'add_vnet_gateway_nat_rule', supports_no_wait=True)
+        # g.custom_show_command('list', 'show_vnet_gateway_nat_rule')
+        # g.custom_command('remove', 'remove_vnet_gateway_nat_rule', supports_no_wait=True)
+        # g.wait_command('wait')
     # endregion
 
     # region VirtualNetworkGatewayConnections
