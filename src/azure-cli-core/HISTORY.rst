@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.45.0
+++++++
+* `aaz`: Support AAZFileArg (#25075)
+* `aaz`: Support singular options of `AAZListArg` in shorthand syntax partial value expression (#25302)
+
 2.44.1
 ++++++
 * No changes
