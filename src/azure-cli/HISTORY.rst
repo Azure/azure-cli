@@ -48,7 +48,6 @@ Release History
 **Batch**
 
 * Fix: `az batch pool create`: Fix bug that caused error when parameter `--encryption-key-identifier` is used (#25034)
-* Test recording cleanup (#25166)
 
 **Compute**
 
@@ -67,7 +66,6 @@ Release History
 **DMS**
 
 * `az dms project task create`: Update DMS MySQL API to support new migration types (#24978)
-* Change Azure Database Migration Service string to Azure Database Migration Service (classic) (#25258)
 
 **Feedback**
 
