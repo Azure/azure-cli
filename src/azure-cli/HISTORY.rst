@@ -53,7 +53,7 @@ Release History
 
 * `az image builder identity assign`: Add this command to add managed identity to an existing image builder template (#25136)
 * `az image builder identity remove`: Add this command to remove managed identity from an existing image builder template (#25136)
-* `az image builder identity show`: Add this command to display managed identity of a image builder template (#25136)
+* `az image builder identity show`: Add this command to display managed identity of an existing image builder template (#25136)
 * `az vmss reimage`: Let `--instance-id` support multiple ids (#25131)
 * Fix #25308: `az disk create`: Fix help message for creating a standard disk for uploading blobs (#25315)
 * `az vmss create/update`: Add new parameter `--enable-osimage-notification` to support enabling OS image scheduled event (#25273)
