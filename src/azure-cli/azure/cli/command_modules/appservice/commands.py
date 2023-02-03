@@ -197,6 +197,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_backup', exception_handler=ex_handler_factory())
         g.custom_command('update', 'update_backup_schedule', exception_handler=ex_handler_factory())
         g.custom_command('restore', 'restore_backup', exception_handler=ex_handler_factory())
+        g.custom_command('delete', 'delete_backup', exception_handler=ex_handler_factory(), confirmation=True)
 
     with self.command_group('webapp config snapshot') as g:
         g.custom_command('list', 'list_snapshots')
@@ -412,6 +413,7 @@ def load_command_table(self, _):
     with self.command_group('functionapp function') as g:
         g.custom_command('show', 'show_function')  # pylint: disable=show-command
         g.custom_command('delete', 'delete_function')
+        g.custom_command('list', 'list_functions')
 
     with self.command_group('functionapp function keys') as g:
         g.custom_command('set', 'update_function_key')
