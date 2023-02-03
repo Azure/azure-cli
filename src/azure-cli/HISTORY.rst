@@ -106,7 +106,7 @@ Release History
 * Fix #25130: `az network list-usages`: `-o table` cannot be used (#25134)
 * Fix #25124: `az network vnet-gateway create`: Active-Active gateway fails with insufficient IP configurations (#25156)
 * `az network dns zone export`: Fix the export to emit all ALIAS records for a particular record set name (#25236)
-* `az network public-ip create`: Add parameter `--ddos-protection-plan` (#25264)
+* `az network public-ip create`: Add parameter `--ddos-protection-plan` to link a DDoS protection plan to public IP (#25264)
 * Fix #25181: `az network nsg rule create`: Use `*` as default value for protocol (#25274)
 * `az network cross-region-lb address-pool update`: Add new command to update an address-pool (#25317)
 
