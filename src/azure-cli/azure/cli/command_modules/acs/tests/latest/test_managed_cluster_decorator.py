@@ -1665,6 +1665,32 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 load_balancer_profile=load_balancer_profile,
             )
 
+        # invalid parameter
+        ctx_6 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+                    "vnet_subnet_id": "test_vnet_subnet_id",
+                    "load_balancer_managed_outbound_ipv6_count": 10,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        agentpool_ctx_6 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vnet_subnet_id": "test_vnet_subnet_id"}),
+            self.models,
+            DecoratorMode.CREATE,
+            AgentPoolDecoratorMode.MANAGED_CLUSTER,
+        )
+        ctx_6.attach_agentpool_context(agentpool_ctx_6)
+        # fail on mutually exclusive outbound_type and managed_outbound_ipv6_count on
+        # load balancer
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_6.get_outbound_type()
+
     def test_get_network_plugin(self):
         # default
         ctx_1 = AKSManagedClusterContext(
