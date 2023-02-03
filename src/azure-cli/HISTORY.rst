@@ -50,10 +50,6 @@ Release History
 * Fix: `az batch pool create`: Fix bug that caused error when parameter `--encryption-key-identifier` is used (#25034)
 * Test recording cleanup (#25166)
 
-**Code**
-
-* `aaz`: Support `AAZListArg` singular options list (#25099)
-
 **Compute**
 
 * `az image builder identity assign`: Add this command to add managed identity to an existing image builder template (#25136)
