@@ -54,7 +54,8 @@ from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclus
 from .tunnel import TunnelServer
 
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
-from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory, appcontainers_client_factory
+from ._client_factory import (web_client_factory, ex_handler_factory, providers_client_factory,
+                              appcontainers_client_factory)
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from .utils import (_normalize_sku,
                     get_sku_tier,
