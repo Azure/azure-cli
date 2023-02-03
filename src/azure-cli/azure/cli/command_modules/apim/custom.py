@@ -143,8 +143,6 @@ def apim_update(instance, publisher_email=None, sku_name=None, sku_capacity=None
             instance.public_network_access = "Enabled"
         else:
             instance.public_network_access = "Disabled"
-        
-        #instance.public_network_access = public_network_access
 
     if disable_gateway is not None:
         instance.disable_gateway = disable_gateway
