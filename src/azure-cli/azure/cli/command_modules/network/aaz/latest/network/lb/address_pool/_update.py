@@ -12,13 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network cross-region-lb address-pool show",
+    "network lb address-pool update",
 )
-class Show(AAZCommand):
-    """Get load balancer backend address pool.
+class Update(AAZCommand):
+    """Update a load balancer backend address pool.
 
-    :example: Get the details of an address pool.
-        az network cross-region-lb address-pool show -g MyResourceGroup --lb-name MyLb -n MyAddressPool
+    :example: Update all backend addresses in the address pool using shorthand syntax
+        az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses "[{name:addr1,frontend-ip-address:'/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb1'},{name:addr2,frontend-ip-address:'/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb2'}]"
+
+    :example: Update the frontend-ip-address of the first backend address in the address pool using shorthand syntax
+        az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses [0].frontend-ip-address='/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb1'
+
+    :example: Remove the first backend address in the address pool using shorthand syntax
+        az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses [0]=null
     """
 
     _aaz_info = {
@@ -28,10 +34,13 @@ class Show(AAZCommand):
         ]
     }
 
+    AZ_SUPPORT_NO_WAIT = True
+
+    AZ_SUPPORT_GENERIC_UPDATE = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return self._output()
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -59,11 +68,114 @@ class Show(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+
+        # define Arg Group "Parameters"
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.drain_period_in_seconds = AAZIntArg(
+            options=["--drain-period", "--drain-period-in-seconds"],
+            arg_group="Properties",
+            help="Amount of seconds Load Balancer waits for before sending RESET to client and backend address.",
+            nullable=True,
+        )
+        _args_schema.backend_addresses = AAZListArg(
+            options=["--backend-addresses"],
+            singular_options=["--backend-address"],
+            arg_group="Properties",
+            help="Backend addresses information for backend address pool.",
+            nullable=True,
+        )
+        _args_schema.location = AAZStrArg(
+            options=["--location"],
+            arg_group="Properties",
+            help="The location of the backend address pool.",
+            nullable=True,
+        )
+        _args_schema.tunnel_interfaces = AAZListArg(
+            options=["--tunnel-interfaces"],
+            arg_group="Properties",
+            help="An array of gateway load balancer tunnel interfaces.",
+            nullable=True,
+        )
+
+        backend_addresses = cls._args_schema.backend_addresses
+        backend_addresses.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.backend_addresses.Element
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="Name of the backend address.",
+            nullable=True,
+        )
+        _element.admin_state = AAZStrArg(
+            options=["admin-state"],
+            help="A list of administrative states which once set can override health probe so that Load Balancer will always forward new connections to backend, or deny new connections and reset existing connections.",
+            nullable=True,
+            enum={"Down": "Down", "Drain": "Drain", "None": "None", "Up": "Up"},
+        )
+        _element.ip_address = AAZStrArg(
+            options=["ip-address"],
+            help="IP Address belonging to the referenced virtual network.",
+            nullable=True,
+        )
+        _element.frontend_ip_address = AAZStrArg(
+            options=["frontend-ip", "frontend-ip-address"],
+            help="The frontend IP configuration ID of a regional load balance.",
+            nullable=True,
+        )
+        _element.subnet = AAZStrArg(
+            options=["subnet"],
+            help="Name or Id of the subnet",
+            nullable=True,
+        )
+        _element.virtual_network = AAZStrArg(
+            options=["vnet", "virtual-network"],
+            help="Name or Id of the virtual network",
+            nullable=True,
+        )
+
+        tunnel_interfaces = cls._args_schema.tunnel_interfaces
+        tunnel_interfaces.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.tunnel_interfaces.Element
+        _element.identifier = AAZIntArg(
+            options=["identifier"],
+            help="Identifier of gateway load balancer tunnel interface.",
+            nullable=True,
+        )
+        _element.port = AAZIntArg(
+            options=["port"],
+            help="Port of gateway load balancer tunnel interface.",
+            nullable=True,
+        )
+        _element.protocol = AAZStrArg(
+            options=["protocol"],
+            help="Protocol of gateway load balancer tunnel interface.",
+            nullable=True,
+            enum={"Native": "Native", "None": "None", "VXLAN": "VXLAN"},
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+            help="Traffic type of gateway load balancer tunnel interface.",
+            nullable=True,
+            enum={"External": "External", "Internal": "Internal", "None": "None"},
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.LoadBalancerBackendAddressPoolsGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.vars.instance)
+        self.InstanceUpdateByJson(ctx=self.ctx)()
+        self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.vars.instance)
+        yield self.LoadBalancerBackendAddressPoolsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -72,6 +184,14 @@ class Show(AAZCommand):
 
     @register_callback
     def post_operations(self):
+        pass
+
+    @register_callback
+    def pre_instance_update(self, instance):
+        pass
+
+    @register_callback
+    def post_instance_update(self, instance):
         pass
 
     def _output(self, *args, **kwargs):
@@ -161,13 +281,199 @@ class Show(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _ShowHelper._build_schema_backend_address_pool_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_backend_address_pool_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
+    class LoadBalancerBackendAddressPoolsCreateOrUpdate(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
 
-class _ShowHelper:
-    """Helper class for Show"""
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+            if session.http_response.status_code in [200, 201]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+
+            return self.on_error(session.http_response)
+
+        @property
+        def url(self):
+            return self.client.format_url(
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/backendAddressPools/{backendAddressPoolName}",
+                **self.url_parameters
+            )
+
+        @property
+        def method(self):
+            return "PUT"
+
+        @property
+        def error_format(self):
+            return "ODataV4Format"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param(
+                    "backendAddressPoolName", self.ctx.args.address_pool_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "loadBalancerName", self.ctx.args.lb_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "api-version", "2022-05-01",
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                value=self.ctx.vars.instance,
+            )
+
+            return self.serialize_content(_content_value)
+
+        def on_200_201(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200_201
+            )
+
+        _schema_on_200_201 = None
+
+        @classmethod
+        def _build_schema_on_200_201(cls):
+            if cls._schema_on_200_201 is not None:
+                return cls._schema_on_200_201
+
+            cls._schema_on_200_201 = AAZObjectType()
+            _UpdateHelper._build_schema_backend_address_pool_read(cls._schema_on_200_201)
+
+            return cls._schema_on_200_201
+
+    class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
+
+        def __call__(self, *args, **kwargs):
+            self._update_instance(self.ctx.vars.instance)
+
+        def _update_instance(self, instance):
+            _instance_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                value=instance,
+                typ=AAZObjectType
+            )
+            _builder.set_prop("name", AAZStrType, ".address_pool_name")
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("drainPeriodInSeconds", AAZIntType, ".drain_period_in_seconds")
+                properties.set_prop("loadBalancerBackendAddresses", AAZListType, ".backend_addresses")
+                properties.set_prop("location", AAZStrType, ".location")
+                properties.set_prop("tunnelInterfaces", AAZListType, ".tunnel_interfaces")
+
+            load_balancer_backend_addresses = _builder.get(".properties.loadBalancerBackendAddresses")
+            if load_balancer_backend_addresses is not None:
+                load_balancer_backend_addresses.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.loadBalancerBackendAddresses[]")
+            if _elements is not None:
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties.loadBalancerBackendAddresses[].properties")
+            if properties is not None:
+                properties.set_prop("adminState", AAZStrType, ".admin_state")
+                properties.set_prop("ipAddress", AAZStrType, ".ip_address")
+                properties.set_prop("loadBalancerFrontendIPConfiguration", AAZObjectType)
+                properties.set_prop("subnet", AAZObjectType)
+                properties.set_prop("virtualNetwork", AAZObjectType)
+
+            load_balancer_frontend_ip_configuration = _builder.get(".properties.loadBalancerBackendAddresses[].properties.loadBalancerFrontendIPConfiguration")
+            if load_balancer_frontend_ip_configuration is not None:
+                load_balancer_frontend_ip_configuration.set_prop("id", AAZStrType, ".frontend_ip_address")
+
+            subnet = _builder.get(".properties.loadBalancerBackendAddresses[].properties.subnet")
+            if subnet is not None:
+                subnet.set_prop("id", AAZStrType, ".subnet")
+
+            virtual_network = _builder.get(".properties.loadBalancerBackendAddresses[].properties.virtualNetwork")
+            if virtual_network is not None:
+                virtual_network.set_prop("id", AAZStrType, ".virtual_network")
+
+            tunnel_interfaces = _builder.get(".properties.tunnelInterfaces")
+            if tunnel_interfaces is not None:
+                tunnel_interfaces.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.tunnelInterfaces[]")
+            if _elements is not None:
+                _elements.set_prop("identifier", AAZIntType, ".identifier")
+                _elements.set_prop("port", AAZIntType, ".port")
+                _elements.set_prop("protocol", AAZStrType, ".protocol")
+                _elements.set_prop("type", AAZStrType, ".type")
+
+            return _instance_value
+
+    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
+
+        def __call__(self, *args, **kwargs):
+            self._update_instance_by_generic(
+                self.ctx.vars.instance,
+                self.ctx.generic_update_args
+            )
+
+
+class _UpdateHelper:
+    """Helper class for Update"""
 
     _schema_application_security_group_read = None
 
@@ -2277,4 +2583,4 @@ class _ShowHelper:
         _schema.type = cls._schema_virtual_network_tap_read.type
 
 
-__all__ = ["Show"]
+__all__ = ["Update"]

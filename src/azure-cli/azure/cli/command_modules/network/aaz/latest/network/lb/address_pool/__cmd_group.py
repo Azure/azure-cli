@@ -8,4 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
-from .__cmd_group import *
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "network lb address-pool",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage address pools of a load balancer.
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]

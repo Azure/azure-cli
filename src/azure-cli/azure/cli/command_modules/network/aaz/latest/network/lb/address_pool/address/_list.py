@@ -12,29 +12,28 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network cross-region-lb address-pool address remove",
+    "network lb address-pool address list",
     is_preview=True,
 )
-class Remove(AAZCommand):
-    """Remove one backend address from the load balance backend address pool.
+class List(AAZCommand):
+    """List all backend addresses of the load balance backend address pool.
 
-    :example: Remove one backend address from the load balance backend address pool.
-        az network cross-region-lb address-pool address remove -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress
+    :example: List all backend addresses of the load balance backend address pool.
+        az network cross-region-lb address-pool address list -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool
     """
 
     _aaz_info = {
         "version": "2022-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}/backendaddresspools/{}", "2022-05-01", "properties.loadBalancerBackendAddresses[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}/backendaddresspools/{}", "2022-05-01", "properties.loadBalancerBackendAddresses"],
         ]
     }
-
-    AZ_SUPPORT_NO_WAIT = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
         self.SubresourceSelector(ctx=self.ctx, name="subresource")
-        return self.build_lro_poller(self._execute_operations, None)
+        self._execute_operations()
+        return self._output()
 
     _args_schema = None
 
@@ -60,20 +59,11 @@ class Remove(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            help="Name of the backend address.",
-            required=True,
-        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.LoadBalancerBackendAddressPoolsGet(ctx=self.ctx)()
-        self.pre_instance_delete()
-        self.InstanceDeleteByJson(ctx=self.ctx)()
-        self.post_instance_delete()
-        yield self.LoadBalancerBackendAddressPoolsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -84,37 +74,19 @@ class Remove(AAZCommand):
     def post_operations(self):
         pass
 
-    @register_callback
-    def pre_instance_delete(self):
-        pass
-
-    @register_callback
-    def post_instance_delete(self):
-        pass
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
+        return result
 
     class SubresourceSelector(AAZJsonSelector):
 
         def _get(self):
             result = self.ctx.vars.instance
-            result = result.properties.loadBalancerBackendAddresses
-            filters = enumerate(result)
-            filters = filter(
-                lambda e: e[1].name == self.ctx.args.name,
-                filters
-            )
-            idx = next(filters)[0]
-            return result[idx]
+            return result.properties.loadBalancerBackendAddresses
 
         def _set(self, value):
             result = self.ctx.vars.instance
-            result = result.properties.loadBalancerBackendAddresses
-            filters = enumerate(result)
-            filters = filter(
-                lambda e: e[1].name == self.ctx.args.name,
-                filters
-            )
-            idx = next(filters, [len(result)])[0]
-            result[idx] = value
+            result.properties.loadBalancerBackendAddresses = value
             return
 
     class LoadBalancerBackendAddressPoolsGet(AAZHttpOperation):
@@ -200,133 +172,13 @@ class Remove(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _RemoveHelper._build_schema_backend_address_pool_read(cls._schema_on_200)
+            _ListHelper._build_schema_backend_address_pool_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
-    class LoadBalancerBackendAddressPoolsCreateOrUpdate(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
 
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [202]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200, 201]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/backendAddressPools/{backendAddressPoolName}",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "PUT"
-
-        @property
-        def error_format(self):
-            return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "backendAddressPoolName", self.ctx.args.pool_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "loadBalancerName", self.ctx.args.lb_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "api-version", "2022-05-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=self.ctx.vars.instance,
-            )
-
-            return self.serialize_content(_content_value)
-
-        def on_200_201(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200_201
-            )
-
-        _schema_on_200_201 = None
-
-        @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
-
-            cls._schema_on_200_201 = AAZObjectType()
-            _RemoveHelper._build_schema_backend_address_pool_read(cls._schema_on_200_201)
-
-            return cls._schema_on_200_201
-
-    class InstanceDeleteByJson(AAZJsonInstanceDeleteOperation):
-
-        def __call__(self, *args, **kwargs):
-            self.ctx.selectors.subresource.set(self._delete_instance())
-
-
-class _RemoveHelper:
-    """Helper class for Remove"""
+class _ListHelper:
+    """Helper class for List"""
 
     _schema_application_security_group_read = None
 
@@ -2436,4 +2288,4 @@ class _RemoveHelper:
         _schema.type = cls._schema_virtual_network_tap_read.type
 
 
-__all__ = ["Remove"]
+__all__ = ["List"]

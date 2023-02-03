@@ -12,26 +12,24 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network cross-region-lb address-pool address show",
-    is_preview=True,
+    "network lb address-pool show",
 )
 class Show(AAZCommand):
-    """Show the backend address from the load balance backend address pool.
+    """Get load balancer backend address pool.
 
-    :example: Show the backend address from the load balance backend address pool.
-        az network cross-region-lb address-pool address show -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress
+    :example: Get the details of an address pool.
+        az network cross-region-lb address-pool show -g MyResourceGroup --lb-name MyLb -n MyAddressPool
     """
 
     _aaz_info = {
         "version": "2022-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}/backendaddresspools/{}", "2022-05-01", "properties.loadBalancerBackendAddresses[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}/backendaddresspools/{}", "2022-05-01"],
         ]
     }
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        self.SubresourceSelector(ctx=self.ctx, name="subresource")
         self._execute_operations()
         return self._output()
 
@@ -46,22 +44,19 @@ class Show(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.pool_name = AAZStrArg(
-            options=["--pool-name"],
-            help="The name of the backend address pool.",
+        _args_schema.address_pool_name = AAZStrArg(
+            options=["-n", "--name", "--address-pool-name"],
+            help="The name of the backend address pool. If only one exists, omit to use as default.",
             required=True,
+            id_part="child_name_1",
         )
         _args_schema.lb_name = AAZStrArg(
             options=["--lb-name"],
             help="The name of the load balancer.",
             required=True,
+            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            required=True,
-        )
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            help="Name of the backend address.",
             required=True,
         )
         return cls._args_schema
@@ -80,33 +75,8 @@ class Show(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
-
-    class SubresourceSelector(AAZJsonSelector):
-
-        def _get(self):
-            result = self.ctx.vars.instance
-            result = result.properties.loadBalancerBackendAddresses
-            filters = enumerate(result)
-            filters = filter(
-                lambda e: e[1].name == self.ctx.args.name,
-                filters
-            )
-            idx = next(filters)[0]
-            return result[idx]
-
-        def _set(self, value):
-            result = self.ctx.vars.instance
-            result = result.properties.loadBalancerBackendAddresses
-            filters = enumerate(result)
-            filters = filter(
-                lambda e: e[1].name == self.ctx.args.name,
-                filters
-            )
-            idx = next(filters, [len(result)])[0]
-            result[idx] = value
-            return
 
     class LoadBalancerBackendAddressPoolsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -138,7 +108,7 @@ class Show(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "backendAddressPoolName", self.ctx.args.pool_name,
+                    "backendAddressPoolName", self.ctx.args.address_pool_name,
                     required=True,
                 ),
                 **self.serialize_url_param(

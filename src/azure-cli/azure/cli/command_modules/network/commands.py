@@ -491,6 +491,10 @@ def load_command_table(self, _):
     self.command_table["network lb outbound-rule create"] = LBOutboundRuleCreate(loader=self)
     self.command_table["network lb outbound-rule update"] = LBOutboundRuleUpdate(loader=self)
 
+    from .operations.load_balancer import LBAddressPoolCreate, LBAddressPoolDelete
+    self.command_table["network lb address-pool create"] = LBAddressPoolCreate(loader=self)
+    self.command_table["network lb address-pool delete"] = LBAddressPoolDelete(loader=self)
+
     with self.command_group("network lb probe") as g:
         g.custom_command("create", "create_lb_probe")
         g.custom_command("update", "update_lb_probe")
@@ -499,12 +503,9 @@ def load_command_table(self, _):
         g.command('delete', delete_lb_resource_property_entry('load_balancers', 'probes'))
 
     with self.command_group('network lb address-pool', network_lb_backend_pool_sdk) as g:
-        g.custom_command('create', 'create_lb_backend_address_pool')
+        # g.custom_command('create', 'create_lb_backend_address_pool')
         g.generic_update_command('update', setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_backend_address_pool')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.custom_command('delete', 'delete_lb_backend_address_pool')
 
     with self.command_group('network lb address-pool address', network_lb_backend_pool_sdk, is_preview=True) as g:
         g.custom_command('add', 'add_lb_backend_address_pool_address')
@@ -548,15 +549,20 @@ def load_command_table(self, _):
         self.command_table['network cross-region-lb rule update'] = CrossRegionLoadBalancerRuleUpdate(loader=self)
 
     with self.command_group('network cross-region-lb address-pool') as g:
-        from .operations.load_balancer import CrossRegionLoadBalancerAddressPoolCreate, CrossRegionLoadBalancerAddressPoolUpdate
+        from .operations.load_balancer import CrossRegionLoadBalancerAddressPoolCreate, CrossRegionLoadBalancerAddressPoolUpdate, CrossRegionLoadBalancerAddressPoolList, CrossRegionLoadBalancerAddressPoolDelete, CrossRegionLoadBalancerAddressPoolShow
+        self.command_table['network cross-region-lb address-pool show'] = CrossRegionLoadBalancerAddressPoolShow(loader=self)
+        self.command_table['network cross-region-lb address-pool delete'] = CrossRegionLoadBalancerAddressPoolDelete(loader=self)
+        self.command_table['network cross-region-lb address-pool list'] = CrossRegionLoadBalancerAddressPoolList(loader=self)
         self.command_table['network cross-region-lb address-pool create'] = CrossRegionLoadBalancerAddressPoolCreate(loader=self)
         self.command_table['network cross-region-lb address-pool update'] = CrossRegionLoadBalancerAddressPoolUpdate(loader=self)
 
     with self.command_group('network cross-region-lb address-pool address') as g:
-        from .operations.load_balancer import CrossRegionLoadBalancerAddressPoolAddressAdd, CrossRegionLoadBalancerAddressPoolAddressUpdate, CrossRegionLoadBalancerAddressPoolAddressRemove
+        from .operations.load_balancer import CrossRegionLoadBalancerAddressPoolAddressAdd, CrossRegionLoadBalancerAddressPoolAddressUpdate, CrossRegionLoadBalancerAddressPoolAddressRemove, CrossRegionLoadBalancerAddressPoolAddressList, CrossRegionLoadBalancerAddressPoolAddressShow
         self.command_table['network cross-region-lb address-pool address add'] = CrossRegionLoadBalancerAddressPoolAddressAdd(loader=self)
         self.command_table['network cross-region-lb address-pool address remove'] = CrossRegionLoadBalancerAddressPoolAddressRemove(loader=self)
         self.command_table['network cross-region-lb address-pool address update'] = CrossRegionLoadBalancerAddressPoolAddressUpdate(loader=self)
+        self.command_table['network cross-region-lb address-pool address list'] = CrossRegionLoadBalancerAddressPoolAddressList(loader=self)
+        self.command_table['network cross-region-lb address-pool address show'] = CrossRegionLoadBalancerAddressPoolAddressShow(loader=self)
 
     cross_region_lb_property_map = {
         'probes': 'probe',

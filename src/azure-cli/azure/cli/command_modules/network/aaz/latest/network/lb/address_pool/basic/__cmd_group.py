@@ -11,11 +11,8 @@
 from azure.cli.core.aaz import *
 
 
-@register_command_group(
-    "network cross-region-lb address-pool",
-)
 class __CMDGroup(AAZCommandGroup):
-    """Manage address pools of a load balancer.
+    """Manage address pools of a basic load balancer
     """
     pass
 

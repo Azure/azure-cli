@@ -12,22 +12,25 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network cross-region-lb address-pool wait",
+    "network lb address-pool list",
 )
-class Wait(AAZWaitCommand):
-    """Place the CLI in a waiting state until a condition is met.
+class List(AAZCommand):
+    """List all the load balancer backed address pools.
+
+    :example: List address pools.
+        az network cross-region-lb address-pool list -g MyResourceGroup --lb-name MyLb -o table
     """
 
     _aaz_info = {
+        "version": "2022-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}/backendaddresspools/{}", "2022-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}/backendaddresspools", "2022-05-01"],
         ]
     }
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return self._output()
+        return self.build_paging(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -40,17 +43,10 @@ class Wait(AAZWaitCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.address_pool_name = AAZStrArg(
-            options=["-n", "--name", "--address-pool-name"],
-            help="The name of the backend address pool. If only one exists, omit to use as default.",
-            required=True,
-            id_part="child_name_1",
-        )
         _args_schema.lb_name = AAZStrArg(
             options=["--lb-name"],
             help="The name of the load balancer.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -59,7 +55,7 @@ class Wait(AAZWaitCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.LoadBalancerBackendAddressPoolsGet(ctx=self.ctx)()
+        self.LoadBalancerBackendAddressPoolsList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -71,10 +67,11 @@ class Wait(AAZWaitCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
-        return result
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
+        return result, next_link
 
-    class LoadBalancerBackendAddressPoolsGet(AAZHttpOperation):
+    class LoadBalancerBackendAddressPoolsList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -88,7 +85,7 @@ class Wait(AAZWaitCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/backendAddressPools/{backendAddressPoolName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/backendAddressPools",
                 **self.url_parameters
             )
 
@@ -103,10 +100,6 @@ class Wait(AAZWaitCommand):
         @property
         def url_parameters(self):
             parameters = {
-                **self.serialize_url_param(
-                    "backendAddressPoolName", self.ctx.args.address_pool_name,
-                    required=True,
-                ),
                 **self.serialize_url_param(
                     "loadBalancerName", self.ctx.args.lb_name,
                     required=True,
@@ -157,13 +150,23 @@ class Wait(AAZWaitCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _WaitHelper._build_schema_backend_address_pool_read(cls._schema_on_200)
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.next_link = AAZStrType(
+                serialized_name="nextLink",
+                flags={"read_only": True},
+            )
+            _schema_on_200.value = AAZListType()
+
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+            _ListHelper._build_schema_backend_address_pool_read(value.Element)
 
             return cls._schema_on_200
 
 
-class _WaitHelper:
-    """Helper class for Wait"""
+class _ListHelper:
+    """Helper class for List"""
 
     _schema_application_security_group_read = None
 
@@ -2273,4 +2276,4 @@ class _WaitHelper:
         _schema.type = cls._schema_virtual_network_tap_read.type
 
 
-__all__ = ["Wait"]
+__all__ = ["List"]

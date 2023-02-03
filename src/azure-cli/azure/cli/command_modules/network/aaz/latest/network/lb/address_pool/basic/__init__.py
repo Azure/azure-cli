@@ -8,17 +8,6 @@
 # pylint: skip-file
 # flake8: noqa
 
-from azure.cli.core.aaz import *
-
-
-@register_command_group(
-    "network cross-region-lb address-pool address",
-    is_preview=True,
-)
-class __CMDGroup(AAZCommandGroup):
-    """Manage backend addresses of the cross-region load balance backend address pool.
-    """
-    pass
-
-
-__all__ = ["__CMDGroup"]
+from .__cmd_group import *
+from ._create import *
+from ._delete import *

@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network cross-region-lb address-pool delete",
-)
 class Delete(AAZCommand):
     """Delete the specified load balancer backend address pool.
 

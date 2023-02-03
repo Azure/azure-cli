@@ -3192,7 +3192,7 @@ examples:
 helps['network cross-region-lb'] = """
 type: group
 short-summary: Manage and configure cross-region load balancers.
-long-summary: To learn more about Azure Load Balancer visit https://docs.microsoft.com/azure/load-balancer/load-balancer-get-started-internet-arm-cli
+long-summary: To learn more about Azure Load Balancer visit https://learn.microsoft.com/en-us/azure/load-balancer/tutorial-cross-region-cli.
 """
 
 helps['network cross-region-lb create'] = """
