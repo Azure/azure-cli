@@ -83,7 +83,7 @@ Release History
 
 **NetAppFiles**
 
-* Fix volume patch dataprotection props (#25231)
+* `az netappfiles volume update`: Fix volume patch dataprotection props (#25231)
 
 **Network**
 
