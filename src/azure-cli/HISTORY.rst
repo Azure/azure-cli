@@ -117,8 +117,8 @@ Release History
 **RDBMS**
 
 * `az mysql flexible-server create/update`: Add `--auto-scale-iops` to enable or disable autoscale of iops (#25153)
-* `az mysql flexible-server start/stop`: Add No Wait Support (#25212)
-* `az postgres flexible-server start/stop`: Add No Wait Support (#25212)
+* `az mysql flexible-server start/stop`: Add no-wait support (#25212)
+* `az postgres flexible-server start/stop`: Add no-wait support (#25212)
 * `az postgres flexible-server migration`: Change behavior of cancel/cutover and added Offline Flag for FMS based migrations (#25217)
 
 **Service Bus**
