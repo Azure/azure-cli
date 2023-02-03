@@ -1174,6 +1174,11 @@ type: command
 short-summary: Restore a web app from a backup.
 """
 
+helps['webapp config backup delete'] = """
+type: command
+short-summary: Delete a web app backup.
+"""
+
 helps['webapp config backup show'] = """
 type: command
 short-summary: Show the backup schedule for a web app.
