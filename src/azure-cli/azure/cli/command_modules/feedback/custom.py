@@ -68,7 +68,7 @@ _ISSUES_TEMPLATE = """
 
 **Errors:**
 ```
-Insert here the error message you have received. Make sure to remove all sensitive information,
+Paste here the error message you have received. Make sure to remove all sensitive information,
 such as user name, password, credential, subscription ID, etc.
 ```
 
