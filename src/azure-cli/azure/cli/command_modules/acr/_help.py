@@ -575,9 +575,9 @@ type: command
 short-summary: Create a cache rule.
 examples:
   - name: Create a cache rule without a credential set.
-    text: az acr cache create -r MyRegistry -n MyRule -s library/ubuntu -t ubuntu
+    text: az acr cache create -r MyRegistry -n MyRule -s docker.io/library/ubuntu -t ubuntu
   - name: Create a cache rule with a credential set.
-    text: az acr cache create -r MyRegistry -n MyRule -s library/ubuntu -t ubuntu -c MyCredSet
+    text: az acr cache create -r MyRegistry -n MyRule -s docker.io/library/ubuntu -t ubuntu -c MyCredSet
 """
 
 helps['acr cache update'] = """
@@ -624,7 +624,7 @@ type: command
 short-summary: Create a credential set.
 examples:
   - name: Create a credential set.
-    text: az acr cache create -r MyRegistry -n MyRule -l myreg.docker.io -u https://MyKeyvault.vault.azure.net/secrets/usernamesecret -p https://MyKeyvault.vault.azure.net/secrets/passwordsecret
+    text: az acr credential-set create -r MyRegistry -n MyRule -l docker.io -u https://MyKeyvault.vault.azure.net/secrets/usernamesecret -p https://MyKeyvault.vault.azure.net/secrets/passwordsecret
 """
 
 helps['acr credential-set update'] = """
