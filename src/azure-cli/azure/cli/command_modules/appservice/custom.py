@@ -2663,7 +2663,10 @@ def _get_log(url, user_name, password, log_file=None):
     r.release_conn()
 
 
-def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certificate_file, slot=None, certificate_name=None):
+def upload_ssl_cert(cmd, resource_group_name,
+                    name, certificate_password,
+                    certificate_file, slot=None,
+                    certificate_name=None):
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
@@ -2795,7 +2798,7 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None,
     hostname = hostname.lower()
     client = web_client_factory(cmd.cli_ctx)
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
-    if not webapp: 
+    if not webapp:
         slot_text = "Deployment slot {} in ".format(slot) if slot else ''
         raise ResourceNotFoundError("{0}app {1} doesn't exist in resource group {2}".format(slot_text,
                                                                                             name,
@@ -2840,7 +2843,7 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None,
                     return r.text
             logger.warning("Managed Certificate creation in progress. Please use the command "
                            "'az webapp config ssl show -g %s --certificate-name %s' "
-                           " to view your certificate once it is created", resource_group_name, hostname)
+                           " to view your certificate once it is created", resource_group_name, certificate_name)
             return
         raise CLIError(ex)
 
