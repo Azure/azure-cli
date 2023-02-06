@@ -1623,8 +1623,9 @@ class WebappSSLImportCertTest(ScenarioTest):
         self.cmd('keyvault certificate import --name {} --vault-name {} --file "{}" --password {}'.format(
             cert_name, key_vault, pfx_file, cert_password))
 
-        self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, key_vault, cert_name), checks=[
-            JMESPathCheck('thumbprint', cert_thumbprint)
+        self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {} --certificate-name {}'.format(resource_group, webapp_name, key_vault, cert_name, "test123"), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint),
+						JMESPathCheck('name', 'test123')
         ])
 
         self.cmd('webapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(resource_group, webapp_name, cert_thumbprint, 'SNI'), checks=[
