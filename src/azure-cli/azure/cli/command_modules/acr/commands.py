@@ -338,14 +338,14 @@ def load_command_table(self, _):
     with self.command_group('acr', acr_check_health_util) as g:
         g.command('check-health', 'acr_check_health')
 
-    with self.command_group('acr scope-map', acr_scope_map_util, is_preview=True) as g:
+    with self.command_group('acr scope-map', acr_scope_map_util) as g:
         g.command('create', 'acr_scope_map_create')
         g.command('delete', 'acr_scope_map_delete')
         g.command('update', 'acr_scope_map_update')
         g.show_command('show', 'acr_scope_map_show')
         g.command('list', 'acr_scope_map_list')
 
-    with self.command_group('acr token', acr_token_util, is_preview=True) as g:
+    with self.command_group('acr token', acr_token_util) as g:
         g.command('create', 'acr_token_create')
         g.command('delete', 'acr_token_delete')
         g.command('update', 'acr_token_update')
