@@ -7658,19 +7658,29 @@ def show_vnet_gateway_aad(cmd, resource_group_name, gateway_name):
 
 
 def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
+    args = {"resource_group": resource_group_name,
+            "name": gateway_name,
+            "aad_audience": None,
+            "aad_issuer": None,
+            "aad_tenant": None,
+            "vpn_auth_type": None}
+    from azure.cli.core.commands import LongRunningOperation
+    poller = _VnetGatewayUpdate(cli_ctx=cmd.cli_ctx)(command_args=args)
+    return LongRunningOperation(cmd.cli_ctx)(poller)['vpnClientConfiguration']
 
-    if gateway.vpn_client_configuration is None:
-        raise CLIError('VPN client configuration must be set first through `az network vnet-gateway create/update`.')
+    # ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+    # gateway = ncf.get(resource_group_name, gateway_name)
 
-    gateway.vpn_client_configuration.aad_tenant = None
-    gateway.vpn_client_configuration.aad_audience = None
-    gateway.vpn_client_configuration.aad_issuer = None
-    if cmd.supported_api_version(min_api='2020-11-01'):
-        gateway.vpn_client_configuration.vpn_authentication_types = None
+    # if gateway.vpn_client_configuration is None:
+    #     raise CLIError('VPN client configuration must be set first through `az network vnet-gateway create/update`.')
 
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
+    # gateway.vpn_client_configuration.aad_tenant = None
+    # gateway.vpn_client_configuration.aad_audience = None
+    # gateway.vpn_client_configuration.aad_issuer = None
+    # if cmd.supported_api_version(min_api='2020-11-01'):
+    #     gateway.vpn_client_configuration.vpn_authentication_types = None
+
+    # return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
 
 
 class VnetGatewayNatRuleAdd(_VnetGatewayNatRuleAdd):
