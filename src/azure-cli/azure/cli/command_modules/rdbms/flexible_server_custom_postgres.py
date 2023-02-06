@@ -15,11 +15,11 @@ from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError
 from azure.mgmt.rdbms import postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, \
-    cf_postgres_flexible_db, cf_postgres_check_resource_availability, \
+    cf_postgres_flexible_db, cf_postgres_check_resource_availability, cf_postgres_flexible_servers, \
     cf_postgres_check_resource_availability_with_location, cf_postgres_flexible_private_dns_zone_suffix_operations
 from ._flexible_server_util import generate_missing_parameters, resolve_poller,\
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
-    _is_resource_name
+    _is_resource_name, get_tenant_id
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
@@ -45,7 +45,8 @@ def flexible_server_create(cmd, client,
                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
-                           geo_redundant_backup=None, byok_identity=None, byok_key=None, yes=False):
+                           geo_redundant_backup=None, byok_identity=None, byok_key=None,
+                           active_directory_auth=None, password_auth=None, yes=False):
 
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
@@ -107,6 +108,9 @@ def flexible_server_create(cmd, client,
                                                                    byok_identity=byok_identity,
                                                                    byok_key=byok_key)
 
+    auth_config = postgresql_flexibleservers.models.AuthConfig(active_directory_auth=active_directory_auth,
+                                                               password_auth=password_auth)
+
     # Create postgresql
     # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
     server_result = _create_server(db_context, cmd, resource_group_name, server_name,
@@ -122,7 +126,8 @@ def flexible_server_create(cmd, client,
                                    high_availability=high_availability,
                                    availability_zone=zone,
                                    identity=identity,
-                                   data_encryption=data_encryption)
+                                   data_encryption=data_encryption,
+                                   auth_config=auth_config)
 
     # Adding firewall rule
     if start_ip != -1 and end_ip != -1:
@@ -240,6 +245,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        standby_availability_zone=None,
                                        maintenance_window=None,
                                        byok_identity=None, byok_key=None,
+                                       active_directory_auth=None, password_auth=None,
                                        tags=None):
 
     # validator
@@ -297,6 +303,12 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                                                    byok_identity=byok_identity,
                                                                    byok_key=byok_key)
 
+    auth_config = instance.auth_config
+    if active_directory_auth:
+        auth_config.active_directory_auth = active_directory_auth
+    if password_auth:
+        auth_config.password_auth = password_auth
+
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
                              backup=instance.backup,
@@ -304,6 +316,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                              maintenance_window=instance.maintenance_window,
                              identity=identity,
                              data_encryption=data_encryption,
+                             auth_config=auth_config,
                              tags=tags)
 
     # High availability can't be updated with existing properties
@@ -323,8 +336,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
 def flexible_server_restart(cmd, client, resource_group_name, server_name, fail_over=None):
     instance = client.get(resource_group_name, server_name)
-    if fail_over is not None and instance.high_availability.mode != "ZoneRedundant":
-        raise ArgumentUsageError("Failing over can only be triggered for zone redundant servers.")
+    if fail_over is not None and instance.high_availability.mode not in ("ZoneRedundant", "SameZone"):
+        raise ArgumentUsageError("Failing over can only be triggered for zone redundant or same zone servers.")
 
     if fail_over is not None:
         if fail_over.lower() not in ['planned', 'forced']:
@@ -544,7 +557,7 @@ def flexible_replica_stop(client, resource_group_name, server_name):
 
 
 def _create_server(db_context, cmd, resource_group_name, server_name, tags, location, sku, administrator_login, administrator_login_password,
-                   storage, backup, network, version, high_availability, availability_zone, identity, data_encryption):
+                   storage, backup, network, version, high_availability, availability_zone, identity, data_encryption, auth_config):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
@@ -567,6 +580,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
         availability_zone=availability_zone,
         identity=identity,
         data_encryption=data_encryption,
+        auth_config=auth_config,
         create_mode="Create")
 
     return resolve_poller(
@@ -620,6 +634,120 @@ def flexible_server_connection_string(
         'connectionStrings': _create_postgresql_connection_strings(host, administrator_login,
                                                                    administrator_login_password, database_name)
     }
+
+
+# Custom functions for identity
+def flexible_server_identity_assign(cmd, client, resource_group_name, server_name, identities):
+    identities_map = {}
+    for identity in identities:
+        identities_map[identity] = {}
+
+    parameters = {
+        'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
+            user_assigned_identities=identities_map,
+            type="UserAssigned")}
+
+    result = resolve_poller(
+        client.begin_update(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            parameters=parameters),
+        cmd.cli_ctx, 'Adding identities to server {}'.format(server_name)
+    )
+
+    return result.identity
+
+
+def flexible_server_identity_remove(cmd, client, resource_group_name, server_name, identities):
+    instance = client.get(resource_group_name, server_name)
+
+    if instance.data_encryption:
+        primary_id = instance.data_encryption.primary_user_assigned_identity_id
+
+        if primary_id and primary_id.lower() in [identity.lower() for identity in identities]:
+            raise CLIError("Cannot remove identity {} because it's used for data encryption.".format(primary_id))
+
+    identities_map = {}
+    for identity in identities:
+        identities_map[identity] = None
+
+    if not (instance.identity and instance.identity.user_assigned_identities) or \
+       all(key.lower() in [identity.lower() for identity in identities] for key in instance.identity.user_assigned_identities.keys()):
+        parameters = {
+            'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
+                type="None")}
+    else:
+        parameters = {
+            'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
+                user_assigned_identities=identities_map,
+                type="UserAssigned")}
+
+    result = resolve_poller(
+        client.begin_update(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            parameters=parameters),
+        cmd.cli_ctx, 'Removing identities from server {}'.format(server_name)
+    )
+
+    return result.identity or postgresql_flexibleservers.models.UserAssignedIdentity(type="SystemAssigned")
+
+
+def flexible_server_identity_list(client, resource_group_name, server_name):
+    server = client.get(resource_group_name, server_name)
+    return server.identity or postgresql_flexibleservers.models.UserAssignedIdentity(type="SystemAssigned")
+
+
+def flexible_server_identity_show(client, resource_group_name, server_name, identity):
+    server = client.get(resource_group_name, server_name)
+
+    for key, value in server.identity.user_assigned_identities.items():
+        if key.lower() == identity.lower():
+            return value
+
+    raise CLIError("Identity '{}' does not exist in server {}.".format(identity, server_name))
+
+
+# Custom functions for ad-admin
+def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, login, sid, principal_type=None, no_wait=False):
+    server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+
+    instance = server_operations_client.get(resource_group_name, server_name)
+
+    if 'replica' in instance.replication_role.lower():
+        raise CLIError("Cannot create an AD admin on a server with replication role. Use the primary server instead.")
+
+    parameters = {
+        'principal_name': login,
+        'tenant_id': get_tenant_id(),
+        'principal_type': principal_type
+    }
+
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, sid, parameters)
+
+
+def flexible_server_ad_admin_delete(cmd, client, resource_group_name, server_name, sid, no_wait=False):
+    server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+
+    instance = server_operations_client.get(resource_group_name, server_name)
+
+    if 'replica' in instance.replication_role.lower():
+        raise CLIError("Cannot delete an AD admin on a server with replication role. Use the primary server instead.")
+
+    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, server_name, sid)
+
+
+def flexible_server_ad_admin_list(client, resource_group_name, server_name):
+    return client.list_by_server(
+        resource_group_name=resource_group_name,
+        server_name=server_name)
+
+
+def flexible_server_ad_admin_show(client, resource_group_name, server_name, sid):
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        object_id=sid)
 
 
 def flexible_server_provision_network_resource(cmd, resource_group_name, server_name,

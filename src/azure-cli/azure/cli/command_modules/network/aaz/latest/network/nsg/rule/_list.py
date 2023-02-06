@@ -43,9 +43,9 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            help="The name of the network security group.",
+        _args_schema.nsg_name = AAZStrArg(
+            options=["--nsg-name"],
+            help="Name of the network security group.",
             required=True,
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -101,7 +101,7 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "networkSecurityGroupName", self.ctx.args.name,
+                    "networkSecurityGroupName", self.ctx.args.nsg_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -223,7 +223,7 @@ class List(AAZCommand):
 
             destination_application_security_groups = cls._schema_on_200.value.Element.properties.destination_application_security_groups
             destination_application_security_groups.Element = AAZObjectType()
-            _build_schema_application_security_group_read(destination_application_security_groups.Element)
+            _ListHelper._build_schema_application_security_group_read(destination_application_security_groups.Element)
 
             destination_port_ranges = cls._schema_on_200.value.Element.properties.destination_port_ranges
             destination_port_ranges.Element = AAZStrType()
@@ -233,7 +233,7 @@ class List(AAZCommand):
 
             source_application_security_groups = cls._schema_on_200.value.Element.properties.source_application_security_groups
             source_application_security_groups.Element = AAZObjectType()
-            _build_schema_application_security_group_read(source_application_security_groups.Element)
+            _ListHelper._build_schema_application_security_group_read(source_application_security_groups.Element)
 
             source_port_ranges = cls._schema_on_200.value.Element.properties.source_port_ranges
             source_port_ranges.Element = AAZStrType()
@@ -241,60 +241,62 @@ class List(AAZCommand):
             return cls._schema_on_200
 
 
-_schema_application_security_group_read = None
+class _ListHelper:
+    """Helper class for List"""
 
+    _schema_application_security_group_read = None
 
-def _build_schema_application_security_group_read(_schema):
-    global _schema_application_security_group_read
-    if _schema_application_security_group_read is not None:
-        _schema.etag = _schema_application_security_group_read.etag
-        _schema.id = _schema_application_security_group_read.id
-        _schema.location = _schema_application_security_group_read.location
-        _schema.name = _schema_application_security_group_read.name
-        _schema.properties = _schema_application_security_group_read.properties
-        _schema.tags = _schema_application_security_group_read.tags
-        _schema.type = _schema_application_security_group_read.type
-        return
+    @classmethod
+    def _build_schema_application_security_group_read(cls, _schema):
+        if cls._schema_application_security_group_read is not None:
+            _schema.etag = cls._schema_application_security_group_read.etag
+            _schema.id = cls._schema_application_security_group_read.id
+            _schema.location = cls._schema_application_security_group_read.location
+            _schema.name = cls._schema_application_security_group_read.name
+            _schema.properties = cls._schema_application_security_group_read.properties
+            _schema.tags = cls._schema_application_security_group_read.tags
+            _schema.type = cls._schema_application_security_group_read.type
+            return
 
-    _schema_application_security_group_read = AAZObjectType()
+        cls._schema_application_security_group_read = _schema_application_security_group_read = AAZObjectType()
 
-    application_security_group_read = _schema_application_security_group_read
-    application_security_group_read.etag = AAZStrType(
-        flags={"read_only": True},
-    )
-    application_security_group_read.id = AAZStrType()
-    application_security_group_read.location = AAZStrType()
-    application_security_group_read.name = AAZStrType(
-        flags={"read_only": True},
-    )
-    application_security_group_read.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    application_security_group_read.tags = AAZDictType()
-    application_security_group_read.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        application_security_group_read = _schema_application_security_group_read
+        application_security_group_read.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        application_security_group_read.id = AAZStrType()
+        application_security_group_read.location = AAZStrType()
+        application_security_group_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        application_security_group_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        application_security_group_read.tags = AAZDictType()
+        application_security_group_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    properties = _schema_application_security_group_read.properties
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
-    properties.resource_guid = AAZStrType(
-        serialized_name="resourceGuid",
-        flags={"read_only": True},
-    )
+        properties = _schema_application_security_group_read.properties
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.resource_guid = AAZStrType(
+            serialized_name="resourceGuid",
+            flags={"read_only": True},
+        )
 
-    tags = _schema_application_security_group_read.tags
-    tags.Element = AAZStrType()
+        tags = _schema_application_security_group_read.tags
+        tags.Element = AAZStrType()
 
-    _schema.etag = _schema_application_security_group_read.etag
-    _schema.id = _schema_application_security_group_read.id
-    _schema.location = _schema_application_security_group_read.location
-    _schema.name = _schema_application_security_group_read.name
-    _schema.properties = _schema_application_security_group_read.properties
-    _schema.tags = _schema_application_security_group_read.tags
-    _schema.type = _schema_application_security_group_read.type
+        _schema.etag = cls._schema_application_security_group_read.etag
+        _schema.id = cls._schema_application_security_group_read.id
+        _schema.location = cls._schema_application_security_group_read.location
+        _schema.name = cls._schema_application_security_group_read.name
+        _schema.properties = cls._schema_application_security_group_read.properties
+        _schema.tags = cls._schema_application_security_group_read.tags
+        _schema.type = cls._schema_application_security_group_read.type
 
 
 __all__ = ["List"]

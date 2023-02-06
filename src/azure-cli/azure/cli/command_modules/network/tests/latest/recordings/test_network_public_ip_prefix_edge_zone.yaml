@@ -13,13 +13,12 @@ interactions:
       ParameterSetName:
       - -g -n --length --edge-zone
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.43.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_public_ip_prefix_edge_zone000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_public_ip_prefix_edge_zone000001","name":"test_network_public_ip_prefix_edge_zone000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","date":"2022-08-28T14:54:12Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_public_ip_prefix_edge_zone000001","name":"test_network_public_ip_prefix_edge_zone000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","date":"2022-12-09T08:24:08Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -28,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 14:54:17 GMT
+      - Fri, 09 Dec 2022 08:24:13 GMT
       expires:
       - '-1'
       pragma:
@@ -43,9 +42,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus2euap", "extendedLocation": {"name": "microsoftrrdclab1",
-      "type": "EdgeZone"}, "sku": {"name": "Standard"}, "properties": {"publicIPAddressVersion":
-      "IPv4", "prefixLength": 30}}'
+    body: '{"extendedLocation": {"name": "microsoftrrdclab1", "type": "EdgeZone"},
+      "location": "eastus2euap", "properties": {"prefixLength": 30, "publicIPAddressVersion":
+      "IPv4"}, "sku": {"name": "Standard"}}'
     headers:
       Accept:
       - application/json
@@ -62,18 +61,17 @@ interactions:
       ParameterSetName:
       - -g -n --length --edge-zone
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.43.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_public_ip_prefix_edge_zone000001/providers/Microsoft.Network/publicIPPrefixes/pubip1-prefix?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"pubip1-prefix\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_public_ip_prefix_edge_zone000001/providers/Microsoft.Network/publicIPPrefixes/pubip1-prefix\",\r\n
-        \ \"etag\": \"W/\\\"659407f8-3475-4166-ab8b-c86493e55634\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"8d77937b-7371-4d44-a18d-87fd3d27c535\\\"\",\r\n  \"type\":
         \"Microsoft.Network/publicIPPrefixes\",\r\n  \"location\": \"eastus2euap\",\r\n
         \ \"extendedLocation\": {\r\n    \"type\": \"EdgeZone\",\r\n    \"name\":
         \"microsoftrrdclab1\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Updating\",\r\n    \"resourceGuid\": \"a984ca86-7a79-449b-8736-c2ecfd6e770e\",\r\n
+        \"Updating\",\r\n    \"resourceGuid\": \"666dcb62-5f3d-4a33-b0d6-23e825f1be3b\",\r\n
         \   \"prefixLength\": 30,\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
         \   \"ipTags\": []\r\n  },\r\n  \"sku\": {\r\n    \"name\": \"Standard\",\r\n
         \   \"tier\": \"Regional\"\r\n  }\r\n}"
@@ -81,7 +79,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/097473f8-d8e2-41bf-a5ce-cbe68f943e1f?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/e0124cc9-681f-4845-a2ee-f114bded8acd?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
@@ -89,7 +87,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 14:54:28 GMT
+      - Fri, 09 Dec 2022 08:24:19 GMT
       expires:
       - '-1'
       pragma:
@@ -102,12 +100,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4ddd30c6-eef8-408f-9102-c00e43c69ecc
+      - f77eecbf-9b26-4dbb-aa8f-de8ed3aa1c20
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1199'
     status:
       code: 201
-      message: Created
+      message: ''
 - request:
     body: null
     headers:
@@ -122,10 +120,9 @@ interactions:
       ParameterSetName:
       - -g -n --length --edge-zone
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.43.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/097473f8-d8e2-41bf-a5ce-cbe68f943e1f?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/e0124cc9-681f-4845-a2ee-f114bded8acd?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -137,7 +134,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 14:54:31 GMT
+      - Fri, 09 Dec 2022 08:24:22 GMT
       expires:
       - '-1'
       pragma:
@@ -154,10 +151,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 796c2676-2ddc-469a-b737-fb7858696fdf
+      - 7621d3a9-339b-408d-8339-7210f0738345
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -172,60 +169,9 @@ interactions:
       ParameterSetName:
       - -g -n --length --edge-zone
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.43.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/097473f8-d8e2-41bf-a5ce-cbe68f943e1f?api-version=2022-01-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Sun, 28 Aug 2022 14:54:42 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 60c3b7bf-2d6c-47df-b695-a7cad8e65efc
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network public-ip prefix create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --length --edge-zone
-      User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/097473f8-d8e2-41bf-a5ce-cbe68f943e1f?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/e0124cc9-681f-4845-a2ee-f114bded8acd?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -237,7 +183,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 14:55:02 GMT
+      - Fri, 09 Dec 2022 08:24:34 GMT
       expires:
       - '-1'
       pragma:
@@ -254,7 +200,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7dae5ffd-aa1e-4fd0-8c32-04cb21881134
+      - 4c226faf-676c-41d4-9470-78f70d666d65
     status:
       code: 200
       message: OK
@@ -272,33 +218,32 @@ interactions:
       ParameterSetName:
       - -g -n --length --edge-zone
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.43.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_public_ip_prefix_edge_zone000001/providers/Microsoft.Network/publicIPPrefixes/pubip1-prefix?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"pubip1-prefix\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_public_ip_prefix_edge_zone000001/providers/Microsoft.Network/publicIPPrefixes/pubip1-prefix\",\r\n
-        \ \"etag\": \"W/\\\"e15237aa-eba3-466b-8c18-3275a30adff8\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"7a417e15-0c29-4e4d-94ec-cb5c50a83888\\\"\",\r\n  \"type\":
         \"Microsoft.Network/publicIPPrefixes\",\r\n  \"location\": \"eastus2euap\",\r\n
         \ \"extendedLocation\": {\r\n    \"type\": \"EdgeZone\",\r\n    \"name\":
         \"microsoftrrdclab1\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"a984ca86-7a79-449b-8736-c2ecfd6e770e\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"666dcb62-5f3d-4a33-b0d6-23e825f1be3b\",\r\n
         \   \"prefixLength\": 30,\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
-        \   \"ipPrefix\": \"198.180.97.212/30\",\r\n    \"ipTags\": []\r\n  },\r\n
+        \   \"ipPrefix\": \"198.180.97.52/30\",\r\n    \"ipTags\": []\r\n  },\r\n
         \ \"sku\": {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '752'
+      - '751'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 14:55:03 GMT
+      - Fri, 09 Dec 2022 08:24:34 GMT
       etag:
-      - W/"e15237aa-eba3-466b-8c18-3275a30adff8"
+      - W/"7a417e15-0c29-4e4d-94ec-cb5c50a83888"
       expires:
       - '-1'
       pragma:
@@ -315,7 +260,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - cd616df4-b427-47c6-91a0-ce0a6688ec9a
+      - e48df4ee-db48-4757-a62a-82099b7ff57a
     status:
       code: 200
       message: OK

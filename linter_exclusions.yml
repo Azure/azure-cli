@@ -330,6 +330,9 @@ aks create:
     enable_syslog:
       rule_exclusions:
       - option_length_too_long
+    data_collection_settings:
+      rule_exclusions:
+      - option_length_too_long
     node_osdisk_diskencryptionset_id:
       rule_exclusions:
       - option_length_too_long
@@ -360,6 +363,9 @@ aks enable-addons:
       rule_exclusions:
       - option_length_too_long
     enable_syslog:
+      rule_exclusions:
+      - option_length_too_long
+    data_collection_settings:
       rule_exclusions:
       - option_length_too_long
 aks install-cli:
@@ -2907,6 +2913,16 @@ openshift create:
     customer_admin_group_id:
       rule_exclusions:
       - option_length_too_long
+policy attestation create:
+  parameters:
+    definition_reference_id:
+      rule_exclusions:
+        - option_length_too_long
+policy attestation update:
+  parameters:
+    definition_reference_id:
+      rule_exclusions:
+        - option_length_too_long
 policy assignment list:
   parameters:
     disable_scope_strict_match:

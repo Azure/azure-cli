@@ -5,13 +5,12 @@
 import time
 import unittest
 from unittest import mock
-from knack.testsdk import record_only
-from knack.util import CLIError
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
 from azure.core.exceptions import HttpResponseError
-
+from knack.util import CLIError
 from msrestazure.tools import parse_resource_id
+
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
 
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
@@ -452,6 +451,69 @@ class ImageTemplateTest(ScenarioTest):
 
         self.assertEqual(img_tmpl['source']['imageVersionId'].lower(), self.kwargs['image_id'].lower())
         self.assertEqual(img_tmpl['source']['type'].lower(), 'sharedimageversion')
+
+    @ResourceGroupPreparer(name_prefix='img_tmpl_identity_')
+    def test_image_build_identity(self, resource_group):
+        self._identity_role(resource_group)
+
+        self.kwargs.update({
+            'img_src': LINUX_IMAGE_SOURCE,
+            'gallery': self.create_random_name("sig_", 10),
+            'sig1': 'image1',
+            'tmpl': 'template01',
+            'script': TEST_SHELL_SCRIPT_URL
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1} '
+                 '--os-type linux -p publisher1 -f offer1 -s sku1')
+
+        self.cmd(
+            'image builder create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --identity {ide} --defer')
+        self.cmd('image builder output add -n {tmpl} -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1}'
+                 ' --gallery-replication-regions westus --defer')
+
+        # send put request using cached template object
+        self.cmd('image builder update -n {tmpl} -g {rg}')
+
+        ide_id = self.cmd('identity show -n {ide} -g {rg}').get_output_in_json()['id']
+
+        # remove identity
+        self.cmd('image builder identity remove -n {tmpl} -g {rg} --user-assigned --yes',
+                 checks=[
+                     self.check('type', 'None'),
+                     self.check('userAssignedIdentities', None)
+                 ])
+
+        # assign identity
+        result = self.cmd('image builder identity assign -n {tmpl} -g {rg} --user-assigned {ide}',
+                          checks=[
+                              self.check('type', 'UserAssigned')
+                          ]).get_output_in_json()
+        result_identities = [x.lower() for x in result['userAssignedIdentities'].keys()]
+        self.assertEqual(result_identities, [ide_id.lower()])
+
+        # show identity
+        result = self.cmd('image builder identity show -n {tmpl} -g {rg}',
+                          checks=[
+                              self.check('type', 'UserAssigned')
+                          ]).get_output_in_json()
+        result_identities = [x.lower() for x in result['userAssignedIdentities'].keys()]
+        self.assertEqual(result_identities, [ide_id.lower()])
+
+        # remove identity
+        self.cmd('image builder identity remove -n {tmpl} -g {rg} --user-assigned {ide} --yes',
+                 checks=[
+                     self.check('type', 'None'),
+                     self.check('userAssignedIdentities', None)
+                 ])
+
+        # show identity
+        self.cmd('image builder identity show -n {tmpl} -g {rg}',
+                 checks=[
+                     self.check('type', 'None'),
+                     self.check('userAssignedIdentities', None)
+                 ])
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_customizers')
     def test_image_builder_customizers(self, resource_group, resource_group_location):

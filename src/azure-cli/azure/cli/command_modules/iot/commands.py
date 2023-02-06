@@ -36,6 +36,9 @@ class RouteUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-f
 class HubDeleteResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
         from azure.cli.core.util import CLIError
+        # if no wait, return right away
+        if not poller:
+            return poller
         try:
             super(HubDeleteResultTransform, self).__call__(poller)
         except CLIError as e:
@@ -131,6 +134,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                                  command_type=update_custom_util, custom_func_name='update_iot_hub_custom')
         g.custom_command('delete', 'iot_hub_delete', transform=HubDeleteResultTransform(self.cli_ctx),
                          supports_no_wait=True)
+        g.custom_wait_command('wait', 'iot_hub_get')
         g.custom_command('list-skus', 'iot_hub_sku_list')
         g.custom_command('show-quota-metrics', 'iot_hub_get_quota_metrics')
         g.custom_command('show-stats', 'iot_hub_get_stats')

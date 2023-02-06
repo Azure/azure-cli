@@ -37,12 +37,13 @@ key_format_values = certificate_format_values = ['PEM', 'DER']
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
-    (JsonWebKeyOperation, JsonWebKeyType, SasTokenType,
+    (JsonWebKeyOperation, SasTokenType,
      SasDefinitionAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes) = self.get_models(
-         'JsonWebKeyOperation', 'JsonWebKeyType', 'SasTokenType',
+         'JsonWebKeyOperation', 'SasTokenType',
          'SasDefinitionAttributes', 'SecretAttributes', 'CertificateAttributes', 'StorageAccountAttributes',
          resource_type=ResourceType.DATA_KEYVAULT)
 
+    JsonWebKeyType = self.get_sdk('KeyType', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_enums')
     KeyCurveName = self.get_sdk('KeyCurveName', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_enums')
     EncryptionAlgorithm = self.get_sdk('EncryptionAlgorithm', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='crypto._enums')
 
@@ -58,16 +59,6 @@ def load_arguments(self, _):
 
     JsonWebKeyOperation = CLIJsonWebKeyOperation  # TODO: Remove this patch when new SDK is released
 
-    class CLIJsonWebKeyType(str, Enum):
-        ec = "EC"  #: Elliptic Curve.
-        ec_hsm = "EC-HSM"  #: Elliptic Curve with a private key which is not exportable from the HSM.
-        rsa = "RSA"  #: RSA (https://tools.ietf.org/html/rfc3447)
-        rsa_hsm = "RSA-HSM"  #: RSA with a private key which is not exportable from the HSM.
-        oct = "oct"  #: Octet sequence (used to represent symmetric keys)
-        oct_hsm = "oct-HSM"  #: Oct with a private key which is not exportable from the HSM.
-
-    JsonWebKeyType = CLIJsonWebKeyType  # TODO: Remove this patch when new SDK is released
-
     class CLIKeyTypeForBYOKImport(str, Enum):
         ec = "EC"  #: Elliptic Curve.
         rsa = "RSA"  #: RSA (https://tools.ietf.org/html/rfc3447)
@@ -76,6 +67,7 @@ def load_arguments(self, _):
     class CLISecurityDomainOperation(str, Enum):
         download = "download"  #: Download operation
         upload = "upload"  #: Upload operation
+        restore_blob = "restore_blob"  #: Restore blob operation
 
     (KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
      NetworkRuleBypassOptions, NetworkRuleAction, PublicNetworkAccess) = self.get_models(
@@ -592,12 +584,24 @@ def load_arguments(self, _):
     with self.argument_context('keyvault security-domain upload') as c:
         c.argument('sd_file', help='This file contains security domain encrypted using SD Exchange file downloaded '
                                    'in security-domain init-recovery command.')
+        c.argument('restore_blob', help='Indicator if blob is already restored.')
         c.argument('sd_exchange_key', help='The exchange key for security domain.')
         c.argument('sd_wrapping_keys', nargs='*',
                    help='Space-separated file paths to PEM files containing private keys.')
         c.argument('passwords', nargs='*', help='Space-separated password list for --sd-wrapping-keys. '
                                                 'CLI will match them in order. Can be omitted if your keys are without '
                                                 'password protection.')
+
+    with self.argument_context('keyvault security-domain restore-blob') as c:
+        c.argument('sd_file', help='This file contains security domain encrypted using SD Exchange file downloaded '
+                                   'in security-domain init-recovery command.')
+        c.argument('sd_exchange_key', help='The exchange key for security domain.')
+        c.argument('sd_wrapping_keys', nargs='*',
+                   help='Space-separated file paths to PEM files containing private keys.')
+        c.argument('passwords', nargs='*', help='Space-separated password list for --sd-wrapping-keys. '
+                                                'CLI will match them in order. Can be omitted if your keys are without '
+                                                'password protection.')
+        c.argument('sd_file_restore_blob', help='Local file path to store the security domain encrypted with the exchange key.')
 
     with self.argument_context('keyvault security-domain download') as c:
         c.argument('sd_wrapping_keys', nargs='*',

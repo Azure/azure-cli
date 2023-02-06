@@ -7,6 +7,7 @@ import ipaddress
 import json
 import re
 import uuid
+from os.path import exists
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -26,70 +27,76 @@ logger = get_logger(__name__)
 def validate_cidr(key):
     def _validate_cidr(namespace):
         cidr = getattr(namespace, key)
-        if cidr is not None:
-            try:
-                ipaddress.IPv4Network(cidr)
-            except ValueError as e:
-                raise InvalidArgumentValueError(f"Invalid --{key.replace('_', '-')} '{cidr}'.") from e
+        if cidr is None:
+            return
+        try:
+            ipaddress.IPv4Network(cidr)
+        except ValueError as e:
+            raise InvalidArgumentValueError(f"Invalid --{key.replace('_', '-')} '{cidr}'.") from e
 
     return _validate_cidr
 
 
 def validate_client_id(namespace):
-    if namespace.client_id is not None:
-        try:
-            uuid.UUID(namespace.client_id)
-        except ValueError as e:
-            raise InvalidArgumentValueError(f"Invalid --client-id '{namespace.client_id}'.") from e
+    if namespace.client_id is None:
+        return
+    try:
+        uuid.UUID(namespace.client_id)
+    except ValueError as e:
+        raise InvalidArgumentValueError(f"Invalid --client-id '{namespace.client_id}'.") from e
 
-        if namespace.client_secret is None or not str(namespace.client_secret):
-            raise RequiredArgumentMissingError('Must specify --client-secret with --client-id.')
+    if namespace.client_secret is None or not str(namespace.client_secret):
+        raise RequiredArgumentMissingError('Must specify --client-secret with --client-id.')
 
 
 def validate_client_secret(isCreate):
     def _validate_client_secret(namespace):
-        if isCreate and namespace.client_secret is not None:
-            if namespace.client_id is None or not str(namespace.client_id):
-                raise RequiredArgumentMissingError('Must specify --client-id with --client-secret.')
+        if not isCreate or namespace.client_secret is None:
+            return
+        if namespace.client_id is None or not str(namespace.client_id):
+            raise RequiredArgumentMissingError('Must specify --client-id with --client-secret.')
 
     return _validate_client_secret
 
 
 def validate_cluster_resource_group(cmd, namespace):
-    if namespace.cluster_resource_group is not None:
-        client = get_mgmt_service_client(
-            cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    if namespace.cluster_resource_group is None:
+        return
+    client = get_mgmt_service_client(
+        cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
-        if client.resource_groups.check_existence(namespace.cluster_resource_group):
-            raise InvalidArgumentValueError(
-                f"Invalid --cluster-resource-group '{namespace.cluster_resource_group}':"
-                " resource group must not exist.")
+    if client.resource_groups.check_existence(namespace.cluster_resource_group):
+        raise InvalidArgumentValueError(
+            f"Invalid --cluster-resource-group '{namespace.cluster_resource_group}':"
+            " resource group must not exist.")
 
 
 def validate_disk_encryption_set(cmd, namespace):
-    if namespace.disk_encryption_set is not None:
-        if not is_valid_resource_id(namespace.disk_encryption_set):
-            raise InvalidArgumentValueError(
-                f"Invalid --disk-encryption-set '{namespace.disk_encryption_set}', has to be a resource ID.")
+    if namespace.disk_encryption_set is None:
+        return
+    if not is_valid_resource_id(namespace.disk_encryption_set):
+        raise InvalidArgumentValueError(
+            f"Invalid --disk-encryption-set '{namespace.disk_encryption_set}', has to be a resource ID.")
 
-        desid = parse_resource_id(namespace.disk_encryption_set)
-        compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE)
-        try:
-            compute_client.disk_encryption_sets.get(resource_group_name=desid['resource_group'],
-                                                    disk_encryption_set_name=desid['name'])
-        except CloudError as err:
-            raise InvalidArgumentValueError(
-                f"Invald --disk-encryption-set, error when getting '{namespace.disk_encryption_set}':"
-                f" {str(err)}") from err
+    desid = parse_resource_id(namespace.disk_encryption_set)
+    compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE)
+    try:
+        compute_client.disk_encryption_sets.get(resource_group_name=desid['resource_group'],
+                                                disk_encryption_set_name=desid['name'])
+    except CloudError as err:
+        raise InvalidArgumentValueError(
+            f"Invalid --disk-encryption-set, error when getting '{namespace.disk_encryption_set}':"
+            f" {str(err)}") from err
 
 
 def validate_domain(namespace):
-    if namespace.domain is not None:
-        if not re.match(r'^' +
-                        r'([a-z0-9]|[a-z0-9][-a-z0-9]{0,61}[a-z0-9])' +
-                        r'(\.([a-z0-9]|[a-z0-9][-a-z0-9]{0,61}[a-z0-9]))*' +
-                        r'$', namespace.domain):
-            raise InvalidArgumentValueError(f"Invalid --domain '{namespace.domain}'.")
+    if namespace.domain is None:
+        return
+    if not re.match(r'^' +
+                    r'([a-z0-9]|[a-z0-9][-a-z0-9]{0,61}[a-z0-9])' +
+                    r'(\.([a-z0-9]|[a-z0-9][-a-z0-9]{0,61}[a-z0-9]))*' +
+                    r'$', namespace.domain):
+        raise InvalidArgumentValueError(f"Invalid --domain '{namespace.domain}'.")
 
 
 def validate_pull_secret(namespace):
@@ -99,13 +106,17 @@ def validate_pull_secret(namespace):
             "Red Hat or from certified partners."
 
         logger.warning(warning)
+        return
 
-    else:
-        try:
-            if not isinstance(json.loads(namespace.pull_secret), dict):
-                raise Exception()
-        except Exception as e:
-            raise InvalidArgumentValueError("Invalid --pull-secret.") from e
+    try:
+        if exists(namespace.pull_secret):
+            with open(namespace.pull_secret, 'r', encoding='utf-8') as file:
+                namespace.pull_secret = file.read().rstrip('\n')
+
+        if not isinstance(json.loads(namespace.pull_secret), dict):
+            raise Exception()
+    except Exception as e:
+        raise InvalidArgumentValueError("Invalid --pull-secret.") from e
 
 
 def validate_subnet(key):
@@ -127,15 +138,18 @@ def validate_subnet(key):
             raise InvalidArgumentValueError(
                 f"--{key.replace('_', '-')} subscription '{parts['subscription']}' must equal cluster subscription.")
 
-        if parts['namespace'].lower() != 'microsoft.network':
+        expected_namespace = 'microsoft.network'
+        if parts['namespace'].lower() != expected_namespace:
             raise InvalidArgumentValueError(
                 f"--{key.replace('_', '-')} namespace '{parts['namespace']}' must equal Microsoft.Network.")
 
-        if parts['type'].lower() != 'virtualnetworks':
+        expected_type = 'virtualnetworks'
+        if parts['type'].lower() != expected_type:
             raise InvalidArgumentValueError(
                 f"--{key.replace('_', '-')} type '{parts['type']}' must equal virtualNetworks.")
 
-        if parts['last_child_num'] != 1:
+        expected_last_child_num = 1
+        if parts['last_child_num'] != expected_last_child_num:
             raise InvalidArgumentValueError(f"--{key.replace('_', '-')} '{subnet}' must have one child.")
 
         if 'child_namespace_1' in parts:
@@ -152,7 +166,7 @@ def validate_subnet(key):
         except Exception as err:
             if isinstance(err, ResourceNotFoundError):
                 raise InvalidArgumentValueError(
-                    f"Invald --{key.replace('_', '-')}, error when getting '{subnet}': {str(err)}") from err
+                    f"Invalid --{key.replace('_', '-')}, error when getting '{subnet}': {str(err)}") from err
             raise CLIInternalError(f"Unexpected error when getting subnet '{subnet}': {str(err)}") from err
 
     return _validate_subnet
@@ -180,10 +194,13 @@ def validate_subnets(master_subnet, worker_subnet):
 def validate_visibility(key):
     def _validate_visibility(namespace):
         visibility = getattr(namespace, key)
-        if visibility is not None:
-            visibility = visibility.capitalize()
-            if visibility not in ['Private', 'Public']:
-                raise InvalidArgumentValueError(f"Invalid --{key.replace('_', '-')} '{visibility}'.")
+        if visibility is None:
+            return
+        visibility = visibility.capitalize()
+
+        possible_visibilities = ['Private', 'Public']
+        if visibility not in possible_visibilities:
+            raise InvalidArgumentValueError(f"Invalid --{key.replace('_', '-')} '{visibility}'.")
 
     return _validate_visibility
 
@@ -191,15 +208,16 @@ def validate_visibility(key):
 def validate_vnet(cmd, namespace):
     validate_vnet_resource_group_name(namespace)
 
-    if namespace.vnet:
-        if not is_valid_resource_id(namespace.vnet):
-            namespace.vnet = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=namespace.vnet_resource_group_name,
-                namespace='Microsoft.Network',
-                type='virtualNetworks',
-                name=namespace.vnet,
-            )
+    if not namespace.vnet:
+        return
+    if not is_valid_resource_id(namespace.vnet):
+        namespace.vnet = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.vnet_resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=namespace.vnet,
+        )
 
 
 def validate_vnet_resource_group_name(namespace):
@@ -208,18 +226,34 @@ def validate_vnet_resource_group_name(namespace):
 
 
 def validate_worker_count(namespace):
-    if namespace.worker_count:
-        if namespace.worker_count < 3:
-            raise InvalidArgumentValueError('--worker-count must be greater than or equal to 3.')
+    if not namespace.worker_count:
+        return
+
+    minimum_workers_count = 3
+    if namespace.worker_count < minimum_workers_count:
+        raise InvalidArgumentValueError('--worker-count must be greater than or equal to ' + str(minimum_workers_count))
 
 
 def validate_worker_vm_disk_size_gb(namespace):
-    if namespace.worker_vm_disk_size_gb:
-        if namespace.worker_vm_disk_size_gb < 128:
-            raise InvalidArgumentValueError('--worker-vm-disk-size-gb must be greater than or equal to 128.')
+    if not namespace.worker_vm_disk_size_gb:
+        return
+
+    minimum_worker_vm_disk_size_gb = 128
+    if namespace.worker_vm_disk_size_gb < minimum_worker_vm_disk_size_gb:
+        error_msg = '--worker-vm-disk-size-gb must be greater than or equal to ' + str(minimum_worker_vm_disk_size_gb)
+
+        raise InvalidArgumentValueError(error_msg)
 
 
 def validate_refresh_cluster_credentials(namespace):
-    if namespace.refresh_cluster_credentials:
-        if namespace.client_secret is not None or namespace.client_id is not None:
-            raise RequiredArgumentMissingError('--client-id and --client-secret must be not set with --refresh-credentials.')  # pylint: disable=line-too-long
+    if not namespace.refresh_cluster_credentials:
+        return
+    if namespace.client_secret is not None or namespace.client_id is not None:
+        raise RequiredArgumentMissingError('--client-id and --client-secret must be not set with --refresh-credentials.')  # pylint: disable=line-too-long
+
+
+def validate_install_version_format(namespace):
+    if namespace.install_version is not None and not re.match(r'^' +
+                                                              r'[4-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}' +
+                                                              r'$', namespace.install_version):
+        raise InvalidArgumentValueError('--install-version is invalid')
