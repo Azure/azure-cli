@@ -20,8 +20,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_connection_monitor,
     cf_dns_references,
-    cf_virtual_router, cf_virtual_router_peering, cf_flow_logs,
-    cf_load_balancer_backend_pools)
+    cf_virtual_router, cf_virtual_router_peering, cf_flow_logs)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
     delete_lb_resource_property_entry)
@@ -91,12 +90,6 @@ def load_command_table(self, _):
     network_lb_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#LoadBalancersOperations.{}',
         client_factory=cf_load_balancers
-    )
-
-    network_lb_backend_pool_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#LoadBalancerBackendAddressPoolsOperations.{}',
-        client_factory=cf_load_balancer_backend_pools,
-        min_api='2020-04-01'
     )
 
     network_nic_sdk = CliCommandType(

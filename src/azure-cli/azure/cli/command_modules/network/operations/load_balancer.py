@@ -5,7 +5,8 @@
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 from knack.log import get_logger
 from azure.cli.core.azclierror import ArgumentUsageError
-from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value
+from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, \
+    AAZStrArg, AAZArgEnum, AAZResourceIdArg
 from ..aaz.latest.network.lb import Delete as _LBDelete, Update as _LBUpdate, List as _LBList, Show as _LBShow
 from ..aaz.latest.network.lb.frontend_ip import Create as _LBFrontendIPCreate, Update as _LBFrontendIPUpdate, \
     Show as _LBFrontendIPShow, Delete as _LBFrontendIPDelete, List as _LBFrontendIPList
@@ -41,7 +42,6 @@ class LBFrontendIPCreate(_LBFrontendIPCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.vnet_name = AAZStrArg(
             arg_group="Properties",
@@ -92,7 +92,6 @@ class LBFrontendIPUpdate(_LBFrontendIPUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.vnet_name = AAZStrArg(
             arg_group="Properties",
@@ -232,7 +231,6 @@ class LBRuleCreate(_LBRuleCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
@@ -288,7 +286,6 @@ class LBRuleUpdate(_LBRuleUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
@@ -338,7 +335,6 @@ class LBOutboundRuleCreate(_LBOutboundRuleCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         args_schema.backend_address_pool._fmt = AAZResourceIdArgFormat(
@@ -374,7 +370,6 @@ class LBOutboundRuleUpdate(_LBOutboundRuleUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         args_schema.backend_address_pool._fmt = AAZResourceIdArgFormat(
@@ -433,7 +428,6 @@ class LBAddressPoolCreate(_LBAddressPoolBasicCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.vnet = AAZResourceIdArg(
             options=["--vnet"],
@@ -515,14 +509,13 @@ class LBAddressPoolCreate(_LBAddressPoolBasicCreate):
             instance = self.ctx.vars.instance
             if has_value(instance.sku.name) and instance.sku.name.to_serialized_data().lower() == 'gateway':
                 # when sku is 'gateway', 'tunnelInterfaces' can't be None. Otherwise, service will respond error
-                args.tunnel_interfaces = [{"identifier": 900, "type": 'Internal', "protocol":'VXLAN'}]
+                args.tunnel_interfaces = [{"identifier": 900, "type": 'Internal', "protocol": 'VXLAN'}]
 
 
 class LBAddressPoolUpdate(_LBAddressPoolUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.vnet = AAZResourceIdArg(
             options=["--vnet"],
@@ -594,7 +587,6 @@ class LBAddressPoolAddressAdd(_LBAddressPoolAddressAdd):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         args_schema.virtual_network._fmt = AAZResourceIdArgFormat(
@@ -645,7 +637,6 @@ class LBAddressPoolAddressUpdate(_LBAddressPoolAddressUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         args_schema.virtual_network._fmt = AAZResourceIdArgFormat(
@@ -685,7 +676,6 @@ class LBAddressPoolTunnelInterfaceAdd(_LBAddressPoolTunnelInterfaceAdd):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         args_schema.identifier._required = True
@@ -714,7 +704,6 @@ class LBAddressPoolTunnelInterfaceUpdate(_LBAddressPoolTunnelInterfaceUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         args_schema.identifier._nullable = False
@@ -804,8 +793,6 @@ class CrossRegionLoadBalancerFrontendIPCreate(_LBFrontendIPCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZArgEnum
-
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.public_ip_prefix._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIpPrefixes/{}",
@@ -837,8 +824,6 @@ class CrossRegionLoadBalancerFrontendIPUpdate(_LBFrontendIPUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZArgEnum
-
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.public_ip_prefix._fmt = EmptyResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIpPrefixes/{}",
@@ -903,7 +888,6 @@ class CrossRegionLoadBalancerRuleCreate(_LBRuleCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
@@ -964,7 +948,6 @@ class CrossRegionLoadBalancerRuleUpdate(_LBRuleUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
