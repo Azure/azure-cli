@@ -503,12 +503,18 @@ jobs:
         pwd
         ls
         # Whether commit changes
-        if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+        if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && ! "$(USER_TARGET)" =~ ^ext-.* && "$(USER_TARGET)" != "extensions" ]]; then
           cd azure-cli
           git status
           git add .
           git commit -m "Upload recording files"
           git push origin $(USER_BRANCH)
+        elif [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && ("$(USER_TARGET)" =~ ^ext-.* || "$(USER_TARGET)" == "extensions") ]]; then
+          cd azure-cli-extensions
+          git status
+          git add .
+          git commit -m "Upload recording files"
+          git push origin $(USER_BRANCH_EXT)
         fi
 
       condition: and(succeededOrFailed(), eq(variables.Match, '1'))
