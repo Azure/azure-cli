@@ -1757,15 +1757,13 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
 
 
 def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_source=None,
-                            deployment_container_image_name=None, docker_registry_server_password=None,
+                            image=None, docker_registry_server_password=None,
                             docker_registry_server_user=None):
-    container_args = deployment_container_image_name or docker_registry_server_password or docker_registry_server_user
+    container_args = image or docker_registry_server_password or docker_registry_server_user
     if container_args and not configuration_source:
-        raise ArgumentUsageError("Cannot use arguments --deployment-container-image_name, "
-                                 "--docker-registry-server_password, or --docker-registry-server-user without argument "
-                                 "--configuration-source")
+        raise ArgumentUsageError("Cannot use image, password and username arguments without --configuration-source argument")
 
-    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
+    docker_registry_server_url = parse_docker_image_name(image)
 
     Site = cmd.get_models('Site')
     client = web_client_factory(cmd.cli_ctx)
@@ -1780,7 +1778,7 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
 
     if configuration_source:
         update_slot_configuration_from_source(cmd, client, resource_group_name, name, slot, configuration_source,
-                                              deployment_container_image_name, docker_registry_server_password,
+                                              image, docker_registry_server_password,
                                               docker_registry_server_user,
                                               docker_registry_server_url=docker_registry_server_url)
 
@@ -3480,7 +3478,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        disable_app_insights=None, deployment_source_url=None,
                        deployment_source_branch='master', deployment_local_git=None,
                        docker_registry_server_password=None, docker_registry_server_user=None,
-                       deployment_container_image_name=None, tags=None, assign_identities=None,
+                       image=None, tags=None, assign_identities=None,
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, environment=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
@@ -3494,7 +3492,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                              "--plan NAME_OR_ID | --consumption-plan-location LOCATION")
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
-    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
+    docker_registry_server_url = parse_docker_image_name(image)
     disable_app_insights = (disable_app_insights == "true")
 
     site_config = SiteConfig(app_settings=[])
@@ -3564,7 +3562,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         raise ValidationError("2.x functions are not supported in this region. To create a 3.x function, "
                               "pass in the flag '--functions-version 3'")
 
-    if is_linux and not runtime and (consumption_plan_location or not deployment_container_image_name):
+    if is_linux and not runtime and (consumption_plan_location or not image):
         raise ArgumentUsageError(
             "usage error: --runtime RUNTIME required for linux functions apps without custom image.")
 
@@ -3587,14 +3585,14 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if not is_consumption:
             site_config.app_settings.append(NameValuePair(name='MACHINEKEY_DecryptionKey',
                                                           value=str(hexlify(urandom(32)).decode()).upper()))
-            if deployment_container_image_name:
+            if image:
                 functionapp_def.kind = 'functionapp,linux,container'
                 site_config.app_settings.append(NameValuePair(name='DOCKER_CUSTOM_IMAGE_NAME',
-                                                              value=deployment_container_image_name))
+                                                              value=image))
                 site_config.app_settings.append(NameValuePair(name='FUNCTION_APP_EDIT_MODE', value='readOnly'))
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='false'))
-                site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
+                site_config.linux_fx_version = _format_fx_version(image)
 
                 # clear all runtime specific configs and settings
                 site_config_dict.use32_bit_worker_process = False
@@ -3678,9 +3676,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             update_app_settings(cmd, functionapp.resource_group, functionapp.name,
                                 ['AzureWebJobsDashboard={}'.format(con_string)])
 
-    if deployment_container_image_name:
+    if image:
         update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url,
-                                              deployment_container_image_name, docker_registry_server_user,
+                                              image, docker_registry_server_user,
                                               docker_registry_server_password)
 
     if assign_identities is not None:

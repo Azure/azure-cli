@@ -222,10 +222,13 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp webjob triggered list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 
-    for scope in ['webapp', 'functionapp', 'logicapp']:
+    for scope in ['webapp', 'logicapp']:
         with self.argument_context(scope + ' create') as c:
             c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'],
                        help='Container image name from Docker Hub, e.g. publisher/image-name:tag')
+
+    for scope in ['webapp', 'functionapp', 'logicapp']:
+        with self.argument_context(scope + ' create') as c:
             c.argument('deployment_local_git', action='store_true', options_list=['--deployment-local-git', '-l'],
                        help='enable local git')
             c.argument('deployment_zip', options_list=['--deployment-zip', '-z'],
@@ -704,6 +707,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('vnet', options_list=['--vnet'], help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
         c.argument('subnet', options_list=['--subnet'], help="Name or resource ID of the pre-existing subnet to have the webapp join. The --vnet is argument also needed if specifying subnet by name.")
         c.argument('environment', options_list=['--environment'], help="Name of the container app environment.", is_preview=True)
+        c.argument('image', options_list=['--image', '-i', c.deprecate(target='--deployment-container-image-name', redirect='--image')],
+                    help='Container image, e.g. publisher/image-name:tag')
 
     with self.argument_context('functionapp cors credentials') as c:
         c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())
@@ -858,8 +863,8 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('functionapp deployment slot create') as c:
         c.argument('configuration_source',
                    help="source slot to clone configurations from. Use function app's name to refer to the production slot")
-        c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'],
-                   help='Container image name, e.g. publisher/image-name:tag')
+        c.argument('image', options_list=['--image', '-i', c.deprecate(target='--deployment-container-image-name', redirect='--image')],
+                   help='Container image, e.g. publisher/image-name:tag')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-d'],
                    help='The container registry server password')
         c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'], help='the container registry server username')
