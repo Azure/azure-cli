@@ -2673,11 +2673,11 @@ def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certif
                                          if webapp.hosting_environment_profile else '')
 
     thumb_print = _get_cert(certificate_password, certificate_file)
-        if certificate_name:
-            cert_name = certificate_name
-        else:
-            cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
-                                            webapp.location, resource_group_name)
+    if certificate_name:
+        cert_name = certificate_name
+    else:
+        cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
+                                        webapp.location, resource_group_name)
     cert = Certificate(password=certificate_password, pfx_blob=cert_contents,
                        location=webapp.location, server_farm_id=webapp.server_farm_id)
     return client.certificates.create_or_update(resource_group_name, cert_name, cert)
@@ -2795,7 +2795,7 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None,
     hostname = hostname.lower()
     client = web_client_factory(cmd.cli_ctx)
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
-    if not webapp:
+    if not webapp: 
         slot_text = "Deployment slot {} in ".format(slot) if slot else ''
         raise ResourceNotFoundError("{0}app {1} doesn't exist in resource group {2}".format(slot_text,
                                                                                             name,
