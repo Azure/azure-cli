@@ -2820,7 +2820,7 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None,
 
     # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
     try:
-				certificate_name = hostname if not certificate_name else certificate_name
+        certificate_name = hostname if not certificate_name else certificate_name
         return client.certificates.create_or_update(name=certificate_name, resource_group_name=resource_group_name,
                                                     certificate_envelope=easy_cert_def)
     except Exception as ex:
