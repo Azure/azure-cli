@@ -197,6 +197,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_backup', exception_handler=ex_handler_factory())
         g.custom_command('update', 'update_backup_schedule', exception_handler=ex_handler_factory())
         g.custom_command('restore', 'restore_backup', exception_handler=ex_handler_factory())
+        g.custom_command('delete', 'delete_backup', exception_handler=ex_handler_factory(), confirmation=True)
 
     with self.command_group('webapp config snapshot') as g:
         g.custom_command('list', 'list_snapshots')
@@ -375,6 +376,7 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_cors')
         g.custom_command('remove', 'remove_cors')
         g.custom_show_command('show', 'show_cors')
+        g.custom_command('credentials', 'enable_credentials')
 
     with self.command_group('functionapp plan', appservice_plan_sdk) as g:
         g.custom_command('create', 'create_functionapp_app_service_plan',
@@ -411,6 +413,7 @@ def load_command_table(self, _):
     with self.command_group('functionapp function') as g:
         g.custom_command('show', 'show_function')  # pylint: disable=show-command
         g.custom_command('delete', 'delete_function')
+        g.custom_command('list', 'list_functions')
 
     with self.command_group('functionapp function keys') as g:
         g.custom_command('set', 'update_function_key')
@@ -438,6 +441,8 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_appserviceenvironment', supports_no_wait=True)
         g.custom_command('delete', 'delete_appserviceenvironment', supports_no_wait=True, confirmation=True)
         g.custom_command('create-inbound-services', 'create_ase_inbound_services', is_preview=True)
+        g.custom_command('upgrade', 'upgrade_appserviceenvironment', supports_no_wait=True, confirmation=True, is_preview=True)
+        g.custom_command('send-test-notification', 'send_test_notification_appserviceenvironment', is_preview=True)
 
     with self.command_group('appservice domain', custom_command_type=appservice_domains, is_preview=True) as g:
         g.custom_command('create', 'create_domain')
@@ -488,13 +493,19 @@ def load_command_table(self, _):
         g.custom_command('unlink', 'unlink_user_function', validator=validate_staticsite_sku)
         g.custom_show_command('show', 'get_user_function', validator=validate_staticsite_sku)
 
+    with self.command_group('staticwebapp backends', custom_command_type=staticsite_sdk) as g:
+        g.custom_command('validate', 'validate_backend', validator=validate_staticsite_sku, exception_handler=ex_handler_factory())
+        g.custom_command('link', 'link_backend', validator=validate_staticsite_sku, exception_handler=ex_handler_factory())
+        g.custom_command('unlink', 'unlink_backend', validator=validate_staticsite_sku, exception_handler=ex_handler_factory())
+        g.custom_show_command('show', 'get_backend', validator=validate_staticsite_sku)
+
     with self.command_group('staticwebapp enterprise-edge', custom_command_type=staticsite_sdk) as g:
         g.custom_command('enable', 'enable_staticwebapp_enterprise_edge')
         g.custom_command('disable', 'disable_staticwebapp_enterprise_edge')
         g.custom_show_command('show', 'show_staticwebapp_enterprise_edge_status')
 
     with self.command_group('logicapp') as g:
-        g.custom_command('delete', 'delete_function_app', confirmation=True)
+        g.custom_command('delete', 'delete_logic_app', confirmation=True)
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
         g.custom_command('restart', 'restart_webapp')

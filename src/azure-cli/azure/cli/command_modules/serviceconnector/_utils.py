@@ -87,11 +87,13 @@ def run_cli_cmd(cmd, retry=0, interval=0, should_retry_func=None):
         if retry:
             time.sleep(interval)
             return run_cli_cmd(cmd, retry - 1, interval)
+        err = output.stderr.decode(encoding='UTF-8', errors='ignore')
         raise CLIInternalError('Command execution failed, command is: '
-                               '{}, error message is: {}'.format(cmd, output.stderr))
+                               '{}, error message is: \n {}'.format(cmd, err))
     try:
-        return json.loads(output.stdout) if output.stdout else None
-    except ValueError:
+        return json.loads(output.stdout.decode(encoding='UTF-8', errors='ignore')) if output.stdout else None
+    except ValueError as e:
+        logger.debug(e)
         return output.stdout or None
 
 
@@ -315,3 +317,33 @@ def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_
         auth_info['clientId'] = client_id
         auth_info['subscriptionId'] = subscription_id
     return auth_info
+
+
+def is_packaged_installed(package_name):
+    import pkg_resources
+    installed_packages = pkg_resources.working_set
+    # pylint: disable=not-an-iterable
+    pkg_installed = any((package_name) in d.key.lower()
+                        for d in installed_packages)
+    return pkg_installed
+
+
+def get_object_id_of_current_user():
+    signed_in_user = run_cli_cmd('az account show').get('user')
+    user_type = signed_in_user.get('type')
+    try:
+        if user_type == 'user':
+            user_info = run_cli_cmd('az ad signed-in-user show')
+            user_object_id = user_info.get('objectId') if user_info.get(
+                'objectId') else user_info.get('id')
+            return user_object_id
+        if user_type == 'servicePrincipal':
+            user_info = run_cli_cmd(
+                f'az ad sp show --id {signed_in_user.get("name")}')
+            user_object_id = user_info.get('id')
+            return user_object_id
+    except CLIInternalError as e:
+        if 'AADSTS530003' in e.error_msg:
+            logger.warning(
+                'Please ask your IT department for help to join this device to Azure Active Directory.')
+        raise e

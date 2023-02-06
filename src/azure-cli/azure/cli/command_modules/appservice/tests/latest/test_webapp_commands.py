@@ -30,7 +30,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 # In the future, for any reasons the repository get removed, the source code is under "sample-repo-for-deployment-test"
 # you can use to rebuild the repository
 TEST_REPO_URL = 'https://github.com/yugangw-msft/azure-site-test.git'
-WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
+WINDOWS_ASP_LOCATION_WEBAPP = 'westeurope'
 WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
@@ -66,11 +66,12 @@ class WebappBasicE2ETest(ScenarioTest):
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
             JMESPathCheck('name', plan)
         ])
-        self.cmd('webapp create -g {} -n {} --plan {} --https-only'.format(resource_group, webapp_name, plan, 'true'), checks=[
+        self.cmd('webapp create -g {} -n {} --plan {} --https-only {} --public-network-access {}'.format(resource_group, webapp_name, plan, 'true', 'Enabled'), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net'),
-            JMESPathCheck('httpsOnly', 'True')
+            JMESPathCheck('httpsOnly', 'True'),
+            JMESPathCheck('publicNetworkAccess', 'Enabled')
         ])
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group,
                                                               webapp_name, plan))  # test idempotency
@@ -879,6 +880,50 @@ class WebappConfigureTest(ScenarioTest):
             'value': 'value3',
             'slotSetting': True
         })
+
+        # app settings set with --slot-settings
+        output = self.cmd('webapp config appsettings set -g {} -n {} --slot-settings "@{}"'.format(
+            resource_group, webapp_name, settings_file)).get_output_in_json()
+        output = [s for s in output if s['name'] in ['s', 's2', 's3']]
+        output.sort(key=lambda s: s['name'])
+
+        self.assertEqual(output[0], {
+            'name': 's',
+            'value': 'value',
+            'slotSetting': False
+        })
+        self.assertEqual(output[1], {
+            'name': 's2',
+            'value': 'value2',
+            'slotSetting': False
+        })
+        self.assertEqual(output[2], {
+            'name': 's3',
+            'value': 'value3',
+            'slotSetting': True
+        })
+
+        output = self.cmd('webapp config appsettings set -g {} -n {} --slot {} --slot-settings "@{}"'.format(
+            resource_group, webapp_name, slot, settings_file)).get_output_in_json()
+        output = [s for s in output if s['name'] in ['s', 's2', 's3']]
+        output.sort(key=lambda s: s['name'])
+
+        self.assertEqual(output[0], {
+            'name': 's',
+            'value': 'value',
+            'slotSetting': False
+        })
+        self.assertEqual(output[1], {
+            'name': 's2',
+            'value': 'value2',
+            'slotSetting': False
+        })
+        self.assertEqual(output[2], {
+            'name': 's3',
+            'value': 'value3',
+            'slotSetting': True
+        })
+
         # update site config
         site_configs = {
             "requestTracingEnabled": True,

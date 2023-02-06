@@ -16,7 +16,7 @@ from azure.cli.core import azclierror
 from ._base import AAZUndefined, AAZBlankArgValue
 from ._help import AAZShowHelp
 from ._utils import AAZShortHandSyntaxParser
-from .exceptions import AAZInvalidShorthandSyntaxError, AAZInvalidValueError
+from .exceptions import AAZInvalidShorthandSyntaxError, AAZInvalidValueError, AAZUnknownFieldError
 
 logger = get_logger(__name__)
 
@@ -64,13 +64,14 @@ class AAZArgAction(Action):
             setattr(namespace, self.dest, AAZArgActionOperations())
         dest_ops = getattr(namespace, self.dest)
         try:
-            self.setup_operations(dest_ops, values)
+            try:
+                self.setup_operations(dest_ops, values)
+            except AAZShowHelp as aaz_help:
+                # show help message
+                aaz_help.keys = (option_string, *aaz_help.keys)
+                self.show_aaz_help(parser, aaz_help)  # may raise AAZUnknownFieldError
         except (ValueError, KeyError) as ex:
             raise azclierror.InvalidArgumentValueError(f"Failed to parse '{option_string}' argument: {ex}") from ex
-        except AAZShowHelp as aaz_help:
-            # show help message
-            aaz_help.keys = (option_string, *aaz_help.keys)
-            self.show_aaz_help(parser, aaz_help)
 
     @classmethod
     def setup_operations(cls, dest_ops, values, prefix_keys=None):
@@ -104,7 +105,7 @@ class AAZSimpleTypeArgAction(AAZArgAction):
 
             if isinstance(values, str) and len(values) > 0:
                 try:
-                    data = cls._str_parser(values, is_simple=True)
+                    data = cls.decode_str(values)
                 except AAZShowHelp as aaz_help:
                     aaz_help.schema = cls._schema
                     raise aaz_help
@@ -112,6 +113,10 @@ class AAZSimpleTypeArgAction(AAZArgAction):
                 data = values
         data = cls.format_data(data)
         dest_ops.add(data, *prefix_keys)
+
+    @classmethod
+    def decode_str(cls, value):
+        return cls._str_parser(value, is_simple=True)
 
     @classmethod
     def format_data(cls, data):
@@ -161,50 +166,78 @@ class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
     def decode_values(cls, values):
         for v in values:
             key, key_parts, v = cls._str_parser.split_partial_value(v)
-            v = cls._decode_value(key, key_parts, v)
+            key_parts, schema = cls.get_schema_by_key_items(key_parts, cls._schema)
+
+            try:
+                v = cls._decode_value(schema, v)
+            except AAZShowHelp as aaz_help:
+                aaz_help.schema = cls._schema
+                aaz_help.keys = (*key_parts, *aaz_help.keys)
+                raise aaz_help
+
             yield key, key_parts, v
 
+    @staticmethod
+    def get_schema_by_key_items(key_items, schema):
+        if not key_items:
+            return key_items, schema
+
+        valid_key_items = []
+        for item in key_items:
+            try:
+                schema = schema[item]
+                valid_key_items.append(item)
+            except AAZUnknownFieldError as err:
+                from ._arg import AAZObjectArg, AAZListArg
+                if not isinstance(schema, AAZObjectArg):
+                    raise err
+                is_singular = False
+                for field_name, field in schema._fields.items():
+                    if not isinstance(field, AAZListArg):
+                        continue
+                    if field.singular_options and item in field.singular_options:
+                        valid_key_items.append(field_name)
+                        schema = field.Element
+                        valid_key_items.append(_ELEMENT_APPEND_KEY)
+                        is_singular = True
+                        break
+                if not is_singular:
+                    raise err
+        return tuple(valid_key_items), schema
+
     @classmethod
-    def _decode_value(cls, key, key_items, value):  # pylint: disable=unused-argument
+    def _decode_value(cls, schema, value):  # pylint: disable=unused-argument
         from ._arg import AAZSimpleTypeArg
         from azure.cli.core.util import get_file_json, shell_safe_json_parse, get_file_yaml
-
-        schema = cls._schema
-        for item in key_items:
-            schema = schema[item]  # pylint: disable=unsubscriptable-object
 
         if len(value) == 0:
             # the express "a=" will return the blank value of schema 'a'
             return AAZBlankArgValue
 
-        try:
-            if isinstance(schema, AAZSimpleTypeArg):
-                # simple type
-                v = cls._str_parser(value, is_simple=True)
-            else:
-                # compound type
-                # read from file
-                path = os.path.expanduser(value)
-                if os.path.exists(path):
-                    if path.endswith('.yml') or path.endswith('.yaml'):
-                        # read from yaml file
-                        v = get_file_yaml(path)
-                    else:
-                        # read from json file
-                        v = get_file_json(path, preserve_order=True)
+        if isinstance(schema, AAZSimpleTypeArg):
+            # simple type
+            v = cls._str_parser(value, is_simple=True)
+        else:
+            # compound type
+            # read from file
+            path = os.path.expanduser(value)
+            if os.path.exists(path):
+                if path.endswith('.yml') or path.endswith('.yaml'):
+                    # read from yaml file
+                    v = get_file_yaml(path)
                 else:
+                    # read from json file
+                    v = get_file_json(path, preserve_order=True)
+            else:
+                try:
+                    v = cls._str_parser(value)
+                except AAZInvalidShorthandSyntaxError as shorthand_ex:
                     try:
-                        v = cls._str_parser(value)
-                    except AAZInvalidShorthandSyntaxError as shorthand_ex:
-                        try:
-                            v = shell_safe_json_parse(value, True)
-                        except Exception as ex:
-                            logger.debug(ex)  # log parse json failed expression
-                            raise shorthand_ex  # raise shorthand syntax exception
-        except AAZShowHelp as aaz_help:
-            aaz_help.schema = cls._schema
-            aaz_help.keys = (*key_items, *aaz_help.keys)
-            raise aaz_help
+                        v = shell_safe_json_parse(value, True)
+                    except Exception as ex:
+                        logger.debug(ex)  # log parse json failed expression
+                        raise shorthand_ex  # raise shorthand syntax exception
+
         return v
 
 
@@ -262,6 +295,50 @@ class AAZDictArgAction(AAZCompoundTypeArgAction):
         raise AAZInvalidValueError(f"dict type value expected, got '{data}'({type(data)})")
 
 
+class AAZFreeFormDictArgAction(AAZSimpleTypeArgAction):
+
+    @classmethod
+    def decode_str(cls, value):
+        from azure.cli.core.util import get_file_json, shell_safe_json_parse, get_file_yaml
+
+        if len(value) == 0:
+            # the express "a=" will return the blank value of schema 'a'
+            return AAZBlankArgValue
+
+        path = os.path.expanduser(value)
+        if os.path.exists(path):
+            if path.endswith('.yml') or path.endswith('.yaml'):
+                # read from yaml file
+                v = get_file_yaml(path)
+            else:
+                # read from json file
+                v = get_file_json(path, preserve_order=True)
+        else:
+            try:
+                v = shell_safe_json_parse(value, True)
+            except Exception as ex:
+                logger.debug(ex)  # log parse json failed expression
+                raise
+        return v
+
+    @classmethod
+    def format_data(cls, data):
+        if data == AAZBlankArgValue:
+            if cls._schema._blank == AAZUndefined:
+                raise AAZInvalidValueError("argument value cannot be blank")
+            data = copy.deepcopy(cls._schema._blank)
+
+        if isinstance(data, dict):
+            return data
+
+        if data is None:
+            if cls._schema._nullable:
+                return data
+            raise AAZInvalidValueError("field is not nullable")
+
+        raise AAZInvalidValueError(f"dict type value expected, got '{data}'({type(data)})")
+
+
 class AAZListArgAction(AAZCompoundTypeArgAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
@@ -274,7 +351,14 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
             if self._schema.singular_options and option_string in self._schema.singular_options:
                 # if singular option is used then parsed values by element action
                 action = self._schema.Element._build_cmd_action()
-                action.setup_operations(dest_ops, values, prefix_keys=[_ELEMENT_APPEND_KEY])
+                if isinstance(values, list) and len(values) > 1:
+                    # append element
+                    action.setup_operations(dest_ops, values[:1], prefix_keys=[_ELEMENT_APPEND_KEY])
+                    # apply on the last element
+                    action.setup_operations(dest_ops, values[1:], prefix_keys=[-1])
+                else:
+                    # append element
+                    action.setup_operations(dest_ops, values, prefix_keys=[_ELEMENT_APPEND_KEY])
             else:
                 self.setup_operations(dest_ops, values)
         except (ValueError, KeyError) as ex:

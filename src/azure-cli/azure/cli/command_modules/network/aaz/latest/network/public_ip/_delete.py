@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network public-ip delete"
+    "network public-ip delete",
 )
 class Delete(AAZCommand):
     """Delete a public IP address.
@@ -61,11 +61,11 @@ class Delete(AAZCommand):
         yield self.PublicIPAddressesDelete(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -153,6 +153,10 @@ class Delete(AAZCommand):
 
         def on_204(self, session):
             pass
+
+
+class _DeleteHelper:
+    """Helper class for Delete"""
 
 
 __all__ = ["Delete"]

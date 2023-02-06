@@ -36,13 +36,15 @@ class ApimScenarioTest(ScenarioTest):
             'skucapacity': 1,
             'enable_cert': True,
             'enable_managed_identity': True,
-            'tag': "foo=boo"
+            'tag': "foo=boo",
+            'public_network_access': True,
+            'disable_gateway' : False
         })
 
         self.cmd('apim check-name -n {service_name} -o json',
                  checks=[self.check('nameAvailable', True)])
 
-        self.cmd('apim create --name {service_name} -g {rg} -l {rg_loc} --sku-name {sku_name} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-client-certificate {enable_cert} --enable-managed-identity {enable_managed_identity}',
+        self.cmd('apim create --name {service_name} -g {rg} -l {rg_loc} --sku-name {sku_name} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-client-certificate {enable_cert} --enable-managed-identity {enable_managed_identity} --public-network-access {public_network_access} --disable-gateway {disable_gateway}',
                  checks=[self.check('name', '{service_name}'),
                          self.check('location', '{rg_loc_displayName}'),
                          self.check('sku.name', '{sku_name}'),
@@ -51,7 +53,10 @@ class ApimScenarioTest(ScenarioTest):
                          self.check('enableClientCertificate', None),
                          self.check('identity.type', 'SystemAssigned'),
                          self.check('publisherName', '{publisher_name}'),
-                         self.check('publisherEmail', '{publisher_email}')])
+                         self.check('publisherEmail', '{publisher_email}'),
+                         self.check('publicNetworkAccess', 'Enabled'),
+                         self.check('disableGateway', '{disable_gateway}')
+        ])
 
         # wait
         self.cmd('apim wait -g {rg} -n {service_name} --created', checks=[self.is_empty()])
@@ -60,10 +65,16 @@ class ApimScenarioTest(ScenarioTest):
                  checks=[self.check('nameAvailable', False),
                          self.check('reason', 'AlreadyExists')])
 
+        self.kwargs.update({
+            'publisher_email': 'publisher@contoso2.com',
+            'publisher_name': 'Contoso2'
+        })
+
         self.cmd(
             'apim update -n {service_name} -g {rg} --publisher-name {publisher_name} --set publisherEmail={publisher_email}',
             checks=[self.check('publisherName', '{publisher_name}'),
-                    self.check('publisherEmail', '{publisher_email}')])
+                    self.check('publisherEmail', '{publisher_email}')
+            ])
 
         self.cmd('apim show -g {rg} -n {service_name}', checks=[
             # recheck properties from create
@@ -437,6 +448,25 @@ class ApimScenarioTest(ScenarioTest):
         
         schema_count = len(self.cmd('apim api schema list -g "{rg}" -n "{service_name}" --api-id "{graphql_api_id}"').get_output_in_json())
         self.assertEqual(schema_count, 0)
+
+        # websocket api
+        self.kwargs.update({
+            'ws_api_id': self.create_random_name('ws-api', 10),
+            'ws_display_name': 'ws API',
+            'ws_protocol': 'wss',
+            'ws_api_type': 'websocket',
+            'ws_path': 'wstestpath',
+            'ws_service_url': 'wss://httpbin.org'
+        })
+
+        # create websocket api
+        self.cmd(
+            'apim api create -g "{rg}" --service-name "{service_name}" --display-name "{ws_display_name}" --path "{ws_path}" --api-id "{ws_api_id}" --service-url "{ws_service_url}"',
+            checks=[self.check('displayName', '{ws_display_name}'),
+                    self.check('path', '{ws_path}'),
+                    self.check('serviceUrl', '{ws_service_url}'),
+                    self.check('apiType','{ws_api_type}'),
+                    self.check('protocols[0]', '{ws_protocol}')])
         
         # named value operations
         self.kwargs.update({

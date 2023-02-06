@@ -10,7 +10,7 @@ from knack.arguments import CLIArgumentType
 def load_arguments(self, _):  # pylint: disable=too-many-statements
     from azure.mgmt.redis.models import RebootType, RedisKeyType, SkuName, TlsVersion, ReplicationRole
     from azure.cli.command_modules.redis._validators import JsonString, ScheduleEntryList
-    from azure.cli.command_modules.redis.custom import allowed_c_family_sizes, allowed_p_family_sizes
+    from azure.cli.command_modules.redis.custom import allowed_c_family_sizes, allowed_p_family_sizes, allowed_auth_methods
     from azure.cli.core.commands.parameters import get_enum_type, tags_type, zones_type
     from azure.cli.core.commands.parameters import get_resource_name_completion_list
 
@@ -32,6 +32,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('file_format', arg_type=format_type)
         c.argument('container', help='SAS url for container where data needs to be exported to')
         c.argument('prefix', help='Prefix to use for exported files')
+        c.argument('preferred_data_archive_auth_method', options_list=['--preferred-data-archive-auth-method', '--auth-method'], arg_type=get_enum_type(allowed_auth_methods), help='Preferred auth method to communicate to storage account used for data archive, default value is SAS')
         c.argument('cache_name', arg_type=cache_name)
         c.argument('shard_count', type=int, help='The number of shards to be created on a Premium Cluster Cache.')
         c.argument('subnet_id', help='The full resource ID of a subnet in a virtual network to deploy the redis cache in. Example format /subscriptions/{subid}/resourceGroups/{resourceGroupName}/providers/Microsoft.{Network|ClassicNetwork}/virtualNetworks/vnet1/subnets/subnet1')
@@ -45,7 +46,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('vm_size', arg_type=get_enum_type(allowed_c_family_sizes + allowed_p_family_sizes), help='Size of Redis cache to deploy. Basic and Standard Cache sizes start with C. Premium Cache sizes start with P')
         c.argument('enable_non_ssl_port', action='store_true', help='If specified, then the non-ssl redis server port (6379) will be enabled.')
         c.argument('replicas_per_master', help='The number of replicas to be created per master.')
-        c.argument('redis_version', help='Redis version. Only major version will be used in create/update request with current valid values: (4, 6)')
+        c.argument('redis_version', help='Redis version. This should be in the form \'major[.minor]\' (only \'major\' is required) or the value \'latest\' which refers to the latest stable Redis version that is available. Supported versions: 4.0, 6.0 (latest). Default value is \'latest\'.')
         c.argument('mi_system_assigned', arg_type=system_identity_type)
         c.argument('mi_user_assigned', arg_type=user_identity_type)
 
