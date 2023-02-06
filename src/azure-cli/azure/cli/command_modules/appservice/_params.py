@@ -254,7 +254,7 @@ subscription than the app service environment, please use the resource ID for --
                        help='The name of the slot. Default to the productions slot if not specified')
         with self.argument_context(scope + ' config ssl') as c:
             c.argument('certificate_thumbprint', help='The ssl cert thumbprint')
-						c.argument('certificate_name', help='The name of the certificate.')
+            c.argument('certificate_name', help='The name of the certificate.')
         with self.argument_context(scope + ' config appsettings') as c:
             c.argument('settings', nargs='+', help="space-separated app settings in a format of `<name>=<value>`")
             c.argument('setting_names', nargs='+', help="space-separated app setting names")

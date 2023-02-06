@@ -2673,11 +2673,11 @@ def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certif
                                          if webapp.hosting_environment_profile else '')
 
     thumb_print = _get_cert(certificate_password, certificate_file)
-		if certificate_name:
-				cert_name = certificate_name
-		else:
-				cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
-																				webapp.location, resource_group_name)
+        if certificate_name:
+            cert_name = certificate_name
+        else:
+            cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
+                                            webapp.location, resource_group_name)
     cert = Certificate(password=certificate_password, pfx_blob=cert_contents,
                        location=webapp.location, server_farm_id=webapp.server_farm_id)
     return client.certificates.create_or_update(resource_group_name, cert_name, cert)
@@ -2771,10 +2771,10 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     if not kv_secret_name:
         kv_secret_name = key_vault_certificate_name
 
-		if certificate_name:
-				cert_name = certificate_name
-		else:
-    		cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
+        if certificate_name:
+            cert_name = certificate_name
+        else:
+            cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
 
     lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
     lnk_msg = 'Find more details here: {}'.format(lnk)
