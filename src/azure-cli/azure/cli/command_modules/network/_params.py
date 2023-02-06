@@ -569,7 +569,6 @@ def load_arguments(self, _):
 
     # region LoadBalancers
     lb_subresources = [
-        {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
         {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
     ]
     for item in lb_subresources:
@@ -615,52 +614,6 @@ def load_arguments(self, _):
         c.argument('vnet_address_prefix', help='The CIDR address prefix to use when creating a new VNet.')
         c.ignore('vnet_type', 'subnet_type')
 
-    with self.argument_context('network lb address-pool') as c:
-        c.argument('load_balancer_name', load_balancer_name_type, id_part=None)
-        c.argument('backend_address_pool_name',
-                   options_list=['--name', '-n'],
-                   help='The name of the backend address pool. {}'.format(default_existing))
-        c.argument('backend_addresses', options_list=['--backend-address'], nargs='+', action=AddBackendAddressCreate, is_preview=True)
-        c.argument('backend_addresses_config_file', type=get_json_object, is_preview=True)
-        c.argument('vnet', help='Name or Id of the virtual network applied to all backend addresses.', validator=process_vnet_name_or_id)
-        c.argument('admin_state', arg_type=get_enum_type(LoadBalancerBackendAddressAdminState), help='Administrative state which once set can override health probe so that Load Balancer will always forward new connections to backend, or deny new connections and reset existing connections.', min_api='2021-08-01')
-        c.argument('drain_period', type=int, help='Amount of seconds Load Balancer waits for before sending RESET to client and backend address.', min_api='2021-08-01')
-
-    with self.argument_context('network lb address-pool address') as c:
-        c.argument('backend_address_pool_name',
-                   options_list=['--pool-name'],
-                   help='The name of the backend address pool. {}'.format(default_existing))
-        c.argument('address_name', options_list=['--name', '-n'], help='Name of the backend address.')
-        c.argument('vnet', help='Name or Id of the virtual network.', validator=process_vnet_name_or_id)
-        c.argument('ip_address', help='Ip Address within the Virtual Network.')
-        c.argument('subnet', help='Name or Id of the existing subnet.(If name is provided, vnet is also required;If id, vnet is not required)', min_api='2020-11-01')
-
-    with self.argument_context('network lb address-pool tunnel-interface', min_api='2021-02-01') as c:
-        c.argument('backend_address_pool_name', options_list=['--address-pool'], help='The name of the backend address pool. {}'.format(default_existing))
-        c.argument('protocol', arg_type=get_enum_type(GatewayLoadBalancerTunnelProtocol), help='Protocol of gateway load balancer tunnel interface.')
-        c.argument('identifier', help='Identifier of gateway load balancer tunnel interface.', type=int)
-        c.argument('port', help='Port of gateway load balancer tunnel interface.')
-        c.argument('traffic_type', options_list='--type', arg_type=get_enum_type(GatewayLoadBalancerTunnelInterfaceType), help='Traffic type of gateway load balancer tunnel interface.')
-        c.argument('index', type=int, help='Index of the tunnel interfaces to change')
-
-    with self.argument_context('network lb frontend-ip') as c:
-        c.argument('zone', zone_type, min_api='2017-06-01', max_api='2020-07-01')
-        c.argument('zone', zone_compatible_type, min_api='2020-08-01')
-
-    for item in ['create', 'update']:
-        with self.argument_context('network lb frontend-ip {}'.format(item)) as c:
-            c.argument('public_ip_address', help='Name or ID of the existing public IP to associate with the configuration.')
-            c.argument('subnet', help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.')
-            c.argument('virtual_network_name', virtual_network_name_type, help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', id_part=None, metavar='')
-            c.ignore('private_ip_address_allocation')
-
-    with self.argument_context('network lb frontend-ip create') as c:
-        c.argument('private_ip_address', help='Static private IP address to associate with the configuration.')
-
-    with self.argument_context('network lb frontend-ip update') as c:
-        c.argument('private_ip_address', help='Static private IP address to associate with the configuration. Use ""(\'""\' in PowerShell) to remove the static address and use a dynamic address instead.')
-        c.argument('gateway_lb', gateway_lb)
-
     with self.argument_context('network lb probe') as c:
         c.argument('interval', type=int, help='Probing time interval in seconds.')
         c.argument('path', help='The endpoint to interrogate (http only).')
@@ -674,8 +627,6 @@ def load_arguments(self, _):
 
     # region cross-region load balancer
     cross_region_lb_subresources = [
-        {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
-        {'name': 'frontend-ip', 'display': 'frontend IP configuration', 'ref': 'frontend_ip_configurations'},
         {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
     ]
     for item in cross_region_lb_subresources:
@@ -717,30 +668,6 @@ def load_arguments(self, _):
         c.argument('public_ip_zone', zone_type, min_api='2017-06-01', options_list=['--public-ip-zone'],
                    help='used to created a new public ip for the load balancer, a.k.a public facing Load balancer')
         c.ignore('public_ip_address_type')
-
-    with self.argument_context('network cross-region-lb address-pool') as c:
-        c.argument('load_balancer_name', load_balancer_name_type, id_part=None)
-        c.argument('backend_address_pool_name',
-                   options_list=['--name', '-n'],
-                   help='The name of the backend address pool. {}'.format(default_existing))
-        c.argument('backend_addresses', options_list=['--backend-address'], nargs='+', action=AddBackendAddressCreateForCrossRegionLB,
-                   is_preview=True)
-        c.argument('backend_addresses_config_file', options_list=['--backend-addresses-config-file', '--config-file'], type=get_json_object, is_preview=True)
-
-    with self.argument_context('network cross-region-lb address-pool address') as c:
-        c.argument('backend_address_pool_name',
-                   options_list=['--pool-name'],
-                   help='The name of the backend address pool. {}'.format(default_existing))
-        c.argument('address_name', options_list=['--name', '-n'], help='Name of the backend address.')
-        c.argument('frontend_ip_address', help='Resource id of the frontend ip configuration defined in regional loadbalancer.')
-
-    with self.argument_context('network cross-region-lb frontend-ip') as c:
-        c.argument('zone', zone_type, min_api='2017-06-01')
-
-    for item in ['create', 'update']:
-        with self.argument_context('network cross-region-lb frontend-ip {}'.format(item)) as c:
-            c.argument('public_ip_address',
-                       help='Name or ID of the existing public IP to associate with the configuration.')
 
     with self.argument_context('network cross-region-lb probe') as c:
         c.argument('interval', help='Probing time interval in seconds.')
