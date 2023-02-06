@@ -501,18 +501,17 @@ def load_command_table(self, _):
     self.command_table["network lb address-pool address remove"] = LBAddressPoolAddressRemove(loader=self)
     self.command_table["network lb address-pool address update"] = LBAddressPoolAddressUpdate(loader=self)
 
+    from .operations.load_balancer import LBAddressPoolTunnelInterfaceAdd, LBAddressPoolTunnelInterfaceRemove, LBAddressPoolTunnelInterfaceUpdate
+    self.command_table["network lb address-pool tunnel-interface add"] = LBAddressPoolTunnelInterfaceAdd(loader=self)
+    self.command_table["network lb address-pool tunnel-interface remove"] = LBAddressPoolTunnelInterfaceRemove(loader=self)
+    self.command_table["network lb address-pool tunnel-interface update"] = LBAddressPoolTunnelInterfaceUpdate(loader=self)
+
     with self.command_group("network lb probe") as g:
         g.custom_command("create", "create_lb_probe")
         g.custom_command("update", "update_lb_probe")
 
     with self.command_group('network lb probe', network_util) as g:
         g.command('delete', delete_lb_resource_property_entry('load_balancers', 'probes'))
-
-    with self.command_group('network lb address-pool tunnel-interface', network_lb_backend_pool_sdk, min_api='2021-02-01', is_preview=True) as g:
-        g.custom_command('add', 'add_lb_backend_address_pool_tunnel_interface')
-        g.custom_command('update', 'update_lb_backend_address_pool_tunnel_interface')
-        g.custom_command('remove', 'remove_lb_backend_address_pool_tunnel_interface')
-        g.custom_command('list', 'list_lb_backend_address_pool_tunnel_interface')
 
     # endregion
 

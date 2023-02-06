@@ -23,12 +23,8 @@ from ..aaz.latest.network.lb.address_pool.address import Add as _LBAddressPoolAd
     Remove as _LBAddressPoolAddressRemove, List as _LBAddressPoolAddressList
 from ..aaz.latest.network.lb.address_pool.basic import Create as _LBAddressPoolBasicCreate, \
     Delete as _LBAddressPoolBasicDelete
-
-# from ..aaz.latest.network.cross_region_lb.address_pool import Create as _CrossRegionLoadBalancerAddressPoolCreate, \
-#     Update as _CrossRegionLoadBalancerAddressPoolUpdate
-# from ..aaz.latest.network.cross_region_lb.address_pool.address import Add as _CrossRegionLoadBalancerAddressPoolAddressAdd, \
-#     Update as _CrossRegionLoadBalancerAddressPoolAddressUpdate, Remove as _CrossRegionLoadBalancerAddressPoolAddressRemove
-
+from ..aaz.latest.network.lb.address_pool.tunnel_interface import Add as _LBAddressPoolTunnelInterfaceAdd, \
+    Update as _LBAddressPoolTunnelInterfaceUpdate, Remove as _LBAddressPoolTunnelInterfaceRemove
 
 logger = get_logger(__name__)
 
@@ -679,6 +675,52 @@ class LBAddressPoolAddressUpdate(_LBAddressPoolAddressUpdate):
             instance.properties.virtual_network = None
         if not has_value(instance.properties.subnet.id):
             instance.properties.subnet = None
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class LBAddressPoolTunnelInterfaceAdd(_LBAddressPoolTunnelInterfaceAdd):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.identifier._required = True
+        args_schema.type._required = True
+        args_schema.protocol._required = True
+        return args_schema
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class LBAddressPoolTunnelInterfaceRemove(_LBAddressPoolTunnelInterfaceRemove):
+
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
+
+    def _output(self, *args, **kwargs):  # pylint: disable=unused-argument
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class LBAddressPoolTunnelInterfaceUpdate(_LBAddressPoolTunnelInterfaceUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.identifier._nullable = False
+        args_schema.type._nullable = False
+        args_schema.protocol._nullable = False
+        return args_schema
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
