@@ -19,7 +19,7 @@ class Show(AAZCommand):
     """Show the backend address from the load balance backend address pool.
 
     :example: Show the backend address from the load balance backend address pool.
-        az network cross-region-lb address-pool address show -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress
+        az network lb address-pool address show -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress
     """
 
     _aaz_info = {

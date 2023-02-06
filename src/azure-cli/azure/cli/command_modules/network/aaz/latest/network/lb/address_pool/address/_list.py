@@ -19,7 +19,7 @@ class List(AAZCommand):
     """List all backend addresses of the load balance backend address pool.
 
     :example: List all backend addresses of the load balance backend address pool.
-        az network cross-region-lb address-pool address list -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool
+        az network lb address-pool address list -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool
     """
 
     _aaz_info = {

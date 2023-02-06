@@ -18,7 +18,7 @@ class Show(AAZCommand):
     """Get load balancer backend address pool.
 
     :example: Get the details of an address pool.
-        az network cross-region-lb address-pool show -g MyResourceGroup --lb-name MyLb -n MyAddressPool
+        az network lb address-pool show -g MyResourceGroup --lb-name MyLb -n MyAddressPool
     """
 
     _aaz_info = {

@@ -19,7 +19,10 @@ class Add(AAZCommand):
     """Add one backend address into the load balance backend address pool.
 
     :example: Add one backend address into the load balance backend address pool.
-        az network cross-region-lb address-pool address add -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress --frontend-ip-address /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb2
+        az network lb address-pool address add -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress --vnet MyVnet --ip-address 10.0.0.1
+
+    :example: Add one backend address into the load balance backend address pool with subnet.
+        az network lb address-pool address add -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress --subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1 --ip-address 10.0.0.1
     """
 
     _aaz_info = {
@@ -88,7 +91,7 @@ class Add(AAZCommand):
         _args_schema.subnet = AAZStrArg(
             options=["--subnet"],
             arg_group="Properties",
-            help="Name or Id of the subnet",
+            help="Name or Id of the subnet. (If name is provided, vnet is also required; If id, vnet is not required)",
         )
         _args_schema.virtual_network = AAZStrArg(
             options=["--vnet", "--virtual-network"],

@@ -15,13 +15,16 @@ class Create(AAZCommand):
     """Create load balancer backend address pool.
 
     :example: Create an address pool.
-        az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool
+        az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool
 
     :example: Create an address pool with several backend addresses using shorthand syntax arguments.
-        az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses "[{name:addr1,frontend-ip-address:'/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb1'},{name:addr2,frontend-ip-address:'/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb2'}]"
+        az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --vnet MyVnetResource --backend-addresses "[{name:addr1,ip-address:10.0.0.1},{name:addr2,ip-address:10.0.0.2,subnet:subnetName}]"
 
     :example: Create an address pool with several backend addresses using config file
-        az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses config_file.json
+        az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses config_file.json
+
+    :example: Create an address pool with one backend address using key-value arguments.
+        az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-address name=addr1 ip-address=10.0.0.1 subnet=/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1
     """
 
     _aaz_info = {

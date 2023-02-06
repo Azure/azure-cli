@@ -15,7 +15,7 @@ class Delete(AAZCommand):
     """Delete the specified load balancer backend address pool.
 
     :example: Delete an address pool.
-        az network cross-region-lb address-pool delete -g MyResourceGroup --lb-name MyLb -n MyAddressPool
+        az network lb address-pool delete -g MyResourceGroup --lb-name MyLb -n MyAddressPool
     """
 
     _aaz_info = {

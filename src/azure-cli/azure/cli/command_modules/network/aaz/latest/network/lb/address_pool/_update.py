@@ -18,13 +18,16 @@ class Update(AAZCommand):
     """Update a load balancer backend address pool.
 
     :example: Update all backend addresses in the address pool using shorthand syntax
-        az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses "[{name:addr1,frontend-ip-address:'/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb1'},{name:addr2,frontend-ip-address:'/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb2'}]"
+        az network lb address-pool update -g MyResourceGroup --lb-name MyLb -n MyAddressPool --vnet MyVnetResource --backend-addresses "[{name:addr1,ip-address:10.0.0.1},{name:addr2,ip-address:10.0.0.2,subnet:subnetName}]"
 
-    :example: Update the frontend-ip-address of the first backend address in the address pool using shorthand syntax
-        az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses [0].frontend-ip-address='/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb1'
+    :example: Update the subnet of the first backend address in the address pool using shorthand syntax
+        az network lb address-pool update -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses [0].subnet=/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1
 
     :example: Remove the first backend address in the address pool using shorthand syntax
-        az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses [0]=null
+        az network lb address-pool update -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses [0]=null
+
+    :example: Remove all the backend addresses in the address pool
+        az network lb address-pool update -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses null
     """
 
     _aaz_info = {
@@ -84,7 +87,7 @@ class Update(AAZCommand):
             options=["--backend-addresses"],
             singular_options=["--backend-address"],
             arg_group="Properties",
-            help="Backend addresses information for backend address pool.",
+            help="An array of backend addresses.",
             nullable=True,
         )
         _args_schema.location = AAZStrArg(

@@ -491,9 +491,15 @@ def load_command_table(self, _):
     self.command_table["network lb outbound-rule create"] = LBOutboundRuleCreate(loader=self)
     self.command_table["network lb outbound-rule update"] = LBOutboundRuleUpdate(loader=self)
 
-    from .operations.load_balancer import LBAddressPoolCreate, LBAddressPoolDelete
+    from .operations.load_balancer import LBAddressPoolCreate, LBAddressPoolDelete, LBAddressPoolUpdate
     self.command_table["network lb address-pool create"] = LBAddressPoolCreate(loader=self)
     self.command_table["network lb address-pool delete"] = LBAddressPoolDelete(loader=self)
+    self.command_table["network lb address-pool update"] = LBAddressPoolUpdate(loader=self)
+
+    from .operations.load_balancer import LBAddressPoolAddressAdd, LBAddressPoolAddressRemove, LBAddressPoolAddressUpdate
+    self.command_table["network lb address-pool address add"] = LBAddressPoolAddressAdd(loader=self)
+    self.command_table["network lb address-pool address remove"] = LBAddressPoolAddressRemove(loader=self)
+    self.command_table["network lb address-pool address update"] = LBAddressPoolAddressUpdate(loader=self)
 
     with self.command_group("network lb probe") as g:
         g.custom_command("create", "create_lb_probe")
@@ -501,16 +507,6 @@ def load_command_table(self, _):
 
     with self.command_group('network lb probe', network_util) as g:
         g.command('delete', delete_lb_resource_property_entry('load_balancers', 'probes'))
-
-    with self.command_group('network lb address-pool', network_lb_backend_pool_sdk) as g:
-        # g.custom_command('create', 'create_lb_backend_address_pool')
-        g.generic_update_command('update', setter_name='begin_create_or_update',
-                                 custom_func_name='set_lb_backend_address_pool')
-
-    with self.command_group('network lb address-pool address', network_lb_backend_pool_sdk, is_preview=True) as g:
-        g.custom_command('add', 'add_lb_backend_address_pool_address')
-        g.custom_command('remove', 'remove_lb_backend_address_pool_address')
-        g.custom_command('list', 'list_lb_backend_address_pool_address')
 
     with self.command_group('network lb address-pool tunnel-interface', network_lb_backend_pool_sdk, min_api='2021-02-01', is_preview=True) as g:
         g.custom_command('add', 'add_lb_backend_address_pool_tunnel_interface')

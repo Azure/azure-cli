@@ -18,8 +18,8 @@ from azure.cli.core.aaz import *
 class Update(AAZCommand):
     """Update the backend address into the load balance backend address pool.
 
-    :example: Update the frontend ip of the backend address into the load balance backend address pool.
-        az network cross-region-lb address-pool address update -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress --frontend-ip-address /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb2
+    :example: Update the subnet of the backend address into the load balance backend address pool.
+        az network lb address-pool address update -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress --subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2
     """
 
     _aaz_info = {
@@ -93,7 +93,7 @@ class Update(AAZCommand):
         _args_schema.subnet = AAZStrArg(
             options=["--subnet"],
             arg_group="Properties",
-            help="Name or Id of the subnet",
+            help="Name or Id of the subnet. (If name is provided, vnet is also required; If id, vnet is not required)",
             nullable=True,
         )
         _args_schema.virtual_network = AAZStrArg(

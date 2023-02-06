@@ -18,7 +18,7 @@ class List(AAZCommand):
     """List all the load balancer backed address pools.
 
     :example: List address pools.
-        az network cross-region-lb address-pool list -g MyResourceGroup --lb-name MyLb -o table
+        az network lb address-pool list -g MyResourceGroup --lb-name MyLb -o table
     """
 
     _aaz_info = {
