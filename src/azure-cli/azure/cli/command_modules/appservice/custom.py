@@ -77,9 +77,9 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
-                         WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
+                         WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, HELLO_WORLD_IMAGE)
 from ._github_oauth import (get_github_access_token, cache_github_token)
-from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
+from ._validators import validate_and_convert_to_int, validate_range_of_int_flag, validate_same_location
 
 logger = get_logger(__name__)
 
@@ -1761,7 +1761,8 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
                             docker_registry_server_user=None):
     container_args = image or docker_registry_server_password or docker_registry_server_user
     if container_args and not configuration_source:
-        raise ArgumentUsageError("Cannot use image, password and username arguments without --configuration-source argument")
+        raise ArgumentUsageError("Cannot use image, password and username arguments without "
+                                 "--configuration-source argument")
 
     docker_registry_server_url = parse_docker_image_name(image)
 
@@ -3569,6 +3570,27 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if runtime is None and runtime_version is not None:
         raise ArgumentUsageError('Must specify --runtime to use --runtime-version')
 
+    # TODO use managed-environment field on ASP model when we the latest SDK is avaliable.
+    if environment is not None:
+        if consumption_plan_location is not None:
+            raise ArgumentUsageError(
+                'The --consumption-plan-location argument is not relevant for managed environment deployments')
+
+        managed_environment = get_managed_environment(cmd, resource_group_name, environment)
+
+        validate_same_location(cmd,
+                               managed_environment.location,
+                               functionapp_def.location,
+                               'The plan location must match the managed environment location')
+
+        functionapp_def.enable_additional_properties_sending()
+        existing_properties = functionapp_def.serialize()["properties"]
+        functionapp_def.additional_properties["properties"] = existing_properties
+        functionapp_def.additional_properties["properties"]["managedEnvironment"] = managed_environment.id
+
+        if image is None:
+            image = HELLO_WORLD_IMAGE
+
     runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
     matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
                                              runtime_version, functions_version, is_linux)
@@ -3647,14 +3669,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     elif not disable_app_insights and matched_runtime.app_insights:
         create_app_insights = True
-
-# TODO use managed-environment field on ASP model when we the latest SDK is avaliable.
-    if environment is not None:
-        managed_environment = get_managed_environment(cmd, resource_group_name, environment)
-        functionapp_def.enable_additional_properties_sending()
-        existing_properties = functionapp_def.serialize()["properties"]
-        functionapp_def.additional_properties["properties"] = existing_properties
-        functionapp_def.additional_properties["properties"]["managedEnvironment"] = managed_environment.id
 
     poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)

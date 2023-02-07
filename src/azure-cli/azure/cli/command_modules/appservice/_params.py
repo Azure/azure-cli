@@ -708,7 +708,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('subnet', options_list=['--subnet'], help="Name or resource ID of the pre-existing subnet to have the webapp join. The --vnet is argument also needed if specifying subnet by name.")
         c.argument('environment', options_list=['--environment'], help="Name of the container app environment.", is_preview=True)
         c.argument('image', options_list=['--image', '-i', c.deprecate(target='--deployment-container-image-name', redirect='--image')],
-                    help='Container image, e.g. publisher/image-name:tag')
+                   help='Container image, e.g. publisher/image-name:tag')
 
     with self.argument_context('functionapp cors credentials') as c:
         c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())
