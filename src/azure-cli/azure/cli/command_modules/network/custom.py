@@ -7492,9 +7492,14 @@ def clear_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name, no
             args = self.ctx.args
             args.no_wait = no_wait
 
+        def pre_instance_update(self, instance):
+            instance.properties.vpn_client_configuration.vpn_client_ipsec_policies = None
+
     ipsec_policies_args = {"resource_group": resource_group_name,
                            "name": gateway_name}
     from azure.cli.core.commands import LongRunningOperation
+    if no_wait:
+        return VnetGatewayIpsecPoliciesClear(cli_ctx=cmd.cli_ctx)(command_args=ipsec_policies_args)
     poller = VnetGatewayIpsecPoliciesClear(cli_ctx=cmd.cli_ctx)(command_args=ipsec_policies_args)
     return LongRunningOperation(cmd.cli_ctx)(poller)['vpnClientConfiguration']['vpnClientIpsecPolicies']
 
