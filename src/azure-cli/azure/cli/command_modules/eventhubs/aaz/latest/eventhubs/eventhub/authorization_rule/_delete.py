@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete an Event Hub AuthorizationRule.
+
+    :example: Deletes the Authorizationrule of Eventhub.
+        az eventhubs eventhub authorization-rule delete --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myauthorule
     """
 
     _aaz_info = {

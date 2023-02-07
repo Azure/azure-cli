@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update an AuthorizationRule for a Namespace.
+
+    :example: Updates Authorizationrule
+        az eventhubs namespace authorization-rule update --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --rights Send
     """
 
     _aaz_info = {

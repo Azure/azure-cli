@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List the authorization rules for an Event Hub.
+
+    :example: shows the list of Authorization-rules by Eventhub
+        az eventhubs eventhub authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub
     """
 
     _aaz_info = {

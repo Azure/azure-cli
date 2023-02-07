@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Renew(AAZCommand):
     """Regenerates the primary or secondary connection strings for the specified Namespace.
+
+    :example: Regenerate the connection strings of Authorizationrule for the namespace.
+        az eventhubs namespace authorization-rule keys renew --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --key PrimaryKey
     """
 
     _aaz_info = {

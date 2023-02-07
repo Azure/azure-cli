@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create an AuthorizationRule for a Namespace.
+
+    :example: Creates Authorizationrule
+        az eventhubs namespace authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --rights Send Listen
     """
 
     _aaz_info = {

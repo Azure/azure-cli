@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get an AuthorizationRule for a Namespace by rule name.
+
+    :example: Shows the details of Authorizationrule
+        az eventhubs namespace authorization-rule update --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --rights Send
     """
 
     _aaz_info = {

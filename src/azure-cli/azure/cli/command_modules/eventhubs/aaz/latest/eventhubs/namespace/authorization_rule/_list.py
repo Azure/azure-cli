@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List a list of authorization rules for a Namespace.
+
+    :example: Shows the list of Authorizationrule by Namespace
+        az eventhubs namespace authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace
     """
 
     _aaz_info = {

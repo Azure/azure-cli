@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """Gets the primary and secondary connection strings for the Namespace.
+
+    :example: Shows the connection strings of Authorizationrule for the namespace.
+        az eventhubs namespace authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
     """
 
     _aaz_info = {

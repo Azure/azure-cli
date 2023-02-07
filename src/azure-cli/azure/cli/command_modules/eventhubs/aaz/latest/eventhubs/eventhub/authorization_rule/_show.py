@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get an AuthorizationRule for an Event Hub by rule name.
+
+    :example: shows the details of Authorizationrule
+        az eventhubs eventhub authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myauthorule
     """
 
     _aaz_info = {

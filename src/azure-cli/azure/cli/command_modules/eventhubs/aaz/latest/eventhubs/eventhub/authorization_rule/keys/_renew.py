@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Renew(AAZCommand):
     """Regenerates the ACS and SAS connection strings for the Event Hub.
+
+    :example: Regenerate the connection strings of Authorizationrule for the namespace
+        az eventhubs eventhub authorization-rule keys renew --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myauthorule --key PrimaryKey
     """
 
     _aaz_info = {

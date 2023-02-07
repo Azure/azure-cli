@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """Gets the ACS and SAS connection strings for the Event Hub.
+
+    :example: Shows the connection strings of Authorizationrule for the eventhub.
+        az eventhubs eventhub authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myauthorule
     """
 
     _aaz_info = {
