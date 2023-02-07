@@ -1767,6 +1767,49 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             self.check('length(@)', 2)
         ])
 
+    @ResourceGroupPreparer(name_prefix="cli_test_ag_rule_default_exists", location="westus")
+    def test_ag_rule_default_exists(self):
+        self.kwargs.update({
+            "pip": self.create_random_name("public-ip-", 16),
+            "ag": self.create_random_name("application-gateway-", 24),
+            "port1": self.create_random_name("frontend-port-", 20),
+            "port2": self.create_random_name("frontend-port-", 20),
+            "listener": self.create_random_name("listener-", 16),
+            "settings": self.create_random_name("settings-", 16),
+            "http_listener": self.create_random_name("http-listener-", 20),
+            "routing_rule": self.create_random_name("routing-rule-", 20),
+            "rule": self.create_random_name("rule-", 12),
+        })
+        self.cmd("network public-ip create -n {pip} -g {rg} --sku Standard")
+        output = self.cmd("network application-gateway create -n {ag} -g {rg} --public-ip-address {pip} --sku Standard_v2 --priority 1001").get_output_in_json()["applicationGateway"]
+        self.kwargs["pool_id"] = output["backendAddressPools"][0]["id"]
+        self.kwargs["http_settings_id"] = output["backendHttpSettingsCollection"][0]["id"]
+
+        self.cmd("network application-gateway frontend-port create -n {port1} -g {rg} --gateway-name {ag} --port 8080")
+        self.kwargs["listener_id"] = self.cmd("network application-gateway listener create -n {listener} -g {rg} --gateway-name {ag} --frontend-port {port1} --frontend-ip appGatewayFrontendIP").get_output_in_json()["listeners"][0]["id"]
+        self.kwargs["settings_id"] = self.cmd("network application-gateway settings create -n {settings} -g {rg} --gateway-name {ag} --port 8080").get_output_in_json()["backendSettingsCollection"][0]["id"]
+
+        self.cmd(
+            "network application-gateway routing-rule create -n {routing_rule} -g {rg} --gateway-name {ag} --priority 1002",
+            checks=[
+                self.check("routingRules[0].backendAddressPool.id", "{pool_id}"),
+                self.check("routingRules[0].backendSettings.id", "{settings_id}"),
+                self.check("routingRules[0].listener.id", "{listener_id}"),
+            ]
+        )
+        self.cmd("network application-gateway routing-rule delete -n {routing_rule} -g {rg} --gateway-name {ag}")
+        # default http listener has been occupied by default rule
+        self.cmd("network application-gateway frontend-port create -n {port2} -g {rg} --gateway-name {ag} --port 8082")
+        self.cmd("network application-gateway http-listener create -n {http_listener} -g {rg} --gateway-name {ag} --frontend-port {port2} --frontend-ip appGatewayFrontendIP")
+        self.cmd(
+            "network application-gateway rule create -n {rule} -g {rg} --gateway-name {ag} --http-listener {http_listener} --priority 1004",
+            checks=[
+                self.check("requestRoutingRules[0].backendAddressPool.id", "{pool_id}"),
+                self.check("requestRoutingRules[0].backendHttpSettings.id", "{http_settings_id}"),
+            ]
+        )
+        self.cmd("network application-gateway rule delete -n {rule} -g {rg} --gateway-name {ag}")
+
     @ResourceGroupPreparer(name_prefix='cli_test_ag_url_path_map')
     def test_network_ag_url_path_map(self, resource_group):
         self.kwargs.update({

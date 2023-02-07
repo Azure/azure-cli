@@ -3476,6 +3476,17 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('upgradePolicy.rollingUpgradePolicy.prioritizeUnhealthyInstances', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_with_max_surge')
+    def test_vmss_with_max_surge(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10)
+        })
+        self.cmd(
+            'vmss create -n {vmss} -g {rg} --image ubuntults --upgrade-policy-mode Manual --max-surge true --disable-overprovision',
+            checks=[
+                self.check('vmss.upgradePolicy.rollingUpgradePolicy.maxSurge', True)
+            ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_ephemeral_os_disk')
     def test_vmss_create_ephemeral_os_disk(self, resource_group):
 
@@ -7104,6 +7115,19 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
                      self.check(update_not_before_timeout_key, 'PT5M')
                  ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_os_iamge_notification_')
+    def test_vmss_os_image_notification(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --enable-osimage-notification true', checks=[
+             self.check('vmss.virtualMachineProfile.scheduledEventsProfile.osImageNotificationProfile.enable', True)
+        ])
+
+        self.cmd('vmss update -g {rg} -n {vmss} --enable-osimage-notification false', checks=[
+            self.check('virtualMachineProfile.scheduledEventsProfile.osImageNotificationProfile', None)
+        ])
+
 
 class VMPriorityEvictionBillingTest(ScenarioTest):
 
@@ -8874,6 +8898,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         message = "Please specify --hyper-v-generation as 'V2'  the value of --upload-type is 'UploadWithSecurityData'"
         with self.assertRaisesRegex(ArgumentUsageError, message):
             self.cmd('disk create -n {disk2} -g {rg} --os-type Windows --hyper-v-generation v1 --security-type TrustedLaunch --upload-type UploadWithSecurityData --upload-size-bytes 34359738880 --sku standard_lrs')
+
+        message = "usage error: --upload-size-bytes is required to create a disk for upload"
+        with self.assertRaisesRegex(RequiredArgumentMissingError, message):
+            self.cmd('disk create -n {disk2} -g {rg} --upload-type Upload --size-gb 10')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_trusted_launch_', location='southcentralus')
     def test_vmss_trusted(self, resource_group):

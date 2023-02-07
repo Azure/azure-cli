@@ -51,7 +51,7 @@ We detect Python package version via `python setup.py --version`. Only when the 
 
 The storage fields can be stored in your config file or as environment variables so you need not supply them every time. Once the publish command has been run (you must be logged in to the Azure CLI for it to succeed), you can open a PR that will contain your code changes and the index update. This used to be done in two steps.
 
-Once your extension is published, you can view it via `az extension list-avaliable -o table`.
+Once your extension is published, you can view it via `az extension list-available -o table`.
 
 However, if you want your extension to be listed in [Official Available Extensions for Azure CLI](https://docs.microsoft.com/cli/azure/azure-cli-extensions-list), you have to wait until the next [Azure CLI release](https://github.com/Azure/azure-cli/milestones). We update that document every time Azure CLI is released. Alternatively, you could file a PR to update it manually if it's urgent.
 
