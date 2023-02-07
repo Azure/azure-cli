@@ -843,12 +843,12 @@ def load_command_table(self, _):
     with self.command_group('network vnet-gateway ipsec-policy') as g:
         from .custom import VnetGatewayIpsecPolicyAdd
         self.command_table['network vnet-gateway ipsec-policy add'] = VnetGatewayIpsecPolicyAdd(loader=self)
-        g.custom_command('clear', 'clear_vnet_gateway_ipsec_policies')
+        g.custom_command('clear', 'clear_vnet_gateway_ipsec_policies', supports_no_wait=True)
 
     with self.command_group('network vnet-gateway aad') as g:
         from .custom import VnetGatewayAadAssign
         self.command_table['network vnet-gateway aad assign'] = VnetGatewayAadAssign(loader=self)
-        g.custom_command('remove', 'remove_vnet_gateway_aad')
+        g.custom_command('remove', 'remove_vnet_gateway_aad', supports_no_wait=True)
 
     with self.command_group('network vnet-gateway nat-rule'):
         from .custom import VnetGatewayNatRuleAdd, VnetGatewayNatRuleShow, VnetGatewayNatRuleRemove

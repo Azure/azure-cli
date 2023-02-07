@@ -54,10 +54,6 @@ class Create(AAZCommand):
             help="Virtual network gateway name.",
             required=True,
         )
-        _args_schema.id = AAZStrArg(
-            options=["--id"],
-            help="Resource ID.",
-        )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
             help="Root certificate name.",
@@ -73,7 +69,9 @@ class Create(AAZCommand):
     def _execute_operations(self):
         self.pre_operations()
         self.VirtualNetworkGatewaysGet(ctx=self.ctx)()
+        self.pre_instance_create()
         self.InstanceCreateByJson(ctx=self.ctx)()
+        self.post_instance_create(self.ctx.selectors.subresource.required())
         yield self.VirtualNetworkGatewaysCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -83,6 +81,14 @@ class Create(AAZCommand):
 
     @register_callback
     def post_operations(self):
+        pass
+
+    @register_callback
+    def pre_instance_create(self):
+        pass
+
+    @register_callback
+    def post_instance_create(self, instance):
         pass
 
     def _output(self, *args, **kwargs):
@@ -318,7 +324,6 @@ class Create(AAZCommand):
                 self.ctx.args,
                 typ=AAZObjectType
             )
-            _builder.set_prop("id", AAZStrType, ".id")
             _builder.set_prop("name", AAZStrType, ".name")
             _builder.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
 

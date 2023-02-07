@@ -7486,12 +7486,16 @@ class VnetGatewayIpsecPolicyAdd(_VnetGatewayIpsecPolicyAdd):
         return args_schema
 
 
-def clear_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name):
-    args = {"resource_group": resource_group_name,
-            "name": gateway_name,
-            "vpn_client_ipsec_policies": None}
+def clear_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name, no_wait=False):
+    class VnetGatewayIpsecPoliciesClear(_VnetGatewayUpdate):
+        def pre_operations(self):
+            args = self.ctx.args
+            args.no_wait = no_wait
+
+    ipsec_policies_args = {"resource_group": resource_group_name,
+                           "name": gateway_name}
     from azure.cli.core.commands import LongRunningOperation
-    poller = _VnetGatewayUpdate(cli_ctx=cmd.cli_ctx)(command_args=args)
+    poller = VnetGatewayIpsecPoliciesClear(cli_ctx=cmd.cli_ctx)(command_args=ipsec_policies_args)
     return LongRunningOperation(cmd.cli_ctx)(poller)['vpnClientConfiguration']['vpnClientIpsecPolicies']
 
 
@@ -7545,15 +7549,20 @@ class VnetGatewayAadAssign(_VnetGatewayAadAssign):
         return args_schema
 
 
-def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name):
-    args = {"resource_group": resource_group_name,
-            "name": gateway_name,
-            "aad_audience": None,
-            "aad_issuer": None,
-            "aad_tenant": None,
-            "vpn_auth_type": None}
+def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name, no_wait=False):
+    class VnetGatewayAadRemove(_VnetGatewayUpdate):
+        def pre_operations(self):
+            args = self.ctx.args
+            args.no_wait = no_wait
+
+    aad_args = {"resource_group": resource_group_name,
+                "name": gateway_name,
+                "aad_audience": None,
+                "aad_issuer": None,
+                "aad_tenant": None,
+                "vpn_auth_type": None}
     from azure.cli.core.commands import LongRunningOperation
-    poller = _VnetGatewayUpdate(cli_ctx=cmd.cli_ctx)(command_args=args)
+    poller = VnetGatewayAadRemove(cli_ctx=cmd.cli_ctx)(command_args=aad_args)
     return LongRunningOperation(cmd.cli_ctx)(poller)['vpnClientConfiguration']
 
 

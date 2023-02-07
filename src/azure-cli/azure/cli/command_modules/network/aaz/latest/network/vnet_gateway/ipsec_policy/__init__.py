@@ -10,6 +10,5 @@
 
 from .__cmd_group import *
 from ._add import *
-from ._clear import *
 from ._list import *
 from ._wait import *

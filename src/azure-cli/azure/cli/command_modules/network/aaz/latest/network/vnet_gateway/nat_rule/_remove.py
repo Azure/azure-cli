@@ -65,7 +65,9 @@ class Remove(AAZCommand):
     def _execute_operations(self):
         self.pre_operations()
         self.VirtualNetworkGatewaysGet(ctx=self.ctx)()
+        self.pre_instance_delete()
         self.InstanceDeleteByJson(ctx=self.ctx)()
+        self.post_instance_delete()
         yield self.VirtualNetworkGatewaysCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -75,6 +77,14 @@ class Remove(AAZCommand):
 
     @register_callback
     def post_operations(self):
+        pass
+
+    @register_callback
+    def pre_instance_delete(self):
+        pass
+
+    @register_callback
+    def post_instance_delete(self):
         pass
 
     class SubresourceSelector(AAZJsonSelector):
