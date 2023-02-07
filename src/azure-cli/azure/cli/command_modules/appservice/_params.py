@@ -323,6 +323,7 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('use32_bit_worker_process', options_list=['--use-32bit-worker-process'],
                        help='use 32 bits worker process or not', arg_type=get_three_state_flag(return_label=True))
             c.argument('php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
+            c.argument('power_shell_version', help='The version used to run your function app if using PowerShell, e.g., 7.2', options_list=['--powershell-version'])
             c.argument('python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
             c.argument('net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
             c.argument('linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.5.5\", \"NODE|12LTS\", \"PHP|7.2\", \"DOTNETCORE|2.1\". See https://aka.ms/linux-stacks for more info.")
@@ -542,6 +543,10 @@ subscription than the app service environment, please use the resource ID for --
                    action='store_true')
         c.argument('ignore_hostname_conflict', help='Ignores custom hostnames stored in the backup',
                    action='store_true')
+
+    with self.argument_context('webapp config backup delete') as c:
+        c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot.')
+        c.argument('backup_id', help='Id of the backup.')
 
     with self.argument_context('webapp config snapshot') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
@@ -898,6 +903,8 @@ subscription than the app service environment, please use the resource ID for --
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                    help='Name of the function app')
         c.argument('function_name', help="Name of the Function")
+    with self.argument_context('functionapp function list', id_part=None) as c:
+        c.ignore('function_name')
     with self.argument_context('functionapp function keys', id_part=None) as c:
         c.argument('slot', options_list=['--slot', '-s'],
                    help="The name of the slot. Defaults to the productions slot if not specified")

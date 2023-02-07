@@ -302,6 +302,38 @@ type: command
 short-summary: Place the CLI in a waiting state until a condition of the database is met.
 """
 
+helps['sql db geo-backup'] = """
+type: group
+short-summary: Manage SQL database geo redundant backups.
+"""
+
+helps['sql db geo-backup show'] = """
+type: command
+short-summary: Gets a recoverable database, which is a resource representing a database's geo backup.
+examples:
+  - name: Gets a recoverable database, which represents a database's geo backup.
+    text: az sql db geo-backup show --server myserver --database mydb --resource-group mygroup
+"""
+
+helps['sql db geo-backup list'] = """
+type: command
+short-summary: Gets a list of recoverable databases.
+examples:
+  - name: Gets a list of recoverable databases.
+    text: az sql db geo-backup list -s myserver -g mygroup
+"""
+
+helps['sql db geo-backup restore'] = """
+type: command
+short-summary: Restore a geo-redundant backup to a new database.
+examples:
+  - name: Restore Geo-redundant backup.
+    text: |
+        az sql db geo-backup restore \\
+        --dest-database targetdb --dest-server myserver --resource-group mygroup \\
+        --geo-backup-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup/providers/Microsoft.Sql/servers/myserver/databases/mydb/geoBackupPolicies/Default"
+"""
+
 helps['sql db op'] = """
 type: group
 short-summary: Manage operations on a database.
@@ -940,7 +972,7 @@ examples:
               --identity-type UserAssigned --pid /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi
   - name: Move managed instance to another subnet
     text: az sql mi update -g myResourceGroup -n myServer -i \\
-              --subnet /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi \\
+              --subnet /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet \\
   - name: Update mi backup storage redundancy
     text: az sql mi update -g mygroup -n myinstance --bsr Local
 """
@@ -1017,6 +1049,10 @@ examples:
     text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22" --deleted-time "2018-05-20T05:34:22"
   - name: Restore a live managed database from another instance using Point in time restore
     text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22" --dest-mi targetmi --dest-resource-group targetrg
+  - name: Restore a live managed database from another subscription using Point in time restore
+    text: az sql midb restore -s sourcesubscriptionid -g sourcegroup --mi sourceinstance -n sourcemanageddb --dest-name targetmidb --dest-mi targetmi --time "2018-05-20T05:34:22"
+  - name: Restore a dropped managed database from another subscription using Point in time restore
+    text: az sql midb restore -s sourcesubscriptionid -g sourcegroup --mi sourceinstance -n sourcemanageddb --dest-name targetmidb --dest-mi targetmi --time "2018-05-20T05:34:22" --deleted-time "2018-05-20T05:34:22"
 """
 
 helps['sql midb recover'] = """

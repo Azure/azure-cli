@@ -10,7 +10,8 @@
 # Generation mode: Incremental
 # --------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-lines,no-else-return
+# pylint: disable=no-self-use, too-many-lines, no-else-return
+# pylint: disable=protected-access
 import json
 import os
 
@@ -45,6 +46,7 @@ from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_
                        load_images_thru_services, _get_latest_image_version)
 from ._client_factory import (_compute_client_factory, cf_public_ip_addresses, cf_vm_image_term,
                               _dev_test_labs_client_factory)
+from .aaz.latest.vmss.nic import List as _VMSSNICList, ListVmNics as _VMSSNICListVMNICs, Show as _VMSSNICShow
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
@@ -438,13 +440,12 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                                  security_data_uri=security_data_uri,
                                  performance_plus=performance_plus)
 
-    if size_gb is None and upload_size_bytes is None:
-        if option == DiskCreateOption.empty:
-            raise RequiredArgumentMissingError(
-                'usage error: --size-gb or --upload-size-bytes required to create an empty disk')
-        if upload_type:
-            raise RequiredArgumentMissingError(
-                'usage error: --size-gb or --upload-size-bytes required to create a disk for upload')
+    if size_gb is None and option == DiskCreateOption.empty:
+        raise RequiredArgumentMissingError(
+            'usage error: --size-gb is required to create an empty disk')
+    if upload_size_bytes is None and upload_type:
+        raise RequiredArgumentMissingError(
+            'usage error: --upload-size-bytes is required to create a disk for upload')
 
     if disk_encryption_set is not None and not is_valid_resource_id(disk_encryption_set):
         disk_encryption_set = resource_id(
@@ -3084,7 +3085,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 v_cpus_available=None, v_cpus_per_core=None, accept_term=None, disable_integrity_monitoring=False,
                 os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
                 os_disk_delete_option=None, data_disk_delete_option=None, regular_priority_count=None,
-                regular_priority_percentage=None, disk_controller_type=None, nat_rule_name=None):
+                regular_priority_percentage=None, disk_controller_type=None, nat_rule_name=None,
+                enable_osimage_notification=None, max_surge=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -3393,7 +3395,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             v_cpus_per_core=v_cpus_per_core, os_disk_security_encryption_type=os_disk_security_encryption_type,
             os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set,
             os_disk_delete_option=os_disk_delete_option, regular_priority_count=regular_priority_count,
-            regular_priority_percentage=regular_priority_percentage, disk_controller_type=disk_controller_type)
+            regular_priority_percentage=regular_priority_percentage, disk_controller_type=disk_controller_type,
+            enable_osimage_notification=enable_osimage_notification, max_surge=max_surge)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3703,8 +3706,9 @@ def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
 def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_id=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_reimage,
-                           resource_group_name, vm_scale_set_name, instance_id)
+        for instance in instance_id:
+            sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_reimage,
+                        resource_group_name, vm_scale_set_name, instance)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage, resource_group_name, vm_scale_set_name)
 
 
@@ -3775,7 +3779,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 user_data=None, enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
                 vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None, enable_secure_boot=None,
                 enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None, v_cpus_per_core=None,
-                regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None, **kwargs):
+                regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
+                enable_osimage_notification=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -3842,6 +3847,12 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             TerminateNotificationProfile(not_before_timeout=terminate_notification_time,
                                          enable=enable_terminate_notification)
 
+    if enable_osimage_notification is not None:
+        if vmss.virtual_machine_profile.scheduled_events_profile is None:
+            vmss.virtual_machine_profile.scheduled_events_profile = cmd.get_models('ScheduledEventsProfile')()
+        OSImageNotificationProfile = cmd.get_models('OSImageNotificationProfile')
+        vmss.virtual_machine_profile.scheduled_events_profile.os_image_notification_profile = \
+            OSImageNotificationProfile(enable=enable_osimage_notification)
     if enable_automatic_repairs is not None or \
             automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
         AutomaticRepairsPolicy = cmd.get_models('AutomaticRepairsPolicy')
@@ -4778,12 +4789,6 @@ def create_dedicated_host_group(cmd, client, host_group_name, resource_group_nam
     return client.create_or_update(resource_group_name, host_group_name, parameters=host_group_params)
 
 
-def list_dedicated_host_groups(cmd, client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list_by_subscription()
-
-
 def get_dedicated_host_group_instance_view(client, host_group_name, resource_group_name):
     return client.get(resource_group_name, host_group_name, expand="instanceView")
 
@@ -5120,7 +5125,7 @@ def list_generator(pages, num_results=50):
 
         # handle num results
         if num_results is not None:
-            if num_results == len(result):
+            if num_results >= len(result):
                 break
 
         page = list(next(pages))
@@ -5651,3 +5656,50 @@ def sig_community_image_version_list(client, location, public_gallery_name, gall
                             gallery_image_name=gallery_image_name)
     return get_page_result(generator, marker, show_next_marker)
 # endRegion
+
+
+# Region VMSS
+class VMSSNICList(_VMSSNICList):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.virtual_machine_scale_set_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/"
+                     "Microsoft.Compute/virtualMachineScaleSets/{}"
+        )
+
+        return args_schema
+
+
+class VMSSNICListVMNICs(_VMSSNICListVMNICs):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.virtual_machine_scale_set_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/"
+                     "Microsoft.Compute/virtualMachineScaleSets/{}"
+        )
+
+        return args_schema
+
+
+class VMSSNICShow(_VMSSNICShow):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.virtual_machine_scale_set_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/"
+                     "Microsoft.Compute/virtualMachineScaleSets/{}"
+        )
+        args_schema.network_interface_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/"
+                     "Microsoft.Network/networkInterfaces/{}"
+        )
+
+        return args_schema

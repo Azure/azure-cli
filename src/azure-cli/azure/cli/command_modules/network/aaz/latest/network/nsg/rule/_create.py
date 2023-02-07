@@ -90,7 +90,7 @@ class Create(AAZCommand):
         _args_schema.protocol = AAZStrArg(
             options=["--protocol"],
             help="Network protocol this rule applies to.",
-            default="\"*\"",
+            default="*",
             enum={"*": "*", "Ah": "Ah", "Esp": "Esp", "Icmp": "Icmp", "Tcp": "Tcp", "Udp": "Udp"},
         )
 
