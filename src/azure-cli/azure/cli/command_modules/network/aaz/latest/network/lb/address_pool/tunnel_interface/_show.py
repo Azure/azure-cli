@@ -12,33 +12,28 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network cross-region-lb address-pool create",
+    "network lb address-pool tunnel-interface show",
+    is_preview=True,
 )
-class Create(AAZCommand):
-    """Create load balancer backend address pool.
+class Show(AAZCommand):
+    """Get one tunnel interface of load balance tunnel interface pool.
 
-    :example: Create an address pool.
-        az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool
-
-    :example: Create an address pool with several backend addresses using shorthand syntax arguments.
-        az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses "[{name:addr1,frontend-ip-address:'/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb1'},{name:addr2,frontend-ip-address:'/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb2'}]"
-
-    :example: Create an address pool with several backend addresses using config file
-        az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses config_file.json
+    :example: Get one tunnel interface from the load balance tunnel interface pool.
+        az network lb address-pool tunnel-interface show -g MyResourceGroup --lb-name MyLb --address-pool MyAddressPool --index 0
     """
 
     _aaz_info = {
         "version": "2022-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}/backendaddresspools/{}", "2022-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}/backendaddresspools/{}", "2022-05-01", "properties.tunnelInterfaces[]"],
         ]
     }
 
-    AZ_SUPPORT_NO_WAIT = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._execute_operations, self._output)
+        self.SubresourceSelector(ctx=self.ctx, name="subresource")
+        self._execute_operations()
+        return self._output()
 
     _args_schema = None
 
@@ -52,8 +47,8 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.address_pool_name = AAZStrArg(
-            options=["-n", "--name", "--address-pool-name"],
-            help="The name of the backend address pool. If only one exists, omit to use as default.",
+            options=["--address-pool", "--address-pool-name"],
+            help="The name of the backend address pool.",
             required=True,
         )
         _args_schema.lb_name = AAZStrArg(
@@ -64,46 +59,16 @@ class Create(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-
-        # define Arg Group "Parameters"
-
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.drain_period = AAZIntArg(
-            options=["--drain-period"],
-            arg_group="Properties",
-            help="Amount of seconds Load Balancer waits for before sending RESET to client and backend address.",
-        )
-        _args_schema.backend_addresses = AAZListArg(
-            options=["--backend-addresses"],
-            singular_options=["--backend-address"],
-            arg_group="Properties",
-            help="An array of backend addresses.",
-        )
-        _args_schema.location = AAZStrArg(
-            options=["--location"],
-            arg_group="Properties",
-            help="The location of the backend address pool.",
-        )
-
-        backend_addresses = cls._args_schema.backend_addresses
-        backend_addresses.Element = AAZObjectArg()
-
-        _element = cls._args_schema.backend_addresses.Element
-        _element.name = AAZStrArg(
-            options=["name"],
-            help="Name of the backend address.",
-        )
-        _element.frontend_ip_address = AAZStrArg(
-            options=["frontend-ip", "frontend-ip-address"],
-            help="The frontend IP configuration ID of a regional load balance.",
+        _args_schema.index = AAZIntArg(
+            options=["--index"],
+            help="Index of the tunnel interfaces to change.",
+            required=True,
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.LoadBalancerBackendAddressPoolsCreateOrUpdate(ctx=self.ctx)()
+        self.LoadBalancerBackendAddressPoolsGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -115,33 +80,43 @@ class Create(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
         return result
 
-    class LoadBalancerBackendAddressPoolsCreateOrUpdate(AAZHttpOperation):
+    class SubresourceSelector(AAZJsonSelector):
+
+        def _get(self):
+            result = self.ctx.vars.instance
+            result = result.properties.tunnelInterfaces
+            filters = enumerate(result)
+            filters = filter(
+                lambda e: e[0] == self.ctx.args.index,
+                filters
+            )
+            idx = next(filters)[0]
+            return result[idx]
+
+        def _set(self, value):
+            result = self.ctx.vars.instance
+            result = result.properties.tunnelInterfaces
+            filters = enumerate(result)
+            filters = filter(
+                lambda e: e[0] == self.ctx.args.index,
+                filters
+            )
+            idx = next(filters, [len(result)])[0]
+            self.ctx.args.index = idx
+            result[idx] = value
+            return
+
+    class LoadBalancerBackendAddressPoolsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [202]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200, 201]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
+            if session.http_response.status_code in [200]:
+                return self.on_200(session)
 
             return self.on_error(session.http_response)
 
@@ -154,7 +129,7 @@ class Create(AAZCommand):
 
         @property
         def method(self):
-            return "PUT"
+            return "GET"
 
         @property
         def error_format(self):
@@ -196,74 +171,34 @@ class Create(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
 
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
-            )
-            _builder.set_prop("name", AAZStrType, ".address_pool_name")
-            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-
-            properties = _builder.get(".properties")
-            if properties is not None:
-                properties.set_prop("drainPeriodInSeconds", AAZIntType, ".drain_period")
-                properties.set_prop("loadBalancerBackendAddresses", AAZListType, ".backend_addresses")
-                properties.set_prop("location", AAZStrType, ".location")
-
-            load_balancer_backend_addresses = _builder.get(".properties.loadBalancerBackendAddresses")
-            if load_balancer_backend_addresses is not None:
-                load_balancer_backend_addresses.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.loadBalancerBackendAddresses[]")
-            if _elements is not None:
-                _elements.set_prop("name", AAZStrType, ".name")
-                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-
-            properties = _builder.get(".properties.loadBalancerBackendAddresses[].properties")
-            if properties is not None:
-                properties.set_prop("loadBalancerFrontendIPConfiguration", AAZObjectType)
-                properties.set_prop("subnet", AAZObjectType)
-                properties.set_prop("virtualNetwork", AAZObjectType)
-
-            load_balancer_frontend_ip_configuration = _builder.get(".properties.loadBalancerBackendAddresses[].properties.loadBalancerFrontendIPConfiguration")
-            if load_balancer_frontend_ip_configuration is not None:
-                load_balancer_frontend_ip_configuration.set_prop("id", AAZStrType, ".frontend_ip_address")
-
-            return self.serialize_content(_content_value)
-
-        def on_200_201(self, session):
+        def on_200(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200_201
+                schema_builder=self._build_schema_on_200
             )
 
-        _schema_on_200_201 = None
+        _schema_on_200 = None
 
         @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
 
-            cls._schema_on_200_201 = AAZObjectType()
-            _CreateHelper._build_schema_backend_address_pool_read(cls._schema_on_200_201)
+            cls._schema_on_200 = AAZObjectType()
+            _ShowHelper._build_schema_backend_address_pool_read(cls._schema_on_200)
 
-            return cls._schema_on_200_201
+            return cls._schema_on_200
 
 
-class _CreateHelper:
-    """Helper class for Create"""
+class _ShowHelper:
+    """Helper class for Show"""
 
     _schema_application_security_group_read = None
 
@@ -2373,4 +2308,4 @@ class _CreateHelper:
         _schema.type = cls._schema_virtual_network_tap_read.type
 
 
-__all__ = ["Create"]
+__all__ = ["Show"]

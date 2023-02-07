@@ -20,8 +20,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_connection_monitor,
     cf_dns_references,
-    cf_virtual_router, cf_virtual_router_peering, cf_flow_logs,
-    cf_load_balancer_backend_pools)
+    cf_virtual_router, cf_virtual_router_peering, cf_flow_logs)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
     delete_lb_resource_property_entry)
@@ -91,12 +90,6 @@ def load_command_table(self, _):
     network_lb_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#LoadBalancersOperations.{}',
         client_factory=cf_load_balancers
-    )
-
-    network_lb_backend_pool_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#LoadBalancerBackendAddressPoolsOperations.{}',
-        client_factory=cf_load_balancer_backend_pools,
-        min_api='2020-04-01'
     )
 
     network_nic_sdk = CliCommandType(
@@ -491,31 +484,27 @@ def load_command_table(self, _):
     self.command_table["network lb outbound-rule create"] = LBOutboundRuleCreate(loader=self)
     self.command_table["network lb outbound-rule update"] = LBOutboundRuleUpdate(loader=self)
 
+    from .operations.load_balancer import LBAddressPoolCreate, LBAddressPoolDelete, LBAddressPoolUpdate
+    self.command_table["network lb address-pool create"] = LBAddressPoolCreate(loader=self)
+    self.command_table["network lb address-pool delete"] = LBAddressPoolDelete(loader=self)
+    self.command_table["network lb address-pool update"] = LBAddressPoolUpdate(loader=self)
+
+    from .operations.load_balancer import LBAddressPoolAddressAdd, LBAddressPoolAddressRemove, LBAddressPoolAddressUpdate
+    self.command_table["network lb address-pool address add"] = LBAddressPoolAddressAdd(loader=self)
+    self.command_table["network lb address-pool address remove"] = LBAddressPoolAddressRemove(loader=self)
+    self.command_table["network lb address-pool address update"] = LBAddressPoolAddressUpdate(loader=self)
+
+    from .operations.load_balancer import LBAddressPoolTunnelInterfaceAdd, LBAddressPoolTunnelInterfaceRemove, LBAddressPoolTunnelInterfaceUpdate
+    self.command_table["network lb address-pool tunnel-interface add"] = LBAddressPoolTunnelInterfaceAdd(loader=self)
+    self.command_table["network lb address-pool tunnel-interface remove"] = LBAddressPoolTunnelInterfaceRemove(loader=self)
+    self.command_table["network lb address-pool tunnel-interface update"] = LBAddressPoolTunnelInterfaceUpdate(loader=self)
+
     with self.command_group("network lb probe") as g:
         g.custom_command("create", "create_lb_probe")
         g.custom_command("update", "update_lb_probe")
 
     with self.command_group('network lb probe', network_util) as g:
         g.command('delete', delete_lb_resource_property_entry('load_balancers', 'probes'))
-
-    with self.command_group('network lb address-pool', network_lb_backend_pool_sdk) as g:
-        g.custom_command('create', 'create_lb_backend_address_pool')
-        g.generic_update_command('update', setter_name='begin_create_or_update',
-                                 custom_func_name='set_lb_backend_address_pool')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.custom_command('delete', 'delete_lb_backend_address_pool')
-
-    with self.command_group('network lb address-pool address', network_lb_backend_pool_sdk, is_preview=True) as g:
-        g.custom_command('add', 'add_lb_backend_address_pool_address')
-        g.custom_command('remove', 'remove_lb_backend_address_pool_address')
-        g.custom_command('list', 'list_lb_backend_address_pool_address')
-
-    with self.command_group('network lb address-pool tunnel-interface', network_lb_backend_pool_sdk, min_api='2021-02-01', is_preview=True) as g:
-        g.custom_command('add', 'add_lb_backend_address_pool_tunnel_interface')
-        g.custom_command('update', 'update_lb_backend_address_pool_tunnel_interface')
-        g.custom_command('remove', 'remove_lb_backend_address_pool_tunnel_interface')
-        g.custom_command('list', 'list_lb_backend_address_pool_tunnel_interface')
 
     # endregion
 
@@ -548,15 +537,20 @@ def load_command_table(self, _):
         self.command_table['network cross-region-lb rule update'] = CrossRegionLoadBalancerRuleUpdate(loader=self)
 
     with self.command_group('network cross-region-lb address-pool') as g:
-        from .operations.load_balancer import CrossRegionLoadBalancerAddressPoolCreate, CrossRegionLoadBalancerAddressPoolUpdate
+        from .operations.load_balancer import CrossRegionLoadBalancerAddressPoolCreate, CrossRegionLoadBalancerAddressPoolUpdate, CrossRegionLoadBalancerAddressPoolList, CrossRegionLoadBalancerAddressPoolDelete, CrossRegionLoadBalancerAddressPoolShow
+        self.command_table['network cross-region-lb address-pool show'] = CrossRegionLoadBalancerAddressPoolShow(loader=self)
+        self.command_table['network cross-region-lb address-pool delete'] = CrossRegionLoadBalancerAddressPoolDelete(loader=self)
+        self.command_table['network cross-region-lb address-pool list'] = CrossRegionLoadBalancerAddressPoolList(loader=self)
         self.command_table['network cross-region-lb address-pool create'] = CrossRegionLoadBalancerAddressPoolCreate(loader=self)
         self.command_table['network cross-region-lb address-pool update'] = CrossRegionLoadBalancerAddressPoolUpdate(loader=self)
 
     with self.command_group('network cross-region-lb address-pool address') as g:
-        from .operations.load_balancer import CrossRegionLoadBalancerAddressPoolAddressAdd, CrossRegionLoadBalancerAddressPoolAddressUpdate, CrossRegionLoadBalancerAddressPoolAddressRemove
+        from .operations.load_balancer import CrossRegionLoadBalancerAddressPoolAddressAdd, CrossRegionLoadBalancerAddressPoolAddressUpdate, CrossRegionLoadBalancerAddressPoolAddressRemove, CrossRegionLoadBalancerAddressPoolAddressList, CrossRegionLoadBalancerAddressPoolAddressShow
         self.command_table['network cross-region-lb address-pool address add'] = CrossRegionLoadBalancerAddressPoolAddressAdd(loader=self)
         self.command_table['network cross-region-lb address-pool address remove'] = CrossRegionLoadBalancerAddressPoolAddressRemove(loader=self)
         self.command_table['network cross-region-lb address-pool address update'] = CrossRegionLoadBalancerAddressPoolAddressUpdate(loader=self)
+        self.command_table['network cross-region-lb address-pool address list'] = CrossRegionLoadBalancerAddressPoolAddressList(loader=self)
+        self.command_table['network cross-region-lb address-pool address show'] = CrossRegionLoadBalancerAddressPoolAddressShow(loader=self)
 
     cross_region_lb_property_map = {
         'probes': 'probe',

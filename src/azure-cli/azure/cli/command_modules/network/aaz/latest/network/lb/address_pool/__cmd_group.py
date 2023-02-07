@@ -12,11 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "network cross-region-lb address-pool address",
-    is_preview=True,
+    "network lb address-pool",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage backend addresses of the cross-region load balance backend address pool.
+    """Manage address pools of a load balancer.
     """
     pass
 
