@@ -6,7 +6,7 @@
 from knack.log import get_logger
 from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, \
-    AAZStrArg, AAZArgEnum, AAZResourceIdArg
+    AAZStrArg, AAZArgEnum
 from ..aaz.latest.network.lb import Delete as _LBDelete, Update as _LBUpdate, List as _LBList, Show as _LBShow
 from ..aaz.latest.network.lb.frontend_ip import Create as _LBFrontendIPCreate, Update as _LBFrontendIPUpdate, \
     Show as _LBFrontendIPShow, Delete as _LBFrontendIPDelete, List as _LBFrontendIPList
@@ -470,12 +470,11 @@ class LBAddressPoolCreate(_LBAddressPoolBasicCreate):
         self.post_operations()
 
     def pre_operations(self):
-        from azure.cli.core.aaz.utils import assign_aaz_list_arg
         from azure.mgmt.core.tools import is_valid_resource_id
 
         args = self.ctx.args
         if has_value(args.backend_addresses):
-            for idx, backend_address in enumerate(args.backend_addresses):
+            for backend_address in args.backend_addresses:
                 if not has_value(backend_address.admin_state) and has_value(args.admin_state):
                     # use the command level argument --admin-state
                     backend_address.admin_state = args.admin_state
@@ -542,12 +541,11 @@ class LBAddressPoolUpdate(_LBAddressPoolUpdate):
         return args_schema
 
     def pre_operations(self):
-        from azure.cli.core.aaz.utils import assign_aaz_list_arg
         from azure.mgmt.core.tools import is_valid_resource_id
 
         args = self.ctx.args
         if has_value(args.backend_addresses) and args.backend_addresses.to_serialized_data() is not None:
-            for idx, backend_address in enumerate(args.backend_addresses):
+            for backend_address in args.backend_addresses:
                 if not has_value(backend_address.admin_state) and has_value(args.admin_state):
                     # use the command level argument --admin-state
                     backend_address.admin_state = args.admin_state
