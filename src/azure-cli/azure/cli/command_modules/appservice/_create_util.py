@@ -488,7 +488,7 @@ def _get_dotnet_main_project_csproj(dirPath):
 
 
 # List the project references path in a .csproj file
-def _get_dotnet_project_references(csproj_path: str):
+def _get_dotnet_project_references(csproj_path):
     import xml.etree.ElementTree as ET
 
     abs_references = []
@@ -512,9 +512,9 @@ def _get_dotnet_project_references(csproj_path: str):
 
 
 # List the missing project references because of transitive dependencies
-def _get_dotnet_transitive_missing_references(current_references: list[str]):
-    result_references = list[str](current_references)
-    newReference = set[str](current_references)
+def _get_dotnet_transitive_missing_references(current_references):
+    result_references = list(current_references)
+    newReference = set(current_references)
 
     while any(newReference):
         reference = newReference.pop()
@@ -557,7 +557,7 @@ def _append_dotnet_references(dirPath, abs_references, zip_file_path):
 
 
 # Zip all local project references needed to compile the dotnet webapp
-def zip_dotnet_project_references(dirPath: str, zip_file_path: str):
+def zip_dotnet_project_references(dirPath, zip_file_path):
     # Get csproj path
     csproj_path = _get_dotnet_main_project_csproj(dirPath)
 
