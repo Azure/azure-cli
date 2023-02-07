@@ -12,26 +12,20 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network cross-region-lb address-pool address list",
-    is_preview=True,
+    "network lb address-pool address wait",
 )
-class List(AAZCommand):
-    """List all backend addresses of the load balance backend address pool.
-
-    :example: List all backend addresses of the load balance backend address pool.
-        az network cross-region-lb address-pool address list -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool
+class Wait(AAZWaitCommand):
+    """Place the CLI in a waiting state until a condition is met.
     """
 
     _aaz_info = {
-        "version": "2022-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}/backendaddresspools/{}", "2022-05-01", "properties.loadBalancerBackendAddresses"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}/backendaddresspools/{}", "2022-05-01", "properties.loadBalancerBackendAddresses[]"],
         ]
     }
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        self.SubresourceSelector(ctx=self.ctx, name="subresource")
         self._execute_operations()
         return self._output()
 
@@ -50,11 +44,13 @@ class List(AAZCommand):
             options=["--pool-name"],
             help="The name of the backend address pool.",
             required=True,
+            id_part="child_name_1",
         )
         _args_schema.lb_name = AAZStrArg(
             options=["--lb-name"],
             help="The name of the load balancer.",
             required=True,
+            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -75,19 +71,8 @@ class List(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
         return result
-
-    class SubresourceSelector(AAZJsonSelector):
-
-        def _get(self):
-            result = self.ctx.vars.instance
-            return result.properties.loadBalancerBackendAddresses
-
-        def _set(self, value):
-            result = self.ctx.vars.instance
-            result.properties.loadBalancerBackendAddresses = value
-            return
 
     class LoadBalancerBackendAddressPoolsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -172,13 +157,13 @@ class List(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _ListHelper._build_schema_backend_address_pool_read(cls._schema_on_200)
+            _WaitHelper._build_schema_backend_address_pool_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
 
-class _ListHelper:
-    """Helper class for List"""
+class _WaitHelper:
+    """Helper class for Wait"""
 
     _schema_application_security_group_read = None
 
@@ -2288,4 +2273,4 @@ class _ListHelper:
         _schema.type = cls._schema_virtual_network_tap_read.type
 
 
-__all__ = ["List"]
+__all__ = ["Wait"]

@@ -12,17 +12,13 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network cross-region-lb address-pool show",
+    "network lb address-pool wait",
 )
-class Show(AAZCommand):
-    """Get load balancer backend address pool.
-
-    :example: Get the details of an address pool.
-        az network cross-region-lb address-pool show -g MyResourceGroup --lb-name MyLb -n MyAddressPool
+class Wait(AAZWaitCommand):
+    """Place the CLI in a waiting state until a condition is met.
     """
 
     _aaz_info = {
-        "version": "2022-05-01",
         "resources": [
             ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}/backendaddresspools/{}", "2022-05-01"],
         ]
@@ -75,7 +71,7 @@ class Show(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
         return result
 
     class LoadBalancerBackendAddressPoolsGet(AAZHttpOperation):
@@ -161,13 +157,13 @@ class Show(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _ShowHelper._build_schema_backend_address_pool_read(cls._schema_on_200)
+            _WaitHelper._build_schema_backend_address_pool_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
 
-class _ShowHelper:
-    """Helper class for Show"""
+class _WaitHelper:
+    """Helper class for Wait"""
 
     _schema_application_security_group_read = None
 
@@ -2277,4 +2273,4 @@ class _ShowHelper:
         _schema.type = cls._schema_virtual_network_tap_read.type
 
 
-__all__ = ["Show"]
+__all__ = ["Wait"]
