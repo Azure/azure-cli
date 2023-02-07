@@ -371,23 +371,23 @@ subscription than the app service environment, please use the resource ID for --
 
     with self.argument_context('webapp config container') as c:
         c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'],
-                    help='the container registry server url')
+                   help='the container registry server url')
         c.argument('docker_custom_image_name', options_list=['--docker-custom-image-name', '-c', '-i'],
-                    help='the container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
+                   help='the container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
         c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'],
-                    help='the container registry server username')
+                   help='the container registry server username')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'],
-                    help='the container registry server password')
-    
+                   help='the container registry server password')
+
     with self.argument_context('functionapp config container') as c:
         c.argument('registry_server', options_list=['--registry-server', '-r', c.deprecate(target='--docker-registry-server-url', redirect='--registry-server')],
-                    help='the container registry server url')
+                   help='the container registry server url')
         c.argument('image', options_list=['--image', '-c', '-i', c.deprecate(target='--docker-custom-image-name', redirect='--image')],
-                    help='the container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
+                   help='the container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
         c.argument('registry_username', options_list=['--registry-username', '-u', c.deprecate(target='--docker-registry-server-user', redirect='--registry-username')],
-                    help='the container registry server username')
+                   help='the container registry server username')
         c.argument('registry_password', options_list=['--registry-password', '-p', c.deprecate(target='--docker-registry-server-password', redirect='--registry-password')],
-                    help='the container registry server password')        
+                   help='the container registry server password')
 
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
