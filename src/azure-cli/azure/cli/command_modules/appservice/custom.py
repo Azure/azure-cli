@@ -1578,12 +1578,12 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
                                                                           slot=slot))
 
 
-def update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url=None,
-                                          docker_custom_image_name=None, docker_registry_server_user=None,
-                                          docker_registry_server_password=None, slot=None):
-    return update_container_settings(cmd, resource_group_name, name, docker_registry_server_url,
-                                     docker_custom_image_name, docker_registry_server_user, None,
-                                     docker_registry_server_password, multicontainer_config_type=None,
+def update_container_settings_functionapp(cmd, resource_group_name, name, registry_server=None,
+                                          image=None, registry_username=None,
+                                          registry_password=None, slot=None):
+    return update_container_settings(cmd, resource_group_name, name, registry_server,
+                                     image, registry_username, None,
+                                     registry_password, multicontainer_config_type=None,
                                      multicontainer_config_file=None, slot=slot)
 
 
@@ -1757,9 +1757,9 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
 
 
 def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_source=None,
-                            image=None, docker_registry_server_password=None,
-                            docker_registry_server_user=None):
-    container_args = image or docker_registry_server_password or docker_registry_server_user
+                            image=None, registry_password=None,
+                            registry_username=None):
+    container_args = image or registry_password or registry_username
     if container_args and not configuration_source:
         raise ArgumentUsageError("Cannot use image, password and username arguments without "
                                  "--configuration-source argument")
@@ -1779,8 +1779,8 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
 
     if configuration_source:
         update_slot_configuration_from_source(cmd, client, resource_group_name, name, slot, configuration_source,
-                                              image, docker_registry_server_password,
-                                              docker_registry_server_user,
+                                              image, registry_password,
+                                              registry_username,
                                               docker_registry_server_url=docker_registry_server_url)
 
     result.name = result.name.split('/')[-1]
@@ -3478,7 +3478,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        consumption_plan_location=None, app_insights=None, app_insights_key=None,
                        disable_app_insights=None, deployment_source_url=None,
                        deployment_source_branch='master', deployment_local_git=None,
-                       docker_registry_server_password=None, docker_registry_server_user=None,
+                       registry_password=None, registry_username=None,
                        image=None, tags=None, assign_identities=None,
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, environment=None):
     # pylint: disable=too-many-statements, too-many-branches
@@ -3692,8 +3692,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     if image:
         update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url,
-                                              image, docker_registry_server_user,
-                                              docker_registry_server_password)
+                                              image, registry_username,
+                                              registry_password)
 
     if assign_identities is not None:
         identity = assign_identity(cmd, resource_group_name, name, assign_identities,
