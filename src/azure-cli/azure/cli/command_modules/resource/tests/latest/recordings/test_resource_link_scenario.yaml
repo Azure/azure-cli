@@ -13,13 +13,13 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_link_scenario000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_link_scenario000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_link_scenario000001","name":"cli_test_resource_link_scenario000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-08-26T05:41:57Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_link_scenario000001","name":"cli_test_resource_link_scenario000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-07T11:24:23Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -28,7 +28,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:41:59 GMT
+      - Tue, 07 Feb 2023 11:24:24 GMT
       expires:
       - '-1'
       pragma:
@@ -43,8 +43,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "dhcpOptions": {}}}'
+    body: '{"location": "westus", "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "enableDdosProtection": false, "enableVmProtection": false}}'
     headers:
       Accept:
       - application/json
@@ -55,40 +55,39 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '123'
+      - '152'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_link_scenario000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_link_scenario000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"6854aabd-62b6-4202-a4a4-5971d77f337e\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"c5dec222-8cd1-46e5-b4db-61d78a7ba275\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"0f8ad16a-271c-4e06-b8a8-7bd3f2ca8ad9\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"3b4451f6-c1b1-4b19-bb0e-03b7848eb10c\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [],\r\n
+        \   \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\": false\r\n
+        \ }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f4e46dd5-beeb-450e-bcb7-7dba71687e18?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/13a527ef-ebeb-4728-aa37-219bef80688d?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '694'
+      - '625'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:42:01 GMT
+      - Tue, 07 Feb 2023 11:24:27 GMT
       expires:
       - '-1'
       pragma:
@@ -101,7 +100,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e124fa25-f47a-4044-a9eb-b5020c07f19a
+      - 8e3515e3-135b-404b-8e32-a0beb3d186dc
       x-ms-ratelimit-remaining-subscription-writes:
       - '1198'
     status:
@@ -121,10 +120,10 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f4e46dd5-beeb-450e-bcb7-7dba71687e18?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/13a527ef-ebeb-4728-aa37-219bef80688d?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -136,7 +135,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:42:04 GMT
+      - Tue, 07 Feb 2023 11:24:30 GMT
       expires:
       - '-1'
       pragma:
@@ -153,7 +152,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ce0f4b2a-bdc6-4f02-bfb5-8bf6c0291569
+      - e14513c6-637f-4be3-9738-1ca713ba4a30
     status:
       code: 200
       message: OK
@@ -171,32 +170,31 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_link_scenario000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_link_scenario000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"fd247f84-6ff2-4e0e-b46e-3983e709b18b\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"9060124c-f973-405d-bb7e-016abd192ed7\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"0f8ad16a-271c-4e06-b8a8-7bd3f2ca8ad9\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"3b4451f6-c1b1-4b19-bb0e-03b7848eb10c\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [],\r\n
+        \   \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\": false\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '695'
+      - '626'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:42:04 GMT
+      - Tue, 07 Feb 2023 11:24:31 GMT
       etag:
-      - W/"fd247f84-6ff2-4e0e-b46e-3983e709b18b"
+      - W/"9060124c-f973-405d-bb7e-016abd192ed7"
       expires:
       - '-1'
       pragma:
@@ -213,7 +211,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 731430ff-a219-4138-a433-fee8449c758c
+      - 4ecee06e-c0cc-44f9-bcbb-91c3f0317221
     status:
       code: 200
       message: OK
@@ -231,32 +229,31 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_link_scenario000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_link_scenario000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"fd247f84-6ff2-4e0e-b46e-3983e709b18b\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"9060124c-f973-405d-bb7e-016abd192ed7\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"0f8ad16a-271c-4e06-b8a8-7bd3f2ca8ad9\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"3b4451f6-c1b1-4b19-bb0e-03b7848eb10c\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [],\r\n
+        \   \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\": false\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '695'
+      - '626'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:42:05 GMT
+      - Tue, 07 Feb 2023 11:24:31 GMT
       etag:
-      - W/"fd247f84-6ff2-4e0e-b46e-3983e709b18b"
+      - W/"9060124c-f973-405d-bb7e-016abd192ed7"
       expires:
       - '-1'
       pragma:
@@ -273,7 +270,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 72d05b18-0f0a-4e2e-bc57-0c0acc0fcea6
+      - 9a1f1fc9-3635-4fc7-9d74-10957145cd24
     status:
       code: 200
       message: OK
@@ -291,13 +288,13 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_link_scenario000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_link_scenario000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_link_scenario000001","name":"cli_test_resource_link_scenario000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-08-26T05:41:57Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_link_scenario000001","name":"cli_test_resource_link_scenario000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-07T11:24:23Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -306,7 +303,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:42:05 GMT
+      - Tue, 07 Feb 2023 11:24:32 GMT
       expires:
       - '-1'
       pragma:
@@ -339,8 +336,8 @@ interactions:
       ParameterSetName:
       - --link --target --notes
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_link_scenario000001/providers/Microsoft.Resources/links/link1?api-version=2016-09-01
   response:
@@ -355,7 +352,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:42:05 GMT
+      - Tue, 07 Feb 2023 11:24:31 GMT
       expires:
       - '-1'
       pragma:
@@ -365,7 +362,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -383,8 +380,8 @@ interactions:
       ParameterSetName:
       - --link
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_link_scenario000001/providers/Microsoft.Resources/links/link1?api-version=2016-09-01
   response:
@@ -399,7 +396,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:42:06 GMT
+      - Tue, 07 Feb 2023 11:24:31 GMT
       expires:
       - '-1'
       pragma:
@@ -429,8 +426,8 @@ interactions:
       ParameterSetName:
       - --link --target --notes
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_link_scenario000001/providers/Microsoft.Resources/links/link1?api-version=2016-09-01
   response:
@@ -445,7 +442,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:42:05 GMT
+      - Tue, 07 Feb 2023 11:24:31 GMT
       expires:
       - '-1'
       pragma:
@@ -480,8 +477,8 @@ interactions:
       ParameterSetName:
       - --link --target --notes
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_link_scenario000001/providers/Microsoft.Resources/links/link1?api-version=2016-09-01
   response:
@@ -496,7 +493,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:42:05 GMT
+      - Tue, 07 Feb 2023 11:24:32 GMT
       expires:
       - '-1'
       pragma:
@@ -510,7 +507,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1195'
     status:
       code: 200
       message: OK
@@ -528,8 +525,8 @@ interactions:
       ParameterSetName:
       - --query -o
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/links?api-version=2016-09-01
   response:
@@ -544,7 +541,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:42:06 GMT
+      - Tue, 07 Feb 2023 11:24:32 GMT
       expires:
       - '-1'
       pragma:
@@ -574,8 +571,8 @@ interactions:
       ParameterSetName:
       - --link
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_link_scenario000001/providers/Microsoft.Resources/links/link1?api-version=2016-09-01
   response:
@@ -590,7 +587,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:42:06 GMT
+      - Tue, 07 Feb 2023 11:24:32 GMT
       expires:
       - '-1'
       pragma:
@@ -622,8 +619,8 @@ interactions:
       ParameterSetName:
       - --link
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_link_scenario000001/providers/Microsoft.Resources/links/link1?api-version=2016-09-01
   response:
@@ -635,7 +632,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 26 Aug 2022 05:42:06 GMT
+      - Tue, 07 Feb 2023 11:24:32 GMT
       expires:
       - '-1'
       pragma:
@@ -645,7 +642,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14996'
+      - '14999'
     status:
       code: 200
       message: OK
@@ -661,8 +658,8 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/links?api-version=2016-09-01
   response:
@@ -676,7 +673,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:42:06 GMT
+      - Tue, 07 Feb 2023 11:24:32 GMT
       expires:
       - '-1'
       pragma:

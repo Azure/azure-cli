@@ -13,13 +13,13 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2022-08-26T05:48:07Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2023-02-07T15:34:37Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -28,25 +28,22 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:48:08 GMT
+      - Tue, 07 Feb 2023 15:34:38 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus2", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name": "testsubnet000004",
-      "properties": {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies":
-      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
+    body: '{"location": "eastus2", "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "enableDdosProtection": false, "enableVmProtection": false,
+      "subnets": [{"name": "testsubnet000004", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}'
     headers:
       Accept:
       - application/json
@@ -57,28 +54,26 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '309'
+      - '244'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"testvnet000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003\",\r\n
-        \ \"etag\": \"W/\\\"1e10ab24-706a-4c9e-8ff3-ae36863ccaca\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"56ddf6d0-9683-451f-967d-96499e56fa1a\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"eeef8b41-99e8-4748-b769-5b6bce47616e\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"testsubnet000004\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\",\r\n
-        \       \"etag\": \"W/\\\"1e10ab24-706a-4c9e-8ff3-ae36863ccaca\\\"\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"b8ae5954-315a-4bf6-a26a-caf785b43854\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
+        \     {\r\n        \"name\": \"testsubnet000004\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\",\r\n
+        \       \"etag\": \"W/\\\"56ddf6d0-9683-451f-967d-96499e56fa1a\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -89,15 +84,15 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/824c1a0a-0cc7-41ab-a820-8fa8254e7b71?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/8265aed8-7ae7-4b69-9be9-705d8c31621c?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '1332'
+      - '1263'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:48:08 GMT
+      - Tue, 07 Feb 2023 15:34:39 GMT
       expires:
       - '-1'
       pragma:
@@ -110,12 +105,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9af40e56-20ab-4954-9fa8-66ae001ccb40
+      - f0f9c6e7-f4d9-45a1-8b37-915965414a08
       x-ms-ratelimit-remaining-subscription-writes:
       - '1198'
     status:
       code: 201
-      message: Created
+      message: ''
 - request:
     body: null
     headers:
@@ -130,10 +125,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/824c1a0a-0cc7-41ab-a820-8fa8254e7b71?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/8265aed8-7ae7-4b69-9be9-705d8c31621c?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -145,7 +140,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:48:11 GMT
+      - Tue, 07 Feb 2023 15:34:43 GMT
       expires:
       - '-1'
       pragma:
@@ -155,14 +150,10 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 556b9da7-31ed-4a60-ad23-cfcf2f231472
+      - 43182628-4774-48d8-a1b5-87b06f7fb40f
     status:
       code: 200
       message: OK
@@ -180,22 +171,20 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"testvnet000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003\",\r\n
-        \ \"etag\": \"W/\\\"949085f1-d021-4785-9a50-95fc134e9b85\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"c184afe9-c5a6-4119-8142-aaeef9ffc6fb\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"eeef8b41-99e8-4748-b769-5b6bce47616e\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"testsubnet000004\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\",\r\n
-        \       \"etag\": \"W/\\\"949085f1-d021-4785-9a50-95fc134e9b85\\\"\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"b8ae5954-315a-4bf6-a26a-caf785b43854\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
+        \     {\r\n        \"name\": \"testsubnet000004\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\",\r\n
+        \       \"etag\": \"W/\\\"c184afe9-c5a6-4119-8142-aaeef9ffc6fb\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -206,13 +195,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1334'
+      - '1265'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:48:11 GMT
+      - Tue, 07 Feb 2023 15:34:43 GMT
       etag:
-      - W/"949085f1-d021-4785-9a50-95fc134e9b85"
+      - W/"c184afe9-c5a6-4119-8142-aaeef9ffc6fb"
       expires:
       - '-1'
       pragma:
@@ -222,14 +211,10 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 434a479c-788d-4139-bea5-f76d85b3af7b
+      - 72d25051-b9bc-4527-94bd-a0a046790d5c
     status:
       code: 200
       message: OK
@@ -247,14 +232,14 @@ interactions:
       ParameterSetName:
       - -g --vnet-name --name --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"testsubnet000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\",\r\n
-        \ \"etag\": \"W/\\\"949085f1-d021-4785-9a50-95fc134e9b85\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"c184afe9-c5a6-4119-8142-aaeef9ffc6fb\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -267,9 +252,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:48:11 GMT
+      - Tue, 07 Feb 2023 15:35:02 GMT
       etag:
-      - W/"949085f1-d021-4785-9a50-95fc134e9b85"
+      - W/"c184afe9-c5a6-4119-8142-aaeef9ffc6fb"
       expires:
       - '-1'
       pragma:
@@ -279,22 +264,18 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b3e2e1e7-3eee-446c-81fe-da25638044af
+      - d56c096a-1f89-488e-bb22-7e85d8779478
     status:
       code: 200
       message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004",
-      "name": "testsubnet000004", "type": "Microsoft.Network/virtualNetworks/subnets",
-      "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [], "privateEndpointNetworkPolicies":
-      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}'
+      "name": "testsubnet000004", "properties": {"addressPrefix": "10.0.0.0/24", "delegations":
+      [], "privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}, "type": "Microsoft.Network/virtualNetworks/subnets"}'
     headers:
       Accept:
       - application/json
@@ -311,21 +292,23 @@ interactions:
       ParameterSetName:
       - -g --vnet-name --name --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"testsubnet000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\",\r\n
-        \ \"etag\": \"W/\\\"f4b0fccf-baa8-4f94-8793-f360cb27c4ff\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"eb3244cb-844c-425c-930d-ff6873f134fe\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/9fd76f93-646b-425b-8ad9-ced22edc99b5?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/7b1e738e-4a29-486c-8270-9b4f44071d0f?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
@@ -333,7 +316,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:48:12 GMT
+      - Tue, 07 Feb 2023 15:35:05 GMT
       expires:
       - '-1'
       pragma:
@@ -343,66 +326,12 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b9a286b0-4117-4c58-847b-92b9c44f74e2
+      - 668b250d-b2c8-4149-bbf7-ddbf6d8f47e6
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: ''
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --vnet-name --name --disable-private-endpoint-network-policies
-      User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/9fd76f93-646b-425b-8ad9-ced22edc99b5?api-version=2022-01-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '29'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 26 Aug 2022 05:48:42 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 5ec1fdd5-d6fc-4e28-881e-bedc38a6ae97
+      - '1196'
     status:
       code: 200
       message: OK
@@ -420,14 +349,60 @@ interactions:
       ParameterSetName:
       - -g --vnet-name --name --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/7b1e738e-4a29-486c-8270-9b4f44071d0f?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Feb 2023 15:35:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ecf19bb0-8f91-4f5a-80b0-87fd0112ef2e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"testsubnet000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\",\r\n
-        \ \"etag\": \"W/\\\"f4b0fccf-baa8-4f94-8793-f360cb27c4ff\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"eb3244cb-844c-425c-930d-ff6873f134fe\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -440,9 +415,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:48:42 GMT
+      - Tue, 07 Feb 2023 15:35:55 GMT
       etag:
-      - W/"f4b0fccf-baa8-4f94-8793-f360cb27c4ff"
+      - W/"eb3244cb-844c-425c-930d-ff6873f134fe"
       expires:
       - '-1'
       pragma:
@@ -452,14 +427,10 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7c291f23-d2d2-4a3b-8cb2-248369969776
+      - 933d255e-fdca-4910-9851-f0a9c085d2c5
     status:
       code: 200
       message: OK
@@ -477,13 +448,13 @@ interactions:
       ParameterSetName:
       - --name --resource-group --sku
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2022-08-26T05:48:07Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2023-02-07T15:34:37Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -492,7 +463,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:48:42 GMT
+      - Tue, 07 Feb 2023 15:35:57 GMT
       expires:
       - '-1'
       pragma:
@@ -525,18 +496,18 @@ interactions:
       ParameterSetName:
       - --name --resource-group --sku
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002?api-version=2022-02-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002","name":"testreg000002","location":"eastus2","tags":{},"systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-08-26T05:48:43.2434897+00:00","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T05:48:43.2434897+00:00"},"properties":{"loginServer":"testreg000002.azurecr.io","creationDate":"2022-08-26T05:48:43.2434897Z","provisioningState":"Creating","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2022-08-26T05:48:50.3211728+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"},"azureADAuthenticationAsArmPolicy":{"status":"enabled"},"softDeletePolicy":{"retentionDays":7,"lastUpdatedTime":"2022-08-26T05:48:50.3211728+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002","name":"testreg000002","location":"eastus2","tags":{},"systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-02-07T15:35:57.8961439+00:00","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-02-07T15:35:57.8961439+00:00"},"properties":{"loginServer":"testreg000002.azurecr.io","creationDate":"2023-02-07T15:35:57.8961439Z","provisioningState":"Creating","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2023-02-07T15:36:04.2485546+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"},"azureADAuthenticationAsArmPolicy":{"status":"enabled"},"softDeletePolicy":{"retentionDays":7,"lastUpdatedTime":"2023-02-07T15:36:04.2485546+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
     headers:
       api-supported-versions:
       - 2022-02-01-preview
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/operationStatuses/registries-be193bb8-2502-11ed-a3ee-7b466acf132d?api-version=2022-02-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/operationStatuses/registries-1d9949da-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -544,7 +515,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:48:49 GMT
+      - Tue, 07 Feb 2023 15:36:04 GMT
       expires:
       - '-1'
       pragma:
@@ -556,7 +527,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -574,10 +545,10 @@ interactions:
       ParameterSetName:
       - --name --resource-group --sku
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/operationStatuses/registries-be193bb8-2502-11ed-a3ee-7b466acf132d?api-version=2022-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/operationStatuses/registries-1d9949da-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -585,7 +556,7 @@ interactions:
       api-supported-versions:
       - 2022-02-01-preview
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/operationStatuses/registries-be193bb8-2502-11ed-a3ee-7b466acf132d?api-version=2022-02-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/operationStatuses/registries-1d9949da-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -593,7 +564,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:48:59 GMT
+      - Tue, 07 Feb 2023 15:36:14 GMT
       expires:
       - '-1'
       pragma:
@@ -602,10 +573,6 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -625,13 +592,13 @@ interactions:
       ParameterSetName:
       - --name --resource-group --sku
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002?api-version=2022-02-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002","name":"testreg000002","location":"eastus2","tags":{},"systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-08-26T05:48:43.2434897+00:00","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T05:48:43.2434897+00:00"},"properties":{"loginServer":"testreg000002.azurecr.io","creationDate":"2022-08-26T05:48:43.2434897Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2022-08-26T05:48:50.3211728+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"},"azureADAuthenticationAsArmPolicy":{"status":"enabled"},"softDeletePolicy":{"retentionDays":7,"lastUpdatedTime":"2022-08-26T05:48:50.3211728+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002","name":"testreg000002","location":"eastus2","tags":{},"systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-02-07T15:35:57.8961439+00:00","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-02-07T15:35:57.8961439+00:00"},"properties":{"loginServer":"testreg000002.azurecr.io","creationDate":"2023-02-07T15:35:57.8961439Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2023-02-07T15:36:04.2485546+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"},"azureADAuthenticationAsArmPolicy":{"status":"enabled"},"softDeletePolicy":{"retentionDays":7,"lastUpdatedTime":"2023-02-07T15:36:04.2485546+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
     headers:
       api-supported-versions:
       - 2022-02-01-preview
@@ -642,7 +609,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:48:59 GMT
+      - Tue, 07 Feb 2023 15:36:14 GMT
       expires:
       - '-1'
       pragma:
@@ -651,10 +618,6 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -675,13 +638,13 @@ interactions:
       - -n -g --subnet --vnet-name --private-connection-resource-id --group-ids --connection-name
         --manual-request
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2022-08-26T05:48:07Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2023-02-07T15:34:37Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -690,7 +653,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:49:00 GMT
+      - Tue, 07 Feb 2023 15:36:15 GMT
       expires:
       - '-1'
       pragma:
@@ -705,11 +668,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus2", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004",
-      "properties": {"privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
-      "Enabled"}}, "manualPrivateLinkServiceConnections": [{"name": "priv_endpointconn000006",
-      "properties": {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002",
-      "groupIds": ["registry"]}}]}}'
+    body: '{"location": "eastus2", "properties": {"manualPrivateLinkServiceConnections":
+      [{"name": "priv_endpointconn000006", "properties": {"groupIds": ["registry"],
+      "privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002"}}],
+      "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004"}}}'
     headers:
       Accept:
       - application/json
@@ -720,27 +682,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '632'
+      - '522'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --subnet --vnet-name --private-connection-resource-id --group-ids --connection-name
         --manual-request
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"priv_endpoint000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005\",\r\n
-        \ \"etag\": \"W/\\\"733dca4b-e02f-41b8-8298-a9b4a0bcfe19\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"e2b7a6da-6d48-4c38-a996-0899b12208a5\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"6a3d872f-34c2-4b70-8d1c-96c377939eed\",\r\n    \"privateLinkServiceConnections\":
+        \"2b674133-53d1-4ef4-8566-8416412728de\",\r\n    \"privateLinkServiceConnections\":
         [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
         \"priv_endpointconn000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005/manualPrivateLinkServiceConnections/priv_endpointconn000006\",\r\n
-        \       \"etag\": \"W/\\\"733dca4b-e02f-41b8-8298-a9b4a0bcfe19\\\"\",\r\n
+        \       \"etag\": \"W/\\\"e2b7a6da-6d48-4c38-a996-0899b12208a5\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002\",\r\n
         \         \"groupIds\": [\r\n            \"registry\"\r\n          ],\r\n
@@ -750,13 +712,13 @@ interactions:
         \     }\r\n    ],\r\n    \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\":
         {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\"\r\n
         \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
-        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/priv_endpoint000005.nic.a2dc65d5-077c-4941-94b9-2d270603ed4c\"\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/priv_endpoint000005.nic.5fab5792-af53-4b36-a6bf-749d50673ae1\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/2ddfc8b7-f230-477a-a76b-354a64519361?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/d4436ff8-db0c-4d4f-b420-2851a7cb05ff?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
@@ -764,7 +726,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:49:03 GMT
+      - Tue, 07 Feb 2023 15:36:15 GMT
       expires:
       - '-1'
       pragma:
@@ -777,9 +739,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 060d6f13-ad98-4dcf-98e7-e9c32d31d379
+      - b4af5836-2cd3-4c34-ac2f-1eaf123f7508
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -798,10 +760,10 @@ interactions:
       - -n -g --subnet --vnet-name --private-connection-resource-id --group-ids --connection-name
         --manual-request
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/2ddfc8b7-f230-477a-a76b-354a64519361?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/d4436ff8-db0c-4d4f-b420-2851a7cb05ff?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -813,7 +775,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:49:13 GMT
+      - Tue, 07 Feb 2023 15:36:25 GMT
       expires:
       - '-1'
       pragma:
@@ -823,14 +785,10 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8430b14e-09e1-499d-8796-1a618fa8b4dd
+      - d454e520-914a-4593-9d9b-73079b1552ab
     status:
       code: 200
       message: OK
@@ -849,61 +807,10 @@ interactions:
       - -n -g --subnet --vnet-name --private-connection-resource-id --group-ids --connection-name
         --manual-request
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/2ddfc8b7-f230-477a-a76b-354a64519361?api-version=2022-01-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 26 Aug 2022 05:49:23 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 9eb9c121-7f73-4526-9ef7-93c3577e4523
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --subnet --vnet-name --private-connection-resource-id --group-ids --connection-name
-        --manual-request
-      User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/2ddfc8b7-f230-477a-a76b-354a64519361?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/d4436ff8-db0c-4d4f-b420-2851a7cb05ff?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -915,7 +822,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:49:43 GMT
+      - Tue, 07 Feb 2023 15:36:36 GMT
       expires:
       - '-1'
       pragma:
@@ -925,14 +832,10 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2a550123-9098-4ca4-8d55-b873ba82f99f
+      - 184f6eeb-0a01-402c-9a51-8c312b1b86d4
     status:
       code: 200
       message: OK
@@ -951,20 +854,20 @@ interactions:
       - -n -g --subnet --vnet-name --private-connection-resource-id --group-ids --connection-name
         --manual-request
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"priv_endpoint000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005\",\r\n
-        \ \"etag\": \"W/\\\"75fa836c-dac8-41bb-912d-2d6712fb5133\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"38dd9900-da74-4002-bee7-e24c5def883a\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"6a3d872f-34c2-4b70-8d1c-96c377939eed\",\r\n    \"privateLinkServiceConnections\":
+        \"2b674133-53d1-4ef4-8566-8416412728de\",\r\n    \"privateLinkServiceConnections\":
         [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
         \"priv_endpointconn000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005/manualPrivateLinkServiceConnections/priv_endpointconn000006\",\r\n
-        \       \"etag\": \"W/\\\"75fa836c-dac8-41bb-912d-2d6712fb5133\\\"\",\r\n
+        \       \"etag\": \"W/\\\"38dd9900-da74-4002-bee7-e24c5def883a\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002\",\r\n
         \         \"groupIds\": [\r\n            \"registry\"\r\n          ],\r\n
@@ -974,7 +877,7 @@ interactions:
         \     }\r\n    ],\r\n    \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\":
         {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\"\r\n
         \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
-        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/priv_endpoint000005.nic.a2dc65d5-077c-4941-94b9-2d270603ed4c\"\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/priv_endpoint000005.nic.5fab5792-af53-4b36-a6bf-749d50673ae1\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       cache-control:
@@ -984,9 +887,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:49:43 GMT
+      - Tue, 07 Feb 2023 15:36:37 GMT
       etag:
-      - W/"75fa836c-dac8-41bb-912d-2d6712fb5133"
+      - W/"38dd9900-da74-4002-bee7-e24c5def883a"
       expires:
       - '-1'
       pragma:
@@ -996,14 +899,10 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a20794f1-6c7f-4e24-8e19-895d4de7ead0
+      - 41ae9512-03a7-421e-b94a-ede9e6e2e8ce
     status:
       code: 200
       message: OK
@@ -1021,17 +920,17 @@ interactions:
       ParameterSetName:
       - -g --registry-name
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections?api-version=2022-02-01-preview
   response:
     body:
-      string: '{"value":[{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd","name":"testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005"},"privateLinkServiceConnectionState":{"status":"Pending"},"provisioningState":"Succeeded"}}]}'
+      string: '{"value":[{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792","name":"testreg000002.f574510234a749ffb2a7948b9c0c3792","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005"},"privateLinkServiceConnectionState":{"status":"Pending"},"provisioningState":"Succeeded"}}]}'
     headers:
       api-supported-versions:
       - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-09-01, 2021-12-01-preview, 2022-02-01-preview
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1039,7 +938,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:49:44 GMT
+      - Tue, 07 Feb 2023 15:36:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1071,17 +970,17 @@ interactions:
       ParameterSetName:
       - -g --registry-name -n --description
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd?api-version=2022-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792?api-version=2022-02-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd","name":"testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005"},"privateLinkServiceConnectionState":{"status":"Pending"},"provisioningState":"Succeeded"}}'
+      string: '{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792","name":"testreg000002.f574510234a749ffb2a7948b9c0c3792","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005"},"privateLinkServiceConnectionState":{"status":"Pending"},"provisioningState":"Succeeded"}}'
     headers:
       api-supported-versions:
       - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-09-01, 2021-12-01-preview, 2022-02-01-preview
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1089,7 +988,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:49:44 GMT
+      - Tue, 07 Feb 2023 15:36:37 GMT
       expires:
       - '-1'
       pragma:
@@ -1126,19 +1025,19 @@ interactions:
       ParameterSetName:
       - -g --registry-name -n --description
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd?api-version=2022-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792?api-version=2022-02-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd","name":"testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-08-26T05:49:44.9628112+00:00","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T05:49:44.9628112+00:00"},"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005"},"privateLinkServiceConnectionState":{"status":"Pending"},"provisioningState":"Updating"}}'
+      string: '{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792","name":"testreg000002.f574510234a749ffb2a7948b9c0c3792","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-02-07T15:36:37.8416905+00:00","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-02-07T15:36:37.8416905+00:00"},"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005"},"privateLinkServiceConnectionState":{"status":"Pending"},"provisioningState":"Updating"}}'
     headers:
       api-supported-versions:
       - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-09-01, 2021-12-01-preview, 2022-02-01-preview
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd/operationStatuses/privateendpointconnections-e2cdfe6d-2502-11ed-a3ee-7b466acf132d?api-version=2022-02-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792/operationStatuses/privateendpointconnections-357816d1-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1146,7 +1045,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:49:44 GMT
+      - Tue, 07 Feb 2023 15:36:37 GMT
       expires:
       - '-1'
       pragma:
@@ -1158,7 +1057,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -1176,19 +1075,19 @@ interactions:
       ParameterSetName:
       - -g --registry-name -n --description
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd/operationStatuses/privateendpointconnections-e2cdfe6d-2502-11ed-a3ee-7b466acf132d?api-version=2022-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792/operationStatuses/privateendpointconnections-357816d1-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd","name":"privateendpointconnections-e2cdfe6d-2502-11ed-a3ee-7b466acf132d","status":"Updating"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792","name":"privateendpointconnections-357816d1-a6fd-11ed-b7cd-3b8a2dd05908","status":"Updating"}'
     headers:
       api-supported-versions:
       - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-09-01, 2021-12-01-preview, 2022-02-01-preview
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd/operationStatuses/privateendpointconnections-e2cdfe6d-2502-11ed-a3ee-7b466acf132d?api-version=2022-02-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792/operationStatuses/privateendpointconnections-357816d1-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1196,7 +1095,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:49:55 GMT
+      - Tue, 07 Feb 2023 15:36:47 GMT
       expires:
       - '-1'
       pragma:
@@ -1224,19 +1123,19 @@ interactions:
       ParameterSetName:
       - -g --registry-name -n --description
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd/operationStatuses/privateendpointconnections-e2cdfe6d-2502-11ed-a3ee-7b466acf132d?api-version=2022-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792/operationStatuses/privateendpointconnections-357816d1-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd","name":"privateendpointconnections-e2cdfe6d-2502-11ed-a3ee-7b466acf132d","status":"Updating"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792","name":"privateendpointconnections-357816d1-a6fd-11ed-b7cd-3b8a2dd05908","status":"Updating"}'
     headers:
       api-supported-versions:
       - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-09-01, 2021-12-01-preview, 2022-02-01-preview
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd/operationStatuses/privateendpointconnections-e2cdfe6d-2502-11ed-a3ee-7b466acf132d?api-version=2022-02-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792/operationStatuses/privateendpointconnections-357816d1-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1244,7 +1143,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:50:05 GMT
+      - Tue, 07 Feb 2023 15:36:57 GMT
       expires:
       - '-1'
       pragma:
@@ -1272,17 +1171,65 @@ interactions:
       ParameterSetName:
       - -g --registry-name -n --description
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd/operationStatuses/privateendpointconnections-e2cdfe6d-2502-11ed-a3ee-7b466acf132d?api-version=2022-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792/operationStatuses/privateendpointconnections-357816d1-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd","name":"privateendpointconnections-e2cdfe6d-2502-11ed-a3ee-7b466acf132d","status":"Succeeded"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792","name":"privateendpointconnections-357816d1-a6fd-11ed-b7cd-3b8a2dd05908","status":"Updating"}'
     headers:
       api-supported-versions:
       - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-09-01, 2021-12-01-preview, 2022-02-01-preview
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792/operationStatuses/privateendpointconnections-357816d1-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '322'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Feb 2023 15:37:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --registry-name -n --description
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792/operationStatuses/privateendpointconnections-357816d1-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792","name":"privateendpointconnections-357816d1-a6fd-11ed-b7cd-3b8a2dd05908","status":"Succeeded"}'
+    headers:
+      api-supported-versions:
+      - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1290,7 +1237,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:50:14 GMT
+      - Tue, 07 Feb 2023 15:37:17 GMT
       expires:
       - '-1'
       pragma:
@@ -1322,17 +1269,17 @@ interactions:
       ParameterSetName:
       - -g --registry-name -n --description
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd?api-version=2022-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792?api-version=2022-02-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd","name":"testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"somedescription"},"provisioningState":"Succeeded"}}'
+      string: '{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792","name":"testreg000002.f574510234a749ffb2a7948b9c0c3792","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"somedescription"},"provisioningState":"Succeeded"}}'
     headers:
       api-supported-versions:
       - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-09-01, 2021-12-01-preview, 2022-02-01-preview
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1340,7 +1287,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:50:15 GMT
+      - Tue, 07 Feb 2023 15:37:17 GMT
       expires:
       - '-1'
       pragma:
@@ -1373,13 +1320,13 @@ interactions:
       - -n -g --subnet --vnet-name --private-connection-resource-id --group-ids --connection-name
         --manual-request
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2022-08-26T05:48:07Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2023-02-07T15:34:37Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -1388,7 +1335,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:50:16 GMT
+      - Tue, 07 Feb 2023 15:37:19 GMT
       expires:
       - '-1'
       pragma:
@@ -1403,11 +1350,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus2", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004",
-      "properties": {"privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
-      "Enabled"}}, "manualPrivateLinkServiceConnections": [{"name": "priv_endpointconn000008",
-      "properties": {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002",
-      "groupIds": ["registry"]}}]}}'
+    body: '{"location": "eastus2", "properties": {"manualPrivateLinkServiceConnections":
+      [{"name": "priv_endpointconn000008", "properties": {"groupIds": ["registry"],
+      "privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002"}}],
+      "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004"}}}'
     headers:
       Accept:
       - application/json
@@ -1418,27 +1364,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '632'
+      - '522'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --subnet --vnet-name --private-connection-resource-id --group-ids --connection-name
         --manual-request
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"priv_endpoint000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007\",\r\n
-        \ \"etag\": \"W/\\\"0762bd80-c60a-4977-90b6-7c1cea905bab\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"9cb7c41d-8090-46f0-8419-dd21f6b66aa6\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"77d075b2-cd1c-4010-a6d5-34224bc064ed\",\r\n    \"privateLinkServiceConnections\":
+        \"5825ed2e-c7ce-452d-bda5-fb28b15b45f3\",\r\n    \"privateLinkServiceConnections\":
         [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
         \"priv_endpointconn000008\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007/manualPrivateLinkServiceConnections/priv_endpointconn000008\",\r\n
-        \       \"etag\": \"W/\\\"0762bd80-c60a-4977-90b6-7c1cea905bab\\\"\",\r\n
+        \       \"etag\": \"W/\\\"9cb7c41d-8090-46f0-8419-dd21f6b66aa6\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002\",\r\n
         \         \"groupIds\": [\r\n            \"registry\"\r\n          ],\r\n
@@ -1448,13 +1394,13 @@ interactions:
         \     }\r\n    ],\r\n    \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\":
         {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\"\r\n
         \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
-        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/priv_endpoint000007.nic.3206bbdf-0879-4a7f-ade9-de7ee0afb7cc\"\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/priv_endpoint000007.nic.eb719873-8543-4874-b08a-8760c0bad06d\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/7054e1a9-5b43-4f99-b154-4141468d1d0a?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/41d3358b-98c8-4b3d-9fad-06e9371ad258?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
@@ -1462,7 +1408,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:50:16 GMT
+      - Tue, 07 Feb 2023 15:37:20 GMT
       expires:
       - '-1'
       pragma:
@@ -1475,12 +1421,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f95801c8-2569-484e-8f0a-570173983140
+      - e219488e-9815-4c6b-8395-115d81101810
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
     status:
       code: 201
-      message: ''
+      message: Created
 - request:
     body: null
     headers:
@@ -1496,10 +1442,10 @@ interactions:
       - -n -g --subnet --vnet-name --private-connection-resource-id --group-ids --connection-name
         --manual-request
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/7054e1a9-5b43-4f99-b154-4141468d1d0a?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/41d3358b-98c8-4b3d-9fad-06e9371ad258?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -1511,7 +1457,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:50:27 GMT
+      - Tue, 07 Feb 2023 15:37:30 GMT
       expires:
       - '-1'
       pragma:
@@ -1528,10 +1474,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - cdce449e-f585-4048-bdcd-07f9982c426b
+      - b6fdcc5e-cd04-4e69-a8cd-971fe8711786
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -1547,10 +1493,10 @@ interactions:
       - -n -g --subnet --vnet-name --private-connection-resource-id --group-ids --connection-name
         --manual-request
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/7054e1a9-5b43-4f99-b154-4141468d1d0a?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/41d3358b-98c8-4b3d-9fad-06e9371ad258?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1562,7 +1508,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:50:37 GMT
+      - Tue, 07 Feb 2023 15:37:40 GMT
       expires:
       - '-1'
       pragma:
@@ -1579,10 +1525,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f77fc64a-0d14-4564-9d31-0d45b34d0353
+      - 10720886-1b22-455e-b99d-fcde2995d6a5
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -1598,20 +1544,20 @@ interactions:
       - -n -g --subnet --vnet-name --private-connection-resource-id --group-ids --connection-name
         --manual-request
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
-        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"priv_endpoint000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007\",\r\n
-        \ \"etag\": \"W/\\\"6fa0667c-80c2-49f0-8a8a-6523d5f34e09\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"a674dbc8-4a35-4491-aab4-e7260a163cd5\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"77d075b2-cd1c-4010-a6d5-34224bc064ed\",\r\n    \"privateLinkServiceConnections\":
+        \"5825ed2e-c7ce-452d-bda5-fb28b15b45f3\",\r\n    \"privateLinkServiceConnections\":
         [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
         \"priv_endpointconn000008\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007/manualPrivateLinkServiceConnections/priv_endpointconn000008\",\r\n
-        \       \"etag\": \"W/\\\"6fa0667c-80c2-49f0-8a8a-6523d5f34e09\\\"\",\r\n
+        \       \"etag\": \"W/\\\"a674dbc8-4a35-4491-aab4-e7260a163cd5\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002\",\r\n
         \         \"groupIds\": [\r\n            \"registry\"\r\n          ],\r\n
@@ -1621,7 +1567,7 @@ interactions:
         \     }\r\n    ],\r\n    \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\":
         {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/testvnet000003/subnets/testsubnet000004\"\r\n
         \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
-        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/priv_endpoint000007.nic.3206bbdf-0879-4a7f-ade9-de7ee0afb7cc\"\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/priv_endpoint000007.nic.eb719873-8543-4874-b08a-8760c0bad06d\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       cache-control:
@@ -1631,9 +1577,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:50:37 GMT
+      - Tue, 07 Feb 2023 15:37:41 GMT
       etag:
-      - W/"6fa0667c-80c2-49f0-8a8a-6523d5f34e09"
+      - W/"a674dbc8-4a35-4491-aab4-e7260a163cd5"
       expires:
       - '-1'
       pragma:
@@ -1650,10 +1596,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c75e04cd-c732-4269-aa6e-15cafc6ce852
+      - 3e9409bf-4549-462f-a977-eae978e8ce04
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -1668,17 +1614,17 @@ interactions:
       ParameterSetName:
       - -g -r
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections?api-version=2022-02-01-preview
   response:
     body:
-      string: '{"value":[{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.ab38017fbb3445b8a898ae9f5602679e","name":"testreg000002.ab38017fbb3445b8a898ae9f5602679e","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007"},"privateLinkServiceConnectionState":{"status":"Pending"},"provisioningState":"Succeeded"}},{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd","name":"testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"somedescription"},"provisioningState":"Succeeded"}}]}'
+      string: '{"value":[{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.3b8b0511c95e442bbacfaaced31dc64e","name":"testreg000002.3b8b0511c95e442bbacfaaced31dc64e","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007"},"privateLinkServiceConnectionState":{"status":"Pending"},"provisioningState":"Succeeded"}},{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792","name":"testreg000002.f574510234a749ffb2a7948b9c0c3792","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"somedescription"},"provisioningState":"Succeeded"}}]}'
     headers:
       api-supported-versions:
       - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-09-01, 2021-12-01-preview, 2022-02-01-preview
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1686,7 +1632,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:50:37 GMT
+      - Tue, 07 Feb 2023 15:37:41 GMT
       expires:
       - '-1'
       pragma:
@@ -1718,17 +1664,17 @@ interactions:
       ParameterSetName:
       - -g -r -n --description
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.ab38017fbb3445b8a898ae9f5602679e?api-version=2022-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.3b8b0511c95e442bbacfaaced31dc64e?api-version=2022-02-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.ab38017fbb3445b8a898ae9f5602679e","name":"testreg000002.ab38017fbb3445b8a898ae9f5602679e","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007"},"privateLinkServiceConnectionState":{"status":"Pending"},"provisioningState":"Succeeded"}}'
+      string: '{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.3b8b0511c95e442bbacfaaced31dc64e","name":"testreg000002.3b8b0511c95e442bbacfaaced31dc64e","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007"},"privateLinkServiceConnectionState":{"status":"Pending"},"provisioningState":"Succeeded"}}'
     headers:
       api-supported-versions:
       - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-09-01, 2021-12-01-preview, 2022-02-01-preview
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1736,7 +1682,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:50:37 GMT
+      - Tue, 07 Feb 2023 15:37:41 GMT
       expires:
       - '-1'
       pragma:
@@ -1773,19 +1719,19 @@ interactions:
       ParameterSetName:
       - -g -r -n --description
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.ab38017fbb3445b8a898ae9f5602679e?api-version=2022-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.3b8b0511c95e442bbacfaaced31dc64e?api-version=2022-02-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.ab38017fbb3445b8a898ae9f5602679e","name":"testreg000002.ab38017fbb3445b8a898ae9f5602679e","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-08-26T05:50:38.2592625+00:00","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T05:50:38.2592625+00:00"},"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007"},"privateLinkServiceConnectionState":{"status":"Pending"},"provisioningState":"Updating"}}'
+      string: '{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.3b8b0511c95e442bbacfaaced31dc64e","name":"testreg000002.3b8b0511c95e442bbacfaaced31dc64e","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-02-07T15:37:42.4187599+00:00","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-02-07T15:37:42.4187599+00:00"},"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007"},"privateLinkServiceConnectionState":{"status":"Pending"},"provisioningState":"Updating"}}'
     headers:
       api-supported-versions:
       - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-09-01, 2021-12-01-preview, 2022-02-01-preview
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.ab38017fbb3445b8a898ae9f5602679e/operationStatuses/privateendpointconnections-02af72cf-2503-11ed-a3ee-7b466acf132d?api-version=2022-02-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.3b8b0511c95e442bbacfaaced31dc64e/operationStatuses/privateendpointconnections-5bda85a7-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1793,7 +1739,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:50:37 GMT
+      - Tue, 07 Feb 2023 15:37:41 GMT
       expires:
       - '-1'
       pragma:
@@ -1805,7 +1751,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -1823,19 +1769,19 @@ interactions:
       ParameterSetName:
       - -g -r -n --description
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.ab38017fbb3445b8a898ae9f5602679e/operationStatuses/privateendpointconnections-02af72cf-2503-11ed-a3ee-7b466acf132d?api-version=2022-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.3b8b0511c95e442bbacfaaced31dc64e/operationStatuses/privateendpointconnections-5bda85a7-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.ab38017fbb3445b8a898ae9f5602679e","name":"privateendpointconnections-02af72cf-2503-11ed-a3ee-7b466acf132d","status":"Updating"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.3b8b0511c95e442bbacfaaced31dc64e","name":"privateendpointconnections-5bda85a7-a6fd-11ed-b7cd-3b8a2dd05908","status":"Updating"}'
     headers:
       api-supported-versions:
       - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-09-01, 2021-12-01-preview, 2022-02-01-preview
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.ab38017fbb3445b8a898ae9f5602679e/operationStatuses/privateendpointconnections-02af72cf-2503-11ed-a3ee-7b466acf132d?api-version=2022-02-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.3b8b0511c95e442bbacfaaced31dc64e/operationStatuses/privateendpointconnections-5bda85a7-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1843,7 +1789,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:50:48 GMT
+      - Tue, 07 Feb 2023 15:37:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1871,17 +1817,17 @@ interactions:
       ParameterSetName:
       - -g -r -n --description
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.ab38017fbb3445b8a898ae9f5602679e/operationStatuses/privateendpointconnections-02af72cf-2503-11ed-a3ee-7b466acf132d?api-version=2022-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.3b8b0511c95e442bbacfaaced31dc64e/operationStatuses/privateendpointconnections-5bda85a7-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.ab38017fbb3445b8a898ae9f5602679e","name":"privateendpointconnections-02af72cf-2503-11ed-a3ee-7b466acf132d","status":"Succeeded"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.3b8b0511c95e442bbacfaaced31dc64e","name":"privateendpointconnections-5bda85a7-a6fd-11ed-b7cd-3b8a2dd05908","status":"Succeeded"}'
     headers:
       api-supported-versions:
       - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-09-01, 2021-12-01-preview, 2022-02-01-preview
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1889,7 +1835,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:50:58 GMT
+      - Tue, 07 Feb 2023 15:38:02 GMT
       expires:
       - '-1'
       pragma:
@@ -1921,17 +1867,17 @@ interactions:
       ParameterSetName:
       - -g -r -n --description
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.ab38017fbb3445b8a898ae9f5602679e?api-version=2022-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.3b8b0511c95e442bbacfaaced31dc64e?api-version=2022-02-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.ab38017fbb3445b8a898ae9f5602679e","name":"testreg000002.ab38017fbb3445b8a898ae9f5602679e","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"somedescription"},"provisioningState":"Succeeded"}}'
+      string: '{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.3b8b0511c95e442bbacfaaced31dc64e","name":"testreg000002.3b8b0511c95e442bbacfaaced31dc64e","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"somedescription"},"provisioningState":"Succeeded"}}'
     headers:
       api-supported-versions:
       - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-09-01, 2021-12-01-preview, 2022-02-01-preview
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1939,7 +1885,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:50:58 GMT
+      - Tue, 07 Feb 2023 15:38:02 GMT
       expires:
       - '-1'
       pragma:
@@ -1971,17 +1917,17 @@ interactions:
       ParameterSetName:
       - -g -r
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections?api-version=2022-02-01-preview
   response:
     body:
-      string: '{"value":[{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.ab38017fbb3445b8a898ae9f5602679e","name":"testreg000002.ab38017fbb3445b8a898ae9f5602679e","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"somedescription"},"provisioningState":"Succeeded"}},{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd","name":"testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"somedescription"},"provisioningState":"Succeeded"}}]}'
+      string: '{"value":[{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.3b8b0511c95e442bbacfaaced31dc64e","name":"testreg000002.3b8b0511c95e442bbacfaaced31dc64e","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000007"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"somedescription"},"provisioningState":"Succeeded"}},{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792","name":"testreg000002.f574510234a749ffb2a7948b9c0c3792","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"somedescription"},"provisioningState":"Succeeded"}}]}'
     headers:
       api-supported-versions:
       - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-09-01, 2021-12-01-preview, 2022-02-01-preview
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1989,7 +1935,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:50:58 GMT
+      - Tue, 07 Feb 2023 15:38:02 GMT
       expires:
       - '-1'
       pragma:
@@ -2023,17 +1969,17 @@ interactions:
       ParameterSetName:
       - -g --registry-name -n
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.ab38017fbb3445b8a898ae9f5602679e?api-version=2022-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.3b8b0511c95e442bbacfaaced31dc64e?api-version=2022-02-01-preview
   response:
     body:
       string: 'null'
     headers:
       api-supported-versions:
       - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-09-01, 2021-12-01-preview, 2022-02-01-preview
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -2041,11 +1987,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:50:59 GMT
+      - Tue, 07 Feb 2023 15:38:04 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/eastus2/operationResults/privateendpointconnections-0f474355-2503-11ed-a3ee-7b466acf132d?api-version=2022-02-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/eastus2/operationResults/privateendpointconnections-68b2fb15-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
       pragma:
       - no-cache
       server:
@@ -2073,10 +2019,10 @@ interactions:
       ParameterSetName:
       - -g --registry-name -n
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/eastus2/operationResults/privateendpointconnections-0f474355-2503-11ed-a3ee-7b466acf132d?api-version=2022-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/eastus2/operationResults/privateendpointconnections-68b2fb15-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
   response:
     body:
       string: ''
@@ -2086,7 +2032,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 26 Aug 2022 05:51:09 GMT
+      - Tue, 07 Feb 2023 15:38:14 GMT
       expires:
       - '-1'
       pragma:
@@ -2114,17 +2060,17 @@ interactions:
       ParameterSetName:
       - -g -r -n
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd?api-version=2022-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792?api-version=2022-02-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd","name":"testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"somedescription"},"provisioningState":"Succeeded"}}'
+      string: '{"type":"Microsoft.ContainerRegistry/registries/privateEndpointConnections","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792","name":"testreg000002.f574510234a749ffb2a7948b9c0c3792","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/priv_endpoint000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"somedescription"},"provisioningState":"Succeeded"}}'
     headers:
       api-supported-versions:
       - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-09-01, 2021-12-01-preview, 2022-02-01-preview
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -2132,7 +2078,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:51:09 GMT
+      - Tue, 07 Feb 2023 15:38:14 GMT
       expires:
       - '-1'
       pragma:
@@ -2166,17 +2112,17 @@ interactions:
       ParameterSetName:
       - -g --registry-name -n
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.10767ae0a27c4982913ce9c5bd7c5bbd?api-version=2022-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.f574510234a749ffb2a7948b9c0c3792?api-version=2022-02-01-preview
   response:
     body:
       string: 'null'
     headers:
       api-supported-versions:
       - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-09-01, 2021-12-01-preview, 2022-02-01-preview
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -2184,11 +2130,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:51:10 GMT
+      - Tue, 07 Feb 2023 15:38:15 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/eastus2/operationResults/privateendpointconnections-15eb9b2f-2503-11ed-a3ee-7b466acf132d?api-version=2022-02-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/eastus2/operationResults/privateendpointconnections-6ffa8dd9-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
       pragma:
       - no-cache
       server:
@@ -2198,7 +2144,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
     status:
       code: 202
       message: Accepted
@@ -2216,10 +2162,10 @@ interactions:
       ParameterSetName:
       - -g --registry-name -n
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/eastus2/operationResults/privateendpointconnections-15eb9b2f-2503-11ed-a3ee-7b466acf132d?api-version=2022-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/eastus2/operationResults/privateendpointconnections-6ffa8dd9-a6fd-11ed-b7cd-3b8a2dd05908?api-version=2022-02-01-preview
   response:
     body:
       string: ''
@@ -2229,7 +2175,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 26 Aug 2022 05:51:20 GMT
+      - Tue, 07 Feb 2023 15:38:25 GMT
       expires:
       - '-1'
       pragma:
@@ -2257,8 +2203,8 @@ interactions:
       ParameterSetName:
       - -g -r
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.6
-        (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-containerregistry/10.0.0 Python/3.10.9
+        (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31) VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections?api-version=2022-02-01-preview
   response:
@@ -2267,7 +2213,7 @@ interactions:
     headers:
       api-supported-versions:
       - 2019-12-01-preview, 2020-11-01-preview, 2021-06-01-preview, 2021-08-01-preview,
-        2021-09-01, 2021-12-01-preview, 2022-02-01-preview
+        2021-09-01, 2021-12-01-preview, 2022-02-01-preview, 2022-12-01, 2023-01-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -2275,7 +2221,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 26 Aug 2022 05:51:20 GMT
+      - Tue, 07 Feb 2023 15:38:26 GMT
       expires:
       - '-1'
       pragma:

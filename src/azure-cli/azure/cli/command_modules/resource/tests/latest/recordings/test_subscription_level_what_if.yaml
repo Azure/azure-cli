@@ -1,19 +1,19 @@
 interactions:
 - request:
     body: "{\"location\": \"westus\", \"properties\": {\"parameters\": {}, \"mode\":
-      \"Incremental\", template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
-      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"denyLocation\":
-      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"northeurope\"\r\n
-      \   }\r\n  },\r\n  \"variables\": {\r\n      \"policyDefinitionName\": \"policy-for-what-if-test\"\r\n
-      \ },\r\n  \"resources\": [\r\n    {\r\n      \"name\": \"[variables('policyDefinitionName')]\",\r\n
-      \     \"type\": \"Microsoft.Authorization/policyDefinitions\",\r\n      \"apiVersion\":
-      \"2018-05-01\",\r\n      \"properties\": {\r\n        \"policyType\": \"Custom\",\r\n
-      \       \"policyRule\": {\r\n          \"if\": {\r\n            \"field\": \"location\",\r\n
-      \           \"equals\": \"[parameters('denyLocation')]\"\r\n          },\r\n
-      \         \"then\": {\r\n            \"effect\": \"deny\"\r\n          }\r\n
-      \       }\r\n      }\r\n    }\r\n  ],\r\n  \"outputs\": {\r\n    \"policyDefinitionId\":
-      {\r\n      \"type\": \"string\",\r\n      \"value\": \"[resourceId('Microsoft.Authorization/policyDefinitions',
-      variables('policyDefinitionName'))]\"\r\n    }\r\n  }\r\n}}}"
+      \"Incremental\", template:{\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\n
+      \ \"contentVersion\": \"1.0.0.0\",\n  \"parameters\": {\n    \"denyLocation\":
+      {\n      \"type\": \"string\",\n      \"defaultValue\": \"northeurope\"\n    }\n
+      \ },\n  \"variables\": {\n      \"policyDefinitionName\": \"policy-for-what-if-test\"\n
+      \ },\n  \"resources\": [\n    {\n      \"name\": \"[variables('policyDefinitionName')]\",\n
+      \     \"type\": \"Microsoft.Authorization/policyDefinitions\",\n      \"apiVersion\":
+      \"2018-05-01\",\n      \"properties\": {\n        \"policyType\": \"Custom\",\n
+      \       \"policyRule\": {\n          \"if\": {\n            \"field\": \"location\",\n
+      \           \"equals\": \"[parameters('denyLocation')]\"\n          },\n          \"then\":
+      {\n            \"effect\": \"deny\"\n          }\n        }\n      }\n    }\n
+      \ ],\n  \"outputs\": {\n    \"policyDefinitionId\": {\n      \"type\": \"string\",\n
+      \     \"value\": \"[resourceId('Microsoft.Authorization/policyDefinitions',
+      variables('policyDefinitionName'))]\"\n    }\n  }\n}}}"
     headers:
       Accept:
       - application/json
@@ -24,27 +24,28 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1087'
+      - '1050'
       Content-Type:
       - application/json
       ParameterSetName:
       - --location --template-file
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/policy_definition_deploy","name":"policy_definition_deploy","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateHash":"1669246125929096641","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-07-07T09:29:32.7003169Z","duration":"PT0S","correlationId":"d33084e4-005f-404e-a26c-1a2cba6547cb","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/policy_definition_deploy","name":"policy_definition_deploy","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateHash":"1669246125929096641","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"0001-01-01T00:00:00Z","duration":"PT0S","correlationId":"ed88861e-b245-45dd-8738-81b84068b81a","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '819'
+      - '811'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Jul 2021 09:29:32 GMT
+      - Tue, 07 Feb 2023 12:54:34 GMT
       expires:
       - '-1'
       pragma:
@@ -58,25 +59,25 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1197'
     status:
       code: 200
       message: OK
 - request:
     body: "{\"location\": \"westus\", \"properties\": {\"parameters\": {}, \"mode\":
-      \"Incremental\", template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
-      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"denyLocation\":
-      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"northeurope\"\r\n
-      \   }\r\n  },\r\n  \"variables\": {\r\n      \"policyDefinitionName\": \"policy-for-what-if-test\"\r\n
-      \ },\r\n  \"resources\": [\r\n    {\r\n      \"name\": \"[variables('policyDefinitionName')]\",\r\n
-      \     \"type\": \"Microsoft.Authorization/policyDefinitions\",\r\n      \"apiVersion\":
-      \"2018-05-01\",\r\n      \"properties\": {\r\n        \"policyType\": \"Custom\",\r\n
-      \       \"policyRule\": {\r\n          \"if\": {\r\n            \"field\": \"location\",\r\n
-      \           \"equals\": \"[parameters('denyLocation')]\"\r\n          },\r\n
-      \         \"then\": {\r\n            \"effect\": \"deny\"\r\n          }\r\n
-      \       }\r\n      }\r\n    }\r\n  ],\r\n  \"outputs\": {\r\n    \"policyDefinitionId\":
-      {\r\n      \"type\": \"string\",\r\n      \"value\": \"[resourceId('Microsoft.Authorization/policyDefinitions',
-      variables('policyDefinitionName'))]\"\r\n    }\r\n  }\r\n}}}"
+      \"Incremental\", template:{\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\n
+      \ \"contentVersion\": \"1.0.0.0\",\n  \"parameters\": {\n    \"denyLocation\":
+      {\n      \"type\": \"string\",\n      \"defaultValue\": \"northeurope\"\n    }\n
+      \ },\n  \"variables\": {\n      \"policyDefinitionName\": \"policy-for-what-if-test\"\n
+      \ },\n  \"resources\": [\n    {\n      \"name\": \"[variables('policyDefinitionName')]\",\n
+      \     \"type\": \"Microsoft.Authorization/policyDefinitions\",\n      \"apiVersion\":
+      \"2018-05-01\",\n      \"properties\": {\n        \"policyType\": \"Custom\",\n
+      \       \"policyRule\": {\n          \"if\": {\n            \"field\": \"location\",\n
+      \           \"equals\": \"[parameters('denyLocation')]\"\n          },\n          \"then\":
+      {\n            \"effect\": \"deny\"\n          }\n        }\n      }\n    }\n
+      \ ],\n  \"outputs\": {\n    \"policyDefinitionId\": {\n      \"type\": \"string\",\n
+      \     \"value\": \"[resourceId('Microsoft.Authorization/policyDefinitions',
+      variables('policyDefinitionName'))]\"\n    }\n  }\n}}}"
     headers:
       Accept:
       - application/json
@@ -87,21 +88,22 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1087'
+      - '1050'
       Content-Type:
       - application/json
       ParameterSetName:
       - --location --template-file
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/policy_definition_deploy","name":"policy_definition_deploy","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateHash":"1669246125929096641","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-07-07T09:29:36.4552596Z","duration":"PT3.2172982S","correlationId":"8aa46d34-273a-46aa-ac71-dd1ebe1ff6a2","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/policy_definition_deploy","name":"policy_definition_deploy","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateHash":"1669246125929096641","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2023-02-07T12:54:38.3003357Z","duration":"PT0.0009054S","correlationId":"ea17bafc-c7cb-49f7-89d2-751a9feae2a9","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/policy_definition_deploy/operationStatuses/08585759567122396566?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/policy_definition_deploy/operationStatuses/08585258324098188480?api-version=2022-09-01
       cache-control:
       - no-cache
       content-length:
@@ -109,7 +111,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Jul 2021 09:29:37 GMT
+      - Tue, 07 Feb 2023 12:54:38 GMT
       expires:
       - '-1'
       pragma:
@@ -123,7 +125,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1195'
     status:
       code: 200
       message: OK
@@ -141,9 +143,10 @@ interactions:
       ParameterSetName:
       - --location --template-file
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585759567122396566?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258324098188480?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -155,7 +158,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Jul 2021 09:30:07 GMT
+      - Tue, 07 Feb 2023 12:55:08 GMT
       expires:
       - '-1'
       pragma:
@@ -183,21 +186,22 @@ interactions:
       ParameterSetName:
       - --location --template-file
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/policy_definition_deploy","name":"policy_definition_deploy","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateHash":"1669246125929096641","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-07-07T09:29:38.7994984Z","duration":"PT5.561537S","correlationId":"8aa46d34-273a-46aa-ac71-dd1ebe1ff6a2","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[],"outputs":{"policyDefinitionId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/policy_definition_deploy","name":"policy_definition_deploy","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateHash":"1669246125929096641","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2023-02-07T12:54:39.6271371Z","duration":"PT1.3277068S","correlationId":"ea17bafc-c7cb-49f7-89d2-751a9feae2a9","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[],"outputs":{"policyDefinitionId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1012'
+      - '1013'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Jul 2021 09:30:08 GMT
+      - Tue, 07 Feb 2023 12:55:08 GMT
       expires:
       - '-1'
       pragma:
@@ -214,19 +218,19 @@ interactions:
 - request:
     body: "{\"location\": \"westus\", \"properties\": {\"parameters\": {\"denyLocation\":
       {\"value\": \"westeurope\"}}, \"mode\": \"Incremental\", \"whatIfSettings\":
-      {\"resultFormat\": \"FullResourcePayloads\"}, template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
-      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"denyLocation\":
-      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"northeurope\"\r\n
-      \   }\r\n  },\r\n  \"variables\": {\r\n      \"policyDefinitionName\": \"policy-for-what-if-test\"\r\n
-      \ },\r\n  \"resources\": [\r\n    {\r\n      \"name\": \"[variables('policyDefinitionName')]\",\r\n
-      \     \"type\": \"Microsoft.Authorization/policyDefinitions\",\r\n      \"apiVersion\":
-      \"2018-05-01\",\r\n      \"properties\": {\r\n        \"policyType\": \"Custom\",\r\n
-      \       \"policyRule\": {\r\n          \"if\": {\r\n            \"field\": \"location\",\r\n
-      \           \"equals\": \"[parameters('denyLocation')]\"\r\n          },\r\n
-      \         \"then\": {\r\n            \"effect\": \"deny\"\r\n          }\r\n
-      \       }\r\n      }\r\n    }\r\n  ],\r\n  \"outputs\": {\r\n    \"policyDefinitionId\":
-      {\r\n      \"type\": \"string\",\r\n      \"value\": \"[resourceId('Microsoft.Authorization/policyDefinitions',
-      variables('policyDefinitionName'))]\"\r\n    }\r\n  }\r\n}}}"
+      {\"resultFormat\": \"FullResourcePayloads\"}, template:{\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\n
+      \ \"contentVersion\": \"1.0.0.0\",\n  \"parameters\": {\n    \"denyLocation\":
+      {\n      \"type\": \"string\",\n      \"defaultValue\": \"northeurope\"\n    }\n
+      \ },\n  \"variables\": {\n      \"policyDefinitionName\": \"policy-for-what-if-test\"\n
+      \ },\n  \"resources\": [\n    {\n      \"name\": \"[variables('policyDefinitionName')]\",\n
+      \     \"type\": \"Microsoft.Authorization/policyDefinitions\",\n      \"apiVersion\":
+      \"2018-05-01\",\n      \"properties\": {\n        \"policyType\": \"Custom\",\n
+      \       \"policyRule\": {\n          \"if\": {\n            \"field\": \"location\",\n
+      \           \"equals\": \"[parameters('denyLocation')]\"\n          },\n          \"then\":
+      {\n            \"effect\": \"deny\"\n          }\n        }\n      }\n    }\n
+      \ ],\n  \"outputs\": {\n    \"policyDefinitionId\": {\n      \"type\": \"string\",\n
+      \     \"value\": \"[resourceId('Microsoft.Authorization/policyDefinitions',
+      variables('policyDefinitionName'))]\"\n    }\n  }\n}}}"
     headers:
       Accept:
       - application/json
@@ -237,15 +241,16 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1186'
+      - '1149'
       Content-Type:
       - application/json
       ParameterSetName:
       - --location --template-file --parameters
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/whatIf?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/whatIf?api-version=2022-09-01
   response:
     body:
       string: ''
@@ -255,11 +260,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 07 Jul 2021 09:30:10 GMT
+      - Tue, 07 Feb 2023 12:55:10 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IkRlcGxveW1lbnRXaGF0SWZKb2ItLVBPTElDWTo1RkRFRklOSVRJT046NUZERVBMT1ktQzFDQkU2MDI6MkQwQzE3OjJENDFEMjoyRDg4MzI6MkRDOEY5QjZCMjA5MUYiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IkRlcGxveW1lbnRXaGF0SWZKb2ItLVBPTElDWTo1RkRFRklOSVRJT046NUZERVBMT1ktMTQ0NEQ0NzI6MkRCOEQ5OjJENDUzRDoyRDhCODI6MkQ5NjM5NjE4RkMyMjEiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2022-09-01
       pragma:
       - no-cache
       strict-transport-security:
@@ -285,12 +290,13 @@ interactions:
       ParameterSetName:
       - --location --template-file --parameters
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IkRlcGxveW1lbnRXaGF0SWZKb2ItLVBPTElDWTo1RkRFRklOSVRJT046NUZERVBMT1ktQzFDQkU2MDI6MkQwQzE3OjJENDFEMjoyRDg4MzI6MkRDOEY5QjZCMjA5MUYiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IkRlcGxveW1lbnRXaGF0SWZKb2ItLVBPTElDWTo1RkRFRklOSVRJT046NUZERVBMT1ktMTQ0NEQ0NzI6MkRCOEQ5OjJENDUzRDoyRDhCODI6MkQ5NjM5NjE4RkMyMjEiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2022-09-01
   response:
     body:
-      string: '{"status":"Succeeded","properties":{"correlationId":"c1cbe602-0c17-41d2-8832-c8f9b6b2091f","changes":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","changeType":"Modify","before":{"apiVersion":"2018-05-01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","name":"policy-for-what-if-test","properties":{"mode":"Indexed","policyRule":{"if":{"equals":"northeurope","field":"location"},"then":{"effect":"deny"}},"policyType":"Custom"},"type":"Microsoft.Authorization/policyDefinitions"},"after":{"apiVersion":"2018-05-01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","name":"policy-for-what-if-test","properties":{"mode":"Indexed","policyRule":{"if":{"equals":"westeurope","field":"location"},"then":{"effect":"deny"}},"policyType":"Custom"},"type":"Microsoft.Authorization/policyDefinitions"},"delta":[{"path":"properties.policyRule.if.equals","propertyChangeType":"Modify","before":"northeurope","after":"westeurope"}]}]}}'
+      string: '{"status":"Succeeded","properties":{"correlationId":"1444d472-b8d9-453d-8b82-9639618fc221","changes":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","changeType":"Modify","before":{"apiVersion":"2018-05-01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","name":"policy-for-what-if-test","properties":{"mode":"Indexed","policyRule":{"if":{"equals":"northeurope","field":"location"},"then":{"effect":"deny"}},"policyType":"Custom"},"type":"Microsoft.Authorization/policyDefinitions"},"after":{"apiVersion":"2018-05-01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","name":"policy-for-what-if-test","properties":{"mode":"Indexed","policyRule":{"if":{"equals":"westeurope","field":"location"},"then":{"effect":"deny"}},"policyType":"Custom"},"type":"Microsoft.Authorization/policyDefinitions"},"delta":[{"path":"properties.policyRule.if.equals","propertyChangeType":"Modify","before":"northeurope","after":"westeurope"}]}]}}'
     headers:
       cache-control:
       - no-cache
@@ -299,7 +305,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Jul 2021 09:30:26 GMT
+      - Tue, 07 Feb 2023 12:55:27 GMT
       expires:
       - '-1'
       pragma:
@@ -316,19 +322,19 @@ interactions:
 - request:
     body: "{\"location\": \"westus\", \"properties\": {\"parameters\": {\"denyLocation\":
       {\"value\": \"westeurope\"}}, \"mode\": \"Incremental\", \"whatIfSettings\":
-      {\"resultFormat\": \"FullResourcePayloads\"}, template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
-      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"denyLocation\":
-      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"northeurope\"\r\n
-      \   }\r\n  },\r\n  \"variables\": {\r\n      \"policyDefinitionName\": \"policy-for-what-if-test\"\r\n
-      \ },\r\n  \"resources\": [\r\n    {\r\n      \"name\": \"[variables('policyDefinitionName')]\",\r\n
-      \     \"type\": \"Microsoft.Authorization/policyDefinitions\",\r\n      \"apiVersion\":
-      \"2018-05-01\",\r\n      \"properties\": {\r\n        \"policyType\": \"Custom\",\r\n
-      \       \"policyRule\": {\r\n          \"if\": {\r\n            \"field\": \"location\",\r\n
-      \           \"equals\": \"[parameters('denyLocation')]\"\r\n          },\r\n
-      \         \"then\": {\r\n            \"effect\": \"deny\"\r\n          }\r\n
-      \       }\r\n      }\r\n    }\r\n  ],\r\n  \"outputs\": {\r\n    \"policyDefinitionId\":
-      {\r\n      \"type\": \"string\",\r\n      \"value\": \"[resourceId('Microsoft.Authorization/policyDefinitions',
-      variables('policyDefinitionName'))]\"\r\n    }\r\n  }\r\n}}}"
+      {\"resultFormat\": \"FullResourcePayloads\"}, template:{\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\n
+      \ \"contentVersion\": \"1.0.0.0\",\n  \"parameters\": {\n    \"denyLocation\":
+      {\n      \"type\": \"string\",\n      \"defaultValue\": \"northeurope\"\n    }\n
+      \ },\n  \"variables\": {\n      \"policyDefinitionName\": \"policy-for-what-if-test\"\n
+      \ },\n  \"resources\": [\n    {\n      \"name\": \"[variables('policyDefinitionName')]\",\n
+      \     \"type\": \"Microsoft.Authorization/policyDefinitions\",\n      \"apiVersion\":
+      \"2018-05-01\",\n      \"properties\": {\n        \"policyType\": \"Custom\",\n
+      \       \"policyRule\": {\n          \"if\": {\n            \"field\": \"location\",\n
+      \           \"equals\": \"[parameters('denyLocation')]\"\n          },\n          \"then\":
+      {\n            \"effect\": \"deny\"\n          }\n        }\n      }\n    }\n
+      \ ],\n  \"outputs\": {\n    \"policyDefinitionId\": {\n      \"type\": \"string\",\n
+      \     \"value\": \"[resourceId('Microsoft.Authorization/policyDefinitions',
+      variables('policyDefinitionName'))]\"\n    }\n  }\n}}}"
     headers:
       Accept:
       - application/json
@@ -339,15 +345,16 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1186'
+      - '1149'
       Content-Type:
       - application/json
       ParameterSetName:
       - --location --template-file --parameters --no-pretty-print
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/whatIf?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/whatIf?api-version=2022-09-01
   response:
     body:
       string: ''
@@ -357,11 +364,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 07 Jul 2021 09:30:28 GMT
+      - Tue, 07 Feb 2023 12:55:28 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IkRlcGxveW1lbnRXaGF0SWZKb2ItLVBPTElDWTo1RkRFRklOSVRJT046NUZERVBMT1ktNzgzMzgxM0Q6MkRBOENDOjJENDg2RDoyRDgyRTc6MkQzRjYzM0Q1RUE5QUYiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IkRlcGxveW1lbnRXaGF0SWZKb2ItLVBPTElDWTo1RkRFRklOSVRJT046NUZERVBMT1ktOTNDNjNEMkY6MkRBODMyOjJENEVEQzoyREIwNzQ6MkQ3RjdDNUUxRDZGNzYiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2022-09-01
       pragma:
       - no-cache
       strict-transport-security:
@@ -369,7 +376,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 202
       message: Accepted
@@ -387,12 +394,13 @@ interactions:
       ParameterSetName:
       - --location --template-file --parameters --no-pretty-print
       User-Agent:
-      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IkRlcGxveW1lbnRXaGF0SWZKb2ItLVBPTElDWTo1RkRFRklOSVRJT046NUZERVBMT1ktNzgzMzgxM0Q6MkRBOENDOjJENDg2RDoyRDgyRTc6MkQzRjYzM0Q1RUE5QUYiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IkRlcGxveW1lbnRXaGF0SWZKb2ItLVBPTElDWTo1RkRFRklOSVRJT046NUZERVBMT1ktOTNDNjNEMkY6MkRBODMyOjJENEVEQzoyREIwNzQ6MkQ3RjdDNUUxRDZGNzYiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2022-09-01
   response:
     body:
-      string: '{"status":"Succeeded","properties":{"correlationId":"7833813d-a8cc-486d-82e7-3f633d5ea9af","changes":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","changeType":"Modify","before":{"apiVersion":"2018-05-01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","name":"policy-for-what-if-test","properties":{"mode":"Indexed","policyRule":{"if":{"equals":"northeurope","field":"location"},"then":{"effect":"deny"}},"policyType":"Custom"},"type":"Microsoft.Authorization/policyDefinitions"},"after":{"apiVersion":"2018-05-01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","name":"policy-for-what-if-test","properties":{"mode":"Indexed","policyRule":{"if":{"equals":"westeurope","field":"location"},"then":{"effect":"deny"}},"policyType":"Custom"},"type":"Microsoft.Authorization/policyDefinitions"},"delta":[{"path":"properties.policyRule.if.equals","propertyChangeType":"Modify","before":"northeurope","after":"westeurope"}]}]}}'
+      string: '{"status":"Succeeded","properties":{"correlationId":"93c63d2f-a832-4edc-b074-7f7c5e1d6f76","changes":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","changeType":"Modify","before":{"apiVersion":"2018-05-01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","name":"policy-for-what-if-test","properties":{"mode":"Indexed","policyRule":{"if":{"equals":"northeurope","field":"location"},"then":{"effect":"deny"}},"policyType":"Custom"},"type":"Microsoft.Authorization/policyDefinitions"},"after":{"apiVersion":"2018-05-01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","name":"policy-for-what-if-test","properties":{"mode":"Indexed","policyRule":{"if":{"equals":"westeurope","field":"location"},"then":{"effect":"deny"}},"policyType":"Custom"},"type":"Microsoft.Authorization/policyDefinitions"},"delta":[{"path":"properties.policyRule.if.equals","propertyChangeType":"Modify","before":"northeurope","after":"westeurope"}]}]}}'
     headers:
       cache-control:
       - no-cache
@@ -401,7 +409,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Jul 2021 09:30:44 GMT
+      - Tue, 07 Feb 2023 12:55:44 GMT
       expires:
       - '-1'
       pragma:
