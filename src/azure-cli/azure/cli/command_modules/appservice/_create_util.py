@@ -65,9 +65,11 @@ def zip_contents_from_dir(dirPath, lang):
                     zf.write(absname, arcname)
 
         if lang.lower() == NETCORE_RUNTIME_NAME:
+            from xml.etree.ElementTree import ParseError
+            from zipfile import BadZipFile, LargeZipFile
             try:
                 zip_dotnet_project_references(abs_src, "{}".format(zip_file_path))
-            except Exception:
+            except (OSError, ValueError, TypeError, ParseError, BadZipFile, LargeZipFile):
                 logger.warning("Analysing and bundling dotnet project references have failed.")
     except IOError as e:
         if e.errno == 13:
