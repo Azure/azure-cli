@@ -12,7 +12,6 @@ from azure.cli.core.profiles import get_api_version, ResourceType
 
 from azure.cli.command_modules.network._client_factory import (
     cf_application_gateways,
-    cf_load_balancers,
     cf_network_interfaces, cf_network_watcher, cf_packet_capture,
     cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways,
@@ -21,8 +20,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_dns_references,
     cf_virtual_router, cf_virtual_router_peering, cf_flow_logs)
 from azure.cli.command_modules.network._util import (
-    list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
-    delete_lb_resource_property_entry)
+    list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
@@ -84,11 +82,6 @@ def load_command_table(self, _):
         client_factory=cf_dns_references,
         resource_type=ResourceType.MGMT_NETWORK_DNS,
         min_api='2018-05-01'
-    )
-
-    network_lb_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#LoadBalancersOperations.{}',
-        client_factory=cf_load_balancers
     )
 
     network_nic_sdk = CliCommandType(

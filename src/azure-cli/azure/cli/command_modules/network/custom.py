@@ -14,7 +14,7 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_
 
 from azure.cli.core.aaz import has_value
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
-from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
+from azure.cli.core.commands import upsert_to_collection, get_property
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
 from azure.cli.core.util import CLIError, sdk_no_wait
