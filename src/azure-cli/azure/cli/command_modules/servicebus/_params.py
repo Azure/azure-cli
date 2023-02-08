@@ -20,7 +20,6 @@ def load_arguments_sb(self, _):
         _validate_default_message_time_to_live, \
         _validate_lock_duration, validate_partner_namespace, validate_premiumsku_capacity, validate_target_namespace
 
-    from knack.arguments import CLIArgumentType
     (SkuName, FilterType, TlsVersion) = self.get_models('SkuName', 'FilterType', 'TlsVersion', resource_type=ResourceType.MGMT_SERVICEBUS)
 
     with self.argument_context('servicebus') as c:
