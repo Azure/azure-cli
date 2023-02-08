@@ -100,10 +100,6 @@ def transform_vpn_connection(result):
     return result
 
 
-def transform_vnet_create_output(result):
-    return {'newVNet': result.result()}
-
-
 def transform_vnet_table_output(result):
 
     def _transform(result):
@@ -136,10 +132,6 @@ def transform_nic_create_output(result):
     return None
 
 
-def transform_nsg_create_output(result):
-    return {'NewNSG': result.result()}
-
-
 def transform_nsg_rule_table_output(result):
     item = OrderedDict()
     item['Name'] = result['name']
@@ -156,11 +148,6 @@ def transform_nsg_rule_table_output(result):
         ' '.join(result['destinationAddressPrefixes'])
     item['DestinationASG'] = result['destinationApplicationSecurityGroups'] or 'None'
     return item
-
-
-def transform_vnet_gateway_create_output(result):
-    result = {'vnetGateway': result.result()} if result else result
-    return result
 
 
 def transform_geographic_hierachy_table_output(result):
@@ -212,15 +199,6 @@ def transform_waf_rule_sets_table_output(result):
                 item_obj['ruleGroup'] = rule_group_name
                 transformed.append(item_obj)
     return transformed
-
-
-def transform_network_usage_list(result):
-    result = list(result)
-    for item in result:
-        item.current_value = str(item.current_value)
-        item.limit = str(item.limit)
-        item.local_name = item.name.localized_value
-    return result
 
 
 def transform_network_usage_table(result):

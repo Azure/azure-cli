@@ -1330,11 +1330,10 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
         from ._vm_utils import parse_shared_gallery_image_id, parse_community_gallery_image_id,\
             is_valid_image_version_id, parse_gallery_image_id
         if is_valid_image_version_id(namespace.image):
-            from ._client_factory import cf_gallery_images
             image_info = parse_gallery_image_id(namespace.image)
-            gallery_image_info = cf_gallery_images(cmd.cli_ctx, '').get(
-                resource_group_name=namespace.resource_group_name, gallery_name=image_info[0],
-                gallery_image_name=image_info[1])
+            compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=image_info[0])
+            gallery_image_info = compute_client.gallery_images.get(
+                resource_group_name=image_info[1], gallery_name=image_info[2], gallery_image_name=image_info[3])
             generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
                                                                                   'hyper_v_generation') else None
             features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
@@ -2103,11 +2102,10 @@ def process_set_applications_namespace(cmd, namespace):  # pylint: disable=unuse
 
 def process_gallery_image_version_namespace(cmd, namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
-    TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption, ConfidentialVMEncryptionType = \
-        cmd.get_models('TargetRegion', 'EncryptionImages', 'OSDiskImageEncryption', 'DataDiskImageEncryption',
-                       'ConfidentialVMEncryptionType')
-    storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS']]
-    storage_account_types_str = ", ".join(storage_account_types_list)
+    TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption, \
+        ConfidentialVMEncryptionType, GalleryTargetExtendedLocation, GalleryExtendedLocation = cmd.get_models(
+            'TargetRegion', 'EncryptionImages', 'OSDiskImageEncryption', 'DataDiskImageEncryption',
+            'ConfidentialVMEncryptionType', 'GalleryTargetExtendedLocation', 'GalleryExtendedLocation')
 
     if namespace.target_regions:
         if hasattr(namespace, 'target_region_encryption') and namespace.target_region_encryption:
@@ -2121,6 +2119,9 @@ def process_gallery_image_version_namespace(cmd, namespace):
                 raise InvalidArgumentValueError(
                     'usage error: Length of --target_region_cvm_encryption should be as same as '
                     'length of target regions')
+
+        storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS']]
+        storage_account_types_str = ", ".join(storage_account_types_list)
 
         regions_info = []
         for i, t in enumerate(namespace.target_regions):
@@ -2219,6 +2220,108 @@ def process_gallery_image_version_namespace(cmd, namespace):
                                                  encryption=encryption))
 
         namespace.target_regions = regions_info
+
+    if hasattr(namespace, 'target_edge_zones') and namespace.target_edge_zones:
+        if len(namespace.target_edge_zones) == 1 and namespace.target_edge_zones[0].lower() == 'none':
+            namespace.target_edge_zones = []
+            return
+        if hasattr(namespace, 'target_zone_encryption') and namespace.target_zone_encryption:
+            if len(namespace.target_edge_zones) != len(namespace.target_zone_encryption):
+                raise InvalidArgumentValueError(
+                    'usage error: Length of --target-edge-zone-encryption '
+                    'should be as same as length of --target-edge-zones')
+
+        storage_account_types_list = [item.lower() for item in
+                                      ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS', 'StandardSSD_LRS']]
+        storage_account_types_str = ", ".join(storage_account_types_list)
+
+        edge_zone_info = []
+        for i, t in enumerate(namespace.target_edge_zones):
+            parts = t.split('=', 3)
+            # At least the region and edge zone are specified
+            if len(parts) < 2:
+                continue
+
+            region = parts[0]
+            edge_zone = parts[1]
+            replica_count = None
+            storage_account_type = None
+
+            # Both "region" and "edge zone" are specified,
+            # but only one of "replica count" and "storage account type" is specified
+            if len(parts) == 3:
+                try:
+                    replica_count = int(parts[2])
+                except ValueError:
+                    storage_account_type = parts[2]
+                    if parts[2].lower() not in storage_account_types_list:
+                        raise ArgumentUsageError(
+                            "usage error: {} is an invalid target edge zone argument. "
+                            "The third part is neither an integer replica count or a valid storage account type. "
+                            "Storage account types must be one of {}.".format(t, storage_account_types_str))
+
+            # Not only "region" and "edge zone" are specified,
+            # but also "replica count" and "storage account type" are specified
+            elif len(parts) == 4:
+                try:
+                    replica_count = int(parts[2])  # raises ValueError if this is not a replica count, try other order.
+                    storage_account_type = parts[3]
+                    if storage_account_type not in storage_account_types_list:
+                        raise ArgumentUsageError(
+                            "usage error: {} is an invalid target edge zone argument. "
+                            "The forth part is not a valid storage account type. "
+                            "Storage account types must be one of {}.".format(t, storage_account_types_str))
+                except ValueError:
+                    raise ArgumentUsageError(
+                        "usage error: {} is an invalid target edge zone argument. "
+                        "The third part must be a valid integer replica count.".format(t))
+
+            # Parse target edge zone encryption,
+            # example: ['microsoftlosangeles1', 'des1, 0, des2, 1, des3', 'null', 'des4']
+            encryption = None
+            os_disk_image = None
+            data_disk_images = None
+            if hasattr(namespace, 'target_zone_encryption') and namespace.target_zone_encryption:
+                terms = namespace.target_zone_encryption[i].split(',')
+                if len(terms) < 2:
+                    break
+                # OS disk
+                os_disk_image = terms[1]
+                if os_disk_image == 'null':
+                    os_disk_image = None
+                else:
+                    des_id = _disk_encryption_set_format(cmd, namespace, os_disk_image)
+                    os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id)
+                # Data disk
+                if len(terms) > 2:
+                    data_disk_images = terms[2:]
+                    data_disk_images_len = len(data_disk_images)
+                    if data_disk_images_len % 2 != 0:
+                        raise ArgumentUsageError(
+                            'usage error: LUN and disk encryption set for data disk should appear in pair in '
+                            '--target-edge-zone-encryption. Example: 1,osdes,0,datades0,1,datades1')
+                    data_disk_image_encryption_list = []
+                    for j in range(int(data_disk_images_len / 2)):
+                        lun = data_disk_images[j * 2]
+                        des_id = data_disk_images[j * 2 + 1]
+                        des_id = _disk_encryption_set_format(cmd, namespace, des_id)
+                        data_disk_image_encryption_list.append(DataDiskImageEncryption(
+                            lun=lun, disk_encryption_set_id=des_id))
+                    data_disk_images = data_disk_image_encryption_list
+
+            if os_disk_image or data_disk_images:
+                encryption = EncryptionImages(os_disk_image=os_disk_image, data_disk_images=data_disk_images)
+
+            extended_location = GalleryExtendedLocation(name=edge_zone, type='EdgeZone')
+
+            edge_zone_info.append(
+                GalleryTargetExtendedLocation(name=region, extended_location_replica_count=replica_count,
+                                              extended_location=extended_location,
+                                              storage_account_type=storage_account_type,
+                                              encryption=encryption)
+            )
+
+        namespace.target_edge_zones = edge_zone_info
 
 
 def _disk_encryption_set_format(cmd, namespace, name):

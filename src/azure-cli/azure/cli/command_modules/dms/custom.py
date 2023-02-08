@@ -21,14 +21,16 @@ from azure.mgmt.datamigration.models import (DataMigrationService,
                                              Project,
                                              ProjectTask,
                                              ServiceSku,
-                                             SqlConnectionInfo)
+                                             SqlConnectionInfo, MigrateMySqlAzureDbForMySqlSyncTaskProperties)
 
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.core.util import sdk_no_wait, get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.dms._client_factory import dms_cf_projects
 from azure.cli.command_modules.dms.scenario_inputs import (get_migrate_sql_to_sqldb_offline_input,
                                                            get_migrate_postgresql_to_azuredbforpostgresql_sync_input,
-                                                           get_migrate_mysql_to_azuredbformysql_offline_input)
+                                                           get_migrate_mysql_to_azuredbformysql_offline_input,
+                                                           get_migrate_mysql_to_azuredbformysql_sync_input,
+                                                           get_migrate_mysql_to_azuredbformysql_cdc_input)
 
 
 # region Service
@@ -278,10 +280,12 @@ def core_handles_scenario(
         target_platform,
         task_type=""):
     # Add scenarios here after migrating them to the core from the extension.
-    CoreScenarioTypes = [ScenarioType.sql_sqldb_offline,
-                         ScenarioType.postgres_azurepostgres_online,
-                         ScenarioType.mysql_azuremysql_offline]
-    return get_scenario_type(source_platform, target_platform, task_type) in CoreScenarioTypes
+    core_scenario_types = [ScenarioType.sql_sqldb_offline,
+                           ScenarioType.postgres_azurepostgres_online,
+                           ScenarioType.mysql_azuremysql_offline,
+                           ScenarioType.mysql_azuremysql_online,
+                           ScenarioType.mysql_azuremysql_cdc]
+    return get_scenario_type(source_platform, target_platform, task_type) in core_scenario_types
 
 
 def transform_json_inputs(
@@ -311,8 +315,9 @@ def get_file_or_parse_json(value, value_type):
     # Test if provided value is a valid json
     try:
         json_parse = shell_safe_json_parse(value)
-    except:
-        raise CLIError("The supplied input for '" + value_type + "' is not a valid file path or a valid json object.")
+    except Exception as e:
+        raise CLIError("The supplied input for '{type}' is not a valid file path or a valid json object. {ex}'"
+                       .format(type=value_type, ex=e))
     else:
         return json_parse
 
@@ -384,6 +389,12 @@ def get_task_migration_properties(
     elif st == ScenarioType.mysql_azuremysql_offline:
         TaskProperties = MigrateMySqlAzureDbForMySqlOfflineTaskProperties
         GetInput = get_migrate_mysql_to_azuredbformysql_offline_input
+    elif st == ScenarioType.mysql_azuremysql_online:
+        TaskProperties = MigrateMySqlAzureDbForMySqlSyncTaskProperties
+        GetInput = get_migrate_mysql_to_azuredbformysql_sync_input
+    elif st == ScenarioType.mysql_azuremysql_cdc:
+        TaskProperties = get_migrate_mysql_to_azuredbformysql_cdc_task_properties
+        GetInput = get_migrate_mysql_to_azuredbformysql_cdc_input
     elif st == ScenarioType.postgres_azurepostgres_online:
         TaskProperties = MigratePostgreSqlAzureDbForPostgreSqlSyncTaskProperties
         GetInput = get_migrate_postgresql_to_azuredbforpostgresql_sync_input
@@ -420,7 +431,10 @@ def get_task_properties(scenario_type,
             enable_schema_validation,
             enable_data_integrity_validation,
             enable_query_analysis_validation)
-    elif scenario_type == ScenarioType.mysql_azuremysql_offline:
+    elif scenario_type in {
+            ScenarioType.mysql_azuremysql_offline,
+            ScenarioType.mysql_azuremysql_online,
+            ScenarioType.mysql_azuremysql_cdc}:
         task_input = input_func(
             options_json,
             source_connection_info,
@@ -436,12 +450,21 @@ def get_task_properties(scenario_type,
     return task_properties_type(**task_properties_params)
 
 
+def get_migrate_mysql_to_azuredbformysql_cdc_task_properties(**kwargs):
+    result = MigrateMySqlAzureDbForMySqlOfflineTaskProperties(**kwargs)
+    result.task_type = "Migrate.MySql.AzureDbForMySql.ReplicateChanges"
+    return result
+
+
 def get_scenario_type(source_platform, target_platform, task_type=""):
     if source_platform == "sql" and target_platform == "sqldb":
         scenario_type = ScenarioType.sql_sqldb_offline if not task_type or "offline" in task_type else \
             ScenarioType.unknown
     elif source_platform == "mysql" and target_platform == "azuredbformysql":
-        scenario_type = ScenarioType.mysql_azuremysql_offline if not task_type or "offline" in task_type else \
+        scenario_type = \
+            ScenarioType.mysql_azuremysql_offline if not task_type or "offline" in task_type else \
+            ScenarioType.mysql_azuremysql_online if "online" in task_type else \
+            ScenarioType.mysql_azuremysql_cdc if "replicate" in task_type else \
             ScenarioType.unknown
     elif source_platform == "postgresql" and target_platform == "azuredbforpostgresql":
         scenario_type = ScenarioType.postgres_azurepostgres_online if not task_type or "online" in task_type else \
@@ -456,11 +479,13 @@ class ScenarioType(Enum):
     unknown = 0
     # SQL to SQLDB
     sql_sqldb_offline = 1
-    # MySQL to Azure for MySQL
+    # MySQL to Azure for MySQL Online
     mysql_azuremysql_online = 21
-    # PostgresSQL to Azure for PostgreSQL
-    postgres_azurepostgres_online = 31
     # MySQL to Azure for MySQL Offline
     mysql_azuremysql_offline = 22
+    # MySQL to Azure for MySQL Replicate Changes
+    mysql_azuremysql_cdc = 23
+    # PostgresSQL to Azure for PostgreSQL
+    postgres_azurepostgres_online = 31
 
 # endregion

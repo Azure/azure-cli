@@ -774,6 +774,16 @@ examples:
         az keyvault security-domain init-recovery --hsm-name MyHSM --sd-exchange-key "{PATH_TO_RESTORE}"
 """
 
+helps['keyvault security-domain restore-blob'] = """
+type: command
+short-summary: Enable to decrypt and encrypt security domain file as blob. Can be run in offline environment, before file is uploaded to HSM using security-domain upload.
+examples:
+  - name: Security domain restore blob.
+    text: |
+        az keyvault security-domain restore-blob --sd-file "{SD_TRANSFER_FILE}" --sd-exchange-key "{PEM_FILE_NAME}" --sd-wrapping-keys "{PEM_PRIVATE_KEY1_FILE_NAME}" "{PEM_PRIVATE_KEY2_FILE_NAME}" --sd-file-restore-blob "{SD_TRANSFER_FILE_RESTORE_BLOB}"
+
+"""
+
 helps['keyvault security-domain upload'] = """
 type: command
 short-summary: Start to restore the HSM.
@@ -781,6 +791,9 @@ examples:
   - name: Security domain upload (M=2).
     text: |
         az keyvault security-domain upload --hsm-name MyHSM --sd-file "{SD_TRANSFER_FILE}" --sd-exchange-key "{PEM_FILE_NAME}" --sd-wrapping-keys "{PEM_PRIVATE_KEY1_FILE_NAME}" "{PEM_PRIVATE_KEY2_FILE_NAME}"
+  - name: Security domain upload, in which sd_file is already restored using keyvault security-domain restore-blob command
+    text: |
+        az keyvault security-domain upload --hsm-name MyHSM --sd-file "{SD_TRANSFER_FILE}" --restore-blob
 """
 
 helps['keyvault security-domain download'] = """

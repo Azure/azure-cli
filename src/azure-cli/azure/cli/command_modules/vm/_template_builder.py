@@ -947,7 +947,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None,
                         v_cpus_per_core=None, os_disk_security_encryption_type=None,
                         os_disk_secure_vm_disk_encryption_set=None, os_disk_delete_option=None,
-                        regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None):
+                        regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
+                        enable_osimage_notification=None, max_surge=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1283,6 +1284,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         if prioritize_unhealthy_instances is not None:
             rolling_upgrade_policy['prioritizeUnhealthyInstances'] = prioritize_unhealthy_instances
 
+        if max_surge is not None:
+            rolling_upgrade_policy['maxSurge'] = max_surge
+
         if not rolling_upgrade_policy:
             del rolling_upgrade_policy
 
@@ -1340,13 +1344,22 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if proximity_placement_group:
         vmss_properties['proximityPlacementGroup'] = {'id': proximity_placement_group}
 
+    scheduled_events_profile = {}
     if terminate_notification_time is not None:
-        scheduled_events_profile = {
+        scheduled_events_profile.update({
             'terminateNotificationProfile': {
                 'notBeforeTimeout': terminate_notification_time,
                 'enable': 'true'
             }
-        }
+        })
+        virtual_machine_profile['scheduledEventsProfile'] = scheduled_events_profile
+
+    if enable_osimage_notification is not None:
+        scheduled_events_profile.update({
+            'osImageNotificationProfile': {
+                'enable': enable_osimage_notification
+            }
+        })
         virtual_machine_profile['scheduledEventsProfile'] = scheduled_events_profile
 
     if automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
