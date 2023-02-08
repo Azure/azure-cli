@@ -395,7 +395,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                     for t in temp:
                         if 'slotSetting' in t.keys():
                             slot_result[t['name']] = t['slotSetting']
-                        if setting_type == "SlotSettings":
+                        elif setting_type == "SlotSettings":
                             slot_result[t['name']] = True
                         result[t['name']] = t['value']
                 else:
@@ -2163,6 +2163,13 @@ def restore_backup(cmd, resource_group_name, webapp_name, storage_account_url, b
         return client.web_apps.begin_restore_slot(resource_group_name, webapp_name, 0, slot, restore_request)
 
     return client.web_apps.begin_restore(resource_group_name, webapp_name, 0, restore_request)
+
+
+def delete_backup(cmd, resource_group_name, webapp_name, backup_id, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.delete_backup_slot(resource_group_name, webapp_name, backup_id, slot)
+    return client.web_apps.delete_backup(resource_group_name, webapp_name, backup_id)
 
 
 def list_snapshots(cmd, resource_group_name, name, slot=None):
