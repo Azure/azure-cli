@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create an authorization rule for the specified topic.
+
+    :example: Create Authorization Rule for given Service Bus Topic
+        az servicebus topic authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule --rights Send Listen
     """
 
     _aaz_info = {

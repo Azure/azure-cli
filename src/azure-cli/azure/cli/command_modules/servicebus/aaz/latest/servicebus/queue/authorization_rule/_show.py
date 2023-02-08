@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get an authorization rule for a queue by rule name.
+
+    :example: show properties of Authorization Rule
+        az servicebus queue authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule
     """
 
     _aaz_info = {

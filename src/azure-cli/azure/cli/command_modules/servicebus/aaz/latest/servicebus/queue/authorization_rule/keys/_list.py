@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """Primary and secondary connection strings to the queue.
+
+    :example: List the keys and connection strings of Authorization Rule for the given Service Bus Queue
+        az servicebus queue authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule
     """
 
     _aaz_info = {

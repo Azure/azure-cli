@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update an authorization rule for a namespace.
+
+    :example: Updates Authorization Rule 'myauthorule' for the given Service Bus Namespace 'mynamespace' in resourcegroup
+        az servicebus namespace authorization-rule update --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --rights Send
     """
 
     _aaz_info = {

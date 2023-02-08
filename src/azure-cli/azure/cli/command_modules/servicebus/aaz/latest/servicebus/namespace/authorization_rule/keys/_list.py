@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """Gets the primary and secondary connection strings for the namespace.
+
+    :example: List the keys and connection strings of Authorization Rule for Service Bus Namespace
+        az servicebus namespace authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
     """
 
     _aaz_info = {

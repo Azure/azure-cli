@@ -92,4 +92,4 @@ class SBNamespacePrivateEndpointCRUDScenarioTest(ScenarioTest):
 
         time.sleep(30)
 
-        self.cmd('servicebus namespace private-endpoint-connection delete --id {sa_pec_id} -y')
+        self.cmd('servicebus namespace private-endpoint-connection delete --id {sa_pec_id} --yes')

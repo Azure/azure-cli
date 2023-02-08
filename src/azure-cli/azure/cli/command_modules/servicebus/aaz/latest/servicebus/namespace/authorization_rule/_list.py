@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List the authorization rules for a namespace.
+
+    :example: Shows the list of Authorization Rule by Service Bus Namespace
+        az servicebus namespace authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace
     """
 
     _aaz_info = {

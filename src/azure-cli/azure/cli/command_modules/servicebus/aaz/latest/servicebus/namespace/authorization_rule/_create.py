@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create an authorization rule for a namespace.
+
+    :example: Create Authorization Rule 'myauthorule' for the given Service Bus Namespace 'mynamespace' in resourcegroup
+        az servicebus namespace authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --rights Send Listen
     """
 
     _aaz_info = {

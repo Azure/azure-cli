@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List authorization rules for a topic.
+
+    :example: shows list of Authorization Rule by Service Bus Topic
+        az servicebus topic authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic
     """
 
     _aaz_info = {

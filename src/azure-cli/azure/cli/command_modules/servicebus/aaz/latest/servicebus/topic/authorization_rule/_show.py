@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get the specified authorization rule.
+
+    :example: Shows the details of Authorization Rule for given Service Bus Topic
+        az servicebus topic authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule
     """
 
     _aaz_info = {

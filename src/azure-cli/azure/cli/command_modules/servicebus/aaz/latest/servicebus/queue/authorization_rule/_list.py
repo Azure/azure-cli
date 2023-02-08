@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List all authorization rules for a queue.
+
+    :example: List of Authorization Rule by Queue
+        az servicebus queue authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue
     """
 
     _aaz_info = {

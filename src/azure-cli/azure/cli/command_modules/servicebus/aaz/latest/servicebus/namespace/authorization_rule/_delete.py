@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete a namespace authorization rule.
+
+    :example: Deletes the Authorization Rule of the Service Bus Namespace.
+        az servicebus namespace authorization-rule delete --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
     """
 
     _aaz_info = {

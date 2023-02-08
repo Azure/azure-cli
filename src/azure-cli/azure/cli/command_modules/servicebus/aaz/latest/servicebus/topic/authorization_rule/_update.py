@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update an authorization rule for the specified topic.
+
+    :example: Create Authorization Rule for given Service Bus Topic.
+        az servicebus topic authorization-rule update --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule --rights Send
     """
 
     _aaz_info = {

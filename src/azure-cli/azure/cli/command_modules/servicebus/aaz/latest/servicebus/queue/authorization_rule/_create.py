@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create an authorization rule for a queue.
+
+    :example: Create Authorization Rule for Queue
+        az servicebus queue authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule --rights Listen
     """
 
     _aaz_info = {

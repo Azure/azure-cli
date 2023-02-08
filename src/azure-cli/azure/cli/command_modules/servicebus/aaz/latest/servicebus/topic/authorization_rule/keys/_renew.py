@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Renew(AAZCommand):
     """Regenerates primary or secondary connection strings for the topic.
+
+    :example: Regenerate key of Service Bus Topic.
+        az servicebus topic authorization-rule keys renew --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule --key PrimaryKey
     """
 
     _aaz_info = {

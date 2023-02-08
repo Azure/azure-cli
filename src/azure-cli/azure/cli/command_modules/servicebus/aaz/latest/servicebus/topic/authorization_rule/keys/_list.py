@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """Gets the primary and secondary connection strings for the topic.
+
+    :example: List the keys and connection strings of Authorization Rule for Service Bus Topic.
+        az servicebus topic authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule
     """
 
     _aaz_info = {
