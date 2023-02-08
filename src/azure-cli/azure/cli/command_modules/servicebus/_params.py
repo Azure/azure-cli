@@ -78,8 +78,6 @@ def load_arguments_sb(self, _):
         c.argument('authorization_rule_name', arg_type=name_type, id_part=None, help='Name of Namespace Authorization Rule')
         c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')
 
-<<<<<<< HEAD
-=======
     # region Queue
     with self.argument_context('servicebus queue') as c:
         c.argument('queue_name', arg_type=name_type, id_part='child_name_1', completer=get_queue_command_completion_list, help='Name of Queue')
@@ -116,7 +114,6 @@ def load_arguments_sb(self, _):
     with self.argument_context('servicebus queue list') as c:
         c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')
 
->>>>>>> 278461207ddb8994308c4eeccd52590adb277b16
     # region Queue Authorization Rule
     with self.argument_context('servicebus queue authorization-rule') as c:
         c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_2', help='Name of Queue Authorization Rule')
@@ -182,12 +179,9 @@ def load_arguments_sb(self, _):
             c.argument('reply_to_session_id', help='Session identifier to reply to.')
             c.argument('content_type', help='Content type of message.')
             c.argument('requires_preprocessing', options_list=['--enable-correlation-preprocessing'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether the rule action requires preprocessing.')
-<<<<<<< HEAD
             c.argument('tags', options_list=['--correlation-filter-property', '--correlation-filter'],
                        arg_type=tags_type, help='dictionary object for custom filters')
-=======
             c.argument('tags', options_list=['--correlation-filter-property', '--correlation-filter'], arg_type=tags_type, help='dictionary object for custom filters')
->>>>>>> 278461207ddb8994308c4eeccd52590adb277b16
 
     with self.argument_context('servicebus topic subscription rule list') as c:
         c.argument('subscription_name', options_list=['--subscription-name'], id_part=None, help='Name of Subscription')
