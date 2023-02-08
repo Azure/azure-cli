@@ -96,6 +96,7 @@ def cli_namespace_exists(cmd, client, name):
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
         return client.check_name_availability(parameters={'name': name})
 
+
 # Queue Region
 def cli_sbqueue_create(cmd, client, resource_group_name, namespace_name, queue_name, lock_duration=None,
                        max_size_in_megabytes=None, requires_duplicate_detection=None, requires_session=None,
@@ -213,6 +214,7 @@ def cli_sbqueue_update(instance, lock_duration=None,
 
     return instance
 
+
 # Topic Region
 def cli_sbtopic_create(cmd, client, resource_group_name, namespace_name, topic_name, default_message_time_to_live=None,
                        max_size_in_megabytes=None, requires_duplicate_detection=None,
@@ -300,6 +302,7 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
         instance.max_message_size_in_kilobytes = max_message_size_in_kilobytes
 
     return instance
+
 
 # Subscription Region
 def cli_sbsubscription_create(cmd, client, resource_group_name, namespace_name, topic_name, subscription_name, lock_duration=None,
