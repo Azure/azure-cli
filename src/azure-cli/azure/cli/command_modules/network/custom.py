@@ -7096,22 +7096,6 @@ class VnetGatewayPackageCaptureStop(_VnetGatewayPackageCaptureStop):
         return result
 
 
-def start_vnet_gateway_package_capture(cmd, client, resource_group_name, virtual_network_gateway_name,
-                                       filter_data=None, no_wait=False):
-    VpnPacketCaptureStartParameters = cmd.get_models('VpnPacketCaptureStartParameters')
-    parameters = VpnPacketCaptureStartParameters(filter_data=filter_data)
-    return sdk_no_wait(no_wait, client.begin_start_packet_capture, resource_group_name,
-                       virtual_network_gateway_name, parameters=parameters)
-
-
-def stop_vnet_gateway_package_capture(cmd, client, resource_group_name, virtual_network_gateway_name,
-                                      sas_url, no_wait=False):
-    VpnPacketCaptureStopParameters = cmd.get_models('VpnPacketCaptureStopParameters')
-    parameters = VpnPacketCaptureStopParameters(sas_url=sas_url)
-    return sdk_no_wait(no_wait, client.begin_stop_packet_capture, resource_group_name,
-                       virtual_network_gateway_name, parameters=parameters)
-
-
 class VpnProfilePackageUrlShow(_VpnProfilePackageUrlShow):
 
     def _output(self, *args, **kwargs):
@@ -7125,7 +7109,7 @@ class VpnClientConnectionHealthShow(_VpnClientConnectionHealthShow):
         return result
 
 
-def generate_vpn_client(cmd, client, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
+def generate_vpn_client(cmd, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
                         authentication_method=None, radius_server_auth_certificate=None, client_root_certificates=None,
                         use_legacy=False):
     class VpnClientPackageGenerate(_VpnClientPackageGenerate):
@@ -7148,35 +7132,6 @@ def generate_vpn_client(cmd, client, resource_group_name, virtual_network_gatewa
         return VpnProfileGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
     # legacy implementation
     return VpnClientPackageGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
-
-    # params = cmd.get_models('VpnClientParameters')(
-    #     processor_architecture=processor_architecture
-    # )
-
-    # if cmd.supported_api_version(min_api='2017-06-01') and not use_legacy:
-    #     params.authentication_method = authentication_method
-    #     params.radius_server_auth_certificate = radius_server_auth_certificate
-    #     params.client_root_certificates = client_root_certificates
-    #     return client.begin_generate_vpn_profile(resource_group_name, virtual_network_gateway_name, params)
-    # legacy implementation
-    # return client.begin_generatevpnclientpackage(resource_group_name, virtual_network_gateway_name, params)
-
-
-def set_vpn_client_ipsec_policy(cmd, client, resource_group_name, virtual_network_gateway_name,
-                                sa_life_time_seconds, sa_data_size_kilobytes,
-                                ipsec_encryption, ipsec_integrity,
-                                ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
-    VpnClientIPsecParameters = cmd.get_models('VpnClientIPsecParameters')
-    vpnclient_ipsec_params = VpnClientIPsecParameters(sa_life_time_seconds=sa_life_time_seconds,
-                                                      sa_data_size_kilobytes=sa_data_size_kilobytes,
-                                                      ipsec_encryption=ipsec_encryption,
-                                                      ipsec_integrity=ipsec_integrity,
-                                                      ike_encryption=ike_encryption,
-                                                      ike_integrity=ike_integrity,
-                                                      dh_group=dh_group,
-                                                      pfs_group=pfs_group)
-    return sdk_no_wait(no_wait, client.begin_set_vpnclient_ipsec_parameters, resource_group_name,
-                       virtual_network_gateway_name, vpnclient_ipsec_params)
 
 
 class VnetGatewayVpnConnectionsDisconnect(_VnetGatewayVpnConnectionsDisconnect):
