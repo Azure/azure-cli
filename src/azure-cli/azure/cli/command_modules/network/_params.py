@@ -18,7 +18,7 @@ from azure.cli.core.local_context import LocalContextAttribute, LocalContextActi
 from azure.cli.command_modules.network._validators import (
     dns_zone_name_type, validate_inbound_nat_rule_id_list,
     validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
-    validate_address_pool_name_or_id, load_cert_file, validate_metadata,
+    validate_address_pool_name_or_id, validate_metadata,
     validate_dns_record_type, validate_private_ip_address,
     get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
     get_network_watcher_from_vm, get_network_watcher_for_pcap_creation, get_network_watcher_from_location, validate_capture_size_and_limit,
@@ -51,7 +51,6 @@ def load_arguments(self, _):
      FlowLogFormatType, HTTPMethod, IPAllocationMethod,
      IPVersion, ProbeProtocol, Protocol, PublicIPAddressSkuName, PublicIPAddressSkuTier,
      SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
-     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnType,
      ConnectionMonitorEndpointFilterType, ConnectionMonitorTestConfigurationProtocol,
      PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType,
      PacketCaptureTargetType) = self.get_models(
@@ -61,7 +60,6 @@ def load_arguments(self, _):
          'FlowLogFormatType', 'HTTPMethod', 'IPAllocationMethod',
          'IPVersion', 'ProbeProtocol', 'Protocol', 'PublicIPAddressSkuName', 'PublicIPAddressSkuTier',
          'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
-         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnType',
          'ConnectionMonitorEndpointFilterType', 'ConnectionMonitorTestConfigurationProtocol',
          'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType', 'DestinationPortBehavior', 'CoverageLevel', 'EndpointType',
          'PacketCaptureTargetType')
