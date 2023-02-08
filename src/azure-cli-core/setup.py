@@ -47,6 +47,8 @@ DEPENDENCIES = [
     'azure-cli-telemetry==1.0.8.*',
     'azure-mgmt-core>=1.2.0,<2',
     'cryptography',
+    # On Linux, the distribution (Ubuntu, Debian, etc) and version are logged in telemetry
+    'distro; sys_platform == "linux"',
     'humanfriendly~=10.0',
     'jmespath',
     'knack~=0.10.1',
