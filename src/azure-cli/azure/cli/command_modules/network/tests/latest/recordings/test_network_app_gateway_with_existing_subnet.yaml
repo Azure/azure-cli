@@ -13,13 +13,13 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001","name":"cli_test_ag_existing_subnet000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-08-28T12:25:30Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001","name":"cli_test_ag_existing_subnet000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-07T13:36:36Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -28,7 +28,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:25:33 GMT
+      - Tue, 07 Feb 2023 13:36:38 GMT
       expires:
       - '-1'
       pragma:
@@ -43,10 +43,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name": "subnet1", "properties":
-      {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies": "Disabled",
-      "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
+    body: '{"location": "westus", "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "enableDdosProtection": false, "enableVmProtection": false,
+      "subnets": [{"name": "subnet1", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}'
     headers:
       Accept:
       - application/json
@@ -57,28 +56,26 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '299'
+      - '234'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/virtualNetworks/vnet2?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/virtualNetworks/vnet2\",\r\n
-        \ \"etag\": \"W/\\\"a50dd703-40c4-40a2-aec5-529992cde4f6\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"33281ecf-bf19-448f-a675-76752ff415ca\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"56f7623e-833f-490a-a350-2ec8eb0800f3\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"a50dd703-40c4-40a2-aec5-529992cde4f6\\\"\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"a7f1c6ae-0c0d-4a38-94ff-a2e99df4da28\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
+        \     {\r\n        \"name\": \"subnet1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1\",\r\n
+        \       \"etag\": \"W/\\\"33281ecf-bf19-448f-a675-76752ff415ca\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -89,15 +86,15 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6d231f38-150c-4923-bd3c-d59a1cab4a7f?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ec116c4e-de4d-4165-b02d-bcda301aa3d0?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '1320'
+      - '1251'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:25:36 GMT
+      - Tue, 07 Feb 2023 13:36:40 GMT
       expires:
       - '-1'
       pragma:
@@ -110,9 +107,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 064e2133-05f1-4711-91e9-1f26b7c453ec
+      - 75259e35-a03d-47c4-9f46-be67c24a5439
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -130,10 +127,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6d231f38-150c-4923-bd3c-d59a1cab4a7f?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ec116c4e-de4d-4165-b02d-bcda301aa3d0?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -145,7 +142,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:25:41 GMT
+      - Tue, 07 Feb 2023 13:36:43 GMT
       expires:
       - '-1'
       pragma:
@@ -162,7 +159,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 340f1469-d7bd-4ef8-aaae-40781d1658ee
+      - e0896606-1618-4d33-b239-08891f6ee57b
     status:
       code: 200
       message: OK
@@ -180,22 +177,20 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/virtualNetworks/vnet2?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/virtualNetworks/vnet2\",\r\n
-        \ \"etag\": \"W/\\\"80854ca3-6124-4759-81ab-3c3cba1e8d0f\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"052fc4ef-6a12-4780-bffb-ef4bea93fd88\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"56f7623e-833f-490a-a350-2ec8eb0800f3\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"80854ca3-6124-4759-81ab-3c3cba1e8d0f\\\"\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"a7f1c6ae-0c0d-4a38-94ff-a2e99df4da28\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
+        \     {\r\n        \"name\": \"subnet1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1\",\r\n
+        \       \"etag\": \"W/\\\"052fc4ef-6a12-4780-bffb-ef4bea93fd88\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -206,13 +201,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1322'
+      - '1253'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:25:41 GMT
+      - Tue, 07 Feb 2023 13:36:43 GMT
       etag:
-      - W/"80854ca3-6124-4759-81ab-3c3cba1e8d0f"
+      - W/"052fc4ef-6a12-4780-bffb-ef4bea93fd88"
       expires:
       - '-1'
       pragma:
@@ -229,7 +224,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - fdd43c4a-cb26-4fab-bdc1-52b0117ad061
+      - fc6c2233-dd80-42ff-9cfd-6a0c84d93e67
     status:
       code: 200
       message: OK
@@ -247,13 +242,13 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --subnet-address-prefix --tags --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001","name":"cli_test_ag_existing_subnet000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-08-28T12:25:30Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001","name":"cli_test_ag_existing_subnet000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-07T13:36:36Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -262,7 +257,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:25:42 GMT
+      - Tue, 07 Feb 2023 13:36:44 GMT
       expires:
       - '-1'
       pragma:
@@ -290,22 +285,22 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --subnet-address-prefix --tags --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27cli_test_ag_existing_subnet000001%27%20and%20name%20eq%20%27vnet2%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FvirtualNetworks%27&api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27cli_test_ag_existing_subnet000001%27%20and%20name%20eq%20%27vnet2%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FvirtualNetworks%27&api-version=2022-09-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/virtualNetworks/vnet2","name":"vnet2","type":"Microsoft.Network/virtualNetworks","location":"westus","tags":{}}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceGroup+eq+%27cli_test_ag_existing_subnet000001%27+and+name+eq+%27vnet2%27+and+resourceType+eq+%27Microsoft.Network%2fvirtualNetworks%27&api-version=2021-04-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9FTTVOa1UtIiwibmV4dFJvd0tleSI6IjEhMjE2IU1FSXhSalkwTnpFeFFrWXdORVJFUVVGRlF6TkRRamt5TnpKR01EazFPVEJmUjFKTUxWUkZVMVE2TlVaT1Z6bzFSa1pNVDFjNk5VWk1UMGM2TlVaVFdWSkhXbHBOVGpjM1J6TTJOMWN6UnpReVZqUk1mREl4UXpkRFF6WTFOREU1T1RCRk5qa3RUVWxEVWs5VFQwWlVPakpGVGtWVVYwOVNTem95UmxaSlVsUlZRVXhPUlZSWFQxSkxVem95UmxaT1JWUXhMVU5GVGxSU1FVeFZVMFZWUVZBLSJ9"}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/virtualNetworks/vnet2","name":"vnet2","type":"Microsoft.Network/virtualNetworks","location":"westus"}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceGroup+eq+%27cli_test_ag_existing_subnet000001%27+and+name+eq+%27vnet2%27+and+resourceType+eq+%27Microsoft.Network%2fvirtualNetworks%27&api-version=2022-09-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9FTTVOa1UtIiwibmV4dFJvd0tleSI6IjEhMTY4IU1FSXhSalkwTnpFeFFrWXdORVJFUVVGRlF6TkRRamt5TnpKR01EazFPVEJmUjFKTUxWTlVUMUpCUjBVNk1rUldNbEpVT2pKRVVrVlFVazh0VFVsRFVrOVRUMFpVT2pKRlUxUlBVa0ZIUlRveVJsTlVUMUpCUjBWQlEwTlBWVTVVVXpveVJsTlVUMUpCUjBWVFJsSkZVRkpQT0MxRFJVNVVVa0ZNVlZNLSJ9"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '916'
+      - '842'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:25:42 GMT
+      - Tue, 07 Feb 2023 13:36:44 GMT
       expires:
       - '-1'
       pragma:
@@ -323,7 +318,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -333,10 +328,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --subnet-address-prefix --tags --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?api-version=2021-04-01&%24filter=resourceGroup+eq+%27cli_test_ag_existing_subnet000001%27+and+name+eq+%27vnet2%27+and+resourceType+eq+%27Microsoft.Network%2FvirtualNetworks%27&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9FTTVOa1UtIiwibmV4dFJvd0tleSI6IjEhMjE2IU1FSXhSalkwTnpFeFFrWXdORVJFUVVGRlF6TkRRamt5TnpKR01EazFPVEJmUjFKTUxWUkZVMVE2TlVaT1Z6bzFSa1pNVDFjNk5VWk1UMGM2TlVaVFdWSkhXbHBOVGpjM1J6TTJOMWN6UnpReVZqUk1mREl4UXpkRFF6WTFOREU1T1RCRk5qa3RUVWxEVWs5VFQwWlVPakpGVGtWVVYwOVNTem95UmxaSlVsUlZRVXhPUlZSWFQxSkxVem95UmxaT1JWUXhMVU5GVGxSU1FVeFZVMFZWUVZBLSJ9
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27cli_test_ag_existing_subnet000001%27%20and%20name%20eq%20%27vnet2%27%20and%20resourceType%20eq%20%27Microsoft.Network/virtualNetworks%27&api-version=2022-09-01&$skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9FTTVOa1UtIiwibmV4dFJvd0tleSI6IjEhMTY4IU1FSXhSalkwTnpFeFFrWXdORVJFUVVGRlF6TkRRamt5TnpKR01EazFPVEJmUjFKTUxWTlVUMUpCUjBVNk1rUldNbEpVT2pKRVVrVlFVazh0VFVsRFVrOVRUMFpVT2pKRlUxUlBVa0ZIUlRveVJsTlVUMUpCUjBWQlEwTlBWVTVVVXpveVJsTlVUMUpCUjBWVFJsSkZVRkpQT0MxRFJVNVVVa0ZNVlZNLSJ9
   response:
     body:
       string: '{"value":[]}'
@@ -348,7 +343,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:25:42 GMT
+      - Tue, 07 Feb 2023 13:36:44 GMT
       expires:
       - '-1'
       pragma:
@@ -376,13 +371,13 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001","name":"cli_test_ag_existing_subnet000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-08-28T12:25:30Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001","name":"cli_test_ag_existing_subnet000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-07T13:36:36Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -391,15 +386,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:25:43 GMT
+      - Tue, 07 Feb 2023 13:36:45 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -419,30 +412,28 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27cli_test_ag_existing_subnet000001%27%20and%20name%20eq%20%27vnet2%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FvirtualNetworks%27&api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27cli_test_ag_existing_subnet000001%27%20and%20name%20eq%20%27vnet2%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FvirtualNetworks%27&api-version=2022-09-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/virtualNetworks/vnet2","name":"vnet2","type":"Microsoft.Network/virtualNetworks","location":"westus","tags":{}}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceGroup+eq+%27cli_test_ag_existing_subnet000001%27+and+name+eq+%27vnet2%27+and+resourceType+eq+%27Microsoft.Network%2fvirtualNetworks%27&api-version=2021-04-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9FTTVOa1UtIiwibmV4dFJvd0tleSI6IjEhMjE2IU1FSXhSalkwTnpFeFFrWXdORVJFUVVGRlF6TkRRamt5TnpKR01EazFPVEJmUjFKTUxWUkZVMVE2TlVaT1Z6bzFSa1pNVDFjNk5VWk1UMGM2TlVaVFdWSkhXbHBOVGpjM1J6TTJOMWN6UnpReVZqUk1mREl4UXpkRFF6WTFOREU1T1RCRk5qa3RUVWxEVWs5VFQwWlVPakpGVGtWVVYwOVNTem95UmxaSlVsUlZRVXhPUlZSWFQxSkxVem95UmxaT1JWUXhMVU5GVGxSU1FVeFZVMFZWUVZBLSJ9"}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/virtualNetworks/vnet2","name":"vnet2","type":"Microsoft.Network/virtualNetworks","location":"westus"}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceGroup+eq+%27cli_test_ag_existing_subnet000001%27+and+name+eq+%27vnet2%27+and+resourceType+eq+%27Microsoft.Network%2fvirtualNetworks%27&api-version=2022-09-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9FTTVOa1UtIiwibmV4dFJvd0tleSI6IjEhMTY4IU1FSXhSalkwTnpFeFFrWXdORVJFUVVGRlF6TkRRamt5TnpKR01EazFPVEJmUjFKTUxWTlVUMUpCUjBVNk1rUldNbEpVT2pKRVVrVlFVazh0VFVsRFVrOVRUMFpVT2pKRlUxUlBVa0ZIUlRveVJsTlVUMUpCUjBWQlEwTlBWVTVVVXpveVJsTlVUMUpCUjBWVFJsSkZVRkpQT1MxRFJVNVVVa0ZNVlZNLSJ9"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '916'
+      - '842'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:25:44 GMT
+      - Tue, 07 Feb 2023 13:36:44 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -452,7 +443,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -462,10 +453,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?api-version=2021-04-01&%24filter=resourceGroup+eq+%27cli_test_ag_existing_subnet000001%27+and+name+eq+%27vnet2%27+and+resourceType+eq+%27Microsoft.Network%2FvirtualNetworks%27&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9FTTVOa1UtIiwibmV4dFJvd0tleSI6IjEhMjE2IU1FSXhSalkwTnpFeFFrWXdORVJFUVVGRlF6TkRRamt5TnpKR01EazFPVEJmUjFKTUxWUkZVMVE2TlVaT1Z6bzFSa1pNVDFjNk5VWk1UMGM2TlVaVFdWSkhXbHBOVGpjM1J6TTJOMWN6UnpReVZqUk1mREl4UXpkRFF6WTFOREU1T1RCRk5qa3RUVWxEVWs5VFQwWlVPakpGVGtWVVYwOVNTem95UmxaSlVsUlZRVXhPUlZSWFQxSkxVem95UmxaT1JWUXhMVU5GVGxSU1FVeFZVMFZWUVZBLSJ9
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27cli_test_ag_existing_subnet000001%27%20and%20name%20eq%20%27vnet2%27%20and%20resourceType%20eq%20%27Microsoft.Network/virtualNetworks%27&api-version=2022-09-01&$skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9FTTVOa1UtIiwibmV4dFJvd0tleSI6IjEhMTY4IU1FSXhSalkwTnpFeFFrWXdORVJFUVVGRlF6TkRRamt5TnpKR01EazFPVEJmUjFKTUxWTlVUMUpCUjBVNk1rUldNbEpVT2pKRVVrVlFVazh0VFVsRFVrOVRUMFpVT2pKRlUxUlBVa0ZIUlRveVJsTlVUMUpCUjBWQlEwTlBWVTVVVXpveVJsTlVUMUpCUjBWVFJsSkZVRkpQT1MxRFJVNVVVa0ZNVlZNLSJ9
   response:
     body:
       string: '{"value":[]}'
@@ -477,15 +468,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:25:45 GMT
+      - Tue, 07 Feb 2023 13:36:45 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -534,16 +523,16 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/ag_deploy_aMobih6qXx8ignWXpvZexKgYxAOUkoun","name":"ag_deploy_aMobih6qXx8ignWXpvZexKgYxAOUkoun","type":"Microsoft.Resources/deployments","properties":{"templateHash":"9283568225063050972","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-08-28T12:25:51.4874437Z","duration":"PT0.0003058S","correlationId":"d770a105-4867-4845-a65e-b93c5686cd97","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"applicationGateways","locations":["westus"]}]}],"dependencies":[]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/ag_deploy_whFqQOQGwSCCfwo0IpHrqyL5jrO5W3Gz","name":"ag_deploy_whFqQOQGwSCCfwo0IpHrqyL5jrO5W3Gz","type":"Microsoft.Resources/deployments","properties":{"templateHash":"5911881342662049535","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2023-02-07T13:37:30.5248876Z","duration":"PT0.0007548S","correlationId":"b80d7688-46c4-4950-a1b8-920c685ce26e","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"applicationGateways","locations":["westus"]}]}],"dependencies":[]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/ag_deploy_aMobih6qXx8ignWXpvZexKgYxAOUkoun/operationStatuses/08585399173362422512?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/ag_deploy_whFqQOQGwSCCfwo0IpHrqyL5jrO5W3Gz/operationStatuses/08585258298363160842?api-version=2022-09-01
       cache-control:
       - no-cache
       content-length:
@@ -551,7 +540,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:25:52 GMT
+      - Tue, 07 Feb 2023 13:37:30 GMT
       expires:
       - '-1'
       pragma:
@@ -561,7 +550,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1191'
+      - '1196'
     status:
       code: 201
       message: Created
@@ -579,10 +568,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -594,15 +583,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:26:23 GMT
+      - Tue, 07 Feb 2023 13:38:00 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -622,10 +609,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -637,15 +624,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:26:53 GMT
+      - Tue, 07 Feb 2023 13:38:31 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -665,10 +650,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -680,15 +665,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:27:23 GMT
+      - Tue, 07 Feb 2023 13:39:02 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -708,10 +691,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -723,15 +706,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:27:54 GMT
+      - Tue, 07 Feb 2023 13:39:32 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -751,10 +732,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -766,15 +747,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:28:24 GMT
+      - Tue, 07 Feb 2023 13:40:02 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -794,10 +773,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -809,15 +788,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:28:55 GMT
+      - Tue, 07 Feb 2023 13:40:32 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -837,10 +814,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -852,15 +829,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:29:26 GMT
+      - Tue, 07 Feb 2023 13:41:02 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -880,10 +855,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -895,15 +870,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:29:57 GMT
+      - Tue, 07 Feb 2023 13:41:33 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -923,10 +896,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -938,15 +911,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:30:27 GMT
+      - Tue, 07 Feb 2023 13:42:03 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -966,10 +937,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -981,15 +952,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:30:58 GMT
+      - Tue, 07 Feb 2023 13:42:33 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -1009,10 +978,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1024,15 +993,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:31:28 GMT
+      - Tue, 07 Feb 2023 13:43:03 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -1052,10 +1019,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1067,15 +1034,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:31:59 GMT
+      - Tue, 07 Feb 2023 13:43:33 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -1095,10 +1060,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1110,15 +1075,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:32:29 GMT
+      - Tue, 07 Feb 2023 13:44:03 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -1138,10 +1101,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1153,15 +1116,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:33:01 GMT
+      - Tue, 07 Feb 2023 13:44:33 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -1181,10 +1142,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1196,15 +1157,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:33:31 GMT
+      - Tue, 07 Feb 2023 13:45:04 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -1224,10 +1183,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1239,15 +1198,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:34:01 GMT
+      - Tue, 07 Feb 2023 13:45:34 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -1267,10 +1224,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1282,15 +1239,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:34:32 GMT
+      - Tue, 07 Feb 2023 13:46:04 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -1310,10 +1265,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1325,15 +1280,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:35:02 GMT
+      - Tue, 07 Feb 2023 13:46:38 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -1353,10 +1306,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1368,15 +1321,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:35:34 GMT
+      - Tue, 07 Feb 2023 13:47:08 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -1396,10 +1347,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1411,15 +1362,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:36:04 GMT
+      - Tue, 07 Feb 2023 13:47:38 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -1439,10 +1388,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1454,15 +1403,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:36:35 GMT
+      - Tue, 07 Feb 2023 13:48:09 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -1482,10 +1429,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1497,15 +1444,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:37:05 GMT
+      - Tue, 07 Feb 2023 13:48:39 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -1525,10 +1470,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1540,15 +1485,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:37:36 GMT
+      - Tue, 07 Feb 2023 13:49:09 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -1568,10 +1511,10 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1583,15 +1526,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:38:06 GMT
+      - Tue, 07 Feb 2023 13:49:39 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -1611,10 +1552,461 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585399173362422512?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Feb 2023 13:50:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet --servers --priority
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Feb 2023 13:50:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet --servers --priority
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Feb 2023 13:51:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet --servers --priority
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Feb 2023 13:51:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet --servers --priority
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Feb 2023 13:52:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet --servers --priority
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Feb 2023 13:52:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet --servers --priority
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Feb 2023 13:53:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet --servers --priority
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Feb 2023 13:53:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet --servers --priority
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Feb 2023 13:54:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet --servers --priority
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Feb 2023 13:54:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet --servers --priority
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Feb 2023 13:55:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet --servers --priority
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585258298363160842?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -1626,15 +2018,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:38:37 GMT
+      - Tue, 07 Feb 2023 13:55:41 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -1654,13 +2044,13 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --servers --priority
       User-Agent:
-      - AZURECLI/2.39.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
-        (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/ag_deploy_aMobih6qXx8ignWXpvZexKgYxAOUkoun","name":"ag_deploy_aMobih6qXx8ignWXpvZexKgYxAOUkoun","type":"Microsoft.Resources/deployments","properties":{"templateHash":"9283568225063050972","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-08-28T12:38:19.8260083Z","duration":"PT12M28.3388704S","correlationId":"d770a105-4867-4845-a65e-b93c5686cd97","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"applicationGateways","locations":["westus"]}]}],"dependencies":[],"outputs":{"applicationGateway":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"3ae5d991-b8d2-4426-aaea-8be9c1588c60","sku":{"name":"Standard_Medium","tier":"Standard","capacity":2},"operationalState":"Running","gatewayIPConfigurations":[{"name":"appGatewayPrivateFrontendIP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/gatewayIPConfigurations/appGatewayPrivateFrontendIP","etag":"W/\"125da4a4-6d0e-4b53-8cb1-7b9c5c2d4564\"","properties":{"provisioningState":"Succeeded","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1"}},"type":"Microsoft.Network/applicationGateways/gatewayIPConfigurations"}],"sslCertificates":[],"authenticationCertificates":[],"frontendIPConfigurations":[{"name":"appGatewayPrivateFrontendIP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/frontendIPConfigurations/appGatewayPrivateFrontendIP","etag":"W/\"125da4a4-6d0e-4b53-8cb1-7b9c5c2d4564\"","type":"Microsoft.Network/applicationGateways/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAddress":"10.0.0.6","privateIPAllocationMethod":"Dynamic","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1"},"httpListeners":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/httpListeners/appGatewayHttpListener"}]}}],"frontendPorts":[{"name":"appGatewayFrontendPort","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/frontendPorts/appGatewayFrontendPort","etag":"W/\"125da4a4-6d0e-4b53-8cb1-7b9c5c2d4564\"","properties":{"provisioningState":"Succeeded","port":80,"httpListeners":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/httpListeners/appGatewayHttpListener"}]},"type":"Microsoft.Network/applicationGateways/frontendPorts"}],"backendAddressPools":[{"name":"appGatewayBackendPool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/backendAddressPools/appGatewayBackendPool","etag":"W/\"125da4a4-6d0e-4b53-8cb1-7b9c5c2d4564\"","properties":{"provisioningState":"Succeeded","backendAddresses":[{"ipAddress":"172.0.0.1"},{"fqdn":"www.mydomain.com"}],"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/requestRoutingRules/rule1"}]},"type":"Microsoft.Network/applicationGateways/backendAddressPools"}],"backendHttpSettingsCollection":[{"name":"appGatewayBackendHttpSettings","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/backendHttpSettingsCollection/appGatewayBackendHttpSettings","etag":"W/\"125da4a4-6d0e-4b53-8cb1-7b9c5c2d4564\"","properties":{"provisioningState":"Succeeded","port":80,"protocol":"Http","cookieBasedAffinity":"Disabled","connectionDraining":{"enabled":false,"drainTimeoutInSec":1},"pickHostNameFromBackendAddress":false,"requestTimeout":30,"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/requestRoutingRules/rule1"}]},"type":"Microsoft.Network/applicationGateways/backendHttpSettingsCollection"}],"httpListeners":[{"name":"appGatewayHttpListener","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/httpListeners/appGatewayHttpListener","etag":"W/\"125da4a4-6d0e-4b53-8cb1-7b9c5c2d4564\"","properties":{"provisioningState":"Succeeded","frontendIPConfiguration":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/frontendIPConfigurations/appGatewayPrivateFrontendIP"},"frontendPort":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/frontendPorts/appGatewayFrontendPort"},"protocol":"Http","hostNames":[],"requireServerNameIndication":false,"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/requestRoutingRules/rule1"}]},"type":"Microsoft.Network/applicationGateways/httpListeners"}],"urlPathMaps":[],"requestRoutingRules":[{"name":"rule1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/requestRoutingRules/rule1","etag":"W/\"125da4a4-6d0e-4b53-8cb1-7b9c5c2d4564\"","properties":{"provisioningState":"Succeeded","ruleType":"Basic","httpListener":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/httpListeners/appGatewayHttpListener"},"backendAddressPool":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/backendAddressPools/appGatewayBackendPool"},"backendHttpSettings":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/backendHttpSettingsCollection/appGatewayBackendHttpSettings"}},"type":"Microsoft.Network/applicationGateways/requestRoutingRules"}],"probes":[],"rewriteRuleSets":[],"redirectConfigurations":[]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Resources/deployments/ag_deploy_whFqQOQGwSCCfwo0IpHrqyL5jrO5W3Gz","name":"ag_deploy_whFqQOQGwSCCfwo0IpHrqyL5jrO5W3Gz","type":"Microsoft.Resources/deployments","properties":{"templateHash":"5911881342662049535","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2023-02-07T13:55:29.6656667Z","duration":"PT17M59.1415339S","correlationId":"b80d7688-46c4-4950-a1b8-920c685ce26e","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"applicationGateways","locations":["westus"]}]}],"dependencies":[],"outputs":{"applicationGateway":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"2b3dc129-7d46-44f6-b5cb-c2231656e588","sku":{"name":"Standard_Medium","tier":"Standard","capacity":2},"operationalState":"Running","gatewayIPConfigurations":[{"name":"appGatewayPrivateFrontendIP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/gatewayIPConfigurations/appGatewayPrivateFrontendIP","etag":"W/\"4a60481b-1704-42ac-b50e-65cf9b14bcac\"","properties":{"provisioningState":"Succeeded","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1"}},"type":"Microsoft.Network/applicationGateways/gatewayIPConfigurations"}],"sslCertificates":[],"authenticationCertificates":[],"frontendIPConfigurations":[{"name":"appGatewayPrivateFrontendIP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/frontendIPConfigurations/appGatewayPrivateFrontendIP","etag":"W/\"4a60481b-1704-42ac-b50e-65cf9b14bcac\"","type":"Microsoft.Network/applicationGateways/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAddress":"10.0.0.6","privateIPAllocationMethod":"Dynamic","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnet1"},"httpListeners":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/httpListeners/appGatewayHttpListener"}]}}],"frontendPorts":[{"name":"appGatewayFrontendPort","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/frontendPorts/appGatewayFrontendPort","etag":"W/\"4a60481b-1704-42ac-b50e-65cf9b14bcac\"","properties":{"provisioningState":"Succeeded","port":80,"httpListeners":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/httpListeners/appGatewayHttpListener"}]},"type":"Microsoft.Network/applicationGateways/frontendPorts"}],"backendAddressPools":[{"name":"appGatewayBackendPool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/backendAddressPools/appGatewayBackendPool","etag":"W/\"4a60481b-1704-42ac-b50e-65cf9b14bcac\"","properties":{"provisioningState":"Succeeded","backendAddresses":[{"ipAddress":"172.0.0.1"},{"fqdn":"www.mydomain.com"}],"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/requestRoutingRules/rule1"}]},"type":"Microsoft.Network/applicationGateways/backendAddressPools"}],"backendHttpSettingsCollection":[{"name":"appGatewayBackendHttpSettings","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/backendHttpSettingsCollection/appGatewayBackendHttpSettings","etag":"W/\"4a60481b-1704-42ac-b50e-65cf9b14bcac\"","properties":{"provisioningState":"Succeeded","port":80,"protocol":"Http","cookieBasedAffinity":"Disabled","connectionDraining":{"enabled":false,"drainTimeoutInSec":1},"pickHostNameFromBackendAddress":false,"requestTimeout":30,"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/requestRoutingRules/rule1"}]},"type":"Microsoft.Network/applicationGateways/backendHttpSettingsCollection"}],"httpListeners":[{"name":"appGatewayHttpListener","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/httpListeners/appGatewayHttpListener","etag":"W/\"4a60481b-1704-42ac-b50e-65cf9b14bcac\"","properties":{"provisioningState":"Succeeded","frontendIPConfiguration":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/frontendIPConfigurations/appGatewayPrivateFrontendIP"},"frontendPort":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/frontendPorts/appGatewayFrontendPort"},"protocol":"Http","hostNames":[],"requireServerNameIndication":false,"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/requestRoutingRules/rule1"}]},"type":"Microsoft.Network/applicationGateways/httpListeners"}],"urlPathMaps":[],"requestRoutingRules":[{"name":"rule1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/requestRoutingRules/rule1","etag":"W/\"4a60481b-1704-42ac-b50e-65cf9b14bcac\"","properties":{"provisioningState":"Succeeded","ruleType":"Basic","httpListener":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/httpListeners/appGatewayHttpListener"},"backendAddressPool":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/backendAddressPools/appGatewayBackendPool"},"backendHttpSettings":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2/backendHttpSettingsCollection/appGatewayBackendHttpSettings"}},"type":"Microsoft.Network/applicationGateways/requestRoutingRules"}],"probes":[],"rewriteRuleSets":[],"redirectConfigurations":[]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_existing_subnet000001/providers/Microsoft.Network/applicationGateways/ag2"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -1669,15 +2059,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 28 Aug 2022 12:38:37 GMT
+      - Tue, 07 Feb 2023 13:55:42 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
