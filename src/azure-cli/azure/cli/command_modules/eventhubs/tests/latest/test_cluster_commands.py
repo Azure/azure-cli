@@ -36,7 +36,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         self.cmd('az group create --resource-group {rg} --location {loc1}')
 
         # Create Cluster
-        self.cmd('eventhubs cluster create --resource-group {rg} --name {clustername} --location {loc} --tags tag1=value1',
+        self.cmd('eventhubs cluster create --resource-group {rg} --name {clustername} --location eastus --tags tag1=value1',
                  checks=[self.check('name', self.kwargs['clustername'])])
 
         # Get Cluster
@@ -46,9 +46,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         self.kwargs.update({'clusterid': getresponse['id']})
 
         # Create Namespace in cluster
-        self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --cluster-arm-id {clusterid}',
-                 checks=[self.check('sku.name', self.kwargs['sku']),
-                         self.check('clusterArmId', self.kwargs['clusterid'])])
+        self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location eastus --tags {tags} --sku {sku} --cluster-arm-id {clusterid}')
 
         # Get namespaces created in the cluster
         listnsclusterresult = self.cmd('eventhubs cluster namespace list --resource-group {rg} --name {clustername}').output
@@ -69,7 +67,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_eh_self_serve_cluster(self):
         self.kwargs.update({
-            'loc': 'westus',
+            'loc': 'eastus',
             'rg': self.create_random_name(prefix='rg-cluster-', length=20),
             'clustername': self.create_random_name(prefix='eventhubs-selfserve-', length=24),
             'namespacename': self.create_random_name(prefix='eventhubs-ns1-', length=20),

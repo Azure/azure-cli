@@ -45,7 +45,7 @@ class EHEventhubCURDScenarioTest(ScenarioTest):
 
         # updated teh Storageaccount ID
         subid = self.cmd('account show --query id -otsv').output.replace('\n', '')
-        storageaccountid = '/subscriptions/' + subid + '/resourcegroups/v-ajnavtest/providers/Microsoft.Storage/storageAccounts/testingsdkeventhubnew'
+        storageaccountid = '/subscriptions/' + subid + '/resourcegroups/shubham-rg/providers/Microsoft.Storage/storageAccounts/testingsdkeventhubnew'
         self.kwargs.update({'storageaccount': storageaccountid})
 
         # Create Namespace
@@ -111,7 +111,7 @@ class EHEventhubCURDScenarioTest(ScenarioTest):
 
         # Delete Eventhub AuthorizationRule
         self.cmd(
-            'eventhubs eventhub authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname}')
+            'eventhubs eventhub authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname} --yes')
 
         # Delete Eventhub
         self.cmd(
