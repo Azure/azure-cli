@@ -10,7 +10,10 @@
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-return-statements
 import re
+from knack.log import get_logger
 from azure.cli.core.profiles import ResourceType
+
+logger = get_logger(__name__)
 
 
 # Namespace Region
@@ -400,7 +403,7 @@ def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_nam
                      action_sql_expression=None, action_compatibility_level=None, action_requires_preprocessing=None,
                      filter_sql_expression=None, filter_requires_preprocessing=None, correlation_id=None,
                      message_id=None, to=None, reply_to=None, label=None, session_id=None, reply_to_session_id=None,
-                     content_type=None, requires_preprocessing=None, filter_type=None):
+                     content_type=None, requires_preprocessing=None, filter_type=None, tags=None):
 
     Rule = cmd.get_models('Rule', resource_type=ResourceType.MGMT_SERVICEBUS)
     Action = cmd.get_models('Action', resource_type=ResourceType.MGMT_SERVICEBUS)
@@ -418,6 +421,7 @@ def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_nam
 
     if filter_type == 'CorrelationFilter':
         parameters.correlation_filter = CorrelationFilter(
+            properties=tags,
             correlation_id=correlation_id,
             to=to,
             message_id=message_id,
@@ -434,7 +438,6 @@ def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_nam
             compatibility_level=action_compatibility_level,
             requires_preprocessing=action_requires_preprocessing
         )
-
     return client.create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
@@ -449,7 +452,7 @@ def cli_rules_update(cmd, instance,
                      action_sql_expression=None, action_compatibility_level=None, action_requires_preprocessing=None,
                      filter_sql_expression=None, filter_requires_preprocessing=None, correlation_id=None,
                      message_id=None, to=None, reply_to=None, label=None, session_id=None, reply_to_session_id=None,
-                     content_type=None, requires_preprocessing=None):
+                     content_type=None, requires_preprocessing=None, tags=None):
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
         if action_sql_expression:
@@ -469,6 +472,9 @@ def cli_rules_update(cmd, instance,
 
     if correlation_id:
         instance.correlation_filter.correlation_id = correlation_id
+
+    if tags:
+        instance.correlation_filter.properties = tags
 
     if to:
         instance.correlation_filter.to = to
@@ -550,6 +556,10 @@ def cli_migration_complete(client, resource_group_name, namespace_name, config_n
     return client.complete_migration(resource_group_name, namespace_name, config_name)
 
 
+def revert(client, resource_group_name, namespace_name, config_name="$default"):
+    return client.revert(resource_group_name, namespace_name, config_name)
+
+
 iso8601pattern = re.compile("^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\d+H)?(\\d+M)?(\\d+.)?(\\d+S)?)?$")
 timedeltapattern = re.compile("^\\d+:\\d+:\\d+$")
 
@@ -583,6 +593,7 @@ def return_valid_duration(update_value, current_value=None):
         return value_toreturn
 
     if timedeltapattern.match(value_toreturn):
+        logger.warning('Please use ISO8601 duration for timespan inputs. Timespan inputs of format (days:min:seconds) would be deprecated from version 2.49.0.')
         day, minute, seconds = value_toreturn.split(":")
         if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) <= timedelta(days=DURATION_DAYS,
                                                                                             minutes=DURATION_MIN,
@@ -606,6 +617,7 @@ def return_valid_duration_create(update_value):
                     'duration value should be less than (days:min:secs) 10675199:10085:477581')
 
         if timedeltapattern.match(update_value):
+            logger.warning('Please use ISO8601 duration for timespan inputs. Timespan inputs of format (days:min:seconds) would be deprecated from version 2.49.0.')
             day, minute, seconds = update_value.split(":")
             if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
                 update_value = timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))

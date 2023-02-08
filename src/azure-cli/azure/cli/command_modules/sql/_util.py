@@ -36,6 +36,10 @@ def get_sql_database_operations_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).database_operations
 
 
+def get_sql_database_advanced_threat_protection_settings_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).database_advanced_threat_protection_settings
+
+
 def get_sql_database_blob_auditing_policies_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).database_blob_auditing_policies
 
@@ -120,6 +124,10 @@ def get_sql_restorable_dropped_managed_databases_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).restorable_dropped_managed_databases
 
 
+def get_sql_server_advanced_threat_protection_settings_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).server_advanced_threat_protection_settings
+
+
 def get_sql_server_azure_ad_administrators_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).server_azure_ad_administrators
 
@@ -168,6 +176,10 @@ def get_sql_managed_instances_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_instances
 
 
+def get_sql_managed_instance_advanced_threat_protection_settings_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_instance_advanced_threat_protection_settings
+
+
 def get_sql_managed_instance_azure_ad_administrators_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_instance_administrators
 
@@ -178,6 +190,14 @@ def get_sql_managed_instance_azure_ad_only_operations(cli_ctx, _):
 
 def get_sql_managed_databases_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_databases
+
+
+def get_sql_recoverable_managed_databases_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).recoverable_managed_databases
+
+
+def get_sql_managed_database_advanced_threat_protection_settings_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_database_advanced_threat_protection_settings
 
 
 def get_sql_backup_short_term_retention_policies_operations(cli_ctx, _):
@@ -222,3 +242,7 @@ def get_sql_managed_database_restore_details_operations(cli_ctx, _):
 
 def get_sql_database_ledger_digest_uploads_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).ledger_digest_uploads
+
+
+def get_sql_database_recoverable_databases_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).recoverable_databases

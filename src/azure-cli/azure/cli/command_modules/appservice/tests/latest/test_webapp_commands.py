@@ -305,7 +305,7 @@ class WebappQuickCreateTest(ScenarioTest):
         ])
 
 
-class BackupWithName(ScenarioTest):
+class BackupRestoreTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_backup_with_name(self, resource_group):
@@ -368,6 +368,73 @@ class BackupWithName(ScenarioTest):
 
         # restore a backup to a slot
         self.cmd(f"webapp config backup restore -g {resource_group} --webapp-name {webapp} --target-name {webapp} --slot {slot_name} --backup-name {backup_name} --container-url {sasurl} --overwrite --ignore-hostname-conflict")
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_config_backup_delete(self, resource_group):
+        plan = self.create_random_name(prefix='plan-backup', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan))
+        webapp = self.create_random_name(prefix='backup-webapp', length=24)
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan))
+        slot_name = "slot"
+        self.cmd(f"webapp deployment slot create -g {resource_group} -n {webapp} -s {slot_name}")
+        storage_Account = self.create_random_name(prefix='backup', length=24)
+        self.cmd('storage account create -n {} -g {} --location {}'.format(storage_Account, resource_group, WINDOWS_ASP_LOCATION_WEBAPP))
+        container = self.create_random_name(prefix='backupcontainer', length=24)
+        self.cmd('storage container create --account-name {} --name {}'.format(storage_Account, container))
+        expirydate = (datetime.datetime.now() + datetime.timedelta(days=1, hours=3)).strftime("\"%Y-%m-%dT%H:%MZ\"")
+        sastoken = self.cmd('storage container generate-sas --account-name {} --name {} --expiry {} --permissions rwdl'.format(storage_Account, container, expirydate)).get_output_in_json()
+        sasurl = '\"https://{}.blob.core.windows.net/{}?{}\"'.format(storage_Account, container, sastoken)
+        time.sleep(30)
+        backup_name = self.create_random_name(prefix='backup-name', length=24)
+        slot_backup_name = self.create_random_name(prefix='sbn-', length=24)
+
+        # Create a webapp backup 
+        self.cmd('webapp config backup create -g {} --webapp-name {} --backup-name {} --container-url {}'.format(resource_group, webapp, backup_name, sasurl), checks=[
+            JMESPathCheck('blobName', backup_name)
+        ])
+
+        def get_backup_id(command, backup_name):
+            backup_status = 'InProgress'
+            list_backups_respone = []
+            while backup_status == 'InProgress':
+                list_backups_respone = self.cmd(command, checks=[
+                    JMESPathCheck('length(@)', 1),
+                    JMESPathCheck('[0].namePropertiesName', backup_name)
+                ]).get_output_in_json()
+                backup_status =  list_backups_respone[0]['status']
+                # Backup operation is still in progress, Sleep 30 seconds
+                time.sleep(30)
+            return list_backups_respone[0]['backupId']
+        
+        # Verify webapp backups count 
+        webapp_backup_id = get_backup_id(f'webapp config backup list -g {resource_group} --webapp-name {webapp}', backup_name)
+
+        # Delete webapp backup
+        self.cmd('webapp config backup delete -g {} --webapp-name {} --backup-id {} --yes'.format(resource_group, webapp, webapp_backup_id))
+
+        # Verify webapp backups count
+        self.cmd('webapp config backup list -g {} --webapp-name {}'.format(resource_group, webapp), checks=[
+            JMESPathCheck('length(@)', 0),
+        ])
+
+        # Create a webapp slot backup
+        resp = self.cmd(f"webapp config backup create -g {resource_group} --webapp-name {webapp} --backup-name {slot_backup_name} --container-url {sasurl} -s {slot_name}", checks=[
+            JMESPathCheck('blobName', slot_backup_name)
+        ])
+
+        # Verify webapp slot backups count
+        webapp_slot_backup_id = get_backup_id(f"webapp config backup list -g {resource_group} --webapp-name {webapp} -s {slot_name}", slot_backup_name)
+
+        # Delete webapp slot backup
+        self.cmd('webapp config backup delete -g {} --webapp-name {} --backup-id {} --slot {} --yes'.format(resource_group, webapp, webapp_slot_backup_id, slot_name))
+
+        # Verify webapp slot backups count
+        self.cmd(f"webapp config backup list -g {resource_group} --webapp-name {webapp} -s {slot_name}", checks=[
+            JMESPathCheck('length(@)', 0),
+        ])
+
+
 
 
 # Test Framework is not able to handle binary file format, hence, only run live
@@ -880,6 +947,50 @@ class WebappConfigureTest(ScenarioTest):
             'value': 'value3',
             'slotSetting': True
         })
+
+        # app settings set with --slot-settings
+        output = self.cmd('webapp config appsettings set -g {} -n {} --slot-settings "@{}"'.format(
+            resource_group, webapp_name, settings_file)).get_output_in_json()
+        output = [s for s in output if s['name'] in ['s', 's2', 's3']]
+        output.sort(key=lambda s: s['name'])
+
+        self.assertEqual(output[0], {
+            'name': 's',
+            'value': 'value',
+            'slotSetting': False
+        })
+        self.assertEqual(output[1], {
+            'name': 's2',
+            'value': 'value2',
+            'slotSetting': False
+        })
+        self.assertEqual(output[2], {
+            'name': 's3',
+            'value': 'value3',
+            'slotSetting': True
+        })
+
+        output = self.cmd('webapp config appsettings set -g {} -n {} --slot {} --slot-settings "@{}"'.format(
+            resource_group, webapp_name, slot, settings_file)).get_output_in_json()
+        output = [s for s in output if s['name'] in ['s', 's2', 's3']]
+        output.sort(key=lambda s: s['name'])
+
+        self.assertEqual(output[0], {
+            'name': 's',
+            'value': 'value',
+            'slotSetting': False
+        })
+        self.assertEqual(output[1], {
+            'name': 's2',
+            'value': 'value2',
+            'slotSetting': False
+        })
+        self.assertEqual(output[2], {
+            'name': 's3',
+            'value': 'value3',
+            'slotSetting': True
+        })
+
         # update site config
         site_configs = {
             "requestTracingEnabled": True,

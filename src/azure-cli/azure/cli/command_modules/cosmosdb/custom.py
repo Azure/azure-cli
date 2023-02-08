@@ -1773,12 +1773,14 @@ def cli_cosmosdb_restore(cmd,
     # Validate if source account is empty only for live account restores. For deleted account restores the api will not work
     if not is_source_restorable_account_deleted:
         restorable_resources = None
+        arm_location_normalized = target_restorable_account.location.lower().replace(" ", "")
+
         if target_restorable_account.api_type.lower() == "sql":
             try:
                 from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_sql_resources
                 restorable_sql_resources_client = cf_restorable_sql_resources(cmd.cli_ctx, [])
                 restorable_resources = restorable_sql_resources_client.list(
-                    target_restorable_account.location,
+                    arm_location_normalized,
                     target_restorable_account.name,
                     location,
                     restore_timestamp_datetime_utc)
@@ -1789,7 +1791,7 @@ def cli_cosmosdb_restore(cmd,
                 from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_mongodb_resources
                 restorable_mongodb_resources_client = cf_restorable_mongodb_resources(cmd.cli_ctx, [])
                 restorable_resources = restorable_mongodb_resources_client.list(
-                    target_restorable_account.location,
+                    arm_location_normalized,
                     target_restorable_account.name,
                     location,
                     restore_timestamp_datetime_utc)
@@ -2549,6 +2551,7 @@ def cli_cosmosdb_managed_cassandra_datacenter_update(client,
                                                      cluster_name,
                                                      data_center_name,
                                                      node_count=None,
+                                                     sku=None,
                                                      base64_encoded_cassandra_yaml_fragment=None,
                                                      managed_disk_customer_key_uri=None,
                                                      backup_storage_customer_key_uri=None):
@@ -2559,6 +2562,9 @@ def cli_cosmosdb_managed_cassandra_datacenter_update(client,
 
     if node_count is None:
         node_count = data_center_resource.properties.node_count
+
+    if sku is None:
+        sku = data_center_resource.properties.sku
 
     if base64_encoded_cassandra_yaml_fragment is None:
         base64_encoded_cassandra_yaml_fragment = data_center_resource.properties.base64_encoded_cassandra_yaml_fragment
@@ -2573,6 +2579,7 @@ def cli_cosmosdb_managed_cassandra_datacenter_update(client,
         data_center_location=data_center_resource.properties.data_center_location,
         delegated_subnet_id=data_center_resource.properties.delegated_subnet_id,
         node_count=node_count,
+        sku=sku,
         seed_nodes=data_center_resource.properties.seed_nodes,
         base64_encoded_cassandra_yaml_fragment=base64_encoded_cassandra_yaml_fragment,
         managed_disk_customer_key_uri=managed_disk_customer_key_uri,
