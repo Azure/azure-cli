@@ -493,12 +493,9 @@ def load_command_table(self, _):
     self.command_table["network lb address-pool tunnel-interface remove"] = LBAddressPoolTunnelInterfaceRemove(loader=self)
     self.command_table["network lb address-pool tunnel-interface update"] = LBAddressPoolTunnelInterfaceUpdate(loader=self)
 
-    with self.command_group("network lb probe") as g:
-        g.custom_command("create", "create_lb_probe")
-        g.custom_command("update", "update_lb_probe")
-
-    with self.command_group('network lb probe', network_util) as g:
-        g.command('delete', delete_lb_resource_property_entry('load_balancers', 'probes'))
+    from .operations.load_balancer import LBProbeCreate, LBProbeUpdate
+    self.command_table["network lb probe create"] = LBProbeCreate(loader=self)
+    self.command_table["network lb probe update"] = LBProbeUpdate(loader=self)
 
     # endregion
 
@@ -546,21 +543,13 @@ def load_command_table(self, _):
         self.command_table['network cross-region-lb address-pool address list'] = CrossRegionLoadBalancerAddressPoolAddressList(loader=self)
         self.command_table['network cross-region-lb address-pool address show'] = CrossRegionLoadBalancerAddressPoolAddressShow(loader=self)
 
-    cross_region_lb_property_map = {
-        'probes': 'probe',
-    }
-
-    for subresource, alias in cross_region_lb_property_map.items():
-        with self.command_group('network cross-region-lb {}'.format(alias), network_util) as g:
-            g.command('list', list_network_resource_property('load_balancers', subresource))
-            g.show_command('show', get_network_resource_property_entry('load_balancers', subresource))
-            g.command('delete', delete_lb_resource_property_entry('load_balancers', subresource))
-
-    with self.command_group('network cross-region-lb probe', network_lb_sdk) as g:
-        g.custom_command('create', 'create_cross_lb_probe')
-        g.generic_update_command('update', child_collection_prop_name='probes',
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_cross_lb_probe')
+    with self.command_group('network cross-region-lb probe') as g:
+        from .operations.load_balancer import CrossRegionLoadBalancerProbeCreate, CrossRegionLoadBalancerProbeDelete, CrossRegionLoadBalancerProbeUpdate, CrossRegionLoadBalancerProbeList, CrossRegionLoadBalancerProbeShow
+        self.command_table['network cross-region-lb probe create'] = CrossRegionLoadBalancerProbeCreate(loader=self)
+        self.command_table['network cross-region-lb probe delete'] = CrossRegionLoadBalancerProbeDelete(loader=self)
+        self.command_table['network cross-region-lb probe update'] = CrossRegionLoadBalancerProbeUpdate(loader=self)
+        self.command_table['network cross-region-lb probe list'] = CrossRegionLoadBalancerProbeList(loader=self)
+        self.command_table['network cross-region-lb probe show'] = CrossRegionLoadBalancerProbeShow(loader=self)
     # endregion
 
     # region LocalGateways

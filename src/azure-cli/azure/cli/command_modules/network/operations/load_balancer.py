@@ -26,6 +26,8 @@ from ..aaz.latest.network.lb.address_pool.basic import Create as _LBAddressPoolB
     Delete as _LBAddressPoolBasicDelete
 from ..aaz.latest.network.lb.address_pool.tunnel_interface import Add as _LBAddressPoolTunnelInterfaceAdd, \
     Update as _LBAddressPoolTunnelInterfaceUpdate, Remove as _LBAddressPoolTunnelInterfaceRemove
+from ..aaz.latest.network.lb.probe import Create as _LBProbeCreate, Update as _LBProbeUpdate, Delete as _LBProbeDelete,\
+    Show as _LBProbeShow, List as _LBProbeList
 
 logger = get_logger(__name__)
 
@@ -714,6 +716,46 @@ class LBAddressPoolTunnelInterfaceUpdate(_LBAddressPoolTunnelInterfaceUpdate):
         return result
 
 
+class LBProbeCreate(_LBProbeCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.port._required = True
+        args_schema.protocol._required = True
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.probe_threshold):
+            logger.warning(
+                "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
+                "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
+                "by not specifying the value of the property."
+            )
+
+
+class LBProbeUpdate(_LBProbeUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.port._nullable = False
+        args_schema.protocol._nullable = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.probe_threshold):
+            logger.warning(
+                "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
+                "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
+                "by not specifying the value of the property."
+            )
+
+
 # cross-region-lb commands
 @register_command("network cross-region-lb show")
 class CrossRegionLoadBalancerShow(_LBShow):
@@ -1169,4 +1211,70 @@ class CrossRegionLoadBalancerAddressPoolAddressShow(_LBAddressPoolAddressShow):
 
     :example: Show the backend address from the load balance backend address pool.
         az network cross-region-lb address-pool address show -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress
+    """
+
+
+@register_command("network cross-region-lb probe create")
+class CrossRegionLoadBalancerProbeCreate(_LBProbeCreate):
+    """ Create a probe.
+
+    :example: Create a probe on a load balancer over HTTP and port 80.
+        az network cross-region-lb probe create -g MyResourceGroup --lb-name MyLb -n MyProbe --protocol http --port 80 --path /
+
+    :example: Create a probe on a load balancer over TCP on port 443.
+        az network cross-region-lb probe create -g MyResourceGroup --lb-name MyLb -n MyProbe --protocol tcp --port 443
+    """
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.port._required = True
+        args_schema.protocol._required = True
+        args_schema.probe_threshold._registered = False
+        return args_schema
+
+
+@register_command("network cross-region-lb probe update")
+class CrossRegionLoadBalancerProbeUpdate(_LBProbeUpdate):
+    """ Update a probe with a different port and interval.
+
+    :example: Update a probe with a different port and interval.
+        az network cross-region-lb probe update -g MyResourceGroup --lb-name MyLb -n MyProbe --port 81 --interval 10
+    """
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.port._nullable = False
+        args_schema.protocol._nullable = False
+        args_schema.probe_threshold._registered = False
+        return args_schema
+
+
+@register_command("network cross-region-lb probe delete")
+class CrossRegionLoadBalancerProbeDelete(_LBProbeDelete):
+    """ Delete a probe.
+
+    :example: Delete a probe.
+        az network cross-region-lb probe delete -g MyResourceGroup --lb-name MyLb -n MyProbe
+    """
+
+
+@register_command("network cross-region-lb probe list")
+class CrossRegionLoadBalancerProbeList(_LBProbeList):
+    """ List probes.
+
+    :example: List probes.
+        az network cross-region-lb probe list -g MyResourceGroup --lb-name MyLb
+    """
+
+
+@register_command("network cross-region-lb probe show")
+class CrossRegionLoadBalancerProbeShow(_LBProbeShow):
+    """ Get the details of a probe.
+
+    :example: Get the details of a probe.
+        az network cross-region-lb probe show -g MyResourceGroup --lb-name MyLb -n MyProbe
     """
