@@ -18,10 +18,10 @@ def load_arguments_sb(self, _):
     from azure.cli.command_modules.servicebus._validators import _validate_auto_delete_on_idle, \
         _validate_duplicate_detection_history_time_window, \
         _validate_default_message_time_to_live, \
-        _validate_lock_duration, validate_partner_namespace, validate_premiumsku_capacity, validate_target_namespace, validate_rights
+        _validate_lock_duration, validate_partner_namespace, validate_premiumsku_capacity, validate_target_namespace
 
     from knack.arguments import CLIArgumentType
-    (SkuName, AccessRights, KeyType, FilterType, TlsVersion) = self.get_models('SkuName', 'AccessRights', 'KeyType', 'FilterType', 'TlsVersion', resource_type=ResourceType.MGMT_SERVICEBUS)
+    (SkuName, FilterType, TlsVersion) = self.get_models('SkuName', 'FilterType', 'TlsVersion', resource_type=ResourceType.MGMT_SERVICEBUS)
 
     with self.argument_context('servicebus') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
