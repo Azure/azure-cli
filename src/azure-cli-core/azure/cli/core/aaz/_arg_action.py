@@ -16,7 +16,7 @@ from azure.cli.core import azclierror
 from ._base import AAZUndefined, AAZBlankArgValue
 from ._help import AAZShowHelp
 from ._utils import AAZShortHandSyntaxParser
-from .exceptions import AAZInvalidShorthandSyntaxError, AAZInvalidValueError
+from .exceptions import AAZInvalidShorthandSyntaxError, AAZInvalidValueError, AAZUnknownFieldError
 
 logger = get_logger(__name__)
 
@@ -64,13 +64,14 @@ class AAZArgAction(Action):
             setattr(namespace, self.dest, AAZArgActionOperations())
         dest_ops = getattr(namespace, self.dest)
         try:
-            self.setup_operations(dest_ops, values)
+            try:
+                self.setup_operations(dest_ops, values)
+            except AAZShowHelp as aaz_help:
+                # show help message
+                aaz_help.keys = (option_string, *aaz_help.keys)
+                self.show_aaz_help(parser, aaz_help)  # may raise AAZUnknownFieldError
         except (ValueError, KeyError) as ex:
             raise azclierror.InvalidArgumentValueError(f"Failed to parse '{option_string}' argument: {ex}") from ex
-        except AAZShowHelp as aaz_help:
-            # show help message
-            aaz_help.keys = (option_string, *aaz_help.keys)
-            self.show_aaz_help(parser, aaz_help)
 
     @classmethod
     def setup_operations(cls, dest_ops, values, prefix_keys=None):
@@ -165,50 +166,78 @@ class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
     def decode_values(cls, values):
         for v in values:
             key, key_parts, v = cls._str_parser.split_partial_value(v)
-            v = cls._decode_value(key, key_parts, v)
+            key_parts, schema = cls.get_schema_by_key_items(key_parts, cls._schema)
+
+            try:
+                v = cls._decode_value(schema, v)
+            except AAZShowHelp as aaz_help:
+                aaz_help.schema = cls._schema
+                aaz_help.keys = (*key_parts, *aaz_help.keys)
+                raise aaz_help
+
             yield key, key_parts, v
 
+    @staticmethod
+    def get_schema_by_key_items(key_items, schema):
+        if not key_items:
+            return key_items, schema
+
+        valid_key_items = []
+        for item in key_items:
+            try:
+                schema = schema[item]
+                valid_key_items.append(item)
+            except AAZUnknownFieldError as err:
+                from ._arg import AAZObjectArg, AAZListArg
+                if not isinstance(schema, AAZObjectArg):
+                    raise err
+                is_singular = False
+                for field_name, field in schema._fields.items():
+                    if not isinstance(field, AAZListArg):
+                        continue
+                    if field.singular_options and item in field.singular_options:
+                        valid_key_items.append(field_name)
+                        schema = field.Element
+                        valid_key_items.append(_ELEMENT_APPEND_KEY)
+                        is_singular = True
+                        break
+                if not is_singular:
+                    raise err
+        return tuple(valid_key_items), schema
+
     @classmethod
-    def _decode_value(cls, key, key_items, value):  # pylint: disable=unused-argument
+    def _decode_value(cls, schema, value):  # pylint: disable=unused-argument
         from ._arg import AAZSimpleTypeArg
         from azure.cli.core.util import get_file_json, shell_safe_json_parse, get_file_yaml
-
-        schema = cls._schema
-        for item in key_items:
-            schema = schema[item]  # pylint: disable=unsubscriptable-object
 
         if len(value) == 0:
             # the express "a=" will return the blank value of schema 'a'
             return AAZBlankArgValue
 
-        try:
-            if isinstance(schema, AAZSimpleTypeArg):
-                # simple type
-                v = cls._str_parser(value, is_simple=True)
-            else:
-                # compound type
-                # read from file
-                path = os.path.expanduser(value)
-                if os.path.exists(path):
-                    if path.endswith('.yml') or path.endswith('.yaml'):
-                        # read from yaml file
-                        v = get_file_yaml(path)
-                    else:
-                        # read from json file
-                        v = get_file_json(path, preserve_order=True)
+        if isinstance(schema, AAZSimpleTypeArg):
+            # simple type
+            v = cls._str_parser(value, is_simple=True)
+        else:
+            # compound type
+            # read from file
+            path = os.path.expanduser(value)
+            if os.path.exists(path):
+                if path.endswith('.yml') or path.endswith('.yaml'):
+                    # read from yaml file
+                    v = get_file_yaml(path)
                 else:
+                    # read from json file
+                    v = get_file_json(path, preserve_order=True)
+            else:
+                try:
+                    v = cls._str_parser(value)
+                except AAZInvalidShorthandSyntaxError as shorthand_ex:
                     try:
-                        v = cls._str_parser(value)
-                    except AAZInvalidShorthandSyntaxError as shorthand_ex:
-                        try:
-                            v = shell_safe_json_parse(value, True)
-                        except Exception as ex:
-                            logger.debug(ex)  # log parse json failed expression
-                            raise shorthand_ex  # raise shorthand syntax exception
-        except AAZShowHelp as aaz_help:
-            aaz_help.schema = cls._schema
-            aaz_help.keys = (*key_items, *aaz_help.keys)
-            raise aaz_help
+                        v = shell_safe_json_parse(value, True)
+                    except Exception as ex:
+                        logger.debug(ex)  # log parse json failed expression
+                        raise shorthand_ex  # raise shorthand syntax exception
+
         return v
 
 

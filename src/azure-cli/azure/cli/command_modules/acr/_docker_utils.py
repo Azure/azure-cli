@@ -531,7 +531,10 @@ def get_manifest_authorization_header(username, password):
     return {'Authorization': auth,
             'Accept': '*/*, application/vnd.oci.artifact.manifest.v1+json'
             ', application/vnd.cncf.oras.artifact.manifest.v1+json'
-            ', application/vnd.oci.image.manifest.v1+json'}
+            ', application/vnd.oci.image.manifest.v1+json'
+            ', application/vnd.oci.image.index.v1+json'
+            ', application/vnd.docker.distribution.manifest.v2+json'
+            ', application/vnd.docker.distribution.manifest.list.v2+json'}
 
 
 # pylint: disable=too-many-statements

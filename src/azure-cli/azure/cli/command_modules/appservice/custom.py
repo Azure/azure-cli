@@ -168,17 +168,18 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                vnet_resource_group=subnet_info["resource_group_name"],
                                vnet_name=subnet_info["vnet_name"],
                                subnet_name=subnet_info["subnet_name"])
-        site_config.vnet_route_all_enabled = True
         subnet_resource_id = subnet_info["subnet_resource_id"]
+        vnet_route_all_enabled = True
     else:
         subnet_resource_id = None
+        vnet_route_all_enabled = None
 
     if using_webapp_up:
         https_only = using_webapp_up
 
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=https_only, virtual_network_subnet_id=subnet_resource_id,
-                      public_network_access=public_network_access)
+                      public_network_access=public_network_access, vnet_route_all_enabled=vnet_route_all_enabled)
     if runtime:
         runtime = _StackRuntimeHelper.remove_delimiters(runtime)
 
@@ -394,7 +395,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                     for t in temp:
                         if 'slotSetting' in t.keys():
                             slot_result[t['name']] = t['slotSetting']
-                        if setting_type == "SlotSettings":
+                        elif setting_type == "SlotSettings":
                             slot_result[t['name']] = True
                         result[t['name']] = t['value']
                 else:
@@ -1335,7 +1336,7 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 # pylint: disable=unused-argument
 def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_workers=None, linux_fx_version=None,
                         windows_fx_version=None, pre_warmed_instance_count=None, php_version=None,
-                        python_version=None, net_framework_version=None,
+                        python_version=None, net_framework_version=None, power_shell_version=None,
                         java_version=None, java_container=None, java_container_version=None,
                         remote_debugging_enabled=None, web_sockets_enabled=None,
                         always_on=None, auto_heal_enabled=None,
@@ -2162,6 +2163,13 @@ def restore_backup(cmd, resource_group_name, webapp_name, storage_account_url, b
         return client.web_apps.begin_restore_slot(resource_group_name, webapp_name, 0, slot, restore_request)
 
     return client.web_apps.begin_restore(resource_group_name, webapp_name, 0, restore_request)
+
+
+def delete_backup(cmd, resource_group_name, webapp_name, backup_id, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.delete_backup_slot(resource_group_name, webapp_name, backup_id, slot)
+    return client.web_apps.delete_backup(resource_group_name, webapp_name, backup_id)
 
 
 def list_snapshots(cmd, resource_group_name, name, slot=None):
@@ -3504,13 +3512,15 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                vnet_resource_group=subnet_info["resource_group_name"],
                                vnet_name=subnet_info["vnet_name"],
                                subnet_name=subnet_info["subnet_name"])
-        site_config.vnet_route_all_enabled = True
         subnet_resource_id = subnet_info["subnet_resource_id"]
+        vnet_route_all_enabled = True
     else:
         subnet_resource_id = None
+        vnet_route_all_enabled = None
 
     functionapp_def = Site(location=None, site_config=site_config, tags=tags,
-                           virtual_network_subnet_id=subnet_resource_id, https_only=https_only)
+                           virtual_network_subnet_id=subnet_resource_id, https_only=https_only,
+                           vnet_route_all_enabled=vnet_route_all_enabled)
 
     plan_info = None
     if runtime is not None:
@@ -4180,14 +4190,10 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
                                subnet_name=subnet_info["subnet_name"])
 
     app.virtual_network_subnet_id = subnet_info["subnet_resource_id"]
+    app.vnet_route_all_enabled = True
 
     _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update', slot,
                             client=client, extra_parameter=app)
-
-    # Enable Route All configuration
-    config = get_site_configs(cmd, resource_group_name, name, slot)
-    if config.vnet_route_all_enabled is not True:
-        config = update_site_configs(cmd, resource_group_name, name, slot=slot, vnet_route_all_enabled='true')
 
     return {
         "id": subnet_info["vnet_resource_id"],
@@ -5016,6 +5022,11 @@ def delete_host_key(cmd, resource_group_name, name, key_type, key_name, slot=Non
     if slot:
         return client.web_apps.delete_host_secret_slot(resource_group_name, name, key_type, key_name, slot)
     return client.web_apps.delete_host_secret(resource_group_name, name, key_type, key_name)
+
+
+def list_functions(cmd, resource_group_name, name):
+    client = web_client_factory(cmd.cli_ctx)
+    return client.web_apps.list_functions(resource_group_name, name)
 
 
 def show_function(cmd, resource_group_name, name, function_name):

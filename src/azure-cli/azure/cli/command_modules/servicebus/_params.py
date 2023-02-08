@@ -105,11 +105,11 @@ def load_arguments_sb(self, _):
 
     with self.argument_context('servicebus queue update') as c:
         c.argument('enable_partitioning', arg_type=get_three_state_flag(),
-                   help='A boolean value that indicates whether the queue is to be partitioned across multiple message brokers.', deprecate_info=c.deprecate(hide=True, expiration='2.45.0'))
-        c.argument('requires_session', options_list=['--enable-session'], arg_type=get_three_state_flag(), help='A boolean value indicating whether the queue supports the concept of sessions.', deprecate_info=c.deprecate(hide=True, expiration='2.45.0'))
+                   help='A boolean value that indicates whether the queue is to be partitioned across multiple message brokers.', deprecate_info=c.deprecate(hide=True, expiration='2.49.0'))
+        c.argument('requires_session', options_list=['--enable-session'], arg_type=get_three_state_flag(), help='A boolean value indicating whether the queue supports the concept of sessions.', deprecate_info=c.deprecate(hide=True, expiration='2.49.0'))
         c.argument('requires_duplicate_detection', options_list=['--enable-duplicate-detection'],
                    arg_type=get_three_state_flag(),
-                   help='A boolean value indicating if this queue requires duplicate detection.', deprecate_info=c.deprecate(hide=True, expiration='2.45.0'))
+                   help='A boolean value indicating if this queue requires duplicate detection.', deprecate_info=c.deprecate(hide=True, expiration='2.49.0'))
 
     with self.argument_context('servicebus queue list') as c:
         c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')
@@ -236,6 +236,7 @@ def load_arguments_sb(self, _):
             c.argument('reply_to_session_id', help='Session identifier to reply to.')
             c.argument('content_type', help='Content type of message.')
             c.argument('requires_preprocessing', options_list=['--enable-correlation-preprocessing'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether the rule action requires preprocessing.')
+            c.argument('tags', options_list=['--correlation-filter-property', '--correlation-filter'], arg_type=tags_type, help='dictionary object for custom filters')
 
     with self.argument_context('servicebus topic subscription rule list') as c:
         c.argument('subscription_name', options_list=['--subscription-name'], id_part=None, help='Name of Subscription')

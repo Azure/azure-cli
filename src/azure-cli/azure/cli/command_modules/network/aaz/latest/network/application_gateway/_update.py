@@ -61,7 +61,7 @@ class Update(AAZCommand):
         )
         _args_schema.identity = AAZObjectArg(
             options=["--identity"],
-            help="Identity of the application gateway, if configured.",
+            help="The identity of the application gateway, if configured.",
             nullable=True,
         )
         _args_schema.max_capacity = AAZIntArg(
