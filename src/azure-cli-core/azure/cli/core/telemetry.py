@@ -143,6 +143,10 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
             'Context.Default.VS.Core.OS.Type': platform.system().lower(),  # eg. darwin, windows
             'Context.Default.VS.Core.OS.Version': platform.version().lower(),  # eg. 10.0.14942
             'Context.Default.VS.Core.OS.Platform': platform.platform().lower(),  # eg. windows-10-10.0.19041-sp0
+            # the distro info is complement of platform info for linux
+            'Context.Default.VS.Core.Distro.Name': _get_distro_name(),  # eg. 'CentOS Linux 8'
+            'Context.Default.VS.Core.Distro.Id': _get_distro_id(),  # eg. 'centos'
+            'Context.Default.VS.Core.Distro.Version': _get_distro_version(),  # eg. '8.4.2105'
             'Context.Default.VS.Core.User.Id': _get_installation_id(),
             'Context.Default.VS.Core.User.IsMicrosoftInternal': 'False',
             'Context.Default.VS.Core.User.IsOptedIn': 'True',
@@ -554,6 +558,33 @@ def _get_hash_mac_address():
 def _get_hash_machine_id():
     # Definition: Take first 128bit of the SHA256 hashed MAC address and convert them into a GUID
     return str(uuid.UUID(_get_hash_mac_address()[0:32]))
+
+
+@decorators.suppress_all_exceptions(fallback_return='')
+def _get_distro_name():
+    try:
+        import distro
+        return distro.name(pretty=True)
+    except ImportError:
+        return ''
+
+
+@decorators.suppress_all_exceptions(fallback_return='')
+def _get_distro_id():
+    try:
+        import distro
+        return distro.id()
+    except ImportError:
+        return ''
+
+
+@decorators.suppress_all_exceptions(fallback_return='')
+def _get_distro_version():
+    try:
+        import distro
+        return distro.version()
+    except ImportError:
+        return ''
 
 
 @decorators.suppress_all_exceptions(fallback_return='')
