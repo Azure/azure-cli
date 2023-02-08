@@ -18,7 +18,7 @@ from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
 from azure.cli.core.util import CLIError, sdk_no_wait
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError, \
     UnrecognizedArgumentError, ResourceNotFoundError, ArgumentUsageError, MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, supported_api_version
 
@@ -39,6 +39,8 @@ from .aaz.latest.network.application_gateway.http_listener import Create as _HTT
 from .aaz.latest.network.application_gateway.http_settings import Create as _HTTPSettingsCreate, \
     Update as _HTTPSettingsUpdate
 from .aaz.latest.network.application_gateway.identity import Assign as _IdentityAssign
+from .aaz.latest.network.application_gateway.private_link import Add as _AGPrivateLinkAdd, \
+    Remove as _AGPrivateLinkRemove
 from .aaz.latest.network.application_gateway.listener import Create as _ListenerCreate, Update as _ListenerUpdate
 from .aaz.latest.network.application_gateway.redirect_config import Create as _RedirectConfigCreate, \
     Update as _RedirectConfigUpdate
@@ -695,6 +697,135 @@ def remove_ag_identity(cmd, resource_group_name, application_gateway_name, no_wa
         "name": application_gateway_name,
         "resource_group": resource_group_name
     })
+
+
+class AGPrivateLinkAdd(_AGPrivateLinkAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZBoolArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.frontend_ip = AAZStrArg(
+            options=["--frontend-ip"],
+            help="Frontend IP that the private link will associate to.",
+            required=True,
+        )
+        args_schema.subnet = AAZStrArg(
+            options=["--subnet"],
+            help="Name or an existing ID of a subnet within the same vnet of an application gateway.",
+            required=True,
+        )
+        args_schema.subnet_prefix = AAZStrArg(
+            options=["--subnet-prefix"],
+            help="CIDR prefix to use when creating a new subnet.",
+        )
+        args_schema.ip_address = AAZStrArg(
+            options=["--ip-address"],
+            help="Static private IP address of a subnet for private link. If omitting, a dynamic one will be created.",
+        )
+        args_schema.primary = AAZBoolArg(
+            options=["--primary"],
+            help="Whether the IP configuration is primary or not.",
+        )
+        args_schema.ip_configurations._registered = False
+        return args_schema
+
+    def pre_instance_create(self):
+        args = self.ctx.args
+        instance = self.ctx.vars.instance
+        if not any(fic for fic in instance.properties.frontend_ip_configurations if fic.name == args.frontend_ip):
+            err_msg = "Frontend IP doesn't exist."
+            raise ValidationError(err_msg)
+
+        private_link_id = resource_id(
+            subscription=self.ctx.subscription_id,
+            resource_group=args.resource_group,
+            namespace="Microsoft.Network",
+            type="applicationGateways",
+            name=args.gateway_name,
+            child_type_1="privateLinkConfigurations",
+            child_name_1=args.name
+        )
+        for fic in instance.properties.frontend_ip_configurations:
+            if hasattr(fic.properties, "private_link_configuration") \
+                    and fic.properties.private_link_configuration.id == private_link_id:
+                err_msg = "Frontend IP already reference an existing private link."
+                raise ValidationError(err_msg)
+        # associate private link with frontend IP configuration
+        for fic in instance.properties.frontend_ip_configurations:
+            if fic.name == args.frontend_ip:
+                setattr(fic.properties, "private_link_configuration", {"id": private_link_id})
+
+        if has_value(instance.properties.private_link_configurations):
+            for plc in instance.properties.private_link_configurations:
+                if plc.name == args.name:
+                    err_msg = "Private link name duplicates."
+                    raise ValidationError(err_msg)
+        # prepare subnet for new private link
+        from .aaz.latest.network.vnet import Show
+        rid = instance.properties.gateway_ip_configurations[0].properties.subnet.id.to_serialized_data()
+        vnet_name = parse_resource_id(rid)["name"]
+        vnet = Show(cli_ctx=self.cli_ctx)(command_args={
+            "name": vnet_name,
+            "resource_group": args.resource_group
+        })
+        for subnet in vnet["subnets"]:
+            if subnet["name"] == args.subnet:
+                err_msg = "Subnet name duplicates. In order to use existing subnet, please enter subnet ID."
+                raise ValidationError(err_msg)
+            cond1 = subnet["addressPrefix"] == args.subnet_prefix
+            cond2 = "addressPrefixes" in subnet and args.subnet_prefix in subnet["addressPrefixes"]
+            if cond1 or cond2:
+                err_msg = "Subnet prefix duplicates."
+                raise ValidationError(err_msg)
+
+        if is_valid_resource_id(args.subnet.to_serialized_data()):
+            subnet_id = args.subnet
+        else:
+            subnet_id = resource_id(
+                subscription=self.ctx.subscription_id,
+                resource_group=args.resource_group,
+                namespace="Microsoft.Network",
+                type="virtualNetworks",
+                name=vnet_name,
+                child_type_1="subnets",
+                child_name_1=args.subnet
+            )
+
+            from .aaz.latest.network.vnet.subnet import Create
+            Create(cli_ctx=self.cli_ctx)(command_args={
+                "name": args.subnet,
+                "vnet_name": vnet_name,
+                "address_prefix": args.subnet_prefix,
+                "resource_group": args.resource_group,
+                "private_link_service_network_policies": "Disabled"
+            })
+
+        args.ip_configurations = [{
+            "name": "PrivateLinkDefaultIPConfiguration",
+            "private_ip_address": args.ip_address,
+            "private_ip_allocation_method": "Static" if has_value(args.ip_address) else "Dynamic",
+            "subnet": {"id": subnet_id},
+            "primary": args.primary
+        }]
+
+
+class AGPrivateLinkRemove(_AGPrivateLinkRemove):
+    def pre_instance_delete(self):
+        args = self.ctx.args
+        instance = self.ctx.vars.instance
+
+        for plc in instance.properties.private_link_configurations:
+            if plc.name == args.name:
+                to_be_removed = plc
+                break
+        else:
+            err_msg = "Private link doesn't exist."
+            raise ValidationError(err_msg)
+
+        for fic in instance.properties.frontend_ip_configurations:
+            if hasattr(fic.properties, "private_link_configuration") \
+                    and fic.properties.private_link_configuration.id == to_be_removed.id:
+                fic.properties.private_link_configuration = None
 
 
 def add_ag_private_link(cmd,
@@ -6810,6 +6941,10 @@ class VNetUpdate(_VNetUpdate):
                      "/ddosProtectionPlans/{}",
         )
         return args_schema
+
+    def post_instance_update(self, instance):
+        if not has_value(instance.properties.ddos_protection_plan.id):
+            instance.properties.ddos_protection_plan = None
 
 
 class VNetSubnetCreate(_VNetSubnetCreate):
