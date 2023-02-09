@@ -96,11 +96,6 @@ def load_command_table(self, _):
         client_factory=cf_network_interfaces
     )
 
-    network_vgw_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualNetworkGatewaysOperations.{}',
-        client_factory=cf_virtual_network_gateways
-    )
-
     network_vpn_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#VirtualNetworkGatewayConnectionsOperations.{}',
         client_factory=cf_virtual_network_gateway_connections
@@ -791,20 +786,22 @@ def load_command_table(self, _):
         self.command_table['network vnet-gateway list-advertised-routes'] = ListAdvertisedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
         self.command_table['network vnet-gateway list-learned-routes'] = ListLearnedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
 
-    with self.command_group('network vnet-gateway packet-capture', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2019-07-01') as g:
-        g.custom_command('start', 'start_vnet_gateway_package_capture', supports_no_wait=True)
-        g.custom_command('stop', 'stop_vnet_gateway_package_capture', supports_no_wait=True)
-        g.wait_command('wait')
+    with self.command_group('network vnet-gateway packet-capture'):
+        from .custom import VnetGatewayPackageCaptureStart, VnetGatewayPackageCaptureStop
+        from .aaz.latest.network.vnet_gateway import Wait
+        self.command_table['network vnet-gateway packet-capture start'] = VnetGatewayPackageCaptureStart(loader=self)
+        self.command_table['network vnet-gateway packet-capture stop'] = VnetGatewayPackageCaptureStop(loader=self)
+        self.command_table['network vnet-gateway packet-capture wait'] = Wait(loader=self)
 
-    with self.command_group('network vnet-gateway vpn-client', network_vgw_sdk, client_factory=cf_virtual_network_gateways) as g:
+    with self.command_group('network vnet-gateway vpn-client') as g:
+        from .custom import VpnProfilePackageUrlShow, VpnClientConnectionHealthShow
+        self.command_table['network vnet-gateway vpn-client show-url'] = VpnProfilePackageUrlShow(loader=self)
+        self.command_table['network vnet-gateway vpn-client show-health'] = VpnClientConnectionHealthShow(loader=self)
         g.custom_command('generate', 'generate_vpn_client')
-        g.command('show-url', 'begin_get_vpn_profile_package_url', min_api='2017-08-01')
-        g.command('show-health', 'begin_get_vpnclient_connection_health', is_preview=True, min_api='2019-04-01')
 
-    with self.command_group('network vnet-gateway vpn-client ipsec-policy', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2018-02-01') as g:
-        g.custom_command('set', 'set_vpn_client_ipsec_policy', supports_no_wait=True)
-        g.show_command('show', 'begin_get_vpnclient_ipsec_parameters')
-        g.wait_command('wait')
+    with self.command_group('network vnet-gateway vpn-client ipsec-policy'):
+        from .aaz.latest.network.vnet_gateway import Wait
+        self.command_table['network vnet-gateway vpn-client ipsec-policy wait'] = Wait(loader=self)
 
     with self.command_group('network vnet-gateway revoked-cert'):
         from .custom import VnetGatewayRevokedCertCreate
