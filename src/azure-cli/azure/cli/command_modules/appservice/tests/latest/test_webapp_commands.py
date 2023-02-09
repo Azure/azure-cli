@@ -1743,7 +1743,7 @@ class WebappUndeleteTest(ScenarioTest):
         deleted_id = deleted_list[0]["id"]
 
         # restore deleted webapp to non existent app i.e webapp_2
-        self.cmd(f'webapp deleted restore -g {resource_group} -n {webapp_2_name} --deleted-id "{deleted_id}" --target-app-service-plan {plan}')
+        self.cmd(f'webapp deleted restore -g {resource_group} -n {webapp_2_name} --deleted-id "{deleted_id}" --target-app-svc-plan {plan}')
 
         # get the details of the newly created webapp i.e webapp_2
         self.cmd(f'az webapp show --name {webapp_2_name} -g {resource_group}', checks=[
@@ -1779,7 +1779,7 @@ class WebappUndeleteTest(ScenarioTest):
 
         # # restore deleted webapp to non existent app i.e webapp_2 with non existent ASP, raises ValidationError
         with self.assertRaises(ValidationError) as ctx:
-            self.cmd(f'webapp deleted restore -g {resource_group} -n {webapp_2_name} --deleted-id "{deleted_id}" --target-app-service-plan idontexistplan')
+            self.cmd(f'webapp deleted restore -g {resource_group} -n {webapp_2_name} --deleted-id "{deleted_id}" --target-app-svc-plan idontexistplan')
         
 
 

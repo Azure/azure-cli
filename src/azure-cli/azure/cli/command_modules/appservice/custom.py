@@ -886,19 +886,19 @@ def webapp_exists(cmd, resource_group_name, name, slot=None):
 
 
 def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None, restore_content_only=None,
-                           target_app_service_plan=None):
+                           target_app_svc_plan=None):
     # If web app doesn't exist, Try creating it in the provided app service plan
     if not webapp_exists(cmd, resource_group_name, name, slot):
         logger.debug('Web app %s with slot %s not found under resource group %s', name, slot, resource_group_name)
-        if not target_app_service_plan:
+        if not target_app_svc_plan:
             raise ValidationError(
-                f'Target app "{name}" does not exist. Specify --target-app-service-plan for it to be created automatically.')
-        if not app_service_plan_exists(cmd, resource_group_name, target_app_service_plan):
+                f'Target app "{name}" does not exist. Specify --target-app-svc-plan for it to be created automatically.')
+        if not app_service_plan_exists(cmd, resource_group_name, target_app_svc_plan):
             raise ValidationError(
-                f'Target app service plan "{target_app_service_plan}" not found in target resource group "{resource_group_name}"')
+                f'Target app service plan "{target_app_svc_plan}" not found in target resource group "{resource_group_name}"')
         # create webapp in the plan
-        create_webapp(cmd, resource_group_name, name, target_app_service_plan)
-        logger.debug('Web app %s is created on plan %s, resource group %s', name, target_app_service_plan, resource_group_name)
+        create_webapp(cmd, resource_group_name, name, target_app_svc_plan)
+        logger.debug('Web app %s is created on plan %s, resource group %s', name, target_app_svc_plan, resource_group_name)
 
     DeletedAppRestoreRequest = cmd.get_models('DeletedAppRestoreRequest')
     request = DeletedAppRestoreRequest(deleted_site_id=deleted_id, recover_configuration=not restore_content_only)
