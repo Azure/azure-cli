@@ -18,6 +18,9 @@ from azure.cli.core.aaz import *
 )
 class Remove(AAZCommand):
     """Remove an IP configuration from a private link to scale down its capability.
+
+    :example: Remove an IP configuration from a private link.
+        az network application-gateway private-link ip-config remove -n MyIPConfig -g MyResourceGroup --gateway-name MyGateway --private-link MyPrivateLink --yes
     """
 
     _aaz_info = {

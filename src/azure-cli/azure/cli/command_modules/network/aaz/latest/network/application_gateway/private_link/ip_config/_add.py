@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Add(AAZCommand):
     """Add an IP configuration to a private link to scale up its capability.
+
+    :example: Add an IP configuration to a private link.
+        az network application-gateway private-link ip-config add -n MyIPConfig -g MyResourceGroup  --gateway-name MyGateway --private-link MyPrivateLink --primary true
     """
 
     _aaz_info = {

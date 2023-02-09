@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List all the IP configurations of a private link.
+
+    :example: List all the IP configurations of a private link.
+        az network application-gateway private-link ip-config list -g MyResourceGroup --gateway-name MyGateway --private-link MyPrivateLink
     """
 
     _aaz_info = {
