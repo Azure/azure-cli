@@ -236,13 +236,13 @@ def get_app_service_plan_from_webapp(cmd, webapp, api_version=None):
 
 
 def app_service_plan_exists(cmd, resource_group_name, plan, api_version=None):
+    from azure.core.exceptions import ResourceNotFoundError as RNFR
     exists = True
     try:
         client = web_client_factory(cmd.cli_ctx, api_version=api_version)
         client.app_service_plans.get(resource_group_name, plan)
-    except Exception as exception:
-        if type(exception).__name__ == ResourceNotFoundError.__name__:
-            exists = False
+    except RNFR:
+        exists = False
     return exists
 
 
