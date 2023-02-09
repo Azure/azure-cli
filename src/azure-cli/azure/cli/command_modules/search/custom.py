@@ -44,7 +44,9 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
     :param aad_auth_failure_mode: Describes response code from calls to the search service that failed authentication; possible values include "http401WithBearerChallenge", "http403";
                      This cannot be combined with disable_local_auth.
     """
-    from azure.mgmt.search.models import SearchService, Sku, NetworkRuleSet, IpRule, Identity
+    SearchService, Sku, NetworkRuleSet, IpRule, Identity = cmd.get_models('SearchService', 'Sku', 'NetworkRuleSet', 'IpRule', 'Identity')
+    if SearchService is None:
+        raise UnrecognizedArgumentError("null search service model!")
     from azure.cli.command_modules.search._client_factory import cf_search_services
     import re
 
@@ -83,12 +85,12 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
     if identity_type:
         _identity = Identity(type=identity_type)
         _search.identity = _identity
-    setup_search_auth(_search, disable_local_auth, auth_options, aad_auth_failure_mode)
+    setup_search_auth(cmd, _search, disable_local_auth, auth_options, aad_auth_failure_mode)
 
     return sdk_no_wait(no_wait, _client.begin_create_or_update, resource_group_name, search_service_name, _search)
 
 
-def update_search_service(instance, partition_count=0, replica_count=0, public_network_access=None,
+def update_search_service(cmd, instance, partition_count=0, replica_count=0, public_network_access=None,
                           ip_rules=None, identity_type=None, disable_local_auth=None, auth_options=None,
                           aad_auth_failure_mode=None):
     """
@@ -110,7 +112,7 @@ def update_search_service(instance, partition_count=0, replica_count=0, public_n
     :param aad_auth_failure_mode: Describes response code from calls to the search service that failed authentication; possible values include "http401WithBearerChallenge", "http403";
                      This cannot be combined with disable_local_auth.
     """
-    from azure.mgmt.search.models import NetworkRuleSet, IpRule, Identity
+    NetworkRuleSet, IpRule, Identity = cmd.get_models('NetworkRuleSet', 'IpRule', 'Identity')
     import re
 
     replica_count = int(replica_count)
@@ -134,7 +136,7 @@ def update_search_service(instance, partition_count=0, replica_count=0, public_n
     if identity_type:
         _identity = Identity(type=identity_type)
         instance.identity = _identity
-    setup_search_auth(instance, disable_local_auth, auth_options, aad_auth_failure_mode)
+    setup_search_auth(cmd, instance, disable_local_auth, auth_options, aad_auth_failure_mode)
 
     return instance
 
@@ -158,8 +160,8 @@ def update_private_endpoint_connection(cmd, resource_group_name, search_service_
         the private endpoint connection resource.
     """
 
-    from azure.mgmt.search.models import PrivateEndpointConnection, PrivateEndpointConnectionProperties,\
-        PrivateEndpointConnectionPropertiesPrivateLinkServiceConnectionState
+    PrivateEndpointConnection, PrivateEndpointConnectionProperties, PrivateEndpointConnectionPropertiesPrivateLinkServiceConnectionState = cmd.get_models(
+        'PrivateEndpointConnection', 'PrivateEndpointConnectionProperties', 'PrivateEndpointConnectionPropertiesPrivateLinkServiceConnectionState')
     from azure.cli.command_modules.search._client_factory import cf_search_private_endpoint_connections
 
     _client = cf_search_private_endpoint_connections(cmd.cli_ctx, None)
@@ -196,7 +198,7 @@ def create_shared_private_link_resource(cmd, resource_group_name, search_service
     :param shared_private_link_resource_request_message: Custom request message when creating or updating the shared
         privatelink resources.
     """
-    from azure.mgmt.search.models import SharedPrivateLinkResource, SharedPrivateLinkResourceProperties
+    SharedPrivateLinkResource, SharedPrivateLinkResourceProperties = cmd.get_models('SharedPrivateLinkResource', 'SharedPrivateLinkResourceProperties')
     from azure.cli.command_modules.search._client_factory import cf_search_shared_private_link_resources
 
     _client = cf_search_shared_private_link_resources(cmd.cli_ctx, None)
@@ -230,7 +232,8 @@ def update_shared_private_link_resource(cmd, resource_group_name, search_service
     :param shared_private_link_resource_request_message: Custom request message when creating or updating the shared
         privatelink resources.
     """
-    from azure.mgmt.search.models import SharedPrivateLinkResource, SharedPrivateLinkResourceProperties
+    SharedPrivateLinkResource, SharedPrivateLinkResourceProperties = cmd.get_models(
+        'SharedPrivateLinkResource', 'SharedPrivateLinkResourceProperties')
     from azure.cli.command_modules.search._client_factory import cf_search_shared_private_link_resources
 
     _client = cf_search_shared_private_link_resources(cmd.cli_ctx, None)
@@ -245,7 +248,7 @@ def update_shared_private_link_resource(cmd, resource_group_name, search_service
     return sdk_no_wait(no_wait, _client.begin_create_or_update, resource_group_name,
                        search_service_name, shared_private_link_resource_name, _shared_private_link_resource)
 
-def setup_search_auth(instance, disable_local_auth, auth_options, aad_auth_failure_mode):
+def setup_search_auth(cmd, instance, disable_local_auth, auth_options, aad_auth_failure_mode):
     """
     Add auth options to a search service
 
@@ -257,6 +260,9 @@ def setup_search_auth(instance, disable_local_auth, auth_options, aad_auth_failu
                      This cannot be combined with disable_local_auth.
     """
     from azure.cli.core.azclierror import MutuallyExclusiveArgumentError, RequiredArgumentMissingError
+
+    if not cmd.supported_api_version(min_api='2021-04-30-Preview'):
+        return
 
     if (disable_local_auth is not None and disable_local_auth not in [True, False]):
         raise UnrecognizedArgumentError(
