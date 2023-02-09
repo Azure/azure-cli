@@ -1138,7 +1138,7 @@ def load_arguments(self, _):
                    options_list=['--service-objective', '--service-level-objective'],
                    required=False,
                    arg_group=sku_arg_group,
-                   help='The name of the new service objective.')
+                   help='The name of the service objective for the restored database.')
 
     ###############################################
     #              sql db geo-backup              #
@@ -1208,7 +1208,7 @@ def load_arguments(self, _):
                    options_list=['--service-objective', '--service-level-objective'],
                    required=False,
                    arg_group=sku_arg_group,
-                   help='The name of the new service objective.')
+                   help='The name of the service objective for the restored database.')
 
     ###############################################
     #                sql db str                   #
