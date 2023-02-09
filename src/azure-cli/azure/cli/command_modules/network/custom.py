@@ -41,6 +41,7 @@ from .aaz.latest.network.application_gateway.http_settings import Create as _HTT
 from .aaz.latest.network.application_gateway.identity import Assign as _IdentityAssign
 from .aaz.latest.network.application_gateway.private_link import Add as _AGPrivateLinkAdd, \
     Remove as _AGPrivateLinkRemove
+from .aaz.latest.network.application_gateway.private_link.ip_config import Add as _AGPrivateLinkIPConfigAdd
 from .aaz.latest.network.application_gateway.listener import Create as _ListenerCreate, Update as _ListenerUpdate
 from .aaz.latest.network.application_gateway.redirect_config import Create as _RedirectConfigCreate, \
     Update as _RedirectConfigUpdate
@@ -718,19 +719,23 @@ class AGPrivateLinkAdd(_AGPrivateLinkAdd):
         args_schema.subnet = AAZStrArg(
             options=["--subnet"],
             help="Name or an existing ID of a subnet within the same vnet of an application gateway.",
+            arg_group="Properties",
             required=True,
         )
         args_schema.subnet_prefix = AAZStrArg(
             options=["--subnet-prefix"],
             help="CIDR prefix to use when creating a new subnet.",
+            arg_group="Properties",
         )
         args_schema.ip_address = AAZStrArg(
             options=["--ip-address"],
             help="Static private IP address of a subnet for private link. If omitting, a dynamic one will be created.",
+            arg_group="Properties",
         )
         args_schema.primary = AAZBoolArg(
             options=["--primary"],
             help="Whether the IP configuration is primary or not.",
+            arg_group="Properties",
         )
         args_schema.ip_configurations._registered = False
         return args_schema
@@ -797,14 +802,16 @@ class AGPrivateLinkAdd(_AGPrivateLinkAdd):
                 child_name_1=args.subnet
             )
 
+            from azure.cli.core.commands import LongRunningOperation
             from .aaz.latest.network.vnet.subnet import Create
-            Create(cli_ctx=self.cli_ctx)(command_args={
+            poller = Create(cli_ctx=self.cli_ctx)(command_args={
                 "name": args.subnet,
                 "vnet_name": vnet_name,
                 "address_prefix": args.subnet_prefix,
                 "resource_group": args.resource_group,
                 "private_link_service_network_policies": "Disabled"
             })
+            LongRunningOperation(self.cli_ctx)(poller)
 
         args.ip_configurations = [{
             "name": "PrivateLinkDefaultIPConfiguration",
@@ -819,7 +826,6 @@ class AGPrivateLinkRemove(_AGPrivateLinkRemove):
     def pre_instance_delete(self):
         args = self.ctx.args
         instance = self.ctx.vars.instance
-
         for plc in instance.properties.private_link_configurations:
             if plc.name == args.name:
                 to_be_removed = plc
@@ -832,6 +838,30 @@ class AGPrivateLinkRemove(_AGPrivateLinkRemove):
             if hasattr(fic.properties, "private_link_configuration") \
                     and fic.properties.private_link_configuration.id == to_be_removed.id:
                 fic.properties.private_link_configuration = None
+
+
+class AGPrivateLinkIPConfigAdd(_AGPrivateLinkIPConfigAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.private_ip_allocation_method._registered = False
+        args_schema.subnet._registered = False
+        return args_schema
+
+    def pre_instance_create(self):
+        args = self.ctx.args
+        instance = self.ctx.vars.instance
+        for plc in instance.properties.private_link_configurations:
+            if plc.name == args.private_link:
+                target_private_link = plc
+                break
+        else:
+            err_msg = "Private link doesn't exist."
+            raise ValidationError(err_msg)
+
+        args.private_ip_allocation_method = "Static" if has_value(args.ip_address) else "Dynamic"
+        subnet_id = target_private_link.properties.ip_configurations[0].properties.subnet.id
+        args.subnet.id = subnet_id
 
 
 def add_ag_private_link(cmd,
