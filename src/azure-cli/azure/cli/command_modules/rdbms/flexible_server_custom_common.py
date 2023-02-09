@@ -138,7 +138,6 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
     if operationSpecified is False:
         raise RequiredArgumentMissingError("Incorrect Usage: At least one update operation needs to be specified.")
 
-    server_endpoint = cmd.cli_ctx.cloud.suffixes.postgresql_server_endpoint
     r = send_raw_request(cmd.cli_ctx, "patch", "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{}/migrations/{}?api-version=2022-05-01-privatepreview".format(subscription_id, resource_group_name, server_name, migration_name), None, None, properties)
     return r.json()
 
