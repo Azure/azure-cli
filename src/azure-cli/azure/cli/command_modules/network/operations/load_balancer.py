@@ -734,6 +734,8 @@ class LBProbeCreate(_LBProbeCreate):
                 "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
                 "by not specifying the value of the property."
             )
+        if has_value(args.request_path) and args.request_path == "":
+            args.request_path = None
 
 
 class LBProbeUpdate(_LBProbeUpdate):
@@ -754,6 +756,8 @@ class LBProbeUpdate(_LBProbeUpdate):
                 "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
                 "by not specifying the value of the property."
             )
+        if has_value(args.request_path) and args.request_path == "":
+            args.request_path = None
 
 
 # cross-region-lb commands
@@ -1234,6 +1238,11 @@ class CrossRegionLoadBalancerProbeCreate(_LBProbeCreate):
         args_schema.probe_threshold._registered = False
         return args_schema
 
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.request_path) and args.request_path == "":
+            args.request_path = None
+
 
 @register_command("network cross-region-lb probe update")
 class CrossRegionLoadBalancerProbeUpdate(_LBProbeUpdate):
@@ -1251,6 +1260,11 @@ class CrossRegionLoadBalancerProbeUpdate(_LBProbeUpdate):
         args_schema.protocol._nullable = False
         args_schema.probe_threshold._registered = False
         return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.request_path) and args.request_path == "":
+            args.request_path = None
 
 
 @register_command("network cross-region-lb probe delete")
