@@ -892,13 +892,16 @@ def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None
         logger.debug('Web app %s with slot %s not found under resource group %s', name, slot, resource_group_name)
         if not target_app_svc_plan:
             raise ValidationError(
-                f'Target app "{name}" does not exist. Specify --target-app-svc-plan for it to be created automatically.')
+                f'Target app "{name}" does not exist. '
+                'Specify --target-app-svc-plan for it to be created automatically.')
         if not app_service_plan_exists(cmd, resource_group_name, target_app_svc_plan):
             raise ValidationError(
-                f'Target app service plan "{target_app_svc_plan}" not found in target resource group "{resource_group_name}"')
+                f'Target app service plan "{target_app_svc_plan}" not found '
+                f'in the target resource group "{resource_group_name}"')
         # create webapp in the plan
         create_webapp(cmd, resource_group_name, name, target_app_svc_plan)
-        logger.debug('Web app %s is created on plan %s, resource group %s', name, target_app_svc_plan, resource_group_name)
+        logger.debug(
+            'Web app %s is created on plan %s, resource group %s', name, target_app_svc_plan, resource_group_name)
 
     DeletedAppRestoreRequest = cmd.get_models('DeletedAppRestoreRequest')
     request = DeletedAppRestoreRequest(deleted_site_id=deleted_id, recover_configuration=not restore_content_only)
