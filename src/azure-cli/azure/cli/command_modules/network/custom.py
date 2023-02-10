@@ -757,14 +757,14 @@ class AGPrivateLinkAdd(_AGPrivateLinkAdd):
             child_name_1=args.name
         )
         for fic in instance.properties.frontend_ip_configurations:
-            if hasattr(fic.properties, "private_link_configuration") \
+            if has_value(fic.properties.private_link_configuration) \
                     and fic.properties.private_link_configuration.id == private_link_id:
                 err_msg = "Frontend IP already reference an existing private link."
                 raise ValidationError(err_msg)
         # associate private link with frontend IP configuration
         for fic in instance.properties.frontend_ip_configurations:
             if fic.name == args.frontend_ip:
-                setattr(fic.properties, "private_link_configuration", {"id": private_link_id})
+                fic.properties.private_link_configuration = {"id": private_link_id}
 
         if has_value(instance.properties.private_link_configurations):
             for plc in instance.properties.private_link_configurations:
@@ -834,7 +834,7 @@ class AGPrivateLinkRemove(_AGPrivateLinkRemove):
             raise ValidationError(err_msg)
 
         for fic in instance.properties.frontend_ip_configurations:
-            if hasattr(fic.properties, "private_link_configuration") \
+            if has_value(fic.properties.private_link_configuration) \
                     and fic.properties.private_link_configuration.id == to_be_removed.id:
                 fic.properties.private_link_configuration = None
 
