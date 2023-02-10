@@ -774,16 +774,18 @@ class AGPrivateLinkAdd(_AGPrivateLinkAdd):
         # prepare subnet for new private link
         from .aaz.latest.network.vnet import Show
         rid = instance.properties.gateway_ip_configurations[0].properties.subnet.id.to_serialized_data()
-        vnet_name = parse_resource_id(rid)["name"]
+        metadata = parse_resource_id(rid)
+        vnet_name = metadata["name"]
+        vnet_group = metadata["resource_group"]
+        vnet_subscription = metadata["subscription"]
         vnet = Show(cli_ctx=self.cli_ctx)(command_args={
             "name": vnet_name,
-            "resource_group": args.resource_group
+            "resource_group": vnet_group
         })
         for subnet in vnet["subnets"]:
             if subnet["name"] == args.subnet:
-                err_msg = "Subnet name duplicates. In order to use existing subnet, please enter subnet ID."
-                raise ValidationError(err_msg)
-            cond1 = subnet["addressPrefix"] == args.subnet_prefix
+                args.subnet = subnet["id"]  # implicitly replace name by existing id
+            cond1 = "addressPrefix" in subnet and subnet["addressPrefix"] == args.subnet_prefix
             cond2 = "addressPrefixes" in subnet and args.subnet_prefix in subnet["addressPrefixes"]
             if cond1 or cond2:
                 err_msg = "Subnet prefix duplicates."
@@ -793,8 +795,8 @@ class AGPrivateLinkAdd(_AGPrivateLinkAdd):
             subnet_id = args.subnet
         else:
             subnet_id = resource_id(
-                subscription=self.ctx.subscription_id,
-                resource_group=args.resource_group,
+                subscription=vnet_subscription,
+                resource_group=vnet_group,
                 namespace="Microsoft.Network",
                 type="virtualNetworks",
                 name=vnet_name,
@@ -807,7 +809,7 @@ class AGPrivateLinkAdd(_AGPrivateLinkAdd):
                 "name": args.subnet,
                 "vnet_name": vnet_name,
                 "address_prefix": args.subnet_prefix,
-                "resource_group": args.resource_group,
+                "resource_group": vnet_group,
                 "private_link_service_network_policies": "Disabled"
             })
             LongRunningOperation(self.cli_ctx)(poller)
