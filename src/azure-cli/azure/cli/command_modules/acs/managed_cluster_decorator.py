@@ -3829,7 +3829,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         uptime_sla = self.raw_param.get("uptime_sla")
         if uptime_sla:
             logger.warning(
-                "Argument '--uptime-sla' has been deprecated and will be removed in a future release. \
+                "Argument '--uptime-sla' is deprecated and will be removed in a future release. \
                 Please use '--tier standard' instead.")
 
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
@@ -3905,7 +3905,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # We do not support this option in create mode, therefore we do not read the value from `mc`.
         if no_uptime_sla:
             logger.warning(
-                "Argument '--no-uptime-sla' has been deprecated and will be removed in a future release. \
+                "Argument '--no-uptime-sla' is deprecated and will be removed in a future release. \
                 Please use '--tier free' instead.")
 
         # this parameter does not need dynamic completion
@@ -5315,8 +5315,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         if self.context.get_uptime_sla() or self.context.get_tier() == "standard":
             mc.sku = self.models.ManagedClusterSKU(
-                name="Basic",
-                tier="Paid"
+                name="Base",
+                tier="Standard"
             )
         return mc
 
@@ -5795,13 +5795,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         if self.context.get_uptime_sla() or self.context.get_tier() == "standard":
             mc.sku = self.models.ManagedClusterSKU(
-                name="Basic",
-                tier="Paid"
+                name="Base",
+                tier="Standard"
             )
 
         if self.context.get_no_uptime_sla() or self.context.get_tier() == "free":
             mc.sku = self.models.ManagedClusterSKU(
-                name="Basic",
+                name="Base",
                 tier="Free"
             )
         return mc
