@@ -297,6 +297,59 @@ class Update(AAZCommand):
         )
 
         # define Arg Group "VpnClientConfiguration"
+
+        _args_schema = cls._args_schema
+        _args_schema.vpn_client_ipsec_policies = AAZListArg(
+            options=["--vpn-client-ipsec-policies"],
+            arg_group="VpnClientConfiguration",
+            help="VpnClientIpsecPolicies for virtual network gateway P2S client.",
+            nullable=True,
+        )
+
+        vpn_client_ipsec_policies = cls._args_schema.vpn_client_ipsec_policies
+        vpn_client_ipsec_policies.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.vpn_client_ipsec_policies.Element
+        _element.dh_group = AAZStrArg(
+            options=["dh-group"],
+            help="The DH Group used in IKE Phase 1 for initial SA.",
+            enum={"DHGroup1": "DHGroup1", "DHGroup14": "DHGroup14", "DHGroup2": "DHGroup2", "DHGroup2048": "DHGroup2048", "DHGroup24": "DHGroup24", "ECP256": "ECP256", "ECP384": "ECP384", "None": "None"},
+        )
+        _element.ike_encryption = AAZStrArg(
+            options=["ike-encryption"],
+            help="The IKE encryption algorithm (IKE phase 2).",
+            enum={"AES128": "AES128", "AES192": "AES192", "AES256": "AES256", "DES": "DES", "DES3": "DES3", "GCMAES128": "GCMAES128", "GCMAES256": "GCMAES256"},
+        )
+        _element.ike_integrity = AAZStrArg(
+            options=["ike-integrity"],
+            help="The IKE integrity algorithm (IKE phase 2).",
+            enum={"GCMAES128": "GCMAES128", "GCMAES256": "GCMAES256", "MD5": "MD5", "SHA1": "SHA1", "SHA256": "SHA256", "SHA384": "SHA384"},
+        )
+        _element.ipsec_encryption = AAZStrArg(
+            options=["ipsec-encryption"],
+            help="The IPSec encryption algorithm (IKE phase 1).",
+            enum={"AES128": "AES128", "AES192": "AES192", "AES256": "AES256", "DES": "DES", "DES3": "DES3", "GCMAES128": "GCMAES128", "GCMAES192": "GCMAES192", "GCMAES256": "GCMAES256", "None": "None"},
+        )
+        _element.ipsec_integrity = AAZStrArg(
+            options=["ipsec-integrity"],
+            help="The IPSec integrity algorithm (IKE phase 1).",
+            enum={"GCMAES128": "GCMAES128", "GCMAES192": "GCMAES192", "GCMAES256": "GCMAES256", "MD5": "MD5", "SHA1": "SHA1", "SHA256": "SHA256"},
+        )
+        _element.pfs_group = AAZStrArg(
+            options=["pfs-group"],
+            help="The Pfs Group used in IKE Phase 2 for new child SA.",
+            enum={"ECP256": "ECP256", "ECP384": "ECP384", "None": "None", "PFS1": "PFS1", "PFS14": "PFS14", "PFS2": "PFS2", "PFS2048": "PFS2048", "PFS24": "PFS24", "PFSMM": "PFSMM"},
+        )
+        _element.sa_data_size_kilobytes = AAZIntArg(
+            options=["sa-data-size-kilobytes"],
+            help="The IPSec Security Association (also called Quick Mode or Phase 2 SA) payload size in KB for a site to site VPN tunnel.",
+        )
+        _element.sa_life_time_seconds = AAZIntArg(
+            options=["sa-life-time-seconds"],
+            help="The IPSec Security Association (also called Quick Mode or Phase 2 SA) lifetime in seconds for a site to site VPN tunnel.",
+        )
         return cls._args_schema
 
     _args_sub_resource_update = None
@@ -644,6 +697,7 @@ class Update(AAZCommand):
                 vpn_client_configuration.set_prop("radiusServerSecret", AAZStrType, ".radius_secret")
                 vpn_client_configuration.set_prop("vpnAuthenticationTypes", AAZListType, ".vpn_auth_type")
                 vpn_client_configuration.set_prop("vpnClientAddressPool", AAZObjectType)
+                vpn_client_configuration.set_prop("vpnClientIpsecPolicies", AAZListType, ".vpn_client_ipsec_policies")
                 vpn_client_configuration.set_prop("vpnClientProtocols", AAZListType, ".client_protocol")
                 vpn_client_configuration.set_prop("vpnClientRootCertificates", AAZListType, ".vpn_client_root_certificates")
 
@@ -658,6 +712,21 @@ class Update(AAZCommand):
             address_prefixes = _builder.get(".properties.vpnClientConfiguration.vpnClientAddressPool.addressPrefixes")
             if address_prefixes is not None:
                 address_prefixes.set_elements(AAZStrType, ".")
+
+            vpn_client_ipsec_policies = _builder.get(".properties.vpnClientConfiguration.vpnClientIpsecPolicies")
+            if vpn_client_ipsec_policies is not None:
+                vpn_client_ipsec_policies.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.vpnClientConfiguration.vpnClientIpsecPolicies[]")
+            if _elements is not None:
+                _elements.set_prop("dhGroup", AAZStrType, ".dh_group", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("ikeEncryption", AAZStrType, ".ike_encryption", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("ikeIntegrity", AAZStrType, ".ike_integrity", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("ipsecEncryption", AAZStrType, ".ipsec_encryption", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("ipsecIntegrity", AAZStrType, ".ipsec_integrity", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("pfsGroup", AAZStrType, ".pfs_group", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("saDataSizeKilobytes", AAZIntType, ".sa_data_size_kilobytes", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("saLifeTimeSeconds", AAZIntType, ".sa_life_time_seconds", typ_kwargs={"flags": {"required": True}})
 
             vpn_client_protocols = _builder.get(".properties.vpnClientConfiguration.vpnClientProtocols")
             if vpn_client_protocols is not None:

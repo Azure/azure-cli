@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 # pylint: disable=line-too-long,too-many-lines
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation
@@ -95,11 +94,6 @@ def load_command_table(self, _):
     network_nic_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#NetworkInterfacesOperations.{}',
         client_factory=cf_network_interfaces
-    )
-
-    network_vgw_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualNetworkGatewaysOperations.{}',
-        client_factory=cf_virtual_network_gateways
     )
 
     network_vpn_sdk = CliCommandType(
@@ -792,44 +786,46 @@ def load_command_table(self, _):
         self.command_table['network vnet-gateway list-advertised-routes'] = ListAdvertisedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
         self.command_table['network vnet-gateway list-learned-routes'] = ListLearnedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
 
-    with self.command_group('network vnet-gateway packet-capture', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2019-07-01') as g:
-        g.custom_command('start', 'start_vnet_gateway_package_capture', supports_no_wait=True)
-        g.custom_command('stop', 'stop_vnet_gateway_package_capture', supports_no_wait=True)
-        g.wait_command('wait')
+    with self.command_group('network vnet-gateway packet-capture'):
+        from .custom import VnetGatewayPackageCaptureStart, VnetGatewayPackageCaptureStop
+        from .aaz.latest.network.vnet_gateway import Wait
+        self.command_table['network vnet-gateway packet-capture start'] = VnetGatewayPackageCaptureStart(loader=self)
+        self.command_table['network vnet-gateway packet-capture stop'] = VnetGatewayPackageCaptureStop(loader=self)
+        self.command_table['network vnet-gateway packet-capture wait'] = Wait(loader=self)
 
-    with self.command_group('network vnet-gateway vpn-client', network_vgw_sdk, client_factory=cf_virtual_network_gateways) as g:
+    with self.command_group('network vnet-gateway vpn-client') as g:
+        from .custom import VpnProfilePackageUrlShow, VpnClientConnectionHealthShow
+        self.command_table['network vnet-gateway vpn-client show-url'] = VpnProfilePackageUrlShow(loader=self)
+        self.command_table['network vnet-gateway vpn-client show-health'] = VpnClientConnectionHealthShow(loader=self)
         g.custom_command('generate', 'generate_vpn_client')
-        g.command('show-url', 'begin_get_vpn_profile_package_url', min_api='2017-08-01')
-        g.command('show-health', 'begin_get_vpnclient_connection_health', is_preview=True, min_api='2019-04-01')
 
-    with self.command_group('network vnet-gateway vpn-client ipsec-policy', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2018-02-01') as g:
-        g.custom_command('set', 'set_vpn_client_ipsec_policy', supports_no_wait=True)
-        g.show_command('show', 'begin_get_vpnclient_ipsec_parameters')
-        g.wait_command('wait')
+    with self.command_group('network vnet-gateway vpn-client ipsec-policy'):
+        from .aaz.latest.network.vnet_gateway import Wait
+        self.command_table['network vnet-gateway vpn-client ipsec-policy wait'] = Wait(loader=self)
 
-    with self.command_group('network vnet-gateway revoked-cert', network_vgw_sdk) as g:
-        g.custom_command('create', 'create_vnet_gateway_revoked_cert')
-        g.custom_command('delete', 'delete_vnet_gateway_revoked_cert')
+    with self.command_group('network vnet-gateway revoked-cert'):
+        from .custom import VnetGatewayRevokedCertCreate
+        self.command_table['network vnet-gateway revoked-cert create'] = VnetGatewayRevokedCertCreate(loader=self)
 
-    with self.command_group('network vnet-gateway root-cert', network_vgw_sdk) as g:
-        g.custom_command('create', 'create_vnet_gateway_root_cert')
-        g.custom_command('delete', 'delete_vnet_gateway_root_cert')
+    with self.command_group('network vnet-gateway root-cert'):
+        from .custom import VnetGatewayRootCertCreate
+        self.command_table['network vnet-gateway root-cert create'] = VnetGatewayRootCertCreate(loader=self)
 
-    with self.command_group('network vnet-gateway ipsec-policy', network_vgw_sdk, min_api='2018-02-01') as g:
-        g.custom_command('add', 'add_vnet_gateway_ipsec_policy', supports_no_wait=True, doc_string_source='IpsecPolicy')
-        g.custom_command('list', 'list_vnet_gateway_ipsec_policies')
+    with self.command_group('network vnet-gateway ipsec-policy') as g:
+        from .custom import VnetGatewayIpsecPolicyAdd
+        self.command_table['network vnet-gateway ipsec-policy add'] = VnetGatewayIpsecPolicyAdd(loader=self)
         g.custom_command('clear', 'clear_vnet_gateway_ipsec_policies', supports_no_wait=True)
 
-    with self.command_group('network vnet-gateway aad', network_vgw_sdk, min_api='2019-04-01') as g:
-        g.custom_command('assign', 'assign_vnet_gateway_aad', supports_no_wait=True)
-        g.custom_show_command('show', 'show_vnet_gateway_aad')
+    with self.command_group('network vnet-gateway aad') as g:
+        from .custom import VnetGatewayAadAssign
+        self.command_table['network vnet-gateway aad assign'] = VnetGatewayAadAssign(loader=self)
         g.custom_command('remove', 'remove_vnet_gateway_aad', supports_no_wait=True)
 
-    with self.command_group('network vnet-gateway nat-rule', network_vgw_sdk, min_api='2021-02-01', is_preview=True) as g:
-        g.custom_command('add', 'add_vnet_gateway_nat_rule', supports_no_wait=True)
-        g.custom_show_command('list', 'show_vnet_gateway_nat_rule')
-        g.custom_command('remove', 'remove_vnet_gateway_nat_rule', supports_no_wait=True)
-        g.wait_command('wait')
+    with self.command_group('network vnet-gateway nat-rule'):
+        from .custom import VnetGatewayNatRuleAdd, VnetGatewayNatRuleShow, VnetGatewayNatRuleRemove
+        self.command_table['network vnet-gateway nat-rule add'] = VnetGatewayNatRuleAdd(loader=self)
+        self.command_table['network vnet-gateway nat-rule list'] = VnetGatewayNatRuleShow(loader=self)
+        self.command_table['network vnet-gateway nat-rule remove'] = VnetGatewayNatRuleRemove(loader=self)
     # endregion
 
     # region VirtualNetworkGatewayConnections
