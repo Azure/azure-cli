@@ -78,15 +78,19 @@ def get_sku_tier(name):  # pylint: disable=too-many-return-statements
         return 'PREMIUM'
     if name in ['P1V2', 'P2V2', 'P3V2']:
         return 'PREMIUMV2'
+    if name in ['P0V3']:
+        return 'PREMIUM0V3'
     if name in ['P1V3', 'P2V3', 'P3V3']:
         return 'PREMIUMV3'
+    if name in ['P1MV3', 'P2MV3', 'P3MV3', 'P4MV3', 'P5MV3']:
+        return 'PREMIUMMV3'
     if name in ['PC2', 'PC3', 'PC4']:
         return 'PremiumContainer'
     if name in ['EP1', 'EP2', 'EP3']:
         return 'ElasticPremium'
     if name in ['I1', 'I2', 'I3']:
         return 'Isolated'
-    if name in ['I1V2', 'I2V2', 'I3V2']:
+    if name in ['I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2']:
         return 'IsolatedV2'
     if name in ['WS1', 'WS2', 'WS3']:
         return 'WorkflowStandard'
@@ -138,6 +142,14 @@ def raise_missing_token_suggestion():
     raise RequiredArgumentMissingError("GitHub access token is required to authenticate to your repositories. "
                                        "If you need to create a Github Personal Access Token, "
                                        "please run with the '--login-with-github' flag or follow "
+                                       "the steps found at the following link:\n{0}".format(pat_documentation))
+
+
+def raise_missing_ado_token_suggestion():
+    pat_documentation = ("https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-"
+                         "tokens-to-authenticate?view=azure-devops&tabs=Windows#create-a-pat")
+    raise RequiredArgumentMissingError("If this repo is an Azure Dev Ops repo, please provide a Personal Access Token."
+                                       "Please run with the '--login-with-ado' flag or follow "
                                        "the steps found at the following link:\n{0}".format(pat_documentation))
 
 
@@ -221,6 +233,17 @@ def get_app_service_plan_from_webapp(cmd, webapp, api_version=None):
     client = web_client_factory(cmd.cli_ctx, api_version=api_version)
     plan = parse_resource_id(webapp.server_farm_id)
     return client.app_service_plans.get(plan['resource_group'], plan['name'])
+
+
+def app_service_plan_exists(cmd, resource_group_name, plan, api_version=None):
+    from azure.core.exceptions import ResourceNotFoundError as RNFR
+    exists = True
+    try:
+        client = web_client_factory(cmd.cli_ctx, api_version=api_version)
+        client.app_service_plans.get(resource_group_name, plan)
+    except RNFR:
+        exists = False
+    return exists
 
 
 # Allows putting additional properties on an SDK model instance

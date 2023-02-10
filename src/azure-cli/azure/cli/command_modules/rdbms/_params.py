@@ -67,6 +67,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('storage_mb', options_list=['--storage-size'], type=int, help='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 5120.')
             c.argument('backup_retention', options_list=['--backup-retention'], type=int, help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-grow'], help='Enable or disable autogrow of the storage. Default value is Enabled.')
+            c.argument('auto_scale_iops', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-scale-iops'], help='Enable or disable autoscale of iops. Default value is Disabled.')
             c.argument('infrastructure_encryption', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--infrastructure-encryption', '-i'], help='Add an optional second layer of encryption for data using new encryption algorithm. Default value is Disabled.')
             c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
             c.argument('tags', tags_type)
@@ -86,6 +87,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('geo_redundant_backup', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--geo-redundant-backup'], help='Enable or disable geo-redundant backups. Default value is Disabled. Not supported in Basic pricing tier.')
             c.argument('storage_mb', default=5120, options_list=['--storage-size'], type=int, help='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 5120.')
             c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-grow'], help='Enable or disable autogrow of the storage. Default value is Enabled.')
+            c.argument('auto_scale_iops', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-scale-iops'], help='Enable or disable autogrow of the storage. Default value is Disabled.')
             c.argument('infrastructure_encryption', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--infrastructure-encryption', '-i'], help='Add an optional second layer of encryption for data using new encryption algorithm. Default value is Disabled.')
             c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
 
@@ -149,7 +151,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         with self.argument_context('{} server firewall-rule'.format(command_group)) as c:
             c.argument('server_name', options_list=['--server-name', '-s'])
-            c.argument('firewall_rule_name', options_list=['--name', '-n'], id_part='child_name_1', help='The name of the firewall rule. The firewall rule name cannot be empty. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the firewall rule name cannot exceed 128 characters.')
+            c.argument('firewall_rule_name', options_list=['--name', '-n'], id_part='child_name_1', help='The name of the firewall rule. The firewall rule name cannot be empty. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the name of the firewall rule must be at least 3 characters and no more than 128 characters in length.')
             c.argument('start_ip_address', options_list=['--start-ip-address'], help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses.')
             c.argument('end_ip_address', options_list=['--end-ip-address'], help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses.')
 
@@ -316,6 +318,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Enable or disable autogrow of the storage. Default value is Enabled.'
         )
 
+        auto_scale_iops_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['Enabled', 'Disabled']),
+            options_list=['--auto-scale-iops'],
+            help='Enable or disable the auto scale iops. Default value is Disabled.'
+        )
+
         yes_arg_type = CLIArgumentType(
             options_list=['--yes', '-y'],
             action='store_true',
@@ -450,6 +458,18 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             validator=validate_identities
         )
 
+        active_directory_auth_arg_type = CLIArgumentType(
+            options_list=['--active-directory-auth'],
+            arg_type=get_enum_type(['Enabled', 'Disabled']),
+            help='Whether Azure Active Directory authentication is enabled.'
+        )
+
+        password_auth_arg_type = CLIArgumentType(
+            options_list=['--password-auth'],
+            arg_type=get_enum_type(['Enabled', 'Disabled']),
+            help='Whether password authentication is enabled.'
+        )
+
         with self.argument_context('{} flexible-server'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
             c.argument('server_name', arg_type=server_name_arg_type)
@@ -462,6 +482,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('storage_gb', default='128', arg_type=storage_gb_arg_type)
                 c.argument('version', default='13', arg_type=version_arg_type)
                 c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
+                c.argument('active_directory_auth', default='Disabled', arg_type=active_directory_auth_arg_type)
+                c.argument('password_auth', default='Enabled', arg_type=password_auth_arg_type)
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
@@ -469,6 +491,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('version', default='5.7', arg_type=version_arg_type)
                 c.argument('iops', arg_type=iops_arg_type)
                 c.argument('auto_grow', default='Enabled', arg_type=auto_grow_arg_type)
+                c.argument('auto_scale_iops', default='Disabled', arg_type=auto_scale_iops_arg_type)
                 c.argument('backup_retention', default=7, arg_type=mysql_backup_retention_arg_type)
                 c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
                 c.argument('backup_byok_key', arg_type=backup_key_arg_type)
@@ -542,6 +565,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('byok_identity', arg_type=identity_arg_type)
             if command_group == 'mysql':
                 c.argument('auto_grow', arg_type=auto_grow_arg_type)
+                c.argument('auto_scale_iops', arg_type=auto_scale_iops_arg_type)
                 c.argument('replication_role', options_list=['--replication-role'],
                            help='The replication role of the server.')
                 c.argument('iops', arg_type=iops_arg_type)
@@ -552,6 +576,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('disable_data_encryption', arg_type=disable_data_encryption_arg_type)
             elif command_group == 'postgres':
                 c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
+                c.argument('active_directory_auth', arg_type=active_directory_auth_arg_type)
+                c.argument('password_auth', arg_type=password_auth_arg_type)
 
         with self.argument_context('{} flexible-server upgrade'.format(command_group)) as c:
             c.argument('version', arg_type=mysql_version_upgrade_arg_type if command_group == 'mysql' else pg_version_upgrade_arg_type)
@@ -603,7 +629,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             argument_context_string = '{} flexible-server firewall-rule {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--rule-name', '-r'], validator=firewall_rule_name_validator,
-                           help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the firewall rule name cannot exceed 128 characters. ')
+                           help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the name of the firewall rule must be at least 3 characters and no more than 128 characters in length. ')
                 c.argument('end_ip_address', options_list=['--end-ip-address'], validator=ip_address_validator,
                            help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
                 c.argument('start_ip_address', options_list=['--start-ip-address'], validator=ip_address_validator,
@@ -696,28 +722,30 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
 
         # identity
-        if command_group == 'mysql':
-            with self.argument_context('{} flexible-server identity'.format(command_group)) as c:
-                c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+        with self.argument_context('{} flexible-server identity'.format(command_group)) as c:
+            c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
 
-            with self.argument_context('{} flexible-server identity assign'.format(command_group)) as c:
-                c.argument('identities', arg_type=identities_arg_type)
+        with self.argument_context('{} flexible-server identity assign'.format(command_group)) as c:
+            c.argument('identities', arg_type=identities_arg_type)
 
-            with self.argument_context('{} flexible-server identity remove'.format(command_group)) as c:
-                c.argument('identities', arg_type=identities_arg_type)
+        with self.argument_context('{} flexible-server identity remove'.format(command_group)) as c:
+            c.argument('identities', arg_type=identities_arg_type)
 
-            with self.argument_context('{} flexible-server identity show'.format(command_group)) as c:
-                c.argument('identity', options_list=['--identity', '-n'], help='Name or ID of identity to show.', validator=validate_identity)
+        with self.argument_context('{} flexible-server identity show'.format(command_group)) as c:
+            c.argument('identity', options_list=['--identity', '-n'], help='Name or ID of identity to show.', validator=validate_identity)
 
         # ad-admin
-        if command_group == 'mysql':
-            with self.argument_context('{} flexible-server ad-admin'.format(command_group)) as c:
-                c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+        with self.argument_context('{} flexible-server ad-admin'.format(command_group)) as c:
+            c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
 
-            with self.argument_context('{} flexible-server ad-admin create'.format(command_group)) as c:
-                c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Azure AD administrator user or group.')
+        for scope in ['create', 'show', 'delete', 'wait']:
+            with self.argument_context('{} flexible-server ad-admin {}'.format(command_group, scope)) as c:
                 c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Azure AD administrator.')
-                c.argument('identity', help='Name or ID of identity used for AAD Authentication.', validator=validate_identity)
+
+        with self.argument_context('{} flexible-server ad-admin create'.format(command_group)) as c:
+            c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Azure AD administrator user or group.')
+            c.argument('principal_type', options_list=['--type', '-t'], default='User', arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Azure AD administrator.')
+            c.argument('identity', help='Name or ID of identity used for AAD Authentication.', validator=validate_identity)
 
         handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)
 
@@ -752,10 +780,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                                help='Space-separated list of DBs to migrate. Note that each additional DB affects the performance of the source server.')
                     c.argument('overwrite_dbs', options_list=['--overwrite-dbs'], action='store_true', required=False,
                                help='Allow the migration workflow to overwrite the DB on the target.')
-                    c.argument('cutover', nargs='+', options_list=['--cutover'], required=False,
-                               help='Cut-over the data migration for either all databases or few selected ones. After this is complete, subsequent updates to the selected databases will not be migrated to the target.')
-                    c.argument('cancel', nargs='+', options_list=['--cancel'], required=False,
-                               help='Cancel the data migration for either all databases or few selected ones.')
+                    c.argument('cutover', options_list=['--cutover'], required=False, action='store_true',
+                               help='Cut-over the data migration for all the databases in the migration. After this is complete, subsequent updates to all databases will not be migrated to the target.')
+                    c.argument('cancel', options_list=['--cancel'], required=False, action='store_true',
+                               help='Cancel the data migration for all the databases.')
                 elif scope == "check-name-availability":
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')

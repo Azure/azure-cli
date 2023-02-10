@@ -17,6 +17,23 @@ type: group
 short-summary: Manage databases.
 """
 
+helps['sql db advanced-threat-protection-setting'] = """
+type: group
+short-summary: Manage a database's advanced threat protection setting.
+"""
+
+helps['sql db advanced-threat-protection-setting update'] = """
+type: command
+short-summary: Update a database's advanced threat protection setting.
+parameters:
+  - name: --state
+    type: string
+    short-summary: 'State of the advanced threat protection setting'
+examples:
+  - name: Disable an advanced threat protection setting.
+    text: az sql db advanced-threat-protection-setting update -g mygroup -s myserver -n mydb --state Disabled
+"""
+
 helps['sql db audit-policy'] = """
 type: group
 short-summary: Manage a database's auditing policy.
@@ -128,7 +145,7 @@ examples:
   - name: Get an SAS key for use in export operation.
     text: |
         az storage blob generate-sas --account-name myAccountName -c myContainer -n myBacpac.bacpac \\
-            --permissions w --expiry 2018-01-01T00:00:00Z
+            --permissions rw --expiry 2018-01-01T00:00:00Z
   - name: Export bacpac using an SAS key.
     text: |
         az sql db export -s myserver -n mydatabase -g mygroup -p password -u login \\
@@ -149,7 +166,7 @@ examples:
   - name: Get an SAS key for use in import operation.
     text: |
         az storage blob generate-sas --account-name myAccountName -c myContainer -n myBacpac.bacpac \\
-            --permissions r --expiry 2018-01-01T00:00:00Z
+            --permissions rw --expiry 2018-01-01T00:00:00Z
   - name: Import bacpac into an existing database using an SAS key.
     text: |
         az sql db import -s myserver -n mydatabase -g mygroup -p password -u login \\
@@ -283,6 +300,38 @@ examples:
 helps['sql db ltr-backup wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the database is met.
+"""
+
+helps['sql db geo-backup'] = """
+type: group
+short-summary: Manage SQL database geo redundant backups.
+"""
+
+helps['sql db geo-backup show'] = """
+type: command
+short-summary: Gets a recoverable database, which is a resource representing a database's geo backup.
+examples:
+  - name: Gets a recoverable database, which represents a database's geo backup.
+    text: az sql db geo-backup show --server myserver --database mydb --resource-group mygroup
+"""
+
+helps['sql db geo-backup list'] = """
+type: command
+short-summary: Gets a list of recoverable databases.
+examples:
+  - name: Gets a list of recoverable databases.
+    text: az sql db geo-backup list -s myserver -g mygroup
+"""
+
+helps['sql db geo-backup restore'] = """
+type: command
+short-summary: Restore a geo-redundant backup to a new database.
+examples:
+  - name: Restore Geo-redundant backup.
+    text: |
+        az sql db geo-backup restore \\
+        --dest-database targetdb --dest-server myserver --resource-group mygroup \\
+        --geo-backup-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup/providers/Microsoft.Sql/servers/myserver/databases/mydb/geoBackupPolicies/Default"
 """
 
 helps['sql db op'] = """
@@ -819,6 +868,23 @@ examples:
     text: az sql mi failover -g mygroup -n myinstance --replica-type ReadableSecondary
 """
 
+helps['sql mi advanced-threat-protection-setting'] = """
+type: group
+short-summary: Manage a SQL managed instance's advanced threat protection setting.
+"""
+
+helps['sql mi advanced-threat-protection-setting update'] = """
+type: command
+short-summary: Update a SQL managed instance's advanced threat protection setting.
+parameters:
+  - name: --state
+    type: string
+    short-summary: 'State of the advanced threat protection setting'
+examples:
+  - name: Disable an advanced threat protection setting.
+    text: az sql mi advanced-threat-protection-setting update -g mygroup -n myinstance --state Disabled
+"""
+
 helps['sql mi key'] = """
 type: group
 short-summary: Manage a SQL Instance's keys.
@@ -906,7 +972,7 @@ examples:
               --identity-type UserAssigned --pid /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi
   - name: Move managed instance to another subnet
     text: az sql mi update -g myResourceGroup -n myServer -i \\
-              --subnet /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi \\
+              --subnet /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet \\
   - name: Update mi backup storage redundancy
     text: az sql mi update -g mygroup -n myinstance --bsr Local
 """
@@ -914,6 +980,23 @@ examples:
 helps['sql midb'] = """
 type: group
 short-summary: Manage SQL managed instance databases.
+"""
+
+helps['sql midb advanced-threat-protection-setting'] = """
+type: group
+short-summary: Manage a SQL managed instance database's advanced threat protection setting.
+"""
+
+helps['sql midb advanced-threat-protection-setting update'] = """
+type: command
+short-summary: Update a SQL managed instance database's advanced threat protection setting.
+parameters:
+  - name: --state
+    type: string
+    short-summary: 'State of the advanced threat protection setting'
+examples:
+  - name: Disable an advanced threat protection setting.
+    text: az sql midb advanced-threat-protection-setting update -g mygroup --mi myinstance -n mydb --state Disabled
 """
 
 helps['sql midb create'] = """
@@ -966,6 +1049,39 @@ examples:
     text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22" --deleted-time "2018-05-20T05:34:22"
   - name: Restore a live managed database from another instance using Point in time restore
     text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22" --dest-mi targetmi --dest-resource-group targetrg
+  - name: Restore a live managed database from another subscription using Point in time restore
+    text: az sql midb restore -s sourcesubscriptionid -g sourcegroup --mi sourceinstance -n sourcemanageddb --dest-name targetmidb --dest-mi targetmi --time "2018-05-20T05:34:22"
+  - name: Restore a dropped managed database from another subscription using Point in time restore
+    text: az sql midb restore -s sourcesubscriptionid -g sourcegroup --mi sourceinstance -n sourcemanageddb --dest-name targetmidb --dest-mi targetmi --time "2018-05-20T05:34:22" --deleted-time "2018-05-20T05:34:22"
+"""
+
+helps['sql midb recover'] = """
+type: command
+short-summary: Recover a managed database using geo-pair instance backup
+examples:
+  - name: Recover managed database using recoverable database id
+    text: az sql midb recover -g mygroup --mi myinstance -n mymanageddb -r '/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Sql/managedInstances/myinstance/recoverableDatabases/db1'
+"""
+
+helps['sql recoverable-midb'] = """
+type: group
+short-summary: Recoverable managed databases command group.
+"""
+
+helps['sql recoverable-midb show'] = """
+type: command
+short-summary: Get recoverable managed database
+examples:
+  - name: Get recoverable managed database
+    text: az sql recoverable-midb show -g mygroup --mi myinstance -n mymanageddb
+"""
+
+helps['sql recoverable-midb list'] = """
+type: command
+short-summary: Get all recoverable managed databases for given instance name
+examples:
+  - name: List all recoverable managed databases for given instance name
+    text: az sql recoverable-midb list -g mygroup --mi myinstance
 """
 
 helps['sql midb show'] = """
@@ -1175,6 +1291,23 @@ short-summary: Get a specific Azure Active Directory only Authentication propert
 examples:
   - name: Get Active Directory only authentication status for a sql server
     text: az sql server ad-only-auth get --resource-group mygroup --name myServer
+"""
+
+helps['sql server advanced-threat-protection-setting'] = """
+type: group
+short-summary: Manage a server's advanced threat protection setting.
+"""
+
+helps['sql server advanced-threat-protection-setting update'] = """
+type: command
+short-summary: Update a server's advanced threat protection setting.
+parameters:
+  - name: --state
+    type: string
+    short-summary: 'State of the advanced threat protection setting'
+examples:
+  - name: Disable an advanced threat protection setting.
+    text: az sql server advanced-threat-protection-setting update -g mygroup -n myserver --state Disabled
 """
 
 helps['sql server audit-policy'] = """
@@ -1390,6 +1523,43 @@ short-summary: Update a firewall rule.
 examples:
   - name: Update a firewall rule
     text: az sql server firewall-rule update -g mygroup -s myserver -n myrule --start-ip-address 5.4.3.2 --end-ip-address 9.8.7.6
+"""
+
+helps['sql server ipv6-firewall-rule'] = """
+type: group
+short-summary: Manage a server's ipv6 firewall rules.
+"""
+
+helps['sql server ipv6-firewall-rule create'] = """
+type: command
+short-summary: Create an ipv6 firewall rule.
+examples:
+  - name: Create an ipv6 firewall rule
+    text: az sql server ipv6-firewall-rule create -g mygroup -s myserver -n myrule --start-ipv6-address 9a41:a145:2a80:6c8d:4628:a1b3:5812:3283 --end-ipv6-address 9a41:a145:2a80:6c8d:4628:a1b3:5812:3283
+"""
+
+helps['sql server ipv6-firewall-rule list'] = """
+type: command
+short-summary: List a server's ipv6 firewall rules.
+examples:
+  - name: List a server's ipv6 firewall rules
+    text: az sql server ipv6-firewall-rule list -g mygroup -s myserver
+"""
+
+helps['sql server ipv6-firewall-rule show'] = """
+type: command
+short-summary: Shows the details for an ipv6 firewall rule.
+examples:
+  - name: Show an ipv6 firewall rule
+    text: az sql server ipv6-firewall-rule show -g mygroup -s myserver -n myrule
+"""
+
+helps['sql server ipv6-firewall-rule update'] = """
+type: command
+short-summary: Update an ipv6 firewall rule.
+examples:
+  - name: Update an ipv6 firewall rule
+    text: az sql server ipv6-firewall-rule update -g mygroup -s myserver -n myrule --start-ipv6-address 0229:e3a4:e0d7:36d3:d228:73fa:12fc:ae30 --end-ipv6-address 0229:e3a4:e0d7:36d3:d228:73fa:12fc:ae30
 """
 
 helps['sql server outbound-firewall-rule'] = """

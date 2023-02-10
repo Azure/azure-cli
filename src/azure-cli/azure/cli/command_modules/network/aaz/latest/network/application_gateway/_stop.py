@@ -49,6 +49,7 @@ class Stop(AAZCommand):
             options=["-n", "--name"],
             help="Name of the application gateway.",
             required=True,
+            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -140,6 +141,10 @@ class Stop(AAZCommand):
 
         def on_200(self, session):
             pass
+
+
+class _StopHelper:
+    """Helper class for Stop"""
 
 
 __all__ = ["Stop"]

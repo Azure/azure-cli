@@ -254,7 +254,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(NoneCheck())
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(allow_blob_public_access=True)
     def test_storage_blob_container_operations(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         c = self.create_container(account_info)
