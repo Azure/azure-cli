@@ -1778,6 +1778,8 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             "settings": self.create_random_name("settings-", 16),
             "http_listener": self.create_random_name("http-listener-", 20),
             "routing_rule": self.create_random_name("routing-rule-", 20),
+            "pool": self.create_random_name("pool-", 12),
+            "redirect_config": self.create_random_name("redirect-config-", 20),
             "rule": self.create_random_name("rule-", 12),
         })
         self.cmd("network public-ip create -n {pip} -g {rg} --sku Standard")
@@ -1798,12 +1800,18 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             ]
         )
         self.cmd("network application-gateway routing-rule delete -n {routing_rule} -g {rg} --gateway-name {ag}")
-        # default http listener has been occupied by default rule
+        # default http listener has been associated with default rule
         self.cmd("network application-gateway frontend-port create -n {port2} -g {rg} --gateway-name {ag} --port 8082")
         self.cmd("network application-gateway http-listener create -n {http_listener} -g {rg} --gateway-name {ag} --frontend-port {port2} --frontend-ip appGatewayFrontendIP")
+        # multiple pools are valid when redirection exsits
+        self.cmd("network application-gateway address-pool create -n {pool} -g {rg} --gateway-name {ag}")
+        self.cmd("network application-gateway frontend-port create -n rd-port -g {rg} --gateway-name {ag} --port 8084")
+        self.cmd("network application-gateway http-listener create -n rd-listener -g {rg} --gateway-name {ag} --frontend-port rd-port --frontend-ip appGatewayFrontendIP")
+        self.cmd("network application-gateway redirect-config create -n {redirect_config} -g {rg} --gateway-name {ag} --target-listener rd-listener --type permanent")
         self.cmd(
-            "network application-gateway rule create -n {rule} -g {rg} --gateway-name {ag} --http-listener {http_listener} --priority 1004",
+            "network application-gateway rule create -n {rule} -g {rg} --gateway-name {ag} --http-listener {http_listener} --redirect-config {redirect_config} --priority 1004",
             checks=[
+                self.check("length(backendAddressPools)", 2),
                 self.check("requestRoutingRules[0].backendAddressPool.id", "{pool_id}"),
                 self.check("requestRoutingRules[0].backendHttpSettings.id", "{http_settings_id}"),
             ]
