@@ -233,7 +233,13 @@ database_encryption_protector_param_type = CLIArgumentType(
 
 database_keys_param_type = CLIArgumentType(
     options_list=['--keys'],
+    nargs='+',
     help='The list of AKV keys for the SQL Database.')
+
+database_keys_to_remove_param_type = CLIArgumentType(
+    options_list=['--keys-to-remove'],
+    nargs='+',
+    help='The list of AKV keys to remove from the SQL Database.')
 
 database_user_assigned_identity_param_type = CLIArgumentType(
     options_list=['--user-assigned-identity-id'],
@@ -243,6 +249,10 @@ database_user_assigned_identity_param_type = CLIArgumentType(
 database_federated_client_id_param_type = CLIArgumentType(
     options_list=['--federated-client-id'],
     help='The federated client id for the SQL Database. It is used for cross tenant CMK scenario.')
+
+database_availability_zone_param_type = CLIArgumentType(
+    options_list=['--availability-zone'],
+    help='Availability zone')
 
 managed_instance_param_type = CLIArgumentType(
     options_list=['--managed-instance', '--mi'],
@@ -441,6 +451,9 @@ def _configure_db_dw_params(arg_ctx):
 
     arg_ctx.argument('keys',
                      arg_type=database_keys_param_type)
+    
+    arg_ctx.argument('keys_to_remove',
+                     arg_type=database_keys_to_remove_param_type)
                     
     arg_ctx.argument('user_assigned_identity_id',
                      arg_type=database_user_assigned_identity_param_type)
@@ -450,6 +463,9 @@ def _configure_db_dw_params(arg_ctx):
     
     arg_ctx.argument('expand_keys',
                      arg_type=database_expand_keys_param_type)
+
+    arg_ctx.argument('availability_zone',
+                     arg_type=database_availability_zone_param_type)
 
 def _configure_db_dw_create_params(
         arg_ctx,
@@ -547,7 +563,8 @@ def _configure_db_dw_create_params(
             'encryption_protector',
             'keys',
             'user_assigned_identity_id',
-            'federated_client_id'
+            'federated_client_id',
+            'availability_zone'
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -772,6 +789,20 @@ def load_arguments(self, _):
                     options_list=['--keys-filter'],
                     help='Expand the AKV keys for the database.')
     
+    with self.argument_context('sql db show deleted') as c:
+        c.argument('restorable_dropped_database_id',
+                    options_list=['--restorable-dropped-database-id'],
+                    help='Restorable dropped database id.')
+        
+        c.argument('expand_keys',
+                    options_list=['--expand-keys'],
+                    arg_type=database_expand_keys_param_type,
+                    help='Expand the AKV keys for the database.')
+
+        c.argument('keys_filter',
+                    options_list=['--keys-filter'],
+                    help='Expand the AKV keys for the database.')
+    
     with self.argument_context('sql server show') as c:
         c.argument('expand_ad_admin',
                    options_list=['--expand-ad-admin'],
@@ -829,6 +860,9 @@ def load_arguments(self, _):
                    arg_type=backup_storage_redundancy_param_type)
 
         c.argument('maintenance_configuration_id', arg_type=maintenance_configuration_id_param_type)
+
+        c.argument('availability_zone',
+                     arg_type=database_availability_zone_param_type)
 
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportDatabaseDefinition object
@@ -1230,6 +1264,21 @@ def load_arguments(self, _):
         c.argument('requested_backup_storage_redundancy',
                    required=False,
                    arg_type=backup_storage_redundancy_param_type)
+        
+        c.argument('assign_identity',
+                     arg_type=database_assign_identity_param_type)
+
+        c.argument('encryption_protector',
+                    arg_type=database_encryption_protector_param_type)
+
+        c.argument('keys',
+                     arg_type=database_keys_param_type)
+                    
+        c.argument('user_assigned_identity_id',
+                     arg_type=database_user_assigned_identity_param_type)
+    
+        c.argument('federated_client_id',
+                     arg_type=database_federated_client_id_param_type)
 
     ###############################################
     #                sql db str                   #

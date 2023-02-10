@@ -72,7 +72,8 @@ from azure.mgmt.sql.models import (
     UserIdentity,
     VirtualNetworkRule,
     DatabaseUserIdentity,
-    DatabaseIdentity
+    DatabaseIdentity,
+    DatabaseKey
 )
 
 from azure.cli.core.profiles import ResourceType
@@ -89,6 +90,7 @@ from ._util import (
     get_sql_managed_instances_operations,
     get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations,
     get_sql_managed_database_restore_details_operations,
+    get_sql_databases_operations,
 )
 
 
@@ -972,6 +974,46 @@ def _validate_elastic_pool_id(
 
     return elastic_pool_id
 
+def restorable_databases_get(
+    client,
+    database_name,
+    server_name,
+    resource_group_name,
+    restorable_dropped_database_id,
+    expand_keys=False,
+    keys_filter=None
+):
+    '''
+    Gets a restorable dropped database
+    '''
+
+    expand = None
+    if expand_keys and keys_filter is not None:
+        expand = "keys($filter=pointInTime('%s'))" % keys_filter
+    elif expand_keys:
+        expand = 'keys'
+    
+    return client.get(resource_group_name, server_name, restorable_dropped_database_id, expand)
+
+def recoverable_databases_get(
+    client,
+    database_name,
+    server_name,
+    resource_group_name,
+    expand_keys=False,
+    keys_filter=None):
+    '''
+    Gets a recoverable database
+    '''
+
+    expand = None
+    if expand_keys and keys_filter is not None:
+        expand = "keys($filter=pointInTime('%s'))" % keys_filter
+    elif expand_keys:
+        expand = 'keys'
+    
+    return client.get(resource_group_name, server_name, database_name, expand)
+
 def db_get(
     client,
     database_name,
@@ -983,8 +1025,6 @@ def db_get(
     Gets a database
     '''
 
-    # String.Format("keys($filter=pointInTime('{0}'))", KeysFilter);
-    # weekly_retention = 'P%sD' % weekly_retention
     expand = None
     if expand_keys and keys_filter is not None:
         expand = "keys($filter=pointInTime('%s'))" % keys_filter
@@ -1055,7 +1095,7 @@ def _db_dw_create(
     if assign_identity:
         kwargs['identity'] = _get_database_identity(user_assigned_identity_id)
     
-    kwargs['keys'] = keys
+    kwargs['keys'] = _get_database_keys(keys)
     kwargs['encryption_protector'] = encryption_protector
 
     # Create
@@ -1267,11 +1307,11 @@ def db_create_replica(
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         DatabaseIdentity(cmd.cli_ctx, partner_database_name, partner_server_name, partner_resource_group_name),
         no_wait,
-        assign_identity,
-        user_assigned_identity_id,
-        keys,
-        encryption_protector,
         secondary_type=secondary_type,
+        assign_identity=assign_identity,
+        user_assigned_identity_id=user_assigned_identity_id,
+        keys=keys,
+        encryption_protector=encryption_protector,
         **kwargs)
 
 
@@ -1636,7 +1676,9 @@ def db_update(
         user_assigned_identity_id=None,
         keys=None,
         encryption_protector=None,
-        federated_client_id=None):
+        federated_client_id=None,
+        keys_to_remove=None,
+        availability_zone=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
@@ -1739,18 +1781,27 @@ def db_update(
     # Per DB CMK properties
     #####
     if assign_identity:
-        if keys is not None:
-            instance.keys.append = keys
-    
-        if encryption_protector is not None:
-            instance.encryption_protector = encryption_protector
-        
         if user_assigned_identity_id is not None:
             _get_database_identity_for_update(instance.identity, user_assigned_identity_id)
 
+    if keys is not None or keys_to_remove is not None:
+            database_client = get_sql_databases_operations(cmd.cli_ctx, None)
+
+            database = database_client.get(resource_group_name=resource_group_name, 
+                                           server_name=server_name, 
+                                           database_name=instance.name, 
+                                           expand="keys")
+            
+            instance.keys = _get_database_keys_for_update(database.keys, keys, keys_to_remove)
+    
+    if encryption_protector is not None:
+            instance.encryption_protector = encryption_protector
+
     if federated_client_id is not None:
         instance.federated_client_id = federated_client_id
-
+    
+    instance.availability_zone = None
+    
     return instance
 
 def _get_database_identity_for_update(existingIdentity, userAssignedIdentities):
@@ -1766,6 +1817,39 @@ def _get_database_identity_for_update(existingIdentity, userAssignedIdentities):
         databaseIdentity = _get_database_identity(userAssignedIdentities)
     
     return databaseIdentity
+
+def _get_database_keys(akvKeys):
+
+    databaseKeys = None
+
+    for akvKey in akvKeys:
+        if databaseKeys is None:
+            databaseKeys = {akvKey : DatabaseKey()}
+        else:
+            databaseKeys[akvKey] = DatabaseKey()
+
+    return databaseKeys
+
+def _get_database_keys_for_update(existingAkvKeys, akvKeys, akvKeysToRemove=None):
+
+    databaseKeys = None
+
+    if existingAkvKeys is not None:
+        if akvKeys is not None:
+            for akvKey in akvKeys:
+                existingAkvKeys.update({akvKey: DatabaseKey()})
+        
+        if akvKeysToRemove is not None:
+            for akvKey in akvKeysToRemove:
+                existingAkvKeys.update({akvKey: None})
+                print("Inside loop dict op")
+                print(existingAkvKeys)
+        
+        databaseKeys = existingAkvKeys
+    else:
+        databaseKeys = _get_database_keys(akvKeys)
+    
+    return databaseKeys
 
 #####
 #           sql db audit-policy & threat-policy
@@ -3067,6 +3151,11 @@ def restore_long_term_retention_backup(
         target_server_name,
         target_resource_group_name,
         requested_backup_storage_redundancy,
+        assign_identity=False,
+        user_assigned_identity_id=None,
+        keys=None,
+        encryption_protector=None,
+        federated_client_id=None,
         **kwargs):
     '''
     Restores an existing database (i.e. create with 'RestoreLongTermRetentionBackup' create mode.)
@@ -3095,6 +3184,14 @@ def restore_long_term_retention_backup(
             _backup_storage_redundancy_take_source_warning()
         if kwargs['requested_backup_storage_redundancy'] == 'Geo':
             _backup_storage_redundancy_specify_geo_warning()
+    
+    # Per DB CMK params
+    if assign_identity:
+        kwargs['identity'] = _get_database_identity(user_assigned_identity_id)
+    
+    kwargs['keys'] = _get_database_keys(keys)
+    kwargs['encryption_protector'] = encryption_protector
+    kwargs['federated_client_id'] = federated_client_id
 
     return client.begin_create_or_update(
         database_name=target_database_name,

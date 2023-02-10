@@ -76,7 +76,8 @@ from ._util import (
     get_sql_virtual_network_rules_operations,
     get_sql_instance_failover_groups_operations,
     get_sql_database_ledger_digest_uploads_operations,
-    get_sql_database_encryption_protector_operations
+    get_sql_database_encryption_protector_operations,
+    get_sql_recoverable_databases_operations
 )
 
 from ._validators import (
@@ -244,14 +245,25 @@ def load_command_table(self, _):
         g.custom_command('delete-link', 'db_delete_replica_link',
                          confirmation=True)
         g.custom_command('set-primary', 'db_failover')
+    
+    recoverable_databases_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#RecoverableDatabasesOperations.{}',
+        client_factory=get_sql_recoverable_databases_operations)
+    
+    with self.command_group('sql db recoverable', recoverable_databases_operations) as g:
+
+        g.custom_show_command('show', 'recoverable_databases_get') 
 
     restorable_dropped_databases_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#RestorableDroppedDatabasesOperations.{}',
         client_factory=get_sql_restorable_dropped_databases_operations)
 
-    with self.command_group('sql db', restorable_dropped_databases_operations) as g:
+    with self.command_group('sql db', 
+                            restorable_dropped_databases_operations,
+                            client_factory=get_sql_restorable_dropped_databases_operations) as g:
 
         g.command('list-deleted', 'list_by_server')
+        g.custom_show_command('show deleted', 'restorable_databases_get')
 
     restorable_dropped_managed_databases_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#RestorableDroppedManagedDatabasesOperations.{}',
