@@ -535,14 +535,6 @@ def load_command_table(self, _):
         self.command_table['network cross-region-lb address-pool address update'] = CrossRegionLoadBalancerAddressPoolAddressUpdate(loader=self)
         self.command_table['network cross-region-lb address-pool address list'] = CrossRegionLoadBalancerAddressPoolAddressList(loader=self)
         self.command_table['network cross-region-lb address-pool address show'] = CrossRegionLoadBalancerAddressPoolAddressShow(loader=self)
-
-    with self.command_group('network cross-region-lb probe') as g:
-        from .operations.load_balancer import CrossRegionLoadBalancerProbeCreate, CrossRegionLoadBalancerProbeDelete, CrossRegionLoadBalancerProbeUpdate, CrossRegionLoadBalancerProbeList, CrossRegionLoadBalancerProbeShow
-        self.command_table['network cross-region-lb probe create'] = CrossRegionLoadBalancerProbeCreate(loader=self)
-        self.command_table['network cross-region-lb probe delete'] = CrossRegionLoadBalancerProbeDelete(loader=self)
-        self.command_table['network cross-region-lb probe update'] = CrossRegionLoadBalancerProbeUpdate(loader=self)
-        self.command_table['network cross-region-lb probe list'] = CrossRegionLoadBalancerProbeList(loader=self)
-        self.command_table['network cross-region-lb probe show'] = CrossRegionLoadBalancerProbeShow(loader=self)
     # endregion
 
     # region LocalGateways
