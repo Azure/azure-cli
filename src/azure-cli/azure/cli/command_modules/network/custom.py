@@ -775,16 +775,13 @@ class AGPrivateLinkAdd(_AGPrivateLinkAdd):
         from .aaz.latest.network.vnet import Show
         rid = instance.properties.gateway_ip_configurations[0].properties.subnet.id.to_serialized_data()
         metadata = parse_resource_id(rid)
-        vnet_name = metadata["name"]
-        vnet_group = metadata["resource_group"]
-        vnet_subscription = metadata["subscription"]
         vnet = Show(cli_ctx=self.cli_ctx)(command_args={
-            "name": vnet_name,
-            "resource_group": vnet_group
+            "name": metadata["name"],
+            "resource_group": metadata["resource_group"]
         })
         for subnet in vnet["subnets"]:
             if subnet["name"] == args.subnet:
-                args.subnet = subnet["id"]  # implicitly replace name by existing id
+                args.subnet = subnet["id"]  # help user input existing id
             cond1 = "addressPrefix" in subnet and subnet["addressPrefix"] == args.subnet_prefix
             cond2 = "addressPrefixes" in subnet and args.subnet_prefix in subnet["addressPrefixes"]
             if cond1 or cond2:
@@ -795,11 +792,11 @@ class AGPrivateLinkAdd(_AGPrivateLinkAdd):
             subnet_id = args.subnet
         else:
             subnet_id = resource_id(
-                subscription=vnet_subscription,
-                resource_group=vnet_group,
+                subscription=metadata["subscription"],
+                resource_group=metadata["resource_group"],
                 namespace="Microsoft.Network",
                 type="virtualNetworks",
-                name=vnet_name,
+                name=metadata["name"],
                 child_type_1="subnets",
                 child_name_1=args.subnet
             )
@@ -807,9 +804,9 @@ class AGPrivateLinkAdd(_AGPrivateLinkAdd):
             from azure.cli.core.commands import LongRunningOperation
             poller = VNetSubnetCreate(cli_ctx=self.cli_ctx)(command_args={
                 "name": args.subnet,
-                "vnet_name": vnet_name,
+                "vnet_name": metadata["name"],
+                "resource_group": metadata["resource_group"],
                 "address_prefix": args.subnet_prefix,
-                "resource_group": vnet_group,
                 "private_link_service_network_policies": "Disabled"
             })
             LongRunningOperation(self.cli_ctx)(poller)
