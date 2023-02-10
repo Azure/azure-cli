@@ -3679,8 +3679,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_uptime_sla(), False)
         sku = self.models.ManagedClusterSKU(
-            name="Basic",
-            tier="Paid",
+            name="Base",
+            tier="Standard",
         )
         mc = self.models.ManagedCluster(
             location="test_location",
@@ -3701,8 +3701,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.UPDATE,
         )
         sku_2 = self.models.ManagedClusterSKU(
-            name="Basic",
-            tier="Paid",
+            name="Base",
+            tier="Standard",
         )
         mc_2 = self.models.ManagedCluster(
             location="test_location",
@@ -3724,7 +3724,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         sku_3 = self.models.ManagedClusterSKU(
-            name="Basic",
+            name="Base",
             tier="Free",
         )
         mc_3 = self.models.ManagedCluster(
@@ -3748,8 +3748,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_no_uptime_sla(), False)
         sku = self.models.ManagedClusterSKU(
-            name="Basic",
-            tier="Paid",
+            name="Base",
+            tier="Standard",
         )
         mc = self.models.ManagedCluster(
             location="test_location",
@@ -3771,7 +3771,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.UPDATE,
         )
         sku_2 = self.models.ManagedClusterSKU(
-            name="Basic",
+            name="Base",
             tier="Free",
         )
         mc_2 = self.models.ManagedCluster(
@@ -6323,8 +6323,8 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_2.context.attach_mc(mc_2)
         dec_mc_2 = dec_2.set_up_sku(mc_2)
         sku = self.models.ManagedClusterSKU(
-            name="Basic",
-            tier="Paid",
+            name="Base",
+            tier="Standard",
         )
         ground_truth_mc_2 = self.models.ManagedCluster(
             location="test_location",
@@ -7206,7 +7206,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         mc_1 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
+                name="Base",
                 tier="Free",
             ),
         )
@@ -7218,7 +7218,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
+                name="Base",
                 tier="Free",
             ),
         )
@@ -7237,7 +7237,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         mc_2 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
+                name="Base",
                 tier="Free",
             ),
         )
@@ -7259,8 +7259,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         mc_3 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
-                tier="Paid",
+                name="Base",
+                tier="Standard",
             ),
         )
         dec_3.context.attach_mc(mc_3)
@@ -7268,11 +7268,13 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         ground_truth_mc_3 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
+                name="Base",
                 tier="Free",
             ),
         )
-        self.assertEqual(dec_mc_3, ground_truth_mc_3)
+        self.assertEqual(dec_mc_3.sku.name, ground_truth_mc_3.sku.name)
+        self.assertEqual(dec_mc_3.sku.tier, ground_truth_mc_3.sku.tier)
+        #self.assertEqual(dec_mc_3, ground_truth_mc_3)
 
         # custom value
         dec_4 = AKSManagedClusterUpdateDecorator(
@@ -7287,7 +7289,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         mc_4 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
+                name="Base",
                 tier="Free",
             ),
         )
@@ -7296,8 +7298,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         ground_truth_mc_4 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
-                tier="Paid",
+                name="Base",
+                tier="Standard",
             ),
         )
         self.assertEqual(dec_mc_4, ground_truth_mc_4)

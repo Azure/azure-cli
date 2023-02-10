@@ -3839,7 +3839,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                 self.mc.sku and
                 self.mc.sku.tier is not None
             ):
-                uptime_sla = self.mc.sku.tier == "Paid"
+                uptime_sla = self.mc.sku.tier in ("Paid", "Standard")
 
         # this parameter does not need dynamic completion
         # validation
