@@ -235,6 +235,17 @@ def get_app_service_plan_from_webapp(cmd, webapp, api_version=None):
     return client.app_service_plans.get(plan['resource_group'], plan['name'])
 
 
+def app_service_plan_exists(cmd, resource_group_name, plan, api_version=None):
+    from azure.core.exceptions import ResourceNotFoundError as RNFR
+    exists = True
+    try:
+        client = web_client_factory(cmd.cli_ctx, api_version=api_version)
+        client.app_service_plans.get(resource_group_name, plan)
+    except RNFR:
+        exists = False
+    return exists
+
+
 # Allows putting additional properties on an SDK model instance
 def use_additional_properties(resource):
     resource.enable_additional_properties_sending()
