@@ -443,6 +443,13 @@ jobs:
         git config --global user.email "AzurePipelines"
         git config --global user.name "AzurePipelines"
 
+        # print variables
+        echo "USER_TARGET: $(USER_TARGET)"
+        echo "USER_REPO: $(USER_REPO)"
+        echo "USER_REPO_EXT: $(USER_REPO_EXT)"
+        echo "USER_BRANCH: $(USER_BRANCH)"
+        echo "USER_BRANCH_EXT: $(USER_BRANCH_EXT)"
+
         # Whether commit changes
         if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
           REPO="$(USER_REPO)"
