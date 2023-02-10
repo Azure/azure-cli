@@ -33,7 +33,7 @@ from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read
                           __write_kv_and_features_to_file, __read_kv_from_config_store, __is_json_content_type,
                           __write_kv_and_features_to_config_store, __discard_features_from_retrieved_kv,
                           __read_kv_from_app_service, __write_kv_to_app_service, __print_restore_preview,
-                          __serialize_kv_list_to_comparable_json_object, __print_preview,
+                          __serialize_kv_list_to_comparable_json_object, __print_kv_preview,
                           __serialize_features_from_kv_list_to_comparable_json_object, __export_kvset_to_file,
                           __serialize_feature_list_to_comparable_json_object, __print_features_preview,
                           __import_kvset_from_file, __delete_configuration_setting_from_config_store,
@@ -145,33 +145,38 @@ def import_config(cmd,
         dest_kvs = __read_kv_from_config_store(azconfig_client,
                                                key=prefix + SearchFilterOptions.ANY_KEY if prefix else SearchFilterOptions.ANY_KEY,
                                                label=label if label else SearchFilterOptions.EMPTY_LABEL)
-        all_features = __read_kv_from_config_store(azconfig_client,
-                                                   key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + SearchFilterOptions.ANY_KEY,
-                                                   label=label if label else SearchFilterOptions.EMPTY_LABEL)
         __discard_features_from_retrieved_kv(dest_kvs)
 
     # if customer needs preview & confirmation
+
+    # generate preview and wait for user confirmation
+    need_kv_change = __print_kv_preview(
+        old_json=__serialize_kv_list_to_comparable_json_object(keyvalues=dest_kvs, level=source),
+        new_json=__serialize_kv_list_to_comparable_json_object(keyvalues=src_kvs, level=source), 
+        strict=strict, 
+        yes=yes)
+
+    need_feature_change = False
+    if strict or (src_features and not skip_features):
+        all_features = __read_kv_from_config_store(azconfig_client,
+                                                   key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + SearchFilterOptions.ANY_KEY,
+                                                   label=label if label else SearchFilterOptions.EMPTY_LABEL)
+
+        # Append all features to dest_features list
+        for feature in all_features:
+            if feature.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
+                dest_features.append(feature)
+
+        need_feature_change = __print_features_preview(
+            old_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=dest_features),
+            new_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=src_features),
+            strict=strict,
+            yes=yes)
+
+    if not need_kv_change and not need_feature_change:
+        return
+
     if not yes:
-        # generate preview and wait for user confirmation
-        need_kv_change = __print_preview(
-            old_json=__serialize_kv_list_to_comparable_json_object(keyvalues=dest_kvs, level=source),
-            new_json=__serialize_kv_list_to_comparable_json_object(keyvalues=src_kvs, level=source), strict=strict)
-
-        need_feature_change = False
-        if strict or (src_features and not skip_features):
-            # Append all features to dest_features list
-            for feature in all_features:
-                if feature.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
-                    dest_features.append(feature)
-
-            need_feature_change = __print_features_preview(
-                old_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=dest_features),
-                new_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=src_features),
-                strict=strict)
-
-        if not need_kv_change and not need_feature_change:
-            return
-
         user_confirmation("Do you want to continue? \n")
 
     # append all feature flags to src_kvs list
@@ -285,43 +290,44 @@ def export_config(cmd,
                                         auth_mode=auth_mode,
                                         endpoint=endpoint)
 
+    if destination == 'appconfig':
+        # dest_kvs contains features and KV that match the label
+        dest_kvs = __read_kv_from_config_store(dest_azconfig_client,
+                                                key=SearchFilterOptions.ANY_KEY,
+                                                label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL)
+        __discard_features_from_retrieved_kv(dest_kvs)
+
+        if not skip_features:
+            # Append all features to dest_features list
+            dest_features = list_feature(cmd,
+                                            feature='*',
+                                            label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL,
+                                            name=dest_name,
+                                            connection_string=dest_connection_string,
+                                            all_=True,
+                                            auth_mode=dest_auth_mode,
+                                            endpoint=dest_endpoint)
+
+    elif destination == 'appservice':
+        dest_kvs = __read_kv_from_app_service(cmd, appservice_account=appservice_account)
+
+    
+    need_kv_change = __print_kv_preview(
+        old_json=__serialize_kv_list_to_comparable_json_object(keyvalues=dest_kvs, level=destination),
+        new_json=__serialize_kv_list_to_comparable_json_object(keyvalues=src_kvs, level=destination),
+        yes=yes)
+
+    need_feature_change = False
+    if src_features:
+        need_feature_change = __print_features_preview(
+            old_json=__serialize_feature_list_to_comparable_json_object(features=dest_features),
+            new_json=__serialize_feature_list_to_comparable_json_object(features=src_features),
+            yes=yes)
+    
+    if not need_feature_change and not need_kv_change:
+        return
     # if customer needs preview & confirmation
     if not yes:
-        if destination == 'appconfig':
-            # dest_kvs contains features and KV that match the label
-            dest_kvs = __read_kv_from_config_store(dest_azconfig_client,
-                                                   key=SearchFilterOptions.ANY_KEY,
-                                                   label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL)
-            __discard_features_from_retrieved_kv(dest_kvs)
-
-            if not skip_features:
-                # Append all features to dest_features list
-                dest_features = list_feature(cmd,
-                                             feature='*',
-                                             label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL,
-                                             name=dest_name,
-                                             connection_string=dest_connection_string,
-                                             all_=True,
-                                             auth_mode=dest_auth_mode,
-                                             endpoint=dest_endpoint)
-
-        elif destination == 'appservice':
-            dest_kvs = __read_kv_from_app_service(cmd, appservice_account=appservice_account)
-
-        # generate preview and wait for user confirmation
-        need_kv_change = __print_preview(
-            old_json=__serialize_kv_list_to_comparable_json_object(keyvalues=dest_kvs, level=destination),
-            new_json=__serialize_kv_list_to_comparable_json_object(keyvalues=src_kvs, level=destination))
-
-        need_feature_change = False
-        if src_features:
-            need_feature_change = __print_features_preview(
-                old_json=__serialize_feature_list_to_comparable_json_object(features=dest_features),
-                new_json=__serialize_feature_list_to_comparable_json_object(features=src_features))
-
-        if not need_kv_change and not need_feature_change:
-            return
-
         user_confirmation("Do you want to continue? \n")
 
     # export to destination

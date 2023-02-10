@@ -72,3 +72,8 @@ class KVSetConstants:
 class ImportExportProfiles:
     KVSET = "appconfig/kvset"
     DEFAULT = "appconfig/default"
+
+class ImportExportDiffKeys:
+    ADDED = "added"
+    DELETED = "deleted"
+    UPDATED = "updated"
