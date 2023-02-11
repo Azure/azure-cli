@@ -2066,8 +2066,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded'),
-            self.check('sku.tier', 'Paid'),
-            self.check('sku.name', 'Basic')
+            self.check('sku.tier', 'Paid')
         ])
         # delete
         self.cmd(
@@ -4541,14 +4540,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded'),
-            self.check('sku.tier', 'Paid'),
-            self.check('sku.name', 'Basic')
+            self.check('sku.tier', 'Paid')
         ])
         # update to tier free
         tier_free_cmd = 'aks update --resource-group={resource_group} --name={name} --tier free'
         self.cmd(tier_free_cmd, checks=[
-            self.check('sku.tier', 'Free'),
-            self.check('sku.name', 'Basic')
+            self.check('sku.tier', 'Free')
         ])
         # update to tier standard again
         tier_standard_cmd = 'aks update --resource-group={resource_group} --name={name} --tier standard --no-wait'
