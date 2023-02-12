@@ -287,7 +287,8 @@ parameters:
     long-summary:  --uptime-sla is deprecated. Please use '--tier standard' instead.
   - name: --tier
     type: string
-    short-summary: Specify pricing tier. Standadrd tier enables a standard managed cluster service with a financially backed SLA.
+    short-summary: Specify SKU tier for managed clusters. 
+    long-summary:  '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' does not have a financially backed SLA.
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
@@ -544,7 +545,8 @@ parameters:
     long-summary:  --no-uptime-sla is deprecated. Please use '--tier free' instead.
   - name: --tier
     type: string
-    short-summary: --tier standard enables a standard managed cluster service with a financially backed SLA. --tier free changes a standard managed cluster to a free one.
+    short-summary: Specify SKU tier for managed clusters
+    long-summary: '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' changes a standard managed cluster to a free one.
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
