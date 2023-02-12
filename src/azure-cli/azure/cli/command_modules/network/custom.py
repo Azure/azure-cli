@@ -90,8 +90,13 @@ from .aaz.latest.network.vnet_gateway.aad import Assign as _VnetGatewayAadAssign
 from .aaz.latest.network.vnet_gateway.ipsec_policy import Add as _VnetGatewayIpsecPolicyAdd
 from .aaz.latest.network.vnet_gateway.nat_rule import Add as _VnetGatewayNatRuleAdd, List as _VnetGatewayNatRuleShow, \
     Remove as _VnetGatewayNatRuleRemove
+from .aaz.latest.network.vnet_gateway.packet_capture import Start as _VnetGatewayPackageCaptureStart, \
+    Stop as _VnetGatewayPackageCaptureStop
 from .aaz.latest.network.vnet_gateway.revoked_cert import Create as _VnetGatewayRevokedCertCreate
 from .aaz.latest.network.vnet_gateway.root_cert import Create as _VnetGatewayRootCertCreate
+from .aaz.latest.network.vnet_gateway.vpn_client import GenerateVpnProfile as _VpnProfileGenerate, \
+    Generate as _VpnClientPackageGenerate, ShowUrl as _VpnProfilePackageUrlShow, \
+    ShowHealth as _VpnClientConnectionHealthShow
 
 logger = get_logger(__name__)
 
@@ -7077,53 +7082,56 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
             args.active = active
 
 
-def start_vnet_gateway_package_capture(cmd, client, resource_group_name, virtual_network_gateway_name,
-                                       filter_data=None, no_wait=False):
-    VpnPacketCaptureStartParameters = cmd.get_models('VpnPacketCaptureStartParameters')
-    parameters = VpnPacketCaptureStartParameters(filter_data=filter_data)
-    return sdk_no_wait(no_wait, client.begin_start_packet_capture, resource_group_name,
-                       virtual_network_gateway_name, parameters=parameters)
+class VnetGatewayPackageCaptureStart(_VnetGatewayPackageCaptureStart):
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def stop_vnet_gateway_package_capture(cmd, client, resource_group_name, virtual_network_gateway_name,
-                                      sas_url, no_wait=False):
-    VpnPacketCaptureStopParameters = cmd.get_models('VpnPacketCaptureStopParameters')
-    parameters = VpnPacketCaptureStopParameters(sas_url=sas_url)
-    return sdk_no_wait(no_wait, client.begin_stop_packet_capture, resource_group_name,
-                       virtual_network_gateway_name, parameters=parameters)
+class VnetGatewayPackageCaptureStop(_VnetGatewayPackageCaptureStop):
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def generate_vpn_client(cmd, client, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
+class VpnProfilePackageUrlShow(_VpnProfilePackageUrlShow):
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class VpnClientConnectionHealthShow(_VpnClientConnectionHealthShow):
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+def generate_vpn_client(cmd, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
                         authentication_method=None, radius_server_auth_certificate=None, client_root_certificates=None,
                         use_legacy=False):
-    params = cmd.get_models('VpnClientParameters')(
-        processor_architecture=processor_architecture
-    )
+    class VpnClientPackageGenerate(_VpnClientPackageGenerate):
+        def _output(self, *args, **kwargs):
+            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+            return result
 
-    if cmd.supported_api_version(min_api='2017-06-01') and not use_legacy:
-        params.authentication_method = authentication_method
-        params.radius_server_auth_certificate = radius_server_auth_certificate
-        params.client_root_certificates = client_root_certificates
-        return client.begin_generate_vpn_profile(resource_group_name, virtual_network_gateway_name, params)
+    class VpnProfileGenerate(_VpnProfileGenerate):
+        def _output(self, *args, **kwargs):
+            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+            return result
+
+    generate_args = {"name": virtual_network_gateway_name,
+                     "resource_group": resource_group_name,
+                     "processor_architecture": processor_architecture}
+    if not use_legacy:
+        generate_args['authentication_method'] = authentication_method
+        generate_args['radius_server_auth_certificate'] = radius_server_auth_certificate
+        generate_args['client_root_certificates'] = client_root_certificates
+        return VpnProfileGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
     # legacy implementation
-    return client.begin_generatevpnclientpackage(resource_group_name, virtual_network_gateway_name, params)
-
-
-def set_vpn_client_ipsec_policy(cmd, client, resource_group_name, virtual_network_gateway_name,
-                                sa_life_time_seconds, sa_data_size_kilobytes,
-                                ipsec_encryption, ipsec_integrity,
-                                ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
-    VpnClientIPsecParameters = cmd.get_models('VpnClientIPsecParameters')
-    vpnclient_ipsec_params = VpnClientIPsecParameters(sa_life_time_seconds=sa_life_time_seconds,
-                                                      sa_data_size_kilobytes=sa_data_size_kilobytes,
-                                                      ipsec_encryption=ipsec_encryption,
-                                                      ipsec_integrity=ipsec_integrity,
-                                                      ike_encryption=ike_encryption,
-                                                      ike_integrity=ike_integrity,
-                                                      dh_group=dh_group,
-                                                      pfs_group=pfs_group)
-    return sdk_no_wait(no_wait, client.begin_set_vpnclient_ipsec_parameters, resource_group_name,
-                       virtual_network_gateway_name, vpnclient_ipsec_params)
+    return VpnClientPackageGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
 
 
 class VnetGatewayVpnConnectionsDisconnect(_VnetGatewayVpnConnectionsDisconnect):

@@ -66,7 +66,8 @@ from .utils import (_normalize_sku,
                     _get_location_from_webapp,
                     _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
-                    get_resource_if_exists, repo_url_to_name, get_token)
+                    get_resource_if_exists, repo_url_to_name, get_token,
+                    app_service_plan_exists)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -871,7 +872,37 @@ def list_deleted_webapp(cmd, resource_group_name=None, name=None, slot=None):
     return sorted(result, key=lambda site: site.deleted_site_id)
 
 
-def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None, restore_content_only=None):
+def webapp_exists(cmd, resource_group_name, name, slot=None):
+    from azure.core.exceptions import ResourceNotFoundError as RNFR
+    exists = True
+    try:
+        if slot:
+            get_webapp(cmd, resource_group_name=resource_group_name, name=name, slot=slot)
+        else:
+            get_webapp(cmd, resource_group_name=resource_group_name, name=name)
+    except RNFR:
+        exists = False
+    return exists
+
+
+def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None, restore_content_only=None,
+                           target_app_svc_plan=None):
+    # If web app doesn't exist, Try creating it in the provided app service plan
+    if not webapp_exists(cmd, resource_group_name, name, slot):
+        logger.debug('Web app %s with slot %s not found under resource group %s', name, slot, resource_group_name)
+        if not target_app_svc_plan:
+            raise ValidationError(
+                f'Target app "{name}" does not exist. '
+                'Specify --target-app-svc-plan for it to be created automatically.')
+        if not app_service_plan_exists(cmd, resource_group_name, target_app_svc_plan):
+            raise ValidationError(
+                f'Target app service plan "{target_app_svc_plan}" not found '
+                f'in the target resource group "{resource_group_name}"')
+        # create webapp in the plan
+        create_webapp(cmd, resource_group_name, name, target_app_svc_plan)
+        logger.debug(
+            'Web app %s is created on plan %s, resource group %s', name, target_app_svc_plan, resource_group_name)
+
     DeletedAppRestoreRequest = cmd.get_models('DeletedAppRestoreRequest')
     request = DeletedAppRestoreRequest(deleted_site_id=deleted_id, recover_configuration=not restore_content_only)
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_restore_from_deleted_app',

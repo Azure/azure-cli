@@ -4374,6 +4374,7 @@ class NetworkSecurityGroupScenarioTest(ScenarioTest):
             self.check('length(@)', 1),
             self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
         ])
+        self.cmd('network nsg rule list --resource-group {rg} --nsg-name {nsg} -o table')
         self.cmd('network nsg rule show --resource-group {rg} --nsg-name {nsg} --name {rule}', checks=[
             self.check('type(@)', 'object'),
             self.check('resourceGroup', '{rg}'),
