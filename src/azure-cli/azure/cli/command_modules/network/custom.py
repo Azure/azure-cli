@@ -18,7 +18,7 @@ from azure.cli.core.commands import upsert_to_collection, get_property
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
 from azure.cli.core.util import CLIError, sdk_no_wait
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError, \
     UnrecognizedArgumentError, ResourceNotFoundError, ArgumentUsageError, MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, supported_api_version
 
@@ -39,6 +39,9 @@ from .aaz.latest.network.application_gateway.http_listener import Create as _HTT
 from .aaz.latest.network.application_gateway.http_settings import Create as _HTTPSettingsCreate, \
     Update as _HTTPSettingsUpdate
 from .aaz.latest.network.application_gateway.identity import Assign as _IdentityAssign
+from .aaz.latest.network.application_gateway.private_link import Add as _AGPrivateLinkAdd, \
+    Remove as _AGPrivateLinkRemove
+from .aaz.latest.network.application_gateway.private_link.ip_config import Add as _AGPrivateLinkIPConfigAdd
 from .aaz.latest.network.application_gateway.listener import Create as _ListenerCreate, Update as _ListenerUpdate
 from .aaz.latest.network.application_gateway.redirect_config import Create as _RedirectConfigCreate, \
     Update as _RedirectConfigUpdate
@@ -708,172 +711,155 @@ def remove_ag_identity(cmd, resource_group_name, application_gateway_name, no_wa
     })
 
 
-def add_ag_private_link(cmd,
-                        resource_group_name,
-                        application_gateway_name,
-                        frontend_ip,
-                        private_link_name,
-                        private_link_subnet_name_or_id,
-                        private_link_subnet_prefix=None,
-                        private_link_primary=None,
-                        private_link_ip_address=None,
-                        no_wait=False):
-    (SubResource, IPAllocationMethod, Subnet,
-     ApplicationGatewayPrivateLinkConfiguration,
-     ApplicationGatewayPrivateLinkIpConfiguration) = cmd.get_models(
-         'SubResource', 'IPAllocationMethod', 'Subnet',
-         'ApplicationGatewayPrivateLinkConfiguration', 'ApplicationGatewayPrivateLinkIpConfiguration')
-
-    ncf = network_client_factory(cmd.cli_ctx)
-
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    private_link_config_id = resource_id(
-        subscription=get_subscription_id(cmd.cli_ctx),
-        resource_group=resource_group_name,
-        namespace='Microsoft.Network',
-        type='applicationGateways',
-        name=appgw.name,
-        child_type_1='privateLinkConfigurations',
-        child_name_1=private_link_name
-    )
-
-    if not any(fic for fic in appgw.frontend_ip_configurations if fic.name == frontend_ip):
-        raise CLIError("Frontend IP doesn't exist")
-
-    for fic in appgw.frontend_ip_configurations:
-        if fic.private_link_configuration and fic.private_link_configuration.id == private_link_config_id:
-            raise CLIError('Frontend IP already reference an existing Private Link')
-        if fic.name == frontend_ip:
-            break
-    else:
-        raise CLIError("Frontend IP doesn't exist")
-
-    if appgw.private_link_configurations is not None:
-        for pl in appgw.private_link_configurations:
-            if pl.name == private_link_name:
-                raise CLIError('Private Link name duplicates')
-
-    # get the virtual network of this application gateway
-    vnet_name = parse_resource_id(appgw.gateway_ip_configurations[0].subnet.id)['name']
-    vnet = ncf.virtual_networks.get(resource_group_name, vnet_name)
-
-    # prepare the subnet for new private link
-    for subnet in vnet.subnets:
-        if subnet.name == private_link_subnet_name_or_id:
-            raise CLIError('Subnet name duplicates. In order to use existing subnet, please enter subnet ID.')
-        if subnet.address_prefix == private_link_subnet_prefix:
-            raise CLIError('Subnet prefix duplicates')
-        if subnet.address_prefixes and private_link_subnet_prefix in subnet.address_prefixes:
-            raise CLIError('Subnet prefix duplicates')
-
-    if is_valid_resource_id(private_link_subnet_name_or_id):
-        private_link_subnet_id = private_link_subnet_name_or_id
-    else:
-        private_link_subnet = Subnet(name=private_link_subnet_name_or_id,
-                                     address_prefix=private_link_subnet_prefix,
-                                     private_link_service_network_policies='Disabled')
-        private_link_subnet_id = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=resource_group_name,
-            namespace='Microsoft.Network',
-            type='virtualNetworks',
-            name=vnet_name,
-            child_type_1='subnets',
-            child_name_1=private_link_subnet_name_or_id
+class AGPrivateLinkAdd(_AGPrivateLinkAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZBoolArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.frontend_ip = AAZStrArg(
+            options=["--frontend-ip"],
+            help="Frontend IP that the private link will associate to.",
+            required=True,
         )
-        vnet.subnets.append(private_link_subnet)
-        ncf.virtual_networks.begin_create_or_update(resource_group_name, vnet_name, vnet)
+        args_schema.subnet = AAZStrArg(
+            options=["--subnet"],
+            help="Name or ID of a subnet within the same vnet of an application gateway.",
+            arg_group="Properties",
+            required=True,
+        )
+        args_schema.subnet_prefix = AAZStrArg(
+            options=["--subnet-prefix"],
+            help="CIDR prefix to use when creating a new subnet.",
+            arg_group="Properties",
+        )
+        args_schema.ip_address = AAZStrArg(
+            options=["--ip-address"],
+            help="Static private IP address of a subnet for private link. If omitting, a dynamic one will be created.",
+            arg_group="Properties",
+        )
+        args_schema.primary = AAZBoolArg(
+            options=["--primary"],
+            help="Whether the IP configuration is primary or not.",
+            arg_group="Properties",
+        )
+        args_schema.ip_configurations._registered = False
+        return args_schema
 
-    private_link_ip_allocation_method = IPAllocationMethod.static.value if private_link_ip_address \
-        else IPAllocationMethod.dynamic.value
-    private_link_ip_config = ApplicationGatewayPrivateLinkIpConfiguration(
-        name='PrivateLinkDefaultIPConfiguration',
-        private_ip_address=private_link_ip_address,
-        private_ip_allocation_method=private_link_ip_allocation_method,
-        subnet=SubResource(id=private_link_subnet_id),
-        primary=private_link_primary
-    )
-    private_link_config = ApplicationGatewayPrivateLinkConfiguration(
-        name=private_link_name,
-        ip_configurations=[private_link_ip_config]
-    )
+    def pre_instance_create(self):
+        args = self.ctx.args
+        instance = self.ctx.vars.instance
+        if not any(fic for fic in instance.properties.frontend_ip_configurations if fic.name == args.frontend_ip):
+            err_msg = "Frontend IP doesn't exist."
+            raise ValidationError(err_msg)
 
-    # associate the private link with the frontend IP configuration
-    for fic in appgw.frontend_ip_configurations:
-        if fic.name == frontend_ip:
-            fic.private_link_configuration = SubResource(id=private_link_config_id)
+        private_link_id = resource_id(
+            subscription=self.ctx.subscription_id,
+            resource_group=args.resource_group,
+            namespace="Microsoft.Network",
+            type="applicationGateways",
+            name=args.gateway_name,
+            child_type_1="privateLinkConfigurations",
+            child_name_1=args.name
+        )
+        for fic in instance.properties.frontend_ip_configurations:
+            if has_value(fic.properties.private_link_configuration) \
+                    and fic.properties.private_link_configuration.id == private_link_id:
+                err_msg = "Frontend IP already reference an existing private link."
+                raise ValidationError(err_msg)
+        # associate private link with frontend IP configuration
+        for fic in instance.properties.frontend_ip_configurations:
+            if fic.name == args.frontend_ip:
+                fic.properties.private_link_configuration = {"id": private_link_id}
 
-    if appgw.private_link_configurations is None:
-        appgw.private_link_configurations = []
-    appgw.private_link_configurations.append(private_link_config)
+        if has_value(instance.properties.private_link_configurations):
+            for plc in instance.properties.private_link_configurations:
+                if plc.name == args.name:
+                    err_msg = "Private link name duplicates."
+                    raise ValidationError(err_msg)
+        # prepare subnet for new private link
+        rid = instance.properties.gateway_ip_configurations[0].properties.subnet.id.to_serialized_data()
+        metadata = parse_resource_id(rid)
+        if not is_valid_resource_id(args.subnet.to_serialized_data()):
+            args.subnet = resource_id(
+                subscription=metadata["subscription"],
+                resource_group=metadata["resource_group"],
+                namespace="Microsoft.Network",
+                type="virtualNetworks",
+                name=metadata["name"],
+                child_type_1="subnets",
+                child_name_1=args.subnet
+            )
 
-    return sdk_no_wait(no_wait,
-                       ncf.application_gateways.begin_create_or_update,
-                       resource_group_name,
-                       application_gateway_name, appgw)
+        from .aaz.latest.network.vnet import Show
+        vnet = Show(cli_ctx=self.cli_ctx)(command_args={
+            "name": metadata["name"],
+            "resource_group": metadata["resource_group"]
+        })
+        for subnet in vnet["subnets"]:
+            if subnet["id"] == args.subnet:
+                break
+        else:
+            subnet_name = parse_resource_id(args.subnet.to_serialized_data())["child_name_1"]
+
+            from azure.cli.core.commands import LongRunningOperation
+            poller = VNetSubnetCreate(cli_ctx=self.cli_ctx)(command_args={
+                "name": subnet_name,
+                "vnet_name": metadata["name"],
+                "resource_group": metadata["resource_group"],
+                "address_prefix": args.subnet_prefix,
+                "private_link_service_network_policies": "Disabled"
+            })
+            LongRunningOperation(self.cli_ctx)(poller)
+
+        args.ip_configurations = [{
+            "name": "PrivateLinkDefaultIPConfiguration",
+            "private_ip_address": args.ip_address,
+            "private_ip_allocation_method": "Static" if has_value(args.ip_address) else "Dynamic",
+            "subnet": {"id": args.subnet},
+            "primary": args.primary
+        }]
 
 
-def show_ag_private_link(cmd,
-                         resource_group_name,
-                         application_gateway_name,
-                         private_link_name):
-    ncf = network_client_factory(cmd.cli_ctx)
+class AGPrivateLinkRemove(_AGPrivateLinkRemove):
+    def pre_instance_delete(self):
+        args = self.ctx.args
+        instance = self.ctx.vars.instance
+        for plc in instance.properties.private_link_configurations:
+            if plc.name == args.name:
+                to_be_removed = plc
+                break
+        else:
+            err_msg = "Private link doesn't exist."
+            raise ValidationError(err_msg)
 
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    target_private_link = None
-    for pl in appgw.private_link_configurations:
-        if pl.name == private_link_name:
-            target_private_link = pl
-            break
-    else:
-        raise CLIError("Priavte Link doesn't exist")
-
-    return target_private_link
-
-
-def list_ag_private_link(cmd,
-                         resource_group_name,
-                         application_gateway_name):
-    ncf = network_client_factory(cmd.cli_ctx)
-
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    return appgw.private_link_configurations
+        for fic in instance.properties.frontend_ip_configurations:
+            if has_value(fic.properties.private_link_configuration) \
+                    and fic.properties.private_link_configuration.id == to_be_removed.id:
+                fic.properties.private_link_configuration = None
 
 
-def remove_ag_private_link(cmd,
-                           resource_group_name,
-                           application_gateway_name,
-                           private_link_name,
-                           no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
+class AGPrivateLinkIPConfigAdd(_AGPrivateLinkIPConfigAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.private_ip_allocation_method._registered = False
+        args_schema.subnet._registered = False
+        return args_schema
 
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+    def pre_instance_create(self):
+        args = self.ctx.args
+        instance = self.ctx.vars.instance
+        for plc in instance.properties.private_link_configurations:
+            if plc.name == args.private_link:
+                target_private_link = plc
+                break
+        else:
+            err_msg = "Private link doesn't exist."
+            raise ValidationError(err_msg)
 
-    removed_private_link = None
-
-    for pl in appgw.private_link_configurations:
-        if pl.name == private_link_name:
-            removed_private_link = pl
-            break
-    else:
-        raise CLIError("Priavte Link doesn't exist")
-
-    for fic in appgw.frontend_ip_configurations:
-        if fic.private_link_configuration and fic.private_link_configuration.id == removed_private_link.id:
-            fic.private_link_configuration = None
-
-    # the left vnet have to delete manually
-    # rs = parse_resource_id(removed_private_link.ip_configurations[0].subnet.id)
-    # vnet_resource_group, vnet_name, subnet = rs['resource_group'], rs['name'], rs['child_name_1']
-    # ncf.subnets.delete(vnet_resource_group, vnet_name, subnet)
-
-    appgw.private_link_configurations.remove(removed_private_link)
-    return sdk_no_wait(no_wait,
-                       ncf.application_gateways.begin_create_or_update,
-                       resource_group_name,
-                       application_gateway_name,
-                       appgw)
+        args.private_ip_allocation_method = "Static" if has_value(args.ip_address) else "Dynamic"
+        subnet_id = target_private_link.properties.ip_configurations[0].properties.subnet.id
+        args.subnet.id = subnet_id
 
 
 # region application-gateway trusted-client-certificates
@@ -1059,132 +1045,6 @@ class SSLProfileRemove(_SSLProfileRemove):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 # endregion
-
-
-def add_ag_private_link_ip(cmd,
-                           resource_group_name,
-                           application_gateway_name,
-                           private_link_name,
-                           private_link_ip_name,
-                           private_link_primary=False,
-                           private_link_ip_address=None,
-                           no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    target_private_link = None
-    for pl in appgw.private_link_configurations:
-        if pl.name == private_link_name:
-            target_private_link = pl
-            break
-    else:
-        raise CLIError("Priavte Link doesn't exist")
-
-    (SubResource, IPAllocationMethod,
-     ApplicationGatewayPrivateLinkIpConfiguration) = \
-        cmd.get_models('SubResource', 'IPAllocationMethod',
-                       'ApplicationGatewayPrivateLinkIpConfiguration')
-
-    private_link_subnet_id = target_private_link.ip_configurations[0].subnet.id
-
-    private_link_ip_allocation_method = IPAllocationMethod.static.value if private_link_ip_address \
-        else IPAllocationMethod.dynamic.value
-    private_link_ip_config = ApplicationGatewayPrivateLinkIpConfiguration(
-        name=private_link_ip_name,
-        private_ip_address=private_link_ip_address,
-        private_ip_allocation_method=private_link_ip_allocation_method,
-        subnet=SubResource(id=private_link_subnet_id),
-        primary=private_link_primary
-    )
-
-    target_private_link.ip_configurations.append(private_link_ip_config)
-
-    return sdk_no_wait(no_wait,
-                       ncf.application_gateways.begin_create_or_update,
-                       resource_group_name,
-                       application_gateway_name,
-                       appgw)
-
-
-def show_ag_private_link_ip(cmd,
-                            resource_group_name,
-                            application_gateway_name,
-                            private_link_name,
-                            private_link_ip_name):
-    ncf = network_client_factory(cmd.cli_ctx)
-
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    target_private_link = None
-    for pl in appgw.private_link_configurations:
-        if pl.name == private_link_name:
-            target_private_link = pl
-            break
-    else:
-        raise CLIError("Priavte Link doesn't exist")
-
-    target_private_link_ip_config = None
-    for pic in target_private_link.ip_configurations:
-        if pic.name == private_link_ip_name:
-            target_private_link_ip_config = pic
-            break
-    else:
-        raise CLIError("IP Configuration doesn't exist")
-
-    return target_private_link_ip_config
-
-
-def list_ag_private_link_ip(cmd,
-                            resource_group_name,
-                            application_gateway_name,
-                            private_link_name):
-    ncf = network_client_factory(cmd.cli_ctx)
-
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    target_private_link = None
-    for pl in appgw.private_link_configurations:
-        if pl.name == private_link_name:
-            target_private_link = pl
-            break
-    else:
-        raise CLIError("Priavte Link doesn't exist")
-
-    return target_private_link.ip_configurations
-
-
-def remove_ag_private_link_ip(cmd,
-                              resource_group_name,
-                              application_gateway_name,
-                              private_link_name,
-                              private_link_ip_name,
-                              no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    target_private_link = None
-    for pl in appgw.private_link_configurations:
-        if pl.name == private_link_name:
-            target_private_link = pl
-            break
-    else:
-        raise CLIError("Priavte Link doesn't exist")
-
-    updated_ip_configurations = target_private_link.ip_configurations
-    for pic in target_private_link.ip_configurations:
-        if pic.name == private_link_ip_name:
-            updated_ip_configurations.remove(pic)
-            break
-    else:
-        raise CLIError("IP Configuration doesn't exist")
-
-    return sdk_no_wait(no_wait,
-                       ncf.application_gateways.begin_create_or_update,
-                       resource_group_name,
-                       application_gateway_name,
-                       appgw)
 
 
 class HTTPSettingsCreate(_HTTPSettingsCreate):
@@ -6310,6 +6170,10 @@ class VNetUpdate(_VNetUpdate):
         )
         return args_schema
 
+    def post_instance_update(self, instance):
+        if not has_value(instance.properties.ddos_protection_plan.id):
+            instance.properties.ddos_protection_plan = None
+
 
 class VNetSubnetCreate(_VNetSubnetCreate):
     @classmethod
@@ -6399,8 +6263,10 @@ class VNetSubnetCreate(_VNetSubnetCreate):
             element_transformer=lambda _, policy_id: {"id": policy_id}
         )
         # use string instead of bool
-        args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
-        args.private_link_service_network_policies = args.disable_private_link_service_network_policies
+        if has_value(args.disable_private_endpoint_network_policies):
+            args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
+        if has_value(args.disable_private_link_service_network_policies):
+            args.private_link_service_network_policies = args.disable_private_link_service_network_policies
 
 
 class VNetSubnetUpdate(_VNetSubnetUpdate):
@@ -6529,8 +6395,10 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             element_transformer=lambda _, policy_id: {"id": policy_id}
         )
         # use string instead of bool
-        args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
-        args.private_link_service_network_policies = args.disable_private_link_service_network_policies
+        if has_value(args.disable_private_endpoint_network_policies):
+            args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
+        if has_value(args.disable_private_link_service_network_policies):
+            args.private_link_service_network_policies = args.disable_private_link_service_network_policies
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.network_security_group.id):
