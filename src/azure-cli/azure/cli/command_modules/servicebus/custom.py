@@ -631,6 +631,10 @@ def cli_migration_complete(client, resource_group_name, namespace_name, config_n
     return client.complete_migration(resource_group_name, namespace_name, config_name)
 
 
+def revert(client, resource_group_name, namespace_name, config_name="$default"):
+    return client.revert(resource_group_name, namespace_name, config_name)
+
+
 iso8601pattern = re.compile("^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\d+H)?(\\d+M)?(\\d+.)?(\\d+S)?)?$")
 timedeltapattern = re.compile("^\\d+:\\d+:\\d+$")
 
