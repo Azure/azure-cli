@@ -102,7 +102,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.monitoring_interval_in_seconds = AAZIntArg(
-            options=["--monitoring-interval-in-seconds"],
+            options=["--monitor-in-sec", "--monitoring-interval-in-seconds"],
             arg_group="Properties",
             help="Monitoring interval in seconds.",
             nullable=True,

@@ -92,7 +92,7 @@ class Create(AAZCommand):
             help="List of connection monitor endpoints.",
         )
         _args_schema.monitoring_interval_in_seconds = AAZIntArg(
-            options=["--monitoring-interval-in-seconds"],
+            options=["--monitor-in-sec", "--monitoring-interval-in-seconds"],
             arg_group="Properties",
             help="Monitoring interval in seconds.",
             default=60,
