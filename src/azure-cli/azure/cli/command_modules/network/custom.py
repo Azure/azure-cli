@@ -14,7 +14,7 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_
 
 from azure.cli.core.aaz import has_value
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
-from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
+from azure.cli.core.commands import upsert_to_collection, get_property
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
 from azure.cli.core.util import CLIError, sdk_no_wait
@@ -93,8 +93,13 @@ from .aaz.latest.network.vnet_gateway.aad import Assign as _VnetGatewayAadAssign
 from .aaz.latest.network.vnet_gateway.ipsec_policy import Add as _VnetGatewayIpsecPolicyAdd
 from .aaz.latest.network.vnet_gateway.nat_rule import Add as _VnetGatewayNatRuleAdd, List as _VnetGatewayNatRuleShow, \
     Remove as _VnetGatewayNatRuleRemove
+from .aaz.latest.network.vnet_gateway.packet_capture import Start as _VnetGatewayPackageCaptureStart, \
+    Stop as _VnetGatewayPackageCaptureStop
 from .aaz.latest.network.vnet_gateway.revoked_cert import Create as _VnetGatewayRevokedCertCreate
 from .aaz.latest.network.vnet_gateway.root_cert import Create as _VnetGatewayRootCertCreate
+from .aaz.latest.network.vnet_gateway.vpn_client import GenerateVpnProfile as _VpnProfileGenerate, \
+    Generate as _VpnClientPackageGenerate, ShowUrl as _VpnProfilePackageUrlShow, \
+    ShowHealth as _VpnClientConnectionHealthShow
 
 logger = get_logger(__name__)
 
@@ -4175,216 +4180,6 @@ def create_cross_region_load_balancer(cmd, load_balancer_name, resource_group_na
 # endregion
 
 
-def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol, port,
-                    path=None, interval=None, threshold=None, probe_threshold=None):
-    if probe_threshold is not None:
-        logger.warning(
-            "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
-            "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
-            "by not specifying the value of the property."
-        )
-
-    from .aaz.latest.network.lb import Show
-    lb = Show(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": load_balancer_name,
-        "resource_group": resource_group_name,
-    })
-
-    probes = []
-    for item in lb["probes"]:
-        probe = dict()
-        probe["name"] = item.pop("name", None)
-        if probe["name"] == item_name:
-            logger.warning("Item '%s' already exists. Replacing with new values.", item_name)
-            continue
-
-        probe["interval_in_seconds"] = item.pop("intervalInSeconds", None)
-        probe["number_of_probes"] = item.pop("numberOfProbes", None)
-        probe["port"] = item.pop("port", None)
-        probe["probe_threshold"] = item.pop("probeThreshold", None)
-        probe["protocol"] = item.pop("protocol", None)
-        probe["request_path"] = item.pop("requestPath", None)
-        probes.append(probe)
-
-    probes.append({
-        "name": item_name,
-        "interval_in_seconds": interval,
-        "number_of_probes": threshold,
-        "port": port,
-        "probe_threshold": probe_threshold,
-        "protocol": protocol,
-        "request_path": path,
-    })
-
-    from .aaz.latest.network.lb import Update
-    result = Update(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": load_balancer_name,
-        "resource_group": resource_group_name,
-        "probes": probes,
-    }).result()["probes"]
-
-    return [r for r in result if r["name"] == item_name][0]
-
-
-def update_lb_probe(cmd, resource_group_name, load_balancer_name, item_name,
-                    protocol=None, port=None, path=None, interval=None, threshold=None, probe_threshold=None):
-    from .aaz.latest.network.lb import Show
-    lb = Show(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": load_balancer_name,
-        "resource_group": resource_group_name,
-    })
-
-    probes = []
-    for item in lb["probes"]:
-        probe = dict()
-        probe["name"] = item.pop("name", None)
-        probe["interval_in_seconds"] = item.pop("intervalInSeconds", None)
-        probe["number_of_probes"] = item.pop("numberOfProbes", None)
-        probe["port"] = item.pop("port", None)
-        probe["probe_threshold"] = item.pop("probeThreshold", None)
-        probe["protocol"] = item.pop("protocol", None)
-        probe["request_path"] = item.pop("requestPath", None)
-        probes.append(probe)
-
-    for probe in probes:
-        if probe["name"] == item_name:
-            if interval is not None:
-                probe["interval_in_seconds"] = interval
-            if threshold is not None:
-                probe["number_of_probes"] = threshold
-            if port is not None:
-                probe["port"] = port
-            if probe_threshold is not None:
-                logger.warning(
-                    "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
-                    "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
-                    "by not specifying the value of the property."
-                )
-                probe["probe_threshold"] = probe_threshold
-            if protocol is not None:
-                probe["protocol"] = protocol
-            if path is not None:
-                if path == "":
-                    probe["request_path"] = None
-                else:
-                    probe["request_path"] = path
-
-    from .aaz.latest.network.lb import Update
-    result = Update(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": load_balancer_name,
-        "resource_group": resource_group_name,
-        "probes": probes,
-    }).result()["probes"]
-
-    return [r for r in result if r["name"] == item_name][0]
-
-
-def create_cross_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol, port,
-                          path=None, interval=None, threshold=None):
-    Probe = cmd.get_models('Probe')
-    ncf = network_client_factory(cmd.cli_ctx)
-    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
-    new_probe = Probe(
-        protocol=protocol, port=port, interval_in_seconds=interval, number_of_probes=threshold,
-        request_path=path, name=item_name)
-    upsert_to_collection(lb, 'probes', new_probe, 'name')
-    poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
-    return get_property(poller.result().probes, item_name)
-
-
-def set_cross_lb_probe(cmd, instance, parent, item_name, protocol=None, port=None,
-                       path=None, interval=None, threshold=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('protocol', protocol)
-        c.set_param('port', port)
-        c.set_param('request_path', path)
-        c.set_param('interval_in_seconds', interval)
-        c.set_param('number_of_probes', threshold)
-    return parent
-
-
-def create_lb_rule(
-        cmd, resource_group_name, load_balancer_name, item_name,
-        protocol, frontend_port, backend_port, frontend_ip_name=None,
-        backend_address_pool_name=None, probe_name=None, load_distribution='default',
-        floating_ip=None, idle_timeout=None, enable_tcp_reset=None, disable_outbound_snat=None, backend_pools_name=None):
-    LoadBalancingRule = cmd.get_models('LoadBalancingRule')
-    ncf = network_client_factory(cmd.cli_ctx)
-    lb = cached_get(cmd, ncf.load_balancers.get, resource_group_name, load_balancer_name)
-    lb = lb_get_operation(lb)
-    if not frontend_ip_name:
-        frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
-    # avoid break when backend_address_pool_name is None and backend_pools_name is not None
-    if not backend_address_pool_name and backend_pools_name:
-        backend_address_pool_name = backend_pools_name[0]
-    if not backend_address_pool_name:
-        backend_address_pool_name = _get_default_name(lb, 'backend_address_pools', '--backend-pool-name')
-    new_rule = LoadBalancingRule(
-        name=item_name,
-        protocol=protocol,
-        frontend_port=frontend_port,
-        backend_port=backend_port,
-        frontend_ip_configuration=get_property(lb.frontend_ip_configurations,
-                                               frontend_ip_name),
-        backend_address_pool=get_property(lb.backend_address_pools,
-                                          backend_address_pool_name),
-        probe=get_property(lb.probes, probe_name) if probe_name else None,
-        load_distribution=load_distribution,
-        enable_floating_ip=floating_ip,
-        idle_timeout_in_minutes=idle_timeout,
-        enable_tcp_reset=enable_tcp_reset,
-        disable_outbound_snat=disable_outbound_snat)
-
-    if backend_pools_name:
-        new_rule.backend_address_pools = [get_property(lb.backend_address_pools, name) for name in backend_pools_name]
-        # Otherwiase service will response error : (LoadBalancingRuleBackendAdressPoolAndBackendAddressPoolsCannotBeSetAtTheSameTimeWithDifferentValue) BackendAddressPool and BackendAddressPools[] in LoadBalancingRule rule2 cannot be set at the same time with different value.
-        new_rule.backend_address_pool = None
-
-    upsert_to_collection(lb, 'load_balancing_rules', new_rule, 'name')
-    poller = cached_put(cmd, ncf.load_balancers.begin_create_or_update, lb, resource_group_name, load_balancer_name)
-    return get_property(poller.result().load_balancing_rules, item_name)
-
-
-def set_lb_rule(
-        cmd, instance, parent, item_name, protocol=None, frontend_port=None,
-        frontend_ip_name=None, backend_port=None, backend_address_pool_name=None, probe_name=None,
-        load_distribution='default', floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
-        disable_outbound_snat=None, backend_pools_name=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('protocol', protocol)
-        c.set_param('frontend_port', frontend_port)
-        c.set_param('backend_port', backend_port)
-        c.set_param('idle_timeout_in_minutes', idle_timeout)
-        c.set_param('load_distribution', load_distribution)
-        c.set_param('disable_outbound_snat', disable_outbound_snat)
-        c.set_param('enable_tcp_reset', enable_tcp_reset)
-        c.set_param('enable_floating_ip', floating_ip)
-
-    if frontend_ip_name is not None:
-        instance.frontend_ip_configuration = \
-            get_property(parent.frontend_ip_configurations, frontend_ip_name)
-
-    if backend_address_pool_name is not None:
-        instance.backend_address_pool = \
-            get_property(parent.backend_address_pools, backend_address_pool_name)
-        # To keep compatible when bump version from '2020-11-01' to '2021-02-01'
-        # https://github.com/Azure/azure-rest-api-specs/issues/14430
-        if cmd.supported_api_version(min_api='2021-02-01') and not backend_pools_name:
-            instance.backend_address_pools = [instance.backend_address_pool]
-    if backend_pools_name is not None:
-        instance.backend_address_pools = [get_property(parent.backend_address_pools, i) for i in backend_pools_name]
-        # Otherwiase service will response error : (LoadBalancingRuleBackendAdressPoolAndBackendAddressPoolsCannotBeSetAtTheSameTimeWithDifferentValue) BackendAddressPool and BackendAddressPools[] in LoadBalancingRule rule2 cannot be set at the same time with different value.
-        instance.backend_address_pool = None
-
-    if probe_name == '':
-        instance.probe = None
-    elif probe_name is not None:
-        instance.probe = get_property(parent.probes, probe_name)
-
-    return parent
-# endregion
-
-
 # region NetworkInterfaces (NIC)
 def create_nic(cmd, resource_group_name, network_interface_name, subnet, location=None, tags=None,
                internal_dns_name_label=None, dns_servers=None, enable_ip_forwarding=False,
@@ -6945,53 +6740,56 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
             args.active = active
 
 
-def start_vnet_gateway_package_capture(cmd, client, resource_group_name, virtual_network_gateway_name,
-                                       filter_data=None, no_wait=False):
-    VpnPacketCaptureStartParameters = cmd.get_models('VpnPacketCaptureStartParameters')
-    parameters = VpnPacketCaptureStartParameters(filter_data=filter_data)
-    return sdk_no_wait(no_wait, client.begin_start_packet_capture, resource_group_name,
-                       virtual_network_gateway_name, parameters=parameters)
+class VnetGatewayPackageCaptureStart(_VnetGatewayPackageCaptureStart):
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def stop_vnet_gateway_package_capture(cmd, client, resource_group_name, virtual_network_gateway_name,
-                                      sas_url, no_wait=False):
-    VpnPacketCaptureStopParameters = cmd.get_models('VpnPacketCaptureStopParameters')
-    parameters = VpnPacketCaptureStopParameters(sas_url=sas_url)
-    return sdk_no_wait(no_wait, client.begin_stop_packet_capture, resource_group_name,
-                       virtual_network_gateway_name, parameters=parameters)
+class VnetGatewayPackageCaptureStop(_VnetGatewayPackageCaptureStop):
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def generate_vpn_client(cmd, client, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
+class VpnProfilePackageUrlShow(_VpnProfilePackageUrlShow):
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class VpnClientConnectionHealthShow(_VpnClientConnectionHealthShow):
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+def generate_vpn_client(cmd, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
                         authentication_method=None, radius_server_auth_certificate=None, client_root_certificates=None,
                         use_legacy=False):
-    params = cmd.get_models('VpnClientParameters')(
-        processor_architecture=processor_architecture
-    )
+    class VpnClientPackageGenerate(_VpnClientPackageGenerate):
+        def _output(self, *args, **kwargs):
+            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+            return result
 
-    if cmd.supported_api_version(min_api='2017-06-01') and not use_legacy:
-        params.authentication_method = authentication_method
-        params.radius_server_auth_certificate = radius_server_auth_certificate
-        params.client_root_certificates = client_root_certificates
-        return client.begin_generate_vpn_profile(resource_group_name, virtual_network_gateway_name, params)
+    class VpnProfileGenerate(_VpnProfileGenerate):
+        def _output(self, *args, **kwargs):
+            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+            return result
+
+    generate_args = {"name": virtual_network_gateway_name,
+                     "resource_group": resource_group_name,
+                     "processor_architecture": processor_architecture}
+    if not use_legacy:
+        generate_args['authentication_method'] = authentication_method
+        generate_args['radius_server_auth_certificate'] = radius_server_auth_certificate
+        generate_args['client_root_certificates'] = client_root_certificates
+        return VpnProfileGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
     # legacy implementation
-    return client.begin_generatevpnclientpackage(resource_group_name, virtual_network_gateway_name, params)
-
-
-def set_vpn_client_ipsec_policy(cmd, client, resource_group_name, virtual_network_gateway_name,
-                                sa_life_time_seconds, sa_data_size_kilobytes,
-                                ipsec_encryption, ipsec_integrity,
-                                ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
-    VpnClientIPsecParameters = cmd.get_models('VpnClientIPsecParameters')
-    vpnclient_ipsec_params = VpnClientIPsecParameters(sa_life_time_seconds=sa_life_time_seconds,
-                                                      sa_data_size_kilobytes=sa_data_size_kilobytes,
-                                                      ipsec_encryption=ipsec_encryption,
-                                                      ipsec_integrity=ipsec_integrity,
-                                                      ike_encryption=ike_encryption,
-                                                      ike_integrity=ike_integrity,
-                                                      dh_group=dh_group,
-                                                      pfs_group=pfs_group)
-    return sdk_no_wait(no_wait, client.begin_set_vpnclient_ipsec_parameters, resource_group_name,
-                       virtual_network_gateway_name, vpnclient_ipsec_params)
+    return VpnClientPackageGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
 
 
 class VnetGatewayVpnConnectionsDisconnect(_VnetGatewayVpnConnectionsDisconnect):

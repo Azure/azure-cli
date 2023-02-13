@@ -12,27 +12,31 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network lb probe list",
+    "network lb probe create",
 )
-class List(AAZCommand):
-    """List probes in the load balancer.
+class Create(AAZCommand):
+    """Create a probe in the load balance.
 
-    :example: List probes
-        az network lb probe list -g MyResourceGroup --lb-name MyLb
+    :example: Create a probe on a load balancer over HTTP and port 80.
+        az network lb probe create -g MyResourceGroup --lb-name MyLb -n MyProbe --protocol http --port 80 --path /
+
+    :example: Create a probe on a load balancer over TCP on port 443.
+        az network lb probe create -g MyResourceGroup --lb-name MyLb -n MyProbe --protocol tcp --port 443
     """
 
     _aaz_info = {
         "version": "2022-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}", "2022-05-01", "properties.probes"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}", "2022-05-01", "properties.probes[]"],
         ]
     }
+
+    AZ_SUPPORT_NO_WAIT = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
         self.SubresourceSelector(ctx=self.ctx, name="subresource")
-        self._execute_operations()
-        return self._output()
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -53,11 +57,58 @@ class List(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
+            help="The name of the probe.",
+            required=True,
+        )
+
+        # define Arg Group "Parameters.properties.probes[]"
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.interval_in_seconds = AAZIntArg(
+            options=["--interval", "--interval-in-seconds"],
+            arg_group="Properties",
+            help={"short-summary": "The interval, in seconds, for how frequently to probe the endpoint for health status.", "long-summary": "Typically, the interval is slightly less than half the allocated timeout period (in seconds) which allows two full probes before taking the instance out of rotation. The default value is 15, the minimum value is 5."},
+        )
+        _args_schema.number_of_probes = AAZIntArg(
+            options=["--threshold", "--number-of-probes"],
+            arg_group="Properties",
+            help={"short-summary": "The number of consecutive probe failures before an instance is deemed unhealthy.", "long-summary": "This values allows endpoints to be taken out of rotation faster or slower than the typical times used in Azure."},
+        )
+        _args_schema.port = AAZIntArg(
+            options=["--port"],
+            arg_group="Properties",
+            help="The port for communicating the probe. Possible values range from 1 to 65535, inclusive.",
+        )
+        _args_schema.probe_threshold = AAZIntArg(
+            options=["--probe-threshold"],
+            arg_group="Properties",
+            help={"short-summary": "The number of consecutive successful or failed probes in order to allow or deny traffic from being delivered to this endpoint. It is currently in preview and is not recommended for production workloads. For most scenarios, we recommend maintaining the default value of 1 by not specifying the value of the property.", "long-summary": "After failing the number of consecutive probes equal to this value, the endpoint will be taken out of rotation and require the same number of successful consecutive probes to be placed back in rotation."},
+            is_preview=True,
+        )
+        _args_schema.protocol = AAZStrArg(
+            options=["--protocol"],
+            arg_group="Properties",
+            help={"short-summary": "The protocol of the end point.", "long-summary": "If 'Tcp' is specified, a received ACK is required for the probe to be successful. If 'Http' or 'Https' is specified, a 200 OK response from the specifies URI is required for the probe to be successful."},
+            enum={"Http": "Http", "Https": "Https", "Tcp": "Tcp"},
+        )
+        _args_schema.request_path = AAZStrArg(
+            options=["--path", "--request-path"],
+            arg_group="Properties",
+            help="The URI used for requesting health status from the VM. Path is required if a protocol is set to http. Otherwise, it is not allowed.",
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.LoadBalancersGet(ctx=self.ctx)()
+        self.pre_instance_create()
+        self.InstanceCreateByJson(ctx=self.ctx)()
+        self.post_instance_create(self.ctx.selectors.subresource.required())
+        yield self.LoadBalancersCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -68,6 +119,14 @@ class List(AAZCommand):
     def post_operations(self):
         pass
 
+    @register_callback
+    def pre_instance_create(self):
+        pass
+
+    @register_callback
+    def post_instance_create(self, instance):
+        pass
+
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
         return result
@@ -76,11 +135,25 @@ class List(AAZCommand):
 
         def _get(self):
             result = self.ctx.vars.instance
-            return result.properties.probes
+            result = result.properties.probes
+            filters = enumerate(result)
+            filters = filter(
+                lambda e: e[1].name == self.ctx.args.name,
+                filters
+            )
+            idx = next(filters)[0]
+            return result[idx]
 
         def _set(self, value):
             result = self.ctx.vars.instance
-            result.properties.probes = value
+            result = result.properties.probes
+            filters = enumerate(result)
+            filters = filter(
+                lambda e: e[1].name == self.ctx.args.name,
+                filters
+            )
+            idx = next(filters, [len(result)])[0]
+            result[idx] = value
             return
 
     class LoadBalancersGet(AAZHttpOperation):
@@ -162,13 +235,148 @@ class List(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _ListHelper._build_schema_load_balancer_read(cls._schema_on_200)
+            _CreateHelper._build_schema_load_balancer_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
+    class LoadBalancersCreateOrUpdate(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
 
-class _ListHelper:
-    """Helper class for List"""
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+            if session.http_response.status_code in [200, 201]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+
+            return self.on_error(session.http_response)
+
+        @property
+        def url(self):
+            return self.client.format_url(
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}",
+                **self.url_parameters
+            )
+
+        @property
+        def method(self):
+            return "PUT"
+
+        @property
+        def error_format(self):
+            return "ODataV4Format"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param(
+                    "loadBalancerName", self.ctx.args.lb_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "api-version", "2022-05-01",
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                value=self.ctx.vars.instance,
+            )
+
+            return self.serialize_content(_content_value)
+
+        def on_200_201(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200_201
+            )
+
+        _schema_on_200_201 = None
+
+        @classmethod
+        def _build_schema_on_200_201(cls):
+            if cls._schema_on_200_201 is not None:
+                return cls._schema_on_200_201
+
+            cls._schema_on_200_201 = AAZObjectType()
+            _CreateHelper._build_schema_load_balancer_read(cls._schema_on_200_201)
+
+            return cls._schema_on_200_201
+
+    class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
+
+        def __call__(self, *args, **kwargs):
+            self.ctx.selectors.subresource.set(self._create_instance())
+
+        def _create_instance(self):
+            _instance_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType
+            )
+            _builder.set_prop("name", AAZStrType, ".name")
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("intervalInSeconds", AAZIntType, ".interval_in_seconds")
+                properties.set_prop("numberOfProbes", AAZIntType, ".number_of_probes")
+                properties.set_prop("port", AAZIntType, ".port", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("probeThreshold", AAZIntType, ".probe_threshold")
+                properties.set_prop("protocol", AAZStrType, ".protocol", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("requestPath", AAZStrType, ".request_path")
+
+            return _instance_value
+
+
+class _CreateHelper:
+    """Helper class for Create"""
 
     _schema_application_security_group_read = None
 
@@ -2606,4 +2814,4 @@ class _ListHelper:
         _schema.type = cls._schema_virtual_network_tap_read.type
 
 
-__all__ = ["List"]
+__all__ = ["Create"]

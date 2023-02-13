@@ -9,9 +9,7 @@
 # flake8: noqa
 
 from .__cmd_group import *
-from ._create import *
-from ._delete import *
-from ._list import *
-from ._show import *
-from ._update import *
-from ._wait import *
+from ._generate import *
+from ._generate_vpn_profile import *
+from ._show_health import *
+from ._show_url import *

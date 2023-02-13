@@ -11,8 +11,8 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
 
 from azure.cli.command_modules.network._client_factory import (
-    cf_load_balancers,
     cf_network_interfaces, cf_network_watcher, cf_packet_capture,
+    cf_application_gateways,
     cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
@@ -20,8 +20,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_dns_references,
     cf_virtual_router, cf_virtual_router_peering, cf_flow_logs)
 from azure.cli.command_modules.network._util import (
-    list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
-    delete_lb_resource_property_entry)
+    list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
@@ -80,19 +79,9 @@ def load_command_table(self, _):
         min_api='2018-05-01'
     )
 
-    network_lb_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#LoadBalancersOperations.{}',
-        client_factory=cf_load_balancers
-    )
-
     network_nic_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#NetworkInterfacesOperations.{}',
         client_factory=cf_network_interfaces
-    )
-
-    network_vgw_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualNetworkGatewaysOperations.{}',
-        client_factory=cf_virtual_network_gateways
     )
 
     network_vpn_sdk = CliCommandType(
@@ -478,12 +467,9 @@ def load_command_table(self, _):
     self.command_table["network lb address-pool tunnel-interface remove"] = LBAddressPoolTunnelInterfaceRemove(loader=self)
     self.command_table["network lb address-pool tunnel-interface update"] = LBAddressPoolTunnelInterfaceUpdate(loader=self)
 
-    with self.command_group("network lb probe") as g:
-        g.custom_command("create", "create_lb_probe")
-        g.custom_command("update", "update_lb_probe")
-
-    with self.command_group('network lb probe', network_util) as g:
-        g.command('delete', delete_lb_resource_property_entry('load_balancers', 'probes'))
+    from .operations.load_balancer import LBProbeCreate, LBProbeUpdate
+    self.command_table["network lb probe create"] = LBProbeCreate(loader=self)
+    self.command_table["network lb probe update"] = LBProbeUpdate(loader=self)
 
     # endregion
 
@@ -530,22 +516,6 @@ def load_command_table(self, _):
         self.command_table['network cross-region-lb address-pool address update'] = CrossRegionLoadBalancerAddressPoolAddressUpdate(loader=self)
         self.command_table['network cross-region-lb address-pool address list'] = CrossRegionLoadBalancerAddressPoolAddressList(loader=self)
         self.command_table['network cross-region-lb address-pool address show'] = CrossRegionLoadBalancerAddressPoolAddressShow(loader=self)
-
-    cross_region_lb_property_map = {
-        'probes': 'probe',
-    }
-
-    for subresource, alias in cross_region_lb_property_map.items():
-        with self.command_group('network cross-region-lb {}'.format(alias), network_util) as g:
-            g.command('list', list_network_resource_property('load_balancers', subresource))
-            g.show_command('show', get_network_resource_property_entry('load_balancers', subresource))
-            g.command('delete', delete_lb_resource_property_entry('load_balancers', subresource))
-
-    with self.command_group('network cross-region-lb probe', network_lb_sdk) as g:
-        g.custom_command('create', 'create_cross_lb_probe')
-        g.generic_update_command('update', child_collection_prop_name='probes',
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_cross_lb_probe')
     # endregion
 
     # region LocalGateways
@@ -771,20 +741,22 @@ def load_command_table(self, _):
         self.command_table['network vnet-gateway list-advertised-routes'] = ListAdvertisedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
         self.command_table['network vnet-gateway list-learned-routes'] = ListLearnedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
 
-    with self.command_group('network vnet-gateway packet-capture', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2019-07-01') as g:
-        g.custom_command('start', 'start_vnet_gateway_package_capture', supports_no_wait=True)
-        g.custom_command('stop', 'stop_vnet_gateway_package_capture', supports_no_wait=True)
-        g.wait_command('wait')
+    with self.command_group('network vnet-gateway packet-capture'):
+        from .custom import VnetGatewayPackageCaptureStart, VnetGatewayPackageCaptureStop
+        from .aaz.latest.network.vnet_gateway import Wait
+        self.command_table['network vnet-gateway packet-capture start'] = VnetGatewayPackageCaptureStart(loader=self)
+        self.command_table['network vnet-gateway packet-capture stop'] = VnetGatewayPackageCaptureStop(loader=self)
+        self.command_table['network vnet-gateway packet-capture wait'] = Wait(loader=self)
 
-    with self.command_group('network vnet-gateway vpn-client', network_vgw_sdk, client_factory=cf_virtual_network_gateways) as g:
+    with self.command_group('network vnet-gateway vpn-client') as g:
+        from .custom import VpnProfilePackageUrlShow, VpnClientConnectionHealthShow
+        self.command_table['network vnet-gateway vpn-client show-url'] = VpnProfilePackageUrlShow(loader=self)
+        self.command_table['network vnet-gateway vpn-client show-health'] = VpnClientConnectionHealthShow(loader=self)
         g.custom_command('generate', 'generate_vpn_client')
-        g.command('show-url', 'begin_get_vpn_profile_package_url', min_api='2017-08-01')
-        g.command('show-health', 'begin_get_vpnclient_connection_health', is_preview=True, min_api='2019-04-01')
 
-    with self.command_group('network vnet-gateway vpn-client ipsec-policy', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2018-02-01') as g:
-        g.custom_command('set', 'set_vpn_client_ipsec_policy', supports_no_wait=True)
-        g.show_command('show', 'begin_get_vpnclient_ipsec_parameters')
-        g.wait_command('wait')
+    with self.command_group('network vnet-gateway vpn-client ipsec-policy'):
+        from .aaz.latest.network.vnet_gateway import Wait
+        self.command_table['network vnet-gateway vpn-client ipsec-policy wait'] = Wait(loader=self)
 
     with self.command_group('network vnet-gateway revoked-cert'):
         from .custom import VnetGatewayRevokedCertCreate
