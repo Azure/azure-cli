@@ -12,7 +12,6 @@ from azure.cli.core.profiles import get_api_version, ResourceType
 
 from azure.cli.command_modules.network._client_factory import (
     cf_application_gateways,
-    cf_load_balancers,
     cf_network_interfaces, cf_network_watcher, cf_packet_capture,
     cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways,
@@ -21,8 +20,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_dns_references,
     cf_virtual_router, cf_virtual_router_peering, cf_flow_logs)
 from azure.cli.command_modules.network._util import (
-    list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
-    delete_lb_resource_property_entry)
+    list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
@@ -84,11 +82,6 @@ def load_command_table(self, _):
         client_factory=cf_dns_references,
         resource_type=ResourceType.MGMT_NETWORK_DNS,
         min_api='2018-05-01'
-    )
-
-    network_lb_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#LoadBalancersOperations.{}',
-        client_factory=cf_load_balancers
     )
 
     network_nic_sdk = CliCommandType(
@@ -493,12 +486,9 @@ def load_command_table(self, _):
     self.command_table["network lb address-pool tunnel-interface remove"] = LBAddressPoolTunnelInterfaceRemove(loader=self)
     self.command_table["network lb address-pool tunnel-interface update"] = LBAddressPoolTunnelInterfaceUpdate(loader=self)
 
-    with self.command_group("network lb probe") as g:
-        g.custom_command("create", "create_lb_probe")
-        g.custom_command("update", "update_lb_probe")
-
-    with self.command_group('network lb probe', network_util) as g:
-        g.command('delete', delete_lb_resource_property_entry('load_balancers', 'probes'))
+    from .operations.load_balancer import LBProbeCreate, LBProbeUpdate
+    self.command_table["network lb probe create"] = LBProbeCreate(loader=self)
+    self.command_table["network lb probe update"] = LBProbeUpdate(loader=self)
 
     # endregion
 
@@ -545,22 +535,6 @@ def load_command_table(self, _):
         self.command_table['network cross-region-lb address-pool address update'] = CrossRegionLoadBalancerAddressPoolAddressUpdate(loader=self)
         self.command_table['network cross-region-lb address-pool address list'] = CrossRegionLoadBalancerAddressPoolAddressList(loader=self)
         self.command_table['network cross-region-lb address-pool address show'] = CrossRegionLoadBalancerAddressPoolAddressShow(loader=self)
-
-    cross_region_lb_property_map = {
-        'probes': 'probe',
-    }
-
-    for subresource, alias in cross_region_lb_property_map.items():
-        with self.command_group('network cross-region-lb {}'.format(alias), network_util) as g:
-            g.command('list', list_network_resource_property('load_balancers', subresource))
-            g.show_command('show', get_network_resource_property_entry('load_balancers', subresource))
-            g.command('delete', delete_lb_resource_property_entry('load_balancers', subresource))
-
-    with self.command_group('network cross-region-lb probe', network_lb_sdk) as g:
-        g.custom_command('create', 'create_cross_lb_probe')
-        g.generic_update_command('update', child_collection_prop_name='probes',
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_cross_lb_probe')
     # endregion
 
     # region LocalGateways

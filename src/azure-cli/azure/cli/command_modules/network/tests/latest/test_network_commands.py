@@ -3413,40 +3413,6 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
         self.cmd('network cross-region-lb address-pool list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 1))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_cross_region_lb_probes', location='eastus2')
-    def test_network_cross_region_lb_probes(self, resource_group):
-
-        self.kwargs['lb'] = 'lb1'
-        self.kwargs['lb2'] = 'lb2'
-        self.cmd('network cross-region-lb create -g {rg} -n {lb}')
-
-        for i in range(1, 4):
-            self.cmd('network cross-region-lb probe create -g {{rg}} --lb-name {{lb}} -n probe{0} --port {0} --protocol http --path "/test{0}"'.format(i))
-        self.cmd('network cross-region-lb probe update -g {rg} --lb-name {lb} -n probe1 --interval 20 --threshold 5')
-        self.cmd('network cross-region-lb probe update -g {rg} --lb-name {lb} -n probe2 --protocol tcp --path ""')
-        self.cmd('network cross-region-lb probe show -g {rg} --lb-name {lb} -n probe1', checks=[
-            self.check('intervalInSeconds', 20),
-            self.check('numberOfProbes', 5)
-        ])
-        # test generic update
-        self.cmd('network cross-region-lb probe update -g {rg} --lb-name {lb} -n probe1 --set intervalInSeconds=15 --set numberOfProbes=3', checks=[
-            self.check('intervalInSeconds', 15),
-            self.check('numberOfProbes', 3)
-        ])
-
-        self.cmd('network cross-region-lb probe show -g {rg} --lb-name {lb} -n probe2', checks=[
-            self.check('protocol', 'Tcp'),
-            self.check('path', None)
-        ])
-        self.cmd('network cross-region-lb probe delete -g {rg} --lb-name {lb} -n probe3')
-        self.cmd('network cross-region-lb probe list -g {rg} --lb-name {lb}',
-                 checks=self.check('length(@)', 2))
-
-        # test standard LB supports https probe
-        self.cmd('network cross-region-lb create -g {rg} -n {lb2}')
-        self.cmd('network cross-region-lb probe create -g {rg} --lb-name {lb2} -n probe1 --port 443 --protocol https --path "/test1"')
-        self.cmd('network cross-region-lb probe list -g {rg} --lb-name {lb2}', checks=self.check('[0].protocol', 'Https'))
-
     @ResourceGroupPreparer(name_prefix='cli_test_cross_region_lb_rules')
     def test_network_cross_region_lb_rules(self, resource_group):
 
