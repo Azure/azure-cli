@@ -12,7 +12,6 @@ from azure.cli.core.profiles import get_api_version, ResourceType
 
 from azure.cli.command_modules.network._client_factory import (
     cf_network_interfaces, cf_network_watcher, cf_packet_capture,
-    cf_application_gateways,
     cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
