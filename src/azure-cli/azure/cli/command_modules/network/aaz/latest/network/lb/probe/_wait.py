@@ -12,25 +12,20 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network lb probe list",
+    "network lb probe wait",
 )
-class List(AAZCommand):
-    """List probes in the load balancer.
-
-    :example: List probes
-        az network lb probe list -g MyResourceGroup --lb-name MyLb
+class Wait(AAZWaitCommand):
+    """Place the CLI in a waiting state until a condition is met.
     """
 
     _aaz_info = {
-        "version": "2022-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}", "2022-05-01", "properties.probes"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}", "2022-05-01", "properties.probes[]"],
         ]
     }
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        self.SubresourceSelector(ctx=self.ctx, name="subresource")
         self._execute_operations()
         return self._output()
 
@@ -49,6 +44,7 @@ class List(AAZCommand):
             options=["--lb-name"],
             help="The load balancer name.",
             required=True,
+            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -69,19 +65,8 @@ class List(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
         return result
-
-    class SubresourceSelector(AAZJsonSelector):
-
-        def _get(self):
-            result = self.ctx.vars.instance
-            return result.properties.probes
-
-        def _set(self, value):
-            result = self.ctx.vars.instance
-            result.properties.probes = value
-            return
 
     class LoadBalancersGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -162,13 +147,13 @@ class List(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _ListHelper._build_schema_load_balancer_read(cls._schema_on_200)
+            _WaitHelper._build_schema_load_balancer_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
 
-class _ListHelper:
-    """Helper class for List"""
+class _WaitHelper:
+    """Helper class for Wait"""
 
     _schema_application_security_group_read = None
 
@@ -2606,4 +2591,4 @@ class _ListHelper:
         _schema.type = cls._schema_virtual_network_tap_read.type
 
 
-__all__ = ["List"]
+__all__ = ["Wait"]
