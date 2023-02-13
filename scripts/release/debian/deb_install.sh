@@ -38,6 +38,11 @@ global_consent=0 # Artificially giving global consent after review-feedback. Rem
 
 setup() {
 
+    if [[ $(/usr/bin/whoami) != "root" ]]; then
+        echo "Script $(basename $0) must be run as root."
+        exit 1
+    fi
+
     assert_consent "Add packages necessary to modify your apt-package sources?" ${global_consent}
     set -v
     export DEBIAN_FRONTEND=noninteractive
@@ -45,9 +50,15 @@ setup() {
     apt-get install -y apt-transport-https lsb-release gnupg curl
     set +v
 
+    if [[ ! -d /etc/apt/keyrings ]]; then
+        assert_consent "Create the /etc/apt/keyrings directory?" ${global_consent}
+        mkdir -pm 755 /etc/apt/keyrings
+    fi
+
     assert_consent "Add Microsoft as a trusted package signer?" ${global_consent}
     set -v
-    curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/microsoft.gpg
+    curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/keyrings/microsoft.gpg
+    chmod go+r /etc/apt/keyrings/microsoft.gpg
     set +v
 
     assert_consent "Add the Azure CLI Repository to your apt sources?" ${global_consent}
@@ -81,8 +92,11 @@ setup() {
             exit 1
         fi
     fi
-    echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ ${CLI_REPO} main" \
+
+    # Create sources.list.d file
+    echo "deb [arch=`dpkg --print-architecture` signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/azure-cli ${CLI_REPO} main" \
         > /etc/apt/sources.list.d/azure-cli.list
+
     apt-get update
     set +v
 
