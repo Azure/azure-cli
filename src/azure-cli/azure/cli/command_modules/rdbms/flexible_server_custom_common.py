@@ -95,29 +95,11 @@ def migration_list_func(cmd, client, resource_group_name, server_name, migration
     return r.json()
 
 
-def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, db_names=None, overwrite_dbs=None, cutover=None, cancel=None):
+def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, cutover=None, cancel=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     operationSpecified = False
-    if setup_logical_replication is True:
-        operationSpecified = True
-        properties = "{\"properties\": {\"setupLogicalReplicationOnSourceDBIfNeeded\": \"true\"} }"
-
-    if db_names is not None:
-        if operationSpecified is True:
-            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
-        operationSpecified = True
-        prefix = "{ \"properties\": { \"dBsToMigrate\": ["
-        db_names_str = "\"" + "\", \"".join(db_names) + "\""
-        suffix = "] } }"
-        properties = prefix + db_names_str + suffix
-
-    if overwrite_dbs is True:
-        if operationSpecified is True:
-            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
-        operationSpecified = True
-        properties = "{\"properties\": {\"overwriteDBsInTarget\": \"true\"} }"
 
     if cutover is not None:
         if operationSpecified is True:
