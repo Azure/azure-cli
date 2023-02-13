@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class Create(AAZCommand):
     """Create a virtual network in the specified resource group.
 
-    You may also create a subnet at the same time by specifying a subnet name and (optionally) an address prefix. To learn about how to create a virtual network visit https://docs.microsoft.com/azure/virtual-network/manage-virtual-network#create-a-virtual-network.
+    You may also create a subnet at the same time by specifying a subnet name and (optionally) an address prefix. To learn about how to create a virtual network visit https://learn.microsoft.com/azure/virtual-network/manage-virtual-network#create-a-virtual-network.
 
     :example: Create a virtual network.
         az network vnet create -g MyResourceGroup -n MyVnet
@@ -660,7 +660,7 @@ class Create(AAZCommand):
         )
         _element.remote_virtual_network = AAZObjectArg(
             options=["remote-virtual-network"],
-            help="The reference to the remote virtual network. The remote virtual network can be in the same or different region (preview). See here to register for the preview and learn more (https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-create-peering).",
+            help="The reference to the remote virtual network. The remote virtual network can be in the same or different region (preview). See here to register for the preview and learn more (https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-create-peering).",
         )
         cls._build_args_sub_resource_create(_element.remote_virtual_network)
         _element.remote_virtual_network_address_space = AAZObjectArg(

@@ -102,7 +102,7 @@ class Update(AAZCommand):
         )
         _args_schema.ssl_profiles = AAZListArg(
             options=["--ssl-profiles"],
-            help="SSL profiles of the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
+            help="SSL profiles of the application gateway resource. For default limits, see [Application Gateway limits](https://learn.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
             nullable=True,
         )
         _args_schema.tags = AAZDictArg(

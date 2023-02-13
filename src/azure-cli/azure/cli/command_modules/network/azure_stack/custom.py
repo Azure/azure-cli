@@ -1816,7 +1816,7 @@ def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
 # region ApplicationGatewayWAFPolicy
 def create_ag_waf_policy(cmd, resource_group_name, policy_name,
                          location=None, tags=None, rule_set_type='OWASP', rule_set_version='3.0'):
-    # https://docs.microsoft.com/en-us/azure/application-gateway/waf-overview
+    # https://learn.microsoft.com/en-us/azure/application-gateway/waf-overview
 
     # mandatory default rule with empty rule sets
     managed_rule_set = {
@@ -1954,7 +1954,7 @@ def add_waf_managed_rule_set(cmd, resource_group_name, policy_name,
                              rule_set_type, rule_set_version, rule_group_name=None, rules=None):
     """
     Add managed rule set to the WAF policy managed rules.
-    Visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+    Visit: https://learn.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
     """
     if rules is None:
         managed_rule_overrides = []

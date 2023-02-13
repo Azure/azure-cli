@@ -277,7 +277,7 @@ def create_application(client, display_name):
         return client.application_create(app_create_param)
     except GraphError as ex:
         if 'insufficient privileges' in str(ex).lower():
-            link = ('https://docs.microsoft.com/en-us/azure/azure-resource-manager/' +
+            link = ('https://learn.microsoft.com/en-us/azure/azure-resource-manager/' +
                     'resource-group-create-service-principal-portal')
             raise CLIError("Directory permission is needed for the current user to register the application. "
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))

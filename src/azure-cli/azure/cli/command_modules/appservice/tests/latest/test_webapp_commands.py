@@ -1538,7 +1538,7 @@ class WebappSSLCertTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         slot_name = self.create_random_name(prefix='slot-ssl-test', length=20)
         # Cert Generated using
-        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        # https://learn.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
@@ -1608,7 +1608,7 @@ class WebappSSLImportCertTest(ScenarioTest):
         plan_name = self.create_random_name(prefix='ssl-test-plan', length=24)
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         # Cert Generated using
-        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        # https://learn.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
@@ -1641,7 +1641,7 @@ class WebappSSLImportCertTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         kv_name = self.create_random_name(prefix='kv-ssl-test', length=20)
         # Cert Generated using
-        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        # https://learn.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'

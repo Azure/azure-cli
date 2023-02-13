@@ -193,7 +193,7 @@ def _prepare_mgmt_client_kwargs_track2(cli_ctx, cred):
     # Track 2 currently lacks the ability to take external credentials.
     #   https://github.com/Azure/azure-sdk-for-python/issues/8313
     # As a temporary workaround, manually add external tokens to 'x-ms-authorization-auxiliary' header.
-    #   https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/authenticate-multi-tenant
+    #   https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/authenticate-multi-tenant
     if hasattr(cred, "get_auxiliary_tokens"):
         aux_tokens = cred.get_auxiliary_tokens(*scopes)
         if aux_tokens:

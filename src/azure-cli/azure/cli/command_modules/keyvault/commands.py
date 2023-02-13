@@ -219,7 +219,7 @@ def load_command_table(self, _):
                                    'will be moved to the soft deleted state. You will not be able to create a secret '
                                    'with the same name within this key vault until the secret has been purged from the '
                                    'soft-deleted state. Please see the following documentation for additional guidance.'
-                                   '\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'))
+                                   '\nhttps://learn.microsoft.com/azure/key-vault/general/soft-delete-overview'))
         g.keyvault_command('purge', 'purge_deleted_secret')
         g.keyvault_command('recover', 'recover_deleted_secret', transform=extract_subresource_name())
         g.keyvault_custom('download', 'download_secret')
@@ -255,7 +255,7 @@ def load_command_table(self, _):
                                    'create a certificate with the same name within this key vault until the '
                                    'certificate has been purged from the soft-deleted state. Please see the following '
                                    'documentation for additional guidance.\n'
-                                   'https://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'),
+                                   'https://learn.microsoft.com/azure/key-vault/general/soft-delete-overview'),
                            transform=extract_subresource_name())
         g.keyvault_command('purge', 'purge_deleted_certificate')
         g.keyvault_command('recover', 'recover_deleted_certificate', transform=extract_subresource_name())

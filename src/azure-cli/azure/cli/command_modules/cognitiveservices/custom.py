@@ -105,7 +105,7 @@ def create(
         ' (https://www.microsoft.com/Licensing/product-licensing/products.aspx)'\
         ' for details.'\
         'Microsoft offers policy controls that may be used to disable new Cognitive'\
-        ' Services deployments (https://docs.microsoft.com/azure/cognitive-servic'\
+        ' Services deployments (https://learn.microsoft.com/azure/cognitive-servic'\
         'es/cognitive-services-apis-create-account).'
     terms_not_police = 'Notice\n' \
                        'I certify that use of this service is not by or for a police department in the United States.'

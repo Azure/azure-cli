@@ -555,7 +555,7 @@ def trusted_launch_warning_log(namespace, generation_version, features):
 
     log_message = 'Starting Build 2023 event, "az vm/vmss create" command will deploy Trusted Launch VM by default.' \
                   ' To know more about Trusted Launch, please visit' \
-                  ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch'
+                  ' https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch'
 
     if generation_version == 'V1':
         logger.warning(log_message)

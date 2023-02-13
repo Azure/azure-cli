@@ -379,7 +379,7 @@ class SqlHandler(TargetHandler):
             'ODBC Driver 17 for SQL Server', 'ODBC Driver 18 for SQL Server']]
         if not drivers:
             raise CLIInternalError(
-                "Please manually install odbc 17/18 for SQL server, reference: https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server/")
+                "Please manually install odbc 17/18 for SQL server, reference: https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server/")
         try:
             with pyodbc.connect(connection_args.get("connection_string").format(driver=drivers[0]), attrs_before=connection_args.get("attrs_before")) as conn:
                 with conn.cursor() as cursor:

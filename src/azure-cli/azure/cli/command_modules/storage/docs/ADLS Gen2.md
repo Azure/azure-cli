@@ -1,7 +1,7 @@
 ## Azure Data Lake Storage Gen2
 
 Azure Data Lake Storage Gen2 is a set of capabilities dedicated to big data analytics, built on Azure Blob storage. FOr more information, please refer to
-https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-introduction?toc=/azure/storage/blobs/toc.json.
+https://learn.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-introduction?toc=/azure/storage/blobs/toc.json.
 
 ### Included Features
 
@@ -76,7 +76,7 @@ For more specific examples, use: az find "az storage fs"
 
     4. Using account name and Azure AD credentials
 
-        Azure CLI commands for data operations against Blob storage support the `--auth-mode` parameter, which enables you to specify how to authorize a given operation. Set the `--auth-mode` parameter to login to authorize with Azure AD credentials. For more information, see [Authorize access to blob or queue data with Azure CLI](https://docs.microsoft.com/en-us/azure/storage/common/authorize-data-operations-cli?toc=/azure/storage/blobs/toc.json).
+        Azure CLI commands for data operations against Blob storage support the `--auth-mode` parameter, which enables you to specify how to authorize a given operation. Set the `--auth-mode` parameter to login to authorize with Azure AD credentials. For more information, see [Authorize access to blob or queue data with Azure CLI](https://learn.microsoft.com/en-us/azure/storage/common/authorize-data-operations-cli?toc=/azure/storage/blobs/toc.json).
 
         - Specify `--account-name` and `--auth-mode login` parameter in your command
             ```

@@ -33,7 +33,7 @@ def load_arguments(self, _):
     from azure.mgmt.hdinsight.models import Tier, JsonWebKeyEncryptionAlgorithm, ResourceProviderConnection
     from argcomplete.completers import FilesCompleter
     node_size_type = CLIArgumentType(arg_group='Node',
-                                     help='The size of the node. See also: https://docs.microsoft.com/azure/'
+                                     help='The size of the node. See also: https://learn.microsoft.com/azure/'
                                           'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
 
     # cluster
@@ -47,25 +47,25 @@ def load_arguments(self, _):
                    help='Permit timeout error during argument validation phase. If omitted, '
                         'validation timeout error will be permitted.')
         c.argument('cluster_version', options_list=['--version', '-v'], arg_group='Cluster',
-                   help='The HDInsight cluster version. See also: https://docs.microsoft.com/azure/'
+                   help='The HDInsight cluster version. See also: https://learn.microsoft.com/azure/'
                         'hdinsight/hdinsight-component-versioning#supported-hdinsight-versions')
         c.argument('cluster_type', options_list=['--type', '-t'], arg_group='Cluster',
                    completer=get_generic_completion_list(known_cluster_types),
                    help='Type of HDInsight cluster, like: {}. '
-                        'See also: https://docs.microsoft.com/azure/hdinsight/hdinsight-'
+                        'See also: https://learn.microsoft.com/azure/hdinsight/hdinsight-'
                         'hadoop-provision-linux-clusters#cluster-types'.format(', '.join(known_cluster_types)))
         c.argument('component_version', arg_group='Cluster', nargs='*', validator=validate_component_version,
                    help='The versions of various Hadoop components, in space-'
                         'separated versions in \'component=version\' format. Example: '
                         'Spark=2.0 Hadoop=2.7.3 '
-                        'See also: https://docs.microsoft.com/azure/hdinsight/hdinsight'
+                        'See also: https://learn.microsoft.com/azure/hdinsight/hdinsight'
                         '-component-versioning#hadoop-components-available-with-different-'
                         'hdinsight-versions')
         c.argument('cluster_configurations', arg_group='Cluster', type=shell_safe_json_parse,
                    completer=FilesCompleter(),
                    help='Extra configurations of various components. '
                         'Configurations may be supplied from a file using the `@{path}` syntax or a JSON string. '
-                        'See also: https://docs.microsoft.com/azure/hdinsight/'
+                        'See also: https://learn.microsoft.com/azure/hdinsight/'
                         'hdinsight-hadoop-customize-cluster-bootstrap')
         c.argument('cluster_tier', arg_type=get_enum_type(Tier), arg_group='Cluster',
                    help='The tier of the cluster')
@@ -94,10 +94,10 @@ def load_arguments(self, _):
 
         # Node
         c.argument('headnode_size', arg_type=node_size_type,
-                   help='The size of the node. See also: https://docs.microsoft.com/azure/'
+                   help='The size of the node. See also: https://learn.microsoft.com/azure/'
                         'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
         c.argument('workernode_size', arg_type=node_size_type,
-                   help='The size of the node. See also: https://docs.microsoft.com/azure/'
+                   help='The size of the node. See also: https://learn.microsoft.com/azure/'
                         'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
         c.argument('workernode_data_disks_per_node', arg_group='Node',
                    help='The number of data disks to use per worker node.')

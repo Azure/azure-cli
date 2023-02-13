@@ -343,7 +343,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
     log_message = 'Starting Build 2023 event, "az disk create" command will deploy Trusted Launch VM by default.' \
                   ' To know more about Trusted Launch, please visit' \
-                  ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch'
+                  ' https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch'
     if image_reference is not None:
         if not is_valid_resource_id(image_reference):
             # URN or name
@@ -3248,7 +3248,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             lb_resource['dependsOn'] = lb_dependencies
             master_template.add_resource(lb_resource)
 
-            # Per https://docs.microsoft.com/azure/load-balancer/load-balancer-standard-overview#nsg
+            # Per https://learn.microsoft.com/azure/load-balancer/load-balancer-standard-overview#nsg
             if load_balancer_sku and load_balancer_sku.lower() == 'standard' and nsg is None and os_type:
                 nsg_name = '{}NSG'.format(vmss_name)
                 master_template.add_resource(build_nsg_resource(

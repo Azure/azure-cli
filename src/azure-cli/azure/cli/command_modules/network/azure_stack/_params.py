@@ -657,7 +657,7 @@ def load_arguments(self, _):
                    help='Space-separated names or IDs of virtual networks that register hostnames in this DNS zone. '
                         'Number of private DNS zones with virtual network auto-registration enabled is 1. '
                         'If you need to increase this limit, please contact Azure Support: '
-                        'https://docs.microsoft.com/en-us/azure/azure-subscription-service-limits',
+                        'https://learn.microsoft.com/en-us/azure/azure-subscription-service-limits',
                    validator=get_vnet_validator('registration_vnets'))
         c.argument('resolution_vnets',
                    arg_group='Private Zone',
@@ -847,7 +847,7 @@ def load_arguments(self, _):
         c.argument('connection_name', options_list=['--name', '-n'], help='ExpressRoute connection name.', id_part='child_name_1')
         c.argument('routing_weight', help='Routing weight associated with the connection.', type=int)
         c.argument('authorization_key', help='Authorization key to establish the connection.')
-        c.argument('enable_internet_security', options_list='--internet-security', arg_type=get_three_state_flag(), help='Enable internet security. A virtual hub can have the ability to propagate a learned default route to this ExpressRoute connection. This ref https://review.docs.microsoft.com/en-us/azure/virtual-wan/effective-routes-virtual-hub?branch=pr-en-us-91866#aboutdefaultroute might be helpful.', min_api='2019-09-01')
+        c.argument('enable_internet_security', options_list='--internet-security', arg_type=get_three_state_flag(), help='Enable internet security. A virtual hub can have the ability to propagate a learned default route to this ExpressRoute connection. This ref https://review.learn.microsoft.com/en-us/azure/virtual-wan/effective-routes-virtual-hub?branch=pr-en-us-91866#aboutdefaultroute might be helpful.', min_api='2019-09-01')
 
     with self.argument_context('network express-route gateway connection', arg_group='Peering', min_api='2018-08-01') as c:
         c.argument('peering', help='Name or ID of an ExpressRoute peering.', validator=validate_express_route_peering)
