@@ -49,7 +49,7 @@ def load_arguments(self, _):
      ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySkuName, ApplicationGatewaySslProtocol,
      Direction,
      FlowLogFormatType, HTTPMethod, IPAllocationMethod,
-     IPVersion, ProbeProtocol, Protocol, PublicIPAddressSkuName, PublicIPAddressSkuTier,
+     IPVersion, Protocol, PublicIPAddressSkuName, PublicIPAddressSkuTier,
      SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
      ConnectionMonitorEndpointFilterType, ConnectionMonitorTestConfigurationProtocol,
      PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType,
@@ -58,7 +58,7 @@ def load_arguments(self, _):
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol',
          'Direction',
          'FlowLogFormatType', 'HTTPMethod', 'IPAllocationMethod',
-         'IPVersion', 'ProbeProtocol', 'Protocol', 'PublicIPAddressSkuName', 'PublicIPAddressSkuTier',
+         'IPVersion', 'Protocol', 'PublicIPAddressSkuName', 'PublicIPAddressSkuTier',
          'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
          'ConnectionMonitorEndpointFilterType', 'ConnectionMonitorTestConfigurationProtocol',
          'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType', 'DestinationPortBehavior', 'CoverageLevel', 'EndpointType',
@@ -563,15 +563,6 @@ def load_arguments(self, _):
     # endregion
 
     # region LoadBalancers
-    lb_subresources = [
-        {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
-    ]
-    for item in lb_subresources:
-        with self.argument_context('network lb {}'.format(item['name'])) as c:
-            c.argument('item_name', options_list=['--name', '-n'], help='The name of the {}'.format(item['display']), completer=get_lb_subresource_completion_list(item['ref']), id_part='child_name_1')
-            c.argument('resource_name', options_list='--lb-name', help='The name of the load balancer.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
-            c.argument('load_balancer_name', load_balancer_name_type)
-
     with self.argument_context('network lb') as c:
         c.argument('load_balancer_name', load_balancer_name_type, options_list=['--name', '-n'])
         c.argument('frontend_port', help='Port number')
@@ -608,30 +599,9 @@ def load_arguments(self, _):
         c.argument('virtual_network_name', virtual_network_name_type)
         c.argument('vnet_address_prefix', help='The CIDR address prefix to use when creating a new VNet.')
         c.ignore('vnet_type', 'subnet_type')
-
-    with self.argument_context('network lb probe') as c:
-        c.argument('interval', type=int, help='Probing time interval in seconds.')
-        c.argument('path', help='The endpoint to interrogate (http only).')
-        c.argument('port', type=int, help='The port to interrogate.')
-        c.argument('protocol', help='The protocol to probe.', arg_type=get_enum_type(ProbeProtocol))
-        c.argument('threshold', type=int, help='The number of consecutive probe failures before an instance is deemed unhealthy.')
-        c.argument('probe_threshold', type=int, help='The number of consecutive successful or failed probes in order '
-                                                     'to allow or deny traffic from being delivered to this endpoint.')
-
     # endregion
 
     # region cross-region load balancer
-    cross_region_lb_subresources = [
-        {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
-    ]
-    for item in cross_region_lb_subresources:
-        with self.argument_context('network cross-region-lb {}'.format(item['name'])) as c:
-            c.argument('item_name', options_list=['--name', '-n'], help='The name of the {}'.format(item['display']),
-                       completer=get_lb_subresource_completion_list(item['ref']), id_part='child_name_1')
-            c.argument('resource_name', options_list='--lb-name', help='The name of the load balancer.',
-                       completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
-            c.argument('load_balancer_name', load_balancer_name_type)
-
     with self.argument_context('network cross-region-lb') as c:
         c.argument('load_balancer_name', load_balancer_name_type, options_list=['--name', '-n'])
         c.argument('frontend_port', help='Port number')
@@ -663,13 +633,6 @@ def load_arguments(self, _):
         c.argument('public_ip_zone', zone_type, min_api='2017-06-01', options_list=['--public-ip-zone'],
                    help='used to created a new public ip for the load balancer, a.k.a public facing Load balancer')
         c.ignore('public_ip_address_type')
-
-    with self.argument_context('network cross-region-lb probe') as c:
-        c.argument('interval', help='Probing time interval in seconds.')
-        c.argument('path', help='The endpoint to interrogate (http only).')
-        c.argument('port', help='The port to interrogate.')
-        c.argument('protocol', help='The protocol to probe.', arg_type=get_enum_type(ProbeProtocol))
-        c.argument('threshold', help='The number of consecutive probe failures before an instance is deemed unhealthy.')
     # endregion
 
     # region NetworkInterfaces (NIC)
