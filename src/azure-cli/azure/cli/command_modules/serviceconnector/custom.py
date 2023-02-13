@@ -299,7 +299,6 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       namespace=None,                                        # Resource.EventHub
                       webpubsub=None,                                        # Resource.WebPubSub
                       signalr=None):                                         # Resource.SignalR
-    from ._credential_free import enable_mi_for_db_linker
     all_auth_info = []
     if secret_auth_info is not None:
         all_auth_info.append(secret_auth_info)
@@ -346,7 +345,6 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                   new_addon, no_wait,
                                   # Resource.KubernetesCluster
                                   cluster, scope, enable_csi,
-                                  enable_mi_for_db_linker=enable_mi_for_db_linker
                                   )
 
 
