@@ -11,7 +11,6 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
 
 from azure.cli.command_modules.network._client_factory import (
-    cf_application_gateways,
     cf_network_interfaces, cf_network_watcher, cf_packet_capture,
     cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways,
@@ -55,11 +54,6 @@ NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
 def load_command_table(self, _):
 
     # region Command Types
-    network_ag_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ApplicationGatewaysOperations.{}',
-        client_factory=cf_application_gateways
-    )
-
     network_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.network._util#{}',
         client_factory=None
@@ -219,6 +213,12 @@ def load_command_table(self, _):
         self.command_table["network application-gateway identity assign"] = IdentityAssign(loader=self)
         g.custom_command("remove", "remove_ag_identity", supports_no_wait=True)
 
+    with self.command_group("network application-gateway private-link"):
+        from .custom import AGPrivateLinkAdd, AGPrivateLinkRemove, AGPrivateLinkIPConfigAdd
+        self.command_table["network application-gateway private-link add"] = AGPrivateLinkAdd(loader=self)
+        self.command_table["network application-gateway private-link remove"] = AGPrivateLinkRemove(loader=self)
+        self.command_table["network application-gateway private-link ip-config add"] = AGPrivateLinkIPConfigAdd(loader=self)
+
     with self.command_group("network application-gateway redirect-config"):
         from .custom import RedirectConfigCreate, RedirectConfigUpdate
         self.command_table["network application-gateway redirect-config create"] = RedirectConfigCreate(loader=self)
@@ -264,26 +264,6 @@ def load_command_table(self, _):
         g.custom_command("list-rule-sets", "list_ag_waf_rule_sets", table_transformer=transform_waf_rule_sets_table_output)
         g.custom_command("set", "set_ag_waf_config", supports_no_wait=True)
         g.custom_show_command("show", "show_ag_waf_config")
-
-    with self.command_group('network application-gateway private-link',
-                            command_type=network_ag_sdk,
-                            min_api='2020-05-01',
-                            is_preview=True) as g:
-        g.custom_command('add', 'add_ag_private_link', supports_no_wait=True)
-        g.custom_command('remove', 'remove_ag_private_link', confirmation=True, supports_no_wait=True)
-        g.custom_show_command('show', 'show_ag_private_link')
-        g.custom_command('list', 'list_ag_private_link')
-        g.wait_command('wait')
-
-    with self.command_group('network application-gateway private-link ip-config',
-                            command_type=network_ag_sdk,
-                            min_api='2020-05-01',
-                            is_preview=True) as g:
-        g.custom_command('add', 'add_ag_private_link_ip', supports_no_wait=True)
-        g.custom_command('remove', 'remove_ag_private_link_ip', confirmation=True, supports_no_wait=True)
-        g.custom_show_command('show', 'show_ag_private_link_ip')
-        g.custom_command('list', 'list_ag_private_link_ip')
-        g.wait_command('wait')
     # endregion
 
     # region ApplicationGatewayWAFPolicy
