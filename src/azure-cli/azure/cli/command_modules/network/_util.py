@@ -8,7 +8,6 @@ from knack.util import CLIError
 from azure.cli.core.util import sdk_no_wait
 
 from ._client_factory import network_client_factory
-from .custom import lb_get
 from azure.cli.core.azclierror import UnrecognizedArgumentError
 
 
