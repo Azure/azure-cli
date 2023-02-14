@@ -116,8 +116,6 @@ def _get_biggest_sdks_to_trim():
     # Return top biggest SDKs. This list was retrieved by running
     # ncdu /opt/az/lib/python3.10/site-packages/azure/mgmt
     resource_types = [
-        # /network
-        ResourceType.MGMT_NETWORK,
         # /web
         ResourceType.MGMT_APPSERVICE,
         # /compute
