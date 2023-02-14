@@ -50,6 +50,7 @@ class MultiAPIAdaptor:
 
         # In 2022-04-01 API, principal_type is by default 'User', so we have to explicitly set it to None if we can't
         # resolve principal type from Graph
+        # https://github.com/Azure/azure-rest-api-specs/issues/21664
         parameters.principal_type = assignee_principal_type
 
         if description:
