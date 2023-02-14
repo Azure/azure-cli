@@ -47,8 +47,11 @@ class MultiAPIAdaptor:
             'RoleAssignmentProperties' if self.old_api else 'RoleAssignmentCreateParameters',
             mod='models', operation_group='role_assignments')
         parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id)
-        if assignee_principal_type:
-            parameters.principal_type = assignee_principal_type
+
+        # In 2022-04-01 API, principal_type is by default 'User', so we have to explicitly set it to None if we can't
+        # resolve principal type from Graph
+        parameters.principal_type = assignee_principal_type
+
         if description:
             parameters.description = description
         if condition:
@@ -62,6 +65,7 @@ class MultiAPIAdaptor:
         # 2015-07-01          RoleDefinition: flattened, RoleAssignment: unflattened
         # 2018-01-01-preview  RoleDefinition: flattened
         # 2020-04-01-preview                             RoleAssignment: flattened
+        # 2022-04-01          RoleDefinition: flattened  RoleAssignment: flattened
         # Get property_name from properties if the model is unflattened.
         if isinstance(obj, dict):
             if 'properties' in obj:
