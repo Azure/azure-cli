@@ -11,7 +11,11 @@ def _msi_client_factory(cli_ctx, api_version=None, **_):
 
 
 def _msi_list_resources_client(cli_ctx, **_):
-    return _msi_client_factory(cli_ctx, api_version='2021-09-30-preview').user_assigned_identities
+    """
+    api version is specified for list resources command because new api version (2023-01-31) of MSI does not support
+    listAssociatedResources command. In order to avoid a breaking change, multi-api package is used
+    """
+    return _msi_client_factory(cli_ctx, api_version='2022-01-31-preview').user_assigned_identities
 
 
 def _msi_user_identities_operations(cli_ctx, _):
