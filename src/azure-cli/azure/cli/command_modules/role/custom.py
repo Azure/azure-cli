@@ -52,7 +52,7 @@ CREDENTIAL_WARNING = (
 
 logger = get_logger(__name__)
 
-# pylint: disable=too-many-lines
+# pylint: disable=too-many-lines, protected-access
 
 
 def list_role_definitions(cmd, name=None, resource_group_name=None, scope=None,
