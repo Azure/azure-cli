@@ -17,7 +17,6 @@ import re
 import shutil
 
 import azure.mgmt
-import azure.mgmt.network
 
 from azure.cli.core.profiles import AD_HOC_API_VERSIONS, AZURE_API_PROFILES, ResourceType
 
