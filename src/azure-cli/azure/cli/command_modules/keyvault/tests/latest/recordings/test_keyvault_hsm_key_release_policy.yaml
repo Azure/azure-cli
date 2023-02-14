@@ -13,9 +13,9 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - azsdk-python-keyvault-keys/4.5.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - azsdk-python-keyvault-keys/4.8.0b2 Python/3.7.9 (Windows-10-10.0.22621-SP0)
     method: POST
-    uri: https://ystesthsm.managedhsm.azure.net/keys/skr1-000001/create?api-version=7.3
+    uri: https://ystesthsm.managedhsm.azure.net/keys/skr1-000001/create?api-version=7.4-preview.1
   response:
     body:
       string: ''
@@ -38,7 +38,7 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-server-latency:
-      - '2'
+      - '1'
     status:
       code: 401
       message: Unauthorized
@@ -57,12 +57,12 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - azsdk-python-keyvault-keys/4.5.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - azsdk-python-keyvault-keys/4.8.0b2 Python/3.7.9 (Windows-10-10.0.22621-SP0)
     method: POST
-    uri: https://ystesthsm.managedhsm.azure.net/keys/skr1-000001/create?api-version=7.3
+    uri: https://ystesthsm.managedhsm.azure.net/keys/skr1-000001/create?api-version=7.4-preview.1
   response:
     body:
-      string: '{"attributes":{"created":1649514983,"enabled":true,"exportable":true,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1649514983},"key":{"crv":"P-256","key_ops":["verify","sign"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/skr1-000001/3b5ad2ac1dc70e383eacec1300cf1b76","kty":"EC-HSM","x":"ZNsZbgsj9GAswMdkxyXgCMw14_IxczddmEcthvIQlSs","y":"7DfogIUpcgEfC88Sso68MZCXsomkCT87Tls_Bntwewk"},"release_policy":{"contentType":"application/json;
+      string: '{"attributes":{"created":1670853142,"enabled":true,"exportable":true,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1670853142},"key":{"crv":"P-256","key_ops":["verify","sign"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/skr1-000001/ace10f00983e03640df41322fc921cce","kty":"EC-HSM","x":"DL7ts0vxbgVZkrlmsfgCB7zpTcgXPM7mxVJdUNN3eqo","y":"iqYwpuZe77DJ_3yiKSDnA0chSUkqxnf7RE-Xkfrr2oY"},"release_policy":{"contentType":"application/json;
         charset=utf-8","data":"eyJhbnlPZiI6W3siYWxsT2YiOlt7ImNsYWltIjoieC1tcy1zZ3gtaXMtZGVidWdnYWJsZSIsImVxdWFscyI6ImZhbHNlIn1dLCJhdXRob3JpdHkiOiJodHRwczovL3NoYXJlZGV1cy5ldXMuYXR0ZXN0LmF6dXJlLm5ldC8ifV0sInZlcnNpb24iOiIxLjAuMCJ9","immutable":false}}'
     headers:
       cache-control:
@@ -80,17 +80,99 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.21;act_addr_fam=Ipv4;
+      - conn_type=Ipv4;addr=167.220.255.85;act_addr_fam=Ipv4;
       x-ms-keyvault-region:
       - eastus
       x-ms-server-latency:
-      - '3639'
+      - '323'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.26.0
+    method: GET
+    uri: https://raw.githubusercontent.com/Azure/confidential-computing-cvm/main/cvm_deployment/key/skr-policy.json
+  response:
+    body:
+      string: "{\n  \"anyOf\": [\n    {\n      \"allOf\": [\n        {\n          \"claim\":
+        \"x-ms-attestation-type\",\n          \"equals\": \"sevsnpvm\"\n        },\n
+        \       {\n          \"claim\": \"x-ms-compliance-status\",\n          \"equals\":
+        \"azure-compliant-cvm\"\n        }\n      ],\n      \"authority\": \"https://sharedeus.eus.attest.azure.net/\"\n
+        \   },\n    {\n      \"allOf\": [\n        {\n          \"claim\": \"x-ms-attestation-type\",\n
+        \         \"equals\": \"sevsnpvm\"\n        },\n        {\n          \"claim\":
+        \"x-ms-compliance-status\",\n          \"equals\": \"azure-compliant-cvm\"\n
+        \       }\n      ],\n      \"authority\": \"https://sharedwus.wus.attest.azure.net/\"\n
+        \   },\n    {\n      \"allOf\": [\n        {\n          \"claim\": \"x-ms-attestation-type\",\n
+        \         \"equals\": \"sevsnpvm\"\n        },\n        {\n          \"claim\":
+        \"x-ms-compliance-status\",\n          \"equals\": \"azure-compliant-cvm\"\n
+        \       }\n      ],\n      \"authority\": \"https://sharedneu.neu.attest.azure.net/\"\n
+        \   },\n    {\n      \"allOf\": [\n        {\n          \"claim\": \"x-ms-attestation-type\",\n
+        \         \"equals\": \"sevsnpvm\"\n        },\n        {\n          \"claim\":
+        \"x-ms-compliance-status\",\n          \"equals\": \"azure-compliant-cvm\"\n
+        \       }\n      ],\n      \"authority\": \"https://sharedweu.weu.attest.azure.net/\"\n
+        \   }\n  ],\n  \"version\": \"1.0.0\"\n}\n"
+    headers:
+      accept-ranges:
+      - bytes
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=300
+      connection:
+      - keep-alive
+      content-length:
+      - '1254'
+      content-security-policy:
+      - default-src 'none'; style-src 'unsafe-inline'; sandbox
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Mon, 12 Dec 2022 13:52:24 GMT
+      etag:
+      - W/"994de2921c88e84da9358ba9d8540bf365ad6836eff38e4f17e1c90936fb628b"
+      expires:
+      - Mon, 12 Dec 2022 13:57:24 GMT
+      source-age:
+      - '0'
+      strict-transport-security:
+      - max-age=31536000
+      vary:
+      - Authorization,Accept-Encoding,Origin
+      via:
+      - 1.1 varnish
+      x-cache:
+      - MISS
+      x-cache-hits:
+      - '0'
+      x-content-type-options:
+      - nosniff
+      x-fastly-request-id:
+      - 299892d1e7d98093978e26178f3c3ef9f1d55f36
+      x-frame-options:
+      - deny
+      x-github-request-id:
+      - 40F6:6625:1317F:198DA:63973217
+      x-served-by:
+      - cache-qpg1221-QPG
+      x-timer:
+      - S1670853144.819729,VS0,VE300
+      x-xss-protection:
+      - 1; mode=block
     status:
       code: 200
       message: OK
 - request:
     body: '{"kty": "EC-HSM", "attributes": {"enabled": true, "exportable": true},
-      "release_policy": {"data": "eyJ2ZXJzaW9uIjogIjEuMC4wIiwgImFueU9mIjogW3siYXV0aG9yaXR5IjogImh0dHBzOi8vc2hhcmVkZXVzLmV1cy5hdHRlc3QuYXp1cmUubmV0LyIsICJhbGxPZiI6IFt7ImNsYWltIjogIngtbXMtYXR0ZXN0YXRpb24tdHlwZSIsICJlcXVhbHMiOiAic2V2c25wdm0ifSwgeyJjbGFpbSI6ICJ4LW1zLWNvbXBsaWFuY2Utc3RhdHVzIiwgImVxdWFscyI6ICJhenVyZS1jb21wbGlhbnQtY3ZtIn1dfSwgeyJhdXRob3JpdHkiOiAiaHR0cHM6Ly9zaGFyZWR3dXMud3VzLmF0dGVzdC5henVyZS5uZXQvIiwgImFsbE9mIjogW3siY2xhaW0iOiAieC1tcy1hdHRlc3RhdGlvbi10eXBlIiwgImVxdWFscyI6ICJzZXZzbnB2bSJ9LCB7ImNsYWltIjogIngtbXMtY29tcGxpYW5jZS1zdGF0dXMiLCAiZXF1YWxzIjogImF6dXJlLWNvbXBsaWFudC1jdm0ifV19LCB7ImF1dGhvcml0eSI6ICJodHRwczovL3NoYXJlZG5ldS5uZXUuYXR0ZXN0LmF6dXJlLm5ldC8iLCAiYWxsT2YiOiBbeyJjbGFpbSI6ICJ4LW1zLWF0dGVzdGF0aW9uLXR5cGUiLCAiZXF1YWxzIjogInNldnNucHZtIn0sIHsiY2xhaW0iOiAieC1tcy1jb21wbGlhbmNlLXN0YXR1cyIsICJlcXVhbHMiOiAiYXp1cmUtY29tcGxpYW50LWN2bSJ9XX0sIHsiYXV0aG9yaXR5IjogImh0dHBzOi8vc2hhcmVkd2V1LndldS5hdHRlc3QuYXp1cmUubmV0LyIsICJhbGxPZiI6IFt7ImNsYWltIjogIngtbXMtYXR0ZXN0YXRpb24tdHlwZSIsICJlcXVhbHMiOiAic2V2c25wdm0ifSwgeyJjbGFpbSI6ICJ4LW1zLWNvbXBsaWFuY2Utc3RhdHVzIiwgImVxdWFscyI6ICJhenVyZS1jb21wbGlhbnQtY3ZtIn1dfV19"}}'
+      "release_policy": {"data": "eyJhbnlPZiI6IFt7ImFsbE9mIjogW3siY2xhaW0iOiAieC1tcy1hdHRlc3RhdGlvbi10eXBlIiwgImVxdWFscyI6ICJzZXZzbnB2bSJ9LCB7ImNsYWltIjogIngtbXMtY29tcGxpYW5jZS1zdGF0dXMiLCAiZXF1YWxzIjogImF6dXJlLWNvbXBsaWFudC1jdm0ifV0sICJhdXRob3JpdHkiOiAiaHR0cHM6Ly9zaGFyZWRldXMuZXVzLmF0dGVzdC5henVyZS5uZXQvIn0sIHsiYWxsT2YiOiBbeyJjbGFpbSI6ICJ4LW1zLWF0dGVzdGF0aW9uLXR5cGUiLCAiZXF1YWxzIjogInNldnNucHZtIn0sIHsiY2xhaW0iOiAieC1tcy1jb21wbGlhbmNlLXN0YXR1cyIsICJlcXVhbHMiOiAiYXp1cmUtY29tcGxpYW50LWN2bSJ9XSwgImF1dGhvcml0eSI6ICJodHRwczovL3NoYXJlZHd1cy53dXMuYXR0ZXN0LmF6dXJlLm5ldC8ifSwgeyJhbGxPZiI6IFt7ImNsYWltIjogIngtbXMtYXR0ZXN0YXRpb24tdHlwZSIsICJlcXVhbHMiOiAic2V2c25wdm0ifSwgeyJjbGFpbSI6ICJ4LW1zLWNvbXBsaWFuY2Utc3RhdHVzIiwgImVxdWFscyI6ICJhenVyZS1jb21wbGlhbnQtY3ZtIn1dLCAiYXV0aG9yaXR5IjogImh0dHBzOi8vc2hhcmVkbmV1Lm5ldS5hdHRlc3QuYXp1cmUubmV0LyJ9LCB7ImFsbE9mIjogW3siY2xhaW0iOiAieC1tcy1hdHRlc3RhdGlvbi10eXBlIiwgImVxdWFscyI6ICJzZXZzbnB2bSJ9LCB7ImNsYWltIjogIngtbXMtY29tcGxpYW5jZS1zdGF0dXMiLCAiZXF1YWxzIjogImF6dXJlLWNvbXBsaWFudC1jdm0ifV0sICJhdXRob3JpdHkiOiAiaHR0cHM6Ly9zaGFyZWR3ZXUud2V1LmF0dGVzdC5henVyZS5uZXQvIn1dLCAidmVyc2lvbiI6ICIxLjAuMCJ9"}}'
     headers:
       Accept:
       - application/json
@@ -103,12 +185,12 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - azsdk-python-keyvault-keys/4.5.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - azsdk-python-keyvault-keys/4.8.0b2 Python/3.7.9 (Windows-10-10.0.22621-SP0)
     method: POST
-    uri: https://ystesthsm.managedhsm.azure.net/keys/skr2-000002/create?api-version=7.3
+    uri: https://ystesthsm.managedhsm.azure.net/keys/skr2-000002/create?api-version=7.4-preview.1
   response:
     body:
-      string: '{"attributes":{"created":1649514989,"enabled":true,"exportable":true,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1649514989},"key":{"crv":"P-256","key_ops":["verify","sign"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/skr2-000002/c1cb7f01ef4c0becac39339ca85ac21f","kty":"EC-HSM","x":"6CtG7A91AZ3fTUs1QuB_Dg8az5eEFQMw7F0WsQRFmCE","y":"wakBAcAr7RrXrtzmSbkvYTUb4-KSZ0bjM3Pmmg2guos"},"release_policy":{"contentType":"application/json;
+      string: '{"attributes":{"created":1670853145,"enabled":true,"exportable":true,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1670853145},"key":{"crv":"P-256","key_ops":["verify","sign"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/skr2-000002/eea6881ac6a3445f946d42350514ce59","kty":"EC-HSM","x":"qCIhlfiMnM7brC-0mNNgzB-_5LOJPn_jENTan9Ghv4U","y":"KhZZELSOKUlSyiuHuJOiJTCGrJu0d8SxMch4S6g6PXo"},"release_policy":{"contentType":"application/json;
         charset=utf-8","data":"eyJhbnlPZiI6W3siYWxsT2YiOlt7ImNsYWltIjoieC1tcy1hdHRlc3RhdGlvbi10eXBlIiwiZXF1YWxzIjoic2V2c25wdm0ifSx7ImNsYWltIjoieC1tcy1jb21wbGlhbmNlLXN0YXR1cyIsImVxdWFscyI6ImF6dXJlLWNvbXBsaWFudC1jdm0ifV0sImF1dGhvcml0eSI6Imh0dHBzOi8vc2hhcmVkZXVzLmV1cy5hdHRlc3QuYXp1cmUubmV0LyJ9LHsiYWxsT2YiOlt7ImNsYWltIjoieC1tcy1hdHRlc3RhdGlvbi10eXBlIiwiZXF1YWxzIjoic2V2c25wdm0ifSx7ImNsYWltIjoieC1tcy1jb21wbGlhbmNlLXN0YXR1cyIsImVxdWFscyI6ImF6dXJlLWNvbXBsaWFudC1jdm0ifV0sImF1dGhvcml0eSI6Imh0dHBzOi8vc2hhcmVkd3VzLnd1cy5hdHRlc3QuYXp1cmUubmV0LyJ9LHsiYWxsT2YiOlt7ImNsYWltIjoieC1tcy1hdHRlc3RhdGlvbi10eXBlIiwiZXF1YWxzIjoic2V2c25wdm0ifSx7ImNsYWltIjoieC1tcy1jb21wbGlhbmNlLXN0YXR1cyIsImVxdWFscyI6ImF6dXJlLWNvbXBsaWFudC1jdm0ifV0sImF1dGhvcml0eSI6Imh0dHBzOi8vc2hhcmVkbmV1Lm5ldS5hdHRlc3QuYXp1cmUubmV0LyJ9LHsiYWxsT2YiOlt7ImNsYWltIjoieC1tcy1hdHRlc3RhdGlvbi10eXBlIiwiZXF1YWxzIjoic2V2c25wdm0ifSx7ImNsYWltIjoieC1tcy1jb21wbGlhbmNlLXN0YXR1cyIsImVxdWFscyI6ImF6dXJlLWNvbXBsaWFudC1jdm0ifV0sImF1dGhvcml0eSI6Imh0dHBzOi8vc2hhcmVkd2V1LndldS5hdHRlc3QuYXp1cmUubmV0LyJ9XSwidmVyc2lvbiI6IjEuMC4wIn0","immutable":false}}'
     headers:
       cache-control:
@@ -126,11 +208,11 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.21;act_addr_fam=Ipv4;
+      - conn_type=Ipv4;addr=167.220.255.85;act_addr_fam=Ipv4;
       x-ms-keyvault-region:
       - eastus
       x-ms-server-latency:
-      - '3987'
+      - '2384'
     status:
       code: 200
       message: OK
@@ -148,12 +230,12 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - azsdk-python-keyvault-keys/4.5.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - azsdk-python-keyvault-keys/4.8.0b2 Python/3.7.9 (Windows-10-10.0.22621-SP0)
     method: PATCH
-    uri: https://ystesthsm.managedhsm.azure.net/keys/skr2-000002/?api-version=7.3
+    uri: https://ystesthsm.managedhsm.azure.net/keys/skr2-000002/?api-version=7.4-preview.1
   response:
     body:
-      string: '{"attributes":{"created":1649514989,"enabled":true,"exportable":true,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1649514994},"key":{"crv":"P-256","key_ops":["verify","sign"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/skr2-000002/c1cb7f01ef4c0becac39339ca85ac21f","kty":"EC-HSM","x":"6CtG7A91AZ3fTUs1QuB_Dg8az5eEFQMw7F0WsQRFmCE","y":"wakBAcAr7RrXrtzmSbkvYTUb4-KSZ0bjM3Pmmg2guos"},"release_policy":{"contentType":"application/json;
+      string: '{"attributes":{"created":1670853145,"enabled":true,"exportable":true,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1670853149},"key":{"crv":"P-256","key_ops":["verify","sign"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/skr2-000002/eea6881ac6a3445f946d42350514ce59","kty":"EC-HSM","x":"qCIhlfiMnM7brC-0mNNgzB-_5LOJPn_jENTan9Ghv4U","y":"KhZZELSOKUlSyiuHuJOiJTCGrJu0d8SxMch4S6g6PXo"},"release_policy":{"contentType":"application/json;
         charset=utf-8","data":"eyJhbnlPZiI6W3siYWxsT2YiOlt7ImNsYWltIjoieC1tcy1zZ3gtaXMtZGVidWdnYWJsZSIsImVxdWFscyI6ImZhbHNlIn1dLCJhdXRob3JpdHkiOiJodHRwczovL3NoYXJlZGV1cy5ldXMuYXR0ZXN0LmF6dXJlLm5ldC8ifV0sInZlcnNpb24iOiIxLjAuMCJ9","immutable":true}}'
     headers:
       cache-control:
@@ -171,11 +253,11 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.21;act_addr_fam=Ipv4;
+      - conn_type=Ipv4;addr=167.220.255.85;act_addr_fam=Ipv4;
       x-ms-keyvault-region:
       - eastus
       x-ms-server-latency:
-      - '510'
+      - '167'
     status:
       code: 200
       message: OK
@@ -193,8 +275,8 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-keyvault/7.0 Azure-SDK-For-Python
+      - python/3.7.9 (Windows-10-10.0.22621-SP0) msrest/0.7.1 msrest_azure/0.6.4 azure-keyvault/7.0
+        Azure-SDK-For-Python
       accept-language:
       - en-US
     method: DELETE
@@ -221,7 +303,7 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-server-latency:
-      - '0'
+      - '4'
     status:
       code: 401
       message: Unauthorized
@@ -239,15 +321,15 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-keyvault/7.0 Azure-SDK-For-Python
+      - python/3.7.9 (Windows-10-10.0.22621-SP0) msrest/0.7.1 msrest_azure/0.6.4 azure-keyvault/7.0
+        Azure-SDK-For-Python
       accept-language:
       - en-US
     method: DELETE
     uri: https://ystesthsm.managedhsm.azure.net/keys/skr1-000001?api-version=7.0
   response:
     body:
-      string: '{"attributes":{"created":1649514983,"enabled":true,"exportable":true,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1649514983},"deletedDate":1649514997,"key":{"crv":"P-256","key_ops":["verify","sign"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/skr1-000001/3b5ad2ac1dc70e383eacec1300cf1b76","kty":"EC-HSM","x":"ZNsZbgsj9GAswMdkxyXgCMw14_IxczddmEcthvIQlSs","y":"7DfogIUpcgEfC88Sso68MZCXsomkCT87Tls_Bntwewk"},"recoveryId":"https://ystesthsm.managedhsm.azure.net/deletedkeys/skr1-000001","release_policy":{"anyOf":[{"allOf":[{"claim":"x-ms-sgx-is-debuggable","condition":"equals","value":"false"}],"authority":"https://sharedeus.eus.attest.azure.net/"}],"version":"0.2"},"scheduledPurgeDate":1657290997}'
+      string: '{"attributes":{"created":1670853142,"enabled":true,"exportable":true,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1670853142},"deletedDate":1670853151,"key":{"crv":"P-256","key_ops":["verify","sign"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/skr1-000001/ace10f00983e03640df41322fc921cce","kty":"EC-HSM","x":"DL7ts0vxbgVZkrlmsfgCB7zpTcgXPM7mxVJdUNN3eqo","y":"iqYwpuZe77DJ_3yiKSDnA0chSUkqxnf7RE-Xkfrr2oY"},"recoveryId":"https://ystesthsm.managedhsm.azure.net/deletedkeys/skr1-000001","release_policy":{"anyOf":[{"allOf":[{"claim":"x-ms-sgx-is-debuggable","condition":"equals","value":"false"}],"authority":"https://sharedeus.eus.attest.azure.net/"}],"version":"0.2"},"scheduledPurgeDate":1678629151}'
     headers:
       cache-control:
       - no-cache
@@ -264,11 +346,11 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.21;act_addr_fam=Ipv4;
+      - conn_type=Ipv4;addr=167.220.255.85;act_addr_fam=Ipv4;
       x-ms-keyvault-region:
       - eastus
       x-ms-server-latency:
-      - '154'
+      - '103'
     status:
       code: 200
       message: OK
@@ -286,8 +368,8 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-keyvault/7.0 Azure-SDK-For-Python
+      - python/3.7.9 (Windows-10-10.0.22621-SP0) msrest/0.7.1 msrest_azure/0.6.4 azure-keyvault/7.0
+        Azure-SDK-For-Python
       accept-language:
       - en-US
     method: DELETE
@@ -311,11 +393,11 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.21;act_addr_fam=Ipv4;
+      - conn_type=Ipv4;addr=167.220.255.85;act_addr_fam=Ipv4;
       x-ms-keyvault-region:
       - eastus
       x-ms-server-latency:
-      - '167'
+      - '106'
     status:
       code: 204
       message: ''
@@ -333,15 +415,15 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-keyvault/7.0 Azure-SDK-For-Python
+      - python/3.7.9 (Windows-10-10.0.22621-SP0) msrest/0.7.1 msrest_azure/0.6.4 azure-keyvault/7.0
+        Azure-SDK-For-Python
       accept-language:
       - en-US
     method: DELETE
     uri: https://ystesthsm.managedhsm.azure.net/keys/skr2-000002?api-version=7.0
   response:
     body:
-      string: '{"attributes":{"created":1649514989,"enabled":true,"exportable":true,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1649514994},"deletedDate":1649515002,"key":{"crv":"P-256","key_ops":["verify","sign"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/skr2-000002/c1cb7f01ef4c0becac39339ca85ac21f","kty":"EC-HSM","x":"6CtG7A91AZ3fTUs1QuB_Dg8az5eEFQMw7F0WsQRFmCE","y":"wakBAcAr7RrXrtzmSbkvYTUb4-KSZ0bjM3Pmmg2guos"},"recoveryId":"https://ystesthsm.managedhsm.azure.net/deletedkeys/skr2-000002","release_policy":{"anyOf":[{"allOf":[{"claim":"x-ms-sgx-is-debuggable","condition":"equals","value":"false"}],"authority":"https://sharedeus.eus.attest.azure.net/"}],"version":"0.2"},"scheduledPurgeDate":1657291002}'
+      string: '{"attributes":{"created":1670853145,"enabled":true,"exportable":true,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1670853149},"deletedDate":1670853155,"key":{"crv":"P-256","key_ops":["verify","sign"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/skr2-000002/eea6881ac6a3445f946d42350514ce59","kty":"EC-HSM","x":"qCIhlfiMnM7brC-0mNNgzB-_5LOJPn_jENTan9Ghv4U","y":"KhZZELSOKUlSyiuHuJOiJTCGrJu0d8SxMch4S6g6PXo"},"recoveryId":"https://ystesthsm.managedhsm.azure.net/deletedkeys/skr2-000002","release_policy":{"anyOf":[{"allOf":[{"claim":"x-ms-sgx-is-debuggable","condition":"equals","value":"false"}],"authority":"https://sharedeus.eus.attest.azure.net/"}],"version":"0.2"},"scheduledPurgeDate":1678629155}'
     headers:
       cache-control:
       - no-cache
@@ -358,11 +440,11 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.21;act_addr_fam=Ipv4;
+      - conn_type=Ipv4;addr=167.220.255.85;act_addr_fam=Ipv4;
       x-ms-keyvault-region:
       - eastus
       x-ms-server-latency:
-      - '167'
+      - '85'
     status:
       code: 200
       message: OK
@@ -380,8 +462,8 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       User-Agent:
-      - python/3.7.9 (Windows-10-10.0.22000-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-keyvault/7.0 Azure-SDK-For-Python
+      - python/3.7.9 (Windows-10-10.0.22621-SP0) msrest/0.7.1 msrest_azure/0.6.4 azure-keyvault/7.0
+        Azure-SDK-For-Python
       accept-language:
       - en-US
     method: DELETE
@@ -405,11 +487,11 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.21;act_addr_fam=Ipv4;
+      - conn_type=Ipv4;addr=167.220.255.85;act_addr_fam=Ipv4;
       x-ms-keyvault-region:
       - eastus
       x-ms-server-latency:
-      - '382'
+      - '178'
     status:
       code: 204
       message: ''

@@ -5,6 +5,7 @@
 # pylint: disable=too-many-statements
 import json
 from unittest import mock
+from knack.util import CLIError
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
@@ -838,6 +839,30 @@ class IoTHubTest(ScenarioTest):
         assert updated_hub['properties']['storageEndpoints']['$default']['authenticationType'] == key_based_auth
         assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
         assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='westus2')
+    def test_hub_wait(self, resource_group, resource_group_location):
+        hub = self.create_random_name(prefix='iot-hub-for-test-11', length=32)
+        rg = resource_group
+
+        # Create hub with no wait
+        self.cmd('iot hub create -n {0} -g {1} --no-wait'.format(hub, rg))
+
+        # Poll till hub is active
+        self.cmd('iot hub wait -n {0} -g {1} --created'.format(hub, rg))
+
+        # Delete hub with no wait
+        self.cmd('iot hub delete -n {0} -g {1} --no-wait'.format(hub, rg))
+
+        # Poll to make sure hub is deleted.
+        try:
+            self.cmd('iot hub wait -n {0} -g {1} --deleted'.format(hub, rg))
+        except CLIError:
+            pass
+
+        # Final check and sleep to make sure lro poller thread is done
+        self.cmd('iot hub show -n {0} -g {1}'.format(hub, rg), expect_failure=True)
 
     def _get_eventhub_connectionstring(self, rg):
         ehNamespace = self.create_random_name(prefix='ehNamespaceiothubfortest1', length=32)
