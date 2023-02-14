@@ -331,7 +331,7 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             self.check('nameAvailable', True)
         ])
 
-        self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin} --retention-days 7')
+        self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin} --retention-days 7 --public-network-access Enabled')
 
         self.cmd('keyvault check-name -n {hsm_name}', checks=[
             self.check('nameAvailable', False),
@@ -354,7 +354,7 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault show --hsm-name {hsm_name}', checks=show_checks)
         self.cmd('keyvault show --hsm-name {hsm_name} -g {rg}', checks=show_checks)
 
-        self.cmd('keyvault update-hsm --hsm-name {hsm_name} --bypass None')
+        self.cmd('keyvault update-hsm --hsm-name {hsm_name} --bypass None --public-network-access Disabled --default-action Deny')
 
         self.cmd(r"keyvault list --resource-type hsm --query [?name==\'{hsm_name}\']", checks=list_checks)
         self.cmd('keyvault list --resource-type hsm -g {rg}', checks=list_checks)
