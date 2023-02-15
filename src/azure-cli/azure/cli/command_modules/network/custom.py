@@ -4309,7 +4309,7 @@ class NICCreate(_NICCreate):
         ip_configuration = {
             "name": "ipconfig1",
             "private_ip_address": args.private_ip_address,
-            "private_ip_address_version": args.private_ip_address_version,
+            "private_ip_address_version": args.private_ip_address_version if has_value(args.private_ip_address) else None,
             "private_ip_allocation_method": "Static" if has_value(args.private_ip_address) else "Dynamic",
             "subnet": {"id": args.subnet} if has_value(args.subnet) else None,
             "public_ip_address": {"id": args.public_ip_address} if has_value(args.public_ip_address) else None,
@@ -4321,7 +4321,7 @@ class NICCreate(_NICCreate):
         args.ip_configurations = [ip_configuration]
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = super()._output(*args, **kwargs)
         return {"NewNIC": result}
 
 
