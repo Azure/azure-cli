@@ -1253,6 +1253,47 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_replica_mgmt(self, resource_group):
         self._test_flexible_server_replica_mgmt('mysql', resource_group, False)
+    
+    @AllowLargeResponse()
+    @ResourceGroupPreparer()
+    def test_mysql_flexible_server_replica_mgmt(self, resource_group):
+        self._test_flexible_server_cross_region_replica_mgmt('mysql', resource_group, False)
+    
+    def _test_flexible_server_cross_region_replica_mgmt(self, database_engine, resource_group):
+        # create a server
+        master_location = 'centraluseuap'
+        replica_location = 'eastus2euap'
+        primary_role = 'None'
+        replica_role = 'Replica'
+
+        master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
+        replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --tier GeneralPurpose --sku-name Standard_D2ds_v4 --yes'
+                 .format(database_engine, resource_group, master_server, master_location, 32))
+        result = self.cmd('{} flexible-server show -g {} --name {} '
+                          .format(database_engine, resource_group, master_server),
+                          checks=[JMESPathCheck('replicationRole', primary_role)]).get_output_in_json()
+
+        # test replica create
+        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --location {} --zone 1'
+                 .format(database_engine, resource_group, replicas[0], result['id']),
+                 checks=[
+                     JMESPathCheck('name', replicas[0]),
+                     JMESPathCheck('availabilityZone', 2),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sku.tier', result['sku']['tier']),
+                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('replicationRole', replica_role),
+                     JMESPathCheck('sourceServerResourceId', result['id']),
+                     JMESPathCheck('replicaCapacity', '0'),
+                     JMESPathCheck('location', 'East US 2 EUAP')])
+
+        # test replica list
+        self.cmd('{} flexible-server replica list -g {} --name {}'
+                 .format(database_engine, resource_group, master_server),
+                 checks=[JMESPathCheck('length(@)', 1)])
+
+
 
     def _test_flexible_server_replica_mgmt(self, database_engine, resource_group, vnet_enabled):
         if database_engine == 'postgres':

@@ -548,13 +548,6 @@ def validate_mysql_replica(cmd, server):
         raise ValidationError("Read replica is not supported for the Burstable pricing tier. "
                               "Scale up the source server to General Purpose or Memory Optimized. ")
 
-    # single az validation
-    list_skus_info = get_mysql_list_skus_info(cmd, server.location)
-    single_az = list_skus_info['single_az']
-    if single_az:
-        raise ValidationError("Replica can only be created for multi-availability zone regions. "
-                              "The location of the source server is in a single availability zone region.")
-
 
 def validate_postgres_replica(cmd, server):
     # Tier validation

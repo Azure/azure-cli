@@ -573,7 +573,7 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
 
 # Replica commands
 # Custom functions for server replica, will add MySQL part after backend ready in future
-def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, zone=None, no_wait=False):
+def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, location=None, zone=None, no_wait=False):
     provider = 'Microsoft.DBforMySQL'
     replica_name = replica_name.lower()
 
@@ -596,8 +596,10 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         validate_mysql_replica(cmd, source_server_object)
     except Exception as e:
         raise ResourceNotFoundError(e)
+    
+    if not location:
+        location = source_server_object.location
 
-    location = source_server_object.location
     sku_name = source_server_object.sku.name
     tier = source_server_object.sku.tier
     if not zone:
