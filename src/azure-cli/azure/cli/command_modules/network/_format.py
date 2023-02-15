@@ -126,12 +126,6 @@ def transform_traffic_manager_create_output(result):
     return {'TrafficManagerProfile': result}
 
 
-def transform_nic_create_output(result):
-    if result:
-        return {'NewNIC': result.result()}
-    return None
-
-
 def transform_nsg_rule_table_output(result):
     item = OrderedDict()
     item['Name'] = result['name']

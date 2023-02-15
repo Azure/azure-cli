@@ -24,7 +24,7 @@ from azure.cli.command_modules.network._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
     transform_public_ip_create_output,
-    transform_traffic_manager_create_output, transform_nic_create_output,
+    transform_traffic_manager_create_output,
     transform_vpn_connection, transform_vpn_connection_list,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
@@ -34,7 +34,6 @@ from azure.cli.command_modules.network._format import (
 from azure.cli.command_modules.network._validators import (
     get_network_watcher_from_location,
     process_ag_create_namespace,
-    process_nic_create_namespace,
     process_lb_create_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
