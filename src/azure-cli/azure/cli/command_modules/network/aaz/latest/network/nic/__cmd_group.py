@@ -12,11 +12,12 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "network vnet-gateway packet-capture",
-    is_preview=True,
+    "network nic",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage packet capture on a virtual network gateway.
+    """Manage network interfaces.
+
+    To learn more about network interfaces in Azure, visit https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface?tabs=network-interface-portal.
     """
     pass
 
