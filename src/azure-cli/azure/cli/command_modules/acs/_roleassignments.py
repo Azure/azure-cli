@@ -28,6 +28,8 @@ from msrestazure.azure_exceptions import CloudError
 
 logger = get_logger(__name__)
 
+# pylint: disable=protected-access
+
 
 def resolve_role_id(role, scope, definitions_client):
     role_id = None
