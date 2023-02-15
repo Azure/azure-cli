@@ -424,6 +424,9 @@ AD_HOC_API_VERSIONS = {
     ResourceType.MGMT_CONTAINERSERVICE: {
         # src/azure-cli/azure/cli/command_modules/acs/tests/latest/test_custom.py:50
         'ManagedClusterAddonProfile': '2020-03-01',
+    },
+    ResourceType.MGMT_MSI: {
+        'user_assigned_identities': '2022-01-31-preview',
     }
 }
 
