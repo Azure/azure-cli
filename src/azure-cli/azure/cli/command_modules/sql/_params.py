@@ -1306,7 +1306,15 @@ def load_arguments(self, _):
                    options_list=['--resource-group', '-g'],
                    required=True,
                    help='Retrieves a requested geo-redundant backup under this resource group.')
+        
+        c.argument('expand_keys',
+                    options_list=['--expand-keys'],
+                    help='Expand the AKV keys for the database.')
 
+        c.argument('keys_filter',
+                    options_list=['--keys-filter'],
+                    help='Expand the AKV keys for the database.')
+    
     with self.argument_context('sql db geo-backup list') as c:
         c.argument('server_name',
                    options_list=['--server-name', '--server', '-s'],
@@ -1351,6 +1359,21 @@ def load_arguments(self, _):
         c.argument('zone_redundant',
                    required=False,
                    arg_type=zone_redundant_param_type)
+        
+        c.argument('assign_identity',
+                     arg_type=database_assign_identity_param_type)
+
+        c.argument('encryption_protector',
+                     arg_type=database_encryption_protector_param_type)
+
+        c.argument('keys',
+                     arg_type=database_keys_param_type)
+                    
+        c.argument('user_assigned_identity_id',
+                     arg_type=database_user_assigned_identity_param_type)
+    
+        c.argument('federated_client_id',
+                     arg_type=database_federated_client_id_param_type)
 
     ###############################################
     #                sql db str                   #

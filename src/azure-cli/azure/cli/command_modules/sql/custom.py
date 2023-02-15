@@ -1012,7 +1012,10 @@ def recoverable_databases_get(
     elif expand_keys:
         expand = 'keys'
     
-    return client.get(resource_group_name, server_name, database_name, expand)
+    return client.get(resource_group_name=resource_group_name, 
+                      server_name=server_name, 
+                      database_name=database_name, 
+                      expand=expand)
 
 def db_get(
     client,
@@ -1822,11 +1825,12 @@ def _get_database_keys(akvKeys):
 
     databaseKeys = None
 
-    for akvKey in akvKeys:
-        if databaseKeys is None:
-            databaseKeys = {akvKey : DatabaseKey()}
-        else:
-            databaseKeys[akvKey] = DatabaseKey()
+    if akvKeys is not None:
+        for akvKey in akvKeys:
+            if databaseKeys is None:
+                databaseKeys = {akvKey : DatabaseKey()}
+            else:
+                databaseKeys[akvKey] = DatabaseKey()
 
     return databaseKeys
 
@@ -3218,6 +3222,11 @@ def restore_geo_backup(
         requested_backup_storage_redundancy,
         high_availability_replica_count,
         zone_redundant,
+        assign_identity=False,
+        user_assigned_identity_id=None,
+        keys=None,
+        encryption_protector=None,
+        federated_client_id=None,
         **kwargs):
     '''
     Restores an existing database (i.e. create with 'RestoreGeoBackup' create mode.)

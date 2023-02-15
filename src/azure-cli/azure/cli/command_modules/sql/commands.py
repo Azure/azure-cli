@@ -78,7 +78,7 @@ from ._util import (
     get_sql_instance_failover_groups_operations,
     get_sql_database_ledger_digest_uploads_operations,
     get_sql_database_encryption_protector_operations,
-    get_sql_recoverable_databases_operations
+    get_sql_database_recoverable_databases_operations
 )
 
 from ._validators import (
@@ -246,14 +246,6 @@ def load_command_table(self, _):
         g.custom_command('delete-link', 'db_delete_replica_link',
                          confirmation=True)
         g.custom_command('set-primary', 'db_failover')
-    
-    recoverable_databases_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations#RecoverableDatabasesOperations.{}',
-        client_factory=get_sql_recoverable_databases_operations)
-    
-    with self.command_group('sql db recoverable', recoverable_databases_operations) as g:
-
-        g.custom_show_command('show', 'recoverable_databases_get') 
 
     restorable_dropped_databases_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#RestorableDroppedDatabasesOperations.{}',
@@ -376,7 +368,7 @@ def load_command_table(self, _):
                             client_factory=get_sql_database_recoverable_databases_operations,
                             is_preview=True) as g:
 
-        g.show_command('show', 'get')
+        g.custom_show_command('show', 'recoverable_databases_get')
         g.custom_command('list', 'list_geo_backups')
 
     with self.command_group('sql db geo-backup',
