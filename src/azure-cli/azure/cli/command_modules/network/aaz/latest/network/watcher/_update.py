@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network watcher update",
-)
 class Update(AAZCommand):
     """Update a network watcher in the specified resource group.
     """

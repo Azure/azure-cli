@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network watcher show",
-)
 class Show(AAZCommand):
     """Get the specified network watcher by resource group.
     """

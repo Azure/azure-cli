@@ -11,10 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network watcher delete",
-    confirmation="Are you sure you want to perform this operation?",
-)
 class Delete(AAZCommand):
     """Delete the specified network watcher resource.
     """
