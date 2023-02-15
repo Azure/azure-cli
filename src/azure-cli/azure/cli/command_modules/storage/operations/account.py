@@ -1090,8 +1090,8 @@ def update_local_user(cmd, client, resource_group_name, account_name, username, 
                                    username=username, properties=local_user)
 
 
-def begin_failover(client, resource_group_name, account_name, failover_type=None, **kwargs):
-    if failover_type and failover_type.lower() != "planned":
+def begin_failover(client, resource_group_name, account_name, failover_type=None, yes=None, **kwargs):
+    if not yes and failover_type and failover_type.lower() != "planned":
         from knack.prompting import prompt_y_n
         message = """
         The secondary cluster will become the primary cluster after failover. Please understand the following impact to your storage account before you initiate the failover:
@@ -1101,4 +1101,4 @@ def begin_failover(client, resource_group_name, account_name, failover_type=None
         """
         if not prompt_y_n(message):
             return None
-    return client.begin_failover(resource_group_name = resource_group_name, account_name = account_name, failover_type = failover_type, **kwargs)
+    return client.begin_failover(resource_group_name=resource_group_name, account_name=account_name, failover_type=failover_type, **kwargs)
