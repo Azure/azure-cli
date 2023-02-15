@@ -12,11 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "network vnet-gateway packet-capture",
-    is_preview=True,
+    "network vpn-connection shared-key",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage packet capture on a virtual network gateway.
+    """Manage VPN shared keys.
     """
     pass
 

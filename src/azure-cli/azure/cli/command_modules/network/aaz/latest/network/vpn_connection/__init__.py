@@ -8,17 +8,12 @@
 # pylint: skip-file
 # flake8: noqa
 
-from azure.cli.core.aaz import *
-
-
-@register_command_group(
-    "network vnet-gateway packet-capture",
-    is_preview=True,
-)
-class __CMDGroup(AAZCommandGroup):
-    """Manage packet capture on a virtual network gateway.
-    """
-    pass
-
-
-__all__ = ["__CMDGroup"]
+from .__cmd_group import *
+from ._delete import *
+from ._list import *
+from ._list_connection import *
+from ._list_ike_sas import *
+from ._show import *
+from ._show_device_config_script import *
+from ._update import *
+from ._wait import *

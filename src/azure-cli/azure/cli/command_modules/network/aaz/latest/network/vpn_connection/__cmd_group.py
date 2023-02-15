@@ -12,11 +12,12 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "network vnet-gateway packet-capture",
-    is_preview=True,
+    "network vpn-connection",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage packet capture on a virtual network gateway.
+    """Manage VPN connections.
+
+    For more information on site-to-site connections, visit https://docs.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-cli. For more information on Vnet-to-Vnet connections, visit https://docs.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-vnet-vnet-cli.
     """
     pass
 
