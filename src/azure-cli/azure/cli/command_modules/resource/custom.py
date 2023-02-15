@@ -3680,7 +3680,8 @@ def publish_bicep_file(cmd, file, target, documentationUri=None):
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["publish", file, "--target", target]
-        if documentationUri:
+        minimum_supported_version_for_documentationUri_parameter = "0.14.46"
+        if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_documentationUri_parameter) and documentationUri:
             args += ["--documentationUri", documentationUri]
         run_bicep_command(cmd.cli_ctx, args)
     else:
