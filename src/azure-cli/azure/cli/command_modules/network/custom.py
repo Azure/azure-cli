@@ -4242,7 +4242,7 @@ class NICCreate(_NICCreate):
             help="Name of the application gateway."
         )
         args_schema.app_gateway_address_pools = AAZListArg(
-            options=["--app-gateway-address-pools"],
+            options=["--app-gateway-address-pools", "--ag-address-pools"],
             arg_group="Application Gateway",
             help="Space-separated list of names or IDs of application gateway backend address pools to "
                  "associate with the NIC. If names are used, `--gateway-name` must be specified.",
