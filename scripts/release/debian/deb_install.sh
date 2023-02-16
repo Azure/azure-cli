@@ -81,7 +81,7 @@ setup() {
             exit 1
         fi
     fi
-    echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ ${CLI_REPO} main" \
+    echo "deb [arch=$(dpkg --print-architecture)] https://packages.microsoft.com/repos/azure-cli/ ${CLI_REPO} main" \
         > /etc/apt/sources.list.d/azure-cli.list
     apt-get update
     set +v

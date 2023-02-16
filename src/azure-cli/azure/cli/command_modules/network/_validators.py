@@ -105,20 +105,6 @@ def _validate_vpn_gateway_generation(namespace):
         raise CLIError('vpn_gateway_generation should not be provided if gateway_type is not Vpn.')
 
 
-def validate_vpn_connection_name_or_id(cmd, namespace):
-    if namespace.vpn_connection_ids:
-        from msrestazure.tools import is_valid_resource_id, resource_id
-        for index, vpn_connection_id in enumerate(namespace.vpn_connection_ids):
-            if not is_valid_resource_id(vpn_connection_id):
-                namespace.vpn_connection_ids[index] = resource_id(
-                    subscription=get_subscription_id(cmd.cli_ctx),
-                    resource_group=namespace.resource_group_name,
-                    namespace='Microsoft.Network',
-                    type='connections',
-                    name=vpn_connection_id
-                )
-
-
 def validate_ddos_name_or_id(cmd, namespace):
     if namespace.ddos_protection_plan:
         from msrestazure.tools import is_valid_resource_id, resource_id
@@ -665,21 +651,6 @@ def process_cross_region_lb_create_namespace(cmd, namespace):
     if namespace.public_ip_dns_name and namespace.public_ip_address_type != 'new':
         raise CLIError(
             'specify --public-ip-dns-name only if creating a new public IP address.')
-
-
-def process_nic_create_namespace(cmd, namespace):
-    get_default_location_from_resource_group(cmd, namespace)
-    validate_tags(namespace)
-
-    validate_ag_address_pools(cmd, namespace)
-    validate_address_pool_id_list(cmd, namespace)
-    validate_inbound_nat_rule_id_list(cmd, namespace)
-    get_asg_validator(cmd.loader, 'application_security_groups')(cmd, namespace)
-
-    # process folded parameters
-    get_subnet_validator(has_type_field=False)(cmd, namespace)
-    get_public_ip_validator(has_type_field=False, allow_none=True, default_none=True)(cmd, namespace)
-    get_nsg_validator(has_type_field=False, allow_none=True, default_none=True)(cmd, namespace)
 
 
 def process_public_ip_create_namespace(cmd, namespace):
