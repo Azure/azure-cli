@@ -8725,7 +8725,7 @@ class VMSSReimageScenarioTest(ScenarioTest):
             'vmss': self.create_random_name('vmss', 10)
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image CentOS --admin-username vmtest')
+        self.cmd('vmss create -g {rg} -n {vmss} --image CentOS --admin-username vmtest --instance-count 2')
         instances = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()
         self.kwargs['instance_id1'] = instances[0]['instanceId']
         self.kwargs['instance_id2'] = instances[1]['instanceId']

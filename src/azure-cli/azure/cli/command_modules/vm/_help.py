@@ -3403,6 +3403,9 @@ examples:
   - name: Reimage a batch of VM instances within a VMSS.
     text: |
         az vmss reimage --instance-ids 1 2 3 --name MyScaleSet --resource-group MyResourceGroup --subscription MySubscription
+  - name: Reimage all the VM instances within a VMSS.
+    text: |
+        az vmss reimage --name MyScaleSet --resource-group MyResourceGroup --subscription MySubscription
 """
 
 helps['vmss restart'] = """
