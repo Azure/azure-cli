@@ -1091,7 +1091,7 @@ def update_local_user(cmd, client, resource_group_name, account_name, username, 
 
 
 def begin_failover(client, resource_group_name, account_name, failover_type=None, yes=None, **kwargs):
-    if failover_type.lower() != "planned":
+    if not failover_type or failover_type.lower() != "planned":
         message = """
         The secondary cluster will become the primary cluster after failover. Please understand the following impact to your storage account before you initiate the failover:
             1. Please check the Last Sync Time using `az storage account show` with `--expand geoReplicationStats` and check the "geoReplicationStats" property. This is the data you may lose if you initiate the failover.
