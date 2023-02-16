@@ -145,6 +145,7 @@ def load_command_table(self, _):
 
         with self.command_group('keyvault security-domain', private_data_entity.command_type) as g:
             g.keyvault_custom('init-recovery', 'security_domain_init_recovery')
+            g.keyvault_custom('restore-blob', 'security_domain_restore_blob')
             g.keyvault_custom('upload', 'security_domain_upload', supports_no_wait=True)
             g.keyvault_custom('download', 'security_domain_download', supports_no_wait=True)
             g.keyvault_custom('wait', '_wait_security_domain_operation')

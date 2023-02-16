@@ -14,7 +14,7 @@ short-summary: Managed Identities
 
 helps['identity create'] = """
 type: command
-short-summary: Create Identities
+short-summary: Create Identities.
 examples:
   - name: Create an identity.
     text: |
@@ -23,12 +23,17 @@ examples:
 
 helps['identity list'] = """
 type: command
-short-summary: List Managed Identities
+short-summary: List Managed Identities.
 """
 
 helps['identity list-operations'] = """
 type: command
-short-summary: Lists available operations for the Managed Identity provider
+short-summary: List available operations for the Managed Identity provider.
+"""
+
+helps['identity list-resources'] = """
+type: command
+short-summary: List the associated resources for the identity.
 """
 
 helps['identity federated-credential'] = """

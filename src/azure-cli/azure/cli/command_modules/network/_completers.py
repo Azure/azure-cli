@@ -70,13 +70,3 @@ def tm_endpoint_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: di
     return list_traffic_manager_endpoints(cmd, namespace.resource_group_name, namespace.profile_name) \
         if namespace.resource_group_name and namespace.profile_name \
         else []
-
-
-def get_sdk_completer(group, operation_name):
-
-    @Completer
-    def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
-        client = getattr(network_client_factory(cmd.cli_ctx), group)
-        operation = getattr(client, operation_name)
-        return operation(**kwargs)
-    return completer

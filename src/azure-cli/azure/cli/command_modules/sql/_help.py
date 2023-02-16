@@ -972,7 +972,7 @@ examples:
               --identity-type UserAssigned --pid /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi
   - name: Move managed instance to another subnet
     text: az sql mi update -g myResourceGroup -n myServer -i \\
-              --subnet /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi \\
+              --subnet /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet \\
   - name: Update mi backup storage redundancy
     text: az sql mi update -g mygroup -n myinstance --bsr Local
 """
@@ -1049,6 +1049,39 @@ examples:
     text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22" --deleted-time "2018-05-20T05:34:22"
   - name: Restore a live managed database from another instance using Point in time restore
     text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22" --dest-mi targetmi --dest-resource-group targetrg
+  - name: Restore a live managed database from another subscription using Point in time restore
+    text: az sql midb restore -s sourcesubscriptionid -g sourcegroup --mi sourceinstance -n sourcemanageddb --dest-name targetmidb --dest-mi targetmi --time "2018-05-20T05:34:22"
+  - name: Restore a dropped managed database from another subscription using Point in time restore
+    text: az sql midb restore -s sourcesubscriptionid -g sourcegroup --mi sourceinstance -n sourcemanageddb --dest-name targetmidb --dest-mi targetmi --time "2018-05-20T05:34:22" --deleted-time "2018-05-20T05:34:22"
+"""
+
+helps['sql midb recover'] = """
+type: command
+short-summary: Recover a managed database using geo-pair instance backup
+examples:
+  - name: Recover managed database using recoverable database id
+    text: az sql midb recover -g mygroup --mi myinstance -n mymanageddb -r '/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Sql/managedInstances/myinstance/recoverableDatabases/db1'
+"""
+
+helps['sql recoverable-midb'] = """
+type: group
+short-summary: Recoverable managed databases command group.
+"""
+
+helps['sql recoverable-midb show'] = """
+type: command
+short-summary: Get recoverable managed database
+examples:
+  - name: Get recoverable managed database
+    text: az sql recoverable-midb show -g mygroup --mi myinstance -n mymanageddb
+"""
+
+helps['sql recoverable-midb list'] = """
+type: command
+short-summary: Get all recoverable managed databases for given instance name
+examples:
+  - name: List all recoverable managed databases for given instance name
+    text: az sql recoverable-midb list -g mygroup --mi myinstance
 """
 
 helps['sql midb show'] = """

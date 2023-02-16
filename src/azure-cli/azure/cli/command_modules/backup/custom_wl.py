@@ -20,7 +20,7 @@ from azure.mgmt.recoveryservicesbackup.activestamp.models import AzureVMAppConta
     AzureWorkloadSAPHanaPointInTimeRestoreRequest, AzureWorkloadSQLPointInTimeRestoreRequest, \
     AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem, MoveRPAcrossTiersRequest, \
     RecoveryPointRehydrationInfo, AzureWorkloadSAPHanaRestoreWithRehydrateRequest, \
-    AzureWorkloadSQLRestoreWithRehydrateRequest
+    AzureWorkloadSQLRestoreWithRehydrateRequest, ProtectionState
 
 from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrossRegionRestoreRequest
 
@@ -500,7 +500,8 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until,
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
-def disable_protection(cmd, client, resource_group_name, vault_name, item):
+def disable_protection(cmd, client, resource_group_name, vault_name, item,
+                       retain_recovery_points_as_per_policy=False):
 
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
@@ -513,7 +514,10 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item):
             """)
 
     properties = _get_protected_item_instance(backup_item_type)
-    properties.protection_state = 'ProtectionStopped'
+    if retain_recovery_points_as_per_policy:
+        properties.protection_state = ProtectionState.backups_suspended
+    else:
+        properties.protection_state = ProtectionState.protection_stopped
     properties.policy_id = ''
     param = ProtectedItemResource(properties=properties)
 

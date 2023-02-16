@@ -192,6 +192,10 @@ def get_sql_managed_databases_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_databases
 
 
+def get_sql_recoverable_managed_databases_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).recoverable_managed_databases
+
+
 def get_sql_managed_database_advanced_threat_protection_settings_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_database_advanced_threat_protection_settings
 

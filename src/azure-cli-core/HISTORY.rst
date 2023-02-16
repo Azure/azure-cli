@@ -3,6 +3,20 @@
 Release History
 ===============
 
+2.45.0
+++++++
+* `aaz`: Support AAZFileArg (#25075)
+* `aaz`: Support singular options of `AAZListArg` in shorthand syntax partial value expression (#25302)
+
+2.44.1
+++++++
+* No changes
+
+2.44.0
+++++++
+* `aaz`: Support subresource selector (#24827)
+* `aaz`: Improve generic update arguments to consist with previous behaviors (#24960)
+
 2.43.0
 ++++++
 * `aaz`: Fix `has_value` function for list, dict and object arg types (#24625)
