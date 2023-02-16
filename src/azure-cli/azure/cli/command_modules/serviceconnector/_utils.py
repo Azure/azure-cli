@@ -349,6 +349,41 @@ def get_object_id_of_current_user():
         raise e
 
 
+def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
+                             user_identity_auth_info, system_identity_auth_info,
+                             service_principal_auth_info_secret, new_addon):
+    all_auth_info = []
+    if secret_auth_info is not None:
+        all_auth_info.append(secret_auth_info)
+    if secret_auth_info_auto is not None:
+        all_auth_info.append(secret_auth_info_auto)
+    if user_identity_auth_info is not None:
+        all_auth_info.append(user_identity_auth_info)
+    if system_identity_auth_info is not None:
+        all_auth_info.append(system_identity_auth_info)
+    if service_principal_auth_info_secret is not None:
+        all_auth_info.append(service_principal_auth_info_secret)
+    if not new_addon and len(all_auth_info) != 1:
+        raise ValidationError('Only one auth info is needed')
+    auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
+    return auth_info
+
+
+def get_local_conn_auth_info(secret_auth_info, secret_auth_info_auto,
+                             user_account_auth_info, service_principal_auth_info_secret):
+    all_auth_info = []
+    if secret_auth_info is not None:
+        all_auth_info.append(secret_auth_info)
+    if secret_auth_info_auto is not None:
+        all_auth_info.append(secret_auth_info_auto)
+    if user_account_auth_info is not None:
+        all_auth_info.append(user_account_auth_info)
+    if service_principal_auth_info_secret is not None:
+        all_auth_info.append(service_principal_auth_info_secret)
+    auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
+    return auth_info
+
+
 def _get_azext_module(extension_name, module_name):
     try:
         # Adding the installed extension in the path

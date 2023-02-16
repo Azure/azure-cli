@@ -32,6 +32,8 @@ from ._utils import (
     set_user_token_by_source_and_target,
     set_user_token_header,
     auto_register,
+    get_cloud_conn_auth_info,
+    get_local_conn_auth_info,
     _get_azext_module,
     _get_or_add_extension
 )
@@ -299,20 +301,9 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       namespace=None,                                        # Resource.EventHub
                       webpubsub=None,                                        # Resource.WebPubSub
                       signalr=None):                                         # Resource.SignalR
-    all_auth_info = []
-    if secret_auth_info is not None:
-        all_auth_info.append(secret_auth_info)
-    if secret_auth_info_auto is not None:
-        all_auth_info.append(secret_auth_info_auto)
-    if user_identity_auth_info is not None:
-        all_auth_info.append(user_identity_auth_info)
-    if system_identity_auth_info is not None:
-        all_auth_info.append(system_identity_auth_info)
-    if service_principal_auth_info_secret is not None:
-        all_auth_info.append(service_principal_auth_info_secret)
-    if not new_addon and len(all_auth_info) != 1:
-        raise ValidationError('Only one auth info is needed')
-    auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
+
+    auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
+                                         system_identity_auth_info, service_principal_auth_info_secret)
     if is_passwordless_command(cmd, auth_info):
         if _get_or_add_extension(cmd, PASSWORDLESS_EXTENSION_NAME, PASSWORDLESS_EXTENSION_MODULE, False):
             azext_custom = _get_azext_module(
@@ -380,20 +371,8 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
     if not new_addon and not target_id:
         raise RequiredArgumentMissingError(err_msg.format('--target-id'))
 
-    all_auth_info = []
-    if secret_auth_info is not None:
-        all_auth_info.append(secret_auth_info)
-    if secret_auth_info_auto is not None:
-        all_auth_info.append(secret_auth_info_auto)
-    if user_identity_auth_info is not None:
-        all_auth_info.append(user_identity_auth_info)
-    if system_identity_auth_info is not None:
-        all_auth_info.append(system_identity_auth_info)
-    if service_principal_auth_info_secret is not None:
-        all_auth_info.append(service_principal_auth_info_secret)
-    if not new_addon and len(all_auth_info) != 1:
-        raise ValidationError('Only one auth info is needed')
-    auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
+    auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
+                                         system_identity_auth_info, service_principal_auth_info_secret, new_addon)
 
     if store_in_connection_string:
         if client_type == CLIENT_TYPE.Dotnet.value:
@@ -497,16 +476,8 @@ def local_connection_create(cmd, client,  # pylint: disable=too-many-locals,too-
                             webpubsub=None,                                        # Resource.WebPubSub
                             signalr=None,                                          # Resource.SignalR
                             ):
-    all_auth_info = []
-    if secret_auth_info is not None:
-        all_auth_info.append(secret_auth_info)
-    if secret_auth_info_auto is not None:
-        all_auth_info.append(secret_auth_info_auto)
-    if user_account_auth_info is not None:
-        all_auth_info.append(user_account_auth_info)
-    if service_principal_auth_info_secret is not None:
-        all_auth_info.append(service_principal_auth_info_secret)
-    auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
+    auth_info = get_local_conn_auth_info(secret_auth_info, secret_auth_info_auto,
+                                         user_account_auth_info, service_principal_auth_info_secret)
     if is_passwordless_command(cmd, auth_info):
         if _get_or_add_extension(cmd, PASSWORDLESS_EXTENSION_NAME, PASSWORDLESS_EXTENSION_MODULE, False):
             azext_custom = _get_azext_module(
@@ -556,16 +527,8 @@ def local_connection_create_func(cmd, client,  # pylint: disable=too-many-locals
                                  signalr=None,                                          # Resource.SignalR
                                  enable_mi_for_db_linker=None):
 
-    all_auth_info = []
-    if secret_auth_info is not None:
-        all_auth_info.append(secret_auth_info)
-    if secret_auth_info_auto is not None:
-        all_auth_info.append(secret_auth_info_auto)
-    if user_account_auth_info is not None:
-        all_auth_info.append(user_account_auth_info)
-    if service_principal_auth_info_secret is not None:
-        all_auth_info.append(service_principal_auth_info_secret)
-    auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
+    auth_info = get_local_conn_auth_info(secret_auth_info, secret_auth_info_auto,
+                                         user_account_auth_info, service_principal_auth_info_secret)
     parameters = {
         'target_service': {
             "type": "AzureResource",
