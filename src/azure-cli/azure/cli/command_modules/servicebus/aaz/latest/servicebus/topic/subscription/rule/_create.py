@@ -143,8 +143,8 @@ class Create(AAZCommand):
             arg_group="CorrelationFilter",
             help="Session identifier.",
         )
-        _args_schema.properties = AAZDictArg(
-            options=["--properties"],
+        _args_schema.correlation_filter_property = AAZDictArg(
+            options=["--properties", "--correlation-filter-property"],
             arg_group="CorrelationFilter",
             help="dictionary object for custom filters",
         )
@@ -154,8 +154,8 @@ class Create(AAZCommand):
             help="Address to send to.",
         )
 
-        properties = cls._args_schema.properties
-        properties.Element = AAZStrArg()
+        correlation_filter_property = cls._args_schema.correlation_filter_property
+        correlation_filter_property.Element = AAZStrArg()
 
         # define Arg Group "Properties"
 
@@ -314,7 +314,7 @@ class Create(AAZCommand):
                 correlation_filter.set_prop("replyToSessionId", AAZStrType, ".reply_to_session_id")
                 correlation_filter.set_prop("requiresPreprocessing", AAZBoolType, ".requires_preprocessing")
                 correlation_filter.set_prop("sessionId", AAZStrType, ".session_id")
-                correlation_filter.set_prop("tags", AAZDictType, ".properties")
+                correlation_filter.set_prop("tags", AAZDictType, ".correlation_filter_property")
                 correlation_filter.set_prop("to", AAZStrType, ".to")
 
             tags = _builder.get(".properties.correlationFilter.tags")

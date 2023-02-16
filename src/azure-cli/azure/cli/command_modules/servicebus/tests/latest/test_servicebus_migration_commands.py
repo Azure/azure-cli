@@ -18,7 +18,6 @@ class SBNSMigrationCRUDScenarioTest(ScenarioTest):
     from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
     # Test playback fails and the live-only flag will be removed once it is addressed
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_sb_migration')
     def test_sb_migration(self, resource_group):

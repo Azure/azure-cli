@@ -12,14 +12,11 @@ from azure.cli.core.profiles import ResourceType
 
 def load_command_table(self, _):
     from azure.cli.command_modules.servicebus._client_factory import (namespaces_mgmt_client_factory,
-                                                                      queues_mgmt_client_factory,
-                                                                      topics_mgmt_client_factory,
-                                                                      subscriptions_mgmt_client_factory,
-                                                                      rules_mgmt_client_factory,
                                                                       disaster_recovery_mgmt_client_factory,
                                                                       migration_mgmt_client_factory,
                                                                       private_endpoint_connections_mgmt_client_factory,
-                                                                      private_link_mgmt_client_factory)
+                                                                      private_link_mgmt_client_factory,
+                                                                      rules_mgmt_client_factory)
 
     sb_namespace_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicebus.operations#NamespacesOperations.{}',
@@ -27,8 +24,9 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_SERVICEBUS)
 
     sb_rule_util = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.servicebus.Operation.sb_rule_custom#{}',
-    )
+        operations_tmpl='azure.mgmt.servicebus.operations#RulesOperations.{}',
+        client_factory=rules_mgmt_client_factory,
+        resource_type=ResourceType.MGMT_SERVICEBUS)
 
     sb_geodr_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicebus.operations#DisasterRecoveryConfigsOperations.{}',
@@ -91,9 +89,12 @@ def load_command_table(self, _):
                        transform=gen_dict_to_list_transform(key="value"))
 
 # Rules Region
-    with self.command_group('servicebus topic subscription rule', custom_command_type=sb_rule_util,
-                             is_preview=True) as g:
-        g.custom_command('create', 'sb_rule_create')
+    with self.command_group('servicebus topic subscription rule', sb_rule_util, client_factory=rules_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
+        g.custom_command('create', 'cli_rules_create')
+        g.show_command('show', 'get')
+        g.command('list', 'list_by_subscriptions')
+        g.command('delete', 'delete')
+        g.generic_update_command('update', custom_func_name='cli_rules_update')
 
 
 # DisasterRecoveryConfigs Region
