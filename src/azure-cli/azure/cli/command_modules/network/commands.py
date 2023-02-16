@@ -572,12 +572,22 @@ def load_command_table(self, _):
 
     with self.command_group('network watcher connection-monitor', network_watcher_cm_sdk, client_factory=cf_connection_monitor, min_api='2018-01-01') as g:
         g.custom_command('create', 'create_nw_connection_monitor', validator=process_nw_cm_v2_create_namespace)
-        g.command('delete', 'begin_delete')
-        g.show_command('show', 'get')
-        g.command('stop', 'begin_stop')
-        g.command('start', 'begin_start')
-        g.command('query', 'begin_query')
-        g.command('list', 'list')
+        # g.command('delete', 'begin_delete')
+        # g.show_command('show', 'get')
+        # g.command('stop', 'begin_stop')
+        # g.command('start', 'begin_start')
+        # g.command('query', 'begin_query')
+        # g.command('list', 'list')
+
+    from .operations.watcher import WatcherConnectionMonitorStart, WatcherConnectionMonitorStop, \
+        WatcherConnectionMonitorList, WatcherConnectionMonitorQuery, WatcherConnectionMonitorShow, \
+        WatcherConnectionMonitorDelete
+    self.command_table["network watcher connection-monitor start"] = WatcherConnectionMonitorStart(loader=self)
+    self.command_table["network watcher connection-monitor stop"] = WatcherConnectionMonitorStop(loader=self)
+    self.command_table["network watcher connection-monitor list"] = WatcherConnectionMonitorList(loader=self)
+    self.command_table["network watcher connection-monitor query"] = WatcherConnectionMonitorQuery(loader=self)
+    self.command_table["network watcher connection-monitor delete"] = WatcherConnectionMonitorDelete(loader=self)
+    self.command_table["network watcher connection-monitor show"] = WatcherConnectionMonitorShow(loader=self)
 
     with self.command_group('network watcher connection-monitor endpoint',
                             network_watcher_cm_sdk,
