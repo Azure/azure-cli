@@ -1352,6 +1352,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
                         "volumeMounts": [
                             {"name": "azurejson", "mountPath": "/etc/kubernetes"},
                             {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
+                            {"name": "sfcerts", "mountPath": "/etc/pki"},
                         ],
                     }
                 ],
@@ -1362,6 +1363,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
                 "volumes": [
                     {"name": "azurejson", "hostPath": {"path": "/etc/kubernetes"}},
                     {"name": "sslcerts", "hostPath": {"path": "/etc/ssl/certs"}},
+                    {"name": "sfcerts", "hostPath": {"path": "/etc/pki", "type": "DirectoryOrCreate"}},
                 ],
                 "nodeSelector": {"kubernetes.io/os": "linux"},
             }
