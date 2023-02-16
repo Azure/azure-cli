@@ -1707,7 +1707,7 @@ def db_update(
         compute_model=None,
         requested_backup_storage_redundancy=None,
         maintenance_configuration_id=None,
-        preferred_enclave_type=None):
+        preferred_enclave_type=None,
         assign_identity=False,
         user_assigned_identity_id=None,
         keys=None,
