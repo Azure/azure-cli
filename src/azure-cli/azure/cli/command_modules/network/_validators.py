@@ -653,21 +653,6 @@ def process_cross_region_lb_create_namespace(cmd, namespace):
             'specify --public-ip-dns-name only if creating a new public IP address.')
 
 
-def process_nic_create_namespace(cmd, namespace):
-    get_default_location_from_resource_group(cmd, namespace)
-    validate_tags(namespace)
-
-    validate_ag_address_pools(cmd, namespace)
-    validate_address_pool_id_list(cmd, namespace)
-    validate_inbound_nat_rule_id_list(cmd, namespace)
-    get_asg_validator(cmd.loader, 'application_security_groups')(cmd, namespace)
-
-    # process folded parameters
-    get_subnet_validator(has_type_field=False)(cmd, namespace)
-    get_public_ip_validator(has_type_field=False, allow_none=True, default_none=True)(cmd, namespace)
-    get_nsg_validator(has_type_field=False, allow_none=True, default_none=True)(cmd, namespace)
-
-
 def process_public_ip_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_public_ip_prefix(cmd, namespace)

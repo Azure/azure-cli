@@ -12,11 +12,11 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "network vnet-gateway packet-capture",
+    "network application-gateway private-link",
     is_preview=True,
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage packet capture on a virtual network gateway.
+    """Manage private link of an application gateway.
     """
     pass
 

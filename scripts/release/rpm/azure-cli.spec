@@ -5,11 +5,6 @@
 # Turn off python byte compilation
 %global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
 
-# .el7.centos -> .el7
-%if 0%{?rhel}
-  %define dist .el%{?rhel}
-%endif
-
 # The Python package name for dnf/yum/tdnf, such as python39, python3
 %define python_package %{getenv:PYTHON_PACKAGE}
 # The Python executable name, such as python3.9, python3
@@ -27,7 +22,6 @@ Name:           %{name}
 Version:        %{version}
 Release:        %{release}
 Url:            https://docs.microsoft.com/cli/azure/install-azure-cli
-BuildArch:      x86_64
 Requires:       %{python_package}
 Prefix:         /usr
 Prefix:         /etc
