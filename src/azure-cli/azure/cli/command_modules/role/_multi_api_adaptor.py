@@ -53,7 +53,7 @@ class MultiAPIAdaptor:
         parameters = RoleAssignmentCreateParameters(
             role_definition_id=role_id, principal_id=object_id, principal_type=assignee_principal_type,
             description=description, condition=condition, condition_version=condition_version)
-            
+
         return client.create(scope, assignment_name, parameters)
 
     def get_role_property(self, obj, property_name):  # pylint: disable=no-self-use
