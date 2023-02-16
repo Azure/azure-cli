@@ -27,6 +27,13 @@ def create_identity(client, resource_group_name, resource_name, location, tags=N
                                    parameters=parameters)
 
 
+def list_identity_resources(cmd, resource_group_name, resource_name):
+    from azure.cli.command_modules.identity._client_factory import _msi_list_resources_client
+    client = _msi_list_resources_client(cmd.cli_ctx)
+    return client.list_associated_resources(resource_group_name=resource_group_name,
+                                            resource_name=resource_name)
+
+
 def create_or_update_federated_credential(cmd, client, resource_group_name, identity_name, federated_credential_name,
                                           issuer=None, subject=None, audiences=None):
     _default_audiences = ['api://AzureADTokenExchange']
