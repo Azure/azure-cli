@@ -49,7 +49,7 @@ def load_arguments(self, _):
      ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySkuName, ApplicationGatewaySslProtocol,
      Direction,
      FlowLogFormatType, HTTPMethod, IPAllocationMethod,
-     IPVersion, ProbeProtocol, Protocol, PublicIPAddressSkuName, PublicIPAddressSkuTier,
+     IPVersion, Protocol, PublicIPAddressSkuName, PublicIPAddressSkuTier,
      SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
      ConnectionMonitorEndpointFilterType, ConnectionMonitorTestConfigurationProtocol,
      PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType,
@@ -58,7 +58,7 @@ def load_arguments(self, _):
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol',
          'Direction',
          'FlowLogFormatType', 'HTTPMethod', 'IPAllocationMethod',
-         'IPVersion', 'ProbeProtocol', 'Protocol', 'PublicIPAddressSkuName', 'PublicIPAddressSkuTier',
+         'IPVersion', 'Protocol', 'PublicIPAddressSkuName', 'PublicIPAddressSkuTier',
          'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
          'ConnectionMonitorEndpointFilterType', 'ConnectionMonitorTestConfigurationProtocol',
          'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType', 'DestinationPortBehavior', 'CoverageLevel', 'EndpointType',
@@ -172,44 +172,8 @@ def load_arguments(self, _):
         c.argument('enable_http2')
         c.argument('capacity', help='The number of instances to use with the application gateway.', type=int)
 
-    ag_subresources = [
-        {'name': 'private-link', 'display': 'private link', 'ref': 'private_link_configurations'}
-    ]
-
-    for item in ag_subresources:
-        with self.argument_context('network application-gateway {}'.format(item['name'])) as c:
-            c.argument('item_name', options_list=['--name', '-n'], id_part='child_name_1', help='The name of the {}.'.format(item['display']), completer=get_ag_subresource_completion_list(item['ref']))
-            c.argument('resource_name', options_list='--gateway-name', help='The name of the application gateway.', id_part='name')
-            c.argument('application_gateway_name', app_gateway_name_type)
-            c.argument('private_ip_address', arg_group=None)
-            c.argument('virtual_network_name', arg_group=None)
-
-        with self.argument_context('network application-gateway {} create'.format(item['name'])) as c:
-            c.argument('item_name', options_list=['--name', '-n'], help='The name of the {}.'.format(item['display']), completer=None)
-
-        with self.argument_context('network application-gateway {} list'.format(item['name'])) as c:
-            c.argument('resource_name', options_list=['--gateway-name'], id_part=None)
-
     with self.argument_context('network application-gateway create') as c:
         c.argument('connection_draining_timeout', min_api='2016-12-01', type=int, help='The time in seconds after a backend server is removed during which on open connection remains active. Range: 0 (disabled) to 3600', arg_group='Gateway')
-
-    with self.argument_context('network application-gateway private-link', arg_group=None) as c:
-        c.argument('frontend_ip', help='The frontend IP which the Private Link will associate to')
-        c.argument('private_link_name', options_list=['--name', '-n'], help='The name of Private Link.')
-        c.argument('private_link_ip_address', options_list='--ip-address', help='The static private IP address of a subnet for Private Link. If omitting, a dynamic one will be created')
-        c.argument('private_link_subnet_prefix', options_list='--subnet-prefix', help='The CIDR prefix to use when creating a new subnet')
-        c.argument('private_link_subnet_name_or_id', options_list='--subnet', help='The name or an existing ID of a subnet within the same vnet of an application gateway')
-        c.argument('private_link_primary', options_list='--primary', arg_type=get_three_state_flag(), help='Whether the IP configuration is primary or not')
-
-    with self.argument_context('network application-gateway private-link list', arg_group=None) as c:
-        c.argument('application_gateway_name', id_part=None)
-
-    with self.argument_context('network application-gateway private-link ip-config', arg_group=None) as c:
-        c.argument('private_link_ip_name', options_list='--name', help='The name of the private IP for Private Link')
-        c.argument('private_link_name', options_list='--private-link', help='The name of Private Link.')
-
-    with self.argument_context('network application-gateway private-link ip-config list', arg_group=None) as c:
-        c.argument('application_gateway_name', id_part=None)
 
     with self.argument_context('network application-gateway ssl-policy') as c:
         c.argument('clear', action='store_true', help='Clear SSL policy.')
@@ -563,15 +527,6 @@ def load_arguments(self, _):
     # endregion
 
     # region LoadBalancers
-    lb_subresources = [
-        {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
-    ]
-    for item in lb_subresources:
-        with self.argument_context('network lb {}'.format(item['name'])) as c:
-            c.argument('item_name', options_list=['--name', '-n'], help='The name of the {}'.format(item['display']), completer=get_lb_subresource_completion_list(item['ref']), id_part='child_name_1')
-            c.argument('resource_name', options_list='--lb-name', help='The name of the load balancer.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
-            c.argument('load_balancer_name', load_balancer_name_type)
-
     with self.argument_context('network lb') as c:
         c.argument('load_balancer_name', load_balancer_name_type, options_list=['--name', '-n'])
         c.argument('frontend_port', help='Port number')
@@ -608,30 +563,9 @@ def load_arguments(self, _):
         c.argument('virtual_network_name', virtual_network_name_type)
         c.argument('vnet_address_prefix', help='The CIDR address prefix to use when creating a new VNet.')
         c.ignore('vnet_type', 'subnet_type')
-
-    with self.argument_context('network lb probe') as c:
-        c.argument('interval', type=int, help='Probing time interval in seconds.')
-        c.argument('path', help='The endpoint to interrogate (http only).')
-        c.argument('port', type=int, help='The port to interrogate.')
-        c.argument('protocol', help='The protocol to probe.', arg_type=get_enum_type(ProbeProtocol))
-        c.argument('threshold', type=int, help='The number of consecutive probe failures before an instance is deemed unhealthy.')
-        c.argument('probe_threshold', type=int, help='The number of consecutive successful or failed probes in order '
-                                                     'to allow or deny traffic from being delivered to this endpoint.')
-
     # endregion
 
     # region cross-region load balancer
-    cross_region_lb_subresources = [
-        {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
-    ]
-    for item in cross_region_lb_subresources:
-        with self.argument_context('network cross-region-lb {}'.format(item['name'])) as c:
-            c.argument('item_name', options_list=['--name', '-n'], help='The name of the {}'.format(item['display']),
-                       completer=get_lb_subresource_completion_list(item['ref']), id_part='child_name_1')
-            c.argument('resource_name', options_list='--lb-name', help='The name of the load balancer.',
-                       completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
-            c.argument('load_balancer_name', load_balancer_name_type)
-
     with self.argument_context('network cross-region-lb') as c:
         c.argument('load_balancer_name', load_balancer_name_type, options_list=['--name', '-n'])
         c.argument('frontend_port', help='Port number')
@@ -663,28 +597,9 @@ def load_arguments(self, _):
         c.argument('public_ip_zone', zone_type, min_api='2017-06-01', options_list=['--public-ip-zone'],
                    help='used to created a new public ip for the load balancer, a.k.a public facing Load balancer')
         c.ignore('public_ip_address_type')
-
-    with self.argument_context('network cross-region-lb probe') as c:
-        c.argument('interval', help='Probing time interval in seconds.')
-        c.argument('path', help='The endpoint to interrogate (http only).')
-        c.argument('port', help='The port to interrogate.')
-        c.argument('protocol', help='The protocol to probe.', arg_type=get_enum_type(ProbeProtocol))
-        c.argument('threshold', help='The number of consecutive probe failures before an instance is deemed unhealthy.')
     # endregion
 
     # region NetworkInterfaces (NIC)
-    with self.argument_context('network nic') as c:
-        c.argument('enable_accelerated_networking', min_api='2016-09-01', options_list=['--accelerated-networking'], help='Enable accelerated networking.', arg_type=get_three_state_flag())
-        c.argument('network_interface_name', nic_type, options_list=['--name', '-n'])
-        c.argument('internal_dns_name_label', options_list='--internal-dns-name', help='The internal DNS name label.', arg_group='DNS')
-        c.argument('dns_servers', help='Space-separated list of DNS server IP addresses.', nargs='+', arg_group='DNS')
-        c.argument('enable_ip_forwarding', options_list='--ip-forwarding', help='Enable IP forwarding.', arg_type=get_three_state_flag())
-
-    with self.argument_context('network nic create') as c:
-        c.argument('private_ip_address_version', min_api='2016-09-01', help='The private IP address version to use.', default=IPVersion.I_PV4.value if IPVersion else '')
-        c.argument('network_interface_name', nic_type, options_list=['--name', '-n'], id_part=None)
-        c.argument('edge_zone', edge_zone)
-
         public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, default_none=True)
         c.argument('public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
 
@@ -694,11 +609,7 @@ def load_arguments(self, _):
         subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name', allow_cross_sub=False)
         c.argument('subnet', help=subnet_help, completer=subnet_completion_list)
 
-    with self.argument_context('network nic update') as c:
-        c.argument('network_security_group', help='Name or ID of the associated network security group.', validator=get_nsg_validator(), completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
-        c.argument('dns_servers', help='Space-separated list of DNS server IP addresses. Use ""(\'""\' in PowerShell) to revert to default Azure servers.', nargs='+', arg_group='DNS')
-
-    for item in ['create', 'ip-config update', 'ip-config create']:
+    for item in ['ip-config update', 'ip-config create']:
         with self.argument_context('network nic {}'.format(item)) as c:
             c.argument('application_security_groups', options_list=['--application-security-groups', '--asgs'], min_api='2017-09-01', help='Space-separated list of application security groups.', nargs='+', validator=get_asg_validator(self, 'application_security_groups'))
 
