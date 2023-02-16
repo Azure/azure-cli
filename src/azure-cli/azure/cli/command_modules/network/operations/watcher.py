@@ -21,19 +21,18 @@ def update_network_watcher_from_location(ctx, cli_ctx, remove=False, watcher_nam
                                          rg_name='watcher_rg'):
 
     from ..aaz.latest.network.watcher import List as NetworkWatcherList
-    parameters = {
-        'subscription_id': ctx.subscription_id
-    }
-    network_watcher_list = NetworkWatcherList(cli_ctx=cli_ctx)(command_args=parameters)
+    network_watcher_list = NetworkWatcherList(cli_ctx=cli_ctx)(command_args={})
     args = ctx.args
     location = args.location.to_serialized_data()
-    watcher = next((x for x in list(network_watcher_list) if x.location.lower() == location.lower()), None)
+    watcher = next((x for x in network_watcher_list if x['location'].lower() == location.lower()), None)
     if not watcher:
         raise CLIError("network watcher is not enabled for region '{}'.".format(location))
     from azure.mgmt.core.tools import parse_resource_id
-    id_parts = parse_resource_id(watcher.id)
-    setattr(args, rg_name, id_parts['resource_group'])
-    setattr(args, watcher_name, id_parts['name'])
+    id_parts = parse_resource_id(watcher['id'])
+    args.resource_group = id_parts['resource_group']
+    args.network_watcher_name = id_parts['name']
+    # setattr(args, rg_name, id_parts['resource_group'])
+    # setattr(args, watcher_name, id_parts['name'])
     if remove:
         del args.location
 
