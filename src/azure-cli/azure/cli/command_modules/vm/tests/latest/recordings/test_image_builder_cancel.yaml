@@ -13,12 +13,12 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_cancel_000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001","name":"img_tmpl_cancel_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-15T14:27:18Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001","name":"img_tmpl_cancel_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-10T08:31:09Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Feb 2023 14:27:23 GMT
+      - Fri, 10 Feb 2023 08:31:14 GMT
       expires:
       - '-1'
       pragma:
@@ -59,12 +59,12 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-msi/6.1.0 Python/3.10.6 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-msi/7.0.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1?api-version=2022-01-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1?api-version=2023-01-31
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_cancel_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1","name":"ide1","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"6e26fde3-1391-4829-a9b5-32bb81116095","clientId":"13e9945e-3f70-4c19-8852-d5e088beb246"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_cancel_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1","name":"ide1","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"77212e35-d441-436e-9ac8-41641ebd1d61","clientId":"6d9530c3-8f96-45a4-97ae-4c8ffd16d6b6"}}'
     headers:
       cache-control:
       - no-cache
@@ -73,7 +73,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Feb 2023 14:27:30 GMT
+      - Fri, 10 Feb 2023 08:31:20 GMT
       expires:
       - '-1'
       location:
@@ -85,7 +85,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -103,14 +103,13 @@ interactions:
       ParameterSetName:
       - --assignee --role --scope
       User-Agent:
-      - python/3.10.6 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
-        AZURECLI/2.45.0
+      - python/3.9.13 (Windows-10-10.0.22621-SP0) AZURECLI/2.45.0
     method: GET
-    uri: https://graph.microsoft.com/v1.0/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%2713e9945e-3f70-4c19-8852-d5e088beb246%27%29
+    uri: https://graph.microsoft.com/v1.0/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%276d9530c3-8f96-45a4-97ae-4c8ffd16d6b6%27%29
   response:
     body:
-      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#servicePrincipals","value":[{"id":"6e26fde3-1391-4829-a9b5-32bb81116095","deletedDateTime":null,"accountEnabled":true,"alternativeNames":["isExplicit=True","/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_cancel_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1"],"appDisplayName":null,"appDescription":null,"appId":"13e9945e-3f70-4c19-8852-d5e088beb246","applicationTemplateId":null,"appOwnerOrganizationId":null,"appRoleAssignmentRequired":false,"createdDateTime":"2023-02-15T14:27:28Z","description":null,"disabledByMicrosoftStatus":null,"displayName":"ide1","homepage":null,"loginUrl":null,"logoutUrl":null,"notes":null,"notificationEmailAddresses":[],"preferredSingleSignOnMode":null,"preferredTokenSigningKeyThumbprint":null,"replyUrls":[],"servicePrincipalNames":["13e9945e-3f70-4c19-8852-d5e088beb246","https://identity.azure.net/EVh2QTSX913t9dWyS4VduHiZPbu2vOAZfGSuwx0urXI="],"servicePrincipalType":"ManagedIdentity","signInAudience":null,"tags":[],"tokenEncryptionKeyId":null,"info":null,"samlSingleSignOnSettings":null,"addIns":[],"appRoles":[],"keyCredentials":[{"customKeyIdentifier":"4FD96B7645A56550E939E950E73E0C55A57F1649","displayName":"CN=13e9945e-3f70-4c19-8852-d5e088beb246,
-        DC=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","endDateTime":"2023-05-16T14:22:00Z","key":null,"keyId":"796bcade-c164-4ea9-a198-1af7c760dfba","startDateTime":"2023-02-15T14:22:00Z","type":"AsymmetricX509Cert","usage":"Verify"}],"oauth2PermissionScopes":[],"passwordCredentials":[],"resourceSpecificApplicationPermissions":[],"verifiedPublisher":{"displayName":null,"verifiedPublisherId":null,"addedDateTime":null}}]}'
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#servicePrincipals","value":[{"id":"77212e35-d441-436e-9ac8-41641ebd1d61","deletedDateTime":null,"accountEnabled":true,"alternativeNames":["isExplicit=True","/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_cancel_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1"],"appDisplayName":null,"appDescription":null,"appId":"6d9530c3-8f96-45a4-97ae-4c8ffd16d6b6","applicationTemplateId":null,"appOwnerOrganizationId":null,"appRoleAssignmentRequired":false,"createdDateTime":"2023-02-10T08:31:18Z","description":null,"disabledByMicrosoftStatus":null,"displayName":"ide1","homepage":null,"loginUrl":null,"logoutUrl":null,"notes":null,"notificationEmailAddresses":[],"preferredSingleSignOnMode":null,"preferredTokenSigningKeyThumbprint":null,"replyUrls":[],"servicePrincipalNames":["6d9530c3-8f96-45a4-97ae-4c8ffd16d6b6","https://identity.azure.net/a+0dkTl9UMr6jQI8Wh84Bk0H7cGx5r9j3RBqZA5aHrk="],"servicePrincipalType":"ManagedIdentity","signInAudience":null,"tags":[],"tokenEncryptionKeyId":null,"info":null,"samlSingleSignOnSettings":null,"addIns":[],"appRoles":[],"keyCredentials":[{"customKeyIdentifier":"469E6C3291076DBD9F141A6417F5A1DBBCECA5EC","displayName":"CN=6d9530c3-8f96-45a4-97ae-4c8ffd16d6b6,
+        DC=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","endDateTime":"2023-05-11T08:26:00Z","key":null,"keyId":"81e11544-cf4e-4330-b582-2dfaecd453f3","startDateTime":"2023-02-10T08:26:00Z","type":"AsymmetricX509Cert","usage":"Verify"}],"oauth2PermissionScopes":[],"passwordCredentials":[],"resourceSpecificApplicationPermissions":[],"verifiedPublisher":{"displayName":null,"verifiedPublisherId":null,"addedDateTime":null}}]}'
     headers:
       cache-control:
       - no-cache
@@ -119,11 +118,11 @@ interactions:
       content-type:
       - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
       date:
-      - Wed, 15 Feb 2023 14:28:15 GMT
+      - Fri, 10 Feb 2023 08:32:06 GMT
       odata-version:
       - '4.0'
       request-id:
-      - ecb774aa-35b9-48c5-8190-6305424143ca
+      - 9a530d12-6bea-49d4-bc6e-2aaf3f275551
       strict-transport-security:
       - max-age=31536000
       transfer-encoding:
@@ -131,7 +130,7 @@ interactions:
       vary:
       - Accept-Encoding
       x-ms-ags-diagnostic:
-      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF00001A2F"}}'
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF0000C07E"}}'
       x-ms-resource-unit:
       - '1'
     status:
@@ -151,10 +150,12 @@ interactions:
       ParameterSetName:
       - --assignee --role --scope
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-authorization/3.0.0 Python/3.10.6
-        (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - python/3.9.13 (Windows-10-10.0.22621-SP0) msrest/0.7.1 msrest_azure/0.6.4
+        azure-mgmt-authorization/0.61.0 Azure-SDK-For-Python AZURECLI/2.45.0
+      accept-language:
+      - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Contributor%27&api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Contributor%27&api-version=2018-01-01-preview
   response:
     body:
       string: '{"value":[{"properties":{"roleName":"Contributor","type":"BuiltInRole","description":"Grants
@@ -168,7 +169,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Feb 2023 14:28:16 GMT
+      - Fri, 10 Feb 2023 08:32:06 GMT
       expires:
       - '-1'
       pragma:
@@ -188,7 +189,7 @@ interactions:
       message: OK
 - request:
     body: '{"properties": {"roleDefinitionId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
-      "principalId": "6e26fde3-1391-4829-a9b5-32bb81116095", "principalType": "ServicePrincipal"}}'
+      "principalId": "77212e35-d441-436e-9ac8-41641ebd1d61", "principalType": "ServicePrincipal"}}'
     headers:
       Accept:
       - application/json
@@ -201,19 +202,21 @@ interactions:
       Content-Length:
       - '270'
       Content-Type:
-      - application/json
+      - application/json; charset=utf-8
       Cookie:
       - x-ms-gateway-slice=Production
       ParameterSetName:
       - --assignee --role --scope
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-authorization/3.0.0 Python/3.10.6
-        (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - python/3.9.13 (Windows-10-10.0.22621-SP0) msrest/0.7.1 msrest_azure/0.6.4
+        azure-mgmt-authorization/0.61.0 Azure-SDK-For-Python AZURECLI/2.45.0
+      accept-language:
+      - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.Authorization/roleAssignments/88888888-0000-0000-0000-000000000001?api-version=2022-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.Authorization/roleAssignments/88888888-0000-0000-0000-000000000001?api-version=2020-04-01-preview
   response:
     body:
-      string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"6e26fde3-1391-4829-a9b5-32bb81116095","principalType":"ServicePrincipal","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001","condition":null,"conditionVersion":null,"createdOn":"2023-02-15T14:28:16.5860312Z","updatedOn":"2023-02-15T14:28:17.8850478Z","createdBy":null,"updatedBy":"6d97229a-391f-473a-893f-f0608b592d7b","delegatedManagedIdentityResourceId":null,"description":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.Authorization/roleAssignments/88888888-0000-0000-0000-000000000001","type":"Microsoft.Authorization/roleAssignments","name":"88888888-0000-0000-0000-000000000001"}'
+      string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"77212e35-d441-436e-9ac8-41641ebd1d61","principalType":"ServicePrincipal","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001","condition":null,"conditionVersion":null,"createdOn":"2023-02-10T08:32:07.5422934Z","updatedOn":"2023-02-10T08:32:08.8159488Z","createdBy":null,"updatedBy":"0581142e-ae8f-4bc0-9a0d-ffb7cbad05b2","delegatedManagedIdentityResourceId":null,"description":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.Authorization/roleAssignments/88888888-0000-0000-0000-000000000001","type":"Microsoft.Authorization/roleAssignments","name":"88888888-0000-0000-0000-000000000001"}'
     headers:
       cache-control:
       - no-cache
@@ -222,7 +225,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Feb 2023 14:28:21 GMT
+      - Fri, 10 Feb 2023 08:32:13 GMT
       expires:
       - '-1'
       pragma:
@@ -250,12 +253,12 @@ interactions:
       ParameterSetName:
       - -g -n --image-source --managed-image-destinations --identity
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_cancel_000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001","name":"img_tmpl_cancel_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-15T14:27:18Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001","name":"img_tmpl_cancel_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-10T08:31:09Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -264,7 +267,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Feb 2023 14:28:22 GMT
+      - Fri, 10 Feb 2023 08:32:14 GMT
       expires:
       - '-1'
       pragma:
@@ -292,7 +295,7 @@ interactions:
       ParameterSetName:
       - -g -n --image-source --managed-image-destinations --identity
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.10.6 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/locations?api-version=2019-11-01
   response:
@@ -409,7 +412,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Feb 2023 14:28:24 GMT
+      - Fri, 10 Feb 2023 08:32:15 GMT
       expires:
       - '-1'
       pragma:
@@ -447,7 +450,7 @@ interactions:
       ParameterSetName:
       - -g -n --image-source --managed-image-destinations --identity
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-mgmt-imagebuilder/1.1.0 Python/3.10.6 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-imagebuilder/1.1.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template1?api-version=2022-02-14
   response:
@@ -467,7 +470,7 @@ interactions:
         \"name\": \"template1\",\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\"\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/03b9f77e-bdc5-44ea-9e1b-b6a3596d89fe?api-version=2022-02-14
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/b133ca2d-a0a9-422b-8d26-8a5fc04584c9?api-version=2022-02-14
       cache-control:
       - no-cache
       content-length:
@@ -475,7 +478,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 15 Feb 2023 14:28:34 GMT
+      - Fri, 10 Feb 2023 08:32:25 GMT
       expires:
       - '-1'
       pragma:
@@ -487,7 +490,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -505,14 +508,14 @@ interactions:
       ParameterSetName:
       - -g -n --image-source --managed-image-destinations --identity
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-mgmt-imagebuilder/1.1.0 Python/3.10.6 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-imagebuilder/1.1.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/03b9f77e-bdc5-44ea-9e1b-b6a3596d89fe?api-version=2022-02-14
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/b133ca2d-a0a9-422b-8d26-8a5fc04584c9?api-version=2022-02-14
   response:
     body:
-      string: "{\n \"name\": \"03B9F77E-BDC5-44EA-9E1B-B6A3596D89FE\",\n \"status\":
-        \"Succeeded\",\n \"startTime\": \"2023-02-15T14:28:32.9893623Z\",\n \"endTime\":
-        \"2023-02-15T14:28:43.3053105Z\"\n}"
+      string: "{\n \"name\": \"B133CA2D-A0A9-422B-8D26-8A5FC04584C9\",\n \"status\":
+        \"Succeeded\",\n \"startTime\": \"2023-02-10T08:32:24.3885277Z\",\n \"endTime\":
+        \"2023-02-10T08:32:35.3363466Z\"\n}"
     headers:
       cache-control:
       - no-cache
@@ -521,7 +524,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 15 Feb 2023 14:29:05 GMT
+      - Fri, 10 Feb 2023 08:32:55 GMT
       expires:
       - '-1'
       pragma:
@@ -553,7 +556,7 @@ interactions:
       ParameterSetName:
       - -g -n --image-source --managed-image-destinations --identity
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-mgmt-imagebuilder/1.1.0 Python/3.10.6 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-imagebuilder/1.1.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template1?api-version=2022-02-14
   response:
@@ -566,11 +569,11 @@ interactions:
         \   \"location\": \"westus\",\n    \"runOutputName\": \"img1\",\n    \"type\":
         \"ManagedImage\"\n   }\n  ],\n  \"provisioningState\": \"Succeeded\",\n  \"buildTimeoutInMinutes\":
         0,\n  \"vmProfile\": {\n   \"vmSize\": \"\",\n   \"osDiskSizeGB\": 0\n  },\n
-        \ \"stagingResourceGroup\": \"\",\n  \"exactStagingResourceGroup\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/IT_img_tmpl_cancel_bejafaczzamqjplceak6qxxl_70a0d743-19ef-4e8a-bbda-f90c6b2e3cf5\"\n
+        \ \"stagingResourceGroup\": \"\",\n  \"exactStagingResourceGroup\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/IT_img_tmpl_cancel_kbtr4zkr2yccaxhedf25uo45_48d32ec0-b8eb-48d1-ab5b-2e06fdcd2371\"\n
         },\n \"identity\": {\n  \"type\": \"UserAssigned\",\n  \"userAssignedIdentities\":
         {\n   \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1\":
-        {\n    \"principalId\": \"6e26fde3-1391-4829-a9b5-32bb81116095\",\n    \"clientId\":
-        \"13e9945e-3f70-4c19-8852-d5e088beb246\"\n   }\n  }\n },\n \"tags\": {},\n
+        {\n    \"principalId\": \"77212e35-d441-436e-9ac8-41641ebd1d61\",\n    \"clientId\":
+        \"6d9530c3-8f96-45a4-97ae-4c8ffd16d6b6\"\n   }\n  }\n },\n \"tags\": {},\n
         \"location\": \"westus\",\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_cancel_000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template1\",\n
         \"name\": \"template1\",\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\"\n}"
     headers:
@@ -581,7 +584,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 15 Feb 2023 14:29:06 GMT
+      - Fri, 10 Feb 2023 08:32:56 GMT
       expires:
       - '-1'
       pragma:
@@ -615,7 +618,7 @@ interactions:
       ParameterSetName:
       - -g -n --no-wait
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-mgmt-imagebuilder/1.1.0 Python/3.10.6 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-imagebuilder/1.1.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template1/run?api-version=2022-02-14
   response:
@@ -623,17 +626,17 @@ interactions:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/507ff9b5-b840-4226-963a-7af2e5c88116?api-version=2022-02-14
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/66a4da9a-f767-4d5f-bca7-317ee8b2aebe?api-version=2022-02-14
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Wed, 15 Feb 2023 14:29:09 GMT
+      - Fri, 10 Feb 2023 08:33:01 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/507ff9b5-b840-4226-963a-7af2e5c88116?api-version=2022-02-14
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/66a4da9a-f767-4d5f-bca7-317ee8b2aebe?api-version=2022-02-14
       pragma:
       - no-cache
       server:
@@ -661,7 +664,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-mgmt-imagebuilder/1.1.0 Python/3.10.6 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-imagebuilder/1.1.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template1?api-version=2022-02-14
   response:
@@ -673,26 +676,26 @@ interactions:
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.Compute/images/img1\",\n
         \   \"location\": \"westus\",\n    \"runOutputName\": \"img1\",\n    \"type\":
         \"ManagedImage\"\n   }\n  ],\n  \"provisioningState\": \"Succeeded\",\n  \"lastRunStatus\":
-        {\n   \"startTime\": \"2023-02-15T14:29:08.731984031Z\",\n   \"endTime\":
+        {\n   \"startTime\": \"2023-02-10T08:33:00.394690999Z\",\n   \"endTime\":
         \"0001-01-01T00:00:00Z\",\n   \"runState\": \"Running\",\n   \"runSubState\":
-        \"Queued\",\n   \"message\": \"\"\n  },\n  \"buildTimeoutInMinutes\": 0,\n
+        \"Building\",\n   \"message\": \"\"\n  },\n  \"buildTimeoutInMinutes\": 0,\n
         \ \"vmProfile\": {\n   \"vmSize\": \"\",\n   \"osDiskSizeGB\": 0\n  },\n  \"stagingResourceGroup\":
-        \"\",\n  \"exactStagingResourceGroup\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/IT_img_tmpl_cancel_bejafaczzamqjplceak6qxxl_70a0d743-19ef-4e8a-bbda-f90c6b2e3cf5\"\n
+        \"\",\n  \"exactStagingResourceGroup\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/IT_img_tmpl_cancel_kbtr4zkr2yccaxhedf25uo45_48d32ec0-b8eb-48d1-ab5b-2e06fdcd2371\"\n
         },\n \"identity\": {\n  \"type\": \"UserAssigned\",\n  \"userAssignedIdentities\":
         {\n   \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1\":
-        {\n    \"principalId\": \"6e26fde3-1391-4829-a9b5-32bb81116095\",\n    \"clientId\":
-        \"13e9945e-3f70-4c19-8852-d5e088beb246\"\n   }\n  }\n },\n \"tags\": {},\n
+        {\n    \"principalId\": \"77212e35-d441-436e-9ac8-41641ebd1d61\",\n    \"clientId\":
+        \"6d9530c3-8f96-45a4-97ae-4c8ffd16d6b6\"\n   }\n  }\n },\n \"tags\": {},\n
         \"location\": \"westus\",\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_cancel_000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template1\",\n
         \"name\": \"template1\",\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\"\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1671'
+      - '1673'
       content-type:
       - application/json
       date:
-      - Wed, 15 Feb 2023 14:29:10 GMT
+      - Fri, 10 Feb 2023 08:33:02 GMT
       expires:
       - '-1'
       pragma:
@@ -726,7 +729,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-mgmt-imagebuilder/1.1.0 Python/3.10.6 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-imagebuilder/1.1.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template1/cancel?api-version=2022-02-14
   response:
@@ -736,7 +739,7 @@ interactions:
       cache-control:
       - no-cache
       date:
-      - Wed, 15 Feb 2023 14:29:27 GMT
+      - Fri, 10 Feb 2023 08:33:20 GMT
       expires:
       - '-1'
       pragma:
@@ -766,7 +769,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-mgmt-imagebuilder/1.1.0 Python/3.10.6 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-imagebuilder/1.1.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template1?api-version=2022-02-14
   response:
@@ -778,15 +781,15 @@ interactions:
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.Compute/images/img1\",\n
         \   \"location\": \"westus\",\n    \"runOutputName\": \"img1\",\n    \"type\":
         \"ManagedImage\"\n   }\n  ],\n  \"provisioningState\": \"Succeeded\",\n  \"lastRunStatus\":
-        {\n   \"startTime\": \"2023-02-15T14:29:08.731984031Z\",\n   \"endTime\":
+        {\n   \"startTime\": \"2023-02-10T08:33:00.394690999Z\",\n   \"endTime\":
         \"0001-01-01T00:00:00Z\",\n   \"runState\": \"Canceling\",\n   \"message\":
         \"Canceling image build\"\n  },\n  \"buildTimeoutInMinutes\": 0,\n  \"vmProfile\":
         {\n   \"vmSize\": \"\",\n   \"osDiskSizeGB\": 0\n  },\n  \"stagingResourceGroup\":
-        \"\",\n  \"exactStagingResourceGroup\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/IT_img_tmpl_cancel_bejafaczzamqjplceak6qxxl_70a0d743-19ef-4e8a-bbda-f90c6b2e3cf5\"\n
+        \"\",\n  \"exactStagingResourceGroup\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/IT_img_tmpl_cancel_kbtr4zkr2yccaxhedf25uo45_48d32ec0-b8eb-48d1-ab5b-2e06fdcd2371\"\n
         },\n \"identity\": {\n  \"type\": \"UserAssigned\",\n  \"userAssignedIdentities\":
         {\n   \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_cancel_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1\":
-        {\n    \"principalId\": \"6e26fde3-1391-4829-a9b5-32bb81116095\",\n    \"clientId\":
-        \"13e9945e-3f70-4c19-8852-d5e088beb246\"\n   }\n  }\n },\n \"tags\": {},\n
+        {\n    \"principalId\": \"77212e35-d441-436e-9ac8-41641ebd1d61\",\n    \"clientId\":
+        \"6d9530c3-8f96-45a4-97ae-4c8ffd16d6b6\"\n   }\n  }\n },\n \"tags\": {},\n
         \"location\": \"westus\",\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_cancel_000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template1\",\n
         \"name\": \"template1\",\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\"\n}"
     headers:
@@ -797,7 +800,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 15 Feb 2023 14:29:28 GMT
+      - Fri, 10 Feb 2023 08:33:22 GMT
       expires:
       - '-1'
       pragma:

@@ -24,7 +24,7 @@ from azure.cli.command_modules.network._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
     transform_public_ip_create_output,
-    transform_traffic_manager_create_output, transform_nic_create_output,
+    transform_traffic_manager_create_output,
     transform_vpn_connection, transform_vpn_connection_list,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
@@ -34,7 +34,6 @@ from azure.cli.command_modules.network._format import (
 from azure.cli.command_modules.network._validators import (
     get_network_watcher_from_location,
     process_ag_create_namespace,
-    process_nic_create_namespace,
     process_lb_create_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
@@ -524,15 +523,13 @@ def load_command_table(self, _):
     # endregion
 
     # region NetworkInterfaces: (NIC)
-    with self.command_group('network nic', network_nic_sdk) as g:
-        g.custom_command('create', 'create_nic', transform=transform_nic_create_output, validator=process_nic_create_namespace, supports_no_wait=True)
-        g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_nics')
-        g.command('show-effective-route-table', 'begin_get_effective_route_table', min_api='2016-09-01', table_transformer=transform_effective_route_table)
-        g.command('list-effective-nsg', 'begin_list_effective_network_security_groups', min_api='2016-09-01', table_transformer=transform_effective_nsg)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_nic', supports_no_wait=True)
-        g.wait_command('wait')
+    with self.command_group("network nic"):
+        from .aaz.latest.network.nic import ListEffectiveNsg, ShowEffectiveRouteTable
+        from .custom import NICCreate, NICUpdate
+        self.command_table["network nic create"] = NICCreate(loader=self)
+        self.command_table["network nic update"] = NICUpdate(loader=self)
+        self.command_table["network nic list-effective-nsg"] = ListEffectiveNsg(loader=self, table_transformer=transform_effective_nsg)
+        self.command_table["network nic show-effective-route-table"] = ShowEffectiveRouteTable(loader=self, table_transformer=transform_effective_route_table)
 
     resource = 'network_interfaces'
     subresource = 'ip_configurations'
