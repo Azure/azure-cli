@@ -47,13 +47,15 @@ DEPENDENCIES = [
     'azure-cli-telemetry==1.0.8.*',
     'azure-mgmt-core>=1.2.0,<2',
     'cryptography',
+    # On Linux, the distribution (Ubuntu, Debian, etc) and version are logged in telemetry
+    'distro; sys_platform == "linux"',
     'humanfriendly~=10.0',
     'jmespath',
     'knack~=0.10.1',
     'msal-extensions~=1.0.0',
     'msal[broker]==1.20.0',
     'msrestazure~=0.6.4',
-    'packaging>=20.9,<22.0',
+    'packaging>=20.9',
     'paramiko>=2.0.8,<3.0.0',
     'pkginfo>=1.5.0.1',
     # psutil can't install on cygwin: https://github.com/Azure/azure-cli/issues/9399
