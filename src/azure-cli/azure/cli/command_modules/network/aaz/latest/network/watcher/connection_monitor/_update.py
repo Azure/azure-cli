@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network watcher connection-monitor update",
-)
 class Update(AAZCommand):
     """Update a connection monitor.
     """
