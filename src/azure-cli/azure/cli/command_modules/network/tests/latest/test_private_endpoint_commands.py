@@ -1857,6 +1857,53 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
 
         self.cmd('network application-gateway private-link list -g {rg} --gateway-name {appgw} ')
 
+    @ResourceGroupPreparer(name_prefix="cli_test_private_link_ip_config_", location="westus")
+    def test_private_link_ip_config(self):
+        self.kwargs.update({
+            "pip": self.create_random_name("public-ip-", 16),
+            "ag": self.create_random_name("application-gateway-", 24),
+            "pl": self.create_random_name("private-link-", 20),
+            "subnet": self.create_random_name("subnet-", 12),
+            "ip_config": self.create_random_name("ip-configuration-", 24),
+        })
+        self.cmd("network public-ip create -n {pip} -g {rg} --sku standard")
+        self.cmd("network application-gateway create -n {ag} -g {rg} --public-ip-address {pip} --sku standard_v2 --priority 1001")
+        self.cmd("network application-gateway private-link add -n {pl} -g {rg} --gateway-name {ag} --frontend-ip appGatewayFrontendIP --subnet {subnet} --subnet-prefix 10.0.4.0/24")
+
+        self.cmd(
+            "network application-gateway private-link ip-config add -n {ip_config} -g {rg} "
+            "--gateway-name {ag} --private-link {pl} --primary true",
+            checks=[
+                self.check("name", "{ip_config}"),
+                self.check("primary", True),
+            ]
+        )
+        self.cmd(
+            "network application-gateway private-link ip-config show -n {ip_config} -g {rg} "
+            "--gateway-name {ag} --private-link {pl}",
+            checks=[
+                self.check("name", "{ip_config}"),
+                self.check("privateIPAllocationMethod", "Dynamic"),
+            ]
+        )
+        self.cmd(
+            "network application-gateway private-link ip-config list -g {rg} --gateway-name {ag} --private-link {pl}",
+            checks=[
+                self.check("length(@)", 2),
+                self.check("@[1].name", "{ip_config}"),
+                self.check("@[1].primary", True),
+            ]
+        )
+        self.cmd("network application-gateway private-link ip-config remove -n {ip_config} -g {rg} --gateway-name {ag} --private-link {pl} --yes")
+        self.cmd(
+            "network application-gateway private-link ip-config list -g {rg} --gateway-name {ag} --private-link {pl}",
+            checks=[
+                self.check("length(@)", 1),
+                self.check("@[0].name", "PrivateLinkDefaultIPConfiguration"),
+                self.check("@[0].privateIPAllocationMethod", "Dynamic"),
+            ]
+        )
+
     @ResourceGroupPreparer(name_prefix='test_manage_appgw_private_endpoint_without_standard')
     def test_manage_appgw_private_endpoint_without_standard(self, resource_group):
         """

@@ -107,12 +107,6 @@ def transform_traffic_manager_create_output(result):
     return {'TrafficManagerProfile': result}
 
 
-def transform_nic_create_output(result):
-    if result:
-        return {'NewNIC': result.result()}
-    return None
-
-
 def transform_nsg_rule_table_output(result):
     item = OrderedDict()
     item['Name'] = result['name']
@@ -199,9 +193,9 @@ def transform_effective_route_table(result):
         transformed.append(OrderedDict([
             ('Source', item['source']),
             ('State', item['state']),
-            ('Address Prefix', ' '.join(item['addressPrefix'] or [])),
+            ('Address Prefix', ' '.join(item.get('addressPrefix', []))),
             ('Next Hop Type', item['nextHopType']),
-            ('Next Hop IP', ' '.join(item['nextHopIpAddress'] or []))
+            ('Next Hop IP', ' '.join(item.get('nextHopIpAddress', []))),
         ]))
     return transformed
 
