@@ -303,7 +303,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       signalr=None):                                         # Resource.SignalR
 
     auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
-                                         system_identity_auth_info, service_principal_auth_info_secret)
+                                         system_identity_auth_info, service_principal_auth_info_secret, new_addon)
     if is_passwordless_command(cmd, auth_info):
         if _get_or_add_extension(cmd, PASSWORDLESS_EXTENSION_NAME, PASSWORDLESS_EXTENSION_MODULE, False):
             azext_custom = _get_azext_module(
