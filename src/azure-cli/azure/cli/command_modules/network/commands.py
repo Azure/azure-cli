@@ -810,7 +810,8 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_vpn_connection', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), table_transformer=deployment_validate_table_format, validator=process_vpn_connection_create_namespace, exception_handler=handle_template_based_exception)
         # g.command('delete', 'begin_delete')
         # g.show_command('show', 'get', transform=transform_vpn_connection)
-        # g.custom_command('list', 'list_vpn_connections', transform=transform_vpn_connection_list)
+        # , transform=transform_vpn_connection_list
+        g.custom_command('list', 'list_vpn_connections')
         # g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vpn_connection')
         # g.command('list-ike-sas', 'begin_get_ike_sas', is_preview=True, min_api='2020-08-01')
         # g.custom_command('show-device-config-script', 'show_vpn_connection_device_config_script', client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2017-09-01')

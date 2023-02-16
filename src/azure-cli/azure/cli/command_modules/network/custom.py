@@ -7099,6 +7099,10 @@ class VpnConnectionDeviceConfigScriptShow(_VpnConnectionDeviceConfigScriptShow):
 
         return args_schema
 
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
 
 def show_vpn_connection_device_config_script(cmd, client, resource_group_name, virtual_network_gateway_connection_name,
                                              vendor, device_family, firmware_version):
