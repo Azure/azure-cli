@@ -677,7 +677,8 @@ def load_arguments(self, _):
                 c.argument(dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
 
     with self.argument_context('vmss reimage') as c:
-        c.argument('instance_id', nargs='+', deprecate_info=c.deprecate(target='--instance-id', redirect='--instance-ids', hide=True))
+        c.argument('instance_id', nargs='+', deprecate_info=c.deprecate(target='--instance-id', redirect='--instance-ids', hide=True),
+                   help='Space-separated list of VM instance ID. If missing, reimage all instances.')
         c.argument('instance_ids', nargs='+', help='Space-separated list of VM instance ID. If missing, reimage all instances.')
 
     with self.argument_context('vmss create', operation_group='virtual_machine_scale_sets') as c:
