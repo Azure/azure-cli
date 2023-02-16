@@ -51,7 +51,7 @@ def load_command_table(self, _):
     from ._validators import validate_subnet
 
 # Namespace Region
-    custom_tmpl = 'azure.cli.command_modules.servicebus#custom. {}'
+    custom_tmpl = 'azure.cli.command_modules.servicebus.custom#{}'
     servicebus_custom = CliCommandType(operations_tmpl=custom_tmpl)
     with self.command_group('servicebus namespace', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, min_api='2021-06-01-preview') as g:
         g.custom_command('create', 'cli_namespace_create')
