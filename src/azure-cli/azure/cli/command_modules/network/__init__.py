@@ -69,7 +69,6 @@ class AzureStackNetworkCommandsLoader(AzCommandsLoader):
                          ])
 
     def load_command_table(self, args):
-        from azure.cli.command_modules.network.azure_stack.commands import load_command_table
         from azure.cli.core.aaz import load_aaz_command_table
         try:
             from . import aaz
@@ -81,12 +80,37 @@ class AzureStackNetworkCommandsLoader(AzCommandsLoader):
                 aaz_pkg_name=aaz.__name__,
                 args=args
             )
+
+        # TODO: comments out when finish migrateion
+        from azure.cli.command_modules.network.azure_stack.commands import load_command_table
         load_command_table(self, args)
+
+        profile = self.get_module_by_profile("commands")
+        if profile and hasattr(profile, 'load_command_table'):
+            profile.load_command_table(self, args)
+
         return self.command_table
 
     def load_arguments(self, command):
+        # TODO: comments out when finish
         from azure.cli.command_modules.network.azure_stack._params import load_arguments
         load_arguments(self, command)
+
+        profile = self.get_module_by_profile("_params")
+        if profile and hasattr(profile, 'load_arguments'):
+            profile.load_arguments(self, command)
+
+    def get_module_name_by_profile(self, module_name):
+        profile_module_name = self.cli_ctx.cloud.profile.lower().replace('-', '_')
+        if module_name:
+            return f'azure.cli.command_modules.network.azure_stack.{profile_module_name}.{module_name}'
+        else:
+            return f'azure.cli.command_modules.network.azure_stack.{profile_module_name}'
+
+    def get_module_by_profile(self, name):
+        import importlib
+        module_name = self.get_module_name_by_profile(name)
+        return importlib.import_module(module_name)
 
 
 def get_command_loader(cli_ctx):
