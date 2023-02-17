@@ -70,6 +70,7 @@ class AzureStackNetworkCommandsLoader(AzCommandsLoader):
 
     def load_command_table(self, args):
         from azure.cli.core.aaz import load_aaz_command_table
+        from azure.cli.command_modules.network.azure_stack.commands import load_command_table
         try:
             from . import aaz
         except ImportError:
@@ -81,8 +82,6 @@ class AzureStackNetworkCommandsLoader(AzCommandsLoader):
                 args=args
             )
 
-        # TODO: comments out when finish migrateion
-        from azure.cli.command_modules.network.azure_stack.commands import load_command_table
         load_command_table(self, args)
 
         profile = self.get_module_by_profile("commands")
@@ -92,7 +91,6 @@ class AzureStackNetworkCommandsLoader(AzCommandsLoader):
         return self.command_table
 
     def load_arguments(self, command):
-        # TODO: comments out when finish
         from azure.cli.command_modules.network.azure_stack._params import load_arguments
         load_arguments(self, command)
 
