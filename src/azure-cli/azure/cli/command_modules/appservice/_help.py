@@ -151,6 +151,8 @@ examples:
     text: az functionapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureCloud
   - name: Add Access Restriction opening (Allow) with no rule name for service tag AzureFrontDoor.Backend and http-header X-Azure-FDID with value '12345678-abcd-1234-abcd-12345678910a'
     text: az functionapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureFrontDoor.Backend --http-header x-azure-fdid=12345678-abcd-1234-abcd-12345678910a
+  - name: Add Access Restriction opening (Allow) with multiple http-header values for the same header 'X-Azure-FDID'
+    text: az functionapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureFrontDoor.Backend --http-header x-azure-fdid=12345678-abcd-1234-abcd-12345678910a x-azure-fdid=11111111-abcd-1234-abcd-222222222222
 """
 
 helps['functionapp config access-restriction remove'] = """
@@ -685,6 +687,15 @@ examples:
     crafted: true
 """
 
+helps['functionapp function list'] = """
+type: command
+short-summary: List functions in a function app.
+examples:
+  - name: List functions.
+    text: >
+        az functionapp function list -g MyResourceGroup -n MyFunctionAppName
+"""
+
 helps['functionapp function keys'] = """
 type: group
 short-summary: Manage function keys.
@@ -1063,6 +1074,8 @@ examples:
     text: az webapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureCloud
   - name: Add Access Restriction opening (Allow) with no rule name for service tag AzureFrontDoor.Backend and http-header X-Azure-FDID with value '12345678-abcd-1234-abcd-12345678910a'
     text: az webapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureFrontDoor.Backend --http-header x-azure-fdid=12345678-abcd-1234-abcd-12345678910a
+  - name: Add Access Restriction opening (Allow) with multiple http-header values for the same header 'X-Azure-FDID'
+    text: az webapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureFrontDoor.Backend --http-header x-azure-fdid=12345678-abcd-1234-abcd-12345678910a x-azure-fdid=11111111-abcd-1234-abcd-222222222222
 """
 
 helps['webapp config access-restriction remove'] = """
@@ -1159,6 +1172,11 @@ examples:
 helps['webapp config backup restore'] = """
 type: command
 short-summary: Restore a web app from a backup.
+"""
+
+helps['webapp config backup delete'] = """
+type: command
+short-summary: Delete a web app backup.
 """
 
 helps['webapp config backup show'] = """

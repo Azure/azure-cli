@@ -38,6 +38,7 @@ from azure.mgmt.sql.models import (
     IPv6FirewallRule,
     LedgerDigestUploadsName,
     LongTermRetentionPolicyName,
+    ManagedDatabaseCreateMode,
     ManagedInstanceAzureADOnlyAuthentication,
     ManagedInstanceEncryptionProtector,
     ManagedInstanceExternalAdministrator,
@@ -689,7 +690,12 @@ def _get_server_dns_suffx(cli_ctx):
     return getenv('_AZURE_CLI_SQL_DNS_SUFFIX', default=cli_ctx.cloud.suffixes.sql_server_hostname)
 
 
-def _get_managed_db_resource_id(cli_ctx, resource_group_name, managed_instance_name, database_name):
+def _get_managed_db_resource_id(
+        cli_ctx,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        subscription_id=None):
     '''
     Gets the Managed db resource id in this Azure environment.
     '''
@@ -697,7 +703,7 @@ def _get_managed_db_resource_id(cli_ctx, resource_group_name, managed_instance_n
     from msrestazure.tools import resource_id
 
     return resource_id(
-        subscription=get_subscription_id(cli_ctx),
+        subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
         resource_group=resource_group_name,
         namespace='Microsoft.Sql', type='managedInstances',
         name=managed_instance_name,
@@ -730,7 +736,8 @@ def _get_managed_dropped_db_resource_id(
         resource_group_name,
         managed_instance_name,
         database_name,
-        deleted_time):
+        deleted_time,
+        subscription_id=None):
     '''
     Gets the Managed db resource id in this Azure environment.
     '''
@@ -740,7 +747,7 @@ def _get_managed_dropped_db_resource_id(
     from msrestazure.tools import resource_id
 
     return (resource_id(
-        subscription=get_subscription_id(cli_ctx),
+        subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
         resource_group=resource_group_name,
         namespace='Microsoft.Sql', type='managedInstances',
         name=managed_instance_name,
@@ -748,6 +755,25 @@ def _get_managed_dropped_db_resource_id(
         child_name_1='{},{}'.format(
             quote(database_name),
             _to_filetimeutc(deleted_time))))
+
+
+def _get_managed_instance_resource_id(
+        cli_ctx,
+        resource_group_name,
+        managed_instance_name,
+        subscription_id=None):
+    '''
+    Gets managed instance resource id in this Azure environment.
+    '''
+
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import resource_id
+
+    return (resource_id(
+        subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Sql', type='managedInstances',
+        name=managed_instance_name))
 
 
 def db_show_conn_str(
@@ -2954,6 +2980,9 @@ def restore_long_term_retention_backup(
         target_server_name,
         target_resource_group_name,
         requested_backup_storage_redundancy,
+        high_availability_replica_count,
+        zone_redundant,
+        service_objective,
         **kwargs):
     '''
     Restores an existing database (i.e. create with 'RestoreLongTermRetentionBackup' create mode.)
@@ -2975,6 +3004,71 @@ def restore_long_term_retention_backup(
     kwargs['create_mode'] = CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
     kwargs['requested_backup_storage_redundancy'] = requested_backup_storage_redundancy
+    kwargs['high_availability_replica_count'] = high_availability_replica_count
+    kwargs['zone_redundant'] = zone_redundant
+    kwargs['service_objective'] = service_objective
+
+    # Check backup storage redundancy configurations
+    if _should_show_backup_storage_redundancy_warnings(kwargs['location']):
+        if not kwargs['requested_backup_storage_redundancy']:
+            _backup_storage_redundancy_take_source_warning()
+        if kwargs['requested_backup_storage_redundancy'] == 'Geo':
+            _backup_storage_redundancy_specify_geo_warning()
+
+    return client.begin_create_or_update(
+        database_name=target_database_name,
+        server_name=target_server_name,
+        resource_group_name=target_resource_group_name,
+        parameters=kwargs)
+
+
+def list_geo_backups(
+        client,
+        server_name,
+        resource_group_name):
+    '''
+    Gets the geo redundant backups for a server
+    '''
+    return client.list_by_server(
+        resource_group_name=resource_group_name,
+        server_name=server_name)
+
+
+def restore_geo_backup(
+        cmd,
+        client,
+        geo_backup_id,
+        target_database_name,
+        target_server_name,
+        target_resource_group_name,
+        requested_backup_storage_redundancy,
+        high_availability_replica_count,
+        zone_redundant,
+        service_objective,
+        **kwargs):
+    '''
+    Restores an existing database (i.e. create with 'RestoreGeoBackup' create mode.)
+    '''
+
+    if not target_resource_group_name or not target_server_name or not target_database_name:
+        raise CLIError('Please specify target resource(s). '
+                       'Target resource group, target server, and target database '
+                       'are all required to restore Geo-redundant backup.')
+
+    if not geo_backup_id:
+        raise CLIError('Please specify a geo redundant backup.')
+
+    kwargs['location'] = _get_server_location(
+        cmd.cli_ctx,
+        server_name=target_server_name,
+        resource_group_name=target_resource_group_name)
+
+    kwargs['create_mode'] = CreateMode.RECOVERY
+    kwargs['recoverableDatabaseId'] = geo_backup_id
+    kwargs['requested_backup_storage_redundancy'] = requested_backup_storage_redundancy
+    kwargs['high_availability_replica_count'] = high_availability_replica_count
+    kwargs['zone_redundant'] = zone_redundant
+    kwargs['service_objective'] = service_objective
 
     # Check backup storage redundancy configurations
     if _should_show_backup_storage_redundancy_warnings(kwargs['location']):
@@ -4919,6 +5013,30 @@ def managed_db_update(
     return instance
 
 
+def managed_db_recover(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        recoverable_database_id,
+        **kwargs):
+
+    kwargs['location'] = _get_managed_instance_location(
+        cmd.cli_ctx,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name)
+
+    kwargs['create_mode'] = ManagedDatabaseCreateMode.RECOVERY
+    kwargs['recoverable_database_id'] = recoverable_database_id
+
+    return client.begin_create_or_update(
+        database_name=database_name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
+
 def managed_db_restore(
         cmd,
         client,
@@ -4929,6 +5047,7 @@ def managed_db_restore(
         target_managed_instance_name=None,
         target_resource_group_name=None,
         deleted_time=None,
+        source_subscription_id=None,
         **kwargs):
     '''
     Restores an existing managed DB (i.e. create with 'PointInTimeRestore' create mode.)
@@ -4944,24 +5063,45 @@ def managed_db_restore(
 
     kwargs['location'] = _get_managed_instance_location(
         cmd.cli_ctx,
-        managed_instance_name=managed_instance_name,
-        resource_group_name=resource_group_name)
+        managed_instance_name=target_managed_instance_name,
+        resource_group_name=target_resource_group_name)
 
-    kwargs['create_mode'] = CreateMode.POINT_IN_TIME_RESTORE
+    kwargs['create_mode'] = ManagedDatabaseCreateMode.POINT_IN_TIME_RESTORE
 
-    if deleted_time:
-        kwargs['restorable_dropped_database_id'] = _get_managed_dropped_db_resource_id(
+    if source_subscription_id:
+        kwargs['cross_subscription_target_managed_instance_id'] = _get_managed_instance_resource_id(
             cmd.cli_ctx,
-            resource_group_name,
-            managed_instance_name,
-            database_name,
-            deleted_time)
+            target_resource_group_name,
+            target_managed_instance_name)
+        if deleted_time:
+            kwargs['cross_subscription_restorable_dropped_database_id'] = _get_managed_dropped_db_resource_id(
+                cmd.cli_ctx,
+                resource_group_name,
+                managed_instance_name,
+                database_name,
+                deleted_time,
+                source_subscription_id)
+        else:
+            kwargs['cross_subscription_source_database_id'] = _get_managed_db_resource_id(
+                cmd.cli_ctx,
+                resource_group_name,
+                managed_instance_name,
+                database_name,
+                source_subscription_id)
     else:
-        kwargs['source_database_id'] = _get_managed_db_resource_id(
-            cmd.cli_ctx,
-            resource_group_name,
-            managed_instance_name,
-            database_name)
+        if deleted_time:
+            kwargs['restorable_dropped_database_id'] = _get_managed_dropped_db_resource_id(
+                cmd.cli_ctx,
+                resource_group_name,
+                managed_instance_name,
+                database_name,
+                deleted_time)
+        else:
+            kwargs['source_database_id'] = _get_managed_db_resource_id(
+                cmd.cli_ctx,
+                resource_group_name,
+                managed_instance_name,
+                database_name)
 
     return client.begin_create_or_update(
         database_name=target_managed_database_name,

@@ -143,7 +143,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.exists('volumes'),
                          self.check('volumes[0].secret', {})])
 						 
-	# Test create container with Spot Priority
+    # Test create container with Spot Priority
     @ResourceGroupPreparer()
     def test_container_create_spot_priority(self, resource_group, resource_group_location):
         container_group_name = self.create_random_name('clicontainer', 16)
