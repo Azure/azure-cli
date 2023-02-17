@@ -29,8 +29,7 @@ from azure.cli.command_modules.network.azure_stack._client_factory import (
     cf_private_dns_zone_groups, cf_load_balancer_backend_pools, cf_virtual_hub,
     cf_custom_ip_prefixes)
 from azure.cli.command_modules.network.azure_stack._util import (
-    list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
-    delete_lb_resource_property_entry)
+    list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network.azure_stack._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
@@ -48,7 +47,7 @@ from azure.cli.command_modules.network.azure_stack._validators import (
     process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace, process_ag_settings_create_namespace, process_ag_http_settings_create_namespace,
     process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
     process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace, process_nic_create_namespace,
-    process_lb_create_namespace, process_lb_frontend_ip_namespace, process_nw_cm_v2_create_namespace,
+    process_lb_create_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
     process_nw_flow_log_set_namespace, process_nw_flow_log_create_namespace, process_nw_flow_log_show_namespace,
@@ -57,8 +56,8 @@ from azure.cli.command_modules.network.azure_stack._validators import (
     process_public_ip_create_namespace,
     process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
     process_vpn_connection_create_namespace,
-    process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace,
-    process_appgw_waf_policy_update, process_cross_region_lb_frontend_ip_namespace, process_cross_region_lb_create_namespace)
+    process_nw_config_diagnostic_namespace,
+    process_appgw_waf_policy_update, process_cross_region_lb_frontend_ip_namespace)
 
 NETWORK_VROUTER_DEPRECATION_INFO = 'network routeserver'
 NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
@@ -188,17 +187,6 @@ def load_command_table(self, _):
         min_api='2019-04-01'
     )
 
-    network_lb_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#LoadBalancersOperations.{}',
-        client_factory=cf_load_balancers
-    )
-
-    network_lb_backend_pool_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#LoadBalancerBackendAddressPoolsOperations.{}',
-        client_factory=cf_load_balancer_backend_pools,
-        min_api='2020-04-01'
-    )
-
     network_lgw_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#LocalNetworkGatewaysOperations.{}',
         client_factory=cf_local_network_gateways
@@ -323,12 +311,6 @@ def load_command_table(self, _):
     )
 
     network_custom = CliCommandType(operations_tmpl=custom_operations_tmpl)
-
-    network_load_balancers_custom = CliCommandType(
-        operations_tmpl=custom_operations_tmpl,
-        client_factory=cf_load_balancers,
-        min_api='2020-08-01'
-    )
 
     network_nic_custom = CliCommandType(
         operations_tmpl=custom_operations_tmpl,

@@ -2,12 +2,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=line-too-long, protected-access, too-few-public-methods
+# pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods
 import importlib
 from knack.log import get_logger
 from azure.cli.core.azclierror import ArgumentUsageError
-from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, \
-    AAZStrArg, AAZArgEnum
+from azure.cli.core.aaz import AAZResourceIdArgFormat, has_value, AAZStrArg, AAZArgEnum
 
 def _import_aaz_by_profile(module_name):
     return importlib.import_module(f"azure.cli.command_modules.network.aaz.2018_03_01_hybrid.{module_name}")
@@ -232,7 +231,6 @@ class LBRuleCreate(_LBRule.Create):
         return args_schema
 
     def pre_instance_create(self):
-        from azure.cli.core.aaz.utils import assign_aaz_list_arg
         args = self.ctx.args
         if not has_value(args.frontend_ip_name):
             instance = self.ctx.vars.instance

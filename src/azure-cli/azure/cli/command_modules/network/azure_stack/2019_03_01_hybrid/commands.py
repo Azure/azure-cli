@@ -29,4 +29,3 @@ def load_command_table(self, _):
     self.command_table["network lb probe update"] = LBProbeUpdate(loader=self)
 
     # endregion
-

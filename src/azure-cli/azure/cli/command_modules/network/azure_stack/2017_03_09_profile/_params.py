@@ -4,6 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 
-# pylint: disable=too-many-locals, too-many-branches, too-many-statements
+# pylint: disable=unused-argument, too-many-locals, too-many-branches, too-many-statements
 def load_arguments(self, _):
     pass
