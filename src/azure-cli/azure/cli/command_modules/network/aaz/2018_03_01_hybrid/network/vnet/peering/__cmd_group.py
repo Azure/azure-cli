@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Manage peering connections between Azure Virtual Networks.
 
-    To learn more about virtual network peering visit https://docs.microsoft.com/azure/virtual-network/virtual-network-manage-peering.
+    To learn more about virtual network peering visit https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering.
     """
     pass
 

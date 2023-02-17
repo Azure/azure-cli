@@ -67,6 +67,7 @@ def load_arguments(self, _):
     class CLISecurityDomainOperation(str, Enum):
         download = "download"  #: Download operation
         upload = "upload"  #: Upload operation
+        restore_blob = "restore_blob"  #: Restore blob operation
 
     (KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
      NetworkRuleBypassOptions, NetworkRuleAction, PublicNetworkAccess) = self.get_models(
@@ -583,12 +584,24 @@ def load_arguments(self, _):
     with self.argument_context('keyvault security-domain upload') as c:
         c.argument('sd_file', help='This file contains security domain encrypted using SD Exchange file downloaded '
                                    'in security-domain init-recovery command.')
+        c.argument('restore_blob', help='Indicator if blob is already restored.')
         c.argument('sd_exchange_key', help='The exchange key for security domain.')
         c.argument('sd_wrapping_keys', nargs='*',
                    help='Space-separated file paths to PEM files containing private keys.')
         c.argument('passwords', nargs='*', help='Space-separated password list for --sd-wrapping-keys. '
                                                 'CLI will match them in order. Can be omitted if your keys are without '
                                                 'password protection.')
+
+    with self.argument_context('keyvault security-domain restore-blob') as c:
+        c.argument('sd_file', help='This file contains security domain encrypted using SD Exchange file downloaded '
+                                   'in security-domain init-recovery command.')
+        c.argument('sd_exchange_key', help='The exchange key for security domain.')
+        c.argument('sd_wrapping_keys', nargs='*',
+                   help='Space-separated file paths to PEM files containing private keys.')
+        c.argument('passwords', nargs='*', help='Space-separated password list for --sd-wrapping-keys. '
+                                                'CLI will match them in order. Can be omitted if your keys are without '
+                                                'password protection.')
+        c.argument('sd_file_restore_blob', help='Local file path to store the security domain encrypted with the exchange key.')
 
     with self.argument_context('keyvault security-domain download') as c:
         c.argument('sd_wrapping_keys', nargs='*',

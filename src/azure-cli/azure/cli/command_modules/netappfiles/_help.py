@@ -673,7 +673,7 @@ parameters:
   - name: --allowed-clients
     short-summary: Client ingress specification as comma separated string with IPv4 CIDRs, IPv4 host addresses and host names
   - name: --cifs
-    short-summary: Allows NFSv3 protocol. Enable only for NFSv3 type volumes
+    short-summary: Allows CIFS protocol. Enable only for CIFS type volumes
   - name: --rule-index
     short-summary: Order index
   - name: --unix-read-only
@@ -923,8 +923,8 @@ parameters:
     short-summary: Kerberos5p Read only access
   - name: --kerberos5p-rw
     short-summary: Kerberos5p Read and write access
-  - name: --has-root-access
-    short-summary: Has root access to volume. Possible values are True or False
+#  - name: --has-root-access
+    #short-summary: Has root access to volume. Possible values are True or False
   - name: --chown-mode
     short-summary: This parameter specifies who is authorized to change the ownership of a file. restricted - Only root user can change the ownership of the file. unrestricted - Non-root users can change ownership of files that they own. Possible values include- Restricted, Unrestricted. Default value- Restricted.
 examples:
@@ -1138,7 +1138,7 @@ parameters:
   - name: --pool-name -p
     short-summary: The name of the ANF pool
   - name: --name --volume-name -n -v
-    short-summary: The name of the ANF pool
+    short-summary: The name of the ANF volume
 examples:
   - name: List the ANF backups of the volume
     text: >
@@ -1220,6 +1220,87 @@ examples:
 helps['netappfiles volume backup wait'] = """
 type: command
 short-summary: Wait for a volume backup operation.
+"""
+
+helps['netappfiles volume quota-rule'] = """
+type: group
+short-summary: Manage Azure NetApp Files (ANF) Volume Quota Rules Resources.
+"""
+
+helps['netappfiles volume quota-rule show'] = """
+type: command
+short-summary: Get ANF Volume Quota Rule for Volume.
+examples:
+  - name: Get a ANF Volume quote rule
+    text: >
+        az netappfiles volume quota-rule show -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --quota-rule-name myrulename
+"""
+
+helps['netappfiles volume quota-rule create'] = """
+type: command
+short-summary: Create a ANF Volume Quota Rule.
+parameters:
+  - name: --tags
+    short-summary: Resource tags.
+  - name: --quota-rule-name
+    short-summary: Name of Quota rule.
+  - name: --quota-size
+    short-summary: Size of quota.
+  - name: --quota-type
+    short-summary: Type of quota. Known values are "DefaultUserQuota", "DefaultGroupQuota", "IndividualUserQuota", and "IndividualGroupQuota".
+  - name: --quota-target
+    short-summary: UserID/GroupID/SID based on the quota target type. UserID and groupID can be found by running ‘id’ or ‘getent’ command for the user or group and SID can be found by running :code:`<wmic useraccount where name='user-name' get sid>`.
+examples:
+  - name: Create an ANF Volume quote rule
+    text: >
+        az netappfiles volume quota-rule create -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --quota-rule-name myrulename --quota-type DefaultGroupQuota --quota-size 100006 --quota-target ''
+"""
+
+
+helps['netappfiles volume quota-rule update'] = """
+type: command
+short-summary: Update a specified ANF Volume Quota Rule.
+parameters:
+  - name: --quota-size
+    short-summary: Size of quota.
+  - name: --quota-type
+    short-summary: Type of quota. Known values are "DefaultUserQuota", "DefaultGroupQuota", "IndividualUserQuota", and "IndividualGroupQuota".
+  - name: --quota-target
+    short-summary: UserID/GroupID/SID based on the quota target type. UserID and groupID can be found by running ‘id’ or ‘getent’ command for the user or group and SID can be found by running :code:`<wmic useraccount where name='user-name' get sid>`.
+examples:
+  - name: Update a specified ANF Volume quote rule
+    text: >
+        az netappfiles volume quota-rule update -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --quota-rule-name myrulename --quota-size 100006
+"""
+
+helps['netappfiles volume quota-rule delete'] = """
+type: command
+short-summary: Delete a specified ANF Volume Quota Rule for Volume.
+examples:
+  - name: Delete a specified ANF Volume quote rule
+    text: >
+        az netappfiles volume quota-rule delete -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --quota-rule-name myrulename
+"""
+
+helps['netappfiles volume quota-rule list'] = """
+type: command
+short-summary: Get all ANF Volume Quota Rule for specified Volume.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the ANF volume
+examples:
+  - name: Get all ANF Volume Quota Rule for specified Volume
+    text: >
+        az netappfiles volume quota-rule list -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname
+"""
+
+helps['netappfiles volume quota-rule wait'] = """
+type: command
+short-summary: Wait for a volume quota-rule operation.
 """
 
 
