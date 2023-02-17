@@ -72,6 +72,9 @@ from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCr
 from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRoutePortIdentityAssign
 from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
 from .aaz.latest.network.nic import Create as _NICCreate, Update as _NICUpdate
+from .aaz.latest.network.nic.ip_config import Create as _NICIPConfigCreate, Update as _NICIPConfigUpdate
+from .aaz.latest.network.nic.ip_config.inbound_nat_rule import Add as _NICIPConfigNATAdd, \
+    Remove as _NICIPConfigNATRemove
 from .aaz.latest.network.nsg import Create as _NSGCreate
 from .aaz.latest.network.nsg.rule import Create as _NSGRuleCreate, Update as _NSGRuleUpdate
 from .aaz.latest.network.public_ip import Create as _PublicIPCreate, Update as _PublicIPUpdate
@@ -4309,7 +4312,7 @@ class NICCreate(_NICCreate):
         ip_configuration = {
             "name": "ipconfig1",
             "private_ip_address": args.private_ip_address,
-            "private_ip_address_version": args.private_ip_address_version if has_value(args.private_ip_address) else None,
+            "private_ip_address_version": args.private_ip_address_version,
             "private_ip_allocation_method": "Static" if has_value(args.private_ip_address) else "Dynamic",
             "subnet": {"id": args.subnet} if has_value(args.subnet) else None,
             "public_ip_address": {"id": args.public_ip_address} if has_value(args.public_ip_address) else None,
@@ -4352,6 +4355,7 @@ class NICUpdate(_NICUpdate):
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                          "/networkSecurityGroups/{}",
             ),
+            nullable=True,
         )
         args_schema.dns_servers._fmt = EmptyListArgFormat()
         args_schema.nsg._registered = False
@@ -4369,201 +4373,413 @@ class NICUpdate(_NICUpdate):
             instance.properties.network_security_group = None
 
 
-def create_nic_ip_config(cmd, resource_group_name, network_interface_name, ip_config_name, subnet=None,
-                         virtual_network_name=None, public_ip_address=None, load_balancer_name=None,
-                         load_balancer_backend_address_pool_ids=None,
-                         load_balancer_inbound_nat_rule_ids=None,
-                         private_ip_address=None,
-                         private_ip_address_version=None,
-                         make_primary=False,
-                         application_security_groups=None,
-                         app_gateway_backend_address_pools=None):
-    NetworkInterfaceIPConfiguration, PublicIPAddress, Subnet, SubResource = cmd.get_models(
-        'NetworkInterfaceIPConfiguration', 'PublicIPAddress', 'Subnet', 'SubResource')
-    ncf = network_client_factory(cmd.cli_ctx)
-    nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
+class NICIPConfigCreate(_NICIPConfigCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vnet_name = AAZStrArg(
+            options=["--vnet-name"],
+            arg_group="IP Configuration",
+            help="Name of the virtual network.",
+        )
+        args_schema.subnet = AAZResourceIdArg(
+            options=["--subnet"],
+            arg_group="IP Configuration",
+            help="Name or ID of an existing subnet. If name specified, please also specify `--vnet-name`.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/virtualNetworks/{vnet_name}/subnets/{}",
+            ),
+        )
+        args_schema.application_security_groups = AAZListArg(
+            options=["--application-security-groups", "--asgs"],
+            arg_group="IP Configuration",
+            help="Space-separated list of application security groups.",
+        )
+        args_schema.application_security_groups.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationSecurityGroups/{}",
+            ),
+        )
+        args_schema.public_ip_address = AAZResourceIdArg(
+            options=["--public-ip-address"],
+            arg_group="IP Configuration",
+            help="Name or ID of an existing public IP address.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
+                         "publicIPAddresses/{}"
+            ),
+        )
+        args_schema.gateway_name = AAZStrArg(
+            options=["--gateway-name"],
+            arg_group="Application Gateway",
+            help="Name of the application gateway."
+        )
+        args_schema.app_gateway_address_pools = AAZListArg(
+            options=["--app-gateway-address-pools", "--ag-address-pools"],
+            arg_group="Application Gateway",
+            help="Space-separated list of names or IDs of application gateway backend address pools to "
+                 "associate with the NIC. If names are used, `--gateway-name` must be specified.",
+        )
+        args_schema.app_gateway_address_pools.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/backendAddressPools/{}",
+            ),
+        )
+        args_schema.lb_name = AAZStrArg(
+            options=["--lb-name"],
+            arg_group="Load Balancer",
+            help="Name of the load balancer",
+        )
+        args_schema.lb_address_pools = AAZListArg(
+            options=["--lb-address-pools"],
+            arg_group="Load Balancer",
+            help="Space-separated list of names or IDs of load balancer address pools to associate with the NIC. "
+                 "If names are used, `--lb-name` must be specified.",
+        )
+        args_schema.lb_address_pools.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/loadBalancers/{lb_name}/backendAddressPools/{}",
+            ),
+        )
+        args_schema.lb_inbound_nat_rules = AAZListArg(
+            options=["--lb-inbound-nat-rules"],
+            arg_group="Load Balancer",
+            help="Space-separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. "
+                 "If names are used, `--lb-name` must be specified.",
+        )
+        args_schema.lb_inbound_nat_rules.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/loadBalancers/{lb_name}/inboundNatRules/{}",
+            ),
+        )
+        args_schema.application_gateway_backend_address_pools._registered = False
+        args_schema.load_balancer_backend_address_pools._registered = False
+        args_schema.load_balancer_inbound_nat_rules._registered = False
+        args_schema.private_ip_allocation_method._registered = False
+        args_schema.pip_obj._registered = False
+        args_schema.asgs_obj._registered = False
+        args_schema.subnet_obj._registered = False
+        return args_schema
 
-    if cmd.supported_api_version(min_api='2016-09-01'):
-        IPVersion = cmd.get_models('IPVersion')
-        private_ip_address_version = private_ip_address_version or IPVersion.I_PV4.value
-        if private_ip_address_version == IPVersion.I_PV4.value and not subnet:
-            primary_config = next(x for x in nic.ip_configurations if x.primary)
-            subnet = primary_config.subnet.id
-        if make_primary:
-            for config in nic.ip_configurations:
-                config.primary = False
+    def pre_operations(self):
+        args = self.ctx.args
+        args.private_ip_address_version = args.private_ip_address_version
+        args.private_ip_allocation_method = "Static" if has_value(args.private_ip_address) else "Dynamic"
+        args.application_gateway_backend_address_pools = [{"id": x} for x in args.app_gateway_address_pools] if has_value(args.app_gateway_address_pools) else None
+        args.load_balancer_backend_address_pools = [{"id": x} for x in args.lb_address_pools] if has_value(args.lb_address_pools) else None
+        args.load_balancer_inbound_nat_rules = [{"id": x} for x in args.lb_inbound_nat_rules] if has_value(args.lb_inbound_nat_rules) else None
 
-    new_config_args = {
-        'name': ip_config_name,
-        'subnet': Subnet(id=subnet) if subnet else None,
-        'public_ip_address': PublicIPAddress(id=public_ip_address) if public_ip_address else None,
-        'load_balancer_backend_address_pools': load_balancer_backend_address_pool_ids,
-        'load_balancer_inbound_nat_rules': load_balancer_inbound_nat_rule_ids,
-        'private_ip_address': private_ip_address,
-        'private_ip_allocation_method': 'Static' if private_ip_address else 'Dynamic'
+        args.pip_obj = {"id": args.public_ip_address} if has_value(args.public_ip_address) else None
+        args.asgs_obj = [{"id": x} for x in args.application_security_groups] if has_value(args.application_security_groups) else None
+
+    def pre_instance_create(self):
+        args = self.ctx.args
+        instance = self.ctx.vars.instance
+        if args.private_ip_address_version.to_serialized_data().lower() == "ipv4" and not has_value(args.subnet):
+            primary = next(x for x in instance.properties.ip_configurations if x.properties.primary)
+            args.subnet = primary.properties.subnet.id
+        if args.make_primary.to_serialized_data():
+            for config in instance.properties.ip_configurations:
+                config.properties.primary = False
+
+        args.subnet_obj = {"id": args.subnet} if has_value(args.subnet) else None
+
+
+class NICIPConfigUpdate(_NICIPConfigUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
+
+        class EmptyListArgFormat(AAZListArgFormat):
+            def __call__(self, ctx, value):
+                if value.to_serialized_data() == [""]:
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
+        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
+            def __call__(self, ctx, value):
+                if value._data == "":
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vnet_name = AAZStrArg(
+            options=["--vnet-name"],
+            arg_group="IP Configuration",
+            help="Name of the virtual network.",
+            nullable=True,
+        )
+        args_schema.subnet = AAZResourceIdArg(
+            options=["--subnet"],
+            arg_group="IP Configuration",
+            help="Name or ID of an existing subnet. If name specified, please also specify `--vnet-name`.",
+            fmt=EmptyResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/virtualNetworks/{vnet_name}/subnets/{}",
+            ),
+            nullable=True,
+        )
+        args_schema.public_ip_address = AAZResourceIdArg(
+            options=["--public-ip-address"],
+            arg_group="IP Configuration",
+            help="Name or ID of an existing public IP address.",
+            fmt=EmptyResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
+                         "publicIPAddresses/{}"
+            ),
+            nullable=True,
+        )
+        args_schema.gateway_lb._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
+                     "loadBalancers/{}/frontendIPConfigurations/{}",
+        )
+        args_schema.application_security_groups = AAZListArg(
+            options=["--application-security-groups", "--asgs"],
+            arg_group="IP Configuration",
+            help="Space-separated list of application security groups.",
+            fmt=EmptyListArgFormat(),
+            nullable=True,
+        )
+        args_schema.application_security_groups.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationSecurityGroups/{}",
+            ),
+            nullable=True,
+        )
+        args_schema.gateway_name = AAZStrArg(
+            options=["--gateway-name"],
+            arg_group="Application Gateway",
+            help="Name of the application gateway.",
+            nullable=True,
+        )
+        args_schema.app_gateway_address_pools = AAZListArg(
+            options=["--app-gateway-address-pools", "--ag-address-pools"],
+            arg_group="Application Gateway",
+            help="Space-separated list of names or IDs of application gateway backend address pools to "
+                 "associate with the NIC. If names are used, `--gateway-name` must be specified.",
+            fmt=EmptyListArgFormat(),
+            nullable=True,
+        )
+        args_schema.app_gateway_address_pools.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/backendAddressPools/{}",
+            ),
+            nullable=True,
+        )
+        args_schema.lb_name = AAZStrArg(
+            options=["--lb-name"],
+            arg_group="Load Balancer",
+            help="Name of the load balancer",
+            nullable=True,
+        )
+        args_schema.lb_address_pools = AAZListArg(
+            options=["--lb-address-pools"],
+            arg_group="Load Balancer",
+            help="Space-separated list of names or IDs of load balancer address pools to associate with the NIC. "
+                 "If names are used, `--lb-name` must be specified.",
+            fmt=EmptyListArgFormat(),
+            nullable=True,
+        )
+        args_schema.lb_address_pools.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/loadBalancers/{lb_name}/backendAddressPools/{}",
+            ),
+            nullable=True,
+        )
+        args_schema.lb_inbound_nat_rules = AAZListArg(
+            options=["--lb-inbound-nat-rules"],
+            arg_group="Load Balancer",
+            help="Space-separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. "
+                 "If names are used, `--lb-name` must be specified.",
+            fmt=EmptyListArgFormat(),
+            nullable=True,
+        )
+        args_schema.lb_inbound_nat_rules.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/loadBalancers/{lb_name}/inboundNatRules/{}",
+            ),
+            nullable=True,
+        )
+        args_schema.application_gateway_backend_address_pools._registered = False
+        args_schema.load_balancer_backend_address_pools._registered = False
+        args_schema.load_balancer_inbound_nat_rules._registered = False
+        args_schema.private_ip_allocation_method._registered = False
+        args_schema.pip_obj._registered = False
+        args_schema.asgs_obj._registered = False
+        args_schema.subnet_obj._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.private_ip_address):
+            if args.private_ip_address == "":
+                # switch private IP address allocation to dynamic if empty string is used
+                args.private_ip_address = None
+                args.private_ip_allocation_method = "Dynamic"
+                args.private_ip_address_version = "IPv4"
+            else:
+                # if specific address provided, allocation is static
+                args.private_ip_allocation_method = "Static"
+        if has_value(args.subnet):
+            args.subnet_obj = {"id": args.subnet}
+        if has_value(args.public_ip_address):
+            args.pip_obj = {"id": args.public_ip_address}
+
+    def pre_instance_update(self, instance):
+        args = self.ctx.args
+        instance = self.ctx.vars.instance
+        if args.make_primary.to_serialized_data():
+            for config in instance.properties.ip_configurations:
+                config.properties.primary = False
+        args.asgs_obj = assign_aaz_list_arg(
+            args.asgs_obj,
+            args.application_security_groups,
+            element_transformer=lambda _, asg_id: {"id": asg_id}
+        )
+        args.application_gateway_backend_address_pools = assign_aaz_list_arg(
+            args.application_gateway_backend_address_pools,
+            args.app_gateway_address_pools,
+            element_transformer=lambda _, pool_id: {"id": pool_id}
+        )
+        args.load_balancer_backend_address_pools = assign_aaz_list_arg(
+            args.load_balancer_backend_address_pools,
+            args.lb_address_pools,
+            element_transformer=lambda _, pool_id: {"id": pool_id}
+        )
+        args.load_balancer_inbound_nat_rules = assign_aaz_list_arg(
+            args.load_balancer_inbound_nat_rules,
+            args.lb_inbound_nat_rules,
+            element_transformer=lambda _, rule_id: {"id": rule_id}
+        )
+
+    def post_instance_update(self, instance):
+        if not has_value(instance.properties.subnet.id):
+            instance.properties.subnet = None
+        if not has_value(instance.properties.public_ip_address.id):
+            instance.properties.public_ip_address = None
+        if not has_value(instance.properties.gateway_load_balancer.id):
+            instance.properties.gateway_load_balancer = None
+
+
+def add_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_name, ip_config_name,
+                                   backend_address_pool, load_balancer_name=None, application_gateway_name=None):
+    from .aaz.latest.network.nic.ip_config.lb_pool import Add as _LBPoolAdd
+    from .aaz.latest.network.nic.ip_config.ag_pool import Add as _AGPoolAdd
+
+    class LBPoolAdd(_LBPoolAdd):
+        def _output(self, *args, **kwargs):
+            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+            return result["ipConfigurations"][0]
+
+    class AGPoolAdd(_AGPoolAdd):
+        def _output(self, *args, **kwargs):
+            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+            return result["ipConfigurations"][0]
+
+    arguments = {
+        "ip_config_name": ip_config_name,
+        "nic_name": network_interface_name,
+        "resource_group": resource_group_name,
+        "pool_id": backend_address_pool
     }
-    if cmd.supported_api_version(min_api='2016-09-01'):
-        new_config_args['private_ip_address_version'] = private_ip_address_version
-        new_config_args['primary'] = make_primary
-    if cmd.supported_api_version(min_api='2017-09-01'):
-        new_config_args['application_security_groups'] = application_security_groups
-    if cmd.supported_api_version(min_api='2018-08-01'):
-        new_config_args['application_gateway_backend_address_pools'] = \
-            [SubResource(id=x) for x in app_gateway_backend_address_pools] \
-            if app_gateway_backend_address_pools else None
-
-    new_config = NetworkInterfaceIPConfiguration(**new_config_args)
-
-    upsert_to_collection(nic, 'ip_configurations', new_config, 'name')
-    poller = ncf.network_interfaces.begin_create_or_update(
-        resource_group_name, network_interface_name, nic)
-    return get_property(poller.result().ip_configurations, ip_config_name)
-
-
-def update_nic_ip_config_setter(cmd, resource_group_name, network_interface_name, parameters, gateway_lb):
-    aux_subscriptions = []
-    if is_valid_resource_id(gateway_lb):
-        aux_subscriptions.append(parse_resource_id(gateway_lb)['subscription'])
-    client = network_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions).network_interfaces
-    return client.begin_create_or_update(resource_group_name, network_interface_name, parameters)
-
-
-def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
-                      virtual_network_name=None, public_ip_address=None, load_balancer_name=None,
-                      load_balancer_backend_address_pool_ids=None,
-                      load_balancer_inbound_nat_rule_ids=None,
-                      private_ip_address=None,
-                      private_ip_address_version=None, make_primary=False,
-                      application_security_groups=None,
-                      app_gateway_backend_address_pools=None, gateway_lb=None):
-    PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
-
-    if make_primary:
-        for config in parent.ip_configurations:
-            config.primary = False
-        instance.primary = True
-
-    if private_ip_address == '':
-        # switch private IP address allocation to Dynamic if empty string is used
-        instance.private_ip_address = None
-        instance.private_ip_allocation_method = 'dynamic'
-        if cmd.supported_api_version(min_api='2016-09-01'):
-            instance.private_ip_address_version = 'ipv4'
-    elif private_ip_address is not None:
-        # if specific address provided, allocation is static
-        instance.private_ip_address = private_ip_address
-        instance.private_ip_allocation_method = 'static'
-        if private_ip_address_version is not None:
-            instance.private_ip_address_version = private_ip_address_version
-
-    if subnet == '':
-        instance.subnet = None
-    elif subnet is not None:
-        instance.subnet = Subnet(id=subnet)
-
-    if public_ip_address == '':
-        instance.public_ip_address = None
-    elif public_ip_address is not None:
-        instance.public_ip_address = PublicIPAddress(id=public_ip_address)
-
-    if load_balancer_backend_address_pool_ids == '':
-        instance.load_balancer_backend_address_pools = None
-    elif load_balancer_backend_address_pool_ids is not None:
-        instance.load_balancer_backend_address_pools = load_balancer_backend_address_pool_ids
-
-    if load_balancer_inbound_nat_rule_ids == '':
-        instance.load_balancer_inbound_nat_rules = None
-    elif load_balancer_inbound_nat_rule_ids is not None:
-        instance.load_balancer_inbound_nat_rules = load_balancer_inbound_nat_rule_ids
-
-    for config in parent.ip_configurations:
-        if application_security_groups == ['']:
-            config.application_security_groups = None
-        elif application_security_groups:
-            config.application_security_groups = application_security_groups
-
-    if app_gateway_backend_address_pools == ['']:
-        instance.application_gateway_backend_address_pools = None
-    elif app_gateway_backend_address_pools:
-        instance.application_gateway_backend_address_pools = \
-            [SubResource(id=x) for x in app_gateway_backend_address_pools]
-    if gateway_lb is not None:
-        instance.gateway_load_balancer = None if gateway_lb == '' else SubResource(id=gateway_lb)
-    return parent
-
-
-def _get_nic_ip_config(nic, name):
-    if nic.ip_configurations:
-        ip_config = next(
-            (x for x in nic.ip_configurations if x.name.lower() == name.lower()), None)
-    else:
-        ip_config = None
-    if not ip_config:
-        raise CLIError('IP configuration {} not found.'.format(name))
-    return ip_config
-
-
-def add_nic_ip_config_address_pool(
-        cmd, resource_group_name, network_interface_name, ip_config_name, backend_address_pool,
-        load_balancer_name=None, application_gateway_name=None):
-    BackendAddressPool = cmd.get_models('BackendAddressPool')
-    client = network_client_factory(cmd.cli_ctx).network_interfaces
-    nic = client.get(resource_group_name, network_interface_name)
-    ip_config = _get_nic_ip_config(nic, ip_config_name)
     if load_balancer_name:
-        upsert_to_collection(ip_config, 'load_balancer_backend_address_pools',
-                             BackendAddressPool(id=backend_address_pool),
-                             'id')
-    elif application_gateway_name:
-        upsert_to_collection(ip_config, 'application_gateway_backend_address_pools',
-                             BackendAddressPool(id=backend_address_pool),
-                             'id')
-    poller = client.begin_create_or_update(resource_group_name, network_interface_name, nic)
-    return get_property(poller.result().ip_configurations, ip_config_name)
+        return LBPoolAdd(cli_ctx=cmd.cli_ctx)(command_args=arguments)
+    if application_gateway_name:
+        return AGPoolAdd(cli_ctx=cmd.cli_ctx)(command_args=arguments)
 
 
-def remove_nic_ip_config_address_pool(
-        cmd, resource_group_name, network_interface_name, ip_config_name, backend_address_pool,
-        load_balancer_name=None, application_gateway_name=None):
-    client = network_client_factory(cmd.cli_ctx).network_interfaces
-    nic = client.get(resource_group_name, network_interface_name)
-    ip_config = _get_nic_ip_config(nic, ip_config_name)
+def remove_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_name, ip_config_name,
+                                      backend_address_pool, load_balancer_name=None, application_gateway_name=None):
+    from .aaz.latest.network.nic.ip_config.lb_pool import Remove as _LBPoolRemove
+    from .aaz.latest.network.nic.ip_config.ag_pool import Remove as _AGPoolRemove
+
+    class LBPoolRemove(_LBPoolRemove):
+        def _handler(self, command_args):
+            lro_poller = super()._handler(command_args)
+            lro_poller._result_callback = self._output
+            return lro_poller
+
+        def _output(self, *args, **kwargs):
+            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+            return result["ipConfigurations"][0]
+
+    class AGPoolRemove(_AGPoolRemove):
+        def _handler(self, command_args):
+            lro_poller = super()._handler(command_args)
+            lro_poller._result_callback = self._output
+            return lro_poller
+
+        def _output(self, *args, **kwargs):
+            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+            return result["ipConfigurations"][0]
+
+    arguments = {
+        "ip_config_name": ip_config_name,
+        "nic_name": network_interface_name,
+        "resource_group": resource_group_name,
+        "pool_id": backend_address_pool
+    }
     if load_balancer_name:
-        keep_items = [x for x in ip_config.load_balancer_backend_address_pools or [] if x.id != backend_address_pool]
-        ip_config.load_balancer_backend_address_pools = keep_items
-    elif application_gateway_name:
-        keep_items = [x for x in ip_config.application_gateway_backend_address_pools or [] if
-                      x.id != backend_address_pool]
-        ip_config.application_gateway_backend_address_pools = keep_items
-    poller = client.begin_create_or_update(resource_group_name, network_interface_name, nic)
-    return get_property(poller.result().ip_configurations, ip_config_name)
+        return LBPoolRemove(cli_ctx=cmd.cli_ctx)(command_args=arguments)
+    if application_gateway_name:
+        return AGPoolRemove(cli_ctx=cmd.cli_ctx)(command_args=arguments)
 
 
-def add_nic_ip_config_inbound_nat_rule(
-        cmd, resource_group_name, network_interface_name, ip_config_name, inbound_nat_rule,
-        load_balancer_name=None):
-    InboundNatRule = cmd.get_models('InboundNatRule')
-    client = network_client_factory(cmd.cli_ctx).network_interfaces
-    nic = client.get(resource_group_name, network_interface_name)
-    ip_config = _get_nic_ip_config(nic, ip_config_name)
-    upsert_to_collection(ip_config, 'load_balancer_inbound_nat_rules',
-                         InboundNatRule(id=inbound_nat_rule),
-                         'id')
-    poller = client.begin_create_or_update(resource_group_name, network_interface_name, nic)
-    return get_property(poller.result().ip_configurations, ip_config_name)
+class NICIPConfigNATAdd(_NICIPConfigNATAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.lb_name = AAZStrArg(
+            options=["--lb-name"],
+            help="Name of the load balancer",
+        )
+        args_schema.inbound_nat_rule._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/loadBalancers/{lb_name}/inboundNatRules/{}",
+        )
+        return args_schema
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result["ipConfigurations"][0]
 
 
-def remove_nic_ip_config_inbound_nat_rule(
-        cmd, resource_group_name, network_interface_name, ip_config_name, inbound_nat_rule,
-        load_balancer_name=None):
-    client = network_client_factory(cmd.cli_ctx).network_interfaces
-    nic = client.get(resource_group_name, network_interface_name)
-    ip_config = _get_nic_ip_config(nic, ip_config_name)
-    keep_items = \
-        [x for x in ip_config.load_balancer_inbound_nat_rules or [] if x.id != inbound_nat_rule]
-    ip_config.load_balancer_inbound_nat_rules = keep_items
-    poller = client.begin_create_or_update(resource_group_name, network_interface_name, nic)
-    return get_property(poller.result().ip_configurations, ip_config_name)
+class NICIPConfigNATRemove(_NICIPConfigNATRemove):
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.lb_name = AAZStrArg(
+            options=["--lb-name"],
+            help="Name of the load balancer",
+        )
+        args_schema.inbound_nat_rule._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/loadBalancers/{lb_name}/inboundNatRules/{}",
+        )
+        return args_schema
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result["ipConfigurations"][0]
 # endregion
 
 
