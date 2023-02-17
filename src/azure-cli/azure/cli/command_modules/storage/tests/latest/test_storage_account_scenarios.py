@@ -2230,7 +2230,7 @@ class StorageAccountSkuScenarioTest(ScenarioTest):
 
 
 class StorageAccountFailoverScenarioTest(ScenarioTest):
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2022-09-01')
     @ResourceGroupPreparer(name_prefix='clistorage', location='westus2')
     def test_storage_account_failover(self, resource_group):
         self.kwargs = {
@@ -2254,7 +2254,7 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
         ])
 
         time.sleep(900)
-        self.cmd('storage account failover -n {sa} -g {rg} --no-wait -y')
+        self.cmd('storage account failover -n {sa} -g {rg} --failover-type Planned --no-wait -y')
 
         self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
             self.check('name', '{sa}'),

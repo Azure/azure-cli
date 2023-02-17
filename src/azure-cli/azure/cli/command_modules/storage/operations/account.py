@@ -7,7 +7,7 @@
 
 import os
 from azure.cli.command_modules.storage._client_factory import storage_client_factory, cf_sa_for_keys
-from azure.cli.core.util import get_file_json, shell_safe_json_parse, find_child_item
+from azure.cli.core.util import get_file_json, shell_safe_json_parse, find_child_item, user_confirmation
 from azure.cli.core.profiles import ResourceType, get_sdk
 from knack.log import get_logger
 from knack.util import CLIError
@@ -880,6 +880,19 @@ def update_encryption_scope(cmd, client, resource_group_name, account_name, encr
                         encryption_scope_name=encryption_scope_name, encryption_scope=encryption_scope)
 
 
+def list_encryption_scope(client, resource_group_name, account_name,
+                          maxpagesize=None, marker=None, filter=None, include=None):  # pylint: disable=redefined-builtin
+    generator = client.list(resource_group_name, account_name, maxpagesize=maxpagesize, filter=filter, include=include)
+    pages = generator.by_page(continuation_token=marker)
+
+    result = list(next(pages))
+    if pages.continuation_token:
+        next_marker = {"nextMarker": pages.continuation_token}
+        result.append(next_marker)
+
+    return result
+
+
 # pylint: disable=no-member
 def create_or_policy(cmd, client, account_name, resource_group_name=None, properties=None, source_account=None,
                      destination_account=None, policy_id="default", rule_id=None, source_container=None,
@@ -1075,3 +1088,15 @@ def update_local_user(cmd, client, resource_group_name, account_name, username, 
                          home_directory, has_shared_key, has_ssh_key, has_ssh_password)
     return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                    username=username, properties=local_user)
+
+
+def begin_failover(client, resource_group_name, account_name, failover_type=None, yes=None, **kwargs):
+    if not failover_type or failover_type.lower() != "planned":
+        message = """
+        The secondary cluster will become the primary cluster after failover. Please understand the following impact to your storage account before you initiate the failover:
+            1. Please check the Last Sync Time using `az storage account show` with `--expand geoReplicationStats` and check the "geoReplicationStats" property. This is the data you may lose if you initiate the failover.
+            2. After the failover, your storage account type will be converted to locally redundant storage (LRS). You can convert your account to use geo-redundant storage (GRS).
+            3. Once you re-enable GRS/GZRS for your storage account, Microsoft will replicate data to your new secondary region. Replication time is dependent on the amount of data to replicate. Please note that there are bandwidth charges for the bootstrap. Please refer to doc: https://azure.microsoft.com/pricing/details/bandwidth/
+        """
+        user_confirmation(message, yes)
+    return client.begin_failover(resource_group_name=resource_group_name, account_name=account_name, failover_type=failover_type, **kwargs)

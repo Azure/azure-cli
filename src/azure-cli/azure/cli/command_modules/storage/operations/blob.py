@@ -997,11 +997,12 @@ def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
     if not kwargs['requires_sync']:
         kwargs.pop('requires_sync')
     blob_type = kwargs.pop('destination_blob_type', None)
+    src_client = client.from_blob_url(source_url)
+    if src_client.account_name == client.account_name:
+        src_client = client.from_blob_url(source_url, credential=client.credential)
+    StandardBlobTier = cmd.get_models('_models#StandardBlobTier')
     if blob_type is not None and blob_type != 'Detect':
-        dst_client = client.from_blob_url(source_url)
-        if dst_client.account_name == client.account_name:
-            dst_client = client.from_blob_url(source_url, credential=client.credential)
-        blob_service_client = dst_client._get_container_client()._get_blob_service_client()
+        blob_service_client = src_client._get_container_client()._get_blob_service_client()
         if blob_service_client.credential is not None:
             source_url = generate_sas_blob_uri(cmd, blob_service_client, full_uri=True, blob_url=source_url,
                                                blob_name=None, container_name=None,
@@ -1019,8 +1020,10 @@ def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
             res = client.append_block_from_url(copy_source_url=source_url, **params)
             return transform_response_with_bytearray(res)
         if blob_type == 'BlockBlob':
+            standard_blob_tier = getattr(StandardBlobTier, (kwargs.get("tier"))) if (kwargs.get("tier")) else None
             params.update({"overwrite": True, "tags": kwargs.get("tags"),
-                           "destination_lease": kwargs.get("destination_lease")})
+                           "destination_lease": kwargs.get("destination_lease"),
+                           "standard_blob_tier": standard_blob_tier})
             return client.upload_blob_from_url(source_url=source_url, **params)
         if blob_type == 'PageBlob':
             params.update({"lease": kwargs.get("destination_lease")})
@@ -1032,6 +1035,15 @@ def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
             res = client.upload_pages_from_url(source_url=source_url, offset=0, length=blob_length,
                                                source_offset=0, **params)
             return transform_response_with_bytearray(res)
+    if kwargs.get('tier') is not None:
+        src_properties = src_client.get_blob_properties()
+        BlobType = cmd.get_models('_models#BlobType')
+        tier = kwargs.pop('tier')
+        if src_properties.blob_type == BlobType.BlockBlob:
+            kwargs["standard_blob_tier"] = getattr(StandardBlobTier, tier)
+        elif src_properties.blob_type == BlobType.PageBlob:
+            PremiumPageBlobTier = cmd.get_models('_models#PremiumPageBlobTier')
+            kwargs["premium_page_blob_tier"] = getattr(PremiumPageBlobTier, tier)
     return client.start_copy_from_url(source_url=source_url, metadata=metadata, incremental_copy=False, **kwargs)
 
 

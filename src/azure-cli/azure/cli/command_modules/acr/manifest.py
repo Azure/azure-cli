@@ -59,8 +59,9 @@ def _get_v2_manifest_path(repository, manifest):
     return '/v2/{}/manifests/{}'.format(repository, manifest)
 
 
-def _get_referrers_path(repository):
-    return '/v2/{}/_oras/artifacts/referrers'.format(repository)
+# https://github.com/opencontainers/distribution-spec/blob/main/spec.md#listing-referrers
+def _get_referrers_path(repository, manifest):
+    return '/v2/{}/referrers/{}'.format(repository, manifest)
 
 
 def _get_deleted_manifest_path(repository):
@@ -97,14 +98,12 @@ def _obtain_referrers_from_registry(login_server,
                                     path,
                                     username,
                                     password,
-                                    digest,
                                     artifact_type=None):
 
     result_list = {REF_KEY: []}
     execute_next_http_call = True
 
     params = {
-        'digest': digest,
         'artifactType': artifact_type
     }
 
@@ -464,20 +463,18 @@ def acr_manifest_list_referrers(cmd,
 
     raw_result = _obtain_referrers_from_registry(
         login_server=login_server,
-        path=_get_referrers_path(repository),
+        path=_get_referrers_path(repository, manifest),
         username=username,
         password=password,
-        artifact_type=artifact_type,
-        digest=manifest)
+        artifact_type=artifact_type)
 
     if recursive:
         for referrers_obj in raw_result[REF_KEY]:
             internal_referrers_obj = _obtain_referrers_from_registry(
                 login_server=login_server,
-                path=_get_referrers_path(repository),
+                path=_get_referrers_path(repository, referrers_obj["digest"]),
                 username=username,
-                password=password,
-                digest=referrers_obj["digest"])
+                password=password)
 
             for ref in internal_referrers_obj[REF_KEY]:
                 raw_result[REF_KEY].append(ref)

@@ -87,33 +87,6 @@ class TestActionGroupScenarios(ScenarioTest):
         self.kwargs.update({
             'ag': action_group_name
         })
-        self.cmd('monitor action-group test-notifications create '
-                 '-a email alice alice@example.com usecommonalertsChema '
-                 '-a sms alice_sms 1 5551234567 '
-                 '-a webhook alice_web https://www.example.com/alert?name=alice usecommonalertsChema '
-                 '-a itsm alice_itsm 5def922a-3ed4-49c1-b9fd-05ec533819a3|55dfd1f8-7e59-4f89-bf56-4c82f5ace23c a3b9076c-ce8e-434e-85b4-aff10cb3c8f1 {{\"PayloadRevision\":0,\"WorkItemType\":\"Incident\",\"UseTemplate\":false,\"WorkItemData\":\"{{}}\",\"CreateOneWIPerCI\":false}} westcentralus '
-                 '-a azureapppush alice_apppush alice@example.com '
-                 '-a automationrunbook /subscriptions/187f412d-1758-44d9-b052-169e2564721d/resourceGroups/runbookTest/providers/Microsoft.Automation/automationAccounts/runbooktest alice_runbook /subscriptions/187f412d-1758-44d9-b052-169e2564721d/resourceGroups/runbookTest/providers/Microsoft.Automation/automationAccounts/runbooktest/webhooks/Alert1510184037084 test_runbook http://example.com usecommonalertsChema '
-                 '-a voice alice_voice 1 5551234567 '
-                 '-a logicapp alice_logicapp /subscriptions/187f412d-1758-44d9-b052-169e2564721d/resourceGroups/LogicApp/providers/Microsoft.Logic/workflows/testLogicApp  http://callback '
-                 '-a azurefunction azfunc /subscriptions/5def922a-3ed4-49c1-b9fd-05ec533819a3/resourceGroups/aznsTest/providers/Microsoft.Web/sites/testFunctionApp HttpTriggerCSharp1 http://test.me usecommonalertSchema '
-                 '-a eventhub alice_eventhub testEventHubNameSpace testEventHub 187f412d-1758-44d9-b052-169e2564721d 68a4459a-ccb8-493c-b9da-dd30457d1b84 '
-                 '-a armrole alicearmrole 11111111-1111-1111-1111-111111111111 usecommonAlertSchema '
-                 '--alert-type budget')
-
-        self.cmd('monitor action-group test-notifications create -g {rg} '
-                 '-a email alice alice@example.com usecommonalertsChema '
-                 '-a sms alice_sms 1 5551234567 '
-                 '-a webhook alice_web https://www.example.com/alert?name=alice usecommonalertsChema '
-                 '-a itsm alice_itsm 5def922a-3ed4-49c1-b9fd-05ec533819a3|55dfd1f8-7e59-4f89-bf56-4c82f5ace23c a3b9076c-ce8e-434e-85b4-aff10cb3c8f1 {{\"PayloadRevision\":0,\"WorkItemType\":\"Incident\",\"UseTemplate\":false,\"WorkItemData\":\"{{}}\",\"CreateOneWIPerCI\":false}} westcentralus '
-                 '-a azureapppush alice_apppush alice@example.com '
-                 '-a automationrunbook /subscriptions/187f412d-1758-44d9-b052-169e2564721d/resourceGroups/runbookTest/providers/Microsoft.Automation/automationAccounts/runbooktest alice_runbook /subscriptions/187f412d-1758-44d9-b052-169e2564721d/resourceGroups/runbookTest/providers/Microsoft.Automation/automationAccounts/runbooktest/webhooks/Alert1510184037084 test_runbook http://example.com usecommonalertsChema '
-                 '-a voice alice_voice 1 5551234567 '
-                 '-a logicapp alice_logicapp /subscriptions/187f412d-1758-44d9-b052-169e2564721d/resourceGroups/LogicApp/providers/Microsoft.Logic/workflows/testLogicApp  http://callback '
-                 '-a azurefunction azfunc /subscriptions/5def922a-3ed4-49c1-b9fd-05ec533819a3/resourceGroups/aznsTest/providers/Microsoft.Web/sites/testFunctionApp HttpTriggerCSharp1 http://test.me usecommonalertSchema '
-                 '-a eventhub alice_eventhub testEventHubNameSpace testEventHub 187f412d-1758-44d9-b052-169e2564721d 68a4459a-ccb8-493c-b9da-dd30457d1b84 '
-                 '-a armrole alicearmrole 11111111-1111-1111-1111-111111111111 usecommonAlertSchema '
-                 '--alert-type budget')
 
         self.cmd('monitor action-group create -n {ag} -g {rg} -ojson', checks=[
             JMESPathCheck('length(emailReceivers)', 0),

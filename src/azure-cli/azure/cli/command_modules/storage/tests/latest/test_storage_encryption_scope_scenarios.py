@@ -133,6 +133,42 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage blob upload -c {} -n {} -f "{}" --encryption-scope {} --connection-string "{}"'.format(
             self.kwargs['con'], blob2, file, self.kwargs['encryption'], result['connectionString']))
 
+    @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2022-09-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_encryption')
+    @StorageAccountPreparer(name_prefix='encryption', kind="StorageV2")
+    def test_storage_account_encryption_scope_list(self, resource_group, storage_account):
+        # Prepare 3 encryption scopes: myencryption, testencryption1, testencryption2
+        self.cmd("storage account encryption-scope create -i --account-name {sa} -g {rg} -n myencryption")
+        self.cmd("storage account encryption-scope create -i --account-name {sa} -g {rg} -n testencryption1")
+        self.cmd("storage account encryption-scope create -i --account-name {sa} -g {rg} -n testencryption2")
+
+        # Disable encryption scope testencryption2
+        self.cmd("storage account encryption-scope update --account-name {sa} -g {rg} -n testencryption2 --state Disabled")
+
+        # List all encryption scopes
+        self.cmd("storage account encryption-scope list --account-name {sa} -g {rg}", checks=[
+            JMESPathCheck("length(@)", 3)
+        ])
+
+        # List disabled encryption scopes
+        self.cmd("storage account encryption-scope list --account-name {sa} -g {rg} --include Disabled", checks=[
+            JMESPathCheck("length(@)", 1)
+        ])
+
+        # List encryption scopes with filter
+        self.cmd("storage account encryption-scope list --account-name {sa} -g {rg} --filter 'startswith(name, test)'",
+                 checks=[JMESPathCheck("length(@)", 2)])
+
+        # List encryption scopes with maxpagesize
+        encryption_scopes = self.cmd("storage account encryption-scope list --account-name {sa} -g {rg} --maxpagesize 2").get_output_in_json()
+        self.assertEqual(len(encryption_scopes), 3)
+        self.assertIn('nextMarker', encryption_scopes[2])
+
+        self.kwargs['marker'] = encryption_scopes[2]["nextMarker"]
+        self.cmd("storage account encryption-scope list --account-name {sa} -g {rg} --maxpagesize 2 --marker {marker}",
+                 checks=[JMESPathCheck("length(@)", 1)])
+
     @ResourceGroupPreparer(name_prefix='cli_test_adls_encryption')
     @StorageAccountPreparer(name_prefix='encryption', kind="StorageV2", hns=True)
     def test_storage_adls_gen2_encryption_scope(self, resource_group, storage_account_info):

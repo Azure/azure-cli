@@ -36,6 +36,7 @@ ACCESS_RESTRICTION_ACTION_TYPES = ['Allow', 'Deny']
 ASE_LOADBALANCER_MODES = ['Internal', 'External']
 ASE_KINDS = ['ASEv2', 'ASEv3']
 ASE_OS_PREFERENCE_TYPES = ['Windows', 'Linux']
+PUBLIC_NETWORK_ACCESS_MODES = ['Enabled', 'Disabled']
 
 
 # pylint: disable=too-many-statements, too-many-lines
@@ -46,9 +47,9 @@ def load_arguments(self, _):
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     sku_arg_type = CLIArgumentType(
-        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large), I1v2 (Isolated V2 Small), I2v2 (Isolated V2 Medium), I3v2 (Isolated V2 Large), WS1 (Logic Apps Workflow Standard 1), WS2 (Logic Apps Workflow Standard 2), WS3 (Logic Apps Workflow Standard 3)',
+        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P2V2(Premium V2 Medium), P3V2(Premium V2 Large), P0V3(Premium V3 Extra Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), P1MV3(Premium Memory Optimized V3 Small), P2MV3(Premium Memory Optimized V3 Medium), P3MV3(Premium Memory Optimized V3 Large), P4MV3(Premium Memory Optimized V3 Extra Large), P5MV3(Premium Memory Optimized V3 Extra Extra Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large), I1v2 (Isolated V2 Small), I2v2 (Isolated V2 Medium), I3v2 (Isolated V2 Large), I4v2 (Isolated V2 I4v2), I5v2 (Isolated V2 I5v2), I6v2 (Isolated V2 I6v2), WS1 (Logic Apps Workflow Standard 1), WS2 (Logic Apps Workflow Standard 2), WS3 (Logic Apps Workflow Standard 3)',
         arg_type=get_enum_type(
-            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P1V3', 'P2V3', 'P3V3', 'I1', 'I2', 'I3', 'I1v2', 'I2v2', 'I3v2', 'WS1', 'WS2', 'WS3']))
+            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P0V3', 'P1V3', 'P2V3', 'P3V3', 'P1MV3', 'P2MV3', 'P3MV3', 'P4MV3', 'P5MV3', 'I1', 'I2', 'I3', 'I1v2', 'I2v2', 'I3v2', 'I4v2', 'I5v2', 'I6v2', 'WS1', 'WS2', 'WS3']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                                            id_part='name',
@@ -111,7 +112,8 @@ def load_arguments(self, _):
                                                                  scopes=['appservice', 'webapp', 'functionapp']))
         c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
         c.argument('app_service_environment', options_list=['--app-service-environment', '-e'],
-                   help="Name or ID of the app service environment",
+                   help="Name or ID of the app service environment. If you want to create the app service plan in different \
+subscription than the app service environment, please use the resource ID for --app-service-environment parameter. ",
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', action='store_true', required=False, help='host web app on Linux worker')
@@ -153,6 +155,7 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('vnet', help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
         c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the webapp join. The --vnet is argument also needed if specifying subnet by name.")
+        c.argument('public_network_access', help="Enable or disable public access to the web app", arg_type=get_enum_type(PUBLIC_NETWORK_ACCESS_MODES))
         c.ignore('language')
         c.ignore('using_webapp_up')
 
@@ -180,6 +183,7 @@ def load_arguments(self, _):
         c.argument('slot', options_list=['--slot', '-s'], help='slot to restore the deleted content to')
         c.argument('restore_content_only', action='store_true',
                    help='restore only deleted files without web app settings')
+        c.argument('target_app_svc_plan', help='The app service plan for the new azure web app.')
 
     with self.argument_context('webapp traffic-routing') as c:
         c.argument('distribution', options_list=['--distribution', '-d'], nargs='+',
@@ -206,7 +210,7 @@ def load_arguments(self, _):
         c.argument('logs', options_list=['--logs', '-l'], action='store_true',
                    help='Enable viewing the log stream immediately after launching the web app')
     with self.argument_context('webapp delete') as c:
-        c.argument('name', arg_type=webapp_name_arg_type, local_context_attribute=None)
+        c.argument('name', arg_type=webapp_name_arg_type, local_context_attribute=None, help='The name of the webapp')
         c.argument('keep_empty_plan', action='store_true', help='keep empty app service plan')
         c.argument('keep_metrics', action='store_true', help='keep app metrics')
         c.argument('keep_dns_registration', action='store_true', help='keep DNS registration',
@@ -320,6 +324,7 @@ def load_arguments(self, _):
             c.argument('use32_bit_worker_process', options_list=['--use-32bit-worker-process'],
                        help='use 32 bits worker process or not', arg_type=get_three_state_flag(return_label=True))
             c.argument('php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
+            c.argument('power_shell_version', help='The version used to run your function app if using PowerShell, e.g., 7.2', options_list=['--powershell-version'])
             c.argument('python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
             c.argument('net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
             c.argument('linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.5.5\", \"NODE|12LTS\", \"PHP|7.2\", \"DOTNETCORE|2.1\". See https://aka.ms/linux-stacks for more info.")
@@ -540,6 +545,10 @@ def load_arguments(self, _):
         c.argument('ignore_hostname_conflict', help='Ignores custom hostnames stored in the backup',
                    action='store_true')
 
+    with self.argument_context('webapp config backup delete') as c:
+        c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot.')
+        c.argument('backup_id', help='Id of the backup.')
+
     with self.argument_context('webapp config snapshot') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
         c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot.')
@@ -696,6 +705,9 @@ def load_arguments(self, _):
         c.argument('vnet', options_list=['--vnet'], help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
         c.argument('subnet', options_list=['--subnet'], help="Name or resource ID of the pre-existing subnet to have the webapp join. The --vnet is argument also needed if specifying subnet by name.")
 
+    with self.argument_context('functionapp cors credentials') as c:
+        c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())
+
     with self.argument_context('functionapp vnet-integration') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
         c.argument('slot', help="The name of the slot. Default to the productions slot if not specified")
@@ -749,7 +761,9 @@ def load_arguments(self, _):
     with self.argument_context('functionapp show') as c:
         c.argument('name', arg_type=functionapp_name_arg_type)
     with self.argument_context('functionapp delete') as c:
-        c.argument('name', arg_type=functionapp_name_arg_type, local_context_attribute=None)
+        c.argument('name', arg_type=functionapp_name_arg_type, local_context_attribute=None, help='The name of the functionapp')
+        c.argument('keep_empty_plan', action='store_true', help='keep empty app service plan')
+
     with self.argument_context('functionapp config appsettings') as c:
         c.argument('slot_settings', nargs='+', help="space-separated slot app settings in a format of `<name>=<value>`")
 
@@ -879,10 +893,10 @@ def load_arguments(self, _):
     with self.argument_context('functionapp keys set', id_part=None) as c:
         c.argument('key_name', help="Name of the key to set.")
         c.argument('key_value', help="Value of the new key. If not provided, a value will be generated.")
-        c.argument('key_type', help="Type of key.", arg_type=get_enum_type(['systemKey', 'functionKeys', 'masterKey']))
+        c.argument('key_type', help="Type of key.", arg_type=get_enum_type(['systemKeys', 'functionKeys', 'masterKey']))
     with self.argument_context('functionapp keys delete', id_part=None) as c:
         c.argument('key_name', help="Name of the key to set.")
-        c.argument('key_type', help="Type of key.", arg_type=get_enum_type(['systemKey', 'functionKeys', 'masterKey']))
+        c.argument('key_type', help="Type of key.", arg_type=get_enum_type(['systemKeys', 'functionKeys', 'masterKey']))
 
     with self.argument_context('functionapp function', id_part=None) as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type,)
@@ -890,6 +904,8 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                    help='Name of the function app')
         c.argument('function_name', help="Name of the Function")
+    with self.argument_context('functionapp function list', id_part=None) as c:
+        c.ignore('function_name')
     with self.argument_context('functionapp function keys', id_part=None) as c:
         c.argument('slot', options_list=['--slot', '-s'],
                    help="The name of the slot. Defaults to the productions slot if not specified")
@@ -983,6 +999,10 @@ def load_arguments(self, _):
                    help='Configure App Service Environment as Zone Redundant. Applies to ASEv3 only.')
     with self.argument_context('appservice ase delete') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment')
+    with self.argument_context('appservice ase upgrade') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment')
+    with self.argument_context('appservice ase send-test-notification') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment')
     with self.argument_context('appservice ase update') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
@@ -993,6 +1013,12 @@ def load_arguments(self, _):
         c.argument('allow_new_private_endpoint_connections', arg_type=get_three_state_flag(),
                    options_list=['--allow-new-private-endpoint-connections', '-p'],
                    help='(ASEv3 only) Configure Apps in App Service Environment to allow new private endpoint connections.')
+        c.argument('allow_remote_debugging', arg_type=get_three_state_flag(),
+                   options_list=['--allow-remote-debugging', '-r'],
+                   help='(ASEv3 only) Configure App Service Environment to allow remote debugging. You will still have to configure remote debugging at the individual app level')
+        c.argument('allow_incoming_ftp_connections', arg_type=get_three_state_flag(),
+                   options_list=['--allow-incoming-ftp-connections', '-f'],
+                   help='(ASEv3 only) Configure App Service Environment to allow FTP access. This ftpEnabled setting allows you to allow or deny FTP connections on the App Service Environment level. Individual apps will still need to configure FTP access.')
     with self.argument_context('appservice ase list-addresses') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
@@ -1028,14 +1054,12 @@ def load_arguments(self, _):
         c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
 
     with self.argument_context('staticwebapp', validator=validate_public_cloud) as c:
-        c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.", arg_group="Github")
-        c.argument('token', options_list=['--token', '-t'], arg_group="Github",
-                   help="A user's GitHub repository token. This is used to setup the Github Actions workflow file and "
-                        "API secrets. If you need to create a Github Personal Access Token, "
-                        "please run with the '--login-with-github' flag or follow the steps found at the following link:\n"
-                        "https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line")
-        c.argument('login_with_github', help="Interactively log in with Github to retrieve the Personal Access Token", arg_group="Github")
-        c.argument('branch', options_list=['--branch', '-b'], help="The target branch in the repository.", arg_group="Github")
+        c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.", arg_group="Source Control")
+        c.argument('token', options_list=['--token', '-t'], arg_group="Source Control",
+                   help="A user's GitHub or Azure Dev Ops repository token. This is used to create the Github Action or Dev Ops pipeline.")
+        c.argument('login_with_github', help="Interactively log in with Github to retrieve the Personal Access Token", arg_group="Source Control")
+        c.argument('login_with_ado', help='Use azure credentials to create an Azure Dev Ops personal access token', arg_group="Source Control")
+        c.argument('branch', options_list=['--branch', '-b'], help="The target branch in the repository.", arg_group="Source Control")
         c.ignore('format_output')
         c.argument('name', options_list=['--name', '-n'], metavar='NAME', help="Name of the static site")
     with self.argument_context('staticwebapp environment') as c:
@@ -1102,6 +1126,7 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=static_web_app_sku_arg_type)
     with self.argument_context('staticwebapp functions link') as c:
         c.argument('function_resource_id', help="Resource ID of the functionapp to link. Can be retrieved with 'az functionapp --query id'")
+        c.argument('environment_name', help="Name of the environment of static site")
         c.argument('force', help="Force the function link even if the function is already linked to a static webapp. May be needed if the function was previously linked to a static webapp.")
     with self.argument_context('staticwebapp backends link') as c:
         c.argument('backend_resource_id', help="Resource ID of the backend to link.")
