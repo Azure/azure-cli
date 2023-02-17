@@ -3041,7 +3041,6 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(CLIError, 'Please provide a complete resource ID'):
             self.cmd('network express-route gateway connection show --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myrg/providers/Microsoft.Network/expressRouteGateways/aaa')
 
-    @unittest.skip('Test is wrong, please fix. rg not found')
     @ResourceGroupPreparer(name_prefix='cli_test_express_route')
     def test_network_express_route_connection_routing_configuration(self, resource_group):
         self.kwargs = {
@@ -3082,6 +3081,47 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
             self.check('length(routingConfiguration.propagatedRouteTables.labels)', 2),
             self.check('routingConfiguration.propagatedRouteTables.labels[0]', 'label1'),
             self.check('routingConfiguration.propagatedRouteTables.labels[1]', 'label2')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route_gateway_connection_inbound_outbound_routemap', location='westcentralus')
+    def test_express_route_gateway_connection_inbound_outbound_routemap(self, resource_group):
+        self.kwargs.update({
+            'vwan': self.create_random_name('vwan', 10),
+            'vhub': self.create_random_name('vhub', 10),
+            'er': self.create_random_name("er", 10),
+            'ergateway': self.create_random_name("ergw", 16),
+            'ergatewayconn': self.create_random_name("ergw", 16),
+            "route_map_name": self.create_random_name("routemap-", 16),
+            "route_map_name_2": self.create_random_name("routemap-", 16),
+            "route_map_name_3": self.create_random_name("routemap-", 16),
+            "route_map_name_4": self.create_random_name("routemap-", 16)
+        })
+
+        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan}  --address-prefix 10.5.0.0/16 --sku Standard')
+        route_map_id = self.cmd("network vhub route-map create -n {route_map_name} -g {rg} --vhub-name {vhub}").get_output_in_json()['id']
+        route_map_id_2 = self.cmd("network vhub route-map create -n {route_map_name_2} -g {rg} --vhub-name {vhub}").get_output_in_json()['id']
+        route_map_id_3 = self.cmd("network vhub route-map create -n {route_map_name_3} -g {rg} --vhub-name {vhub}").get_output_in_json()['id']
+        route_map_id_4 = self.cmd("network vhub route-map create -n {route_map_name_4} -g {rg} --vhub-name {vhub}").get_output_in_json()['id']
+        self.kwargs.update({
+            'route_map_id': route_map_id,
+            'route_map_id_2': route_map_id_2,
+            'route_map_id_3': route_map_id_3,
+            'route_map_id_4': route_map_id_4
+        })
+        self.cmd('network express-route create -g {rg} -n {er} --bandwidth 50 --provider "Ibiza Test Provider" --peering-location Area51 --sku-tier Premium')
+        self.cmd('network express-route gateway create -g {rg} -n {ergateway} --virtual-hub {vhub}')
+        peer_id = self.cmd('network express-route peering create -g {rg} --circuit-name {er} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 107.0.0.0/30 --secondary-peer-subnet 108.0.0.0/30 --advertised-public-prefixes 107.0.0.0/30 --customer-asn 10000 --routing-registry-name level3')
+        self.kwargs.update({
+            'peer_id': peer_id
+        })
+        self.cmd('network express-route gateway connection create -g {rg} -n {ergatewayconn} --gateway-name {ergateway} --peering {peer_id} --inbound-route-map {route_map_id} --outbound-route-map {route_map_id_2}', checks=[
+            self.check('p2SConnectionConfigurations[0].routingConfiguration.inboundRouteMap.id', '{route_map_id}'),
+            self.check('p2SConnectionConfigurations[0].routingConfiguration.outboundRouteMap.id', '{route_map_id_2}')
+        ])
+        self.cmd('network express-route gateway connection update -g {rg} -n {ergatewayconn} --inbound-route-map {route_map_id_3} --outbound-route-map {route_map_id_4}', checks=[
+            self.check('p2SConnectionConfigurations[0].routingConfiguration.inboundRouteMap.id', '{route_map_id_3}'),
+            self.check('p2SConnectionConfigurations[0].routingConfiguration.outboundRouteMap.id', '{route_map_id_4}')
         ])
 
 
