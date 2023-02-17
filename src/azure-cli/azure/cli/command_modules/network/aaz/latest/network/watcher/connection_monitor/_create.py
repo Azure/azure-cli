@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network watcher connection-monitor create",
-)
 class Create(AAZCommand):
     """Create a connection monitor.
     """
@@ -52,7 +49,8 @@ class Create(AAZCommand):
             help="The name of the Network Watcher resource.",
             required=True,
         )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
+        _args_schema.resource_group_name = AAZResourceGroupNameArg(
+            options=["-g", "--resource-group-name"],
             help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
@@ -514,7 +512,7 @@ class Create(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "resourceGroupName", self.ctx.args.resource_group_name,
                     required=True,
                 ),
                 **self.serialize_url_param(

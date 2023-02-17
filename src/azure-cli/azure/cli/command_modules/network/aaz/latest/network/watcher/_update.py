@@ -46,7 +46,8 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
         )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
+        _args_schema.resource_group_name = AAZResourceGroupNameArg(
+            options=["-g", "--resource-group-name"],
             help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
@@ -69,7 +70,7 @@ class Update(AAZCommand):
             help="Resource location.",
             nullable=True,
             fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
+                resource_group_arg="resource_group_name",
             ),
         )
         return cls._args_schema
@@ -138,7 +139,7 @@ class Update(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "resourceGroupName", self.ctx.args.resource_group_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -221,7 +222,7 @@ class Update(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "resourceGroupName", self.ctx.args.resource_group_name,
                     required=True,
                 ),
                 **self.serialize_url_param(

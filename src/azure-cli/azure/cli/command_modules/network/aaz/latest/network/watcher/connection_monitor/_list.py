@@ -15,7 +15,11 @@ from azure.cli.core.aaz import *
     "network watcher connection-monitor list",
 )
 class List(AAZCommand):
-    """List all connection monitors for the specified Network Watcher.
+    """List connection monitors for the given region.
+
+    :example: List a connection monitor for the given region.
+        az network watcher connection-monitor list -l westus
+        az az network watcher connection-monitor list --location westus --subscription MySubscription
     """
 
     _aaz_info = {
@@ -44,11 +48,12 @@ class List(AAZCommand):
         _args_schema.network_watcher_name = AAZStrArg(
             options=["--network-watcher-name"],
             help="The name of the Network Watcher resource.",
-            required=False,
+            required=True,
         )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
+        _args_schema.resource_group_name = AAZResourceGroupNameArg(
+            options=["-g", "--resource-group-name"],
             help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
-            required=False,
+            required=True,
         )
         return cls._args_schema
 
@@ -103,7 +108,7 @@ class List(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "resourceGroupName", self.ctx.args.resource_group_name,
                     required=True,
                 ),
                 **self.serialize_url_param(

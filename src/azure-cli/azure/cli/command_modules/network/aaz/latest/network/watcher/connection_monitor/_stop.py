@@ -15,7 +15,10 @@ from azure.cli.core.aaz import *
     "network watcher connection-monitor stop",
 )
 class Stop(AAZCommand):
-    """Stops the specified connection monitor.
+    """Stop the specified connection monitor.
+
+    :example: Stop the specified connection monitor.
+        az network watcher connection-monitor stop -l westus -n MyConnectionMonitorName
     """
 
     _aaz_info = {
@@ -54,7 +57,8 @@ class Stop(AAZCommand):
             required=True,
             id_part="name",
         )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
+        _args_schema.resource_group_name = AAZResourceGroupNameArg(
+            options=["-g", "--resource-group-name"],
             help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
@@ -127,7 +131,7 @@ class Stop(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "resourceGroupName", self.ctx.args.resource_group_name,
                     required=True,
                 ),
                 **self.serialize_url_param(

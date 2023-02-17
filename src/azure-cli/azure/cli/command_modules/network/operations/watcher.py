@@ -29,10 +29,8 @@ def update_network_watcher_from_location(ctx, cli_ctx, remove=False, watcher_nam
         raise CLIError("network watcher is not enabled for region '{}'.".format(location))
     from azure.mgmt.core.tools import parse_resource_id
     id_parts = parse_resource_id(watcher['id'])
-    args.resource_group = id_parts['resource_group']
-    args.network_watcher_name = id_parts['name']
-    # setattr(args, rg_name, id_parts['resource_group'])
-    # setattr(args, watcher_name, id_parts['name'])
+    setattr(args, rg_name, id_parts['resource_group'])
+    setattr(args, watcher_name, id_parts['name'])
     if remove:
         del args.location
 
@@ -43,7 +41,9 @@ class WatcherConnectionMonitorStart(_WatcherConnectionMonitorStart):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
-        args_schema.resource_group._registered = False
+        args_schema.network_watcher_name._required = False
+        args_schema.resource_group_name._registered = False
+        args_schema.resource_group_name._required = False
         args_schema.location = AAZResourceLocationArg(
             options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
@@ -51,7 +51,7 @@ class WatcherConnectionMonitorStart(_WatcherConnectionMonitorStart):
                  "using `az configure --defaults location=<location>`.",
             required=True,
             fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
+                resource_group_arg="resource_group_name",
             ),
         )
         return args_schema
@@ -70,7 +70,9 @@ class WatcherConnectionMonitorStop(_WatcherConnectionMonitorStop):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
-        args_schema.resource_group._registered = False
+        args_schema.network_watcher_name._required = False
+        args_schema.resource_group_name._registered = False
+        args_schema.resource_group_name._required = False
         args_schema.location = AAZResourceLocationArg(
             options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
@@ -78,7 +80,7 @@ class WatcherConnectionMonitorStop(_WatcherConnectionMonitorStop):
                  "using `az configure --defaults location=<location>`.",
             required=True,
             fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
+                resource_group_arg="resource_group_name",
             ),
         )
         return args_schema
@@ -97,7 +99,9 @@ class WatcherConnectionMonitorList(_WatcherConnectionMonitorList):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
-        args_schema.resource_group._registered = False
+        args_schema.network_watcher_name._required = False
+        args_schema.resource_group_name._registered = False
+        args_schema.resource_group_name._required = False
         args_schema.location = AAZResourceLocationArg(
             options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
@@ -105,7 +109,7 @@ class WatcherConnectionMonitorList(_WatcherConnectionMonitorList):
                  "using `az configure --defaults location=<location>`.",
             required=True,
             fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
+                resource_group_arg="resource_group_name",
             ),
         )
         return args_schema
@@ -124,7 +128,9 @@ class WatcherConnectionMonitorShow(_WatcherConnectionMonitorShow):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
-        args_schema.resource_group._registered = False
+        args_schema.network_watcher_name._required = False
+        args_schema.resource_group_name._registered = False
+        args_schema.resource_group_name._required = False
         args_schema.location = AAZResourceLocationArg(
             options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
@@ -132,7 +138,7 @@ class WatcherConnectionMonitorShow(_WatcherConnectionMonitorShow):
                  "using `az configure --defaults location=<location>`.",
             required=True,
             fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
+                resource_group_arg="resource_group_name",
             ),
         )
         return args_schema
@@ -151,7 +157,9 @@ class WatcherConnectionMonitorQuery(_WatcherConnectionMonitorQuery):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
-        args_schema.resource_group._registered = False
+        args_schema.network_watcher_name._required = False
+        args_schema.resource_group_name._registered = False
+        args_schema.resource_group_name._required = False
         args_schema.location = AAZResourceLocationArg(
             options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
@@ -159,7 +167,7 @@ class WatcherConnectionMonitorQuery(_WatcherConnectionMonitorQuery):
                  "using `az configure --defaults location=<location>`.",
             required=True,
             fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
+                resource_group_arg="resource_group_name",
             ),
         )
         return args_schema
@@ -178,7 +186,9 @@ class WatcherConnectionMonitorDelete(_WatcherConnectionMonitorDelete):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
-        args_schema.resource_group._registered = False
+        args_schema.network_watcher_name._required = False
+        args_schema.resource_group_name._registered = False
+        args_schema.resource_group_name._required = False
         args_schema.location = AAZResourceLocationArg(
             options=["-l", "--location"],
             help="Location. Values from: `az account list-locations`. "
@@ -186,7 +196,7 @@ class WatcherConnectionMonitorDelete(_WatcherConnectionMonitorDelete):
                  "using `az configure --defaults location=<location>`.",
             required=True,
             fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
+                resource_group_arg="resource_group_name",
             ),
         )
         return args_schema

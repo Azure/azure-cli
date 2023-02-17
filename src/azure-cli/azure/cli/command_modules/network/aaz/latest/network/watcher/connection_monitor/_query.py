@@ -15,7 +15,10 @@ from azure.cli.core.aaz import *
     "network watcher connection-monitor query",
 )
 class Query(AAZCommand):
-    """Query a snapshot of the most recent connection states.
+    """Query a snapshot of the most recent connection state of a connection monitor.
+
+    :example: List a connection monitor for the given region.
+        az network watcher connection-monitor query -l westus -n MyConnectionMonitorName
     """
 
     _aaz_info = {
@@ -54,7 +57,8 @@ class Query(AAZCommand):
             required=True,
             id_part="name",
         )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
+        _args_schema.resource_group_name = AAZResourceGroupNameArg(
+            options=["-g", "--resource-group-name"],
             help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
@@ -131,7 +135,7 @@ class Query(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "resourceGroupName", self.ctx.args.resource_group_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
