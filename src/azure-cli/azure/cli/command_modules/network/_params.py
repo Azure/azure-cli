@@ -724,11 +724,11 @@ def load_arguments(self, _):
         c.argument('network_watcher_name', arg_type=ignore_type, options_list=['--__NETWORK_WATCHER_NAME'])
         c.argument('connection_monitor_name', name_arg_type, help='Connection monitor name.')
 
-    nw_validator = get_network_watcher_from_location(remove=True, watcher_name='network_watcher_name', rg_name='resource_group_name')
-    for scope in ['list', 'show', 'start', 'stop', 'delete', 'query']:
-        with self.argument_context('network watcher connection-monitor {}'.format(scope)) as c:
-            c.extra('location', get_location_type(self.cli_ctx), required=True)
-            c.argument('resource_group_name', arg_type=ignore_type, validator=nw_validator)
+    # nw_validator = get_network_watcher_from_location(remove=True, watcher_name='network_watcher_name', rg_name='resource_group_name')
+    # for scope in ['list', 'show', 'start', 'stop', 'delete', 'query']:
+    #     with self.argument_context('network watcher connection-monitor {}'.format(scope)) as c:
+    #         c.extra('location', get_location_type(self.cli_ctx), required=True)
+    #         c.argument('resource_group_name', arg_type=ignore_type, validator=nw_validator)
 
     # connection monitor V2 parameter set
     with self.argument_context('network watcher connection-monitor', min_api='2019-11-01', arg_group='V2') as c:
