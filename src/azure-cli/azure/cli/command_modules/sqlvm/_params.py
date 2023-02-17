@@ -372,3 +372,6 @@ def load_arguments(self, _):
                    action='store_true')
         c.argument('msi_client_id',
                    help='Virutal Machine Managed Identity Client ID.')
+        c.argument('skip_msi_validation',
+                   help='Skip client side AzureAD authentication validation, the server side validation will still happen.',
+                   action='store_true')
