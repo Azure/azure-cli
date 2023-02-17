@@ -394,7 +394,7 @@ def _get_azext_module(extension_name, module_name):
         azext_custom = import_module(module_name)
         return azext_custom
     except ImportError as ie:
-        raise CLIError(ie)
+        raise CLIInternalError(ie)
 
 
 def _get_or_add_extension(cmd, extension_name, extension_module, update=False):
