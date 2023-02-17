@@ -9,10 +9,13 @@ from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.aaz import AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, \
     AAZStrArg, AAZArgEnum
 
+
 def _import_aaz_by_profile(module_name):
     return importlib.import_module(f"azure.cli.command_modules.network.aaz.2020_09_01_hybrid.{module_name}")
 
+
 logger = get_logger(__name__)
+
 
 class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
     def __call__(self, ctx, value):

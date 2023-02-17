@@ -14,7 +14,7 @@ from azure.cli.core.profiles import get_api_version, ResourceType
 from azure.cli.command_modules.network.azure_stack._client_factory import (
     cf_application_gateways, cf_express_route_circuit_authorizations,
     cf_express_route_circuit_peerings, cf_express_route_circuits,
-    cf_express_route_service_providers, cf_load_balancers, cf_local_network_gateways,
+    cf_express_route_service_providers, cf_local_network_gateways,
     cf_network_interfaces, cf_network_security_groups, cf_network_watcher, cf_packet_capture,
     cf_virtual_networks, cf_virtual_network_peerings, cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways,
@@ -26,7 +26,7 @@ from azure.cli.command_modules.network.azure_stack._client_factory import (
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
     cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
     cf_virtual_router, cf_virtual_router_peering, cf_flow_logs,
-    cf_private_dns_zone_groups, cf_load_balancer_backend_pools, cf_virtual_hub,
+    cf_private_dns_zone_groups, cf_virtual_hub,
     cf_custom_ip_prefixes)
 from azure.cli.command_modules.network.azure_stack._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
@@ -57,7 +57,7 @@ from azure.cli.command_modules.network.azure_stack._validators import (
     process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
     process_vpn_connection_create_namespace,
     process_nw_config_diagnostic_namespace,
-    process_appgw_waf_policy_update, process_cross_region_lb_frontend_ip_namespace)
+    process_appgw_waf_policy_update)
 
 NETWORK_VROUTER_DEPRECATION_INFO = 'network routeserver'
 NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
