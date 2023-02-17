@@ -42,11 +42,6 @@ class LBFrontendIPCreate(_LBFrontendIP.Create):
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIPAddresses/{}",
         )
 
-        args_schema.zones.Element.enum = AAZArgEnum({
-            "1": "1",
-            "2": "2",
-            "3": "3",
-        })
         args_schema.private_ip_allocation_method._registered = False
         return args_schema
 
@@ -86,11 +81,6 @@ class LBFrontendIPUpdate(_LBFrontendIP.Update):
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIPAddresses/{}",
         )
 
-        args_schema.zones.Element.enum = AAZArgEnum({
-            "1": "1",
-            "2": "2",
-            "3": "3",
-        })
         args_schema.private_ip_allocation_method._registered = False
         return args_schema
 
