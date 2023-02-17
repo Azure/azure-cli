@@ -81,25 +81,6 @@ def transform_local_gateway_table_output(result):
     return final_result
 
 
-def transform_vpn_connection_list(result):
-    return [transform_vpn_connection(v) for v in result]
-
-
-def transform_vpn_connection(result):
-    if result:
-        properties_to_strip = \
-            ['virtual_network_gateway1', 'virtual_network_gateway2', 'local_network_gateway2', 'peer']
-        for prop in properties_to_strip:
-            prop_val = getattr(result, prop, None)
-            if not prop_val:
-                delattr(result, prop)
-            else:
-                null_props = [key for key in prop_val.__dict__ if not prop_val.__dict__[key]]
-                for null_prop in null_props:
-                    delattr(prop_val, null_prop)
-    return result
-
-
 def transform_vnet_table_output(result):
 
     def _transform(result):
