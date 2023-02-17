@@ -394,7 +394,7 @@ def upload_workspace_package(cmd, workspace_name, package, progress_callback=Non
             if data == b'':
                 break
 
-            client.append(package_name, data)
+            client.append('appendblock', package_name, data)
             index += len(data)
             if progress_callback is not None:
                 progress_callback(index, package_size)

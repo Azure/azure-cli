@@ -63,11 +63,6 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     from requests.exceptions import SSLError, HTTPError
     from azure.cli.core import azclierror
     from msal_extensions.persistence import PersistenceError
-    import traceback
-
-    logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
-    # Print the traceback and exception message
-    logger.debug(traceback.format_exc())
 
     error_msg = getattr(ex, 'message', str(ex))
     exit_code = 1
