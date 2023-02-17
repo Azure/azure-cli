@@ -179,9 +179,9 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
         ResourceType.MGMT_KEYVAULT: '2022-07-01',
-        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2020-04-01-preview', {
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
             'classic_administrators': '2015-06-01',
-            'role_definitions': '2018-01-01-preview',
+            'role_definitions': '2022-04-01',
             'provider_operations_metadata': '2018-01-01-preview'
         }),
         ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2022-02-01-preview', {
@@ -239,7 +239,7 @@ AZURE_API_PROFILES = {
             'private_endpoint_connections': '2019-10-17-preview',
             'subscription_diagnostic_settings': '2017-05-01-preview'
         }),
-        ResourceType.MGMT_MSI: '2022-01-31-preview',
+        ResourceType.MGMT_MSI: '2023-01-31',
         ResourceType.MGMT_APPSERVICE: '2022-03-01',
         ResourceType.MGMT_IOTHUB: '2022-04-30-preview',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
@@ -424,6 +424,9 @@ AD_HOC_API_VERSIONS = {
     ResourceType.MGMT_CONTAINERSERVICE: {
         # src/azure-cli/azure/cli/command_modules/acs/tests/latest/test_custom.py:50
         'ManagedClusterAddonProfile': '2020-03-01',
+    },
+    ResourceType.MGMT_MSI: {
+        'user_assigned_identities': '2022-01-31-preview',
     }
 }
 

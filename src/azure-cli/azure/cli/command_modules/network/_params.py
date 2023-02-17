@@ -600,18 +600,6 @@ def load_arguments(self, _):
     # endregion
 
     # region NetworkInterfaces (NIC)
-    with self.argument_context('network nic') as c:
-        c.argument('enable_accelerated_networking', min_api='2016-09-01', options_list=['--accelerated-networking'], help='Enable accelerated networking.', arg_type=get_three_state_flag())
-        c.argument('network_interface_name', nic_type, options_list=['--name', '-n'])
-        c.argument('internal_dns_name_label', options_list='--internal-dns-name', help='The internal DNS name label.', arg_group='DNS')
-        c.argument('dns_servers', help='Space-separated list of DNS server IP addresses.', nargs='+', arg_group='DNS')
-        c.argument('enable_ip_forwarding', options_list='--ip-forwarding', help='Enable IP forwarding.', arg_type=get_three_state_flag())
-
-    with self.argument_context('network nic create') as c:
-        c.argument('private_ip_address_version', min_api='2016-09-01', help='The private IP address version to use.', default=IPVersion.I_PV4.value if IPVersion else '')
-        c.argument('network_interface_name', nic_type, options_list=['--name', '-n'], id_part=None)
-        c.argument('edge_zone', edge_zone)
-
         public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, default_none=True)
         c.argument('public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
 
@@ -621,11 +609,7 @@ def load_arguments(self, _):
         subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name', allow_cross_sub=False)
         c.argument('subnet', help=subnet_help, completer=subnet_completion_list)
 
-    with self.argument_context('network nic update') as c:
-        c.argument('network_security_group', help='Name or ID of the associated network security group.', validator=get_nsg_validator(), completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
-        c.argument('dns_servers', help='Space-separated list of DNS server IP addresses. Use ""(\'""\' in PowerShell) to revert to default Azure servers.', nargs='+', arg_group='DNS')
-
-    for item in ['create', 'ip-config update', 'ip-config create']:
+    for item in ['ip-config update', 'ip-config create']:
         with self.argument_context('network nic {}'.format(item)) as c:
             c.argument('application_security_groups', options_list=['--application-security-groups', '--asgs'], min_api='2017-09-01', help='Space-separated list of application security groups.', nargs='+', validator=get_asg_validator(self, 'application_security_groups'))
 
@@ -1336,27 +1320,6 @@ def load_arguments(self, _):
         for item in ['vnet_gateway2', 'local_gateway2', 'express_route_circuit2']:
             c.argument(item, arg_group='Destination')
 
-    with self.argument_context('network vpn-connection update') as c:
-        c.argument('enable_bgp', help='Enable BGP (Border Gateway Protocol)', arg_type=get_enum_type(['true', 'false']))
-
-    with self.argument_context('network vpn-connection shared-key') as c:
-        c.argument('connection_shared_key_name', options_list=['--name', '-n'], id_part='name')
-        c.argument('virtual_network_gateway_connection_name', options_list='--connection-name', metavar='NAME', id_part='name')
-        c.argument('key_length', type=int, help='The virtual network connection reset shared key length, should between 1 and 128.')
-        c.argument('value', help='The virtual network connection shared key value.')
-
-    with self.argument_context('network vpn-connection show-device-config-script') as c:
-        c.argument('vendor', help='The vendor for the VPN device.')
-        c.argument('device_family', help='The device family for the vpn device.')
-        c.argument('firmware_version', help='The firmware version for the vpn device.')
-
-    with self.argument_context('network vpn-connection packet-capture start') as c:
-        c.argument('filter_data', options_list=['--filter'], help='Data filter.')
-
-    with self.argument_context('network vpn-connection packet-capture stop') as c:
-        c.argument('sas_url', options_list=['--sas-url'],
-                   help='The SAS url to be used for packet capture on VPN connection.')
-
     with self.argument_context('network vrouter') as c:
         c.argument('virtual_router_name', options_list=['--name', '-n'], help='The name of the Virtual Router.')
         c.argument('hosted_gateway',
@@ -1384,26 +1347,6 @@ def load_arguments(self, _):
 
     with self.argument_context('network routeserver create') as c:
         c.argument('virtual_hub_name', id_part=None)
-
-    for scope in ['vpn-connection']:
-        with self.argument_context('network {} ipsec-policy'.format(scope), arg_group='Security Association') as c:
-            c.argument('sa_data_size_kilobytes', options_list=['--sa-max-size'], type=int, help='The payload size in KB for P2S client.')
-            c.argument('sa_life_time_seconds', options_list=['--sa-lifetime'], type=int, help='The lifetime in seconds for P2S client.')
-        with self.argument_context('network {} ipsec-policy'.format(scope), arg_group='IKE Phase 1') as c:
-            c.argument('dh_group', arg_type=get_enum_type(self.get_models('DhGroup')),
-                       help='The DH Groups used for initial SA.')
-            c.argument('ipsec_encryption', arg_type=get_enum_type(self.get_models('IpsecEncryption')),
-                       help='The IPSec encryption algorithm.')
-            c.argument('ipsec_integrity', arg_type=get_enum_type(self.get_models('IpsecIntegrity')),
-                       help='The IPSec integrity algorithm.')
-        with self.argument_context('network {} ipsec-policy'.format(scope), arg_group='IKE Phase 2') as c:
-            c.argument('pfs_group', arg_type=get_enum_type(self.get_models('PfsGroup')),
-                       help='The Pfs Groups used for new child SA.')
-            c.argument('ike_encryption', arg_type=get_enum_type(self.get_models('IkeEncryption')),
-                       help='The IKE encryption algorithm.')
-            c.argument('ike_integrity', arg_type=get_enum_type(self.get_models('IkeIntegrity')),
-                       help='The IKE integrity algorithm.')
-
     # endregion
 
     # region Remove --ids from listsaz

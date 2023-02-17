@@ -28,6 +28,8 @@ from msrestazure.azure_exceptions import CloudError
 
 logger = get_logger(__name__)
 
+# pylint: disable=protected-access
+
 
 def resolve_role_id(role, scope, definitions_client):
     role_id = None
@@ -68,10 +70,10 @@ def add_role_assignment_executor(cmd, role, assignee, resource_group_name=None, 
     definitions_client = factory.role_definitions
 
     # FIXME: is this necessary?
-    if assignments_client.config is None:
+    if assignments_client._config is None:
         raise AzCLIError("Assignments client config is undefined.")
 
-    scope = build_role_scope(resource_group_name, scope, assignments_client.config.subscription_id)
+    scope = build_role_scope(resource_group_name, scope, assignments_client._config.subscription_id)
 
     # XXX: if role is uuid, this function's output cannot be used as role assignment defintion id
     # ref: https://github.com/Azure/azure-cli/issues/2458
@@ -92,8 +94,9 @@ def add_role_assignment_executor(cmd, role, assignee, resource_group_name=None, 
         operation_group="role_assignments",
     )
     if cmd.supported_api_version(min_api="2018-01-01-preview", resource_type=ResourceType.MGMT_AUTHORIZATION):
-        parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id)
-        return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers)
+        parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id,
+                                                    principal_type=None)
+        return assignments_client.create(scope, assignment_name, parameters, headers=custom_headers)
 
     # for backward compatibility
     RoleAssignmentProperties = get_sdk(
@@ -104,7 +107,7 @@ def add_role_assignment_executor(cmd, role, assignee, resource_group_name=None, 
         operation_group="role_assignments",
     )
     properties = RoleAssignmentProperties(role_definition_id=role_id, principal_id=object_id)
-    return assignments_client.create(scope, assignment_name, properties, custom_headers=custom_headers)
+    return assignments_client.create(scope, assignment_name, properties, headers=custom_headers)
 
 
 def add_role_assignment(cmd, role, service_principal_msi_id, is_service_principal=True, delay=2, scope=None):
@@ -164,9 +167,9 @@ def search_role_assignments(
             f = "assignedTo('{}')".format(assignee_object_id)
         else:
             f = "principalId eq '{}'".format(assignee_object_id)
-        assignments = list(assignments_client.list(filter=f))
+        assignments = list(assignments_client.list_for_subscription(filter=f))
     else:
-        assignments = list(assignments_client.list())
+        assignments = list(assignments_client.list_for_subscription())
 
     if assignments:
         assignments = [
@@ -245,7 +248,7 @@ def delete_role_assignments_executor(
         if not prompt_y_n(msg, default="n"):
             return
 
-    scope = build_role_scope(resource_group_name, scope, assignments_client.config.subscription_id)
+    scope = build_role_scope(resource_group_name, scope, assignments_client._config.subscription_id)
     assignments = search_role_assignments(
         cli_ctx,
         assignments_client,

@@ -4025,14 +4025,14 @@ class NetworkNicScenarioTest(ScenarioTest):
 
         # create with minimum parameters
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet}', checks=[
-            self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
             self.check('NewNIC.provisioningState', 'Succeeded')
         ])
         # exercise optional parameters
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet_id} --ip-forwarding --private-ip-address {pri_ip} --public-ip-address {pub_ip} --internal-dns-name test --dns-servers 100.1.2.3 --lb-address-pools {address_pool_ids} --lb-inbound-nat-rules {rule_ids} --accelerated-networking --tags foo=doo', checks=[
-            self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Static'),
-            self.check('NewNIC.ipConfigurations[0].privateIpAddress', '{pri_ip}'),
-            self.check('NewNIC.enableIpForwarding', True),
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Static'),
+            self.check('NewNIC.ipConfigurations[0].privateIPAddress', '{pri_ip}'),
+            self.check('NewNIC.enableIPForwarding', True),
             self.check('NewNIC.enableAcceleratedNetworking', True),
             self.check('NewNIC.provisioningState', 'Succeeded'),
             self.check('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
@@ -4043,15 +4043,15 @@ class NetworkNicScenarioTest(ScenarioTest):
         ])
         # exercise creating with NSG
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet} --network-security-group {nsg1}', checks=[
-            self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
-            self.check('NewNIC.enableIpForwarding', False),
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
+            self.check('NewNIC.enableIPForwarding', False),
             self.check("NewNIC.networkSecurityGroup.contains(id, '{nsg1}')", True),
             self.check('NewNIC.provisioningState', 'Succeeded')
         ])
         # exercise creating with NSG and Public IP
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet} --network-security-group {nsg_id} --public-ip-address {pub_ip_id}', checks=[
-            self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
-            self.check('NewNIC.enableIpForwarding', False),
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
+            self.check('NewNIC.enableIPForwarding', False),
             self.check("NewNIC.networkSecurityGroup.contains(id, '{nsg1}')", True),
             self.check('NewNIC.provisioningState', 'Succeeded')
         ])
@@ -4071,15 +4071,15 @@ class NetworkNicScenarioTest(ScenarioTest):
             self.check('name', '{nic}')
         ])
         self.cmd('network nic update -g {rg} -n {nic} --internal-dns-name noodle --ip-forwarding true --accelerated-networking false --dns-servers "" --network-security-group {nsg2}', checks=[
-            self.check('enableIpForwarding', True),
+            self.check('enableIPForwarding', True),
             self.check('enableAcceleratedNetworking', False),
             self.check('dnsSettings.internalDnsNameLabel', 'noodle'),
             self.check('length(dnsSettings.dnsServers)', 0),
             self.check("networkSecurityGroup.contains(id, '{nsg2}')", True)
         ])
         # test generic update
-        self.cmd('network nic update -g {rg} -n {nic} --set dnsSettings.internalDnsNameLabel=doodle --set enableIpForwarding=false', checks=[
-            self.check('enableIpForwarding', False),
+        self.cmd('network nic update -g {rg} -n {nic} --set dnsSettings.internalDnsNameLabel=doodle --set enableIPForwarding=false', checks=[
+            self.check('enableIPForwarding', False),
             self.check('dnsSettings.internalDnsNameLabel', 'doodle')
         ])
 
@@ -4310,6 +4310,7 @@ class NetworkNicConvenienceCommandsScenarioTest(ScenarioTest):
                  checks=self.greater_than('length(@)', 0))
         self.cmd('network nic show-effective-route-table --ids {nic_id}',
                  checks=self.greater_than('length(@)', 0))
+        self.cmd('network nic show-effective-route-table --ids {nic_id} -o table')
 
 
 class NetworkExtendedNSGScenarioTest(ScenarioTest):
