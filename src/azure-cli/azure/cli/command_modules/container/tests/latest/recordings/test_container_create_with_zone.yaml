@@ -1,5 +1,97 @@
 interactions:
 - request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - container attach
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-containerinstance/10.1.0b1 Python/3.10.10
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgfss4ibm5frapqzdnvtis25cn4lbgccmdjtm4f5ernzll4kmpdre4vptmjvq2otqko/providers/Microsoft.ContainerInstance/containerGroups/clicontainervnel?api-version=2022-10-01-preview
+  response:
+    body:
+      string: '{"properties":{"sku":"Standard","provisioningState":"Succeeded","containers":[{"name":"clicontainervnel","properties":{"image":"alpine:latest","command":["/bin/sh","-c","echo
+        hello; sleep 15; done"],"ports":[{"protocol":"TCP","port":80}],"environmentVariables":[],"instanceView":{"restartCount":0,"currentState":{"state":"Terminated","startTime":"2023-02-17T19:26:32.547Z","exitCode":2,"finishTime":"2023-02-17T19:26:37.226Z","detailStatus":"Error"}},"resources":{"requests":{"memoryInGB":1.0,"cpu":1.0}}}}],"initContainers":[],"restartPolicy":"Never","ipAddress":{"ports":[{"protocol":"TCP","port":80}],"ip":"20.66.109.52","type":"Public"},"osType":"Linux","instanceView":{"events":[],"state":"Failed"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgfss4ibm5frapqzdnvtis25cn4lbgccmdjtm4f5ernzll4kmpdre4vptmjvq2otqko/providers/Microsoft.ContainerInstance/containerGroups/clicontainervnel","name":"clicontainervnel","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1035'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Feb 2023 19:26:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - container attach
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-containerinstance/10.1.0b1 Python/3.10.10
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgfss4ibm5frapqzdnvtis25cn4lbgccmdjtm4f5ernzll4kmpdre4vptmjvq2otqko/providers/Microsoft.ContainerInstance/containerGroups/clicontainervnel?api-version=2022-10-01-preview
+  response:
+    body:
+      string: '{"properties":{"sku":"Standard","provisioningState":"Succeeded","containers":[{"name":"clicontainervnel","properties":{"image":"alpine:latest","command":["/bin/sh","-c","echo
+        hello; sleep 15; done"],"ports":[{"protocol":"TCP","port":80}],"environmentVariables":[],"instanceView":{"restartCount":0,"currentState":{"state":"Terminated","startTime":"2023-02-17T19:26:32.547Z","exitCode":2,"finishTime":"2023-02-17T19:26:37.226Z","detailStatus":"Error"}},"resources":{"requests":{"memoryInGB":1.0,"cpu":1.0}}}}],"initContainers":[],"restartPolicy":"Never","ipAddress":{"ports":[{"protocol":"TCP","port":80}],"ip":"20.66.109.52","type":"Public"},"osType":"Linux","instanceView":{"events":[],"state":"Failed"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgfss4ibm5frapqzdnvtis25cn4lbgccmdjtm4f5ernzll4kmpdre4vptmjvq2otqko/providers/Microsoft.ContainerInstance/containerGroups/clicontainervnel","name":"clicontainervnel","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1035'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Feb 2023 19:26:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
     body: '{"properties": {"containers": [{"name": "clicontainer000002", "properties":
       {"image": "alpine:latest", "command": ["/bin/sh", "-c", "while true; do echo
       hello; sleep 20; done"], "ports": [{"protocol": "TCP", "port": 80}], "resources":
@@ -25,7 +117,7 @@ interactions:
         --restart-policy --location
       User-Agent:
       - AZURECLI/2.45.0 azsdk-python-mgmt-containerinstance/10.1.0b1 Python/3.10.10
-        (Windows-10-10.0.19045-SP0)
+        (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002?api-version=2022-10-01-preview
   response:
@@ -34,7 +126,7 @@ interactions:
         true; do echo hello; sleep 20; done"],"ports":[{"protocol":"TCP","port":80}],"environmentVariables":[],"resources":{"requests":{"memoryInGB":1.0,"cpu":1.0}}}}],"initContainers":[],"restartPolicy":"Never","ipAddress":{"ports":[{"protocol":"TCP","port":80}],"type":"Public"},"osType":"Linux","instanceView":{"events":[],"state":"Pending"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"eastus","zones":["1"],"tags":{}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/eastus/operations/8277dcc3-4fcc-4cd5-98b9-10dcf5f62af4?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/eastus/operations/17e494f8-7b91-44ae-bce4-18aedbcc91ba?api-version=2018-06-01
       cache-control:
       - no-cache
       content-length:
@@ -42,7 +134,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 17 Feb 2023 01:14:11 GMT
+      - Fri, 17 Feb 2023 19:27:00 GMT
       expires:
       - '-1'
       pragma:
@@ -52,11 +144,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests-pt1h:
-      - '14992'
+      - '14970'
       x-ms-ratelimit-remaining-subscription-resource-requests-pt5m:
       - '1498'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -64,33 +156,33 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - container create
+      - container attach
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --image --os-type --ip-address --cpu --memory --zone --command-line
-        --restart-policy --location
+      - -g -n
       User-Agent:
       - AZURECLI/2.45.0 azsdk-python-mgmt-containerinstance/10.1.0b1 Python/3.10.10
-        (Windows-10-10.0.19045-SP0)
+        (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/eastus/operations/8277dcc3-4fcc-4cd5-98b9-10dcf5f62af4?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgfss4ibm5frapqzdnvtis25cn4lbgccmdjtm4f5ernzll4kmpdre4vptmjvq2otqko/providers/Microsoft.ContainerInstance/containerGroups/clicontainervnel?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","status":"Pending","startTime":"2023-02-17T01:14:12.0941518Z","properties":{"events":[]}}'
+      string: '{"properties":{"sku":"Standard","provisioningState":"Succeeded","containers":[{"name":"clicontainervnel","properties":{"image":"alpine:latest","command":["/bin/sh","-c","echo
+        hello; sleep 15; done"],"ports":[{"protocol":"TCP","port":80}],"environmentVariables":[],"instanceView":{"restartCount":0,"currentState":{"state":"Terminated","startTime":"2023-02-17T19:26:32.547Z","exitCode":2,"finishTime":"2023-02-17T19:26:37.226Z","detailStatus":"Error"}},"resources":{"requests":{"memoryInGB":1.0,"cpu":1.0}}}}],"initContainers":[],"restartPolicy":"Never","ipAddress":{"ports":[{"protocol":"TCP","port":80}],"ip":"20.66.109.52","type":"Public"},"osType":"Linux","instanceView":{"events":[],"state":"Failed"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgfss4ibm5frapqzdnvtis25cn4lbgccmdjtm4f5ernzll4kmpdre4vptmjvq2otqko/providers/Microsoft.ContainerInstance/containerGroups/clicontainervnel","name":"clicontainervnel","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '254'
+      - '1035'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 17 Feb 2023 01:14:42 GMT
+      - Fri, 17 Feb 2023 19:27:00 GMT
       expires:
       - '-1'
       pragma:
@@ -110,6 +202,48 @@ interactions:
     body: null
     headers:
       Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - container attach
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-containerinstance/10.1.0b1 Python/3.10.10
+        (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgfss4ibm5frapqzdnvtis25cn4lbgccmdjtm4f5ernzll4kmpdre4vptmjvq2otqko/providers/Microsoft.ContainerInstance/containerGroups/clicontainervnel?api-version=2022-10-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"ContainerGroupNotFound","message":"The container
+        group ''clicontainervnel'' does not exist."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '110'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Feb 2023 19:27:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
       - '*/*'
       Accept-Encoding:
       - gzip, deflate
@@ -122,14 +256,14 @@ interactions:
         --restart-policy --location
       User-Agent:
       - AZURECLI/2.45.0 azsdk-python-mgmt-containerinstance/10.1.0b1 Python/3.10.10
-        (Windows-10-10.0.19045-SP0)
+        (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/eastus/operations/8277dcc3-4fcc-4cd5-98b9-10dcf5f62af4?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/eastus/operations/17e494f8-7b91-44ae-bce4-18aedbcc91ba?api-version=2018-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","status":"Succeeded","startTime":"2023-02-17T01:14:12.0941518Z","properties":{"events":[{"count":1,"firstTimestamp":"2023-02-17T01:14:16Z","lastTimestamp":"2023-02-17T01:14:16Z","name":"Pulling","message":"pulling
-        image \"alpine@sha256:e2e16842c9b54d985bf1ef9242a313f36b856181f188de21313820e177002501\"","type":"Normal"},{"count":1,"firstTimestamp":"2023-02-17T01:14:17Z","lastTimestamp":"2023-02-17T01:14:17Z","name":"Pulled","message":"Successfully
-        pulled image \"alpine@sha256:e2e16842c9b54d985bf1ef9242a313f36b856181f188de21313820e177002501\"","type":"Normal"},{"count":1,"firstTimestamp":"2023-02-17T01:14:30Z","lastTimestamp":"2023-02-17T01:14:30Z","name":"Started","message":"Started
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","status":"Succeeded","startTime":"2023-02-17T19:27:00.0507661Z","properties":{"events":[{"count":1,"firstTimestamp":"2023-02-17T19:27:05Z","lastTimestamp":"2023-02-17T19:27:05Z","name":"Pulling","message":"pulling
+        image \"alpine@sha256:e2e16842c9b54d985bf1ef9242a313f36b856181f188de21313820e177002501\"","type":"Normal"},{"count":1,"firstTimestamp":"2023-02-17T19:27:06Z","lastTimestamp":"2023-02-17T19:27:06Z","name":"Pulled","message":"Successfully
+        pulled image \"alpine@sha256:e2e16842c9b54d985bf1ef9242a313f36b856181f188de21313820e177002501\"","type":"Normal"},{"count":1,"firstTimestamp":"2023-02-17T19:27:16Z","lastTimestamp":"2023-02-17T19:27:16Z","name":"Started","message":"Started
         container","type":"Normal"}]}}'
     headers:
       cache-control:
@@ -139,7 +273,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 17 Feb 2023 01:15:12 GMT
+      - Fri, 17 Feb 2023 19:27:30 GMT
       expires:
       - '-1'
       pragma:
@@ -171,25 +305,25 @@ interactions:
         --restart-policy --location
       User-Agent:
       - AZURECLI/2.45.0 azsdk-python-mgmt-containerinstance/10.1.0b1 Python/3.10.10
-        (Windows-10-10.0.19045-SP0)
+        (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002?api-version=2022-10-01-preview
   response:
     body:
       string: '{"properties":{"sku":"Standard","provisioningState":"Succeeded","containers":[{"name":"clicontainer000002","properties":{"image":"alpine:latest","command":["/bin/sh","-c","while
-        true; do echo hello; sleep 20; done"],"ports":[{"protocol":"TCP","port":80}],"environmentVariables":[],"instanceView":{"restartCount":0,"currentState":{"state":"Running","startTime":"2023-02-17T01:14:30.409Z","detailStatus":""},"events":[{"count":1,"firstTimestamp":"2023-02-17T01:14:16Z","lastTimestamp":"2023-02-17T01:14:16Z","name":"Pulling","message":"pulling
-        image \"alpine@sha256:e2e16842c9b54d985bf1ef9242a313f36b856181f188de21313820e177002501\"","type":"Normal"},{"count":1,"firstTimestamp":"2023-02-17T01:14:17Z","lastTimestamp":"2023-02-17T01:14:17Z","name":"Pulled","message":"Successfully
-        pulled image \"alpine@sha256:e2e16842c9b54d985bf1ef9242a313f36b856181f188de21313820e177002501\"","type":"Normal"},{"count":1,"firstTimestamp":"2023-02-17T01:14:30Z","lastTimestamp":"2023-02-17T01:14:30Z","name":"Started","message":"Started
-        container","type":"Normal"}]},"resources":{"requests":{"memoryInGB":1.0,"cpu":1.0}}}}],"initContainers":[],"restartPolicy":"Never","ipAddress":{"ports":[{"protocol":"TCP","port":80}],"ip":"20.242.204.135","type":"Public"},"osType":"Linux","instanceView":{"events":[],"state":"Running"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"eastus","zones":["1"],"tags":{}}'
+        true; do echo hello; sleep 20; done"],"ports":[{"protocol":"TCP","port":80}],"environmentVariables":[],"instanceView":{"restartCount":0,"currentState":{"state":"Running","startTime":"2023-02-17T19:27:16.229Z","detailStatus":""},"events":[{"count":1,"firstTimestamp":"2023-02-17T19:27:05Z","lastTimestamp":"2023-02-17T19:27:05Z","name":"Pulling","message":"pulling
+        image \"alpine@sha256:e2e16842c9b54d985bf1ef9242a313f36b856181f188de21313820e177002501\"","type":"Normal"},{"count":1,"firstTimestamp":"2023-02-17T19:27:06Z","lastTimestamp":"2023-02-17T19:27:06Z","name":"Pulled","message":"Successfully
+        pulled image \"alpine@sha256:e2e16842c9b54d985bf1ef9242a313f36b856181f188de21313820e177002501\"","type":"Normal"},{"count":1,"firstTimestamp":"2023-02-17T19:27:16Z","lastTimestamp":"2023-02-17T19:27:16Z","name":"Started","message":"Started
+        container","type":"Normal"}]},"resources":{"requests":{"memoryInGB":1.0,"cpu":1.0}}}}],"initContainers":[],"restartPolicy":"Never","ipAddress":{"ports":[{"protocol":"TCP","port":80}],"ip":"20.81.66.109","type":"Public"},"osType":"Linux","instanceView":{"events":[],"state":"Running"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"eastus","zones":["1"],"tags":{}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1595'
+      - '1593'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 17 Feb 2023 01:15:12 GMT
+      - Fri, 17 Feb 2023 19:27:30 GMT
       expires:
       - '-1'
       pragma:
