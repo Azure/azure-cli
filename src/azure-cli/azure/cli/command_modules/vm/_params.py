@@ -185,7 +185,7 @@ def load_arguments(self, _):
         c.argument('disk_iops_read_write', type=int, min_api='2018-06-01', help='The number of IOPS allowed for this disk. Only settable for UltraSSD disks. One operation can transfer between 4k and 256k bytes')
         c.argument('disk_mbps_read_write', type=int, min_api='2018-06-01', help="The bandwidth allowed for this disk. Only settable for UltraSSD disks. MBps means millions of bytes per second with ISO notation of powers of 10")
         c.argument('upload_size_bytes', type=int, min_api='2019-03-01',
-                   help='The size (in bytes) of the contents of the upload including the VHD footer. Min value: 20972032. Max value: 35183298347520')
+                   help='The size (in bytes) of the contents of the upload including the VHD footer. Min value: 20972032. Max value: 35183298347520. This parameter is required if --upload-type is specified')
         c.argument('max_shares', type=int, help='The maximum number of VMs that can attach to the disk at the same time. Value greater than one indicates a disk that can be mounted on multiple VMs at the same time')
         c.argument('disk_iops_read_only', type=int, help='The total number of IOPS that will be allowed across all VMs mounting the shared disk as ReadOnly. One operation can transfer between 4k and 256k bytes')
         c.argument('disk_mbps_read_only', type=int, help='The total throughput (MBps) that will be allowed across all VMs mounting the shared disk as ReadOnly. MBps means millions of bytes per second - MB here uses the ISO notation, of powers of 10')
@@ -299,6 +299,10 @@ def load_arguments(self, _):
         c.argument('managed_image_destinations', arg_type=ib_cutput_type)
         c.argument('shared_image_destinations', arg_type=ib_cutput_type)
         c.argument('output_name', arg_type=ib_cutput_type)
+
+    for scope in ['image builder identity assign', 'image builder identity remove']:
+        with self.argument_context(scope, min_api='2022-02-14') as c:
+            c.argument('user_assigned', arg_group='Managed Identity', nargs='*', help='Specify one user assigned identity (name or ID, space delimited) of the image template.')
 
     with self.argument_context('image builder output') as c:
         ib_sig_regions_help = "Space-separated list of regions to replicate the image version into."
@@ -672,6 +676,9 @@ def load_arguments(self, _):
             for dest in scaleset_name_aliases:
                 c.argument(dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
 
+    with self.argument_context('vmss reimage') as c:
+        c.argument('instance_id', nargs='+', help='Space-separated list of VM instance ID. If missing, reimage all instances.')
+
     with self.argument_context('vmss create', operation_group='virtual_machine_scale_sets') as c:
         VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)
 
@@ -715,6 +722,8 @@ def load_arguments(self, _):
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('os_disk_delete_option', arg_type=get_enum_type(self.get_models('DiskDeleteOptionTypes')), min_api='2022-03-01', arg_group='Storage', help='Specify whether OS disk should be deleted or detached upon VMSS Flex deletion (This feature is only for VMSS with flexible orchestration mode).')
         c.argument('data_disk_delete_option', arg_type=get_enum_type(self.get_models('DiskDeleteOptionTypes')), min_api='2022-03-01', arg_group='Storage', help='Specify whether data disk should be deleted or detached upon VMSS Flex deletion (This feature is only for VMSS with flexible orchestration mode)')
+        c.argument('max_surge', arg_type=get_three_state_flag(), min_api='2022-11-01', is_preview=True,
+                   help='Specify it to create new virtual machines to upgrade the scale set, rather than updating the existing virtual machines.')
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
@@ -784,6 +793,7 @@ def load_arguments(self, _):
                        help='Set this Boolean property will lead to all unhealthy instances in a scale set getting upgraded before any healthy instances')
             c.argument('regular_priority_count', type=int, min_api='2022-08-01', is_preview=True, help='The base number of regular priority VMs that will be created in this scale set as it scales out. Must be greater than 0.')
             c.argument('regular_priority_percentage', type=int, min_api='2022-08-01', is_preview=True, help='The percentage of VM instances, after the base regular priority count has been reached, that are expected to use regular priority. Must be between 0 and 100.')
+            c.argument('enable_osimage_notification', arg_type=get_three_state_flag(), min_api='2022-11-01', help='Specify whether the OS Image Scheduled event is enabled or disabled.')
 
     for scope, help_prefix in [('vmss update', 'Update the'), ('vmss wait', 'Wait on the')]:
         with self.argument_context(scope) as c:
@@ -814,14 +824,6 @@ def load_arguments(self, _):
     with self.argument_context('vmss extension') as c:
         c.argument('extension_name', name_arg_type, help='Name of the extension.')
         c.argument('vmss_name', vmss_name_type, options_list=['--vmss-name'], id_part=None)
-
-    with self.argument_context('vmss nic') as c:
-        c.argument('virtual_machine_scale_set_name', options_list=['--vmss-name'], help='Scale set name.', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
-        c.argument('virtualmachine_index', options_list=['--instance-id'], id_part='child_name_1')
-        c.argument('network_interface_name', options_list=['--name', '-n'], metavar='NIC_NAME', help='The network interface (NIC).', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'), id_part='child_name_2')
-
-    with self.argument_context('vmss nic list') as c:
-        c.argument('virtual_machine_scale_set_name', arg_type=vmss_name_type, options_list=['--vmss-name'], id_part=None)
 
     with self.argument_context('vmss set-orchestration-service-state') as c:
         c.argument('service_name', arg_type=get_enum_type(OrchestrationServiceNames), help='The name of the orchestration service.')

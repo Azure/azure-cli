@@ -327,8 +327,8 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
 
 
 # -- volume update
-def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, vault_id=None, backup_enabled=False,
-                 backup_policy_id=None, policy_enforced=False, throughput_mibps=None, snapshot_policy_id=None,
+def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, vault_id=None, backup_enabled=None,
+                 backup_policy_id=None, policy_enforced=None, throughput_mibps=None, snapshot_policy_id=None,
                  is_def_quota_enabled=None, default_user_quota=None, default_group_quota=None, unix_permissions=None,
                  cool_access=None, coolness_period=None):
     data_protection = None
@@ -338,8 +338,11 @@ def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, 
     if any(x is not None for x in [vault_id, backup_policy_id, backup_enabled, policy_enforced]):
         backup = VolumeBackupProperties(vault_id=vault_id, backup_enabled=backup_enabled,
                                         backup_policy_id=backup_policy_id, policy_enforced=policy_enforced)
-    if snapshot_policy_id is not None:
+        logger.debug("ANF Log: backup set")
+
+    if any(x is not None for x in [backup, snapshot]):
         snapshot = VolumeSnapshotProperties(snapshot_policy_id=snapshot_policy_id)
+        logger.debug("ANF Log: DataProtection props set")
 
     if backup is not None or snapshot is not None:
         data_protection = VolumePatchPropertiesDataProtection(backup=backup, snapshot=snapshot)

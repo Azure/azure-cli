@@ -11,8 +11,14 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "network application-gateway waf-policy create",
+)
 class Create(AAZCommand):
-    """Create policy with specified rule set name within a resource group.
+    """Create an application gateway WAF policy.
+
+    :example: Create an application gateway WAF policy.
+        az network application-gateway waf-policy create --name MyApplicationGatewayWAFPolicy --resource-group MyResourceGroup
     """
 
     _aaz_info = {
@@ -40,7 +46,7 @@ class Create(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the application gateway WAF policy.",
+            help="Name of the application gateway WAF policy.",
             required=True,
             fmt=AAZStrArgFormat(
                 max_length=128,
@@ -49,25 +55,21 @@ class Create(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-
-        # define Arg Group "Parameters"
-
-        _args_schema = cls._args_schema
         _args_schema.location = AAZResourceLocationArg(
-            arg_group="Parameters",
-            help="Resource location.",
+            help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
             fmt=AAZResourceLocationArgFormat(
                 resource_group_arg="resource_group",
             ),
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
-            arg_group="Parameters",
-            help="Resource tags.",
+            help="Space-separated tags: key[=value] [key[=value] ...].",
         )
 
         tags = cls._args_schema.tags
         tags.Element = AAZStrArg()
+
+        # define Arg Group "Parameters"
 
         # define Arg Group "Properties"
 

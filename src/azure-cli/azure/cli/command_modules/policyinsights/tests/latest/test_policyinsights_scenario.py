@@ -8,6 +8,8 @@ import time
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, create_random_name, record_only
 from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
+from .test_utils import AttestationConstants as C
+
 
 class PolicyInsightsTests(ScenarioTest):
 
@@ -77,7 +79,8 @@ class PolicyInsightsTests(ScenarioTest):
             assert len(summary["policyAssignments"]) >= 0
             if len(summary["policyAssignments"]) > 0:
                 assert summary["policyAssignments"][0]["results"] is not None
-                assert len(summary["policyAssignments"][0]["policyDefinitions"]) >= 0
+                assert len(summary["policyAssignments"]
+                           [0]["policyDefinitions"]) >= 0
                 if len(summary["policyAssignments"][0]["policyDefinitions"]) > 0:
                     assert summary["policyAssignments"][0]["policyDefinitions"][0]["results"] is not None
 
@@ -86,7 +89,8 @@ class PolicyInsightsTests(ScenarioTest):
             '--expand PolicyEvaluationDetails',
             top_clause
         ), checks=[
-            self.check('length([?complianceState==`NonCompliant`].policyEvaluationDetails)', 2)
+            self.check(
+                'length([?complianceState==`NonCompliant`].policyEvaluationDetails)', 2)
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_triggerscan')
@@ -128,7 +132,8 @@ class PolicyInsightsTests(ScenarioTest):
         })
 
         # create a subscription policy assignment that we can trigger remediations on
-        assignment = self.cmd('policy assignment create --policy {bip} -n {pan}').get_output_in_json()
+        assignment = self.cmd(
+            'policy assignment create --policy {bip} -n {pan}').get_output_in_json()
         self.kwargs['pid'] = assignment['id'].lower()
 
         try:
@@ -239,7 +244,8 @@ class PolicyInsightsTests(ScenarioTest):
                 self.is_empty()
             ])
 
-            self.cmd('policy remediation delete -n {rn} -g {rg} --namespace "Microsoft.Storage" --resource-type storageAccounts --resource {sa}')
+            self.cmd(
+                'policy remediation delete -n {rn} -g {rg} --namespace "Microsoft.Storage" --resource-type storageAccounts --resource {sa}')
 
             self.cmd('policy remediation list -g {rg} --namespace "Microsoft.Storage" --resource-type storageAccounts --resource {sa}', checks=[
                 self.check("length([?name == '{rn}'])", 0)
@@ -259,10 +265,12 @@ class PolicyInsightsTests(ScenarioTest):
 
         try:
             # create a policy set that will be remediated
-            self.cmd('policy set-definition create -n {psn} --definitions "[{{ \\"policyDefinitionId\\": \\"{bip}\\", \\"policyDefinitionReferenceId\\": \\"{drid}\\" }}]"')
+            self.cmd(
+                'policy set-definition create -n {psn} --definitions "[{{ \\"policyDefinitionId\\": \\"{bip}\\", \\"policyDefinitionReferenceId\\": \\"{drid}\\" }}]"')
 
             # create a subscription policy assignment that we can trigger remediations on
-            assignment = self.cmd('policy assignment create --policy-set-definition {psn} -n {pan}').get_output_in_json()
+            assignment = self.cmd(
+                'policy assignment create --policy-set-definition {psn} -n {pan}').get_output_in_json()
             self.kwargs['pid'] = assignment['id'].lower()
 
             # create a remediation at subscription scop
@@ -320,12 +328,12 @@ class PolicyInsightsTests(ScenarioTest):
         time.sleep(20)
         management_group = self.cmd(
             'account management-group show --name cli-test-mg').get_output_in_json()
-        
 
         try:
             # create a policy assignment that we can trigger remediations on
             self.kwargs['mgid'] = management_group['id']
-            assignment = self.cmd('policy assignment create --scope {mgid} --policy {bip} -n {pan}').get_output_in_json()
+            assignment = self.cmd(
+                'policy assignment create --scope {mgid} --policy {bip} -n {pan}').get_output_in_json()
             self.kwargs['pid'] = assignment['id'].lower()
 
             # create a remediation at management group scope
@@ -387,7 +395,8 @@ class PolicyInsightsTests(ScenarioTest):
             'rn': self.create_random_name('azurecli-test-remediation', 40)
         })
 
-        assignment = self.cmd('policy assignment show -g {rg} -n {pan}').get_output_in_json()
+        assignment = self.cmd(
+            'policy assignment show -g {rg} -n {pan}').get_output_in_json()
         self.kwargs['pid'] = assignment['id'].lower()
 
         # create a remediation at resource group scope
@@ -423,7 +432,8 @@ class PolicyInsightsTests(ScenarioTest):
             self.exists('[0].lastUpdatedOn'),
             self.exists('[0].resourceLocation'),
             self.exists('[0].status'),
-            self.check("length([?contains(@.remediatedResourceId, '/resourcegroups/{rg}/providers/microsoft.storage/storageaccounts')])", 2)
+            self.check(
+                "length([?contains(@.remediatedResourceId, '/resourcegroups/{rg}/providers/microsoft.storage/storageaccounts')])", 2)
         ])
 
         # cancel the remediation
@@ -486,22 +496,379 @@ class PolicyInsightsTests(ScenarioTest):
     @AllowLargeResponse(8192)
     def test_policy_insights_metadata(self):
         # Get all metadata resources
-        all_metadata_resources = self.cmd('policy metadata list').get_output_in_json()
+        all_metadata_resources = self.cmd(
+            'policy metadata list').get_output_in_json()
         assert len(all_metadata_resources) > 1
 
         # Test the --top argument
-        assert len(self.cmd('policy metadata list --top 0').get_output_in_json()) == 0
+        assert len(
+            self.cmd('policy metadata list --top 0').get_output_in_json()) == 0
 
-        top_metadata_resources = self.cmd('policy metadata list --top {}'.format(len(all_metadata_resources) + 1)).get_output_in_json()
+        top_metadata_resources = self.cmd(
+            'policy metadata list --top {}'.format(len(all_metadata_resources) + 1)).get_output_in_json()
         assert len(top_metadata_resources) == len(all_metadata_resources)
 
-        top_metadata_resources = self.cmd('policy metadata list --top {}'.format(len(all_metadata_resources) - 1)).get_output_in_json()
+        top_metadata_resources = self.cmd(
+            'policy metadata list --top {}'.format(len(all_metadata_resources) - 1)).get_output_in_json()
         assert len(top_metadata_resources) == len(all_metadata_resources) - 1
 
         # Test getting an individual resouce
         resource_metadata_name = top_metadata_resources[0]['name']
-        metadata_resource = self.cmd('policy metadata show --name {}'.format(resource_metadata_name)).get_output_in_json()
+        metadata_resource = self.cmd(
+            'policy metadata show --name {}'.format(resource_metadata_name)).get_output_in_json()
         assert metadata_resource['name'] == resource_metadata_name
 
-        metadata_resource = self.cmd('policy metadata show -n {}'.format(resource_metadata_name)).get_output_in_json()
+        metadata_resource = self.cmd(
+            'policy metadata show -n {}'.format(resource_metadata_name)).get_output_in_json()
         assert metadata_resource['name'] == resource_metadata_name
+
+    # Test policy attestation CRUD requests at various scopes
+    @record_only()
+    @AllowLargeResponse()
+    def test_policy_attestation(self):
+        self._test_policy_insights_attestation_sub()
+        self._test_policy_insights_attestation_resource()
+        self._test_policy_insights_attestation_rg()
+        self._test_policy_insights_attestation_collection()
+
+    def _test_policy_insights_attestation_rg(self):
+        self.kwargs.update({
+            'pan': C.MANUAL_POLICY_RG_ASSIGNMENT,
+            'rn': self.create_random_name('azurecli-test-attestation', 40),
+            'rg': C.ATTESTATION_TEST_RG_NAME,
+            'initiative_id': C.MANUAL_POLICY_RG_INITIATIVE_ASSIGNMENT,
+            'ref_id': C.MANUAL_POLICY_RG_INITIATIVE_REFID
+        })
+
+        try:
+            assignment = self.cmd(
+                'policy assignment show -n {pan}').get_output_in_json()
+            self.kwargs['pid'] = assignment['id'].lower()
+
+            # region Policy Attestation RG CRUD minimal
+
+            # create a minimal attestation at resource group scope
+            self.cmd(
+                'policy attestation create --attestation-name {rn} -g {rg} -a {pan}', checks=self._check_create_attestation_common())
+
+            # get the attestation at resource group scope
+            self.cmd(
+                'policy attestation show --attestation-name {rn} -g {rg}', checks=self._check_create_attestation_common())
+
+            # update the attestation at resource group scope
+            self.kwargs['comments'] = 'Adding a comment'
+            self.cmd("policy attestation update --attestation-name {rn} -g {rg} --comments '{comments}'", checks=[
+                     self.check('comments', '{comments}')] + self._check_create_attestation_common())
+
+            # delete an attestation at resource group scope
+            self.cmd(
+                'policy attestation delete --attestation-name {rn} -g {rg}')
+
+            self.cmd('policy attestation list -g {rg}', checks=[
+                self.check("length([?name == '{rn}'])", 0)
+            ])
+            # endregion
+
+            # region Policy Attestation RG CRUD Full
+
+            self.kwargs.update({
+                "assessment_date": "2023-01-01T08:29:18Z",
+                'rn': self.create_random_name('azurecli-test-attestation', 40),
+                "compliance_state": "Compliant",
+                "evidence1": "source-uri=https://sampleuri.com description='Sample description for the sample uri'",
+                "evidence2": "source-uri=https://sampleuri2.com description='Sample description 2 for the sample uri 2'",
+                "expires_on": "2024-08-01T05:29:18Z",
+                "owner": "user@microsoft.com",
+                "metadata": "Location=NYC Dept=ACC"
+            })
+
+            assignment = self.cmd(
+                'policy assignment show -n {initiative_id}').get_output_in_json()
+            self.kwargs['pid'] = assignment['id'].lower()
+
+            # create an attestation with all the properties at RG scope.
+            self.cmd(
+                "policy attestation create --attestation-name {rn} -g {rg} -a {initiative_id} --compliance-state {compliance_state} --assessment-date '{assessment_date}' --evidence {evidence1} --evidence {evidence2} --expires-on '{expires_on}' --owner {owner} --metadata {metadata} --definition-reference-id '{ref_id}' --debug", checks=self._check_attestation_properties())
+
+            # get the attestation at resource group scope
+            self.cmd(
+                'policy attestation show --attestation-name {rn} -g {rg}', checks=self._check_attestation_properties())
+
+            self.cmd(
+                'policy attestation delete --attestation-name {rn} -g {rg}')
+
+            self.cmd('policy attestation list -g {rg}', checks=[
+                self.check("length([?name == '{rn}'])", 0)
+            ])
+            # endregion
+        finally:
+            self._delete_all_attestations()
+
+    def _test_policy_insights_attestation_sub(self):
+        self.kwargs.update({
+            'pan': C.MANUAL_POLICY_SUB_ASSIGNMENT,
+            'rn': self.create_random_name('azurecli-test-attestation', 40),
+            'initiative_id': C.MANUAL_POLICY_SUB_INITIATIVE_ASSIGNMENT,
+            'ref_id': C.MANUAL_POLICY_SUB_INITIATIVE_REFID
+        })
+
+        try:
+            assignment = self.cmd(
+                'policy assignment show -n {pan}').get_output_in_json()
+            self.kwargs['pid'] = assignment['id'].lower()
+
+            # region Policy Attestation Subscription CRUD minimal
+
+            # create a minimal attestation at subscription scope
+            self.cmd(
+                'policy attestation create --attestation-name {rn} -a {pan}', checks=self._check_create_attestation_common())
+
+            # get the attestation at subscription scope
+            self.cmd(
+                'policy attestation show --attestation-name {rn}', checks=self._check_create_attestation_common())
+
+            # update the attestation at subscription scope
+            self.kwargs['comments'] = 'Adding a comment'
+            self.cmd("policy attestation update --attestation-name {rn} --comments '{comments}'", checks=[
+                     self.check('comments', '{comments}')] + self._check_create_attestation_common())
+
+            # delete an attestation at subscription scope
+            self.cmd('policy attestation delete --attestation-name {rn}')
+
+            # verify that the attestation has been deleted.
+            self.cmd('policy attestation list', checks=[
+                self.check("length([?name == '{rn}'])", 0)
+            ])
+            # endregion
+
+            # region Policy Attestation Subscription CRUD Full
+
+            self.kwargs.update({
+                "assessment_date": "2023-01-01T08:29:18Z",
+                'rn': self.create_random_name('azurecli-test-attestation', 40),
+                "compliance_state": "Compliant",
+                "evidence1": "source-uri=https://sampleuri.com description='Sample description for the sample uri'",
+                "evidence2": "source-uri=https://sampleuri2.com description='Sample description 2 for the sample uri 2'",
+                "expires_on": "2024-08-01T05:29:18Z",
+                "owner": "user@microsoft.com",
+                "metadata": "Location=NYC Dept=ACC"
+            })
+
+            assignment = self.cmd(
+                'policy assignment show -n {initiative_id}').get_output_in_json()
+            self.kwargs['pid'] = assignment['id'].lower()
+
+            self.cmd(
+                "policy attestation create --attestation-name {rn} -a {initiative_id} --compliance-state {compliance_state} --assessment-date '{assessment_date}' --evidence {evidence1} --evidence {evidence2} --expires-on '{expires_on}' --owner {owner} --metadata {metadata} --definition-reference-id '{ref_id}'", checks=self._check_attestation_properties())
+
+            # get the attestation at subscription scope
+            self.cmd(
+                'policy attestation show --attestation-name {rn}', checks=self._check_attestation_properties())
+
+            # delete the attestation.
+            self.cmd('policy attestation delete --attestation-name {rn}')
+
+            # verify that the attestation has been deleted.
+            self.cmd('policy attestation list', checks=[
+                self.check("length([?name == '{rn}'])", 0)
+            ])
+            # endregion
+        finally:
+            self._delete_all_attestations()
+
+    def _test_policy_insights_attestation_resource(self):
+        self.kwargs.update({
+            'pan': C.MANUAL_POLICY_RESOURCE_ASSIGNMENT,
+            'rn': self.create_random_name('azurecli-test-attestation', 40),
+            'resource_name': C.ATTESTATION_TEST_RESOURCE_NAME,
+            'rg': C.ATTESTATION_TEST_RG_NAME,
+            'initiative_id': C.MANUAL_POLICY_RESOURCE_INITIATIVE_ASSIGNMENT,
+            'ref_id': C.MANUAL_POLICY_RESOURCE_INITIATIVE_REFID
+        })
+
+        try:
+            assignment = self.cmd(
+                'policy assignment show -n {pan}').get_output_in_json()
+            self.kwargs['pid'] = assignment['id'].lower()
+
+            # region Policy Attestation Resource CRUD minimal
+
+            vnet = self.cmd(
+                "network vnet show -n '{resource_name}' -g {rg}").get_output_in_json()
+            self.kwargs['resource_id'] = vnet['id'].lower()
+            # create a minimal attestation at resource scope
+            self.cmd(
+                "policy attestation create --attestation-name {rn} -a {pan} --resource '{resource_id}'", checks=self._check_create_attestation_common())
+
+            # get the attestation at resource scope
+            self.cmd("policy attestation show --attestation-name {rn} --resource '{resource_id}'", checks=[
+                self.check('name', '{rn}'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('policyDefinitionReferenceId', None),
+                self.check('policyAssignmentId', '{pid}')
+            ])
+
+            # update the attestation at resource scope
+            self.kwargs['comments'] = 'Adding a comment'
+            self.cmd("policy attestation update --attestation-name {rn} --comments '{comments}' --resource '{resource_id}'", checks=[
+                     self.check('comments', '{comments}')] + self._check_create_attestation_common())
+
+            # delete an attestation at resource scope
+            self.cmd(
+                "policy attestation delete --attestation-name {rn}  --resource '{resource_id}'")
+
+            # verify that the attestation has been deleted.
+            self.cmd("policy attestation list  --resource '{resource_id}'", checks=[
+                self.check("length([?name == '{rn}'])", 0)
+            ])
+            # endregion
+
+            # region Policy Attestation Resource CRUD Full
+
+            self.kwargs.update({
+                "assessment_date": "2023-01-01T08:29:18Z",
+                'rn': self.create_random_name('azurecli-test-attestation', 40),
+                "compliance_state": "Compliant",
+                "evidence1": "source-uri=https://sampleuri.com description='Sample description for the sample uri'",
+                "evidence2": "source-uri=https://sampleuri2.com description='Sample description 2 for the sample uri 2'",
+                "expires_on": "2024-08-01T05:29:18Z",
+                "owner": "user@microsoft.com",
+                "metadata": "Location=NYC Dept=ACC"
+            })
+
+            assignment = self.cmd(
+                'policy assignment show -n {initiative_id}').get_output_in_json()
+            self.kwargs['pid'] = assignment['id'].lower()
+
+            # create the attestation with all the properties
+            self.cmd("policy attestation create --attestation-name {rn} --resource '{resource_id}' -a {initiative_id} --compliance-state {compliance_state} --assessment-date '{assessment_date}' --evidence {evidence1} --evidence {evidence2} --expires-on '{expires_on}' --owner {owner} --metadata {metadata} --definition-reference-id '{ref_id}'", checks=self._check_attestation_properties())
+
+            # get the attestation at resource scope.
+            self.cmd(
+                'policy attestation show --attestation-name {rn}  --resource {resource_id}', checks=self._check_attestation_properties())
+
+            # delete the attestation.
+            self.cmd(
+                'policy attestation delete --attestation-name {rn} --resource {resource_id}')
+
+            # verify that the attestation has been deleted.
+            self.cmd('policy attestation list --resource-id {resource_id}', checks=[
+                self.check("length([?name == '{rn}'])", 0)
+            ])
+            # endregion
+        finally:
+            self._delete_all_attestations()
+
+    def _test_policy_insights_attestation_collection(self):
+        self.kwargs.update({
+            'pan_resource': C.MANUAL_POLICY_RESOURCE_ASSIGNMENT,
+            'rn_resource': self.create_random_name('azurecli-test-attestation', 40),
+            'pan_sub': C.MANUAL_POLICY_SUB_ASSIGNMENT,
+            'rn_sub': self.create_random_name('azurecli-test-attestation', 40),
+            'pan_rg': C.MANUAL_POLICY_RG_INITIATIVE_ASSIGNMENT,
+            'rn_rg': self.create_random_name('azurecli-test-attestation', 40),
+            'resource_name': C.ATTESTATION_TEST_RESOURCE_NAME,
+            'rg': C.ATTESTATION_TEST_RG_NAME,
+            'ref_id': C.MANUAL_POLICY_RG_INITIATIVE_REFID,
+            'sub': '086aecf4-23d6-4dfd-99a8-a5c6299f0322'
+        })
+
+        try:
+            vnet = self.cmd(
+                "network vnet show -n '{resource_name}' -g {rg}").get_output_in_json()
+            self.kwargs['resource_id'] = vnet['id'].lower()
+
+            # create a minimal attestation at resource scope
+            self.cmd(
+                "policy attestation create --attestation-name {rn_resource} -a {pan_resource} --resource '{resource_id}'")
+
+            # create a minimal attestation at subscription scope
+            self.cmd(
+                'policy attestation create --attestation-name {rn_sub} -a {pan_sub}')
+
+            # create a minimal attestation at resource group scope
+            self.cmd(
+                'policy attestation create --attestation-name {rn_rg} -g {rg} -a {pan_rg} --definition-reference-id {ref_id}')
+
+            # region List Tests
+            # list policy attestations at subscription scope
+            self.cmd('az policy attestation list', checks=[
+                self.check(
+                    "length(@[?starts_with(name, 'azurecli-test-attestation')])", 3)
+            ])
+
+            # list at rg
+            self.cmd('az policy attestation list -g {rg}', checks=[
+                self.check(
+                    "length(@[?starts_with(name, 'azurecli-test-attestation')])", 2)
+            ])
+
+            # # list at resource scope
+            self.cmd('az policy attestation list --resource {resource_id}', checks=[
+                self.check(
+                    "length(@[?starts_with(name, 'azurecli-test-attestation')])", 1)
+            ])
+
+            # list with filter
+            assignment = self.cmd(
+                'policy assignment show -n {pan_rg}').get_output_in_json()
+            self.kwargs['pid'] = self._replace_subscription_id(
+                assignment['id'].lower(), self.kwargs['sub'])
+            filter_clause = "PolicyAssignmentId eq '{pid}'"
+            self.cmd('az policy attestation list --filter "{}"'.format(filter_clause), checks=[
+                self.check(
+                    "length(@[?starts_with(name, 'azurecli-test-attestation')])", 1)
+            ])
+            # list top 1 at resource group scope
+            self.cmd('az policy attestation list -g {rg} --top 1', checks=[
+                self.check(
+                    "length(@[?starts_with(name, 'azurecli-test-attestation')])", 1)
+            ])
+
+            # endregion
+        finally:
+            self._delete_all_attestations()
+
+    def _check_create_attestation_common(self):
+        return [self.check('name', '{rn}'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('policyAssignmentId', '{pid}'),
+                self.check('resourceGroup',
+                           '{rg}' if self.kwargs.get('rg') else None)
+                ]
+
+    def _check_attestation_properties(self):
+        return [self.check('name', '{rn}'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('policyDefinitionReferenceId',
+                           '{ref_id}', case_sensitive=False),
+                self.check('policyAssignmentId', '{pid}'),
+                self.check('assessmentDate', '{assessment_date}'),
+                self.check('complianceState', '{compliance_state}'),
+                self.check('evidence[0].sourceUri', 'https://sampleuri.com'),
+                self.check('evidence[0].description',
+                           'Sample description for the sample uri'),
+                self.check('evidence[1].sourceUri', 'https://sampleuri2.com'),
+                self.check('evidence[1].description',
+                           'Sample description 2 for the sample uri 2'),
+                self.check('expiresOn', '{expires_on}'),
+                self.check('owner', '{owner}'),
+                self.check('metadata.Location', 'NYC'),
+                self.check('metadata.Dept', 'ACC')]
+
+    def _delete_all_attestations(self):
+        all_attestations = self.cmd(
+            'az policy attestation list').get_output_in_json()
+        for attestation in all_attestations:
+            resource_id = attestation['id'].replace(
+                "{}/{}".format(C.ATTESTATION_RESOURCE_TYPE, attestation['name']), "")
+            self.cmd('policy attestation delete --attestation-name "{}" --resource "{}"'.format(
+                attestation['name'], resource_id))
+
+    def _replace_subscription_id(self, resource_id, replacement_id):
+        if resource_id:
+            import re
+            return re.sub("(subscriptions)/([^/]*)/",
+                          r'\1/{}/'.format(replacement_id),
+                          resource_id,
+                          flags=re.IGNORECASE)

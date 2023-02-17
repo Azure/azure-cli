@@ -16,32 +16,12 @@ def resource_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
 
-def cf_application_gateways(cli_ctx, _):
-    return network_client_factory(cli_ctx).application_gateways
-
-
-def cf_app_gateway_waf_policy(cli_ctx, _):
-    return network_client_factory(cli_ctx).web_application_firewall_policies
-
-
 def cf_connection_monitor(cli_ctx, _):
     return network_client_factory(cli_ctx).connection_monitors
 
 
 def cf_flow_logs(cli_ctx, _):
     return network_client_factory(cli_ctx).flow_logs
-
-
-def cf_private_endpoints(cli_ctx, _):
-    return network_client_factory(cli_ctx).private_endpoints
-
-
-def cf_private_dns_zone_groups(cli_ctx, _):
-    return network_client_factory(cli_ctx).private_dns_zone_groups
-
-
-def cf_private_endpoint_types(cli_ctx, _):
-    return network_client_factory(cli_ctx).available_private_endpoint_types
 
 
 def cf_private_link_services(cli_ctx, _):
@@ -74,10 +54,6 @@ def cf_packet_capture(cli_ctx, _):
 
 def cf_private_access(cli_ctx, _):
     return network_client_factory(cli_ctx).available_private_access_services
-
-
-def cf_public_ip_addresses(cli_ctx, _):
-    return network_client_factory(cli_ctx).public_ip_addresses
 
 
 def cf_virtual_network_gateway_connections(cli_ctx, _):

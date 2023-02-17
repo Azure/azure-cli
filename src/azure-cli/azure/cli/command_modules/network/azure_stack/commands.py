@@ -874,7 +874,6 @@ def load_command_table(self, _):
     cross_region_lb_property_map = {
         'frontend_ip_configurations': 'frontend-ip',
         'load_balancing_rules': 'rule',
-        'probes': 'probe',
     }
 
     for subresource, alias in cross_region_lb_property_map.items():
@@ -907,11 +906,6 @@ def load_command_table(self, _):
                                  setter_name='begin_create_or_update',
                                  custom_func_name='set_cross_region_lb_rule')
 
-    with self.command_group('network cross-region-lb probe', network_lb_sdk) as g:
-        g.custom_command('create', 'create_lb_probe')
-        g.generic_update_command('update', child_collection_prop_name='probes',
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_lb_probe')
     # endregion
 
     # region LocalGateways
