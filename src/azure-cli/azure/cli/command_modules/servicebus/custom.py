@@ -632,6 +632,10 @@ def cli_add_encryption(cmd, client, resource_group_name, namespace_name, encrypt
     return get_namespace
 
 
+def revert(client, resource_group_name, namespace_name, config_name="$default"):
+    return client.revert(resource_group_name, namespace_name, config_name)
+
+
 def cli_remove_encryption(client, resource_group_name, namespace_name, encryption_config):
     namespace = client.get(resource_group_name, namespace_name)
 
