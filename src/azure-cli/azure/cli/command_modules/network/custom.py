@@ -101,6 +101,12 @@ from .aaz.latest.network.vnet_gateway.root_cert import Create as _VnetGatewayRoo
 from .aaz.latest.network.vnet_gateway.vpn_client import GenerateVpnProfile as _VpnProfileGenerate, \
     Generate as _VpnClientPackageGenerate, ShowUrl as _VpnProfilePackageUrlShow, \
     ShowHealth as _VpnClientConnectionHealthShow
+from .aaz.latest.network.vpn_connection import Update as _VpnConnectionUpdate, \
+    ShowDeviceConfigScript as _VpnConnectionDeviceConfigScriptShow
+from .aaz.latest.network.vpn_connection.ipsec_policy import Add as _VpnConnIpsecPolicyAdd
+from .aaz.latest.network.vpn_connection.packet_capture import Start as _VpnConnPackageCaptureStart, \
+    Stop as _VpnConnPackageCaptureStop
+from .aaz.latest.network.vpn_connection.shared_key import Update as _SharedKeyUpdate
 
 logger = get_logger(__name__)
 
@@ -6928,7 +6934,6 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import build_vpn_connection_resource
 
-    client = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     tags = tags or {}
 
@@ -6968,73 +6973,57 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
-def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, tags=None,
-                          enable_bgp=None, use_policy_based_traffic_selectors=None,
-                          express_route_gateway_bypass=None):
+class VpnConnectionUpdate(_VpnConnectionUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.ipsec_policies._registered = False
 
-    with cmd.update_context(instance) as c:
-        c.set_param('routing_weight', routing_weight)
-        c.set_param('shared_key', shared_key)
-        c.set_param('tags', tags)
-        c.set_param('enable_bgp', enable_bgp)
-        c.set_param('express_route_gateway_bypass', express_route_gateway_bypass)
-        c.set_param('use_policy_based_traffic_selectors', use_policy_based_traffic_selectors)
-
-    # TODO: Remove these when issue #1615 is fixed
-    gateway1_id = parse_resource_id(instance.virtual_network_gateway1.id)
-    ncf = network_client_factory(cmd.cli_ctx, subscription_id=gateway1_id['subscription'])
-    instance.virtual_network_gateway1 = ncf.virtual_network_gateways.get(
-        gateway1_id['resource_group'], gateway1_id['name'])
-
-    if instance.virtual_network_gateway2:
-        gateway2_id = parse_resource_id(instance.virtual_network_gateway2.id)
-        ncf = network_client_factory(cmd.cli_ctx, subscription_id=gateway2_id['subscription'])
-        instance.virtual_network_gateway2 = ncf.virtual_network_gateways.get(
-            gateway2_id['resource_group'], gateway2_id['name'])
-
-    if instance.local_network_gateway2:
-        gateway2_id = parse_resource_id(instance.local_network_gateway2.id)
-        ncf = network_client_factory(cmd.cli_ctx, subscription_id=gateway2_id['subscription'])
-        instance.local_network_gateway2 = ncf.local_network_gateways.get(
-            gateway2_id['resource_group'], gateway2_id['name'])
-
-    return instance
+        return args_schema
 
 
 def list_vpn_connections(cmd, resource_group_name, virtual_network_gateway_name=None):
+    from .aaz.latest.network.vpn_connection import List, ListConnection
     if virtual_network_gateway_name:
-        client = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-        return client.list_connections(resource_group_name, virtual_network_gateway_name)
-    client = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
-    return client.list(resource_group_name)
+        return ListConnection(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": resource_group_name,
+                                                                 "vnet_gateway": virtual_network_gateway_name})
+    return List(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": resource_group_name})
 
 
-def start_vpn_conn_package_capture(cmd, client, resource_group_name, virtual_network_gateway_connection_name,
-                                   filter_data=None, no_wait=False):
-    VpnPacketCaptureStartParameters = cmd.get_models('VpnPacketCaptureStartParameters')
-    parameters = VpnPacketCaptureStartParameters(filter_data=filter_data)
-    return sdk_no_wait(no_wait, client.begin_start_packet_capture, resource_group_name,
-                       virtual_network_gateway_connection_name, parameters=parameters)
+class VpnConnPackageCaptureStart(_VpnConnPackageCaptureStart):
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def stop_vpn_conn_package_capture(cmd, client, resource_group_name, virtual_network_gateway_connection_name,
-                                  sas_url, no_wait=False):
-    VpnPacketCaptureStopParameters = cmd.get_models('VpnPacketCaptureStopParameters')
-    parameters = VpnPacketCaptureStopParameters(sas_url=sas_url)
-    return sdk_no_wait(no_wait, client.begin_stop_packet_capture, resource_group_name,
-                       virtual_network_gateway_connection_name, parameters=parameters)
+class VpnConnPackageCaptureStop(_VpnConnPackageCaptureStop):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.sas_url._required = True
+        return args_schema
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def show_vpn_connection_device_config_script(cmd, client, resource_group_name, virtual_network_gateway_connection_name,
-                                             vendor, device_family, firmware_version):
-    VpnDeviceScriptParameters = cmd.get_models('VpnDeviceScriptParameters')
-    parameters = VpnDeviceScriptParameters(
-        vendor=vendor,
-        device_family=device_family,
-        firmware_version=firmware_version
-    )
-    return client.vpn_device_configuration_script(resource_group_name, virtual_network_gateway_connection_name,
-                                                  parameters=parameters)
+class VpnConnectionDeviceConfigScriptShow(_VpnConnectionDeviceConfigScriptShow):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.device_family._required = True
+        args_schema.firmware_version._required = True
+        args_schema.vendor._required = True
+
+        return args_schema
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 # endregion
 
 
@@ -7067,42 +7056,32 @@ def clear_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name, no
     return LongRunningOperation(cmd.cli_ctx)(poller)['vpnClientConfiguration']['vpnClientIpsecPolicies']
 
 
-def add_vpn_conn_ipsec_policy(cmd, client, resource_group_name, connection_name,
-                              sa_life_time_seconds, sa_data_size_kilobytes,
-                              ipsec_encryption, ipsec_integrity,
-                              ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
-    IpsecPolicy = cmd.get_models('IpsecPolicy')
-    new_policy = IpsecPolicy(sa_life_time_seconds=sa_life_time_seconds,
-                             sa_data_size_kilobytes=sa_data_size_kilobytes,
-                             ipsec_encryption=ipsec_encryption,
-                             ipsec_integrity=ipsec_integrity,
-                             ike_encryption=ike_encryption,
-                             ike_integrity=ike_integrity,
-                             dh_group=dh_group,
-                             pfs_group=pfs_group)
-
-    conn = client.get(resource_group_name, connection_name)
-    if conn.ipsec_policies:
-        conn.ipsec_policies.append(new_policy)
-    else:
-        conn.ipsec_policies = [new_policy]
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
+class VpnConnIpsecPolicyAdd(_VpnConnIpsecPolicyAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.ipsec_policy_index._registered = False
+        return args_schema
 
 
-def clear_vpn_conn_ipsec_policies(cmd, client, resource_group_name, connection_name, no_wait=False):
-    conn = client.get(resource_group_name, connection_name)
-    conn.ipsec_policies = None
-    conn.use_policy_based_traffic_selectors = False
-    if no_wait:
-        return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
+def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_wait=False):
 
+    class VpnConnIpsecPoliciesClear(_VpnConnectionUpdate):
+        def pre_operations(self):
+            args = self.ctx.args
+            args.no_wait = no_wait
+
+        def pre_instance_update(self, instance):
+            instance.properties.ipsec_policies = None
+            instance.properties.use_policy_based_traffic_selectors = None
+
+    ipsec_policies_args = {"resource_group": resource_group_name,
+                           "name": connection_name}
     from azure.cli.core.commands import LongRunningOperation
-    poller = sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
-    return LongRunningOperation(cmd.cli_ctx)(poller).ipsec_policies
-
-
-def list_vpn_conn_ipsec_policies(cmd, client, resource_group_name, connection_name):
-    return client.get(resource_group_name, connection_name).ipsec_policies
+    if no_wait:
+        return VpnConnIpsecPoliciesClear(cli_ctx=cmd.cli_ctx)(command_args=ipsec_policies_args)
+    poller = VpnConnIpsecPoliciesClear(cli_ctx=cmd.cli_ctx)(command_args=ipsec_policies_args)
+    return LongRunningOperation(cmd.cli_ctx)(poller)['ipsecPolicies']
 
 
 class VnetGatewayAadAssign(_VnetGatewayAadAssign):
@@ -7596,18 +7575,13 @@ def delete_virtual_router_peering(cmd, resource_group_name, virtual_router_name,
 
 
 # region network gateway connection
-def reset_shared_key(cmd, client, virtual_network_gateway_connection_name, key_length, resource_group_name=None):
-    ConnectionResetSharedKey = cmd.get_models('ConnectionResetSharedKey')
-    shared_key = ConnectionResetSharedKey(key_length=key_length)
-    return client.begin_reset_shared_key(resource_group_name=resource_group_name,
-                                         virtual_network_gateway_connection_name=virtual_network_gateway_connection_name,
-                                         parameters=shared_key)
+class SharedKeyUpdate(_SharedKeyUpdate):
 
-
-def update_shared_key(cmd, instance, value):
-    with cmd.update_context(instance) as c:
-        c.set_param('value', value)
-    return instance
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.value._required = True
+        return args_schema
 # endregion
 
 
