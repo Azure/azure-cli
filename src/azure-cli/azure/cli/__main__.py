@@ -42,6 +42,7 @@ telemetry.set_application(az_cli, ARGCOMPLETE_ENV_NAME)
 
 # Log the init finish time
 init_finish_time = timeit.default_timer()
+exit_code = None
 
 try:
     telemetry.start()
