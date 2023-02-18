@@ -298,7 +298,7 @@ def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, s
                  service_principal_secret=None, connectivity_type=None, port=None, sql_workload_type=None, enable_r_services=None, tags=None,
                  enable_assessment=None, enable_assessment_schedule=None, assessment_weekly_interval=None,
                  assessment_monthly_occurrence=None, assessment_day_of_week=None, assessment_start_time_local=None,
-                 workspace_name=None, workspace_rg=None, enable_azure_ad_auth=None, msi_client_id=None):
+                 workspace_name=None, workspace_rg=None, enable_azure_ad_auth=False, msi_client_id=None, skip_msi_validation=False):
     '''
     Updates a SQL virtual machine.
     '''
