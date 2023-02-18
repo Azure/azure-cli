@@ -302,10 +302,10 @@ def _validate_msi_valid_on_vm(cli_ctx, namespace):
         return vm.identity.principal_id
 
     # The user-assigned MSI case.
-    if vm.identity is None or not hasattr(vm.identity, 'user_assigned_identities'):
+    if vm.identity is None or not hasattr(vm.identity, 'user_assigned_identities') or getattr(vm.identity, 'user_assigned_identities') is None:
         raise InvalidArgumentValueError("Enable Azure AD authentication with user-assigned managed identity {}, but the managed identity is not attached to this Azure VM".format(namespace.msi_client_id))
 
-    for umi in vm.identity.user_assigned_identities:
+    for umi in vm.identity.user_assigned_identities.values():
         if umi.client_id == namespace.msi_client_id:
             return umi.principal_id
 
