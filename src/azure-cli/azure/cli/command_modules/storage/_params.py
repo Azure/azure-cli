@@ -632,6 +632,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tenant_id', help='The tenant id to add in network rule.', arg_group='Resource Access Rule',
                    min_api='2020-08-01-preview')
 
+    for item in ['add', 'remove']:
+        with self.argument_context('storage account network-rule {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
+            c.argument('ip_address', nargs='*', help='IPv4 address or CIDR range. Can supply a list: --ip-address ip1 '
+                                                     '[ip2]...')
+
     with self.argument_context('storage account blob-service-properties show',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', acct_name_type, id_part=None)

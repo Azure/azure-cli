@@ -643,8 +643,9 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
         IpRule = cmd.get_models('IPRule')
         if not rules.ip_rules:
             rules.ip_rules = []
-        rules.ip_rules = [r for r in rules.ip_rules if r.ip_address_or_range != ip_address]
-        rules.ip_rules.append(IpRule(ip_address_or_range=ip_address, action=action))
+        for ip in ip_address:
+            rules.ip_rules = [r for r in rules.ip_rules if r.ip_address_or_range != ip]
+            rules.ip_rules.append(IpRule(ip_address_or_range=ip, action=action))
     if resource_id:
         ResourceAccessRule = cmd.get_models('ResourceAccessRule')
         if not rules.resource_access_rules:
@@ -666,7 +667,8 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
         rules.virtual_network_rules = [x for x in rules.virtual_network_rules
                                        if not x.virtual_network_resource_id.endswith(subnet)]
     if ip_address:
-        rules.ip_rules = [x for x in rules.ip_rules if x.ip_address_or_range != ip_address]
+        to_remove = [x for x in ip_address]
+        rules.ip_rules = list(filter(lambda x: all(x.ip_address_or_range != i for i in to_remove), rules.ip_rules))
 
     if resource_id:
         rules.resource_access_rules = [x for x in rules.resource_access_rules if

@@ -26,7 +26,9 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'rg': resource_group,
             'acc': self.create_random_name(prefix='cli', length=24),
             'vnet': 'vnet1',
-            'subnet': 'subnet1'
+            'subnet': 'subnet1',
+            'ip1': '25.1.2.3',
+            'ip2': '25.2.0.0/24'
         }
         self.cmd('storage account create -g {rg} -n {acc} --bypass Metrics --default-action Deny --https-only'.format(**kwargs),
                  checks=[
@@ -46,11 +48,14 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints Microsoft.Storage'.format(
                 **kwargs))
 
-        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
+        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip1}'.format(**kwargs))
         # test network-rule add idempotent
-        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
+        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip1}'.format(**kwargs))
         self.cmd(
-            'storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.2.0.0/24'.format(**kwargs))
+            'storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip2}'.format(**kwargs))
+        # test add multiple ip addresses
+        self.cmd(
+            'storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip1} {ip2}'.format(**kwargs))
         self.cmd(
             'storage account network-rule add -g {rg} --account-name {acc} --vnet-name {vnet} --subnet {subnet}'.format(
                 **kwargs))
@@ -67,12 +72,15 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('length(virtualNetworkRules)', 1)
         ])
         self.cmd(
-            'storage account network-rule remove -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
+            'storage account network-rule remove -g {rg} --account-name {acc} --ip-address {ip1}'.format(**kwargs))
+        # test remove multiple ip addresses
+        self.cmd(
+            'storage account network-rule remove -g {rg} --account-name {acc} --ip-address {ip1} {ip2}'.format(**kwargs))
         self.cmd(
             'storage account network-rule remove -g {rg} --account-name {acc} --vnet-name {vnet} --subnet {subnet}'.format(
                 **kwargs))
         self.cmd('storage account network-rule list -g {rg} --account-name {acc}'.format(**kwargs), checks=[
-            JMESPathCheck('length(ipRules)', 1),
+            JMESPathCheck('length(ipRules)', 0),
             JMESPathCheck('length(virtualNetworkRules)', 0)
         ])
 
