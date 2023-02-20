@@ -83,7 +83,7 @@ steps:
       fi
       echo $pipelineTestJson
       echo $pipelineTestJsonFile
-      echo "##vso[task.setvariable variable=pipelineTestJson]pipelineTestJson"
+      echo "##vso[task.setvariable variable=pipelineTestJson]$pipelineTestJson"
       echo ${{ variables.pipelineTestJson }}
 
       pipelineTestXml='false'
@@ -93,7 +93,7 @@ steps:
       fi
       echo $pipelineTestXml
       echo $pipelineTestXmlFile
-      echo "##vso[task.setvariable variable=pipelineTestXml]pipelineTestXml"
+      echo "##vso[task.setvariable variable=pipelineTestXml]$pipelineTestXml"
       echo ${{ variables.pipelineTestXml }}
   - task: PublishBuildArtifacts@1
     condition: and(succeededOrFailed(), eq(variables.pipelineTestJson, 'true'))
