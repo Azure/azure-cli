@@ -395,14 +395,14 @@ def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, s
 
 def sqlvm_enable_azure_ad_auth(cmd, instance, sql_virtual_machine_name, resource_group_name, msi_client_id=None):
     ''' Enable Azure AD authentication on a SQL virtual machine.
-    
+
         :param cmd: The CLI command.
         :type cmd: AzCliCommand.
         :param instance: The Sql Virtual Machine instance.
         :type instance: SqlVirtualMachine.
         :param resource_group_name: The resource group name
         :type resource_group_name: str.
-        :param msi_client_id: The clientId of the managed identity used in Azure AD authentication. 
+        :param msi_client_id: The clientId of the managed identity used in Azure AD authentication.
                               None means system-assigned managed identity
         :type: str.
 
@@ -417,7 +417,7 @@ def sqlvm_enable_azure_ad_auth(cmd, instance, sql_virtual_machine_name, resource
     return instance
 
 
-# pylint: unused-argument
+# pylint: disable=unused-argument
 def validate_azure_ad_auth(cmd, sql_virtual_machine_name, resource_group_name, msi_client_id=None):
     ''' Valida if Azure AD authentication is ready on a SQL virtual machine.
         The logic of validation is in the validator method. If the SQL virtual machine passes the validator,
@@ -427,7 +427,7 @@ def validate_azure_ad_auth(cmd, sql_virtual_machine_name, resource_group_name, m
         :type cmd: AzCliCommand.
         :param resource_group_name: The resource group name
         :type resource_group_name: str.
-        :param msi_client_id: The clientId of the managed identity used in Azure AD authentication. 
+        :param msi_client_id: The clientId of the managed identity used in Azure AD authentication.
                               None means system-assigned managed identity
         :type: str.
 

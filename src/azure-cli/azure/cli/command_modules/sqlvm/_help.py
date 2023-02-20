@@ -182,13 +182,6 @@ examples:
   - name: Update a SQL virtual machine to enable SQL best practices assessment without setting a schedule for running assessment on-demand
     text: >
         az sql vm update -n sqlvm -g myresourcegroup --enable-assessment true
-  - name: Enable AzureAD authentication on a SQL virtual machine
-    text: >
-      Enable AzureAD authentication with system-assigned managed identity:
-        az sql vm update -n sqlvm -g myresourcegroup --enable-azure-ad-auth
-
-      Enable AzureAD authentication with user-assigned managed identity:
-        az sql vm update -n sqlvm -g myresourcegroup --enable-azure-ad-auth --msi-client_id 12345678
 """
 
 helps['sql vm enable-azure-ad-auth'] = """
@@ -200,13 +193,13 @@ examples:
         az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup
   - name: Enable Azure AD authentication with user-assigned managed identity with client side validation.
     text: >
-        az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup --msi-client_id 12345678
+        az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup --msi-client-id 12345678
   - name: Enable Azure AD authentication with system-assigned managed identity skipping client side validation. The server side validation always happens.
     text: >
         az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup --skip-msi-validation
   - name: Enable Azure AD authentication with user-assigned managed identity skipping client side validation. The server side validation always happens.
     text: >
-        az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup --msi-client_id 12345678 --skip-msi-validation
+        az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup --msi-client-id 12345678 --skip-msi-validation
 """
 
 helps['sql vm validate-azure-ad-auth'] = """
@@ -215,8 +208,8 @@ short-summary: Validate Azure AD authentication of a SQL virtual machine at the 
 examples:
   - name: Validate Azure AD authentication with system-assigned managed identity at the client side.
     text: >
-        az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup
+        az sql vm validate-azure-ad-auth -n sqlvm -g myresourcegroup
   - name: Validate Azure AD authentication with user-assigned managed identity at the client side.
     text: >
-        az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup --msi-client_id 12345678
+        az sql vm validate-azure-ad-auth -n sqlvm -g myresourcegroup --msi-client-id 12345678
 """
