@@ -19,9 +19,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-10-01-preview",
+        "version": "2022-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/topics/{}/subscriptions/{}", "2022-10-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/topics/{}/subscriptions/{}", "2022-01-01-preview"],
         ]
     }
 
@@ -108,13 +108,13 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.dead_letter_on_filter_exceptions = AAZBoolArg(
-            options=["--dead-letter-on-filter-exceptions"],
+            options=["-f", "--dead-letter-on-filter-exceptions"],
             arg_group="Properties",
             help="Value that indicates whether a subscription has dead letter support on filter evaluation exceptions.",
             nullable=True,
         )
         _args_schema.enable_dead_lettering_on_message_expiration = AAZBoolArg(
-            options=["--enable-dead-lettering-on-message-expiration"],
+            options=["--message-expiration", "--enable-dead-lettering-on-message-expiration"],
             arg_group="Properties",
             help="A value that indicates whether this queue has dead letter support when a message expires.",
             nullable=True,
@@ -126,7 +126,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.duplicate_detection_history_time_window = AAZDurationArg(
-            options=["--duplicate-detection-history-time-window"],
+            options=["-d", "--duplicate-detection-history-time-window"],
             arg_group="Properties",
             help="ISO 8601 timeSpan structure that defines the duration of the duplicate detection history. The default value is 10 minutes.",
             nullable=True,
@@ -268,7 +268,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01-preview",
+                    "api-version", "2022-01-01-preview",
                     required=True,
                 ),
             }
@@ -359,7 +359,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01-preview",
+                    "api-version", "2022-01-01-preview",
                     required=True,
                 ),
             }

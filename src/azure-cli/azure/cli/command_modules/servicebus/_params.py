@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 # pylint: disable=too-many-statements
-# pylint: disble=too-many-locals
+# pylint: disable=too-many-locals
 
 from azure.cli.core.commands.parameters import tags_type, get_enum_type, resource_group_name_type, name_type,\
     get_location_type, get_three_state_flag, get_resource_name_completion_list
@@ -15,7 +15,7 @@ from azure.cli.core.profiles import ResourceType
 
 def load_arguments_sb(self, _):
     from azure.cli.command_modules.servicebus._completers import get_rules_command_completion_list, \
-        get_queue_command_completion_list, get_topic_command_completion_list, get_subscriptions_command_completion_list
+        get_queue_command_completion_list
     from azure.cli.command_modules.servicebus._validators import _validate_auto_delete_on_idle, \
         _validate_duplicate_detection_history_time_window, \
         _validate_default_message_time_to_live, \

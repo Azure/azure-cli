@@ -121,51 +121,6 @@ def cli_keys_renew(client, resource_group_name, namespace_name, name, key_type, 
         parameters={'key_type': key_type, 'key': key}
     )
 
-
-# Queue Authorization rule:
-def cli_queueautho_create(cmd, client, resource_group_name, namespace_name, queue_name, name, rights=None):
-    from azure.cli.command_modules.servicebus._utils import accessrights_converter
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        return client.create_or_update_authorization_rule(
-            resource_group_name=resource_group_name,
-            namespace_name=namespace_name,
-            queue_name=queue_name,
-            authorization_rule_name=name,
-            parameters={'rights': accessrights_converter(rights)})
-
-
-def cli_queueauthokey_renew(cmd, client, resource_group_name, namespace_name, queue_name, name, key_type=None, key=None):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        return client.regenerate_keys(
-            resource_group_name=resource_group_name,
-            namespace_name=namespace_name,
-            queue_name=queue_name,
-            authorization_rule_name=name,
-            parameters={'key_type': key_type, 'key': key})
-
-
-# Topic Authorization rule
-def cli_topicautho_create(cmd, client, resource_group_name, namespace_name, topic_name, name, rights=None):
-    from azure.cli.command_modules.servicebus._utils import accessrights_converter
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        return client.create_or_update_authorization_rule(
-            resource_group_name=resource_group_name,
-            namespace_name=namespace_name,
-            topic_name=topic_name,
-            authorization_rule_name=name,
-            parameters={'rights': accessrights_converter(rights)})
-
-
-def cli_topicauthokey_renew(cmd, client, resource_group_name, namespace_name, topic_name, name, key_type=None, key=None):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        return client.regenerate_keys(
-            resource_group_name=resource_group_name,
-            namespace_name=namespace_name,
-            topic_name=topic_name,
-            authorization_rule_name=name,
-            parameters={'key_type': key_type, 'key': key})
-
-
 # Rule Region
 def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_name, subscription_name, rule_name,
                      action_sql_expression=None, action_compatibility_level=None, action_requires_preprocessing=None,

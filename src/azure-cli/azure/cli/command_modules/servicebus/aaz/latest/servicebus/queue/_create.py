@@ -19,9 +19,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-10-01-preview",
+        "version": "2022-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/queues/{}", "2022-10-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/queues/{}", "2022-01-01-preview"],
         ]
     }
 
@@ -71,7 +71,7 @@ class Create(AAZCommand):
             help="ISO 8061 timeSpan idle interval after which the queue is automatically deleted. The minimum duration is 5 minutes.",
         )
         _args_schema.enable_dead_lettering_on_message_expiration = AAZBoolArg(
-            options=["--enable-dead-lettering-on-message-expiration"],
+            options=["--message-expiration", "--enable-dead-lettering-on-message-expiration"],
             arg_group="Properties",
             help="A value that indicates whether this queue has dead letter support when a message expires.",
         )
@@ -81,7 +81,7 @@ class Create(AAZCommand):
             help="ISO 8601 default message timespan to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.",
         )
         _args_schema.duplicate_detection_history_time_window = AAZDurationArg(
-            options=["--duplicate-detection-history-time-window"],
+            options=["-d", "--duplicate-detection-history-time-window"],
             arg_group="Properties",
             help="ISO 8601 timeSpan structure that defines the duration of the duplicate detection history. The default value is 10 minutes.",
         )
@@ -131,7 +131,7 @@ class Create(AAZCommand):
             help="Maximum size of the topic in megabytes, which is the size of the memory allocated for the topic. Default is 1024.",
         )
         _args_schema.enable_duplicate_detection = AAZBoolArg(
-            options=["--enable-duplicate-detection"],
+            options=["--duplicate-detection", "--enable-duplicate-detection"],
             arg_group="Properties",
             help="A value indicating if this queue requires duplicate detection.",
         )
@@ -217,7 +217,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01-preview",
+                    "api-version", "2022-01-01-preview",
                     required=True,
                 ),
             }

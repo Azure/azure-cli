@@ -19,9 +19,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-10-01-preview",
+        "version": "2022-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/topics/{}", "2022-10-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/topics/{}", "2022-01-01-preview"],
         ]
     }
 
@@ -82,9 +82,9 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.duplicate_detection_history_time_window = AAZDurationArg(
-            options=["--duplicate-detection-history-time-window"],
+            options=["-d", "--duplicate-detection-history-time-window"],
             arg_group="Properties",
-            help="ISO8601 timespan structure that defines the duration of the duplicate detection history. The default value is 10 minutes.",
+            help="ISO 8601 timeSpan structure that defines the duration of the duplicate detection history. The default value is 10 minutes.",
             nullable=True,
         )
         _args_schema.enable_batched_operations = AAZBoolArg(
@@ -118,7 +118,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.enable_duplicate_detection = AAZBoolArg(
-            options=["--enable-duplicate-detection"],
+            options=["--duplicate-detection", "--enable-duplicate-detection"],
             arg_group="Properties",
             help="A value indicating if this queue requires duplicate detection.",
             nullable=True,
@@ -220,7 +220,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01-preview",
+                    "api-version", "2022-01-01-preview",
                     required=True,
                 ),
             }
@@ -307,7 +307,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01-preview",
+                    "api-version", "2022-01-01-preview",
                     required=True,
                 ),
             }
