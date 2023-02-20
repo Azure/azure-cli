@@ -374,7 +374,7 @@ def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, s
     if (instance.server_configurations_management_settings.sql_connectivity_update_settings is None and
             instance.server_configurations_management_settings.sql_workload_type_update_settings is None and
             instance.server_configurations_management_settings.sql_storage_update_settings is None and
-            instance.server_configurations_management_settings.additional_features_server_configurations):
+            instance.server_configurations_management_settings.additional_features_server_configurations is None):
         instance.server_configurations_management_settings = None
 
     set_assessment_properties(cmd,
