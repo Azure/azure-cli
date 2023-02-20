@@ -94,21 +94,28 @@ class Update(AAZCommand):
             nullable=True,
             enum={"IPv4": "IPv4", "IPv6": "IPv6"},
         )
-
-        # define Arg Group "Parameters.properties.ipConfigurations[]"
-
-        # define Arg Group "PipObj"
-
-        _args_schema = cls._args_schema
-        _args_schema.pip_id = AAZResourceIdArg(
-            options=["--pip-id"],
-            arg_group="PipObj",
-            help="Resource ID.",
+        _args_schema.public_ip_address = AAZResourceIdArg(
+            options=["--public-ip-address"],
+            arg_group="IP Configuration",
+            help="Name or ID of an existing public IP address.",
             nullable=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/publicIPAddresses/{}",
             ),
         )
+        _args_schema.subnet = AAZResourceIdArg(
+            options=["--subnet"],
+            arg_group="IP Configuration",
+            help="Name or ID of an existing subnet. If name specified, please also specify `--vnet-name`.",
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}",
+            ),
+        )
+
+        # define Arg Group "Parameters.properties.ipConfigurations[]"
+
+        # define Arg Group "PipObj"
 
         # define Arg Group "Properties"
 
@@ -242,17 +249,6 @@ class Update(AAZCommand):
         cls._build_args_sub_resource_update(_element.backend_address_pool)
 
         # define Arg Group "SubnetObj"
-
-        _args_schema = cls._args_schema
-        _args_schema.subnet_id = AAZResourceIdArg(
-            options=["--subnet-id"],
-            arg_group="SubnetObj",
-            help="Resource ID.",
-            nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}",
-            ),
-        )
         return cls._args_schema
 
     _args_application_security_group_update = None
@@ -2052,12 +2048,12 @@ class Update(AAZCommand):
 
             public_ip_address = _builder.get(".properties.publicIPAddress")
             if public_ip_address is not None:
-                public_ip_address.set_prop("id", AAZStrType, ".pip_id")
+                public_ip_address.set_prop("id", AAZStrType, ".public_ip_address")
                 public_ip_address.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
             subnet = _builder.get(".properties.subnet")
             if subnet is not None:
-                subnet.set_prop("id", AAZStrType, ".subnet_id")
+                subnet.set_prop("id", AAZStrType, ".subnet")
                 subnet.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
             return _instance_value

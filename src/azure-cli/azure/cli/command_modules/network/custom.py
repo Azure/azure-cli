@@ -4400,15 +4400,6 @@ class NICIPConfigCreate(_NICIPConfigCreate):
             arg_group="IP Configuration",
             help="Name of the virtual network.",
         )
-        args_schema.subnet = AAZResourceIdArg(
-            options=["--subnet"],
-            arg_group="IP Configuration",
-            help="Name or ID of an existing subnet. If name specified, please also specify `--vnet-name`.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/virtualNetworks/{vnet_name}/subnets/{}",
-            ),
-        )
         args_schema.application_security_groups = AAZListArg(
             options=["--application-security-groups", "--asgs"],
             arg_group="IP Configuration",
@@ -4418,15 +4409,6 @@ class NICIPConfigCreate(_NICIPConfigCreate):
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                          "/applicationSecurityGroups/{}",
-            ),
-        )
-        args_schema.public_ip_address = AAZResourceIdArg(
-            options=["--public-ip-address"],
-            arg_group="IP Configuration",
-            help="Name or ID of an existing public IP address.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
-                         "publicIPAddresses/{}"
             ),
         )
         args_schema.gateway_name = AAZStrArg(
@@ -4479,15 +4461,12 @@ class NICIPConfigCreate(_NICIPConfigCreate):
         args_schema.load_balancer_backend_address_pools._registered = False
         args_schema.load_balancer_inbound_nat_rules._registered = False
         args_schema.private_ip_allocation_method._registered = False
-        args_schema.pip_id._registered = False
-        args_schema.subnet_id._registered = False
         args_schema.asgs_obj._registered = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
         args.private_ip_allocation_method = "Static" if has_value(args.private_ip_address) else "Dynamic"
-        args.pip_id = args.public_ip_address if has_value(args.public_ip_address) else None
 
         args.asgs_obj = assign_aaz_list_arg(
             args.asgs_obj,
@@ -4520,8 +4499,6 @@ class NICIPConfigCreate(_NICIPConfigCreate):
             for config in instance.properties.ip_configurations:
                 config.properties.primary = False
 
-        args.subnet_id = args.subnet if has_value(args.subnet) else None
-
 
 class NICIPConfigUpdate(_NICIPConfigUpdate):
     @classmethod
@@ -4549,25 +4526,13 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             help="Name of the virtual network.",
             nullable=True,
         )
-        args_schema.subnet = AAZResourceIdArg(
-            options=["--subnet"],
-            arg_group="IP Configuration",
-            help="Name or ID of an existing subnet. If name specified, please also specify `--vnet-name`.",
-            fmt=EmptyResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/virtualNetworks/{vnet_name}/subnets/{}",
-            ),
-            nullable=True,
+        args_schema.subnet._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/virtualNetworks/{vnet_name}/subnets/{}",
         )
-        args_schema.public_ip_address = AAZResourceIdArg(
-            options=["--public-ip-address"],
-            arg_group="IP Configuration",
-            help="Name or ID of an existing public IP address.",
-            fmt=EmptyResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
-                         "publicIPAddresses/{}"
-            ),
-            nullable=True,
+        args_schema.public_ip_address._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
+                     "publicIPAddresses/{}"
         )
         args_schema.gateway_lb._fmt = EmptyResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
@@ -4648,8 +4613,6 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
         args_schema.load_balancer_backend_address_pools._registered = False
         args_schema.load_balancer_inbound_nat_rules._registered = False
         args_schema.private_ip_allocation_method._registered = False
-        args_schema.pip_id._registered = False
-        args_schema.subnet_id._registered = False
         args_schema.asgs_obj._registered = False
         return args_schema
 
@@ -4664,10 +4627,6 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             else:
                 # if specific address provided, allocation is static
                 args.private_ip_allocation_method = "Static"
-        if has_value(args.subnet):
-            args.subnet_id = args.subnet
-        if has_value(args.public_ip_address):
-            args.pip_id = args.public_ip_address
 
     def pre_instance_update(self, instance):
         args = self.ctx.args
