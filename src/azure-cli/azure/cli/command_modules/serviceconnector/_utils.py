@@ -5,7 +5,7 @@
 
 import time
 from knack.log import get_logger
-from knack.util import todict
+from knack.util import todict, CLIError
 from msrestazure.tools import parse_resource_id
 from azure.cli.core.azclierror import (
     ValidationError,
@@ -347,3 +347,91 @@ def get_object_id_of_current_user():
             logger.warning(
                 'Please ask your IT department for help to join this device to Azure Active Directory.')
         raise e
+
+
+def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
+                             user_identity_auth_info, system_identity_auth_info,
+                             service_principal_auth_info_secret, new_addon):
+    all_auth_info = []
+    if secret_auth_info is not None:
+        all_auth_info.append(secret_auth_info)
+    if secret_auth_info_auto is not None:
+        all_auth_info.append(secret_auth_info_auto)
+    if user_identity_auth_info is not None:
+        all_auth_info.append(user_identity_auth_info)
+    if system_identity_auth_info is not None:
+        all_auth_info.append(system_identity_auth_info)
+    if service_principal_auth_info_secret is not None:
+        all_auth_info.append(service_principal_auth_info_secret)
+    if not new_addon and len(all_auth_info) != 1:
+        raise ValidationError('Only one auth info is needed')
+    auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
+    return auth_info
+
+
+def get_local_conn_auth_info(secret_auth_info, secret_auth_info_auto,
+                             user_account_auth_info, service_principal_auth_info_secret):
+    all_auth_info = []
+    if secret_auth_info is not None:
+        all_auth_info.append(secret_auth_info)
+    if secret_auth_info_auto is not None:
+        all_auth_info.append(secret_auth_info_auto)
+    if user_account_auth_info is not None:
+        all_auth_info.append(user_account_auth_info)
+    if service_principal_auth_info_secret is not None:
+        all_auth_info.append(service_principal_auth_info_secret)
+    auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
+    return auth_info
+
+
+def _get_azext_module(extension_name, module_name):
+    try:
+        # Adding the installed extension in the path
+        from azure.cli.core.extension.operations import add_extension_to_path
+        add_extension_to_path(extension_name)
+        # Import the extension module
+        from importlib import import_module
+        azext_custom = import_module(module_name)
+        return azext_custom
+    except ImportError as ie:
+        raise CLIInternalError(ie)
+
+
+def _get_or_add_extension(cmd, extension_name, extension_module, update=False):
+    from azure.cli.core.extension import (
+        ExtensionNotInstalledException, get_extension)
+    try:
+        get_extension(extension_name)
+        if update:
+            return _update_extension(cmd, extension_name, extension_module)
+    except ExtensionNotInstalledException:
+        return _install_extension(cmd, extension_name)
+    return True
+
+
+def _update_extension(cmd, extension_name):
+    from azure.cli.core.extension import ExtensionNotInstalledException
+    try:
+        from azure.cli.core.extension import operations
+        operations.update_extension(cmd=cmd, extension_name=extension_name)
+        operations.reload_extension(extension_name=extension_name)
+    except CLIError as err:
+        logger.info(err)
+    except ExtensionNotInstalledException as err:
+        logger.debug(err)
+        return False
+    except ModuleNotFoundError as err:
+        logger.debug(err)
+        logger.error(
+            "Error occurred attempting to load the extension module. Use --debug for more information.")
+        return False
+    return True
+
+
+def _install_extension(cmd, extension_name):
+    try:
+        from azure.cli.core.extension import operations
+        operations.add_extension(cmd=cmd, extension_name=extension_name)
+    except Exception:  # nopa pylint: disable=broad-except
+        return False
+    return True

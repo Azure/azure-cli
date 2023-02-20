@@ -8,6 +8,7 @@ from knack.util import todict
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import (
+    CLIInternalError,
     InvalidArgumentValueError,
     RequiredArgumentMissingError,
     ValidationError,
@@ -30,13 +31,20 @@ from ._addon_factory import AddonFactory
 from ._utils import (
     set_user_token_by_source_and_target,
     set_user_token_header,
-    auto_register
+    auto_register,
+    get_cloud_conn_auth_info,
+    get_local_conn_auth_info,
+    _get_azext_module,
+    _get_or_add_extension
 )
+from ._credential_free import is_passwordless_command
 # pylint: disable=unused-argument,unsubscriptable-object,unsupported-membership-test,too-many-statements,too-many-locals
 
 
 logger = get_logger(__name__)
 err_msg = 'Required argument is missing, please provide the arguments: {}'
+PASSWORDLESS_EXTENSION_NAME = "serviceconnector-passwordless"
+PASSWORDLESS_EXTENSION_MODULE = "azext_serviceconnector_passwordless.custom"
 
 
 def connection_list(client,
@@ -293,8 +301,28 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       namespace=None,                                        # Resource.EventHub
                       webpubsub=None,                                        # Resource.WebPubSub
                       signalr=None):                                         # Resource.SignalR
-    from ._credential_free import enable_mi_for_db_linker
 
+    auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
+                                         system_identity_auth_info, service_principal_auth_info_secret, new_addon)
+    if is_passwordless_command(cmd, auth_info):
+        if _get_or_add_extension(cmd, PASSWORDLESS_EXTENSION_NAME, PASSWORDLESS_EXTENSION_MODULE, False):
+            azext_custom = _get_azext_module(
+                PASSWORDLESS_EXTENSION_NAME, PASSWORDLESS_EXTENSION_MODULE)
+            return azext_custom.connection_create_ext(cmd, client, connection_name, client_type,
+                                                      source_resource_group, source_id,
+                                                      target_resource_group, target_id,
+                                                      secret_auth_info, secret_auth_info_auto,
+                                                      user_identity_auth_info, system_identity_auth_info,
+                                                      service_principal_auth_info_secret,
+                                                      key_vault_id,
+                                                      service_endpoint,
+                                                      private_endpoint,
+                                                      store_in_connection_string,
+                                                      new_addon, no_wait,
+                                                      cluster, scope, enable_csi,)
+        raise CLIInternalError("Fail to install `serviceconnector-passwordless` extension. Please manually install it"
+                               " with `az extension add --name serviceconnector-passwordless --upgrade`"
+                               " and rerun the command")
     return connection_create_func(cmd, client, connection_name, client_type,
                                   source_resource_group, source_id,
                                   target_resource_group, target_id,
@@ -308,7 +336,6 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                   new_addon, no_wait,
                                   # Resource.KubernetesCluster
                                   cluster, scope, enable_csi,
-                                  enable_mi_for_db_linker=enable_mi_for_db_linker
                                   )
 
 
@@ -344,20 +371,8 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
     if not new_addon and not target_id:
         raise RequiredArgumentMissingError(err_msg.format('--target-id'))
 
-    all_auth_info = []
-    if secret_auth_info is not None:
-        all_auth_info.append(secret_auth_info)
-    if secret_auth_info_auto is not None:
-        all_auth_info.append(secret_auth_info_auto)
-    if user_identity_auth_info is not None:
-        all_auth_info.append(user_identity_auth_info)
-    if system_identity_auth_info is not None:
-        all_auth_info.append(system_identity_auth_info)
-    if service_principal_auth_info_secret is not None:
-        all_auth_info.append(service_principal_auth_info_secret)
-    if not new_addon and len(all_auth_info) != 1:
-        raise ValidationError('Only one auth info is needed')
-    auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
+    auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
+                                         system_identity_auth_info, service_principal_auth_info_secret, new_addon)
 
     if store_in_connection_string:
         if client_type == CLIENT_TYPE.Dotnet.value:
@@ -461,7 +476,24 @@ def local_connection_create(cmd, client,  # pylint: disable=too-many-locals,too-
                             webpubsub=None,                                        # Resource.WebPubSub
                             signalr=None,                                          # Resource.SignalR
                             ):
-    from ._credential_free import enable_mi_for_db_linker
+    auth_info = get_local_conn_auth_info(secret_auth_info, secret_auth_info_auto,
+                                         user_account_auth_info, service_principal_auth_info_secret)
+    if is_passwordless_command(cmd, auth_info):
+        if _get_or_add_extension(cmd, PASSWORDLESS_EXTENSION_NAME, PASSWORDLESS_EXTENSION_MODULE, False):
+            azext_custom = _get_azext_module(
+                PASSWORDLESS_EXTENSION_NAME, PASSWORDLESS_EXTENSION_MODULE)
+            return azext_custom.local_connection_create_ext(cmd, client, resource_group_name,
+                                                            connection_name,
+                                                            location,
+                                                            client_type,
+                                                            target_resource_group, target_id,
+                                                            secret_auth_info, secret_auth_info_auto,
+                                                            user_account_auth_info,                      # new auth info
+                                                            service_principal_auth_info_secret,
+                                                            no_wait,)
+        raise CLIInternalError("Fail to install `serviceconnector-passwordless` extension. Please manually install it"
+                               " with `az extension add --name serviceconnector-passwordless --upgrade`"
+                               " and rerun the command")
 
     return local_connection_create_func(cmd, client, resource_group_name,
                                         connection_name,
@@ -471,8 +503,7 @@ def local_connection_create(cmd, client,  # pylint: disable=too-many-locals,too-
                                         secret_auth_info, secret_auth_info_auto,
                                         user_account_auth_info,                      # new auth info
                                         service_principal_auth_info_secret,
-                                        no_wait,
-                                        enable_mi_for_db_linker=enable_mi_for_db_linker)
+                                        no_wait)
 
 
 def local_connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-many-statements
@@ -496,16 +527,8 @@ def local_connection_create_func(cmd, client,  # pylint: disable=too-many-locals
                                  signalr=None,                                          # Resource.SignalR
                                  enable_mi_for_db_linker=None):
 
-    all_auth_info = []
-    if secret_auth_info is not None:
-        all_auth_info.append(secret_auth_info)
-    if secret_auth_info_auto is not None:
-        all_auth_info.append(secret_auth_info_auto)
-    if user_account_auth_info is not None:
-        all_auth_info.append(user_account_auth_info)
-    if service_principal_auth_info_secret is not None:
-        all_auth_info.append(service_principal_auth_info_secret)
-    auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
+    auth_info = get_local_conn_auth_info(secret_auth_info, secret_auth_info_auto,
+                                         user_account_auth_info, service_principal_auth_info_secret)
     parameters = {
         'target_service': {
             "type": "AzureResource",
