@@ -76,11 +76,11 @@ steps:
       PYTHON_VERSION: ${{ parameters.pythonVersion }}
       JOB_NAME: ${{ parameters.jobName }}
   - bash: |
-    pipelineTestResult='false'
-    if [[ -f '~/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.json' ]]; then
-    pipelineTestResult='true'
-    fi
-    echo "##vso[task.setvariable variable=pipelineTestResult]pipelineTestResult"
+      pipelineTestResult='false'
+      if [[ -f '~/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.json' ]]; then
+      pipelineTestResult='true'
+      fi
+      echo "##vso[task.setvariable variable=pipelineTestResult]pipelineTestResult"
   - task: PublishBuildArtifacts@1
     condition: and(succeededOrFailed(), eq(variables.pipelineTestResult, 'true'))
     inputs:
