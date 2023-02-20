@@ -75,8 +75,14 @@ steps:
       ADO_PULL_REQUEST_LATEST_COMMIT: $(System.PullRequest.TargetBranch)
       PYTHON_VERSION: ${{ parameters.pythonVersion }}
       JOB_NAME: ${{ parameters.jobName }}
+  - bash: |
+    pipelineTestResult='false'
+    if [[ -f '~/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.json' ]]; then
+    pipelineTestResult='true'
+    fi
+    echo "##vso[task.setvariable variable=pipelineTestResult]pipelineTestResult"
   - task: PublishBuildArtifacts@1
-    condition: always()
+    condition: and(succeededOrFailed(), eq(variables.pipelineTestResult, 'true'))
     inputs:
       # /home/cloudtest/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_3.8_latest_1.json
       PathtoPublish: '$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.json'
