@@ -88,7 +88,7 @@ steps:
 
       pipelineTestXml='false'
       pipelineTestXmlFile='/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
-      if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml' ]]; then
+      if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_${{ parameters.instance_idx }}.parallel.xml' ]] || [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_${{ parameters.instance_idx }}.serial.xml' ]]; then
         pipelineTestXml='true'
       fi
       echo $pipelineTestXml
