@@ -23,6 +23,10 @@ parameters:
   displayName: Run test for specific module
   type: string
   default: ''
+- name: jobName
+  displayName: Job name
+  type: string
+  default: 'FullTest'
 
 steps:
   - task: UsePythonVersion@0
@@ -34,7 +38,7 @@ steps:
       set -ev
 
       source env/bin/activate
-
+      echo jobName: ${{ parameters.jobName }}
       echo pythonVersion: ${{ parameters.pythonVersion }}
       echo profile: ${{ parameters.profile }}
       echo fullTest: ${{ parameters.fullTest }}
@@ -69,3 +73,5 @@ steps:
     displayName: "azdev test"
     env:
       ADO_PULL_REQUEST_LATEST_COMMIT: $(System.PullRequest.TargetBranch)
+      PYTHON_VERSION: ${{ parameters.pythonVersion }}
+      JOB_NAME: ${{ parameters.jobName }}
