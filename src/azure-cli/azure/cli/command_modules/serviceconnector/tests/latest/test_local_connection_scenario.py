@@ -21,7 +21,7 @@ from ._test_utils import CredentialReplacer
 resource_group = 'servicelinker-cli-test-group'
 
 
-# @unittest.skip('Test with user account signed in')
+@unittest.skip('Test with user account signed in')
 class LocalConnectionScenarioTest(ScenarioTest):
 
     def __init__(self, method_name):

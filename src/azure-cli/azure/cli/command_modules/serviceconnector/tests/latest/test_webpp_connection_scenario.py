@@ -26,7 +26,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             recording_processors=[CredentialReplacer()]
         )
 
-    # @record_only()
+    @record_only()
     def test_webapp_appconfig_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -1323,7 +1323,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     def test_webapp_confluentkafka_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
