@@ -21,7 +21,7 @@ from ._test_utils import CredentialReplacer
 resource_group = 'servicelinker-cli-test-group'
 
 
-@unittest.skip('Test with user account signed in')
+# @unittest.skip('Test with user account signed in')
 class LocalConnectionScenarioTest(ScenarioTest):
 
     def __init__(self, method_name):
@@ -45,7 +45,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
 
         # create connection
         self.cmd('connection create appconfig -g {} --connection {} --target-id {} '
-                 '--user-account --client-type python'.format(resource_group, name, target_id))
+                 '--user-account --client-type python --customized-keys AZURE_APPCONFIGURATION_ENDPOINT=test_endpoint'.format(resource_group, name, target_id))
 
         # list connection
         connections = self.cmd(
@@ -62,8 +62,8 @@ class LocalConnectionScenarioTest(ScenarioTest):
         self.cmd('connection update appconfig --id {} --client-type dotnet'.format(connection_id),
                  checks=[self.check('clientType', 'dotnet')])
         # generate configuration
-        self.cmd('connection generate-configuration --id {}'.format(connection_id))
-
+        configs = self.cmd('connection generate-configuration --id {}'.format(connection_id)).get_output_in_json()
+        self.assertTrue(any(x.get('name') == 'test_endpoint' for x in configs.get('configurations')))
         # validate connection
         self.cmd('connection validate --id {}'.format(connection_id))
 
@@ -1112,7 +1112,7 @@ class LocalConnectionScenarioTest(ScenarioTest):
         self.cmd('connection create confluent-cloud -g {} --connection {} '
                  '--bootstrap-server xxx.eastus.azure.confluent.cloud:9092 --kafka-key Name --kafka-secret Secret '
                  '--schema-registry https://xxx.eastus.azure.confluent.cloud --schema-key Name --schema-secret Secret '
-                 '--client-type python'.format(resource_group, name))
+                 '--client-type python '.format(resource_group, name))
 
         # list connection
         connections = self.cmd(
@@ -1125,13 +1125,13 @@ class LocalConnectionScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # update connection
-        self.cmd('connection update confluent-cloud --connection {} '
-                 '--client-type dotnet --kafka-secret Secret'.format(name),
+        self.cmd('connection update confluent-cloud -g {} --connection {} '
+                 '--client-type dotnet --kafka-secret Secret --customized-keys CONFLUENTCLOUD_KAFKA_BOOTSTRAPSERVER=test_server'.format(resource_group, name),
                  checks=[self.check('clientType', 'dotnet')])
 
         # generate configuration
-        self.cmd('connection generate-configuration --id {}'.format(connection_id))
-
+        configs = self.cmd('connection generate-configuration --id {}'.format(connection_id)).get_output_in_json()
+        self.assertTrue(any(x.get('name') == 'test_server' for x in configs.get('configurations')))
         # validate connection
         self.cmd('connection validate --id {}'.format(connection_id))
 

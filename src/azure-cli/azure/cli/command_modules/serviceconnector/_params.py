@@ -32,6 +32,7 @@ from ._resource_config import (
 )
 from ._addon_factory import AddonFactory
 from knack.arguments import CLIArgumentType
+from .action import AddCustomizedKeys
 
 
 def add_source_resource_block(context, source, enable_id=True, validate_source_id=False):
@@ -147,6 +148,12 @@ def add_client_type_argument(context, source, target):
                      help='The client type used on the {}'.format(source.value))
 
 
+def add_customized_keys_argument(context):
+    context.argument('customized_keys', options_list=['--customized-keys'], action=AddCustomizedKeys, nargs='*',
+                     help='The customized key used to change generated configurations. Key is the original name, '
+                     'value is the customized name.')
+
+
 def add_target_type_argument(context, source):
     TARGET_TYPES = [
         elem.value for elem in SUPPORTED_AUTH_TYPE.get(source).keys()]
@@ -254,6 +261,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_secret_store_argument(c)
                 add_vnet_block(c, target)
                 add_connection_string_argument(c, source, target)
+                add_customized_keys_argument(c)
             with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)
                 add_connection_name_argument(c, source)
@@ -262,6 +270,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_secret_store_argument(c)
                 add_vnet_block(c, target)
                 add_connection_string_argument(c, source, target)
+                add_customized_keys_argument(c)
 
         # special target resource: independent implementation
         target = RESOURCE.ConfluentKafka
@@ -270,11 +279,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             add_source_resource_block(c, source, enable_id=False)
             add_confluent_kafka_argument(c)
             add_secret_store_argument(c)
+            add_customized_keys_argument(c)
         with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
             add_client_type_argument(c, source, target)
             add_source_resource_block(c, source, enable_id=False)
             add_confluent_kafka_argument(c)
             add_secret_store_argument(c)
+            add_customized_keys_argument(c)
 
     # local connection
     with self.argument_context('connection list') as c:
@@ -312,12 +323,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             add_secret_store_argument(c)
             add_vnet_block(c, target)
             add_local_connection_block(c)
+            add_customized_keys_argument(c)
         with self.argument_context('connection update {}'.format(target.value)) as c:
             add_client_type_argument(c, source, target)
             add_auth_block(c, source, target)
             add_secret_store_argument(c)
             add_vnet_block(c, target)
             add_local_connection_block(c)
+            add_customized_keys_argument(c)
 
     # special target resource: independent implementation
     target = RESOURCE.ConfluentKafka
@@ -326,11 +339,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         add_confluent_kafka_argument(c)
         add_secret_store_argument(c)
         add_local_connection_block(c, show_id=False)
+        add_customized_keys_argument(c)
     with self.argument_context('connection update {}'.format(target.value)) as c:
         add_client_type_argument(c, source, target)
         add_confluent_kafka_argument(c)
         add_secret_store_argument(c)
         add_local_connection_block(c, show_id=False)
+        add_customized_keys_argument(c)
     with self.argument_context('connection preview-configuration {}'.format(target.value)) as c:
         add_auth_block(c, source, target)
         add_client_type_argument(c, source, target)

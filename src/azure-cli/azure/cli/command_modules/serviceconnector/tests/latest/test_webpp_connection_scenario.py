@@ -26,7 +26,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             recording_processors=[CredentialReplacer()]
         )
 
-    @record_only()
+    # @record_only()
     def test_webapp_appconfig_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -43,7 +43,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # create connection
         self.cmd('webapp connection create appconfig --connection {} --source-id {} --target-id {} '
-                 '--system-identity --client-type python'.format(name, source_id, target_id))
+                 '--system-identity --client-type python --customized-keys AZURE_APPCONFIGURATION_ENDPOINT=test_endpoint'.format(name, source_id, target_id))
 
         # list connection
         connections = self.cmd(
@@ -61,8 +61,9 @@ class WebAppConnectionScenarioTest(ScenarioTest):
                  checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
-        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
-
+        configs = self.cmd('webapp connection list-configuration --id {}'.format(connection_id)).get_output_in_json()
+        self.assertTrue(any(x.get('name') == 'test_endpoint' for x in configs.get('configurations')))
+        
         # validate connection
         self.cmd('webapp connection validate --id {}'.format(connection_id))
 
@@ -1322,7 +1323,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    @record_only()
+    # @record_only()
     def test_webapp_confluentkafka_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -1353,12 +1354,12 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # update connection
         self.cmd('webapp connection update confluent-cloud --connection {} '
-                 '--source-id {} --client-type dotnet --kafka-secret Secret'.format(name, source_id),
+                 '--source-id {} --client-type dotnet --kafka-secret Secret --customized-keys CONFLUENTCLOUD_KAFKA_BOOTSTRAPSERVER=test_server'.format(name, source_id),
                  checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
-        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
-
+        configs = self.cmd('webapp connection list-configuration --id {}'.format(connection_id)).get_output_in_json()
+        self.assertTrue(any(x.get('name') == 'test_server' for x in configs.get('configurations')))
         # validate connection
         self.cmd('webapp connection validate --id {}'.format(connection_id))
 

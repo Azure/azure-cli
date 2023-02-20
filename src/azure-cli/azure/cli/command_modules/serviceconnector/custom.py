@@ -300,7 +300,9 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       config_store=None,                                     # Resource.AppConfig
                       namespace=None,                                        # Resource.EventHub
                       webpubsub=None,                                        # Resource.WebPubSub
-                      signalr=None):                                         # Resource.SignalR
+                      signalr=None,                                          # Resource.SignalR
+                      customized_keys=None,
+                      ):
 
     auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
                                          system_identity_auth_info, service_principal_auth_info_secret, new_addon)
@@ -319,7 +321,8 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                                       private_endpoint,
                                                       store_in_connection_string,
                                                       new_addon, no_wait,
-                                                      cluster, scope, enable_csi,)
+                                                      cluster, scope, enable_csi,
+                                                      customized_keys=customized_keys)
         raise CLIInternalError("Fail to install `serviceconnector-passwordless` extension. Please manually install it"
                                " with `az extension add --name serviceconnector-passwordless --upgrade`"
                                " and rerun the command")
@@ -336,6 +339,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                   new_addon, no_wait,
                                   # Resource.KubernetesCluster
                                   cluster, scope, enable_csi,
+                                  customized_keys=customized_keys,
                                   )
 
 
@@ -363,8 +367,10 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                            config_store=None,                                     # Resource.AppConfig
                            namespace=None,                                        # Resource.EventHub
                            webpubsub=None,                                        # Resource.WebPubSub
-                           signalr=None,
-                           enable_mi_for_db_linker=None):                                         # Resource.SignalR
+                           signalr=None,                                          # Resource.SignalR
+                           enable_mi_for_db_linker=None,
+                           customized_keys=None,
+                           ):
 
     if not source_id:
         raise RequiredArgumentMissingError(err_msg.format('--source-id'))
@@ -390,7 +396,10 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
             'key_vault_id': key_vault_id,
         },
         'client_type': client_type,
-        'scope': scope
+        'scope': scope,
+        'configurationInfo': {
+            'customizedKeys': customized_keys
+        }
     }
 
     # HACK: set user token to work around OBO
@@ -475,6 +484,7 @@ def local_connection_create(cmd, client,  # pylint: disable=too-many-locals,too-
                             namespace=None,                                        # Resource.EventHub
                             webpubsub=None,                                        # Resource.WebPubSub
                             signalr=None,                                          # Resource.SignalR
+                            customized_keys=None,
                             ):
     auth_info = get_local_conn_auth_info(secret_auth_info, secret_auth_info_auto,
                                          user_account_auth_info, service_principal_auth_info_secret)
@@ -490,7 +500,8 @@ def local_connection_create(cmd, client,  # pylint: disable=too-many-locals,too-
                                                             secret_auth_info, secret_auth_info_auto,
                                                             user_account_auth_info,                      # new auth info
                                                             service_principal_auth_info_secret,
-                                                            no_wait,)
+                                                            no_wait,
+                                                            customized_keys=customized_keys)
         raise CLIInternalError("Fail to install `serviceconnector-passwordless` extension. Please manually install it"
                                " with `az extension add --name serviceconnector-passwordless --upgrade`"
                                " and rerun the command")
@@ -503,7 +514,8 @@ def local_connection_create(cmd, client,  # pylint: disable=too-many-locals,too-
                                         secret_auth_info, secret_auth_info_auto,
                                         user_account_auth_info,                      # new auth info
                                         service_principal_auth_info_secret,
-                                        no_wait)
+                                        no_wait,
+                                        customized_keys=customized_keys)
 
 
 def local_connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-many-statements
@@ -525,8 +537,9 @@ def local_connection_create_func(cmd, client,  # pylint: disable=too-many-locals
                                  namespace=None,                                        # Resource.EventHub
                                  webpubsub=None,                                        # Resource.WebPubSub
                                  signalr=None,                                          # Resource.SignalR
-                                 enable_mi_for_db_linker=None):
-
+                                 enable_mi_for_db_linker=None,
+                                 customized_keys=None,
+                                 ):
     auth_info = get_local_conn_auth_info(secret_auth_info, secret_auth_info_auto,
                                          user_account_auth_info, service_principal_auth_info_secret)
     parameters = {
@@ -540,6 +553,9 @@ def local_connection_create_func(cmd, client,  # pylint: disable=too-many-locals
             'firewall_rules': {
                 'caller_client_iP': 'true'
             }
+        },
+        'configurationInfo': {
+            'customizedKeys': customized_keys
         }
     }
 
@@ -563,7 +579,7 @@ def local_connection_create_func(cmd, client,  # pylint: disable=too-many-locals
                          parameters=parameters)
 
 
-def connection_update(cmd, client,  # pylint: disable=too-many-locals
+def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-branches
                       connection_name=None, client_type=None,
                       source_resource_group=None, source_id=None, indentifier=None,
                       secret_auth_info=None, secret_auth_info_auto=None,
@@ -577,7 +593,9 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
                       scope=None,
                       cluster=None, enable_csi=False,                         # Resource.Kubernetes
                       site=None,                                              # Resource.WebApp
-                      spring=None, app=None, deployment='default'):           # Resource.SpringCloud
+                      spring=None, app=None, deployment='default',            # Resource.SpringCloud
+                      customized_keys=None,
+                      ):
 
     linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
 
@@ -621,6 +639,8 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
         else:
             logger.warning('client_type is not dotnet, ignore "--config-connstr"')
 
+    if linker.get('configurationInfo') and linker.get('configurationInfo').get('customizedKeys'):
+        customized_keys = customized_keys or linker.get('configurationInfo').get('customizedKeys')
     parameters = {
         'target_service': linker.get('targetService'),
         'auth_info': auth_info,
@@ -629,7 +649,10 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals
         },
         'client_type': client_type,
         # scope can be updated in container app while cannot be updated in aks due to some limitations
-        'scope': scope or linker.get('scope')
+        'scope': scope or linker.get('scope'),
+        'configurationInfo': {
+            'customizedKeys': customized_keys
+        }
     }
 
     # HACK: set user token to work around OBO
@@ -675,7 +698,9 @@ def local_connection_update(cmd, client,  # pylint: disable=too-many-locals
                             secret_auth_info=None, secret_auth_info_auto=None,
                             user_account_auth_info=None,                      # new auth info
                             service_principal_auth_info_secret=None,
-                            no_wait=False):
+                            no_wait=False,
+                            customized_keys=None,
+                            ):
 
     linker = todict(client.get(subscription_id=get_subscription_id(cmd.cli_ctx),
                                resource_group_name=resource_group_name,
@@ -711,6 +736,8 @@ def local_connection_update(cmd, client,  # pylint: disable=too-many-locals
             'Either client type or auth info should be specified to update')
 
     client_type = client_type or linker.get('clientType')
+    if linker.get('configurationInfo') and linker.get('configurationInfo').get('customizedKeys'):
+        customized_keys = customized_keys or linker.get('configurationInfo').get('customizedKeys')
 
     parameters = {
         'target_service': linker.get('targetService'),
@@ -720,6 +747,9 @@ def local_connection_update(cmd, client,  # pylint: disable=too-many-locals
             'firewall_rules': {
                 'caller_client_iP': 'true'
             }
+        },
+        'configurationInfo': {
+            'customizedKeys': customized_keys
         }
     }
 
@@ -742,7 +772,8 @@ def local_connection_create_kafka(cmd, client,  # pylint: disable=too-many-local
                                   schema_secret,
                                   connection_name=None,
                                   location=None,
-                                  client_type=None):
+                                  client_type=None,
+                                  customized_keys=None,):
 
     from ._transformers import transform_linker_properties
     # validation
@@ -772,6 +803,9 @@ def local_connection_create_kafka(cmd, client,  # pylint: disable=too-many-local
             'firewall_rules': {
                 'caller_client_iP': 'true'
             }
+        },
+        'configurationInfo': {
+            'customizedKeys': customized_keys
         },
     }
     logger.warning('Start creating a connection for bootstrap server ...')
@@ -806,6 +840,9 @@ def local_connection_create_kafka(cmd, client,  # pylint: disable=too-many-local
                 'caller_client_iP': 'true'
             }
         },
+        'configurationInfo': {
+            'customizedKeys': customized_keys
+        },
     }
     logger.warning('Start creating a connection for schema registry ...')
     registry_linker = client.begin_create_or_update(
@@ -834,7 +871,8 @@ def local_connection_update_kafka(cmd, client,  # pylint: disable=too-many-local
                                   schema_registry=None,
                                   schema_key=None,
                                   schema_secret=None,
-                                  client_type=None):
+                                  client_type=None,
+                                  customized_keys=None,):
 
     # use the suffix to decide the connection type
     if connection_name.endswith('_schema'):  # the schema registry connection
@@ -848,6 +886,9 @@ def local_connection_update_kafka(cmd, client,  # pylint: disable=too-many-local
                                           resource_group_name=resource_group_name,
                                           location=location,
                                           connector_name=connection_name))
+        if server_linker.get('configurationInfo') and server_linker.get('configurationInfo').get('customizedKeys'):
+            customized_keys = customized_keys or server_linker.get('configurationInfo').get('customizedKeys')
+
         parameters = {
             'targetService': server_linker.get('targetService'),
             'auth_info': {
@@ -861,7 +902,10 @@ def local_connection_update_kafka(cmd, client,  # pylint: disable=too-many-local
                 'firewall_rules': {
                     'caller_client_iP': 'true'
                 }
-            }
+            },
+            'configurationInfo': {
+                'customizedKeys': customized_keys
+            },
         }
         if schema_registry:
             parameters['targetService'] = {
@@ -879,6 +923,9 @@ def local_connection_update_kafka(cmd, client,  # pylint: disable=too-many-local
                                           resource_group_name=resource_group_name,
                                           location=location,
                                           connector_name=connection_name))
+        if schema_linker.get('configurationInfo') and schema_linker.get('configurationInfo').get('customizedKeys'):
+            schema_linker = customized_keys or schema_linker.get('configurationInfo').get('customizedKeys')
+
         parameters = {
             'targetService': schema_linker.get('targetService'),
             'auth_info': {
@@ -891,6 +938,9 @@ def local_connection_update_kafka(cmd, client,  # pylint: disable=too-many-local
                 'firewall_rules': {
                     'caller_client_iP': 'true'
                 }
+            },
+            'configurationInfo': {
+                'customizedKeys': customized_keys
             },
         }
         if bootstrap_server:
@@ -918,6 +968,7 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
                             client_type=None,
                             source_resource_group=None,
                             source_id=None,
+                            customized_keys=None,
                             cluster=None, scope=None,          # Resource.Kubernetes
                             site=None,                         # Resource.WebApp
                             deployment='default',
@@ -953,7 +1004,10 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
             'key_vault_id': key_vault_id,
         },
         'client_type': client_type,
-        'scope': scope
+        'scope': scope,
+        'configurationInfo': {
+            'customizedKeys': customized_keys
+        },
     }
     logger.warning('Start creating a connection for bootstrap server ...')
     server_linker = client.begin_create_or_update(resource_uri=source_id,
@@ -1009,6 +1063,7 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
                             client_type=None,
                             source_resource_group=None,
                             source_id=None,
+                            customized_keys=None,
                             cluster=None,
                             site=None,                         # Resource.WebApp
                             deployment='default',
@@ -1029,6 +1084,9 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             client = set_user_token_header(client, cmd.cli_ctx)
             from ._utils import create_key_vault_reference_connection_if_not_exist
             create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
+        if server_linker.get('configurationInfo') and server_linker.get('configurationInfo').get('customizedKeys'):
+            customized_keys = customized_keys or server_linker.get('configurationInfo').get('customizedKeys')
+
         parameters = {
             'targetService': server_linker.get('targetService'),
             'auth_info': {
@@ -1041,7 +1099,10 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             },
             'client_type': client_type or server_linker.get('clientType'),
             # scope does not support update due to aks solution's limitation
-            'scope': server_linker.get('scope')
+            'scope': server_linker.get('scope'),
+            'configurationInfo': {
+                'customizedKeys': customized_keys
+            },
         }
         if schema_registry:
             parameters['targetService'] = {
@@ -1062,6 +1123,9 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             client = set_user_token_header(client, cmd.cli_ctx)
             from ._utils import create_key_vault_reference_connection_if_not_exist
             create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id)
+        if schema_linker.get('configurationInfo') and schema_linker.get('configurationInfo').get('customizedKeys'):
+            customized_keys = customized_keys or schema_linker.get('configurationInfo').get('customizedKeys')
+
         parameters = {
             'targetService': schema_linker.get('targetService'),
             'auth_info': {
@@ -1073,6 +1137,9 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
                 'key_vault_id': key_vault_id,
             },
             'client_type': client_type or schema_linker.get('clientType'),
+            'configurationInfo': {
+                'customizedKeys': customized_keys
+            },
         }
         if bootstrap_server:
             parameters['targetService'] = {
