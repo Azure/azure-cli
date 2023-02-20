@@ -4753,46 +4753,58 @@ def list_nsg_rules(cmd, resource_group_name, network_security_group_name, includ
 
 
 # region NetworkWatchers
-def _create_network_watchers(cmd, client, resource_group_name, locations, tags):
+def _create_network_watchers(cmd, resource_group_name, locations, tags):
     if resource_group_name is None:
         raise CLIError("usage error: '--resource-group' required when enabling new regions")
 
-    NetworkWatcher = cmd.get_models('NetworkWatcher')
+    from .aaz.latest.network.watcher import Create
     for location in locations:
-        client.create_or_update(
-            resource_group_name, '{}-watcher'.format(location),
-            NetworkWatcher(location=location, tags=tags))
+        Create(cli_ctx=cmd.cli_ctx)(command_args={
+            'name': '{}-watcher'.format(location),
+            'resource_group': resource_group_name,
+            'location': location,
+            'tags': tags
+        })
 
 
-def _update_network_watchers(cmd, client, watchers, tags):
-    NetworkWatcher = cmd.get_models('NetworkWatcher')
+def _update_network_watchers(cmd, watchers, tags):
+    from .aaz.latest.network.watcher import Update
     for watcher in watchers:
-        id_parts = parse_resource_id(watcher.id)
+        id_parts = parse_resource_id(watcher['id'])
         watcher_rg = id_parts['resource_group']
         watcher_name = id_parts['name']
-        watcher_tags = watcher.tags if tags is None else tags
-        client.create_or_update(
-            watcher_rg, watcher_name,
-            NetworkWatcher(location=watcher.location, tags=watcher_tags))
+        watcher_tags = watcher.get('tag', None) if tags is None else tags
+        Update(cli_ctx=cmd.cli_ctx)(command_args={
+            'name': watcher_name,
+            'resource_group': watcher_rg,
+            'location': watcher['location'],
+            'tags': watcher_tags
+        })
 
 
-def _delete_network_watchers(cmd, client, watchers):
+def _delete_network_watchers(cmd, watchers):
+    from .aaz.latest.network.watcher import Delete
     for watcher in watchers:
         from azure.cli.core.commands import LongRunningOperation
-        id_parts = parse_resource_id(watcher.id)
+        id_parts = parse_resource_id(watcher['id'])
         watcher_rg = id_parts['resource_group']
         watcher_name = id_parts['name']
         logger.warning(
             "Disabling Network Watcher for region '%s' by deleting resource '%s'",
-            watcher.location, watcher.id)
-        LongRunningOperation(cmd.cli_ctx)(client.begin_delete(watcher_rg, watcher_name))
+            watcher['location'], watcher['id'])
+        poller = Delete(cli_ctx=cmd.cli_ctx)(command_args={
+            'name': watcher_name,
+            'resource_group': watcher_rg
+        })
+        LongRunningOperation(cmd.cli_ctx)(poller)
 
 
-def configure_network_watcher(cmd, client, locations, resource_group_name=None, enabled=None, tags=None):
-    watcher_list = list(client.list_all())
+def configure_network_watcher(cmd, locations, resource_group_name=None, enabled=None, tags=None):
+    from .aaz.latest.network.watcher import List
+    watcher_list = List(cli_ctx=cmd.cli_ctx)(command_args={})
     locations_list = [location.lower() for location in locations]
-    existing_watchers = [w for w in watcher_list if w.location in locations_list]
-    nonenabled_regions = list(set(locations) - set(watcher.location for watcher in existing_watchers))
+    existing_watchers = [w for w in watcher_list if w["location"] in locations_list]
+    nonenabled_regions = list(set(locations) - set(watcher["location"] for watcher in existing_watchers))
 
     if enabled is None:
         if resource_group_name is not None:
@@ -4802,18 +4814,18 @@ def configure_network_watcher(cmd, client, locations, resource_group_name=None, 
         for location in nonenabled_regions:
             logger.warning(
                 "Region '%s' is not enabled for Network Watcher and will be ignored.", location)
-        _update_network_watchers(cmd, client, existing_watchers, tags)
+        _update_network_watchers(cmd, existing_watchers, tags)
 
     elif enabled:
-        _create_network_watchers(cmd, client, resource_group_name, nonenabled_regions, tags)
-        _update_network_watchers(cmd, client, existing_watchers, tags)
+        _create_network_watchers(cmd, resource_group_name, nonenabled_regions, tags)
+        _update_network_watchers(cmd, existing_watchers, tags)
 
     else:
         if tags is not None:
             raise CLIError("usage error: '--tags' cannot be used when disabling regions")
-        _delete_network_watchers(cmd, client, existing_watchers)
+        _delete_network_watchers(cmd, existing_watchers)
 
-    return client.list_all()
+    return List(cli_ctx=cmd.cli_ctx)(command_args={})
 
 
 def create_nw_connection_monitor(cmd,
