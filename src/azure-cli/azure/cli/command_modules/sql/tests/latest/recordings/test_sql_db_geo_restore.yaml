@@ -1,0 +1,2769 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/servers/rebeccaxu-eastus-svr/recoverableDatabases?api-version=2014-04-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/servers/rebeccaxu-eastus-svr/recoverabledatabases/cli-test-hs","name":"cli-test-hs","type":"Microsoft.Sql/servers/recoverableDatabases","properties":{"edition":"Hyperscale","lastAvailableBackupDate":"2023-01-28T03:04:26Z","serviceLevelObjective":"SQLDB_HS_Gen5_2","elasticPoolName":null}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/servers/rebeccaxu-eastus-svr/recoverabledatabases/pitr-cli","name":"pitr-cli","type":"Microsoft.Sql/servers/recoverableDatabases","properties":{"edition":"Hyperscale","lastAvailableBackupDate":"2023-01-28T03:04:26Z","serviceLevelObjective":"SQLDB_HS_Gen5_2","elasticPoolName":null}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/servers/rebeccaxu-eastus-svr/recoverabledatabases/pitr-cli-ha-four","name":"pitr-cli-ha-four","type":"Microsoft.Sql/servers/recoverableDatabases","properties":{"edition":"Hyperscale","lastAvailableBackupDate":"2023-01-28T03:04:26Z","serviceLevelObjective":"SQLDB_HS_Gen5_2","elasticPoolName":null}}]}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '1221'
+      content-type:
+      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
+      dataserviceversion:
+      - 3.0;
+      date:
+      - Sat, 28 Jan 2023 03:08:54 GMT
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -s -d -g
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/servers/rebeccaxu-eastus-svr/recoverableDatabases/cli-test-hs?api-version=2014-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/servers/rebeccaxu-eastus-svr/recoverabledatabases/cli-test-hs","name":"cli-test-hs","type":"Microsoft.Sql/servers/recoverableDatabases","properties":{"edition":"Hyperscale","lastAvailableBackupDate":"2023-01-28T03:04:26Z","serviceLevelObjective":"SQLDB_HS_Gen5_2","elasticPoolName":null}}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '401'
+      content-type:
+      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
+      dataserviceversion:
+      - 3.0;
+      date:
+      - Sat, 28 Jan 2023 03:08:55 GMT
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/servers/rebeccaxu-eastus-svr?api-version=2021-02-01-preview
+  response:
+    body:
+      string: '{"kind":"v12.0","properties":{"administratorLogin":"rebeccaxu","version":"12.0","state":"Ready","fullyQualifiedDomainName":"rebeccaxu-eastus-svr.database.windows.net","privateEndpointConnections":[],"publicNetworkAccess":"Enabled","restrictOutboundNetworkAccess":"Disabled"},"location":"eastus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/servers/rebeccaxu-eastus-svr","name":"rebeccaxu-eastus-svr","type":"Microsoft.Sql/servers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '508'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:08:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "properties": {"createMode": "Recovery", "recoverableDatabaseId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/servers/rebeccaxu-eastus-svr/recoverabledatabases/cli-test-hs"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '260'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/servers/rebeccaxu-eastus-svr/databases/cli-georestore?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"operation":"CreateRecoverRequest","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '75'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:08:56 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseOperationResults/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:09:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:09:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:09:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:09:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:10:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:10:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:10:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:10:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:11:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:11:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:11:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:11:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:12:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:12:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:12:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:13:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:13:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:13:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:13:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:14:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:14:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:14:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:14:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:15:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:15:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:15:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:15:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:16:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:16:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:16:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:16:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:17:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:17:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:17:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:17:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:18:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:18:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:18:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:18:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:19:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:19:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:19:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:19:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:20:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:20:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:20:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:20:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:21:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:21:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:21:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:21:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"InProgress","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:22:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/91853917-7a05-4d91-9eb7-1149dbbf10d2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"91853917-7a05-4d91-9eb7-1149dbbf10d2","status":"Succeeded","startTime":"2023-01-28T03:08:57.197Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:22:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db geo-backup restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --geo-backup-id --dest-database --dest-server --resource-group
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/servers/rebeccaxu-eastus-svr/databases/cli-georestore?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"HS_Gen5","tier":"Hyperscale","family":"Gen5","capacity":2},"kind":"v12.0,user,vcore,hyperscale","properties":{"collation":"SQL_Latin1_General_CP1_CI_AS","maxSizeBytes":-1,"status":"Online","databaseId":"d49566ae-5ea4-496c-9bbf-069a3d849e46","creationDate":"2023-01-28T03:21:42.413Z","currentServiceObjectiveName":"HS_Gen5_2","requestedServiceObjectiveName":"HS_Gen5_2","defaultSecondaryLocation":"westus","catalogCollation":"SQL_Latin1_General_CP1_CI_AS","zoneRedundant":false,"licenseType":"LicenseIncluded","earliestRestoreDate":"2023-01-28T03:21:42.413Z","readScale":"Enabled","highAvailabilityReplicaCount":1,"currentSku":{"name":"HS_Gen5","tier":"Hyperscale","family":"Gen5","capacity":2},"currentBackupStorageRedundancy":"GeoZone","requestedBackupStorageRedundancy":"GeoZone","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","isLedgerOn":false,"isInfraEncryptionEnabled":false},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/servers/rebeccaxu-eastus-svr/databases/cli-georestore","name":"cli-georestore","type":"Microsoft.Sql/servers/databases"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1262'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:22:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -s -n --yes
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/servers/rebeccaxu-eastus-svr/databases/cli-georestore?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"operation":"DropLogicalDatabase","startTime":"2023-01-28T03:22:22.207Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/e3e207d1-54cc-40ef-828e-cf15f4b48264?api-version=2022-05-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '74'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:22:21 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseOperationResults/e3e207d1-54cc-40ef-828e-cf15f4b48264?api-version=2022-05-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n --yes
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/4.0.0b6 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rebeccaxu-test/providers/Microsoft.Sql/locations/eastus/databaseAzureAsyncOperation/e3e207d1-54cc-40ef-828e-cf15f4b48264?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"e3e207d1-54cc-40ef-828e-cf15f4b48264","status":"Succeeded","startTime":"2023-01-28T03:22:22.207Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 28 Jan 2023 03:22:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -283,12 +283,12 @@ def git_push(message, modules=[]):
     if "nothing to commit, working tree clean" in str(stdout):
         return
     try:
-        build_id = os.getenv("BUILD_BUILDID")
-        branch_name = f"regression_test_{build_id}"
         if modules:
+            build_id = os.getenv("BUILD_BUILDID")
             module_name = '_'.join(modules)
             branch_name = f"regression_test_{build_id}_{module_name}"
             run_command(["git", "checkout", "-b", branch_name])
+            run_command(["git", "push", "--set-upstream", "azclibot", branch_name], check_return_code=True)
         run_command(["git", "add", "src/*"], check_return_code=True)
         run_command(["git", "commit", "-m", message], check_return_code=True)
     except RuntimeError as ex:
@@ -298,7 +298,7 @@ def git_push(message, modules=[]):
         try:
             run_command(["git", "fetch"], check_return_code=True)
             run_command(["git", "pull", "--rebase"], check_return_code=True)
-            run_command(["git", "push", "azclibot", branch_name], check_return_code=True)
+            run_command(["git", "push"], check_return_code=True)
 
             logger.info("git push all recording files")
             break

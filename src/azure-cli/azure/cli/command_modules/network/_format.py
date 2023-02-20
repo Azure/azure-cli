@@ -126,33 +126,22 @@ def transform_traffic_manager_create_output(result):
     return {'TrafficManagerProfile': result}
 
 
-def transform_nic_create_output(result):
-    if result:
-        return {'NewNIC': result.result()}
-    return None
-
-
 def transform_nsg_rule_table_output(result):
     item = OrderedDict()
     item['Name'] = result['name']
     item['ResourceGroup'] = result['resourceGroup']
     item['Priority'] = result['priority']
-    item['SourcePortRanges'] = result['sourcePortRange'] or ' '.join(result['sourcePortRanges'])
-    item['SourceAddressPrefixes'] = result['sourceAddressPrefix'] or ' '.join(result['sourceAddressPrefixes'])
-    item['SourceASG'] = result['sourceApplicationSecurityGroups'] or 'None'
+    item['SourcePortRanges'] = result.get('sourcePortRange', ' '.join(result['sourcePortRanges']))
+    item['SourceAddressPrefixes'] = result.get('sourceAddressPrefix', ' '.join(result['sourceAddressPrefixes']))
+    item['SourceASG'] = result.get('sourceApplicationSecurityGroups', 'None')
     item['Access'] = result['access']
     item['Protocol'] = result['protocol']
     item['Direction'] = result['direction']
-    item['DestinationPortRanges'] = result['destinationPortRange'] or ' '.join(result['destinationPortRanges'])
-    item['DestinationAddressPrefixes'] = result['destinationAddressPrefix'] or \
-        ' '.join(result['destinationAddressPrefixes'])
-    item['DestinationASG'] = result['destinationApplicationSecurityGroups'] or 'None'
+    item['DestinationPortRanges'] = result.get('destinationPortRange', ' '.join(result['destinationPortRanges']))
+    item['DestinationAddressPrefixes'] = result.get('destinationAddressPrefix',
+                                                    ' '.join(result['destinationAddressPrefixes']))
+    item['DestinationASG'] = result.get('destinationApplicationSecurityGroups', 'None')
     return item
-
-
-def transform_vnet_gateway_create_output(result):
-    result = {'vnetGateway': result.result()} if result else result
-    return result
 
 
 def transform_geographic_hierachy_table_output(result):
@@ -223,9 +212,9 @@ def transform_effective_route_table(result):
         transformed.append(OrderedDict([
             ('Source', item['source']),
             ('State', item['state']),
-            ('Address Prefix', ' '.join(item['addressPrefix'] or [])),
+            ('Address Prefix', ' '.join(item.get('addressPrefix', []))),
             ('Next Hop Type', item['nextHopType']),
-            ('Next Hop IP', ' '.join(item['nextHopIpAddress'] or []))
+            ('Next Hop IP', ' '.join(item.get('nextHopIpAddress', []))),
         ]))
     return transformed
 

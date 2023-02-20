@@ -105,20 +105,6 @@ def _validate_vpn_gateway_generation(namespace):
         raise CLIError('vpn_gateway_generation should not be provided if gateway_type is not Vpn.')
 
 
-def validate_vpn_connection_name_or_id(cmd, namespace):
-    if namespace.vpn_connection_ids:
-        from msrestazure.tools import is_valid_resource_id, resource_id
-        for index, vpn_connection_id in enumerate(namespace.vpn_connection_ids):
-            if not is_valid_resource_id(vpn_connection_id):
-                namespace.vpn_connection_ids[index] = resource_id(
-                    subscription=get_subscription_id(cmd.cli_ctx),
-                    resource_group=namespace.resource_group_name,
-                    namespace='Microsoft.Network',
-                    type='connections',
-                    name=vpn_connection_id
-                )
-
-
 def validate_ddos_name_or_id(cmd, namespace):
     if namespace.ddos_protection_plan:
         from msrestazure.tools import is_valid_resource_id, resource_id
@@ -571,19 +557,6 @@ def validate_subresource_list(cmd, namespace):
         namespace.target_resources = subresources
 
 
-def validate_target_listener(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.target_listener and not is_valid_resource_id(namespace.target_listener):
-        namespace.target_listener = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            name=namespace.application_gateway_name,
-            namespace='Microsoft.Network',
-            type='applicationGateways',
-            child_type_1='httpListeners',
-            child_name_1=namespace.target_listener)
-
-
 def validate_private_dns_zone(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     if namespace.private_dns_zone and not is_valid_resource_id(namespace.private_dns_zone):
@@ -620,120 +593,6 @@ def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_
 
 
 # COMMAND NAMESPACE VALIDATORS
-
-def process_ag_http_listener_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.frontend_ip and not is_valid_resource_id(namespace.frontend_ip):
-        namespace.frontend_ip = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'frontendIpConfigurations', namespace.frontend_ip)
-
-    if namespace.frontend_port and not is_valid_resource_id(namespace.frontend_port):
-        namespace.frontend_port = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'frontendPorts', namespace.frontend_port)
-
-    if namespace.ssl_cert and not is_valid_resource_id(namespace.ssl_cert):
-        namespace.ssl_cert = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'sslCertificates', namespace.ssl_cert)
-
-    if namespace.firewall_policy and not is_valid_resource_id(namespace.firewall_policy):
-        namespace.firewall_policy = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='ApplicationGatewayWebApplicationFirewallPolicies',
-            name=namespace.firewall_policy
-        )
-
-
-def process_ag_listener_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
-    from msrestazure.tools import is_valid_resource_id
-    if namespace.frontend_ip and not is_valid_resource_id(namespace.frontend_ip):
-        namespace.frontend_ip = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'frontendIpConfigurations', namespace.frontend_ip)
-
-    if namespace.frontend_port and not is_valid_resource_id(namespace.frontend_port):
-        namespace.frontend_port = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'frontendPorts', namespace.frontend_port)
-
-    if namespace.ssl_cert and not is_valid_resource_id(namespace.ssl_cert):
-        namespace.ssl_cert = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'sslCertificates', namespace.ssl_cert)
-
-
-def process_ag_http_settings_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
-    from msrestazure.tools import is_valid_resource_id
-    if namespace.probe and not is_valid_resource_id(namespace.probe):
-        namespace.probe = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'probes', namespace.probe)
-    if namespace.auth_certs:
-        def _validate_name_or_id(val):
-            return val if is_valid_resource_id(val) else _generate_ag_subproperty_id(
-                cmd.cli_ctx, namespace, 'authenticationCertificates', val)
-
-        namespace.auth_certs = [_validate_name_or_id(x) for x in namespace.auth_certs]
-    if namespace.root_certs:
-        def _validate_name_or_id(val):
-            return val if is_valid_resource_id(val) else _generate_ag_subproperty_id(
-                cmd.cli_ctx, namespace, 'trustedRootCertificates', val)
-
-        namespace.root_certs = [_validate_name_or_id(x) for x in namespace.root_certs]
-
-
-def process_ag_settings_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
-    from msrestazure.tools import is_valid_resource_id
-    if namespace.probe and not is_valid_resource_id(namespace.probe):
-        namespace.probe = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'probes', namespace.probe)
-    if namespace.root_certs:
-        def _validate_name_or_id(val):
-            return val if is_valid_resource_id(val) else _generate_ag_subproperty_id(
-                cmd.cli_ctx, namespace, 'trustedRootCertificates', val)
-
-        namespace.root_certs = [_validate_name_or_id(x) for x in namespace.root_certs]
-
-
-def process_ag_rule_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
-    from msrestazure.tools import is_valid_resource_id
-    if namespace.address_pool and not is_valid_resource_id(namespace.address_pool):
-        namespace.address_pool = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'backendAddressPools', namespace.address_pool)
-
-    if namespace.http_listener and not is_valid_resource_id(namespace.http_listener):
-        namespace.http_listener = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'httpListeners', namespace.http_listener)
-
-    if namespace.http_settings and not is_valid_resource_id(namespace.http_settings):
-        namespace.http_settings = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'backendHttpSettingsCollection', namespace.http_settings)
-
-    if namespace.url_path_map and not is_valid_resource_id(namespace.url_path_map):
-        namespace.url_path_map = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'urlPathMaps', namespace.url_path_map)
-
-    if namespace.redirect_config and not is_valid_resource_id(namespace.redirect_config):
-        namespace.redirect_config = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'redirectConfigurations', namespace.redirect_config)
-
-    if namespace.rewrite_rule_set and not is_valid_resource_id(namespace.rewrite_rule_set):
-        namespace.rewrite_rule_set = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'rewriteRuleSets', namespace.rewrite_rule_set)
-
-
-def process_ag_routing_rule_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
-    from msrestazure.tools import is_valid_resource_id
-    if namespace.address_pool and not is_valid_resource_id(namespace.address_pool):
-        namespace.address_pool = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'backendAddressPools', namespace.address_pool)
-
-    if namespace.listener and not is_valid_resource_id(namespace.listener):
-        namespace.listener = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'listeners', namespace.listener)
-
-    if namespace.settings and not is_valid_resource_id(namespace.settings):
-        namespace.settings = _generate_ag_subproperty_id(
-            cmd.cli_ctx, namespace, 'backendSettingsCollection', namespace.settings)
-
-
 def process_ag_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     get_servers_validator(camel_case=True)(namespace)
@@ -794,21 +653,6 @@ def process_cross_region_lb_create_namespace(cmd, namespace):
             'specify --public-ip-dns-name only if creating a new public IP address.')
 
 
-def process_nic_create_namespace(cmd, namespace):
-    get_default_location_from_resource_group(cmd, namespace)
-    validate_tags(namespace)
-
-    validate_ag_address_pools(cmd, namespace)
-    validate_address_pool_id_list(cmd, namespace)
-    validate_inbound_nat_rule_id_list(cmd, namespace)
-    get_asg_validator(cmd.loader, 'application_security_groups')(cmd, namespace)
-
-    # process folded parameters
-    get_subnet_validator(has_type_field=False)(cmd, namespace)
-    get_public_ip_validator(has_type_field=False, allow_none=True, default_none=True)(cmd, namespace)
-    get_nsg_validator(has_type_field=False, allow_none=True, default_none=True)(cmd, namespace)
-
-
 def process_public_ip_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_public_ip_prefix(cmd, namespace)
@@ -829,45 +673,6 @@ def _validate_cert(namespace, param_name):
     attr = getattr(namespace, param_name)
     if attr and os.path.isfile(attr):
         setattr(namespace, param_name, read_base_64_file(attr))
-
-
-def process_vnet_gateway_create_namespace(cmd, namespace):
-    ns = namespace
-    get_default_location_from_resource_group(cmd, ns)
-    validate_tags(ns)
-
-    _validate_vpn_gateway_generation(ns)
-
-    get_virtual_network_validator()(cmd, ns)
-
-    get_public_ip_validator()(cmd, ns)
-    public_ip_count = len(ns.public_ip_address or [])
-    if public_ip_count > 2:
-        raise CLIError('Specify a single public IP to create an active-standby gateway or two '
-                       'public IPs to create an active-active gateway.')
-
-    validate_local_gateway(cmd, ns)
-
-    enable_bgp = any([ns.asn, ns.bgp_peering_address, ns.peer_weight])
-    if enable_bgp and not ns.asn:
-        raise ValueError(
-            'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP ]')
-
-    if cmd.supported_api_version(min_api='2020-11-01'):
-        _validate_cert(namespace, 'root_cert_data')
-
-
-def process_vnet_gateway_update_namespace(cmd, namespace):
-    ns = namespace
-    get_virtual_network_validator()(cmd, ns)
-    get_public_ip_validator()(cmd, ns)
-    validate_tags(ns)
-    if cmd.supported_api_version(min_api='2020-11-01'):
-        _validate_cert(namespace, 'root_cert_data')
-    public_ip_count = len(ns.public_ip_address or [])
-    if public_ip_count > 2:
-        raise CLIError('Specify a single public IP to create an active-standby gateway or two '
-                       'public IPs to create an active-active gateway.')
 
 
 def process_vpn_connection_create_namespace(cmd, namespace):
@@ -1689,24 +1494,6 @@ class WafConfigExclusionAction(argparse.Action):
             "selector_match_operator": op,
             "selector": selector
         })
-
-
-def get_header_configuration_validator(dest):
-    def validator(namespace):
-        values = getattr(namespace, dest, None)
-        if not values:
-            return
-
-        results = []
-        for item in values:
-            key, value = item.split('=', 1)
-            results.append({
-                'header_name': key,
-                'header_value': value
-            })
-        setattr(namespace, dest, results)
-
-    return validator
 
 
 def process_private_link_resource_id_argument(cmd, namespace):
