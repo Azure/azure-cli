@@ -6,6 +6,7 @@
 
 # pylint: disable=too-many-locals, too-many-statements
 def load_command_table(self, _):
+    from .operations import import_aaz_by_profile
 
     # region LoadBalancers
     from .operations.load_balancer import LBFrontendIPCreate, LBFrontendIPUpdate
@@ -31,5 +32,14 @@ def load_command_table(self, _):
     from .operations.load_balancer import LBProbeCreate, LBProbeUpdate
     self.command_table["network lb probe create"] = LBProbeCreate(loader=self)
     self.command_table["network lb probe update"] = LBProbeUpdate(loader=self)
+
+    # endregion
+
+    # region LocalNetworkGateways
+    local_gateway = import_aaz_by_profile("network.local_gateway")
+
+    from .._format import transform_local_gateway_table_output
+    self.command_table['network local-gateway list'] = local_gateway.List(
+        loader=self, table_transformer=transform_local_gateway_table_output)
 
     # endregion

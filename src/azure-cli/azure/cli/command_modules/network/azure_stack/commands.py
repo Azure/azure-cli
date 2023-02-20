@@ -746,11 +746,6 @@ def load_command_table(self, _):
                          exception_handler=handle_template_based_exception)
     # endregion
 
-    # region LocalGateways
-    with self.command_group('network local-gateway', network_lgw_sdk) as g:
-        g.command('list', 'list', table_transformer=transform_local_gateway_table_output)
-    # endregion
-
     # region NetworkInterfaces: (NIC)
     with self.command_group('network nic', network_nic_sdk) as g:
         g.custom_command('create', 'create_nic', transform=transform_nic_create_output, validator=process_nic_create_namespace, supports_no_wait=True)

@@ -7,10 +7,7 @@ import importlib
 from knack.log import get_logger
 from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.aaz import AAZResourceIdArgFormat, has_value, AAZStrArg
-
-
-def _import_aaz_by_profile(module_name):
-    return importlib.import_module(f"azure.cli.command_modules.network.aaz.2017_03_09_profile.{module_name}")
+from ._util import import_aaz_by_profile
 
 
 logger = get_logger(__name__)
@@ -24,7 +21,7 @@ class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
         return super().__call__(ctx, value)
 
 
-_LBFrontendIP = _import_aaz_by_profile("network.lb.frontend_ip")
+_LBFrontendIP = import_aaz_by_profile("network.lb.frontend_ip")
 
 
 class LBFrontendIPCreate(_LBFrontendIP.Create):
@@ -103,7 +100,7 @@ class LBFrontendIPUpdate(_LBFrontendIP.Update):
             instance.properties.public_ip_address = None
 
 
-_LBInboundNatPool = _import_aaz_by_profile("network.lb.inbound_nat_pool")
+_LBInboundNatPool = import_aaz_by_profile("network.lb.inbound_nat_pool")
 
 
 class LBInboundNatPoolCreate(_LBInboundNatPool.Create):
@@ -153,7 +150,7 @@ class LBInboundNatPoolUpdate(_LBInboundNatPool.Update):
             instance.properties.frontend_ip_configuration = None
 
 
-_LBInboundNatRule = _import_aaz_by_profile("network.lb.inbound_nat_rule")
+_LBInboundNatRule = import_aaz_by_profile("network.lb.inbound_nat_rule")
 
 
 class LBInboundNatRuleCreate(_LBInboundNatRule.Create):
@@ -198,7 +195,7 @@ class LBInboundNatRuleUpdate(_LBInboundNatRule.Update):
             instance.properties.frontend_ip_configuration = None
 
 
-_LBRule = _import_aaz_by_profile("network.lb.rule")
+_LBRule = import_aaz_by_profile("network.lb.rule")
 
 
 class LBRuleCreate(_LBRule.Create):
@@ -273,7 +270,7 @@ class LBRuleUpdate(_LBRule.Update):
             instance.properties.backend_address_pool = None
 
 
-_LBProbe = _import_aaz_by_profile("network.lb.probe")
+_LBProbe = import_aaz_by_profile("network.lb.probe")
 
 
 class LBProbeCreate(_LBProbe.Create):
