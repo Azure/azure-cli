@@ -3083,7 +3083,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
             self.check('routingConfiguration.propagatedRouteTables.labels[1]', 'label2')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_express_route_gateway_connection_inbound_outbound_routemap', location='westcentralus')
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route_gateway_connection_inbound_outbound_routemap')
     def test_express_route_gateway_connection_inbound_outbound_routemap(self, resource_group):
         self.kwargs.update({
             'vwan': self.create_random_name('vwan', 10),
@@ -3111,17 +3111,23 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         })
         self.cmd('network express-route create -g {rg} -n {er} --bandwidth 50 --provider "Ibiza Test Provider" --peering-location Area51 --sku-tier Premium')
         self.cmd('network express-route gateway create -g {rg} -n {ergateway} --virtual-hub {vhub}')
-        peer_id = self.cmd('network express-route peering create -g {rg} --circuit-name {er} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 107.0.0.0/30 --secondary-peer-subnet 108.0.0.0/30 --advertised-public-prefixes 107.0.0.0/30 --customer-asn 10000 --routing-registry-name level3')
+        # self.cmd('network express-route peering create -g {rg} --circuit-name {er} --peering-type AzurePrivatePeering --peer-asn 10001 --vlan-id 101 --primary-peer-subnet 102.0.0.0/30 --secondary-peer-subnet 103.0.0.0/30')
+        peer_id = self.cmd('network express-route peering create -g {rg} --circuit-name {er} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30 --advertised-public-prefixes 104.0.0.0/30 --customer-asn 10000 --routing-registry-name level3').get_output_in_json()['id']
         self.kwargs.update({
             'peer_id': peer_id
         })
-        self.cmd('network express-route gateway connection create -g {rg} -n {ergatewayconn} --gateway-name {ergateway} --peering {peer_id} --inbound-route-map {route_map_id} --outbound-route-map {route_map_id_2}', checks=[
-            self.check('p2SConnectionConfigurations[0].routingConfiguration.inboundRouteMap.id', '{route_map_id}'),
-            self.check('p2SConnectionConfigurations[0].routingConfiguration.outboundRouteMap.id', '{route_map_id_2}')
+
+        with self.assertRaises(Exception):
+            self.cmd('network express-route gateway connection create -g {rg} -n {ergatewayconn} --gateway-name {ergateway} --peering {peer_id} --inbound-route-map {{id:{route_map_id}}} --outbound-route-map {{id:{route_map_id_2}}}')
+        self.cmd('network express-route gateway connection show -n {ergatewayconn} -g {rg} --gateway-name {ergateway}', checks=[
+            self.check('routingConfiguration.inboundRouteMap.id', '{route_map_id}'),
+            self.check('routingConfiguration.outboundRouteMap.id', '{route_map_id_2}')
         ])
-        self.cmd('network express-route gateway connection update -g {rg} -n {ergatewayconn} --inbound-route-map {route_map_id_3} --outbound-route-map {route_map_id_4}', checks=[
-            self.check('p2SConnectionConfigurations[0].routingConfiguration.inboundRouteMap.id', '{route_map_id_3}'),
-            self.check('p2SConnectionConfigurations[0].routingConfiguration.outboundRouteMap.id', '{route_map_id_4}')
+        with self.assertRaises(Exception):
+            self.cmd('network express-route gateway connection update -g {rg} -n {ergatewayconn} --gateway-name {ergateway} --inbound-route-map {{id:{route_map_id_3}}} --outbound-route-map {{id:{route_map_id_4}}}')
+        self.cmd('network express-route gateway connection show -n {ergatewayconn} -g {rg} --gateway-name {ergateway}', checks=[
+            self.check('routingConfiguration.inboundRouteMap.id', '{route_map_id_3}'),
+            self.check('routingConfiguration.outboundRouteMap.id', '{route_map_id_4}')
         ])
 
 

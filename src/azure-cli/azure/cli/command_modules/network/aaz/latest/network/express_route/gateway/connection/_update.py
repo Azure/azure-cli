@@ -90,14 +90,6 @@ class Update(AAZCommand):
 
         # define Arg Group "Properties"
 
-        _args_schema = cls._args_schema
-        _args_schema.enable_private_link_fast_path = AAZBoolArg(
-            options=["--enable-private-link-fast-path"],
-            arg_group="Properties",
-            help="Bypass the ExpressRoute gateway when accessing private-links. ExpressRoute FastPath (expressRouteGatewayBypass) must be enabled.",
-            nullable=True,
-        )
-
         # define Arg Group "PutExpressRouteConnectionParameters"
 
         # define Arg Group "Routing Configuration"
@@ -424,7 +416,6 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("authorizationKey", AAZStrType, ".authorization_key")
                 properties.set_prop("enableInternetSecurity", AAZBoolType, ".internet_security")
-                properties.set_prop("enablePrivateLinkFastPath", AAZBoolType, ".enable_private_link_fast_path")
                 properties.set_prop("expressRouteCircuitPeering", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("routingConfiguration", AAZObjectType)
                 properties.set_prop("routingWeight", AAZIntType, ".routing_weight")
