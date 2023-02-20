@@ -242,8 +242,8 @@ def _validate_azure_ad_authentication_supported_on_sqlvm(cli_ctx, namespace):
     # information.
     try:
         sqlvm = sqlvm_ops.get(namespace.resource_group_name, namespace.sql_virtual_machine_name)
-    except Exception as e:
-        raise InvalidArgumentValueError("Unable to validate Azure AD authentication due to retrieving SQL VM instance encountering an error: {}.".format(e.message)) from e
+    except Exception as ex:
+        raise InvalidArgumentValueError("Unable to validate Azure AD authentication due to retrieving SQL VM instance encountering an error: {}.".format(ex)) from ex
 
     # Construct error message for unsupported SQL server version or OS platform.
     unsupported_error = "Azure AD authentication requires SQL Server 2022 on Windows platform but the SQL Image Offer of this SQL VM is {}".format(sqlvm.sql_image_offer)
@@ -291,8 +291,8 @@ def _validate_msi_valid_on_vm(cli_ctx, namespace):
     try:
         # Azure VM has the same name as the SQL VM
         vm = compute_client.virtual_machines.get(namespace.resource_group_name, namespace.sql_virtual_machine_name)
-    except Exception as e:
-        raise InvalidArgumentValueError("Unable to validate Azure AD authentication due to retrieving the Azure VM instance encountering an error: {}.".format(e.message)) from e
+    except Exception as ex:
+        raise InvalidArgumentValueError("Unable to validate Azure AD authentication due to retrieving the Azure VM instance encountering an error: {}.".format(ex)) from ex
 
     # The system-assigned MSI case.
     if namespace.msi_client_id is None:
@@ -349,7 +349,7 @@ def _validate_msi_with_enough_permission(cli_ctx, principal_id):
         raise InvalidArgumentValueError("The managed identity is lack of the following roles for Azure AD authentication: {}.".format(", ".join(missing_roles)))
 
 
-MICROSOFT_GRAPH_API_ERROR = "Unable to validate the permission of MSI due to querying Microsoft Graph API encountered error."
+MICROSOFT_GRAPH_API_ERROR = "Unable to validate the permission of MSI due to querying Microsoft Graph API encountered error: {}."
 
 
 def _send(cli_ctx, method, url, param=None, body=None):
@@ -389,7 +389,7 @@ def _send(cli_ctx, method, url, param=None, body=None):
         try:
             r = send_raw_request(cli_ctx, method, url, resource=graph_resource, uri_parameters=param, body=body)
         except Exception as ex:
-            raise InvalidArgumentValueError(MICROSOFT_GRAPH_API_ERROR) from ex
+            raise InvalidArgumentValueError(MICROSOFT_GRAPH_API_ERROR.format(ex)) from ex
 
         if r.text:
             dic = r.json()
@@ -419,14 +419,20 @@ def _send(cli_ctx, method, url, param=None, body=None):
 # retrieve all directory role assigned to a service principal
 def _directory_role_list(cli_ctx, principal_id):
     DIRECTORY_ROLE_URL = "/servicePrincipals/{}/transitiveMemberOf/microsoft.graph.directoryRole"
-    return _send(cli_ctx, "GET", DIRECTORY_ROLE_URL.format(principal_id))
+    try:
+        return _send(cli_ctx, "GET", DIRECTORY_ROLE_URL.format(principal_id))
+    except Exception as ex:
+        raise InvalidArgumentValueError(MICROSOFT_GRAPH_API_ERROR.format(ex)) from ex
 
 
 # https://graph.microsoft.com/v1.0/servicePrincipals/{principalId}/appRoleAssignments
 # retrieve all app role assignments to a service principal
 def _app_role_assignment_list(cli_ctx, principal_id):
     APP_ROLE_ASSIGNMENT_URL = "/servicePrincipals/{}/appRoleAssignments"
-    return _send(cli_ctx, "GET", APP_ROLE_ASSIGNMENT_URL.format(principal_id))
+    try:
+        return _send(cli_ctx, "GET", APP_ROLE_ASSIGNMENT_URL.format(principal_id))
+    except Exception as ex:
+        raise InvalidArgumentValueError(MICROSOFT_GRAPH_API_ERROR.format(ex)) from ex
 
 
 # https://graph.microsoft.com/v1.0/servicePrincipals?$filter=displayName%20eq%20'Microsoft%20Graph'
@@ -446,12 +452,13 @@ def _find_role_id(cli_ctx):
     try:
         service_principals = _send(cli_ctx, "GET", MICROSOFT_GRAPH_URL)
     except Exception as ex:  # pylint: disable=broad-except
-        raise InvalidArgumentValueError(MICROSOFT_GRAPH_API_ERROR) from ex
+        raise InvalidArgumentValueError(MICROSOFT_GRAPH_API_ERROR.format(ex)) from ex
 
     # If we failed to find the Microsoft Graph service application, fail the validation.
     # This in fact shoud not happen.
     if service_principals is None or len(service_principals) == 0:
-        raise InvalidArgumentValueError(MICROSOFT_GRAPH_API_ERROR)
+        error_message = "Querying Microsoft Graph API failed to find the service principal of Microsoft Graph Application"
+        raise InvalidArgumentValueError(MICROSOFT_GRAPH_API_ERROR.format(error_message))
 
     app_roles = service_principals[0]['appRoles']
     for app_role in app_roles:
@@ -467,8 +474,9 @@ def _find_role_id(cli_ctx):
     if len(app_role_id_map) < 3:
         requird_role_defs = [USER_READ_ALL, APPLICATION_READ_ALL, GROUP_MEMBER_READ_ALL]
         missing_role_defs = [role for role in requird_role_defs if role not in app_role_id_map.keys()]
-        logger.warning("Querying Microsoft Graph API cannot find the following roles: %s.", ", ".join(missing_role_defs))
+        error_message = "Querying Microsoft Graph API failed to find the following roles: %s.", ", ".join(missing_role_defs)
+        logger.warning(error_message)
 
-        raise InvalidArgumentValueError(MICROSOFT_GRAPH_API_ERROR)
+        raise InvalidArgumentValueError(MICROSOFT_GRAPH_API_ERROR.format(error_message))
 
     return app_role_id_map
