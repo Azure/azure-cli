@@ -53,30 +53,6 @@ class Create(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.location = AAZResourceLocationArg(
-            help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
-        )
-        _args_schema.gateway_ip_address = AAZStrArg(
-            options=["--gateway-ip-address"],
-            help="Gateway's public IP address. (e.g. 10.1.1.1).",
-        )
-        _args_schema.local_address_prefixes = AAZListArg(
-            options=["--address-prefixes", "--local-address-prefixes"],
-            help="List of CIDR block prefixes representing the address space of the OnPremise VPN's subnet.",
-        )
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            help="Space-separated tags: key[=value] [key[=value] ...].",
-        )
-
-        local_address_prefixes = cls._args_schema.local_address_prefixes
-        local_address_prefixes.Element = AAZStrArg()
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg()
 
         # define Arg Group "BGP Peering"
 
@@ -97,9 +73,45 @@ class Create(AAZCommand):
             help="Weight (0-100) added to routes learned through BGP peering.",
         )
 
+        # define Arg Group "LocalNetworkAddressSpace"
+
+        _args_schema = cls._args_schema
+        _args_schema.local_address_prefixes = AAZListArg(
+            options=["--address-prefixes", "--local-address-prefixes"],
+            arg_group="LocalNetworkAddressSpace",
+            help="List of CIDR block prefixes representing the address space of the OnPremise VPN's subnet.",
+        )
+
+        local_address_prefixes = cls._args_schema.local_address_prefixes
+        local_address_prefixes.Element = AAZStrArg()
+
         # define Arg Group "Parameters"
 
+        _args_schema = cls._args_schema
+        _args_schema.location = AAZResourceLocationArg(
+            arg_group="Parameters",
+            help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            arg_group="Parameters",
+            help="Space-separated tags: key[=value] [key[=value] ...].",
+        )
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg()
+
         # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.gateway_ip_address = AAZStrArg(
+            options=["--gateway-ip-address"],
+            arg_group="Properties",
+            help="Gateway's public IP address. (e.g. 10.1.1.1).",
+        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -159,7 +171,7 @@ class Create(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):

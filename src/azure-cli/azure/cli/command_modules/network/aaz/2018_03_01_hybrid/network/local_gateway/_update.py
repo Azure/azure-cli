@@ -62,31 +62,6 @@ class Update(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.gateway_ip_address = AAZStrArg(
-            options=["--gateway-ip-address"],
-            help="Gateway's public IP address. (e.g. 10.1.1.1).",
-            nullable=True,
-        )
-        _args_schema.local_address_prefixes = AAZListArg(
-            options=["--address-prefixes", "--local-address-prefixes"],
-            help="List of CIDR block prefixes representing the address space of the OnPremise VPN's subnet.",
-            nullable=True,
-        )
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            help="Space-separated tags: key[=value] [key[=value] ...].",
-            nullable=True,
-        )
-
-        local_address_prefixes = cls._args_schema.local_address_prefixes
-        local_address_prefixes.Element = AAZStrArg(
-            nullable=True,
-        )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg(
-            nullable=True,
-        )
 
         # define Arg Group "BGP Peering"
 
@@ -110,9 +85,45 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        # define Arg Group "LocalNetworkAddressSpace"
+
+        _args_schema = cls._args_schema
+        _args_schema.local_address_prefixes = AAZListArg(
+            options=["--address-prefixes", "--local-address-prefixes"],
+            arg_group="LocalNetworkAddressSpace",
+            help="List of CIDR block prefixes representing the address space of the OnPremise VPN's subnet.",
+            nullable=True,
+        )
+
+        local_address_prefixes = cls._args_schema.local_address_prefixes
+        local_address_prefixes.Element = AAZStrArg(
+            nullable=True,
+        )
+
         # define Arg Group "Parameters"
 
+        _args_schema = cls._args_schema
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            arg_group="Parameters",
+            help="Space-separated tags: key[=value] [key[=value] ...].",
+            nullable=True,
+        )
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg(
+            nullable=True,
+        )
+
         # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.gateway_ip_address = AAZStrArg(
+            options=["--gateway-ip-address"],
+            arg_group="Properties",
+            help="Gateway's public IP address. (e.g. 10.1.1.1).",
+            nullable=True,
+        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -169,7 +180,7 @@ class Update(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -268,7 +279,7 @@ class Update(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
