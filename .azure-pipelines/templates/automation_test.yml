@@ -80,14 +80,14 @@ steps:
       if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.json' ]]; then
         pipelineTestJson='true'
       fi
-      echo pipelineTestJson
+      echo $pipelineTestJson
       echo "##vso[task.setvariable variable=pipelineTestJson]pipelineTestJson"
 
       pipelineTestXml='false'
       if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.json' ]]; then
         pipelineTestXml='true'
       fi
-      echo pipelineTestXml
+      echo $pipelineTestXml
       echo "##vso[task.setvariable variable=pipelineTestXml]pipelineTestXml"
   - task: PublishBuildArtifacts@1
     condition: and(succeededOrFailed(), eq(variables.pipelineTestJson, 'true'))
