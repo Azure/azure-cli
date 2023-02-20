@@ -214,7 +214,6 @@ def update_network_watcher_from_location(ctx, cli_ctx, watcher_name='watcher_nam
     watcher = next((x for x in network_watcher_list if x['location'].lower() == location.lower()), None)
     if not watcher:
         raise ValidationError("network watcher is not enabled for region '{}'.".format(location))
-    from azure.mgmt.core.tools import parse_resource_id
     id_parts = parse_resource_id(watcher['id'])
     setattr(args, rg_name, id_parts['resource_group'])
     setattr(args, watcher_name, id_parts['name'])
