@@ -20,7 +20,7 @@ from azure.cli.command_modules.network._validators import (
     validate_address_pool_name_or_id, validate_metadata,
     validate_dns_record_type, validate_private_ip_address,
     get_servers_validator, get_public_ip_validator, get_nsg_validator,
-    get_network_watcher_from_vm, get_network_watcher_for_pcap_creation, get_network_watcher_from_location, validate_capture_size_and_limit,
+    get_network_watcher_for_pcap_creation, get_network_watcher_from_location, validate_capture_size_and_limit,
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
     validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
     validate_custom_error_pages,
@@ -982,15 +982,6 @@ def load_arguments(self, _):
     with self.argument_context('network watcher create') as c:
         c.argument('location', validator=get_default_location_from_resource_group)
 
-    for item in ['test-ip-flow', 'show-next-hop', 'show-security-group-view']:
-        with self.argument_context('network watcher {}'.format(item)) as c:
-            c.argument('watcher_name', ignore_type, validator=get_network_watcher_from_vm)
-            c.ignore('location')
-            c.ignore('watcher_rg')
-            c.argument('vm', help='Name or ID of the VM to target. If the name of the VM is provided, the --resource-group is required.')
-            c.argument('resource_group_name', help='Name of the resource group the target VM is in.')
-            c.argument('nic', help='Name or ID of the NIC resource to test. If the VM has multiple NICs and IP forwarding is enabled on any of them, this parameter is required.')
-
     with self.argument_context('network watcher packet-capture create') as c:
         c.argument('watcher_name', ignore_type, validator=get_network_watcher_for_pcap_creation)
         c.ignore('location')
@@ -1065,14 +1056,6 @@ def load_arguments(self, _):
             c.argument('packet_capture_name', name_arg_type)
             c.argument('network_watcher_name', ignore_type, options_list=['--network-watcher-name'], validator=get_network_watcher_from_location(remove=True, rg_name='resource_group_name', watcher_name='network_watcher_name'))
             c.ignore('resource_group_name')
-
-    with self.argument_context('network watcher test-ip-flow') as c:
-        c.argument('direction', arg_type=get_enum_type(Direction))
-        c.argument('protocol', arg_type=get_enum_type(Protocol))
-
-    with self.argument_context('network watcher show-next-hop') as c:
-        c.argument('source_ip', help='Source IPv4 address.')
-        c.argument('dest_ip', help='Destination IPv4 address.')
 
     with self.argument_context('network watcher troubleshooting') as c:
         c.argument('resource', help='Name or ID of the resource to troubleshoot.')
