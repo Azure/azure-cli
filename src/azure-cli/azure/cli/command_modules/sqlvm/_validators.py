@@ -202,11 +202,10 @@ def validate_azure_ad_authentication(cmd, namespace):
         :type namespace: argpase.Namespace.
     """
 
-    enable_azure_ad_authentication = namespace.enable_azure_ad_auth
-    if enable_azure_ad_authentication is False:
-        raise InvalidArgumentValueError("Disable Azure AD authentication is not supported")
+    skip_msi_validation = False
+    if hasattr(namespace, "skip_msi_validation"):
+        skip_msi_validation = getattr(namespace, "skip_msi_validation")
 
-    skip_msi_validation = namespace.skip_msi_validation
     if skip_msi_validation is True:
         return
 
@@ -312,14 +311,14 @@ def _validate_msi_valid_on_vm(cli_ctx, namespace):
     raise InvalidArgumentValueError("Enable Azure AD authentication with user-assigned managed identity {}, but the managed identity is not attached to this Azure VM".format(namespace.msi_client_id))
 
 
-# Validate the MSI has appropriate permission to query Microsoft Graph API.
+# Validate the MSI has appropriate permissions to query Microsoft Graph API.
 USER_READ_ALL = "User.Read.All"
 APPLICATION_READ_ALL = "Application.Read.All"
 GROUP_MEMBER_READ_ALL = "GroupMember.Read.All"
 
 
 def _validate_msi_with_enough_permission(cli_ctx, principal_id):
-    """ Validate the MSI has enough permission to be query Microsoft Graph API, which is needed for SQL server to
+    """ Validate the MSI has enough permissions to query Microsoft Graph API, which are needed for SQL server to
         carry out the Azure AD authentication.
 
         :param cli_ctx: The CLI context.
@@ -330,11 +329,12 @@ def _validate_msi_with_enough_permission(cli_ctx, principal_id):
 
     directory_roles = _directory_role_list(cli_ctx, principal_id)
 
-    # If the MSI is assigned "Directory Readers" role, it has enough permission.
+    # If the MSI is assigned the "Directory Readers" role, it has enough permissions.
     if any(role["displayName"] == "Directory Readers" for role in directory_roles):
         return
 
-    # Retrieve the app role Id for User.Read.All, Application.Read.All, GroupMember.Read.All.
+    # If the MSI is not assigned the "Directory Readers" role, check the app roles.
+    # Retrieve the app role Id for User.Read.All, Application.Read.All, GroupMember.Read.All roles.
     app_role_id_map = _find_role_id(cli_ctx)
 
     # Retrieve all the role assignments assigned to the MSI
@@ -346,10 +346,10 @@ def _validate_msi_with_enough_permission(cli_ctx, principal_id):
     missing_roles = [role_name for role_name in required_role_names if app_role_id_map[role_name] not in all_assigned_role_ids]
 
     if len(missing_roles) > 0:
-        raise InvalidArgumentValueError("The managed identity is lack of the following roles for Azure AD authentication: " + ", ".join(missing_roles))
+        raise InvalidArgumentValueError("The managed identity is lack of the following roles for Azure AD authentication: {}.".format(", ".join(missing_roles)))
 
 
-MICROSOFT_GRAPH_API_ERROR = "Unable to validate the permission of MSI due to querying Microsoft Graph API encountered error"
+MICROSOFT_GRAPH_API_ERROR = "Unable to validate the permission of MSI due to querying Microsoft Graph API encountered error."
 
 
 def _send(cli_ctx, method, url, param=None, body=None):

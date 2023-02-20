@@ -40,8 +40,7 @@ from ._validators import (
     validate_expand,
     validate_assessment,
     validate_assessment_start_time_local,
-    validate_least_privilege_mode,
-    validate_azure_ad_authentication
+    validate_least_privilege_mode
 )
 
 
@@ -371,13 +370,14 @@ def load_arguments(self, _):
         c.argument('workspace_rg',
                    help='Resource group containing the Log Analytics workspace.')
 
-    with self.argument_context('sql vm update', arg_group='AzureAD authentication Settings') as c:
-        c.argument('enable_azure_ad_auth',
-                   help='Enable Azure AD authentication.',
-                   validator=validate_azure_ad_authentication,
-                   action='store_true')
+    with self.argument_context('sql vm enable-azure-ad-auth') as c:
         c.argument('msi_client_id',
                    help='Virutal Machine Managed Identity Client ID.')
-        c.argument('skip_msi_validation',
+        # this method is not needed for the handler of the enable-azure-ad-auth command
+        c.extra('skip_msi_validation',
                    help='Skip client side Azure AD authentication validation, the server side validation will still happen.',
                    action='store_true')
+
+    with self.argument_context('sql vm validate-azure-ad-auth') as c:
+        c.argument('msi_client_id',
+                   help='Virutal Machine Managed Identity Client ID.')

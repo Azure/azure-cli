@@ -21,6 +21,9 @@ from ._util import (
     get_sqlvirtualmachine_sql_virtual_machines_operations,
 )
 
+from ._validators import (
+    validate_azure_ad_authentication
+)
 
 # pylint: disable=too-many-statements,line-too-long,too-many-locals
 def load_command_table(self, _):
@@ -45,6 +48,8 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('create', 'sqlvm_create', transform=transform_sqlvm_output, table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
         g.command('start-assessment', 'begin_start_assessment')
+        g.generic_update_command('enable-azure-ad-auth', custom_func_name='sqlvm_enable_azure_ad_auth', setter_name='begin_create_or_update', transform=transform_sqlvm_output, validator=validate_azure_ad_authentication)
+        g.custom_command('validate-azure-ad-auth', 'validate_azure_ad_auth', validator=validate_azure_ad_authentication)
 
     ###############################################
     #      sql virtual machine groups             #
