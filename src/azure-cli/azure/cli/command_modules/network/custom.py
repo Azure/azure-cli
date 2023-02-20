@@ -4400,6 +4400,14 @@ class NICIPConfigCreate(_NICIPConfigCreate):
             arg_group="IP Configuration",
             help="Name of the virtual network.",
         )
+        args_schema.subnet._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/virtualNetworks/{vnet_name}/subnets/{}",
+        )
+        args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
+                     "publicIPAddresses/{}"
+        )
         args_schema.application_security_groups = AAZListArg(
             options=["--application-security-groups", "--asgs"],
             arg_group="IP Configuration",
