@@ -84,7 +84,7 @@ steps:
       echo $pipelineTestJson
       echo $pipelineTestJsonFile
       echo "##vso[task.setvariable variable=pipelineTestJson]pipelineTestJson"
-      echo variables.pipelineTestJson
+      echo ${{ variables.pipelineTestJson }}
 
       pipelineTestXml='false'
       pipelineTestXmlFile='/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
@@ -94,7 +94,7 @@ steps:
       echo $pipelineTestXml
       echo $pipelineTestXmlFile
       echo "##vso[task.setvariable variable=pipelineTestXml]pipelineTestXml"
-      echo variables.$pipelineTestXml
+      echo ${{ variables.pipelineTestXml }}
   - task: PublishBuildArtifacts@1
     condition: and(succeededOrFailed(), eq(variables.pipelineTestJson, 'true'))
     inputs:
