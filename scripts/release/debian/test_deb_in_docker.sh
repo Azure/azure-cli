@@ -8,7 +8,7 @@ export USERNAME=azureuser
 apt update
 apt install -y apt-transport-https git gcc python3-dev
 
-dpkg -i /mnt/artifacts/azure-cli_$CLI_VERSION-1~${DISTRO}_all.deb
+dpkg -i /mnt/artifacts/azure-cli_$CLI_VERSION-1~${DISTRO}_*.deb
 
 time az self-test
 time az --version

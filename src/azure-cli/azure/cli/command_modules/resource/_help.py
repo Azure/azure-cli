@@ -2693,6 +2693,14 @@ examples:
 helps['bicep'] = """
 type: group
 short-summary: Bicep CLI command group.
+long-summary: |
+  Bicep CLI command group. There are two configurations that can be set for the command group, including bicep.check_version and bicep.use_binary_from_path:
+
+  [1] az config set bicep.version_check=True/False
+      Turn on/off Bicep CLI version check when executing az bicep commands.
+
+  [2] az config set bicep.use_binary_from_path=True/False/if_found_in_ci
+      Specify whether to use Bicep CLI from PATH or not. The default value is if_found_in_ci.
 """
 
 helps['bicep install'] = """

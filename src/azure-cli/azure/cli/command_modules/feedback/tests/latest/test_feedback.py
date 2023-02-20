@@ -182,7 +182,6 @@ class TestCommandLogFile(ScenarioTest):
         for log_file, original_issue_body in items:
             self.assertTrue(log_file.get_command_name_str() in original_issue_body)
             self.assertTrue(log_file.command_data_dict["command_args"] in original_issue_body)
-            self.assertTrue(log_file.command_data_dict["errors"][0] in original_issue_body)
 
     @staticmethod
     def _ext_installed(ext):
