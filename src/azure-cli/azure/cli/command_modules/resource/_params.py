@@ -565,13 +565,13 @@ def load_arguments(self, _):
             c.argument('notes', help='Notes about this lock.')
 
     with self.argument_context('managedapp') as c:
-        c.argument('resource_group_name', arg_type=resource_group_name_type, help='the resource group of the managed application', id_part='resource_group')
-        c.argument('application_name', options_list=['--name', '-n'], id_part='name')
+        c.argument('resource_group_name', arg_type=resource_group_name_type, required=True, help='the resource group of the managed application', id_part='resource_group')
+        c.argument('application_name', options_list=['--name', '-n'], required=True, id_part='name')
         c.argument('tags', tags_type)
 
     with self.argument_context('managedapp definition') as c:
-        c.argument('resource_group_name', arg_type=resource_group_name_type, help='the resource group of the managed application definition', id_part='resource_group')
-        c.argument('application_definition_name', options_list=['--name', '-n'], id_part='name')
+        c.argument('resource_group_name', arg_type=resource_group_name_type, required=True, help='the resource group of the managed application definition', id_part='resource_group')
+        c.argument('application_definition_name', options_list=['--name', '-n'], required=True, id_part='name')
 
     with self.argument_context('managedapp create') as c:
         c.argument('name', options_list=['--name', '-n'], help='name of the new managed application', completer=None)
