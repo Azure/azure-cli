@@ -2275,7 +2275,8 @@ def load_arguments(self, _):
                 'deleted_time',
                 'target_managed_database_name',
                 'target_managed_instance_name',
-                'restore_point_in_time'
+                'restore_point_in_time',
+                'tags'
             ])
 
         c.argument('deleted_time',
