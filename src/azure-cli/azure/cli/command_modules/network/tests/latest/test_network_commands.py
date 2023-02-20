@@ -3083,6 +3083,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
             self.check('routingConfiguration.propagatedRouteTables.labels[1]', 'label2')
         ])
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_gateway_connection_inbound_outbound_routemap')
     def test_express_route_gateway_connection_inbound_outbound_routemap(self, resource_group):
         self.kwargs.update({
