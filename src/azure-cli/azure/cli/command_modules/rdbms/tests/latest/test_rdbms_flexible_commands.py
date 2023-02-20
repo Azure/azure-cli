@@ -87,6 +87,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self._test_flexible_server_iops_mgmt('mysql', resource_group)
 
     @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_paid_iops_mgmt(self, resource_group):
+        self._test_flexible_server_paid_iops_mgmt('mysql', resource_group)
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_mgmt(self, resource_group):
         self._test_flexible_server_mgmt('postgres', resource_group)
@@ -314,6 +319,36 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                                       tier="Burstable",
                                       sku_name="Standard_B1ms")
         self.assertEqual(iops_result, 640)
+
+    def _test_flexible_server_paid_iops_mgmt(self, database_engine, resource_group):
+        
+        location = 'northeurope'
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        server_name_2 = self.create_random_name(SERVER_NAME_PREFIX + '2', SERVER_NAME_MAX_LENGTH)
+
+        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 200 --sku-name Standard_D16ds_v4 --tier GeneralPurpose'
+                 .format(database_engine, resource_group, server_name, location))
+        
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
+                          checks=[JMESPathCheck('storage.autoIoScaling', 'Disabled')]).get_output_in_json()
+
+        self.cmd('{} flexible-server update -g {} -n {} --auto-scale-iops Enabled'
+                 .format(database_engine, resource_group, server_name))
+        
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
+                          checks=[JMESPathCheck('storage.autoIoScaling', 'Enabled')]).get_output_in_json()
+        
+        self.cmd('{} flexible-server update -g {} -n {} --auto-scale-iops Disabled'
+                 .format(database_engine, resource_group, server_name))
+        
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
+                          checks=[JMESPathCheck('storage.autoIoScaling', 'Disabled')]).get_output_in_json()
+
+        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --auto-scale-iops Enabled --storage-size 200 --sku-name Standard_D16ds_v4 --tier GeneralPurpose'
+                 .format(database_engine, resource_group, server_name_2, location))
+
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name_2),
+                          checks=[JMESPathCheck('storage.autoIoScaling', 'Enabled')]).get_output_in_json()
 
     def _test_flexible_server_restore_mgmt(self, database_engine, resource_group):
 
@@ -2238,19 +2273,19 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_identity_aad_admin_mgmt(self, resource_group):
-        self._test_identity_aad_admin_mgmt('mysql', resource_group)
+        self._test_identity_aad_admin_mgmt('mysql', resource_group, 'enabled')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgresql_flexible_server_identity_aad_admin_mgmt(self, resource_group):
-        self._test_identity_aad_admin_mgmt('postgres', resource_group)
+        self._test_identity_aad_admin_mgmt('postgres', resource_group, 'enabled')
 
-    def _test_identity_aad_admin_mgmt(self, database_engine, resource_group):
+    def _test_identity_aad_admin_mgmt(self, database_engine, resource_group, password_auth):
         login = 'alanenriqueo@microsoft.com'
         sid = '894ef8da-7971-4f68-972c-f561441eb329'
 
         if database_engine == 'postgres':
-            auth_args = '--password-auth enabled --active-directory-auth enabled'
+            auth_args = '--password-auth {} --active-directory-auth enabled'.format(password_auth)
             admin_id_arg = '-i {}'.format(sid) if database_engine == 'postgres' else ''
         elif database_engine == 'mysql':
             auth_args = ''
@@ -2374,10 +2409,23 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
                     checks=admin_checks)
 
         if database_engine == 'mysql':
+            # verify that aad_auth_only=OFF in primary server and all replicas
+            for server_name in [server, replica[0], replica[1]]:
+                self.cmd('{} flexible-server parameter show -g {} -s {} -n aad_auth_only'
+                         .format(database_engine, resource_group, server_name),
+                         checks=[JMESPathCheck('value', 'OFF')])
+        elif database_engine == 'postgres':
+            # verify that authConfig.activeDirectoryAuth=enabled and authConfig.passwordAuth=disabled in primary server and all replicas
+            for server_name in [server, replica[0], replica[1]]:
+                list_checks = [JMESPathCheck('authConfig.activeDirectoryAuth', 'enabled', False),
+                            JMESPathCheck('authConfig.passwordAuth', password_auth, False)]
+                self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name), checks=list_checks)
+
+        if database_engine == 'mysql':
             # set aad_auth_only=ON in primary server and replica 2
             for server_name in [server, replica[1]]:
-                self.cmd('{} flexible-server parameter set -g {} -s {} -n aad_auth_only -v ON'
-                         .format(database_engine, resource_group, server_name),
+                self.cmd('{} flexible-server parameter set -g {} -s {} -n aad_auth_only -v {}'
+                         .format(database_engine, resource_group, server_name, 'ON'),
                          checks=[JMESPathCheck('value', 'ON')])
 
             # try to remove identity 2 from primary server
@@ -2456,3 +2504,8 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
         # delete everything
         for server_name in [replica[0], replica[1], server]:
             self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgresql_flexible_server_identity_aad_admin_only_mgmt(self, resource_group):
+        self._test_identity_aad_admin_mgmt('postgres', resource_group, 'disabled')

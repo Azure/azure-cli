@@ -14,7 +14,7 @@ from azure.cli.core.azclierror import (
 )
 from azure.cli.core.extension.operations import _install_deps_for_psycopg2, _run_pip
 from azure.cli.core._profile import Profile
-from ._utils import run_cli_cmd, generate_random_string, is_packaged_installed
+from ._utils import run_cli_cmd, generate_random_string, is_packaged_installed, get_object_id_of_current_user
 from ._resource_config import (
     RESOURCE,
     AUTH_TYPE
@@ -32,29 +32,28 @@ AUTHTYPES = {
 }
 
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, consider-using-f-string
 # For db(mysqlFlex/psql/psqlFlex/sql) linker with auth type=systemAssignedIdentity, enable AAD auth and create db user on data plane
 # For other linker, ignore the steps
 def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, client_type, connection_name):
     # return if connection is not for db mi
     if auth_info['auth_type'] not in {AUTHTYPES[AUTH_TYPE.SystemIdentity], AUTHTYPES[AUTH_TYPE.UserAccount]}:
-        return
+        return None
 
     source_type = get_source_resource_name(cmd)
     target_type = get_target_resource_name(cmd)
     source_handler = getSourceHandler(source_id, source_type)
     if source_handler is None:
-        return
+        return None
     target_handler = getTargetHandler(
         cmd, target_id, target_type, auth_info['auth_type'], client_type, connection_name)
     if target_handler is None:
-        return
+        return None
 
     user_object_id = auth_info.get('principal_id')
     if user_object_id is None:
-        user_info = run_cli_cmd('az ad signed-in-user show')
-        user_object_id = user_info.get('objectId') if user_info.get(
-            'objectId') else user_info.get('id')
+        user_object_id = get_object_id_of_current_user()
+
     if user_object_id is None:
         raise Exception(
             "No object id for user {}".format(target_handler.login_username))
@@ -64,10 +63,16 @@ def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, client_type, c
         # enable source mi
         source_object_id = source_handler.get_identity_pid()
         target_handler.identity_object_id = source_object_id
-        identity_info = run_cli_cmd(
-            'az ad sp show --id {}'.format(source_object_id), 15, 10)
-        target_handler.identity_client_id = identity_info.get('appId')
-        target_handler.identity_name = identity_info.get('displayName')
+        try:
+            identity_info = run_cli_cmd(
+                'az ad sp show --id {}'.format(source_object_id), 15, 10)
+            target_handler.identity_client_id = identity_info.get('appId')
+            target_handler.identity_name = identity_info.get('displayName')
+        except CLIInternalError as e:
+            if 'AADSTS530003' in e.error_msg:
+                logger.warning(
+                    'Please ask your IT department for help to join this device to Azure Active Directory.')
+            raise e
 
     # enable target aad authentication and set login user as db aad admin
     target_handler.enable_target_aad_auth()
@@ -104,6 +109,7 @@ class TargetHandler:
     endpoint = ""
 
     login_username = ""
+    login_usertype = ""  # servicePrincipal, user
     user_object_id = ""
     aad_username = ""
 
@@ -123,6 +129,11 @@ class TargetHandler:
         self.auth_type = auth_type
         self.login_username = run_cli_cmd(
             'az account show').get("user").get("name")
+        self.login_usertype = run_cli_cmd(
+            'az account show').get("user").get("type")
+        if(self.login_usertype not in ['servicePrincipal', 'user']):
+            raise CLIInternalError(
+                f'{self.login_usertype} is not supported. Please login as user or servicePrincipal')
         self.aad_username = "aad_" + connection_name
 
     def enable_target_aad_auth(self):
@@ -149,6 +160,7 @@ class TargetHandler:
                 'auth_type': self.auth_type,
                 'username': self.aad_username,
             }
+        return None
 
 
 class MysqlFlexibleHandler(TargetHandler):
@@ -234,9 +246,9 @@ class MysqlFlexibleHandler(TargetHandler):
         try:
             import pymysql
             from pymysql.constants import CLIENT
-        except ModuleNotFoundError:
+        except ModuleNotFoundError as e:
             raise CLIInternalError(
-                "Dependency pymysql can't be installed, please install it manually with `" + sys.executable + " -m pip install pymysql`.")
+                "Dependency pymysql can't be installed, please install it manually with `" + sys.executable + " -m pip install pymysql`.") from e
 
         connection_kwargs['client_flag'] = CLIENT.MULTI_STATEMENTS
         try:
@@ -251,12 +263,12 @@ class MysqlFlexibleHandler(TargetHandler):
                         logger.warning(
                             "Query %s, error: %s", q, str(e))
         except pymysql.Error as e:
-            raise AzureConnectionError("Fail to connect mysql. " + str(e))
+            raise AzureConnectionError("Fail to connect mysql. " + str(e)) from e
         if cursor is not None:
             try:
                 cursor.close()
             except Exception as e:  # pylint: disable=broad-except
-                raise CLIInternalError(str(e))
+                raise CLIInternalError("connection close failed." + str(e)) from e
 
     def get_connection_string(self):
         password = run_cli_cmd(
@@ -350,7 +362,7 @@ class SqlHandler(TargetHandler):
                 '--subscription {3} --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255'.format(
                     self.resource_group, self.server, ip_name, self.subscription)
             )
-            return False
+            # return False
 
     def create_aad_user_in_sql(self, connection_args, query_list):
 
@@ -360,9 +372,9 @@ class SqlHandler(TargetHandler):
         # pylint: disable=import-error, c-extension-no-member
         try:
             import pyodbc
-        except ModuleNotFoundError:
+        except ModuleNotFoundError as e:
             raise CLIInternalError(
-                "Dependency pyodbc can't be installed, please install it manually with `" + sys.executable + " -m pip install pyodbc`.")
+                "Dependency pyodbc can't be installed, please install it manually with `" + sys.executable + " -m pip install pyodbc`.") from e
         drivers = [x for x in pyodbc.drivers() if x in [
             'ODBC Driver 17 for SQL Server', 'ODBC Driver 18 for SQL Server']]
         if not drivers:
@@ -379,7 +391,7 @@ class SqlHandler(TargetHandler):
                             logger.warning(e)
                         conn.commit()
         except pyodbc.Error as e:
-            raise AzureConnectionError("Fail to connect sql. " + str(e))
+            raise AzureConnectionError("Fail to connect sql." + str(e)) from e
 
     def get_connection_string(self):
         token_bytes = run_cli_cmd(
@@ -461,7 +473,7 @@ class PostgresFlexHandler(TargetHandler):
                 'az postgres flexible-server show --ids {}'.format(self.target_id))
             # logger.warning("Update database server firewall rule to connect...")
             if target.get('network').get('publicNetworkAccess') == "Disabled":
-                return True
+                return
             start_ip = self.ip or '0.0.0.0'
             end_ip = self.ip or '255.255.255.255'
             run_cli_cmd(
@@ -469,7 +481,6 @@ class PostgresFlexHandler(TargetHandler):
                 '--subscription {3} --start-ip-address {4} --end-ip-address {5}'.format(
                     self.resource_group, self.db_server, ip_name, self.subscription, start_ip, end_ip)
             )
-            return False
         # logger.warning("Remove database server firewall rules to recover...")
         # run_cli_cmd('az postgres server firewall-rule delete -g {0} -s {1} -n {2} -y'.format(rg, server, ipname))
         # if deny_public_access:
@@ -478,26 +489,26 @@ class PostgresFlexHandler(TargetHandler):
     def create_aad_user_in_pg(self, conn_string, query_list):
         if not is_packaged_installed('psycopg2'):
             _install_deps_for_psycopg2()
-            _run_pip(["install", "psycopg2-binary"])
+            _run_pip(["install", "psycopg2"])
         # pylint: disable=import-error
         try:
             import psycopg2
-        except ModuleNotFoundError:
+        except ModuleNotFoundError as e:
             raise CLIInternalError(
-                "Dependency psycopg2 can't be installed, please install it manually with `" + sys.executable + " -m pip install psycopg2-binary`.")
+                "Dependency psycopg2 can't be installed, please install it manually with `" + sys.executable + " -m pip install psycopg2-binary`.") from e
 
         # pylint: disable=protected-access
         try:
             conn = psycopg2.connect(conn_string)
         except (psycopg2.Error, psycopg2.OperationalError) as e:
             import re
-            logger.warning(e)
+            # logger.warning(e)
             search_ip = re.search(
                 'no pg_hba.conf entry for host "(.*)", user ', str(e))
             if search_ip is not None:
                 self.ip = search_ip.group(1)
             raise AzureConnectionError(
-                "Fail to connect to postgresql. " + str(e))
+                "Fail to connect to postgresql. " + str(e)) from e
 
         conn.autocommit = True
         cursor = conn.cursor()
@@ -583,7 +594,7 @@ class PostgresSingleHandler(PostgresFlexHandler):
                 ' --start-ip-address {4} --end-ip-address {5}'.format(
                     rg, server, ip_name, sub, start_ip, end_ip)
             )
-            return target.get('publicNetworkAccess') == "Disabled"
+            # return target.get('publicNetworkAccess') == "Disabled"
         # logger.warning("Remove database server firewall rules to recover...")
         # run_cli_cmd('az postgres server firewall-rule delete -g {0} -s {1} -n {2} -y'.format(rg, server, ipname))
         # if deny_public_access:
@@ -625,6 +636,7 @@ def getSourceHandler(source_id, source_type):
         return SpringHandler(source_id, source_type)
     if source_type in {RESOURCE.Local}:
         return LocalHandler(source_id, source_type)
+    return None
 
 
 # pylint: disable=too-few-public-methods
