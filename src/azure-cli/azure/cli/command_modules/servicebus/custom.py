@@ -121,6 +121,7 @@ def cli_keys_renew(client, resource_group_name, namespace_name, name, key_type, 
         parameters={'key_type': key_type, 'key': key}
     )
 
+
 # Rule Region
 def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_name, subscription_name, rule_name,
                      action_sql_expression=None, action_compatibility_level=None, action_requires_preprocessing=None,
