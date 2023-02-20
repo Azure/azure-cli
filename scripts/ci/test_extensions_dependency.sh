@@ -29,17 +29,17 @@ for ext in $output; do
     pip check
     if [ $? != 0 ]
         then
-            echo "Dependency conflict detected:" $ext
             # Use regex to detect if $ext is in $ignore_list
             if [[ $ignore_list =~ $ext ]]; then
                 echo "Ignore extension: $ext"
             else
+                echo "Dependency conflict detected:" $ext
                 exit_code=1
             fi
         fi
     rm *.whl
     deactivate
-    rsync -au --delete "lib_backup/" "env/lib"
+    rsync -ar --delete "lib_backup/" "env/lib"
     source env/bin/activate
 
 done
