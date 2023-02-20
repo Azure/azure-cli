@@ -4318,7 +4318,7 @@ class NICCreate(_NICCreate):
         ip_configuration = {
             "name": "ipconfig1",
             "private_ip_address": args.private_ip_address,
-            "private_ip_address_version": args.private_ip_address_version,
+            "private_ip_address_version": args.private_ip_address_version,  # when address doesn't exist, version should be ipv4 (default)
             "private_ip_allocation_method": "Static" if has_value(args.private_ip_address) else "Dynamic",
             "subnet": {"id": args.subnet} if has_value(args.subnet) else None,
             "public_ip_address": {"id": args.public_ip_address} if has_value(args.public_ip_address) else None,
@@ -4479,21 +4479,36 @@ class NICIPConfigCreate(_NICIPConfigCreate):
         args_schema.load_balancer_backend_address_pools._registered = False
         args_schema.load_balancer_inbound_nat_rules._registered = False
         args_schema.private_ip_allocation_method._registered = False
-        args_schema.pip_obj._registered = False
+        args_schema.pip_id._registered = False
+        args_schema.subnet_id._registered = False
         args_schema.asgs_obj._registered = False
-        args_schema.subnet_obj._registered = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        args.private_ip_address_version = args.private_ip_address_version
         args.private_ip_allocation_method = "Static" if has_value(args.private_ip_address) else "Dynamic"
-        args.application_gateway_backend_address_pools = [{"id": x} for x in args.app_gateway_address_pools] if has_value(args.app_gateway_address_pools) else None
-        args.load_balancer_backend_address_pools = [{"id": x} for x in args.lb_address_pools] if has_value(args.lb_address_pools) else None
-        args.load_balancer_inbound_nat_rules = [{"id": x} for x in args.lb_inbound_nat_rules] if has_value(args.lb_inbound_nat_rules) else None
+        args.pip_id = args.public_ip_address if has_value(args.public_ip_address) else None
 
-        args.pip_obj = {"id": args.public_ip_address} if has_value(args.public_ip_address) else None
-        args.asgs_obj = [{"id": x} for x in args.application_security_groups] if has_value(args.application_security_groups) else None
+        args.asgs_obj = assign_aaz_list_arg(
+            args.asgs_obj,
+            args.application_security_groups,
+            element_transformer=lambda _, asg_id: {"id": asg_id}
+        )
+        args.application_gateway_backend_address_pools = assign_aaz_list_arg(
+            args.application_gateway_backend_address_pools,
+            args.app_gateway_address_pools,
+            element_transformer=lambda _, pool_id: {"id": pool_id}
+        )
+        args.load_balancer_backend_address_pools = assign_aaz_list_arg(
+            args.load_balancer_backend_address_pools,
+            args.lb_address_pools,
+            element_transformer=lambda _, pool_id: {"id": pool_id}
+        )
+        args.load_balancer_inbound_nat_rules = assign_aaz_list_arg(
+            args.load_balancer_inbound_nat_rules,
+            args.lb_inbound_nat_rules,
+            element_transformer=lambda _, rule_id: {"id": rule_id}
+        )
 
     def pre_instance_create(self):
         args = self.ctx.args
@@ -4505,7 +4520,7 @@ class NICIPConfigCreate(_NICIPConfigCreate):
             for config in instance.properties.ip_configurations:
                 config.properties.primary = False
 
-        args.subnet_obj = {"id": args.subnet} if has_value(args.subnet) else None
+        args.subnet_id = args.subnet if has_value(args.subnet) else None
 
 
 class NICIPConfigUpdate(_NICIPConfigUpdate):
@@ -4633,15 +4648,15 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
         args_schema.load_balancer_backend_address_pools._registered = False
         args_schema.load_balancer_inbound_nat_rules._registered = False
         args_schema.private_ip_allocation_method._registered = False
-        args_schema.pip_obj._registered = False
+        args_schema.pip_id._registered = False
+        args_schema.subnet_id._registered = False
         args_schema.asgs_obj._registered = False
-        args_schema.subnet_obj._registered = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
         if has_value(args.private_ip_address):
-            if args.private_ip_address == "":
+            if args.private_ip_address is None or args.private_ip_address == "":
                 # switch private IP address allocation to dynamic if empty string is used
                 args.private_ip_address = None
                 args.private_ip_allocation_method = "Dynamic"
@@ -4650,9 +4665,9 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
                 # if specific address provided, allocation is static
                 args.private_ip_allocation_method = "Static"
         if has_value(args.subnet):
-            args.subnet_obj = {"id": args.subnet}
+            args.subnet_id = args.subnet
         if has_value(args.public_ip_address):
-            args.pip_obj = {"id": args.public_ip_address}
+            args.pip_id = args.public_ip_address
 
     def pre_instance_update(self, instance):
         args = self.ctx.args
