@@ -92,4 +92,8 @@ class SBNamespacePrivateEndpointCRUDScenarioTest(ScenarioTest):
 
         time.sleep(30)
 
+        while getstatus['provisioningState'] != 'Succeeded':
+            time.sleep(30)
+            getstatus = self.cmd(
+                'servicebus namespace private-endpoint-connection show --namespace-name {namespacename} -g {rg} --name {ehn_pec_name}').get_output_in_json()
         self.cmd('servicebus namespace private-endpoint-connection delete --id {sa_pec_id} -y')

@@ -160,7 +160,7 @@ class SBDRAliasCRUDScenarioTest(ScenarioTest):
         time.sleep(30)
 
         # Delete Namespace - primary
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacenameprimary}')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacenameprimary} --yes')
 
         # Delete Namespace - secondary
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacenamesecondary}')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacenamesecondary} --yes')
