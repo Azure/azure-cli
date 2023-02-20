@@ -40,10 +40,6 @@ def cf_local_network_gateways(cli_ctx, _):
     return network_client_factory(cli_ctx).local_network_gateways
 
 
-def cf_network_interfaces(cli_ctx, _):
-    return network_client_factory(cli_ctx).network_interfaces
-
-
 def cf_network_watcher(cli_ctx, _):
     return network_client_factory(cli_ctx).network_watchers
 
