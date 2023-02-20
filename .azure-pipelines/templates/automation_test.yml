@@ -79,6 +79,11 @@ steps:
     condition: always()
     inputs:
       # /home/cloudtest/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_3.8_latest_1.json
-      PathtoPublish: '~/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.json'
+      PathtoPublish: '$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.json'
       ArtifactName: 'test_results'
       publishLocation: 'Container'
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFiles: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
+      testRunTitle: 'CLI full test results of instance ${{ parameters.instance_idx }}'
