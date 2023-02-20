@@ -202,11 +202,11 @@ def validate_azure_ad_authentication(cmd, namespace):
         :type namespace: argpase.Namespace.
     """
 
-    skip_msi_validation = False
-    if hasattr(namespace, "skip_msi_validation"):
-        skip_msi_validation = getattr(namespace, "skip_msi_validation")
+    skip_client_validation = False
+    if hasattr(namespace, "skip_client_validation"):
+        skip_client_validation = getattr(namespace, "skip_client_validation")
 
-    if skip_msi_validation is True:
+    if skip_client_validation is True:
         return
 
     # SQL VM Azure AD authentication is currently only supported on Azure Public Cloud

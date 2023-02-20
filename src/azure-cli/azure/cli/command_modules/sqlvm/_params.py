@@ -374,7 +374,7 @@ def load_arguments(self, _):
         c.argument('msi_client_id',
                    help='Virutal Machine Managed Identity Client ID.')
         # this method is not needed for the handler of the enable-azure-ad-auth command
-        c.extra('skip_msi_validation',
+        c.extra('skip_client_validation',
                    help='Skip client side Azure AD authentication validation, the server side validation will still happen.',
                    action='store_true')
 

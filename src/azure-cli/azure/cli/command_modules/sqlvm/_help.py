@@ -196,10 +196,10 @@ examples:
         az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup --msi-client-id 12345678
   - name: Enable Azure AD authentication with system-assigned managed identity skipping client side validation. The server side validation always happens.
     text: >
-        az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup --skip-msi-validation
+        az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup --skip-client-validation
   - name: Enable Azure AD authentication with user-assigned managed identity skipping client side validation. The server side validation always happens.
     text: >
-        az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup --msi-client-id 12345678 --skip-msi-validation
+        az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup --msi-client-id 12345678 --skip-client-validation
 """
 
 helps['sql vm validate-azure-ad-auth'] = """
