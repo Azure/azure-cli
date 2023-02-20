@@ -370,6 +370,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                            signalr=None,                                          # Resource.SignalR
                            enable_mi_for_db_linker=None,
                            customized_keys=None,
+                           **kwargs,
                            ):
 
     if not source_id:
@@ -539,6 +540,7 @@ def local_connection_create_func(cmd, client,  # pylint: disable=too-many-locals
                                  signalr=None,                                          # Resource.SignalR
                                  enable_mi_for_db_linker=None,
                                  customized_keys=None,
+                                 **kwargs,
                                  ):
     auth_info = get_local_conn_auth_info(secret_auth_info, secret_auth_info_auto,
                                          user_account_auth_info, service_principal_auth_info_secret)
