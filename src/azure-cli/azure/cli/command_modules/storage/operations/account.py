@@ -667,8 +667,7 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
         rules.virtual_network_rules = [x for x in rules.virtual_network_rules
                                        if not x.virtual_network_resource_id.endswith(subnet)]
     if ip_address:
-        to_remove = [x for x in ip_address]
-        rules.ip_rules = list(filter(lambda x: all(x.ip_address_or_range != i for i in to_remove), rules.ip_rules))
+        rules.ip_rules = list(filter(lambda x: all(x.ip_address_or_range != i for i in ip_address), rules.ip_rules))
 
     if resource_id:
         rules.resource_access_rules = [x for x in rules.resource_access_rules if
