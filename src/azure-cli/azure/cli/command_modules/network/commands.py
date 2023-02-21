@@ -533,13 +533,14 @@ def load_command_table(self, _):
     # endregion
 
     # region NetworkWatchers
-    with self.command_group('network watcher', network_watcher_sdk, client_factory=cf_network_watcher, min_api='2016-09-01') as g:
-        g.custom_command('configure', 'configure_network_watcher')
-        # g.command('list', 'list_all')
-        g.custom_command('test-ip-flow', 'check_nw_ip_flow', client_factory=cf_network_watcher)
+    with self.command_group("network watcher", network_watcher_sdk, client_factory=cf_network_watcher) as g:
+        from .operations.watcher import TestIPFlow, ShowNextHop, ShowSecurityGroupView
+        self.command_table["network watcher test-ip-flow"] = TestIPFlow(loader=self)
+        self.command_table["network watcher show-next-hop"] = ShowNextHop(loader=self)
+        self.command_table["network watcher show-security-group-view"] = ShowSecurityGroupView(loader=self)
+        g.custom_command("configure", "configure_network_watcher")
+
         g.custom_command('test-connectivity', 'check_nw_connectivity', client_factory=cf_network_watcher, validator=process_nw_test_connectivity_namespace, is_preview=True)
-        g.custom_command('show-next-hop', 'show_nw_next_hop', client_factory=cf_network_watcher)
-        g.custom_command('show-security-group-view', 'show_nw_security_view', client_factory=cf_network_watcher)
         g.custom_command('show-topology', 'show_topology_watcher', validator=process_nw_topology_namespace)
         g.custom_command('run-configuration-diagnostic', 'run_network_configuration_diagnostic', client_factory=cf_network_watcher, min_api='2018-06-01', validator=process_nw_config_diagnostic_namespace)
 
