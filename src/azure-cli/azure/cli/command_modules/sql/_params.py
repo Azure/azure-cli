@@ -266,7 +266,7 @@ allow_data_loss_param_type = CLIArgumentType(
     'This will allow the failover to proceed even if a primary database is unavailable.')
 
 secondary_type_param_type = CLIArgumentType(
-    help='The type of the secondary managed instance in a failover group.')
+    help='Intended usage of the secondary instance in the Failover Group. Standby indicates that the secondary instance will be used as a passive replica for disaster recovery only.')
 
 aad_admin_login_param_type = CLIArgumentType(
     options_list=['--display-name', '-u'],
