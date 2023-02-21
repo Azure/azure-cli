@@ -640,8 +640,9 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.exists('containers[0].volumeMounts'),
                          self.check('containers[0].volumeMounts[0].mountPath', '{azure_file_volume_mount_path}')])
 
-        # Test create container with git repo volume
+    # Test create container with git repo volume
     @ResourceGroupPreparer()
+    @unittest.skip("Skip test as unable to re-record due to missing pre-req. resources.")
     def test_container_git_repo_volume_mount(self, resource_group, resource_group_location):
         container_group_name = self.create_random_name('clicontainer', 16)
         gitrepo_url = 'https://github.com/yolo3301/dumb-flow.git'
