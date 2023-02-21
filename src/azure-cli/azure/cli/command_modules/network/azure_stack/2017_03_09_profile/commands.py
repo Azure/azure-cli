@@ -39,3 +39,9 @@ def load_command_table(self, _):
         loader=self, table_transformer=transform_local_gateway_table_output)
 
     # endregion
+
+    # region VirtualNetworkGatewayConnections
+    from .operations.vpn_connection import VpnConnSharedKeyUpdate
+    self.command_table['network vpn-connection shared-key update'] = VpnConnSharedKeyUpdate(loader=self)
+
+    # endregion

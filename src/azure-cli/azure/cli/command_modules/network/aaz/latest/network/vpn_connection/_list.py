@@ -11,17 +11,11 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network vpn-connection list",
-)
 class List(AAZCommand):
     """List all VPN connections.
 
     :example: List all VPN connections in a resource group.
         az network vpn-connection list -g MyResourceGroup
-
-    :example: List all VPN connections in a virtual network gateway.
-        az network vpn-connection list -g MyResourceGroup --vnet-gateway MyVnetGateway
     """
 
     _aaz_info = {

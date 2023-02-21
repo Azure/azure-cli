@@ -7549,7 +7549,6 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network.azure_stack._template_builder import build_vpn_connection_resource
 
-    client = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     tags = tags or {}
 
@@ -7587,39 +7586,6 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
         return client.validate(resource_group_name, deployment_name, deployment)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
-
-
-def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, tags=None,
-                          enable_bgp=None, use_policy_based_traffic_selectors=None,
-                          express_route_gateway_bypass=None):
-
-    with cmd.update_context(instance) as c:
-        c.set_param('routing_weight', routing_weight)
-        c.set_param('shared_key', shared_key)
-        c.set_param('tags', tags)
-        c.set_param('enable_bgp', enable_bgp)
-        c.set_param('express_route_gateway_bypass', express_route_gateway_bypass)
-        c.set_param('use_policy_based_traffic_selectors', use_policy_based_traffic_selectors)
-
-    # TODO: Remove these when issue #1615 is fixed
-    gateway1_id = parse_resource_id(instance.virtual_network_gateway1.id)
-    ncf = network_client_factory(cmd.cli_ctx, subscription_id=gateway1_id['subscription'])
-    instance.virtual_network_gateway1 = ncf.virtual_network_gateways.get(
-        gateway1_id['resource_group'], gateway1_id['name'])
-
-    if instance.virtual_network_gateway2:
-        gateway2_id = parse_resource_id(instance.virtual_network_gateway2.id)
-        ncf = network_client_factory(cmd.cli_ctx, subscription_id=gateway2_id['subscription'])
-        instance.virtual_network_gateway2 = ncf.virtual_network_gateways.get(
-            gateway2_id['resource_group'], gateway2_id['name'])
-
-    if instance.local_network_gateway2:
-        gateway2_id = parse_resource_id(instance.local_network_gateway2.id)
-        ncf = network_client_factory(cmd.cli_ctx, subscription_id=gateway2_id['subscription'])
-        instance.local_network_gateway2 = ncf.local_network_gateways.get(
-            gateway2_id['resource_group'], gateway2_id['name'])
-
-    return instance
 
 
 def list_vpn_connections(cmd, resource_group_name, virtual_network_gateway_name=None):
@@ -7731,20 +7697,21 @@ def add_vpn_conn_ipsec_policy(cmd, client, resource_group_name, connection_name,
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
 
 
-def clear_vpn_conn_ipsec_policies(cmd, client, resource_group_name, connection_name, no_wait=False):
-    conn = client.get(resource_group_name, connection_name)
-    conn.ipsec_policies = None
-    conn.use_policy_based_traffic_selectors = False
-    if no_wait:
-        return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
 
-    from azure.cli.core.commands import LongRunningOperation
-    poller = sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
-    return LongRunningOperation(cmd.cli_ctx)(poller).ipsec_policies
+# def clear_vpn_conn_ipsec_policies(cmd, client, resource_group_name, connection_name, no_wait=False):
+#     conn = client.get(resource_group_name, connection_name)
+#     conn.ipsec_policies = None
+#     conn.use_policy_based_traffic_selectors = False
+#     if no_wait:
+#         return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
+#
+#     from azure.cli.core.commands import LongRunningOperation
+#     poller = sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
+#     return LongRunningOperation(cmd.cli_ctx)(poller).ipsec_policies
 
 
-def list_vpn_conn_ipsec_policies(cmd, client, resource_group_name, connection_name):
-    return client.get(resource_group_name, connection_name).ipsec_policies
+# def list_vpn_conn_ipsec_policies(cmd, client, resource_group_name, connection_name):
+#     return client.get(resource_group_name, connection_name).ipsec_policies
 
 
 def assign_vnet_gateway_aad(cmd, resource_group_name, gateway_name,

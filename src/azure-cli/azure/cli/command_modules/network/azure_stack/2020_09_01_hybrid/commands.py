@@ -43,3 +43,22 @@ def load_command_table(self, _):
         loader=self, table_transformer=transform_local_gateway_table_output)
 
     # endregion
+
+    # region VirtualNetworkGatewayConnections
+    from .operations.vpn_connection import VpnConnectionUpdate, VpnConnectionDeviceConfigScriptShow
+    self.command_table['network vpn-connection update'] = VpnConnectionUpdate(loader=self)
+    self.command_table['network vpn-connection show-device-config-script'] = VpnConnectionDeviceConfigScriptShow(
+        loader=self)
+
+    from .operations.vpn_connection import VpnConnSharedKeyUpdate
+    self.command_table['network vpn-connection shared-key update'] = VpnConnSharedKeyUpdate(loader=self)
+
+    from .operations.vpn_connection import VpnConnIpsecPolicyAdd
+    self.command_table['network vpn-connection ipsec-policy add'] = VpnConnIpsecPolicyAdd(loader=self)
+
+    operations_tmpl = self.get_module_name_by_profile("operations.vpn_connection#{}")
+    with self.command_group('network vpn-connection', operations_tmpl=operations_tmpl) as g:
+        g.command('list', 'list_vpn_connections')
+        g.command('ipsec-policy clear', 'clear_vpn_conn_ipsec_policies', supports_no_wait=True)
+
+    # endregion
