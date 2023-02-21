@@ -218,7 +218,7 @@ preferred_enclave_param_type = CLIArgumentType(
     arg_type=get_enum_type(AlwaysEncryptedEnclaveType))
 
 database_assign_identity_param_type = CLIArgumentType(
-    options_list=['--assign-identity', '-ai'],
+    options_list=['--assign-identity', '-i'],
     help='Assign identity for database.',
     arg_type=get_three_state_flag())
 
