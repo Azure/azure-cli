@@ -609,7 +609,7 @@ def _configure_db_dw_create_params(
                      arg_type=database_assign_identity_param_type)
 
     arg_ctx.argument('encryption_protector',
-                    arg_type=database_encryption_protector_param_type)
+                     arg_type=database_encryption_protector_param_type)
 
     arg_ctx.argument('keys',
                      arg_type=database_keys_param_type)
@@ -793,26 +793,26 @@ def load_arguments(self, _):
         # Service tier advisors and transparent data encryption are not included in the first batch
         # of GA commands.
         c.argument('expand_keys',
-                    options_list=['--expand-keys'],
-                    help='Expand the AKV keys for the database.')
+                   options_list=['--expand-keys'],
+                   help='Expand the AKV keys for the database.')
 
         c.argument('keys_filter',
-                    options_list=['--keys-filter'],
-                    help='Expand the AKV keys for the database.')
+                   options_list=['--keys-filter'],
+                   help='Expand the AKV keys for the database.')
 
     with self.argument_context('sql db show deleted') as c:
         c.argument('restorable_dropped_database_id',
-                    options_list=['--restorable-dropped-database-id'],
-                    help='Restorable dropped database id.')
+                   options_list=['--restorable-dropped-database-id'],
+                   help='Restorable dropped database id.')
 
         c.argument('expand_keys',
-                    options_list=['--expand-keys'],
-                    arg_type=database_expand_keys_param_type,
-                    help='Expand the AKV keys for the database.')
+                   options_list=['--expand-keys'],
+                   arg_type=database_expand_keys_param_type,
+                   help='Expand the AKV keys for the database.')
 
         c.argument('keys_filter',
-                    options_list=['--keys-filter'],
-                    help='Expand the AKV keys for the database.')
+                   options_list=['--keys-filter'],
+                   help='Expand the AKV keys for the database.')
 
     with self.argument_context('sql server show') as c:
         c.argument('expand_ad_admin',
@@ -873,7 +873,7 @@ def load_arguments(self, _):
         c.argument('maintenance_configuration_id', arg_type=maintenance_configuration_id_param_type)
 
         c.argument('availability_zone',
-                     arg_type=database_availability_zone_param_type)
+                   arg_type=database_availability_zone_param_type)
 
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportDatabaseDefinition object
@@ -1290,6 +1290,21 @@ def load_arguments(self, _):
                    arg_group=sku_arg_group,
                    help='The name of the new service objective.')
 
+        c.argument('assign_identity',
+                   arg_type=database_assign_identity_param_type)
+
+        c.argument('encryption_protector',
+                   arg_type=database_encryption_protector_param_type)
+
+        c.argument('keys',
+                   arg_type=database_keys_param_type)
+
+        c.argument('user_assigned_identity_id',
+                   arg_type=database_user_assigned_identity_param_type)
+
+        c.argument('federated_client_id',
+                   arg_type=database_federated_client_id_param_type)
+
     ###############################################
     #              sql db geo-backup              #
     ###############################################
@@ -1310,12 +1325,12 @@ def load_arguments(self, _):
                    help='Retrieves a requested geo-redundant backup under this resource group.')
 
         c.argument('expand_keys',
-                    options_list=['--expand-keys'],
-                    help='Expand the AKV keys for the database.')
+                   options_list=['--expand-keys'],
+                   help='Expand the AKV keys for the database.')
 
         c.argument('keys_filter',
-                    options_list=['--keys-filter'],
-                    help='Expand the AKV keys for the database.')
+                   options_list=['--keys-filter'],
+                   help='Expand the AKV keys for the database.')
 
     with self.argument_context('sql db geo-backup list') as c:
         c.argument('server_name',
@@ -1369,19 +1384,19 @@ def load_arguments(self, _):
                    help='The name of the new service objective.')
 
         c.argument('assign_identity',
-                     arg_type=database_assign_identity_param_type)
+                   arg_type=database_assign_identity_param_type)
 
         c.argument('encryption_protector',
-                     arg_type=database_encryption_protector_param_type)
+                   arg_type=database_encryption_protector_param_type)
 
         c.argument('keys',
-                     arg_type=database_keys_param_type)
+                   arg_type=database_keys_param_type)
 
         c.argument('user_assigned_identity_id',
-                     arg_type=database_user_assigned_identity_param_type)
+                   arg_type=database_user_assigned_identity_param_type)
 
         c.argument('federated_client_id',
-                     arg_type=database_federated_client_id_param_type)
+                   arg_type=database_federated_client_id_param_type)
 
     ###############################################
     #                sql db str                   #

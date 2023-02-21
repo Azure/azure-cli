@@ -73,7 +73,6 @@ from azure.mgmt.sql.models import (
     UserIdentity,
     VirtualNetworkRule,
     DatabaseUserIdentity,
-    DatabaseIdentity,
     DatabaseKey
 )
 
@@ -541,6 +540,7 @@ def _get__user_assigned_identity(
 
     return identityResult
 
+
 def _get_database_identity(
         userAssignedIdentities):
     '''
@@ -557,14 +557,14 @@ def _get_database_identity(
         if umiDict is None:
             umiDict = {umi: DatabaseUserIdentity()}
         else:
-            umiDict[umi] = DatabaseUserIdentity() # pylint: disable=unsupported-assignment-operation
+            umiDict[umi] = DatabaseUserIdentity()  # pylint: disable=unsupported-assignment-operation
 
     from azure.mgmt.sql.models import DatabaseIdentity
 
-    databaseIdentity = DatabaseIdentity(type=ResourceIdType.user_assigned.value,
-                                            user_assigned_identities=umiDict)
+    databaseIdentity = DatabaseIdentity(type=ResourceIdType.user_assigned.value, user_assigned_identities=umiDict)
 
     return databaseIdentity
+
 
 _DEFAULT_SERVER_VERSION = "12.0"
 
@@ -1006,9 +1006,9 @@ def _validate_elastic_pool_id(
 
     return elastic_pool_id
 
+
 def restorable_databases_get(
     client,
-    database_name,
     server_name,
     resource_group_name,
     restorable_dropped_database_id,
@@ -1027,13 +1027,14 @@ def restorable_databases_get(
 
     return client.get(resource_group_name, server_name, restorable_dropped_database_id, expand)
 
+
 def recoverable_databases_get(
-    client,
-    database_name,
-    server_name,
-    resource_group_name,
-    expand_keys=False,
-    keys_filter=None):
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        expand_keys=False,
+        keys_filter=None):
     '''
     Gets a recoverable database
     '''
@@ -1049,13 +1050,14 @@ def recoverable_databases_get(
                       database_name=database_name,
                       expand=expand)
 
+
 def db_get(
-    client,
-    database_name,
-    server_name,
-    resource_group_name,
-    expand_keys=False,
-    keys_filter=None):
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        expand_keys=False,
+        keys_filter=None):
     '''
     Gets a database
     '''
@@ -1067,6 +1069,7 @@ def db_get(
         expand = 'keys'
 
     return client.get(resource_group_name, server_name, database_name, expand)
+
 
 def _db_dw_create(
         cli_ctx,
@@ -1713,8 +1716,7 @@ def db_update(
         keys=None,
         encryption_protector=None,
         federated_client_id=None,
-        keys_to_remove=None,
-        availability_zone=None):
+        keys_to_remove=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
@@ -1827,9 +1829,9 @@ def db_update(
         database_client = get_sql_databases_operations(cmd.cli_ctx, None)
 
         database = database_client.get(resource_group_name=resource_group_name,
-                                           server_name=server_name,
-                                           database_name=instance.name,
-                                           expand="keys")
+                                       server_name=server_name,
+                                       database_name=instance.name,
+                                       expand="keys")
 
         instance.keys = _get_database_keys_for_update(database.keys, keys, keys_to_remove)
 
@@ -1842,6 +1844,7 @@ def db_update(
     instance.availability_zone = None
 
     return instance
+
 
 def _get_database_identity_for_update(existingIdentity, userAssignedIdentities):
 
@@ -1857,6 +1860,7 @@ def _get_database_identity_for_update(existingIdentity, userAssignedIdentities):
 
     return databaseIdentity
 
+
 def _get_database_keys(akvKeys):
 
     databaseKeys = None
@@ -1864,11 +1868,12 @@ def _get_database_keys(akvKeys):
     if akvKeys is not None:
         for akvKey in akvKeys:
             if databaseKeys is None:
-                databaseKeys = {akvKey : DatabaseKey()}
+                databaseKeys = {akvKey: DatabaseKey()}
             else:
                 databaseKeys[akvKey] = DatabaseKey()  # pylint: disable=unsupported-assignment-operation
 
     return databaseKeys
+
 
 def _get_database_keys_for_update(existingAkvKeys, akvKeys, akvKeysToRemove=None):
 
@@ -1886,8 +1891,9 @@ def _get_database_keys_for_update(existingAkvKeys, akvKeys, akvKeysToRemove=None
         databaseKeys = existingAkvKeys
     else:
         databaseKeys = _get_database_keys(akvKeys)
-    
+
     return databaseKeys
+
 
 #####
 #           sql db audit-policy & threat-policy
@@ -3229,6 +3235,14 @@ def restore_long_term_retention_backup(
         if kwargs['requested_backup_storage_redundancy'] == 'Geo':
             _backup_storage_redundancy_specify_geo_warning()
 
+    # Per DB CMK params
+    if assign_identity:
+        kwargs['identity'] = _get_database_identity(user_assigned_identity_id)
+
+    kwargs['keys'] = _get_database_keys(keys)
+    kwargs['encryption_protector'] = encryption_protector
+    kwargs['federated_client_id'] = federated_client_id
+
     return client.begin_create_or_update(
         database_name=target_database_name,
         server_name=target_server_name,
@@ -3246,6 +3260,7 @@ def list_geo_backups(
     return client.list_by_server(
         resource_group_name=resource_group_name,
         server_name=server_name)
+
 
 def restore_geo_backup(
         cmd,
@@ -4487,6 +4502,7 @@ def encryption_protector_update(
                                        server_key_name=key_name,
                                        auto_rotation_enabled=auto_rotation_enabled))
 
+
 def encryption_protector_revalidate(
         client,
         resource_group_name,
@@ -4497,65 +4513,67 @@ def encryption_protector_revalidate(
 
     if server_name is None:
         raise CLIError('Server name cannot be null')
-    
+
     try:
-            return client.begin_revalidate(
-                resource_group_name=resource_group_name,
-                server_name=server_name,
-                encryption_protector_name=EncryptionProtectorName.CURRENT)
+        return client.begin_revalidate(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            encryption_protector_name=EncryptionProtectorName.CURRENT)
 
     except Exception as ex:
-            raise ex
+        raise ex
+
 
 def database_encryption_protector_revalidate(
-    client,
-    resource_group_name,
-    server_name,
-    database_name):
+        client,
+        resource_group_name,
+        server_name,
+        database_name):
     '''
     Revalidate a database encryption protector.
     '''
 
     if server_name is None:
         raise CLIError('Server name cannot be null')
-    
+
     if database_name is None:
         raise CLIError('Database name cannot be null')
 
     try:
-            return client.begin_revalidate(
-                resource_group_name=resource_group_name,
-                server_name=server_name,
-                database_name=database_name,
-                encryption_protector_name=EncryptionProtectorName.CURRENT)
+        return client.begin_revalidate(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            database_name=database_name,
+            encryption_protector_name=EncryptionProtectorName.CURRENT)
 
     except Exception as ex:
-            raise ex
+        raise ex
+
 
 def database_encryption_protector_revert(
-    client,
-    resource_group_name,
-    server_name,
-    database_name):
+        client,
+        resource_group_name,
+        server_name,
+        database_name):
     '''
     Reverts a database encryption protector.
     '''
 
     if server_name is None:
         raise CLIError('Server name cannot be null')
-    
+
     if database_name is None:
         raise CLIError('Database name cannot be null')
 
     try:
-            return client.begin_revert(
-                resource_group_name=resource_group_name,
-                server_name=server_name,
-                database_name=database_name,
-                encryption_protector_name=EncryptionProtectorName.CURRENT)
+        return client.begin_revert(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            database_name=database_name,
+            encryption_protector_name=EncryptionProtectorName.CURRENT)
 
     except Exception as ex:
-            raise ex
+        raise ex
 
 #####
 #           sql server aad-only
@@ -5176,6 +5194,7 @@ def managed_instance_encryption_protector_get(
         managed_instance_name=managed_instance_name,
         encryption_protector_name=EncryptionProtectorName.CURRENT)
 
+
 def managed_instance_encryption_protector_revalidate(
         client,
         resource_group_name,
@@ -5186,14 +5205,14 @@ def managed_instance_encryption_protector_revalidate(
 
     if managed_instance_name is None:
         raise CLIError('Managed instance name cannot be null')
-    
+
     try:
-            return client.begin_revalidate(
-                resource_group_name=resource_group_name,
-                managed_instance_name=managed_instance_name,
-                encryption_protector_name=EncryptionProtectorName.CURRENT)
+        return client.begin_revalidate(
+            resource_group_name=resource_group_name,
+            managed_instance_name=managed_instance_name,
+            encryption_protector_name=EncryptionProtectorName.CURRENT)
     except Exception as ex:
-            raise ex 
+        raise ex
 
 
 #####

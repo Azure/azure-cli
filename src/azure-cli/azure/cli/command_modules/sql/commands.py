@@ -141,8 +141,8 @@ def load_command_table(self, _):
                          transform=database_lro_transform,
                          table_transformer=db_table_format)
         g.custom_show_command('show', 'db_get',
-                       transform=db_transform,
-                       table_transformer=db_table_format)
+                              transform=db_transform,
+                              table_transformer=db_table_format)
         g.custom_command('list', 'db_list',
                          transform=db_list_transform,
                          table_transformer=db_table_format)
