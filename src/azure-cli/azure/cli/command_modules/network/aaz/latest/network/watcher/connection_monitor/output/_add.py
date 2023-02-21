@@ -49,12 +49,14 @@ class Add(AAZCommand):
             help="Connection monitor name.",
             required=True,
         )
-        _args_schema.network_watcher_name = AAZStrArg(
-            options=["--network-watcher-name"],
+        _args_schema.watcher_name = AAZStrArg(
+            options=["--watcher-name"],
             help="The name of the Network Watcher resource.",
             required=True,
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
+            options=["-g", "--watcher-rg", "--resource-group"],
+            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
         _args_schema.migrate = AAZStrArg(
@@ -164,7 +166,7 @@ class Add(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "networkWatcherName", self.ctx.args.network_watcher_name,
+                    "networkWatcherName", self.ctx.args.watcher_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -267,7 +269,7 @@ class Add(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "networkWatcherName", self.ctx.args.network_watcher_name,
+                    "networkWatcherName", self.ctx.args.watcher_name,
                     required=True,
                 ),
                 **self.serialize_url_param(

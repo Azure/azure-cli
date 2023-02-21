@@ -31,6 +31,10 @@ from ..aaz.latest.network.watcher.packet_capture import Create as _PacketCapture
 from ..aaz.latest.network.watcher.packet_capture import Delete as _PacketCaptureDelete, List as _PacketCaptureList, \
     Show as _PacketCaptureShow, ShowStatus as _PacketCaptureShowStatus, Stop as _PacketCaptureStop
 
+from ..aaz.latest.network.watcher.connection_monitor.output import Add as _WatcherConnectionMonitorOutputAdd
+from ..aaz.latest.network.watcher.connection_monitor.output import List as _WatcherConnectionMonitorOutputList
+from ..aaz.latest.network.watcher.connection_monitor.output import Delete as _WatcherConnectionMonitorOutputDelete
+
 logger = get_logger(__name__)
 
 
@@ -997,6 +1001,8 @@ class NwFlowLogDelete(_NwFlowLogDelete):
                                           rg_name='resource_group')
 
 
+
+
 class NwTroubleshootingStart(_NwTroubleshootingStart):
 
     @classmethod
@@ -1082,3 +1088,56 @@ class NwTroubleshootingShow(_NwTroubleshootingShow):
         if has_value(args.resource):
             args.target_resource_id = args.resource
 
+
+def process_nw_cm_v2_output_namespace(cmd):
+    args = cmd.ctx.args
+    v2_output_optional_parameter_set = ['workspace_id']
+    if hasattr(args, 'out_type') and args.out_type.to_serialized_data() is not None:
+        tmp = [p for p in v2_output_optional_parameter_set if getattr(args, p) is None]
+        if v2_output_optional_parameter_set == tmp:
+            raise ValidationError('usage error: --type is specified but no other resource id provided')
+    get_network_watcher_from_location(cmd)
+
+
+class WatcherConnectionMonitorOutputAdd(_WatcherConnectionMonitorOutputAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.watcher_name._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.resource_group._registered = False
+        args_schema.resource_group._required = False
+        args_schema.migrate._registered = False
+        args_schema.output_type._required = True
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location. Values from: `az account list-locations`. "
+                 "You can configure the default location "
+                 "using `az configure --defaults location=<location>`.",
+        )
+        return args_schema
+
+    def pre_operations(self):
+        process_nw_cm_v2_output_namespace(self)
+
+
+class WatcherConnectionMonitorOutputList(_WatcherConnectionMonitorOutputList):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.watcher_name._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.resource_group._registered = False
+        args_schema.resource_group._required = False
+
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location. Values from: `az account list-locations`. "
+                 "You can configure the default location "
+                 "using `az configure --defaults location=<location>`.",
+            required=True,
+        )
+        return args_schema
+
+    def pre_operations(self):
+        process_nw_cm_v2_output_namespace(self)
