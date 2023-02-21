@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods
-import importlib
 from knack.log import get_logger
 from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.aaz import AAZResourceIdArgFormat, has_value, AAZStrArg
