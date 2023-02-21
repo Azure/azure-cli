@@ -24,7 +24,7 @@ from ..aaz.latest.network.watcher.connection_monitor import Query as _WatcherCon
 logger = get_logger(__name__)
 
 
-def get_network_watcher_from_location(cmd, remove=False, watcher_name="watcher_name", rg_name="watcher_rg"):
+def get_network_watcher_from_location(cmd, watcher_name="watcher_name", rg_name="watcher_rg"):
     from ..aaz.latest.network.watcher import List
 
     args = cmd.ctx.args
@@ -37,9 +37,6 @@ def get_network_watcher_from_location(cmd, remove=False, watcher_name="watcher_n
     id_parts = parse_resource_id(watcher["id"])
     setattr(args, rg_name, id_parts["resource_group"])
     setattr(args, watcher_name, id_parts["name"])
-
-    if remove:
-        args.location = None
 
 
 def get_network_watcher_from_vm(cmd):
