@@ -94,12 +94,14 @@ class Create(AAZCommand):
             options=["--associated-id"],
             arg_group="Routing Configuration",
             help="The resource id of route table associated with this routing configuration.",
+            is_preview=True,
         )
         cls._build_args_sub_resource_create(_args_schema.associated_id)
         _args_schema.propagated_ids = AAZListArg(
             options=["--propagated-ids"],
             arg_group="Routing Configuration",
             help="pace-separated list of resource id  of propagated route tables.",
+            is_preview=True,
         )
         _args_schema.labels = AAZListArg(
             options=["--labels"],
