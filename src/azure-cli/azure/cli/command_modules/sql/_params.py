@@ -31,13 +31,7 @@ from azure.mgmt.sql.models import (
     ServerConnectionType,
     ServerKeyType,
     StorageKeyType,
-    TransparentDataEncryptionState,
-    DatabaseIdentity,
-    DatabaseUserIdentity,
-    DatabaseIdentityType,
-    DatabaseKey,
-    RestorableDroppedDatabase,
-    RecoverableDatabase
+    TransparentDataEncryptionState
 )
 
 from azure.cli.core.commands.parameters import (
@@ -451,7 +445,7 @@ def _configure_db_dw_params(arg_ctx):
 
     arg_ctx.argument('preferred_enclave_type',
                      arg_type=preferred_enclave_param_type)
-    
+
     arg_ctx.argument('assign_identity',
                      arg_type=database_assign_identity_param_type)
 
@@ -460,16 +454,16 @@ def _configure_db_dw_params(arg_ctx):
 
     arg_ctx.argument('keys',
                      arg_type=database_keys_param_type)
-    
+
     arg_ctx.argument('keys_to_remove',
                      arg_type=database_keys_to_remove_param_type)
-                    
+
     arg_ctx.argument('user_assigned_identity_id',
                      arg_type=database_user_assigned_identity_param_type)
-    
+
     arg_ctx.argument('federated_client_id',
                      arg_type=database_federated_client_id_param_type)
-    
+
     arg_ctx.argument('expand_keys',
                      arg_type=database_expand_keys_param_type)
 
@@ -610,7 +604,7 @@ def _configure_db_dw_create_params(
 
     arg_ctx.argument('preferred_enclave_type',
                      arg_type=preferred_enclave_param_type)
-    
+
     arg_ctx.argument('assign_identity',
                      arg_type=database_assign_identity_param_type)
 
@@ -619,10 +613,10 @@ def _configure_db_dw_create_params(
 
     arg_ctx.argument('keys',
                      arg_type=database_keys_param_type)
-                    
+
     arg_ctx.argument('user_assigned_identity_id',
                      arg_type=database_user_assigned_identity_param_type)
-    
+
     arg_ctx.argument('federated_client_id',
                      arg_type=database_federated_client_id_param_type)
 
@@ -678,7 +672,7 @@ def _configure_db_dw_create_params(
         arg_ctx.ignore('user_assigned_identity_id')
 
         # Federated client id is not applicable to DataWarehouse
-        arg_ctx.ignore('federated_client_id')     
+        arg_ctx.ignore('federated_client_id')
 
         # Provisioning with capacity is not applicable to DataWarehouse
         arg_ctx.ignore('capacity')
@@ -805,12 +799,12 @@ def load_arguments(self, _):
         c.argument('keys_filter',
                     options_list=['--keys-filter'],
                     help='Expand the AKV keys for the database.')
-    
+
     with self.argument_context('sql db show deleted') as c:
         c.argument('restorable_dropped_database_id',
                     options_list=['--restorable-dropped-database-id'],
                     help='Restorable dropped database id.')
-        
+
         c.argument('expand_keys',
                     options_list=['--expand-keys'],
                     arg_type=database_expand_keys_param_type,
@@ -819,7 +813,7 @@ def load_arguments(self, _):
         c.argument('keys_filter',
                     options_list=['--keys-filter'],
                     help='Expand the AKV keys for the database.')
-    
+
     with self.argument_context('sql server show') as c:
         c.argument('expand_ad_admin',
                    options_list=['--expand-ad-admin'],
@@ -1382,10 +1376,10 @@ def load_arguments(self, _):
 
         c.argument('keys',
                      arg_type=database_keys_param_type)
-                    
+
         c.argument('user_assigned_identity_id',
                      arg_type=database_user_assigned_identity_param_type)
-    
+
         c.argument('federated_client_id',
                      arg_type=database_federated_client_id_param_type)
 

@@ -549,8 +549,8 @@ def _get_database_identity(
     databaseIdentity = None
 
     if userAssignedIdentities is None:
-                raise CLIError('"The list of user assigned identity ids needs to be passed for database CMK')
-    
+        raise CLIError('The list of user assigned identity ids needs to be passed for database CMK')
+
     umiDict = None
 
     for umi in userAssignedIdentities:
@@ -558,12 +558,12 @@ def _get_database_identity(
             umiDict = {umi: DatabaseUserIdentity()}
         else:
             umiDict[umi] = DatabaseUserIdentity() # pylint: disable=unsupported-assignment-operation
-    
+
     from azure.mgmt.sql.models import DatabaseIdentity
 
     databaseIdentity = DatabaseIdentity(type=ResourceIdType.user_assigned.value,
                                             user_assigned_identities=umiDict)
-    
+
     return databaseIdentity
 
 _DEFAULT_SERVER_VERSION = "12.0"
@@ -1024,7 +1024,7 @@ def restorable_databases_get(
         expand = "keys($filter=pointInTime('%s'))" % keys_filter
     elif expand_keys:
         expand = 'keys'
-    
+
     return client.get(resource_group_name, server_name, restorable_dropped_database_id, expand)
 
 def recoverable_databases_get(
@@ -1043,10 +1043,10 @@ def recoverable_databases_get(
         expand = "keys($filter=pointInTime('%s'))" % keys_filter
     elif expand_keys:
         expand = 'keys'
-    
-    return client.get(resource_group_name=resource_group_name, 
-                      server_name=server_name, 
-                      database_name=database_name, 
+
+    return client.get(resource_group_name=resource_group_name,
+                      server_name=server_name,
+                      database_name=database_name,
                       expand=expand)
 
 def db_get(
@@ -1065,7 +1065,7 @@ def db_get(
         expand = "keys($filter=pointInTime('%s'))" % keys_filter
     elif expand_keys:
         expand = 'keys'
-    
+
     return client.get(resource_group_name, server_name, database_name, expand)
 
 def _db_dw_create(
@@ -1129,7 +1129,7 @@ def _db_dw_create(
     # Per DB CMK params
     if assign_identity:
         kwargs['identity'] = _get_database_identity(user_assigned_identity_id)
-    
+
     kwargs['keys'] = _get_database_keys(keys)
     kwargs['encryption_protector'] = encryption_protector
 
@@ -1815,7 +1815,7 @@ def db_update(
 
     if auto_pause_delay:
         instance.auto_pause_delay = auto_pause_delay
-    
+
     #####
     # Per DB CMK properties
     #####
@@ -1824,37 +1824,37 @@ def db_update(
             _get_database_identity_for_update(instance.identity, user_assigned_identity_id)
 
     if keys is not None or keys_to_remove is not None:
-            database_client = get_sql_databases_operations(cmd.cli_ctx, None)
+        database_client = get_sql_databases_operations(cmd.cli_ctx, None)
 
-            database = database_client.get(resource_group_name=resource_group_name, 
-                                           server_name=server_name, 
-                                           database_name=instance.name, 
+        database = database_client.get(resource_group_name=resource_group_name,
+                                           server_name=server_name,
+                                           database_name=instance.name,
                                            expand="keys")
-            
-            instance.keys = _get_database_keys_for_update(database.keys, keys, keys_to_remove)
-    
+
+        instance.keys = _get_database_keys_for_update(database.keys, keys, keys_to_remove)
+
     if encryption_protector is not None:
-            instance.encryption_protector = encryption_protector
+        instance.encryption_protector = encryption_protector
 
     if federated_client_id is not None:
         instance.federated_client_id = federated_client_id
-    
+
     instance.availability_zone = None
-    
+
     return instance
 
 def _get_database_identity_for_update(existingIdentity, userAssignedIdentities):
-    
+
     databaseIdentity = None
 
     if existingIdentity is not None and existingIdentity.user_assigned_identities is not None:
         for umi in userAssignedIdentities:
             existingIdentity.user_assigned_identities.update({umi: DatabaseUserIdentity()})
-        
+
         databaseIdentity = existingIdentity
     else:
         databaseIdentity = _get_database_identity(userAssignedIdentities)
-    
+
     return databaseIdentity
 
 def _get_database_keys(akvKeys):
@@ -1866,7 +1866,7 @@ def _get_database_keys(akvKeys):
             if databaseKeys is None:
                 databaseKeys = {akvKey : DatabaseKey()}
             else:
-                databaseKeys[akvKey] = DatabaseKey()
+                databaseKeys[akvKey] = DatabaseKey()  # pylint: disable=unsupported-assignment-operation
 
     return databaseKeys
 
@@ -1878,13 +1878,11 @@ def _get_database_keys_for_update(existingAkvKeys, akvKeys, akvKeysToRemove=None
         if akvKeys is not None:
             for akvKey in akvKeys:
                 existingAkvKeys.update({akvKey: DatabaseKey()})
-        
+
         if akvKeysToRemove is not None:
             for akvKey in akvKeysToRemove:
                 existingAkvKeys.update({akvKey: None})
-                print("Inside loop dict op")
-                print(existingAkvKeys)
-        
+
         databaseKeys = existingAkvKeys
     else:
         databaseKeys = _get_database_keys(akvKeys)
@@ -3249,7 +3247,6 @@ def list_geo_backups(
         resource_group_name=resource_group_name,
         server_name=server_name)
 
-
 def restore_geo_backup(
         cmd,
         client,
@@ -3261,6 +3258,11 @@ def restore_geo_backup(
         high_availability_replica_count,
         zone_redundant,
         service_objective,
+        assign_identity=False,
+        user_assigned_identity_id=None,
+        keys=None,
+        encryption_protector=None,
+        federated_client_id=None,
         **kwargs):
     '''
     Restores an existing database (i.e. create with 'RestoreGeoBackup' create mode.)
@@ -3293,75 +3295,10 @@ def restore_geo_backup(
         if kwargs['requested_backup_storage_redundancy'] == 'Geo':
             _backup_storage_redundancy_specify_geo_warning()
 
-    return client.begin_create_or_update(
-        database_name=target_database_name,
-        server_name=target_server_name,
-        resource_group_name=target_resource_group_name,
-        parameters=kwargs)
-
-
-def list_geo_backups(
-        client,
-        server_name,
-        resource_group_name):
-    '''
-    Gets the geo redundant backups for a server
-    '''
-    return client.list_by_server(
-        resource_group_name=resource_group_name,
-        server_name=server_name)
-
-
-def restore_geo_backup(
-        cmd,
-        client,
-        geo_backup_id,
-        target_database_name,
-        target_server_name,
-        target_resource_group_name,
-        requested_backup_storage_redundancy,
-        high_availability_replica_count,
-        zone_redundant,
-        assign_identity=False,
-        user_assigned_identity_id=None,
-        keys=None,
-        encryption_protector=None,
-        federated_client_id=None,
-        **kwargs):
-    '''
-    Restores an existing database (i.e. create with 'RestoreGeoBackup' create mode.)
-    '''
-
-    if not target_resource_group_name or not target_server_name or not target_database_name:
-        raise CLIError('Please specify target resource(s). '
-                       'Target resource group, target server, and target database '
-                       'are all required to restore Geo-redundant backup.')
-
-    if not geo_backup_id:
-        raise CLIError('Please specify a geo redundant backup.')
-
-    kwargs['location'] = _get_server_location(
-        cmd.cli_ctx,
-        server_name=target_server_name,
-        resource_group_name=target_resource_group_name)
-
-    kwargs['create_mode'] = CreateMode.RECOVERY
-    kwargs['recoverableDatabaseId'] = geo_backup_id
-    kwargs['requested_backup_storage_redundancy'] = requested_backup_storage_redundancy
-    kwargs['high_availability_replica_count'] = high_availability_replica_count
-    kwargs['zone_redundant'] = zone_redundant
-
-    # Check backup storage redundancy configurations
-    if _should_show_backup_storage_redundancy_warnings(kwargs['location']):
-        if not kwargs['requested_backup_storage_redundancy']:
-            _backup_storage_redundancy_take_source_warning()
-        if kwargs['requested_backup_storage_redundancy'] == 'Geo':
-            _backup_storage_redundancy_specify_geo_warning()
-    
     # Per DB CMK params
     if assign_identity:
         kwargs['identity'] = _get_database_identity(user_assigned_identity_id)
-    
+
     kwargs['keys'] = _get_database_keys(keys)
     kwargs['encryption_protector'] = encryption_protector
     kwargs['federated_client_id'] = federated_client_id
@@ -6360,7 +6297,7 @@ def transparent_data_encryptions_set(
     '''
     kwargs['state'] = status
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         database_name=database_name,
