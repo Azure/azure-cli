@@ -593,10 +593,10 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     source_server_id_parts = parse_resource_id(source_server_id)
     try:
         source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
-        validate_mysql_replica(cmd, source_server_object)
+        validate_mysql_replica(source_server_object)
     except Exception as e:
         raise ResourceNotFoundError(e)
-    
+
     if not location:
         location = source_server_object.location
 

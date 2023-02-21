@@ -542,7 +542,7 @@ def validate_vnet_location(vnet, location):
         raise ValidationError("The location of Vnet should be same as the location of the server")
 
 
-def validate_mysql_replica(cmd, server):
+def validate_mysql_replica(server):
     # Tier validation
     if server.sku.tier == 'Burstable':
         raise ValidationError("Read replica is not supported for the Burstable pricing tier. "
