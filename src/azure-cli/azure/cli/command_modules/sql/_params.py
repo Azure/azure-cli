@@ -266,7 +266,8 @@ allow_data_loss_param_type = CLIArgumentType(
     'This will allow the failover to proceed even if a primary database is unavailable.')
 
 secondary_type_param_type = CLIArgumentType(
-    help='Intended usage of the secondary instance in the Failover Group. Standby indicates that the secondary instance will be used as a passive replica for disaster recovery only.')
+    help='Intended usage of the secondary instance in the Failover Group. '
+    'Standby indicates that the secondary instance will be used as a passive replica for disaster recovery only.')
 
 aad_admin_login_param_type = CLIArgumentType(
     options_list=['--display-name', '-u'],
@@ -2559,12 +2560,14 @@ def load_arguments(self, _):
                    arg_type=secondary_type_param_type)
 
         c.argument('resource_group_name_failover',
-                options_list=['--resource-group', '-g'],
-                help="Name of resource group of the secondary instance in the Instance Failover Group. You can configure the default group using `az configure --defaults group=<name>`")
+                    options_list=['--resource-group', '-g'],
+                    help='Name of resource group of the secondary instance in the Instance Failover Group. '
+                    'You can configure the default group using `az configure --defaults group=<name>`')
 
         c.argument('location_name_failover',
-                options_list=['--location', '-l'],
-                help="Location of the secondary instance in the Instance Failover Group. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`")
+                    options_list=['--location', '-l'],
+                    help='Location of the secondary instance in the Instance Failover Group. '
+                    'Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`')
 
     ###################################################
     #             sql sensitivity classification      #
