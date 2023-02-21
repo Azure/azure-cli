@@ -105,6 +105,7 @@ class Create(AAZCommand):
             options=["--labels"],
             arg_group="Routing Configuration",
             help="Space-separated list of labels for propagated route tables.",
+            is_preview=True,
         )
 
         propagated_ids = cls._args_schema.propagated_ids
