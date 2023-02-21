@@ -929,14 +929,14 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         from azure.cli.core import telemetry
         telemetry.set_region_identified(identified_region)
 
-    # In the latest profile, the default public IP will be expected to be changed from Basic to Standard.
-    # In order to avoid breaking change which has a big impact to users,
-    # we use the hint to guide users to use Standard public IP to create VM in the first stage.
-    if public_ip_sku is None and cmd.cli_ctx.cloud.profile == 'latest':
-        logger.warning(
-            'It is recommended to use parameter "--public-ip-sku Standard" to create new VM with Standard public IP. '
-            'Please note that the default public IP used for VM creation will be changed from Basic to Standard '
-            'in the future.')
+    # # In the latest profile, the default public IP will be expected to be changed from Basic to Standard.
+    # # In order to avoid breaking change which has a big impact to users,
+    # # we use the hint to guide users to use Standard public IP to create VM in the first stage.
+    # if public_ip_sku is None and cmd.cli_ctx.cloud.profile == 'latest':
+    #     logger.warning(
+    #         'It is recommended to use parameter "--public-ip-sku Standard" to create new VM with Standard public IP. '
+    #         'Please note that the default public IP used for VM creation will be changed from Basic to Standard '
+    #         'in the future.')
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
