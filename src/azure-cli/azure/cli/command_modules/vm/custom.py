@@ -911,6 +911,24 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     from azure.cli.command_modules.vm._vm_utils import ArmTemplateBuilder20190401
     from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
 
+    identified_region_maps = {
+        'westeurope': 'uksouth',
+        'francecentral': 'northeurope',
+        'germanywestcentral': 'northeurope'
+    }
+
+    identified_region = identified_region_maps.get(location)
+
+    if identified_region and cmd.cli_ctx.config.getboolean('core', 'display_region_identified', True):
+        logger.warning('Selecting "%s" may reduce your costs. '
+                       'The region you\'ve selected may cost more for the same services. '
+                       'You can disable this message in the future with the command'
+                       ' "az config set core.display_region_identified=false". '
+                       'Learn more at https://go.microsoft.com/fwlink/?linkid=222571 ',
+                       identified_region)
+        from azure.cli.core import telemetry
+        telemetry.set_region_identified(identified_region)
+
     # In the latest profile, the default public IP will be expected to be changed from Basic to Standard.
     # In order to avoid breaking change which has a big impact to users,
     # we use the hint to guide users to use Standard public IP to create VM in the first stage.
