@@ -110,7 +110,7 @@ jobs:
           git config --global user.email "AzPyCLI@microsoft.com"
           git config --global user.name "Azure CLI Team"
           git remote add ${GITHUB_REPO} https://${GITHUB_REPO}:${GITHUB_TOKEN}@github.com/${GITHUB_REPO}/azure-cli.git
-          git fetch ${GITHUB_REPO}
+          git fetch ${GITHUB_REPO} ${GITHUB_BRANCH}
 
           git checkout -b ${GITHUB_BRANCH} ${GITHUB_REPO}/${GITHUB_BRANCH}
     - template: ../../.azure-pipelines/templates/azdev_setup.yml
