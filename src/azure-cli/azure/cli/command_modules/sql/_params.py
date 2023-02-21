@@ -2560,14 +2560,15 @@ def load_arguments(self, _):
                    arg_type=secondary_type_param_type)
 
         c.argument('resource_group_name_failover',
-                    options_list=['--resource-group', '-g'],
-                    help='Name of resource group of the secondary instance in the Instance Failover Group. '
-                    'You can configure the default group using `az configure --defaults group=<name>`')
+                   options_list=['--resource-group', '-g'],
+                   help='Name of resource group of the secondary instance in the Instance Failover Group. '
+                   'You can configure the default group using `az configure --defaults group=<name>`')
 
         c.argument('location_name_failover',
-                    options_list=['--location', '-l'],
-                    help='Location of the secondary instance in the Instance Failover Group. '
-                    'Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`')
+                   options_list=['--location', '-l'],
+                   help='Location of the secondary instance in the Instance Failover Group. '
+                   'Values from: `az account list-locations`. You can configure the default location using '
+                   '`az configure --defaults location=<location>`')
 
     ###################################################
     #             sql sensitivity classification      #
