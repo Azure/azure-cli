@@ -550,21 +550,6 @@ class PacketCaptureStop(_PacketCaptureStop):
         get_network_watcher_from_location(self)
 
 
-def update_network_watcher_from_location(ctx, cli_ctx, watcher_name='watcher_name',
-                                         rg_name='watcher_rg'):
-
-    from ..aaz.latest.network.watcher import List as NetworkWatcherList
-    network_watcher_list = NetworkWatcherList(cli_ctx=cli_ctx)(command_args={})
-    args = ctx.args
-    location = args.location.to_serialized_data()
-    watcher = next((x for x in network_watcher_list if x['location'].lower() == location.lower()), None)
-    if not watcher:
-        raise ValidationError("network watcher is not enabled for region '{}'.".format(location))
-    id_parts = parse_resource_id(watcher['id'])
-    setattr(args, rg_name, id_parts['resource_group'])
-    setattr(args, watcher_name, id_parts['name'])
-
-
 class WatcherConnectionMonitorStart(_WatcherConnectionMonitorStart):
 
     @classmethod
@@ -587,10 +572,10 @@ class WatcherConnectionMonitorStart(_WatcherConnectionMonitorStart):
         return args_schema
 
     def pre_operations(self):
-        update_network_watcher_from_location(self.ctx,
-                                             self.cli_ctx,
-                                             watcher_name='network_watcher_name',
-                                             rg_name='resource_group_name')
+        get_network_watcher_from_location(self,
+                                          watcher_name='network_watcher_name',
+                                          rg_name='resource_group_name'
+                                          )
 
 
 class WatcherConnectionMonitorStop(_WatcherConnectionMonitorStop):
@@ -615,10 +600,10 @@ class WatcherConnectionMonitorStop(_WatcherConnectionMonitorStop):
         return args_schema
 
     def pre_operations(self):
-        update_network_watcher_from_location(self.ctx,
-                                             self.cli_ctx,
-                                             watcher_name='network_watcher_name',
-                                             rg_name='resource_group_name')
+        get_network_watcher_from_location(self,
+                                          watcher_name='network_watcher_name',
+                                          rg_name='resource_group_name'
+                                          )
 
 
 class WatcherConnectionMonitorList(_WatcherConnectionMonitorList):
@@ -643,10 +628,10 @@ class WatcherConnectionMonitorList(_WatcherConnectionMonitorList):
         return args_schema
 
     def pre_operations(self):
-        update_network_watcher_from_location(self.ctx,
-                                             self.cli_ctx,
-                                             watcher_name='network_watcher_name',
-                                             rg_name='resource_group_name')
+        get_network_watcher_from_location(self,
+                                          watcher_name='network_watcher_name',
+                                          rg_name='resource_group_name'
+                                          )
 
 
 class WatcherConnectionMonitorShow(_WatcherConnectionMonitorShow):
@@ -671,10 +656,10 @@ class WatcherConnectionMonitorShow(_WatcherConnectionMonitorShow):
         return args_schema
 
     def pre_operations(self):
-        update_network_watcher_from_location(self.ctx,
-                                             self.cli_ctx,
-                                             watcher_name='network_watcher_name',
-                                             rg_name='resource_group_name')
+        get_network_watcher_from_location(self,
+                                          watcher_name='network_watcher_name',
+                                          rg_name='resource_group_name'
+                                          )
 
 
 class WatcherConnectionMonitorQuery(_WatcherConnectionMonitorQuery):
@@ -699,10 +684,10 @@ class WatcherConnectionMonitorQuery(_WatcherConnectionMonitorQuery):
         return args_schema
 
     def pre_operations(self):
-        update_network_watcher_from_location(self.ctx,
-                                             self.cli_ctx,
-                                             watcher_name='network_watcher_name',
-                                             rg_name='resource_group_name')
+        get_network_watcher_from_location(self,
+                                          watcher_name='network_watcher_name',
+                                          rg_name='resource_group_name'
+                                          )
 
 
 class WatcherConnectionMonitorDelete(_WatcherConnectionMonitorDelete):
@@ -727,10 +712,10 @@ class WatcherConnectionMonitorDelete(_WatcherConnectionMonitorDelete):
         return args_schema
 
     def pre_operations(self):
-        update_network_watcher_from_location(self.ctx,
-                                             self.cli_ctx,
-                                             watcher_name='network_watcher_name',
-                                             rg_name='resource_group_name')
+        get_network_watcher_from_location(self,
+                                          watcher_name='network_watcher_name',
+                                          rg_name='resource_group_name'
+                                          )
 
 
 class NwFlowLogCreate(_NwFlowLogCreate):
@@ -1096,3 +1081,4 @@ class NwTroubleshootingShow(_NwTroubleshootingShow):
         get_network_watcher_from_resource(self)
         if has_value(args.resource):
             args.target_resource_id = args.resource
+
