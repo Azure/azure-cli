@@ -245,6 +245,9 @@ def _validate_azure_ad_authentication_supported_on_sqlvm(cli_ctx, namespace):
     except Exception as ex:
         raise InvalidArgumentValueError("Unable to validate Azure AD authentication due to retrieving SQL VM instance encountering an error: {}.".format(ex)) from ex
 
+    if sqlvm.sql_management != "Full":
+        raise InvalidArgumentValueError("Enabling Azure AD authentication requires Full SQL VM management mode")
+
     # Construct error message for unsupported SQL server version or OS platform.
     unsupported_error = "Azure AD authentication requires SQL Server 2022 on Windows platform but the SQL Image Offer of this SQL VM is {}".format(sqlvm.sql_image_offer)
 
