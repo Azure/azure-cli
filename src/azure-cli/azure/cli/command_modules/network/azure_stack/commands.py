@@ -14,7 +14,7 @@ from azure.cli.core.profiles import get_api_version, ResourceType
 from azure.cli.command_modules.network.azure_stack._client_factory import (
     cf_application_gateways, cf_express_route_circuit_authorizations,
     cf_express_route_circuit_peerings, cf_express_route_circuits,
-    cf_express_route_service_providers, cf_local_network_gateways,
+    cf_express_route_service_providers,
     cf_network_interfaces, cf_network_security_groups, cf_network_watcher, cf_packet_capture,
     cf_virtual_networks, cf_virtual_network_peerings, cf_virtual_network_gateway_connections,
     cf_virtual_network_gateways,
@@ -31,7 +31,7 @@ from azure.cli.command_modules.network.azure_stack._client_factory import (
 from azure.cli.command_modules.network.azure_stack._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network.azure_stack._format import (
-    transform_local_gateway_table_output, transform_dns_record_set_output,
+    transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
     transform_vnet_create_output, transform_public_ip_create_output,
     transform_traffic_manager_create_output, transform_nic_create_output,
@@ -185,11 +185,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#PrivateLinkServicesOperations.{}',
         client_factory=cf_private_link_services,
         min_api='2019-04-01'
-    )
-
-    network_lgw_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#LocalNetworkGatewaysOperations.{}',
-        client_factory=cf_local_network_gateways
     )
 
     network_nic_sdk = CliCommandType(
@@ -744,11 +739,6 @@ def load_command_table(self, _):
                          table_transformer=deployment_validate_table_format,
                          validator=process_lb_create_namespace,
                          exception_handler=handle_template_based_exception)
-    # endregion
-
-    # region LocalGateways
-    with self.command_group('network local-gateway', network_lgw_sdk) as g:
-        g.command('list', 'list', table_transformer=transform_local_gateway_table_output)
     # endregion
 
     # region NetworkInterfaces: (NIC)
