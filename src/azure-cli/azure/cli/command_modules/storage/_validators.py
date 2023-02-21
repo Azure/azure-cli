@@ -6,11 +6,12 @@
 # pylint: disable=protected-access
 import os
 import argparse
+from ipaddress import ip_network
 
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
-from azure.cli.core.azclierror import UnrecognizedArgumentError
+from azure.cli.core.azclierror import UnrecognizedArgumentError, InvalidArgumentValueError
 
 from azure.cli.command_modules.storage._client_factory import (get_storage_data_service_client,
                                                                blob_data_service_factory,
@@ -2233,6 +2234,23 @@ def validate_fs_file_set_expiry(namespace):
         namespace.expires_on = get_datetime_type(False)(namespace.expires_on)
     except ValueError:
         pass
+
+
+def validate_ip_address(namespace):
+    # if there are overlapping ip ranges, throw an exception
+    ip_address = namespace.ip_address
+
+    if not ip_address:
+        return
+
+    ip_address_networks = [ip_network(ip) for ip in ip_address]
+    for idx, ip_address_network in enumerate(ip_address_networks):
+        for idx2, ip_address_network2 in enumerate(ip_address_networks):
+            if idx == idx2:
+                continue
+            if ip_address_network.overlaps(ip_address_network2):
+                raise InvalidArgumentValueError(f"ip addresses {ip_address_network} and {ip_address_network2} "
+                                                f"provided are overlapping: --ip_address ip1 [ip2]...")
 
 
 # pylint: disable=too-few-public-methods

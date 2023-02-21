@@ -622,8 +622,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, id_part=None)
 
     with self.argument_context('storage account network-rule', resource_type=ResourceType.MGMT_STORAGE) as c:
+        from ._validators import validate_ip_address
         c.argument('account_name', acct_name_type, id_part=None)
-        c.argument('ip_address', help='IPv4 address or CIDR range.')
+        c.argument('ip_address', nargs='*', help='IPv4 address or CIDR range. Can supply a list: --ip-address ip1 '
+                                                 '[ip2]...', validator=validate_ip_address)
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
         c.argument('action', action_type)
@@ -631,12 +633,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    min_api='2020-08-01-preview')
         c.argument('tenant_id', help='The tenant id to add in network rule.', arg_group='Resource Access Rule',
                    min_api='2020-08-01-preview')
-
-    for item in ['add', 'remove']:
-        with self.argument_context('storage account network-rule {}'.format(item),
-                                   resource_type=ResourceType.MGMT_STORAGE) as c:
-            c.argument('ip_address', nargs='*', help='IPv4 address or CIDR range. Can supply a list: --ip-address ip1 '
-                                                     '[ip2]...')
 
     with self.argument_context('storage account blob-service-properties show',
                                resource_type=ResourceType.MGMT_STORAGE) as c:

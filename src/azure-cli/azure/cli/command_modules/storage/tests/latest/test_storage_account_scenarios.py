@@ -28,7 +28,8 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'vnet': 'vnet1',
             'subnet': 'subnet1',
             'ip1': '25.1.2.3',
-            'ip2': '25.2.0.0/24'
+            'ip2': '25.2.0.0/24',
+            'ip3': '25.1.2.3/32'
         }
         self.cmd('storage account create -g {rg} -n {acc} --bypass Metrics --default-action Deny --https-only'.format(**kwargs),
                  checks=[
@@ -66,6 +67,20 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         # test network-rule add idempotent
         self.cmd(
             'storage account network-rule add -g {rg} --account-name {acc} --vnet-name {vnet} --subnet {subnet}'.format(
+                **kwargs))
+        self.cmd('storage account network-rule list -g {rg} --account-name {acc}'.format(**kwargs), checks=[
+            JMESPathCheck('length(ipRules)', 2),
+            JMESPathCheck('length(virtualNetworkRules)', 1)
+        ])
+        # test add multiple ip addresses with overlaps between them
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd(
+                'storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip1} {ip3}'.format(
+                    **kwargs))
+        # test add multiple ip addresses with some overlaps with the server
+        self.cmd(
+            'storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip2} {ip3}'.format(
                 **kwargs))
         self.cmd('storage account network-rule list -g {rg} --account-name {acc}'.format(**kwargs), checks=[
             JMESPathCheck('length(ipRules)', 2),

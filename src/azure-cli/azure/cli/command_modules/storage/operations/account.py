@@ -6,6 +6,7 @@
 """Custom operations for storage account commands"""
 
 import os
+from ipaddress import ip_network
 from azure.cli.command_modules.storage._client_factory import storage_client_factory, cf_sa_for_keys
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, find_child_item, user_confirmation
 from azure.cli.core.profiles import ResourceType, get_sdk
@@ -629,6 +630,8 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
                      vnet_name=None, ip_address=None, tenant_id=None, resource_id=None):  # pylint: disable=unused-argument
     sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_rule_set
+    if not subnet and not ip_address:
+        logger.warning('No subnet or ip address supplied.')
     if subnet:
         from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(subnet):
@@ -644,8 +647,17 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
         if not rules.ip_rules:
             rules.ip_rules = []
         for ip in ip_address:
-            rules.ip_rules = [r for r in rules.ip_rules if r.ip_address_or_range != ip]
-            rules.ip_rules.append(IpRule(ip_address_or_range=ip, action=action))
+            to_modify = True
+            for x in rules.ip_rules:
+                existing_ip_network = ip_network(x.ip_address_or_range)
+                new_ip_network = ip_network(ip)
+                if new_ip_network.overlaps(existing_ip_network):
+                    logger.warning("IP/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
+                                   ip, x.ip_address_or_range)
+                    to_modify = False
+                    break
+            if to_modify:
+                rules.ip_rules.append(IpRule(ip_address_or_range=ip, action=action))
     if resource_id:
         ResourceAccessRule = cmd.get_models('ResourceAccessRule')
         if not rules.resource_access_rules:
@@ -667,7 +679,9 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
         rules.virtual_network_rules = [x for x in rules.virtual_network_rules
                                        if not x.virtual_network_resource_id.endswith(subnet)]
     if ip_address:
-        rules.ip_rules = list(filter(lambda x: all(x.ip_address_or_range != i for i in ip_address), rules.ip_rules))
+        to_remove = [ip_network(x) for x in ip_address]
+        rules.ip_rules = list(filter(lambda x: all(ip_network(x.ip_address_or_range) != i for i in to_remove),
+                                     rules.ip_rules))
 
     if resource_id:
         rules.resource_access_rules = [x for x in rules.resource_access_rules if
