@@ -11,13 +11,11 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
 
 from azure.cli.command_modules.network._client_factory import (
-    cf_network_interfaces, cf_network_watcher, cf_packet_capture,
+    cf_network_watcher, cf_packet_capture,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_connection_monitor,
     cf_dns_references,
     cf_virtual_router, cf_virtual_router_peering, cf_flow_logs)
-from azure.cli.command_modules.network._util import (
-    list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
@@ -50,11 +48,6 @@ NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
 def load_command_table(self, _):
 
     # region Command Types
-    network_util = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network._util#{}',
-        client_factory=None
-    )
-
     network_dns_zone_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.dns.operations#ZonesOperations.{}',
         client_factory=cf_dns_mgmt_zones,
@@ -72,11 +65,6 @@ def load_command_table(self, _):
         client_factory=cf_dns_references,
         resource_type=ResourceType.MGMT_NETWORK_DNS,
         min_api='2018-05-01'
-    )
-
-    network_nic_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#NetworkInterfacesOperations.{}',
-        client_factory=cf_network_interfaces
     )
 
     network_watcher_sdk = CliCommandType(
@@ -126,11 +114,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.cli.command_modules.network.custom#{}',
         client_factory=cf_virtual_router_peering,
         min_api='2019-08-01'
-    )
-
-    network_nic_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
-        client_factory=cf_network_interfaces
     )
     # endregion
 
@@ -523,26 +506,16 @@ def load_command_table(self, _):
         self.command_table["network nic list-effective-nsg"] = ListEffectiveNsg(loader=self, table_transformer=transform_effective_nsg)
         self.command_table["network nic show-effective-route-table"] = ShowEffectiveRouteTable(loader=self, table_transformer=transform_effective_route_table)
 
-    resource = 'network_interfaces'
-    subresource = 'ip_configurations'
-    with self.command_group('network nic ip-config', network_nic_sdk) as g:
-        g.custom_command('create', 'create_nic_ip_config')
-        g.generic_update_command('update',
-                                 child_collection_prop_name='ip_configurations', child_arg_name='ip_config_name',
-                                 setter_name='update_nic_ip_config_setter',
-                                 setter_type=network_nic_custom,
-                                 custom_func_name='set_nic_ip_config')
-        g.command('list', list_network_resource_property(resource, subresource), command_type=network_util)
-        g.show_command('show', get_network_resource_property_entry(resource, subresource), command_type=network_util)
-        g.command('delete', delete_network_resource_property_entry(resource, subresource), command_type=network_util)
+    with self.command_group("network nic ip-config"):
+        from .custom import NICIPConfigCreate, NICIPConfigUpdate, NICIPConfigNATAdd, NICIPConfigNATRemove
+        self.command_table["network nic ip-config create"] = NICIPConfigCreate(loader=self)
+        self.command_table["network nic ip-config update"] = NICIPConfigUpdate(loader=self)
+        self.command_table["network nic ip-config inbound-nat-rule add"] = NICIPConfigNATAdd(loader=self)
+        self.command_table["network nic ip-config inbound-nat-rule remove"] = NICIPConfigNATRemove(loader=self)
 
-    with self.command_group('network nic ip-config address-pool') as g:
-        g.custom_command('add', 'add_nic_ip_config_address_pool')
-        g.custom_command('remove', 'remove_nic_ip_config_address_pool')
-
-    with self.command_group('network nic ip-config inbound-nat-rule') as g:
-        g.custom_command('add', 'add_nic_ip_config_inbound_nat_rule')
-        g.custom_command('remove', 'remove_nic_ip_config_inbound_nat_rule')
+    with self.command_group("network nic ip-config address-pool") as g:
+        g.custom_command("add", "add_nic_ip_config_address_pool")
+        g.custom_command("remove", "remove_nic_ip_config_address_pool")
     # endregion
 
     # region NetworkSecurityGroups
@@ -560,13 +533,14 @@ def load_command_table(self, _):
     # endregion
 
     # region NetworkWatchers
-    with self.command_group('network watcher', network_watcher_sdk, client_factory=cf_network_watcher, min_api='2016-09-01') as g:
-        g.custom_command('configure', 'configure_network_watcher')
-        # g.command('list', 'list_all')
-        g.custom_command('test-ip-flow', 'check_nw_ip_flow', client_factory=cf_network_watcher)
+    with self.command_group("network watcher", network_watcher_sdk, client_factory=cf_network_watcher) as g:
+        from .operations.watcher import TestIPFlow, ShowNextHop, ShowSecurityGroupView
+        self.command_table["network watcher test-ip-flow"] = TestIPFlow(loader=self)
+        self.command_table["network watcher show-next-hop"] = ShowNextHop(loader=self)
+        self.command_table["network watcher show-security-group-view"] = ShowSecurityGroupView(loader=self)
+        g.custom_command("configure", "configure_network_watcher")
+
         g.custom_command('test-connectivity', 'check_nw_connectivity', client_factory=cf_network_watcher, validator=process_nw_test_connectivity_namespace, is_preview=True)
-        g.custom_command('show-next-hop', 'show_nw_next_hop', client_factory=cf_network_watcher)
-        g.custom_command('show-security-group-view', 'show_nw_security_view', client_factory=cf_network_watcher)
         g.custom_command('show-topology', 'show_topology_watcher', validator=process_nw_topology_namespace)
         g.custom_command('run-configuration-diagnostic', 'run_network_configuration_diagnostic', client_factory=cf_network_watcher, min_api='2018-06-01', validator=process_nw_config_diagnostic_namespace)
 
