@@ -9,7 +9,7 @@ from ._base import AAZBaseType, AAZValuePatch, AAZUndefined
 from ._field_value import AAZObject, AAZDict, AAZFreeFormDict, AAZList, AAZSimpleValue
 from ._utils import to_snack_case
 from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, AAZValuePrecisionLossError, \
-    AAZInvalidFieldError
+    AAZInvalidFieldError, AAZInvalidValueError
 
 # pylint: disable=protected-access, too-few-public-methods, isinstance-second-argument-not-valid-type
 # pylint: disable=too-many-instance-attributes
@@ -33,6 +33,9 @@ class AAZSimpleType(AAZBaseType):
                 return None
             return AAZValuePatch.build(self)
 
+        if data == AAZUndefined:
+            return AAZValuePatch.build(self)
+
         if isinstance(data, AAZSimpleValue):
             if data._is_patch:
                 # return value patch
@@ -40,8 +43,10 @@ class AAZSimpleType(AAZBaseType):
 
             data = data._data
 
-        assert self.DataType is not None and isinstance(data, self.DataType), \
-            f'Expect {self.DataType}, got {data} ({type(data)}'
+        assert self.DataType is not None
+        if not isinstance(data, self.DataType):
+            raise AAZInvalidValueError('Expect {}, got {} ({})'.format(self.DataType, data, type(data)))
+
         return data
 
 
@@ -67,6 +72,9 @@ class AAZFloatType(AAZSimpleType):
                 return None
             return AAZValuePatch.build(self)
 
+        if data == AAZUndefined:
+            return AAZValuePatch.build(self)
+
         if isinstance(data, AAZSimpleValue):
             if data._is_patch:
                 # return value patch
@@ -79,7 +87,10 @@ class AAZFloatType(AAZSimpleType):
             if float(data) != data:
                 raise AAZValuePrecisionLossError(data, float(data))
             data = float(data)
-        assert isinstance(data, self.DataType), f'Expect {self.DataType}, got {data} ({type(data)}'
+
+        if not isinstance(data, self.DataType):
+            raise AAZInvalidValueError('Expect {}, got {} ({})'.format(self.DataType, data, type(data)))
+
         return data
 
 
@@ -179,6 +190,9 @@ class AAZObjectType(AAZBaseType):
                 return None
             return AAZValuePatch.build(self)
 
+        if data == AAZUndefined:
+            return AAZValuePatch.build(self)
+
         if isinstance(data, AAZObject) and data._is_patch:
             # use value patch
             result = AAZValuePatch.build(self)
@@ -202,7 +216,8 @@ class AAZObjectType(AAZBaseType):
                 value[key] = data[key]
 
         else:
-            assert isinstance(data, (dict,))
+            if not isinstance(data, dict):
+                raise AAZInvalidValueError("Expect <class 'dict'>, got {} ({})".format(data, type(data)))
 
             if self._discriminator_field_name:
                 # assign discriminator field first
@@ -246,7 +261,9 @@ class AAZObjectType(AAZBaseType):
             return None
         if isinstance(data, AAZObject):
             data = data._data
-        assert isinstance(data, dict)
+        if not isinstance(data, dict):
+            raise AAZInvalidValueError("Expect <class 'dict'>, got {} ({})".format(data, type(data)))
+
         for key, field_data in data.items():
             name = self.get_attr_name(key)
             if name == self._discriminator_field_name:
@@ -272,6 +289,9 @@ class AAZBaseDictType(AAZBaseType):
                 return None
             return AAZValuePatch.build(self)
 
+        if data == AAZUndefined:
+            return AAZValuePatch.build(self)
+
         if isinstance(data, self._ValueCls) and data._is_patch:
             # use value patch
             result = AAZValuePatch.build(self)
@@ -284,7 +304,9 @@ class AAZBaseDictType(AAZBaseType):
             for key in data._data.keys():
                 value[key] = data[key]
         else:
-            assert isinstance(data, (dict,))
+            if not isinstance(data, dict):
+                raise AAZInvalidValueError("Expect <class 'dict'>, got {} ({})".format(data, type(data)))
+
             for key, sub_data in data.items():
                 value[key] = sub_data
         return result
@@ -366,6 +388,9 @@ class AAZListType(AAZBaseType):
                 return None
             return AAZValuePatch.build(self)
 
+        if data == AAZUndefined:
+            return AAZValuePatch.build(self)
+
         if isinstance(data, AAZList) and data._is_patch:
             # use value patch
             result = AAZValuePatch.build(self)
@@ -377,7 +402,9 @@ class AAZListType(AAZBaseType):
             for idx in data._data.keys():
                 value[idx] = data[idx]
         else:
-            assert isinstance(data, list)
+            if not isinstance(data, list):
+                raise AAZInvalidValueError("Expect <class 'list'>, got {} ({})".format(data, type(data)))
+
             for idx, sub_data in enumerate(data):
                 value[idx] = sub_data
 

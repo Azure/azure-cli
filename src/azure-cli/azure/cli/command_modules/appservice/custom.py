@@ -168,17 +168,18 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                vnet_resource_group=subnet_info["resource_group_name"],
                                vnet_name=subnet_info["vnet_name"],
                                subnet_name=subnet_info["subnet_name"])
-        site_config.vnet_route_all_enabled = True
         subnet_resource_id = subnet_info["subnet_resource_id"]
+        vnet_route_all_enabled = True
     else:
         subnet_resource_id = None
+        vnet_route_all_enabled = None
 
     if using_webapp_up:
         https_only = using_webapp_up
 
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=https_only, virtual_network_subnet_id=subnet_resource_id,
-                      public_network_access=public_network_access)
+                      public_network_access=public_network_access, vnet_route_all_enabled=vnet_route_all_enabled)
     if runtime:
         runtime = _StackRuntimeHelper.remove_delimiters(runtime)
 
@@ -394,7 +395,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                     for t in temp:
                         if 'slotSetting' in t.keys():
                             slot_result[t['name']] = t['slotSetting']
-                        if setting_type == "SlotSettings":
+                        elif setting_type == "SlotSettings":
                             slot_result[t['name']] = True
                         result[t['name']] = t['value']
                 else:
@@ -1137,8 +1138,18 @@ def list_function_app_runtimes(cmd, os_type=None):
     return {WINDOWS_OS_NAME: windows_stacks, LINUX_OS_NAME: linux_stacks}
 
 
-def delete_function_app(cmd, resource_group_name, name, slot=None):
+def delete_logic_app(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'delete', slot)
+
+
+def delete_function_app(cmd, resource_group_name, name, keep_empty_plan=None, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        client.web_apps.delete_slot(resource_group_name, name, slot,
+                                    delete_empty_server_farm=False if keep_empty_plan else None)
+    else:
+        client.web_apps.delete(resource_group_name, name,
+                               delete_empty_server_farm=False if keep_empty_plan else None)
 
 
 def delete_webapp(cmd, resource_group_name, name, keep_metrics=None, keep_empty_plan=None,
@@ -1325,7 +1336,7 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 # pylint: disable=unused-argument
 def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_workers=None, linux_fx_version=None,
                         windows_fx_version=None, pre_warmed_instance_count=None, php_version=None,
-                        python_version=None, net_framework_version=None,
+                        python_version=None, net_framework_version=None, power_shell_version=None,
                         java_version=None, java_container=None, java_container_version=None,
                         remote_debugging_enabled=None, web_sockets_enabled=None,
                         always_on=None, auto_heal_enabled=None,
@@ -1931,6 +1942,7 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
 
     client = web_client_factory(cmd.cli_ctx)
     if app_service_environment:
+        # Method app_service_environments.list can only list ASE form the same subscription.
         ase_list = client.app_service_environments.list()
         ase_found = False
         ase = None
@@ -1941,8 +1953,17 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
                 ase_found = True
                 break
         if not ase_found:
-            err_msg = "App service environment '{}' not found in subscription.".format(app_service_environment)
-            raise ResourceNotFoundError(err_msg)
+            if is_valid_resource_id(app_service_environment):
+                ase_def = HostingEnvironmentProfile(id=app_service_environment)
+                if location is None:
+                    location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+            else:
+                err_msg = "App service environment '{}' not found in subscription. If you want to create the \
+app service plan in different subscription than the app service environment, please use the resource ID for \
+--app-service-environment parameter. Additionally if the resource group is in different region than the \
+app service environment, please use --location parameter and specify the region where the app service environment \
+has been deployed ".format(app_service_environment)
+                raise ResourceNotFoundError(err_msg)
         if hyper_v and ase.kind in ('ASEV1', 'ASEV2'):
             raise ArgumentUsageError('Windows containers are only supported on v3 App Service Environments v3 or newer')
     else:  # Non-ASE
@@ -2142,6 +2163,13 @@ def restore_backup(cmd, resource_group_name, webapp_name, storage_account_url, b
         return client.web_apps.begin_restore_slot(resource_group_name, webapp_name, 0, slot, restore_request)
 
     return client.web_apps.begin_restore(resource_group_name, webapp_name, 0, restore_request)
+
+
+def delete_backup(cmd, resource_group_name, webapp_name, backup_id, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.delete_backup_slot(resource_group_name, webapp_name, backup_id, slot)
+    return client.web_apps.delete_backup(resource_group_name, webapp_name, backup_id)
 
 
 def list_snapshots(cmd, resource_group_name, name, slot=None):
@@ -2530,6 +2558,16 @@ def show_traffic_routing(cmd, resource_group_name, name):
 
 def clear_traffic_routing(cmd, resource_group_name, name):
     set_traffic_routing(cmd, resource_group_name, name, [])
+
+
+def enable_credentials(cmd, resource_group_name, name, enable, slot=None):
+    from azure.mgmt.web.models import CorsSettings
+    configs = get_site_configs(cmd, resource_group_name, name, slot)
+    if not configs.cors:
+        configs.cors = CorsSettings()
+    configs.cors.support_credentials = enable
+    result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    return result.cors
 
 
 def add_cors(cmd, resource_group_name, name, allowed_origins, slot=None):
@@ -3474,13 +3512,15 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                vnet_resource_group=subnet_info["resource_group_name"],
                                vnet_name=subnet_info["vnet_name"],
                                subnet_name=subnet_info["subnet_name"])
-        site_config.vnet_route_all_enabled = True
         subnet_resource_id = subnet_info["subnet_resource_id"]
+        vnet_route_all_enabled = True
     else:
         subnet_resource_id = None
+        vnet_route_all_enabled = None
 
     functionapp_def = Site(location=None, site_config=site_config, tags=tags,
-                           virtual_network_subnet_id=subnet_resource_id, https_only=https_only)
+                           virtual_network_subnet_id=subnet_resource_id, https_only=https_only,
+                           vnet_route_all_enabled=vnet_route_all_enabled)
 
     plan_info = None
     if runtime is not None:
@@ -4117,6 +4157,14 @@ def add_webapp_vnet_integration(cmd, name, resource_group_name, vnet, subnet, sl
 
 def add_functionapp_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None,
                                      skip_delegation_check=False):
+    client = web_client_factory(cmd.cli_ctx)
+    functionapp = get_functionapp(cmd, resource_group_name, name)
+    parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
+    plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
+    if plan_info is None:
+        raise ResourceNotFoundError('Could not determine the current plan of the functionapp')
+    if is_plan_consumption(cmd, plan_info):
+        raise ValidationError('Virtual network integration is not allowed for consumption plans')
     return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check)
 
 
@@ -4142,14 +4190,10 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
                                subnet_name=subnet_info["subnet_name"])
 
     app.virtual_network_subnet_id = subnet_info["subnet_resource_id"]
+    app.vnet_route_all_enabled = True
 
     _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update', slot,
                             client=client, extra_parameter=app)
-
-    # Enable Route All configuration
-    config = get_site_configs(cmd, resource_group_name, name, slot)
-    if config.vnet_route_all_enabled is not True:
-        config = update_site_configs(cmd, resource_group_name, name, slot=slot, vnet_route_all_enabled='true')
 
     return {
         "id": subnet_info["vnet_resource_id"],
@@ -4569,7 +4613,7 @@ def get_tunnel(cmd, resource_group_name, name, port=None, slot=None, instance=No
 
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
 
-    tunnel_server = TunnelServer('', port, scm_url, profile_user_name, profile_user_password, instance)
+    tunnel_server = TunnelServer('127.0.0.1', port, scm_url, profile_user_name, profile_user_password, instance)
     _ping_scm_site(cmd, resource_group_name, name, instance=instance)
 
     _wait_for_webapp(tunnel_server)
@@ -4582,7 +4626,7 @@ def create_tunnel(cmd, resource_group_name, name, port=None, slot=None, timeout=
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
     t.start()
-
+    logger.warning('Opening tunnel on addr: %s', tunnel_server.local_addr)
     logger.warning('Opening tunnel on port: %s', tunnel_server.local_port)
 
     config = get_site_configs(cmd, resource_group_name, name, slot)
@@ -4978,6 +5022,11 @@ def delete_host_key(cmd, resource_group_name, name, key_type, key_name, slot=Non
     if slot:
         return client.web_apps.delete_host_secret_slot(resource_group_name, name, key_type, key_name, slot)
     return client.web_apps.delete_host_secret(resource_group_name, name, key_type, key_name)
+
+
+def list_functions(cmd, resource_group_name, name):
+    client = web_client_factory(cmd.cli_ctx)
+    return client.web_apps.list_functions(resource_group_name, name)
 
 
 def show_function(cmd, resource_group_name, name, function_name):

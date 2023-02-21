@@ -2468,8 +2468,13 @@ def _security_domain_gen_blob(sd_exchange_key, share_arrays, enc_data, required)
     return json.dumps(security_domain_restore_data.to_json())
 
 
-def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_wrapping_keys, passwords=None,
-                           identifier=None, vault_base_url=None, no_wait=False):  # pylint: disable=unused-argument
+def _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, passwords=None):
+
+    if not sd_exchange_key:
+        raise RequiredArgumentMissingError('Please specify --sd-exchange-key')
+    if not sd_wrapping_keys:
+        raise RequiredArgumentMissingError('Please specify --sd-wrapping-keys')
+
     resource_paths = [sd_file, sd_exchange_key]
     for p in resource_paths:
         if not os.path.exists(p):
@@ -2506,10 +2511,15 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_w
         shared_keys=shared_keys,
         required=required
     )
-    SecurityDomainObject = cmd.get_models('SecurityDomainObject', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+    return restore_blob_value
+
+
+def _security_domain_upload_blob(cmd, client, hsm_name, restore_blob_value, identifier=None,
+                                 vault_base_url=None, no_wait=False):
+    SecurityDomainObject = cmd.get_models('SecurityDomainObject',
+                                          resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
     security_domain = SecurityDomainObject(value=restore_blob_value)
     retval = client.upload(vault_base_url=hsm_name or vault_base_url, security_domain=security_domain)
-
     if no_wait:
         return retval
 
@@ -2519,6 +2529,34 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_w
     if new_retval:
         return new_retval
     return retval
+
+
+def security_domain_upload(cmd, client, hsm_name, sd_file, restore_blob=False, sd_exchange_key=None,
+                           sd_wrapping_keys=None, passwords=None, identifier=None, vault_base_url=None,
+                           no_wait=False):  # pylint: disable=unused-argument
+    if not restore_blob:
+        restore_blob_value = _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys)
+    else:
+        with open(sd_file, 'r') as f:
+            restore_blob_value = f.read()
+            if not restore_blob_value:
+                raise CLIError('Empty restore_blob_value.')
+    retval = _security_domain_upload_blob(cmd, client, hsm_name, restore_blob_value,
+                                          identifier, vault_base_url, no_wait)
+    return retval
+
+
+def security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, sd_file_restore_blob,
+                                 passwords=None):  # pylint: disable=unused-argument
+    restore_blob_value = _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys,
+                                                       passwords)
+    try:
+        with open(sd_file_restore_blob, 'w') as f:
+            f.write(restore_blob_value)
+    except Exception as ex:  # pylint: disable=broad-except
+        if os.path.isfile(sd_file_restore_blob):
+            os.remove(sd_file_restore_blob)
+        raise ex
 
 
 def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_domain_file, sd_quorum,

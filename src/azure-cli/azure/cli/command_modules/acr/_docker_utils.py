@@ -529,7 +529,8 @@ def get_manifest_authorization_header(username, password):
     else:
         auth = _get_basic_auth_str(username, password)
     return {'Authorization': auth,
-            'Accept': '*/*, application/vnd.cncf.oras.artifact.manifest.v1+json'
+            'Accept': '*/*, application/vnd.oci.artifact.manifest.v1+json'
+            ', application/vnd.cncf.oras.artifact.manifest.v1+json'
             ', application/vnd.oci.image.manifest.v1+json'}
 
 

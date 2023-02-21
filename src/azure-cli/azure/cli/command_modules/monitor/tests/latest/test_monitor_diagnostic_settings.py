@@ -6,6 +6,7 @@
 import json
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer
 from azure.core.exceptions import HttpResponseError
+from azure.cli.core.azclierror import ArgumentUsageError
 
 class TestMonitorDiagnosticSettings(ScenarioTest):
     @ResourceGroupPreparer(location='southcentralus')
@@ -104,6 +105,38 @@ class TestMonitorDiagnosticSettings(ScenarioTest):
                                                        'found or does not support the required functionality.'):
             self.cmd('monitor diagnostic-settings create -n test01 --resource {nsg} --resource-type Microsoft.Network/networkSecurityGroups --resource-group {rg} --storage-account {sa} --marketplace-partner-id {mp_id} --logs \'{log_config}\' -o json')
 
+    @ResourceGroupPreparer(location='southcentralus')
+    @StorageAccountPreparer(location='southcentralus')
+    def test_monitor_diagnostic_settings_resource_id(self, resource_group, storage_account):
+        self.kwargs.update({
+            'nsg': self.create_random_name(prefix='nsg', length=16)
+        })
+        self.cmd('network nsg create -n {nsg} -g {rg}')
+        self.kwargs['resource_id'] = self.cmd('network nsg show -n {nsg} -g {rg}').get_output_in_json()['id']
+
+        self.cmd('monitor diagnostic-settings create -n test01 --resource {resource_id} --storage-account {sa} -o json',
+                 checks=self.check('name', 'test01'))
+
+    @ResourceGroupPreparer(location='southcentralus')
+    @StorageAccountPreparer(location='southcentralus')
+    def test_monitor_diagnostic_settings_workspace(self, resource_group, storage_account):
+
+        self.kwargs.update({
+            'nsg': self.create_random_name(prefix='nsg', length=16),
+            'ws': self.create_random_name(prefix='ws', length=16)
+        })
+        self.cmd('network nsg create -n {nsg} -g {rg}')
+        self.kwargs['resource_id'] = self.cmd('network nsg show -n {nsg} -g {rg}').get_output_in_json()['id']
+        self.cmd('monitor log-analytics workspace create -g {rg} -n {ws}')
+
+        self.cmd('monitor diagnostic-settings create -n test01 --resource {resource_id} --storage-account {sa} --workspace {ws} --export-to-resource-specific -o json',
+                 checks=[
+                     self.check('name', 'test01'),
+                     self.check('logAnalyticsDestinationType', 'Dedicated')
+                 ])
+
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('monitor diagnostic-settings create -n test02 --resource {resource_id} --storage-account {sa} --export-to-resource-specific -o json')
 
 
 if __name__ == '__main__':

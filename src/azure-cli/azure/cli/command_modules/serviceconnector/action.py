@@ -127,6 +127,34 @@ class AddSystemAssignedIdentityAuthInfo(argparse.Action):
         return d
 
 
+class AddUserAccountAuthInfo(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        namespace.user_account_auth_info = action
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        try:
+            properties = defaultdict(list)
+            for (k, v) in (x.split('=', 1) for x in values):
+                properties[k].append(v)
+            properties = dict(properties)
+        except ValueError:
+            raise ValidationError('usage error: {} [KEY=VALUE ...]'.format(option_string))
+        d = {}
+        for k in properties:
+            kl = k.lower()
+            v = properties[k]
+            if kl == 'object-id':
+                d['principal_id'] = v[0]
+            elif kl == 'mysql-identity-id':
+                d['mysql-identity-id'] = v[0]
+            else:
+                raise ValidationError('Unsupported Key {} is provided for parameter --user-account. All '
+                                      'possible keys are: principal-id, mysql-identity-id'.format(k))
+        d['auth_type'] = 'userAccount'
+        return d
+
+
 class AddServicePrincipalAuthInfo(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)

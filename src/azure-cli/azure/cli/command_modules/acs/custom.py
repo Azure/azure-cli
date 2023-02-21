@@ -73,10 +73,12 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
     AzureInternalError,
+    CLIInternalError,
     FileOperationError,
     InvalidArgumentValueError,
     MutuallyExclusiveArgumentError,
     ResourceNotFoundError,
+    UnknownError,
     ValidationError,
 )
 from azure.cli.core.commands import LongRunningOperation
@@ -435,10 +437,13 @@ def aks_create(
     azure_keyvault_kms_key_id=None,
     azure_keyvault_kms_key_vault_network_access=None,
     azure_keyvault_kms_key_vault_resource_id=None,
+    enable_keda=False,
     # addons
     enable_addons=None,
     workspace_resource_id=None,
     enable_msi_auth_for_monitoring=False,
+    enable_syslog=False,
+    data_collection_settings=None,
     aci_subnet_name=None,
     appgw_name=None,
     appgw_subnet_cidr=None,
@@ -475,12 +480,12 @@ def aks_create(
     enable_fips_image=False,
     kubelet_config=None,
     linux_os_config=None,
-    no_wait=False,
-    yes=False,
-    aks_custom_headers=None,
     host_group_id=None,
     gpu_instance_profile=None,
-    enable_syslog=False,
+    # misc
+    yes=False,
+    no_wait=False,
+    aks_custom_headers=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -558,6 +563,9 @@ def aks_update(
     azure_keyvault_kms_key_id=None,
     azure_keyvault_kms_key_vault_network_access=None,
     azure_keyvault_kms_key_vault_resource_id=None,
+    http_proxy_config=None,
+    enable_keda=False,
+    disable_keda=False,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
@@ -569,9 +577,9 @@ def aks_update(
     min_count=None,
     max_count=None,
     nodepool_labels=None,
-    http_proxy_config=None,
-    no_wait=False,
+    # misc
     yes=False,
+    no_wait=False,
     aks_custom_headers=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
@@ -638,7 +646,8 @@ def aks_upgrade(cmd,
         mc = client.get(resource_group_name, name)
         return _remove_nulls([mc])[0]
 
-    if instance.kubernetes_version == kubernetes_version:
+    if instance.kubernetes_version == kubernetes_version or kubernetes_version == '':
+        # don't prompt here because there is another prompt below?
         if instance.provisioning_state == "Succeeded":
             logger.warning("The cluster is already on version %s and is not in a failed state. No operations "
                            "will occur when upgrading to the same version if the cluster is not in a failed state.",
@@ -778,6 +787,7 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
                 create_dcr=False,
                 create_dcra=True,
                 enable_syslog=False,
+                data_collection_settings=None,
             )
     except TypeError:
         pass
@@ -811,7 +821,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       rotation_poll_interval=None,
                       no_wait=False,
                       enable_msi_auth_for_monitoring=False,
-                      enable_syslog=False):
+                      enable_syslog=False,
+                      data_collection_settings=None,):
     instance = client.get(resource_group_name, name)
     msi_auth = False
     if instance.service_principal_profile.client_id == "msi":
@@ -831,7 +842,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                               enable_secret_rotation=enable_secret_rotation,
                               rotation_poll_interval=rotation_poll_interval,
                               no_wait=no_wait,
-                              enable_syslog=enable_syslog)
+                              enable_syslog=enable_syslog,
+                              data_collection_settings=data_collection_settings)
 
     enable_monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
         and instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
@@ -860,7 +872,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                         aad_route=True,
                         create_dcr=True,
                         create_dcra=True,
-                        enable_syslog=enable_syslog)
+                        enable_syslog=enable_syslog,
+                        data_collection_settings=data_collection_settings)
                 else:
                     raise ArgumentUsageError(
                         "--enable-msi-auth-for-monitoring can not be used on clusters with service principal auth.")
@@ -869,6 +882,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                 if enable_syslog:
                     raise ArgumentUsageError(
                         "--enable-syslog can not be used without MSI auth.")
+                if data_collection_settings is not None:
+                    raise ArgumentUsageError("--data-collection-settings can not be used without MSI auth.")
                 ensure_container_insights_for_monitoring(
                     cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME], subscription_id, resource_group_name, name, instance.location, aad_route=False)
 
@@ -923,7 +938,8 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                    disable_secret_rotation=False,
                    rotation_poll_interval=None,
                    no_wait=False,
-                   enable_syslog=False):
+                   enable_syslog=False,
+                   data_collection_settings=None,):
     ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
                                                 resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                                 operation_group='managed_clusters')
@@ -1413,29 +1429,110 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
 def k8s_install_cli(cmd, client_version='latest', install_location=None, base_src_url=None,
                     kubelogin_version='latest', kubelogin_install_location=None,
                     kubelogin_base_src_url=None):
-    k8s_install_kubectl(cmd, client_version, install_location, base_src_url)
-    k8s_install_kubelogin(cmd, kubelogin_version,
-                          kubelogin_install_location, kubelogin_base_src_url)
+    arch = get_arch_for_cli_binary()
+    k8s_install_kubectl(cmd, client_version, install_location, base_src_url, arch=arch)
+    k8s_install_kubelogin(cmd, kubelogin_version, kubelogin_install_location, kubelogin_base_src_url, arch=arch)
 
 
-# determine architecture for kubectl based on platform.processor()
-# the results returned here may be inaccurate if the installed python is translated (e.g. by Rosetta)
+# determine the architecture for the binary based on platform.machine()
+# currently only used to distinguish between amd64 and arm64 (386, arm, ppc64le, s390x not supported)
+# Note: the results returned here may be inaccurate if the installed python is translated (e.g. by Rosetta)
 def get_arch_for_cli_binary():
-    arch = platform.processor().lower()
+    arch = platform.machine().lower()
+    # default arch
     formatted_arch = "amd64"
+    # set to "arm64" when the detection value contains the word "arm"
     if "arm" in arch:
         formatted_arch = "arm64"
     logger.warning(
-        "The detected arch is %s, would be treated as %s, which may not match the actual situation due to translation "
-        "and other reasons. If there is any problem, please download the appropriate binary by yourself.",
+        "The detected architecture is '%s', which will be regarded as '%s' and "
+        "the corresponding binary will be downloaded. "
+        "If there is any problem, please download the appropriate binary by yourself.",
         arch,
         formatted_arch,
     )
     return formatted_arch
 
 
+# get the user path environment variable
+def get_windows_user_path():
+    reg_query_exp = "reg query HKCU\\Environment /v path"
+    reg_regex_exp = r"REG\w+"
+    try:
+        reg_result = subprocess.run(reg_query_exp.split(" "), shell=True, check=True, capture_output=True, text=True)
+    except Exception as e:
+        raise CLIInternalError("failed to perfrom reg query, error: {}".format(e))
+    raw_user_path = reg_result.stdout.strip()
+    # find the identifier where the user's path really starts
+    m = re.search(reg_regex_exp, raw_user_path)
+    identifier = m.group(0) if m else ""
+    if not identifier:
+        raise CLIInternalError("failed to parse reg query result")
+    start_idx = raw_user_path.find(identifier)
+    user_path = raw_user_path[start_idx + len(identifier):].strip()
+    return user_path
+
+
+# append the installation directory to the user path environment variable
+def append_install_dir_to_windows_user_path(install_dir, binary_name):
+    user_path = ""
+    try:
+        user_path = get_windows_user_path()
+    # pylint: disable=broad-except
+    except Exception as e:
+        logger.debug("failed to get user path, error: %s", e)
+        log_windows_post_installation_manual_steps_warning(install_dir, binary_name)
+        # unable to get user path, skip appending user path
+        return
+    if install_dir in user_path:
+        logger.debug("installation directory '%s' already exists in user path", install_dir)
+        return
+    # keep user path style (with or without semicolon at the end)
+    flag = user_path.endswith(";")
+    setxexp = ["setx", "path", "{}{}{}{}".format(user_path, "" if flag else ";", install_dir, ";" if flag else "")]
+    try:
+        subprocess.run(setxexp, shell=True, check=True, capture_output=True)
+        log_windows_successful_installation_warning(install_dir)
+    # pylint: disable=broad-except
+    except Exception as e:
+        logger.debug("failed to set user path, error: %s", e)
+        log_windows_post_installation_manual_steps_warning(install_dir, binary_name)
+
+
+# handle system path issues after binary installation
+def handle_windows_post_install(install_dir, binary_name):
+    if not check_windows_install_dir(install_dir):
+        append_install_dir_to_windows_user_path(install_dir, binary_name)
+
+
+# check if the installation directory is in the system path
+def check_windows_install_dir(install_dir):
+    env_paths = os.environ['PATH'].split(';')
+    return next((x for x in env_paths if x.lower().rstrip('\\') == install_dir.lower()), None)
+
+
+def log_windows_successful_installation_warning(install_dir):
+    logger.warning(
+        'The installation directory "%s" has been successfully appended to the user path, '
+        "the configuration will only take effect in the new command sessions. "
+        "Please re-open the command window.", install_dir
+    )
+
+
+# pylint: disable=logging-format-interpolation
+def log_windows_post_installation_manual_steps_warning(install_dir, binary_name):
+    logger.warning(
+        'Please add "{0}" to your search PATH so the `{1}` can be found. 2 options: \n'
+        '    1. Run "set PATH=%PATH%;{0}" or "$env:path += \';{0}\'" for PowerShell. '
+        "This is good for the current command session.\n"
+        "    2. Update system PATH environment variable by following "
+        '"Control Panel->System->Advanced->Environment Variables", and re-open the command window. '
+        "You only need to do it once".format(install_dir, binary_name)
+    )
+
+
 # install kubectl
-def k8s_install_kubectl(cmd, client_version='latest', install_location=None, source_url=None):
+def k8s_install_kubectl(cmd, client_version='latest', install_location=None, source_url=None, arch=None):
     """
     Install kubectl, a command-line interface for Kubernetes clusters.
     """
@@ -1455,7 +1552,8 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
 
     file_url = ''
     system = platform.system()
-    arch = get_arch_for_cli_binary()
+    if arch is None:
+        arch = get_arch_for_cli_binary()
     base_url = source_url + f"/{{}}/bin/{{}}/{arch}/{{}}"
 
     # ensure installation directory exists
@@ -1471,8 +1569,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
     elif system == 'Darwin':
         file_url = base_url.format(client_version, 'darwin', 'kubectl')
     else:
-        raise CLIError(
-            'Proxy server ({}) does not exist on the cluster.'.format(system))
+        raise UnknownError("Unsupported system '{}'.".format(system))
 
     logger.warning('Downloading client to "%s" from "%s"',
                    install_location, file_url)
@@ -1484,25 +1581,15 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
         raise CLIError(
             'Connection error while attempting to download client ({})'.format(ex))
 
-    if system == 'Windows':  # be verbose, as the install_location likely not in Windows's search PATHs
-        env_paths = os.environ['PATH'].split(';')
-        found = next((x for x in env_paths if x.lower().rstrip(
-            '\\') == install_dir.lower()), None)
-        if not found:
-            # pylint: disable=logging-format-interpolation
-            logger.warning('Please add "{0}" to your search PATH so the `{1}` can be found. 2 options: \n'
-                           '    1. Run "set PATH=%PATH%;{0}" or "$env:path += \';{0}\'" for PowerShell. '
-                           'This is good for the current command session.\n'
-                           '    2. Update system PATH environment variable by following '
-                           '"Control Panel->System->Advanced->Environment Variables", and re-open the command window. '
-                           'You only need to do it once'.format(install_dir, cli))
+    if system == 'Windows':
+        handle_windows_post_install(install_dir, cli)
     else:
         logger.warning('Please ensure that %s is in your search PATH, so the `%s` command can be found.',
                        install_dir, cli)
 
 
 # install kubelogin
-def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, source_url=None):
+def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, source_url=None, arch=None):
     """
     Install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
     """
@@ -1534,7 +1621,8 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
         os.makedirs(install_dir)
 
     system = platform.system()
-    arch = get_arch_for_cli_binary()
+    if arch is None:
+        arch = get_arch_for_cli_binary()
     if system == 'Windows':
         sub_dir, binary_name = 'windows_amd64', 'kubelogin.exe'
     elif system == 'Linux':
@@ -1542,8 +1630,7 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
     elif system == 'Darwin':
         sub_dir, binary_name = f'darwin_{arch}', 'kubelogin'
     else:
-        raise CLIError(
-            'Proxy server ({}) does not exist on the cluster.'.format(system))
+        raise UnknownError("Unsupported system '{}'.".format(system))
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         try:
@@ -1560,18 +1647,8 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
     os.chmod(install_location, os.stat(install_location).st_mode |
              stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
-    if system == 'Windows':  # be verbose, as the install_location likely not in Windows's search PATHs
-        env_paths = os.environ['PATH'].split(';')
-        found = next((x for x in env_paths if x.lower().rstrip(
-            '\\') == install_dir.lower()), None)
-        if not found:
-            # pylint: disable=logging-format-interpolation
-            logger.warning('Please add "{0}" to your search PATH so the `{1}` can be found. 2 options: \n'
-                           '    1. Run "set PATH=%PATH%;{0}" or "$env:path += \'{0}\'" for PowerShell. '
-                           'This is good for the current command session.\n'
-                           '    2. Update system PATH environment variable by following '
-                           '"Control Panel->System->Advanced->Environment Variables", and re-open the command window. '
-                           'You only need to do it once'.format(install_dir, cli))
+    if system == 'Windows':
+        handle_windows_post_install(install_dir, cli)
     else:
         logger.warning('Please ensure that %s is in your search PATH, so the `%s` command can be found.',
                        install_dir, cli)
@@ -1992,7 +2069,8 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           max_surge=None,
                           no_wait=False,
                           aks_custom_headers=None,
-                          snapshot_id=None):
+                          snapshot_id=None,
+                          yes=False):
     AgentPoolUpgradeSettings = cmd.get_models(
         "AgentPoolUpgradeSettings",
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
@@ -2039,6 +2117,16 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         )
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
+
+    if kubernetes_version != '' or instance.orchestrator_version == kubernetes_version:
+        msg = "The new kubernetes version is the same as the current kubernetes version."
+        if instance.provisioning_state == "Succeeded":
+            msg = "The cluster is already on version {} and is not in a failed state. No operations will occur when upgrading to the same version if the cluster is not in a failed state.".format(instance.kubernetes_version)
+        elif instance.provisioning_state == "Failed":
+            msg = "Cluster currently in failed state. Proceeding with upgrade to existing version {} to attempt resolution of failed cluster state.".format(instance.kubernetes_version)
+        if not yes and not prompt_y_n(msg):
+            return None
+
     instance.orchestrator_version = kubernetes_version
     instance.creation_data = creationData
 

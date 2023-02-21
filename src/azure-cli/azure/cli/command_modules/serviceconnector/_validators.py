@@ -20,10 +20,13 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (
     ValidationError,
     InvalidArgumentValueError,
-    RequiredArgumentMissingError
+    RequiredArgumentMissingError,
 )
 
-from ._utils import run_cli_cmd
+from ._utils import (
+    run_cli_cmd,
+    get_object_id_of_current_user
+)
 from ._resource_config import (
     CLIENT_TYPE,
     RESOURCE,
@@ -33,7 +36,9 @@ from ._resource_config import (
     SOURCE_RESOURCES_CREATE_PARAMS,
     TARGET_RESOURCES_PARAMS,
     AUTH_TYPE_PARAMS,
-    SUPPORTED_AUTH_TYPE
+    SUPPORTED_AUTH_TYPE,
+    LOCAL_CONNECTION_RESOURCE,
+    LOCAL_CONNECTION_PARAMS
 )
 
 
@@ -46,6 +51,8 @@ def get_source_resource_name(cmd):
     '''
     source = None
     source_name = cmd.name.split(' ')[0]
+    if source_name == RESOURCE.Local.value.lower():
+        return RESOURCE.Local
     for item in SOURCE_RESOURCES:
         if item.value.lower() == source_name.lower():
             source = item
@@ -229,6 +236,14 @@ def interactive_input(arg, hint):
             'auth_type': 'userAssignedIdentity'
         }
         cmd_value = 'client-id={} subscription-id={}'.format(client_id, subscription_id)
+    elif arg == 'user_account_auth_info':
+        object_id = prompt(
+            'User Account object-id (--user-account object-id=): ')
+        value = {
+            'auth_type': 'userAccount',
+            'principal_id': object_id
+        }
+        cmd_value = 'object-id={}'.format(object_id)
     else:
         value = prompt('{}: '.format(hint))
         cmd_value = value
@@ -284,7 +299,12 @@ def intelligent_experience(cmd, namespace, missing_args):
             'auth_type': 'systemAssignedIdentity'
         }
         logger.warning('Auth info is not specified, use default one: --system-identity')
-
+    elif 'user_account_auth_info' in missing_args:
+        cmd_arg_values['user_account_auth_info'] = {
+            'auth_type': 'userAccount'
+        }
+        logger.warning(
+            'Auth info is not specified, use default one: --user-account')
     if cmd.cli_ctx.local_context.is_on:
         # arguments found in local context
         context_arg_values = dict()
@@ -380,7 +400,7 @@ def get_missing_source_args(cmd):
     source = get_source_resource_name(cmd)
     missing_args = dict()
 
-    for arg, content in SOURCE_RESOURCES_PARAMS.get(source).items():
+    for arg, content in SOURCE_RESOURCES_PARAMS.get(source, {}).items():
         missing_args[arg] = content
 
     return missing_args
@@ -472,6 +492,48 @@ def get_missing_client_type(namespace):
     return missing_args
 
 
+def validate_local_default_params(cmd, namespace):  # pylint: disable=unused-argument
+    '''Get missing args of local connection command
+    '''
+    missing_args = dict()
+
+    if getattr(namespace, 'id', None):
+        namespace.id = namespace.id.lower()
+        if not is_valid_resource_id(namespace.id):
+            raise InvalidArgumentValueError(
+                'Resource id is invalid: {}'.format(namespace.id))
+        resource = LOCAL_CONNECTION_RESOURCE.lower()
+        for item in re.findall(r'(\{[^\{\}]*\})', resource):
+            resource = resource.replace(item, '([^/]*)')
+
+        matched = re.match(resource, namespace.id)
+        if matched:
+            namespace.resource_group_name = matched.group(2)
+            namespace.location = matched.group(3)
+            namespace.connection_name = matched.group(4)
+        else:
+            raise InvalidArgumentValueError(
+                'Unsupported resource id: {}'.format(namespace.id))
+    else:
+        if not getattr(namespace, 'resource_group_name', None):
+            missing_args.update(
+                {'resource_group_name': LOCAL_CONNECTION_PARAMS.get("resource_group_name")})
+    return missing_args
+
+
+def apply_local_default_params(cmd, namespace, arg_values):  # pylint: disable=unused-argument
+    for arg in LOCAL_CONNECTION_PARAMS:
+        if arg in arg_values:
+            setattr(namespace, arg, arg_values.get(arg, None))
+
+
+def validate_local_list_params(cmd, namespace):  # pylint: disable=unused-argument
+    missing_args = dict()
+    if getattr(namespace, 'resource_group', None) is None:
+        missing_args.update(LOCAL_CONNECTION_PARAMS.get("resource_group"))
+    return missing_args
+
+
 def validate_list_params(cmd, namespace):
     '''Get missing args of list command
     '''
@@ -488,6 +550,17 @@ def validate_create_params(cmd, namespace):
     if not validate_source_resource_id(namespace):
         missing_args.update(get_missing_source_args(cmd))
     missing_args.update(get_missing_source_create_args(cmd, namespace))
+    if not validate_target_resource_id(namespace):
+        missing_args.update(get_missing_target_args(cmd))
+    missing_args.update(get_missing_auth_args(cmd, namespace))
+    return missing_args
+
+
+def validate_local_create_params(cmd, namespace):
+    '''Get missing args of create command
+    '''
+    missing_args = dict()
+
     if not validate_target_resource_id(namespace):
         missing_args.update(get_missing_target_args(cmd))
     missing_args.update(get_missing_auth_args(cmd, namespace))
@@ -511,6 +584,14 @@ def validate_update_params(cmd, namespace):
         missing_args.update(get_missing_source_args(cmd))
     missing_args.update(get_missing_auth_args(cmd, namespace))
     missing_args.update(get_missing_connection_name(namespace))
+    return missing_args
+
+
+def validate_local_update_params(cmd, namespace):  # pylint: disable=unused-argument
+    '''Get missing args of update command
+    '''
+    missing_args = dict()
+    # missing_args.update(get_missing_auth_args(cmd, namespace))
     return missing_args
 
 
@@ -606,6 +687,13 @@ def apply_create_params(cmd, namespace, arg_values):
     apply_auth_args(cmd, namespace, arg_values)
 
 
+def apply_local_create_params(cmd, namespace, arg_values):
+    '''Set create command missing args
+    '''
+    apply_target_args(cmd, namespace, arg_values)
+    apply_auth_args(cmd, namespace, arg_values)
+
+
 def apply_addon_params(cmd, namespace, arg_values):
     '''Set addon command missing args
     '''
@@ -620,11 +708,53 @@ def apply_update_params(cmd, namespace, arg_values):
     apply_auth_args(cmd, namespace, arg_values)
 
 
+def apply_local_update_params(cmd, namespace, arg_values):
+    '''Set update command missing args
+    '''
+    apply_auth_args(cmd, namespace, arg_values)
+
+
 def apply_default_params(cmd, namespace, arg_values):
     '''Set missing args of commands except for list, create
     '''
     apply_source_args(cmd, namespace, arg_values)
     apply_connection_name(namespace, arg_values)
+
+
+def validate_local_params(cmd, namespace):
+    '''Validate command parameters
+    '''
+    def _validate_and_apply(validate, apply):
+        missing_args = validate(cmd, namespace)
+        if missing_args:
+            arg_values = intelligent_experience(cmd, namespace, missing_args)
+            apply(cmd, namespace, arg_values)
+    # for command: 'list'
+    if cmd.name.endswith(' list'):
+        _validate_and_apply(validate_local_list_params,
+                            apply_local_default_params)
+    else:
+        _validate_and_apply(validate_local_default_params,
+                            apply_local_default_params)
+
+    # for command: 'create'
+    if 'create' in cmd.name:
+        # if --new is specified
+        if getattr(namespace, 'connection_name', None) is None:
+            namespace.connection_name = generate_connection_name(cmd)
+        else:
+            validate_connection_name(namespace.connection_name)
+        if getattr(namespace, 'new_addon', None):
+            _validate_and_apply(validate_addon_params, apply_addon_params)
+        else:
+            _validate_and_apply(validate_local_create_params,
+                                apply_local_create_params)
+        if getattr(namespace, 'client_type', None) is None:
+            namespace.client_type = get_client_type(cmd, namespace)
+    # for command: update
+    elif 'update' in cmd.name:
+        _validate_and_apply(validate_local_update_params,
+                            apply_local_update_params)
 
 
 def validate_params(cmd, namespace):
@@ -702,3 +832,11 @@ def validate_service_state(linker_parameters):
         if output and output.get('disableLocalAuth') is True:
             raise ValidationError('Secret as auth type is not allowed when local auth is disabled for the '
                                   'specified appconfig, you may use service principal or managed identity.')
+
+
+def get_default_object_id_of_current_user(cmd, namespace):  # pylint: disable=unused-argument
+    user_account_auth_info = getattr(namespace, 'user_account_auth_info', None)
+    if user_account_auth_info and not user_account_auth_info.get('principal_id', None):
+        user_object_id = get_object_id_of_current_user()
+        user_account_auth_info['principal_id'] = user_object_id
+        setattr(namespace, 'user_account_auth_info', user_account_auth_info)

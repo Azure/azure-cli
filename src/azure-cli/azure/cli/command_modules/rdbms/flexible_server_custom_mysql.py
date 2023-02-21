@@ -45,7 +45,7 @@ def flexible_server_create(cmd, client,
                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
-                           iops=None, auto_grow=None, geo_redundant_backup=None,
+                           iops=None, auto_grow=None, auto_scale_iops=None, geo_redundant_backup=None,
                            byok_identity=None, backup_byok_identity=None, byok_key=None, backup_byok_key=None,
                            yes=False):
     # Generate missing parameters
@@ -110,7 +110,8 @@ def flexible_server_create(cmd, client,
 
     storage = mysql_flexibleservers.models.Storage(storage_size_gb=storage_gb,
                                                    iops=iops,
-                                                   auto_grow=auto_grow)
+                                                   auto_grow=auto_grow,
+                                                   auto_io_scaling=auto_scale_iops)
 
     backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                  geo_redundant_backup=geo_redundant_backup)
@@ -329,6 +330,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        storage_gb=None,
                                        auto_grow=None,
                                        iops=None,
+                                       auto_scale_iops=None,
                                        backup_retention=None,
                                        geo_redundant_backup=None,
                                        administrator_login_password=None,
@@ -443,6 +445,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     if storage_gb:
         instance.storage.storage_size_gb = storage_gb
+
+    if auto_scale_iops:
+        instance.storage.auto_io_scaling = auto_scale_iops
 
     if not iops:
         iops = instance.storage.iops

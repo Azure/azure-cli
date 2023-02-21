@@ -290,3 +290,68 @@ examples:
     text: >
         az policy metadata show --name ACF1000
 """
+
+helps['policy attestation'] = """
+type: group
+short-summary: Manage resource policy attestations.
+"""
+
+helps['policy attestation create'] = """
+type: command
+short-summary: Create a policy attestation.
+examples:
+  - name: Create an attestation at resource group scope for a policy assignment
+    text: >
+        az policy attestation create -g myRg -n myAttestation --policy-assignment eeb18edc813c42d0ad5a9eab
+  - name: Create an attestation at resource group scope for a policy assignment using the policy assignment resource ID
+    text: >
+        az policy attestation create -g myRg -n myAttestation \\
+          --policy-assignment "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/providers/Microsoft.Authorization/policyAssignments/myPa"
+  - name: Create an attestation at subscription scope for a policy set assignment
+    text: >
+        az policy attestation create -n myAttestation \\
+          --policy-assignment eeb18edc813c42d0ad5a9eab \\
+          --definition-reference-id auditVMPolicyReference
+  - name: Create an attestation for a specific resource using the resource ID
+    text: >
+        az policy attestation create \\
+          --resource "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myRg/providers/Microsoft.Compute/virtualMachines/myVm" \\
+          -n myAttestation --policy-assignment eeb18edc813c42d0ad5a9eab
+  - name: Create an attestation at resource group scope using all properties
+    text: >
+       az policy attestation create --attestation-name myAttestation -g myRg -a eeb18edc813c42d0ad5a9eab \\
+        --compliance-state Compliant --assessment-date 2023-01-01T08:29:18Z \\
+        --evidence source-uri=https://sampleuri.com description="Sample description for the sample uri" \\
+        --evidence source-uri=https://sampleuri2.com description="Sample description 2 for the sample uri 2" \\
+        --expires-on 2024-08-01T05:29:18Z --owner user@myOrg.com --metadata Location=NYC Dept=ACC \\
+        --definition-reference-id auditVMPolicyReference
+"""
+
+helps['policy attestation delete'] = """
+type: command
+short-summary: Delete an existing policy attestation.
+examples:
+  - name: Delete an attestation at resource group scope
+    text: >
+        az policy attestation delete -g myRg -n myAttestation
+"""
+
+helps['policy attestation update'] = """
+type: command
+short-summary: Update an existing policy attestation.
+examples:
+  - name: Update an attestation at resource scope
+    text: >
+        az policy attestation update --attestation-name myAttestation \\
+          --resource "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myRg/providers/Microsoft.Compute/virtualMachines/myVm" \\
+          --comments "Adding comments for this attestation"
+"""
+
+helps['policy attestation show'] = """
+type: command
+short-summary: Get a policy attestation.
+examples:
+  - name: Show an attestation at subscription.
+    text: >
+      az policy attestation show --attestation-name myAttestation
+"""
