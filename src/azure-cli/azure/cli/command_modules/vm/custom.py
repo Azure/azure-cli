@@ -3703,12 +3703,14 @@ def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
     return [r for r in result if r.ip_address]
 
 
-def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_id=None, no_wait=False):
+def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
-    if instance_id:
-        for instance in instance_id:
-            sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_reimage,
-                        resource_group_name, vm_scale_set_name, instance)
+    if instance_ids:
+        VirtualMachineScaleSetVMInstanceIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceIDs')
+        instance_ids = VirtualMachineScaleSetVMInstanceIDs(instance_ids=instance_ids)
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage_all, resource_group_name,
+                           vm_scale_set_name, instance_ids)
+
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage, resource_group_name, vm_scale_set_name)
 
 

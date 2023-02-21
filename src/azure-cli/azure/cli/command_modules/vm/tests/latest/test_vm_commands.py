@@ -8721,17 +8721,17 @@ class VMSSReimageScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_reimage_')
     def test_vmss_reimage(self, resource_group):
-        self.cmd('vmss create -g {rg} -n vmss1 --image centos --admin-username vmtest')
-        self.cmd('vmss reimage -g {rg} -n vmss1 --instance-id 1')
-        self.cmd('vmss reimage -g {rg} -n vmss1')
-
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_reimage_instance_id')
-    def test_vmss_reimage_instance_id(self, resource_group):
         self.kwargs.update({
             'vmss': self.create_random_name('vmss', 10)
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --instance-count 2')
-        self.cmd('vmss reimage -g {rg} -n {vmss} --instance-id 0 1')
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image CentOS --admin-username vmtest --instance-count 2')
+        instances = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()
+        self.kwargs['instance_id1'] = instances[0]['instanceId']
+        self.kwargs['instance_id2'] = instances[1]['instanceId']
+        self.cmd('vmss reimage -g {rg} -n {vmss} --instance-ids {instance_id1}')
+        self.cmd('vmss reimage -g {rg} -n {vmss} --instance-ids {instance_id1} {instance_id2}')
+        self.cmd('vmss reimage -g {rg} -n {vmss}')
 
 
 class VMSSHKeyScenarioTest(ScenarioTest):
