@@ -1,0 +1,199 @@
+name: CLI EXTENSION REGRESSION TEST $(Date:yyyyMMdd)$(Rev:.r)
+
+resources:
+- repo: self
+
+trigger:
+  branches:
+    exclude:
+    - '*'
+
+variables:
+- template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
+
+jobs:
+- job: PrepareExtensionRegressionTest
+  displayName: Prepare Extension Regression Test Branch
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.10'
+        displayName: "Use Python 3.10"
+    - task: AzureCLI@1
+      displayName: 'checkout branch'
+      inputs:
+        azureSubscription: 'Azure CLI release'
+        scriptLocation: inlineScript
+        inlineScript: |
+          set -ev
+          pwd
+          git clone https://github.com/Azure/azure-cli-extensions.git
+          cd azure-cli-extensions
+
+          # git config
+          GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
+          git config --global user.email "AzPyCLI@microsoft.com"
+          git config --global user.name "Azure CLI Team"
+          git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli-extensions.git
+          git checkout -b regression_test_$(Build.BuildId)
+          git push --set-upstream azclibot regression_test_$(Build.BuildId)
+
+- job: CLIExtensionRegressionTest
+  displayName: CLI Extension Regression Test
+  dependsOn: PrepareExtensionRegressionTest
+  timeoutInMinutes: 0
+  strategy:
+    maxParallel: 12
+    matrix:
+      instance1:
+        Instance_idx: 1
+      instance2:
+        Instance_idx: 2
+      instance3:
+        Instance_idx: 3
+      instance4:
+        Instance_idx: 4
+      instance5:
+        Instance_idx: 5
+      instance6:
+        Instance_idx: 6
+      instance7:
+        Instance_idx: 7
+      instance8:
+        Instance_idx: 8
+      instance9:
+        Instance_idx: 9
+      instance10:
+        Instance_idx: 10
+      instance11:
+        Instance_idx: 11
+      instance12:
+        Instance_idx: 12
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.10'
+      displayName: "Use Python 3.10"
+  - task: AzureCLI@1
+    displayName: 'checkout cli and extension repo'
+    inputs:
+      azureSubscription: 'Azure CLI release'
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -ev
+        pwd
+        git clone https://github.com/Azure/azure-cli-extensions.git
+        cd azure-cli-extensions
+
+        # git config
+        GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
+        git config --global user.email "AzPyCLI@microsoft.com"
+        git config --global user.name "Azure CLI Team"
+        git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli-extensions.git
+
+        git fetch azclibot
+        git checkout -b regression_test_$(Build.BuildId) azclibot/regression_test_$(Build.BuildId)
+  - template: ../../.azure-pipelines/templates/azdev_setup.yml
+    parameters:
+      CLIExtensionRepoPath: ./azure-cli-extensions
+  - bash: |
+      set -ev
+
+      source env/bin/activate
+      cd azure-cli-extensions
+
+      az login -u $(CLI_LIVE_TEST_ACCOUNT) -p "$(CLI_LIVE_TEST_PASSWORD)"
+      az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+
+      python ../scripts/ci/automation_full_test.py "12" "$(Instance_idx)" "latest" "" "True" "extension"
+    displayName: "Rerun tests"
+  - bash: |
+      publishErrorModules='false'
+      if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_error_modules_$(Instance_idx).txt' ]]; then
+        publishErrorModules='true'
+      fi
+      echo "##vso[task.setvariable variable=publishErrorModules]$publishErrorModules"
+
+      publishFailureTests='false'
+      if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_failure_tests_$(Instance_idx).txt' ]]; then
+        publishFailureTests='true'
+      fi
+      echo "##vso[task.setvariable variable=publishFailureTests]$publishFailureTests"
+    condition: succeededOrFailed()
+    displayName: "Prepare publishing results"
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFiles: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
+      testRunTitle: 'CLI Regression test results of instance $(Instance_idx)'
+  - task: PublishBuildArtifacts@1
+    condition: and(succeededOrFailed(), eq(variables.publishErrorModules, 'true'))
+    inputs:
+      PathtoPublish: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_error_modules_$(Instance_idx).txt'
+      ArtifactName: 'error_modules'
+      publishLocation: 'Container'
+  - task: PublishBuildArtifacts@1
+    condition: and(succeededOrFailed(), eq(variables.publishFailureTests, 'true'))
+    inputs:
+      PathtoPublish: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_failure_tests_$(Instance_idx).txt'
+      ArtifactName: 'failure_tests'
+      publishLocation: 'Container'
+
+- job: ResultSummary
+  displayName: CLI Extension Regression Test Result Summary
+  dependsOn: CLIExtensionRegressionTest
+  condition: succeededOrFailed()
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+    - task: AzureCLI@1
+      displayName: 'Result Summary'
+      inputs:
+        azureSubscription: 'Azure CLI release'
+        scriptLocation: inlineScript
+        inlineScript: |
+          set -ev
+
+          # git config
+          git clone https://github.com/Azure/azure-cli-extensions.git
+          cd azure-cli-extensions
+
+          # git config
+          GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
+          git config --global user.email "AzPyCLI@microsoft.com"
+          git config --global user.name "Azure CLI Team"
+          git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli-extensions.git
+
+          git fetch azclibot
+          # this would get all related branches like: "refs/heads/regression_test_23193_acrtransfer", "refs/heads/regression_test_23193_blueprint", "refs/heads/regression_test_23193_storage-preview", ...
+          REGRESSION_BRANCHES=$(curl -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/repos/azclibot/azure-cli-extensions/git/matching-refs/heads/regression_test_$(Build.BuildId)_ | jq '.[] | .ref')
+
+          for branch in ${REGRESSION_BRANCHES[@]}
+          do
+            # this would remove the prefix 'refs/heads/':
+            # "refs/heads/regression_test_23193_storage-preview" -> regression_test_23193_storage-preview"
+            branch=${branch##*/}
+            # this would remove the surfix '"':
+            # regression_test_23193_storage-preview" -> regression_test_23193_storage-preview
+            branch=${branch%\"*}
+            echo ${branch}
+
+            # this would extract the module name
+            # regression_test_23193_storage-preview -> storage-preview
+            module=${branch##*_}
+
+            pr_title="Extension Regression Test for ${module}"
+            pr_body="Triggered by CLI Extension Regression Test Pipeline - ADO_BUILD_ID=$(Build.BuildId)\n\nThere may still exist some failed tests and failed modules, see [details](https://dev.azure.com/azclitools/internal/_build/results?buildId=$(Build.BuildId)&view=artifacts&type=publishedArtifacts) in ADO pipeline"
+            pr_head="azclibot:${branch}"
+
+            curl \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            -d "{\"title\": \"${pr_title}\", \"body\": \"${pr_body}\", \"head\": \"${pr_head}\", \"base\": \"main\"}" \
+            https://api.github.com/repos/Azure/azure-cli-extensions/pulls
+
+            sleep 5
+          done
