@@ -11,7 +11,7 @@ from ipaddress import ip_network
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
-from azure.cli.core.azclierror import UnrecognizedArgumentError, InvalidArgumentValueError
+from azure.cli.core.azclierror import UnrecognizedArgumentError
 
 from azure.cli.command_modules.storage._client_factory import (get_storage_data_service_client,
                                                                blob_data_service_factory,
@@ -2249,6 +2249,7 @@ def validate_ip_address(namespace):
             if idx == idx2:
                 continue
             if ip_address_network.overlaps(ip_address_network2):
+                from azure.cli.core.azclierror import InvalidArgumentValueError
                 raise InvalidArgumentValueError(f"ip addresses {ip_address_network} and {ip_address_network2} "
                                                 f"provided are overlapping: --ip_address ip1 [ip2]...")
 
