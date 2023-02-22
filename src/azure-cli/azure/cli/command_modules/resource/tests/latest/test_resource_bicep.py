@@ -66,13 +66,9 @@ class TestBicep(unittest.TestCase):
     @mock.patch("io.BufferedWriter")
     @mock.patch("azure.cli.command_modules.resource._bicep.open")
     @mock.patch("azure.cli.command_modules.resource._bicep.urlopen")
-    @mock.patch("os.path.exists")
-    @mock.patch("os.path.dirname")
     @mock.patch("os.path.isfile")
-    def test_use_bicep_cli_from_path_false_after_install(self, isfile_stub, dirname_stub, exists_stub, urlopen_stub, open_stub, buffered_writer_stub, chmod_stub):
+    def test_use_bicep_cli_from_path_false_after_install(self, isfile_stub, urlopen_stub, open_stub, buffered_writer_stub, chmod_stub):
         isfile_stub.return_value = False
-        dirname_stub.return_value = "C:\\Users\\test\\.azure\\bicep\\0.14.85"
-        exists_stub.return_value = True
 
         response = mock.Mock()
         response.getcode.return_value = 200
