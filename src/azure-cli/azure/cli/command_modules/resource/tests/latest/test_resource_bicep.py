@@ -61,7 +61,6 @@ class TestBicep(unittest.TestCase):
 
         cli_ctx.config.set_value("bicep", "use_binary_from_path", "false")
 
-    @mock.patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}, clear=True)
     @mock.patch("os.chmod")
     @mock.patch("io.BufferedWriter")
     @mock.patch("azure.cli.command_modules.resource._bicep.open")
