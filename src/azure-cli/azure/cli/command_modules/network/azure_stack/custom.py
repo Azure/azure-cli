@@ -7697,23 +7697,6 @@ def add_vpn_conn_ipsec_policy(cmd, client, resource_group_name, connection_name,
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
 
 
-
-# def clear_vpn_conn_ipsec_policies(cmd, client, resource_group_name, connection_name, no_wait=False):
-#     conn = client.get(resource_group_name, connection_name)
-#     conn.ipsec_policies = None
-#     conn.use_policy_based_traffic_selectors = False
-#     if no_wait:
-#         return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
-#
-#     from azure.cli.core.commands import LongRunningOperation
-#     poller = sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
-#     return LongRunningOperation(cmd.cli_ctx)(poller).ipsec_policies
-
-
-# def list_vpn_conn_ipsec_policies(cmd, client, resource_group_name, connection_name):
-#     return client.get(resource_group_name, connection_name).ipsec_policies
-
-
 def assign_vnet_gateway_aad(cmd, resource_group_name, gateway_name,
                             aad_tenant, aad_audience, aad_issuer, no_wait=False):
     ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
