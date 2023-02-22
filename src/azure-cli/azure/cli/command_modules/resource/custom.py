@@ -3645,7 +3645,7 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
 
 def install_bicep_cli(cmd, version=None, target_platform=None):
     # The parameter version is actually a git tag here.
-    ensure_bicep_installation(release_tag=version, target_platform=target_platform)
+    ensure_bicep_installation(cmd.cli_ctx, release_tag=version, target_platform=target_platform)
 
 
 def uninstall_bicep_cli(cmd):
@@ -3654,7 +3654,7 @@ def uninstall_bicep_cli(cmd):
 
 def upgrade_bicep_cli(cmd, target_platform=None):
     latest_release_tag = get_bicep_latest_release_tag()
-    ensure_bicep_installation(release_tag=latest_release_tag, target_platform=target_platform)
+    ensure_bicep_installation(cmd.cli_ctx, release_tag=latest_release_tag, target_platform=target_platform)
 
 
 def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_restore=None):
@@ -3675,8 +3675,6 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
 
 
 def publish_bicep_file(cmd, file, target):
-    ensure_bicep_installation()
-
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         run_bicep_command(cmd.cli_ctx, ["publish", file, "--target", target])
@@ -3685,8 +3683,6 @@ def publish_bicep_file(cmd, file, target):
 
 
 def restore_bicep_file(cmd, file, force=None):
-    ensure_bicep_installation()
-
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["restore", file]
@@ -3713,8 +3709,6 @@ def list_bicep_cli_versions(cmd):
 
 
 def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None):
-    ensure_bicep_installation()
-
     minimum_supported_version = "0.7.4"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["generate-params", file]
