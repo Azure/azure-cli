@@ -393,7 +393,8 @@ def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, s
     return instance
 
 
-def sqlvm_enable_azure_ad_auth(cmd, instance, sql_virtual_machine_name, resource_group_name, msi_client_id=None):
+# pylint: disable=unused-argument
+def sqlvm_enable_azure_ad_auth(client, cmd, sql_virtual_machine_name, resource_group_name, msi_client_id=None, skip_client_validation=None):
     ''' Enable Azure AD authentication on a SQL virtual machine.
 
         :param cmd: The CLI command.
@@ -405,16 +406,26 @@ def sqlvm_enable_azure_ad_auth(cmd, instance, sql_virtual_machine_name, resource
         :param msi_client_id: The clientId of the managed identity used in Azure AD authentication.
                               None means system-assigned managed identity
         :type: str.
+        :param skip_client_validation: Whether to skip the client side validation. The server side validation always happens.
+                                       This parameter is used in the validation and ignored here.
+        :type: bool.
 
         :return: The updated Sql Virtual Machine instance.
         :rtype: SqlVirtualMachine.
     '''
 
-    instance.server_configurations_management_settings = ServerConfigurationsManagementSettings()
+    sqlvm_object = client.get(resource_group_name, sql_virtual_machine_name)
+    
+    if sqlvm_object.server_configurations_management_settings is None:
+        sqlvm_object.server_configurations_management_settings = ServerConfigurationsManagementSettings()
 
-    instance.server_configurations_management_settings.azure_ad_authentication_settings = AADAuthenticationSettings(client_id=msi_client_id if msi_client_id else '')
+    sqlvm_object.server_configurations_management_settings.azure_ad_authentication_settings = AADAuthenticationSettings(client_id=msi_client_id if msi_client_id else '')
 
-    return instance
+    # Since it's a running operation, we will do the put and then the get to display the instance.
+    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(False, client.begin_create_or_update,
+                                                  resource_group_name, sql_virtual_machine_name, sqlvm_object))
+
+    return client.get(resource_group_name, sql_virtual_machine_name)
 
 
 # pylint: disable=unused-argument
