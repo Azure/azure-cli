@@ -541,18 +541,20 @@ def load_command_table(self, _):
         c.custom_show_command('show', 'show_nw_connection_monitor_v2_test_group')
         c.custom_command('list', 'list_nw_connection_monitor_v2_test_group')
 
-    with self.command_group('network watcher connection-monitor output',
-                            network_watcher_cm_sdk,
-                            min_api='2019-11-01',
-                            client_factory=cf_connection_monitor,
-                            is_preview=True,
-                            validator=process_nw_cm_v2_output_namespace) as c:
-        # c.custom_command('add', 'add_nw_connection_monitor_v2_output')
-        c.custom_command('remove', 'remove_nw_connection_monitor_v2_output')
-        # c.custom_command('list', 'list_nw_connection_monitor_v2_output')
-    from .operations.watcher import WatcherConnectionMonitorOutputAdd, WatcherConnectionMonitorOutputList
+    # with self.command_group('network watcher connection-monitor output',
+    #                         network_watcher_cm_sdk,
+    #                         min_api='2019-11-01',
+    #                         client_factory=cf_connection_monitor,
+    #                         is_preview=True,
+    #                         validator=process_nw_cm_v2_output_namespace) as c:
+    #     c.custom_command('add', 'add_nw_connection_monitor_v2_output')
+    #     c.custom_command('remove', 'remove_nw_connection_monitor_v2_output')
+    #     c.custom_command('list', 'list_nw_connection_monitor_v2_output')
+    from .operations.watcher import WatcherConnectionMonitorOutputAdd, WatcherConnectionMonitorOutputList, \
+        WatcherConnectionMonitorOutputRemove
     self.command_table["network watcher connection-monitor output add"] = WatcherConnectionMonitorOutputAdd(loader=self)
     self.command_table["network watcher connection-monitor output list"] = WatcherConnectionMonitorOutputList(loader=self)
+    self.command_table["network watcher connection-monitor output remove"] = WatcherConnectionMonitorOutputRemove(loader=self)
 
 
     with self.command_group("network watcher packet-capture"):

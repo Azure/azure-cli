@@ -1001,8 +1001,6 @@ class NwFlowLogDelete(_NwFlowLogDelete):
                                           rg_name='resource_group')
 
 
-
-
 class NwTroubleshootingStart(_NwTroubleshootingStart):
 
     @classmethod
@@ -1122,6 +1120,33 @@ class WatcherConnectionMonitorOutputAdd(_WatcherConnectionMonitorOutputAdd):
 
 
 class WatcherConnectionMonitorOutputList(_WatcherConnectionMonitorOutputList):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.watcher_name._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.resource_group._registered = False
+        args_schema.resource_group._required = False
+
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location. Values from: `az account list-locations`. "
+                 "You can configure the default location "
+                 "using `az configure --defaults location=<location>`.",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        return args_schema
+
+    def pre_operations(self):
+        process_nw_cm_v2_output_namespace(self)
+
+
+class WatcherConnectionMonitorOutputRemove(_WatcherConnectionMonitorOutputDelete):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -1141,3 +1166,8 @@ class WatcherConnectionMonitorOutputList(_WatcherConnectionMonitorOutputList):
 
     def pre_operations(self):
         process_nw_cm_v2_output_namespace(self)
+
+    def pre_instance_delete(self):
+        instance = self.ctx.vars.instance
+        instance.properties.outputs = []
+
