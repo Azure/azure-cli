@@ -144,7 +144,7 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
 
         # Delete Authorization Rule
         self.cmd(
-            'servicebus namespace authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --name {authoname} --yes')
+            'servicebus namespace authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --name {authoname} ')
 
         # Delete Namespace list by ResourceGroup
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')

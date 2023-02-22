@@ -298,7 +298,7 @@ class SBTopicsCRUDScenarioTest(ScenarioTest):
 
         # Delete Topic Authorization Rule
         self.cmd(
-            'servicebus topic authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {authoname} --yes')
+            'servicebus topic authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {authoname}')
 
         # Delete Topic
         self.cmd('servicebus topic delete --resource-group {rg} --namespace-name {namespacename} --name {topicname} ')

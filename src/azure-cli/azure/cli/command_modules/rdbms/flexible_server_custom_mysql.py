@@ -82,7 +82,9 @@ def flexible_server_create(cmd, client,
                               byok_identity=byok_identity,
                               backup_byok_identity=backup_byok_identity,
                               byok_key=byok_key,
-                              backup_byok_key=backup_byok_key)
+                              backup_byok_key=backup_byok_key,
+                              auto_io_scaling=auto_scale_iops,
+                              iops=iops)
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
     iops_info = list_skus_info['iops_info']
 
@@ -369,7 +371,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
                               backup_byok_identity=backup_byok_identity,
                               byok_key=byok_key,
                               backup_byok_key=backup_byok_key,
-                              disable_data_encryption=disable_data_encryption)
+                              disable_data_encryption=disable_data_encryption,
+                              auto_io_scaling=auto_scale_iops,
+                              iops=iops)
 
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location, server_name=instance.name if instance else None)
     iops_info = list_skus_info['iops_info']

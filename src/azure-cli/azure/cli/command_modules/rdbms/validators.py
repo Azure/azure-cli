@@ -131,7 +131,8 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
                               server_name=None, zone=None, standby_availability_zone=None, high_availability=None,
                               subnet=None, public_access=None, version=None, auto_grow=None, replication_role=None,
                               geo_redundant_backup=None, byok_identity=None, backup_byok_identity=None, byok_key=None,
-                              backup_byok_key=None, disable_data_encryption=None, instance=None):
+                              backup_byok_key=None, disable_data_encryption=None, iops=None, auto_io_scaling=None,
+                              instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location, server_name=instance.name if instance else None)
@@ -155,6 +156,7 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
     _mysql_auto_grow_validator(auto_grow, replication_role, high_availability, instance)
     _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_byok_key,
                           disable_data_encryption, geo_redundant_backup, instance)
+    _mysql_iops_validator(iops, auto_io_scaling, instance)
 
 
 def _mysql_retention_validator(backup_retention, sku_info, tier):
@@ -272,6 +274,15 @@ def _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_
     if (instance and instance.replication_role == "Replica") and (disable_data_encryption or byok_key):
         raise CLIError("Data encryption cannot be modified on a server with replication role. "
                        "Use the primary server instead.")
+
+
+def _mysql_iops_validator(iops, auto_io_scaling, instance):
+    if iops is None:
+        return
+    if instance is not None:
+        auto_io_scaling = instance.storage.auto_io_scaling if auto_io_scaling is None else auto_io_scaling
+    if auto_io_scaling.lower() == 'enabled':
+        logger.warning("The server has enabled the auto scale iops. So the iops will be ignored.")
 
 
 def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, zone=None,

@@ -339,7 +339,7 @@ class SBQueueScenarioTest(ScenarioTest):
 
         # Delete Queue Authorization Rule
         self.cmd(
-            'servicebus queue authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --queue-name {queuename} --name {authoname} --yes')
+            'servicebus queue authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --queue-name {queuename} --name {authoname}')
 
         # Delete Queue
         self.cmd('servicebus queue delete --resource-group {rg} --namespace-name {namespacename} --name {queuename}')

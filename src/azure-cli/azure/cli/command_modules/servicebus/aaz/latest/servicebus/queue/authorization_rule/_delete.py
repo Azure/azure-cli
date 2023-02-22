@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "servicebus queue authorization-rule delete",
-    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
     """Delete a queue authorization rule.

@@ -149,9 +149,10 @@ class StorageArgumentContext(AzArgumentContext):
                       help='Generate and assign a new Storage Account Identity for this storage account for use '
                            'with key management services like Azure KeyVault.')
         self.argument('access_tier', arg_type=get_enum_type(t_access_tier),
-                      help='The access tier used for billing StandardBlob accounts. Cannot be set for StandardLRS, '
-                           'StandardGRS, StandardRAGRS, or PremiumLRS account types. It is required for '
-                           'StandardBlob accounts during creation')
+                      help='Required for storage accounts where kind = BlobStorage. '
+                           'The access tier is used for billing. The "Premium" access tier is the default value for '
+                           'premium block blobs storage account type and it cannot be changed for '
+                           'the premium block blobs storage account type.')
 
         if t_encryption_services:
             encryption_choices = list(
