@@ -3674,12 +3674,19 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
         print(output)
 
 
-def publish_bicep_file(cmd, file, target):
+def publish_bicep_file(cmd, file, target, documentationUri=None):
     ensure_bicep_installation()
 
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
-        run_bicep_command(cmd.cli_ctx, ["publish", file, "--target", target])
+        args = ["publish", file, "--target", target]
+        if documentationUri:
+            minimum_supported_version_for_documentationUri_parameter = "0.14.46"
+            if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_documentationUri_parameter):
+                args += ["--documentationUri", documentationUri]
+            else:
+                logger.error("az bicep publish with --documentationUri/-d parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_documentationUri_parameter)
+        run_bicep_command(cmd.cli_ctx, args)
     else:
         logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
