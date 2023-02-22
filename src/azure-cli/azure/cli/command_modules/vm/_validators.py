@@ -20,8 +20,7 @@ from azure.cli.core.azclierror import (ValidationError, ArgumentUsageError, Requ
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
-from azure.cli.command_modules.vm._vm_utils import (
-    check_existence, get_target_network_api, get_storage_blob_uri, list_sku_info)
+from azure.cli.command_modules.vm._vm_utils import (check_existence, get_storage_blob_uri, list_sku_info)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 from azure.cli.core import keys
 from azure.core.exceptions import ResourceNotFoundError
@@ -573,6 +572,17 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                 "The --os-type is not the correct os type of this community gallery image, "
                 "the os type of this image should be {}".format(community_gallery_image_info.os_type))
         namespace.os_type = community_gallery_image_info.os_type
+
+    if getattr(namespace, 'security_type', None) == 'ConfidentialVM' and \
+            not getattr(namespace, 'os_disk_security_encryption_type', None):
+        raise RequiredArgumentMissingError('usage error: "--os-disk-security-encryption-type" is required '
+                                           'when "--security-type" is specified as "ConfidentialVM"')
+
+    if getattr(namespace, 'os_disk_secure_vm_disk_encryption_set', None) and \
+            getattr(namespace, 'os_disk_security_encryption_type', None) != 'DiskWithVMGuestState':
+        raise ArgumentUsageError(
+            'usage error: The "--os-disk-secure-vm-disk-encryption-set" can only be passed in '
+            'when "--os-disk-security-encryption-type" is "DiskWithVMGuestState"')
 
     if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
@@ -1300,6 +1310,97 @@ def _enable_msi_for_trusted_launch(namespace):
             namespace.assign_identity.append(MSI_LOCAL_ID)
 
 
+def _validate_trusted_launch(namespace):
+    if not namespace.security_type or namespace.security_type.lower() != 'trustedlaunch':
+        return
+
+    if namespace.enable_vtpm is None:
+        namespace.enable_vtpm = True
+
+    if namespace.enable_secure_boot is None:
+        namespace.enable_secure_boot = True
+
+
+def _validate_generation_version_and_trusted_launch(cmd, namespace):
+    from azure.cli.core.profiles import ResourceType
+    if not cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE, min_api='2020-12-01'):
+        return
+    from ._vm_utils import trusted_launch_warning_log
+    if namespace.image is not None:
+        from ._vm_utils import parse_shared_gallery_image_id, parse_community_gallery_image_id,\
+            is_valid_image_version_id, parse_gallery_image_id
+        if is_valid_image_version_id(namespace.image):
+            image_info = parse_gallery_image_id(namespace.image)
+            compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=image_info[0])
+            gallery_image_info = compute_client.gallery_images.get(
+                resource_group_name=image_info[1], gallery_name=image_info[2], gallery_image_name=image_info[3])
+            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
+                                                                                  'hyper_v_generation') else None
+            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
+            return
+
+        image_type = _parse_image_argument(cmd, namespace)
+
+        if image_type == 'image_id':
+            # managed image does not support trusted launch
+            return
+
+        if image_type == 'uri':
+            # vhd does not support trusted launch
+            return
+
+        if image_type == 'shared_gallery_image_id':
+            from ._client_factory import cf_shared_gallery_image
+            image_info = parse_shared_gallery_image_id(namespace.image)
+            gallery_image_info = cf_shared_gallery_image(cmd.cli_ctx).get(
+                location=namespace.location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
+            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
+                                                                                  'hyper_v_generation') else None
+            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
+            return
+
+        if image_type == 'community_gallery_image_id':
+            from ._client_factory import cf_community_gallery_image
+            image_info = parse_community_gallery_image_id(namespace.image)
+            gallery_image_info = cf_community_gallery_image(cmd.cli_ctx).get(
+                location=namespace.location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
+            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
+                                                                                  'hyper_v_generation') else None
+            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
+            return
+
+        if image_type == 'urn':
+            client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
+            os_version = namespace.os_version
+            if os_version.lower() == 'latest':
+                os_version = _get_latest_image_version(cmd.cli_ctx, namespace.location, namespace.os_publisher,
+                                                       namespace.os_offer, namespace.os_sku)
+            vm_image_info = client.get(namespace.location, namespace.os_publisher, namespace.os_offer,
+                                       namespace.os_sku, os_version)
+            generation_version = vm_image_info.hyper_v_generation if hasattr(vm_image_info,
+                                                                             'hyper_v_generation') else None
+            features = vm_image_info.features if hasattr(vm_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
+            return
+
+    # create vm with os disk
+    if hasattr(namespace, 'attach_os_disk') and namespace.attach_os_disk is not None:
+        from msrestazure.tools import parse_resource_id
+        if urlparse(namespace.attach_os_disk).scheme and "://" in namespace.attach_os_disk:
+            # vhd does not support trusted launch
+            return
+        client = _compute_client_factory(cmd.cli_ctx).disks
+        attach_os_disk_name = parse_resource_id(namespace.attach_os_disk)['name']
+        attach_os_disk_info = client.get(namespace.resource_group_name, attach_os_disk_name)
+        generation_version = attach_os_disk_info.hyper_v_generation if hasattr(attach_os_disk_info,
+                                                                               'hyper_v_generation') else None
+        features = attach_os_disk_info.features if hasattr(attach_os_disk_info, 'features') else None
+        trusted_launch_warning_log(namespace, generation_version, features)
+
+
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
     if namespace.application_configuration_overrides and \
        len(namespace.application_version_ids) != len(namespace.application_configuration_overrides):
@@ -1371,7 +1472,9 @@ def process_vm_create_namespace(cmd, namespace):
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
+    _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
+    _validate_generation_version_and_trusted_launch(cmd, namespace)
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
 
@@ -1492,9 +1595,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
                     if len(lb.inbound_nat_pools) > 1:
                         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' explicitly.".format(  # pylint: disable=line-too-long
                             '--nat-pool-name', ', '.join([n.name for n in lb.inbound_nat_pools])))
-                    if not lb.inbound_nat_pools:  # Associated scaleset will be missing ssh/rdp, so warn here.
-                        logger.warning("No inbound nat pool was configured on '%s'", namespace.load_balancer)
-                    else:
+                    if lb.inbound_nat_pools:
                         namespace.nat_pool_name = lb.inbound_nat_pools[0].name
                 logger.debug("using specified existing load balancer '%s'", namespace.load_balancer)
             else:
@@ -1526,7 +1627,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
 def get_network_client(cli_ctx):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK, api_version=get_target_network_api(cli_ctx))
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
 
 
 def get_network_lb(cli_ctx, resource_group_name, lb_name):
@@ -1542,6 +1643,17 @@ def process_vmss_create_namespace(cmd, namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
     # uniform_str = 'Uniform'
     flexible_str = 'Flexible'
+
+    if namespace.os_disk_delete_option is not None or namespace.data_disk_delete_option is not None:
+        if namespace.orchestration_mode.lower() != flexible_str.lower():
+            raise InvalidArgumentValueError('usage error: --os-disk-delete-option/--data-disk-delete-option is only'
+                                            ' available for VMSS with flexible orchestration mode')
+
+    if namespace.regular_priority_count is not None or namespace.regular_priority_percentage is not None:
+        if namespace.orchestration_mode.lower() != flexible_str.lower():
+            raise InvalidArgumentValueError('usage error: --regular-priority-count/--regular-priority-percentage is'
+                                            ' only available for VMSS with flexible orchestration mode')
+
     if namespace.orchestration_mode.lower() == flexible_str.lower():
 
         # The commentted parameters are also forbidden, but they have default values.
@@ -1569,6 +1681,7 @@ def process_vmss_create_namespace(cmd, namespace):
         if namespace.vm_sku and not namespace.image:
             raise ArgumentUsageError('usage error: please specify the --image when you want to specify the VM SKU')
 
+        _validate_trusted_launch(namespace)
         if namespace.image:
 
             if namespace.vm_sku is None:
@@ -1658,7 +1771,9 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vmss_create_nsg(cmd, namespace)
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
     _validate_vm_vmss_create_auth(namespace, cmd)
+    _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
+    _validate_generation_version_and_trusted_launch(cmd, namespace)
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vmss_terminate_notification(cmd, namespace)
     _validate_vmss_create_automatic_repairs(cmd, namespace)
@@ -1755,6 +1870,10 @@ def process_disk_create_namespace(cmd, namespace):
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
     _validate_gallery_image_reference(cmd, namespace)
+    _validate_security_data_uri(namespace)
+    _validate_upload_type(cmd, namespace)
+    _validate_secure_vm_disk_encryption_set(namespace)
+    _validate_hyper_v_generation(namespace)
     if namespace.source:
         usage_error = 'usage error: --source {SNAPSHOT | DISK | RESTOREPOINT} | ' \
                       '--source VHD_BLOB_URI [--source-storage-account-id ID]'
@@ -1766,6 +1885,68 @@ def process_disk_create_namespace(cmd, namespace):
                 raise ArgumentUsageError(usage_error)
         except HttpResponseError:
             raise ArgumentUsageError(usage_error)
+
+
+def _validate_security_data_uri(namespace):
+    if 'security_data_uri' not in namespace or not namespace.security_data_uri:
+        return
+
+    if not namespace.security_type:
+        raise RequiredArgumentMissingError(
+            'Please specify --security-type when using the --security-data-uri parameter')
+
+    if not namespace.hyper_v_generation or namespace.hyper_v_generation != 'V2':
+        raise ArgumentUsageError(
+            "Please specify --hyper-v-generation as 'V2' when using the --security-data-uri parameter")
+
+    if not namespace.source:
+        raise RequiredArgumentMissingError(
+            'Please specify --source when using the --security-data-uri parameter')
+
+
+def _validate_upload_type(cmd, namespace):
+    if 'upload_type' not in namespace:
+        return
+
+    if not namespace.upload_type and namespace.for_upload:
+        namespace.upload_type = 'Upload'
+
+    if namespace.upload_type == 'UploadWithSecurityData':
+
+        if not cmd.supported_api_version(min_api='2021-08-01', operation_group='disks'):
+            raise ArgumentUsageError(
+                "'UploadWithSecurityData' is not supported in the current profile. "
+                "Please upgrade your profile with 'az cloud set --profile newerProfile' and try again")
+
+        if not namespace.security_type:
+            raise RequiredArgumentMissingError(
+                "Please specify --security-type when the value of --upload-type is 'UploadWithSecurityData'")
+
+        if not namespace.hyper_v_generation or namespace.hyper_v_generation != 'V2':
+            raise ArgumentUsageError(
+                "Please specify --hyper-v-generation as 'V2'  the value of --upload-type is 'UploadWithSecurityData'")
+
+
+def _validate_secure_vm_disk_encryption_set(namespace):
+    if 'secure_vm_disk_encryption_set' not in namespace:
+        return
+
+    if namespace.secure_vm_disk_encryption_set:
+        if not namespace.security_type or \
+                namespace.security_type.lower() != 'confidentialvm_diskencryptedwithcustomerkey':
+            raise ArgumentUsageError('usage error: --secure-vm-disk-encryption-set can only be specified only '
+                                     'when --security-type is set to ConfidentialVM_DiskEncryptedWithCustomerKey')
+
+    elif namespace.security_type and namespace.security_type.lower() == 'confidentialvm_diskencryptedwithcustomerkey':
+        raise ArgumentUsageError('usage error: --secure-vm-disk-encryption-set is mandatory when '
+                                 '--security-type is set to ConfidentialVM_DiskEncryptedWithCustomerKey')
+
+
+def _validate_hyper_v_generation(namespace):
+    if namespace.security_type and (not namespace.hyper_v_generation or namespace.hyper_v_generation == 'V1'):
+        logger.warning(
+            'Enabling security features by using parameter "--security-type" requires UEFI support with Generation 2 '
+            'VMs, please set the parameter "--hyper-v-generation" to "V2" for enabling Generation 2 VM support.')
 
 
 def process_snapshot_create_namespace(cmd, namespace):
@@ -1921,11 +2102,10 @@ def process_set_applications_namespace(cmd, namespace):  # pylint: disable=unuse
 
 def process_gallery_image_version_namespace(cmd, namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
-    TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption, ConfidentialVMEncryptionType = \
-        cmd.get_models('TargetRegion', 'EncryptionImages', 'OSDiskImageEncryption', 'DataDiskImageEncryption',
-                       'ConfidentialVMEncryptionType')
-    storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS']]
-    storage_account_types_str = ", ".join(storage_account_types_list)
+    TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption, \
+        ConfidentialVMEncryptionType, GalleryTargetExtendedLocation, GalleryExtendedLocation = cmd.get_models(
+            'TargetRegion', 'EncryptionImages', 'OSDiskImageEncryption', 'DataDiskImageEncryption',
+            'ConfidentialVMEncryptionType', 'GalleryTargetExtendedLocation', 'GalleryExtendedLocation')
 
     if namespace.target_regions:
         if hasattr(namespace, 'target_region_encryption') and namespace.target_region_encryption:
@@ -1939,6 +2119,9 @@ def process_gallery_image_version_namespace(cmd, namespace):
                 raise InvalidArgumentValueError(
                     'usage error: Length of --target_region_cvm_encryption should be as same as '
                     'length of target regions')
+
+        storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS']]
+        storage_account_types_str = ", ".join(storage_account_types_list)
 
         regions_info = []
         for i, t in enumerate(namespace.target_regions):
@@ -1975,6 +2158,8 @@ def process_gallery_image_version_namespace(cmd, namespace):
 
             # Parse target region encryption, example: ['des1,0,des2,1,des3', 'null', 'des4']
             encryption = None
+            os_disk_image = None
+            data_disk_images = None
             if hasattr(namespace, 'target_region_encryption') and namespace.target_region_encryption:
                 terms = namespace.target_region_encryption[i].split(',')
                 # OS disk
@@ -1983,30 +2168,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     os_disk_image = None
                 else:
                     des_id = _disk_encryption_set_format(cmd, namespace, os_disk_image)
-                    security_profile = None
-                    if hasattr(namespace, 'target_region_cvm_encryption') and namespace.target_region_cvm_encryption:
-                        cvm_terms = namespace.target_region_cvm_encryption[i].split(',')
-                        if not cvm_terms or len(cvm_terms) != 2:
-                            raise ArgumentUsageError(
-                                "usage error: {} is an invalid target region cvm encryption. "
-                                "Both os_cvm_encryption_type and os_cvm_des parameters are required.".format(cvm_terms))
-
-                        storage_profile_types = [profile_type.value for profile_type in ConfidentialVMEncryptionType]
-                        storage_profile_types_str = ", ".join(storage_profile_types)
-                        if cvm_terms[0] not in storage_profile_types:
-                            raise ArgumentUsageError(
-                                "usage error: {} is an invalid os_cvm_encryption_type. "
-                                "The valid values for os_cvm_encryption_type are {}".format(
-                                    cvm_terms, storage_profile_types_str))
-                        if cvm_terms[1]:
-                            cvm_des_id = _disk_encryption_set_format(cmd, namespace, cvm_terms[1])
-                        else:
-                            cvm_des_id = None
-                        security_profile = OSDiskImageSecurityProfile(confidential_vm_encryption_type=cvm_terms[0],
-                                                                      secure_vm_disk_encryption_set_id=cvm_des_id)
-
-                    os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id,
-                                                          security_profile=security_profile)
+                    os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id)
                 # Data disk
                 if len(terms) > 1:
                     data_disk_images = terms[1:]
@@ -2023,8 +2185,32 @@ def process_gallery_image_version_namespace(cmd, namespace):
                         data_disk_image_encryption_list.append(DataDiskImageEncryption(
                             lun=lun, disk_encryption_set_id=des_id))
                     data_disk_images = data_disk_image_encryption_list
+
+            if hasattr(namespace, 'target_region_cvm_encryption') and namespace.target_region_cvm_encryption:
+                cvm_terms = namespace.target_region_cvm_encryption[i].split(',')
+                if not cvm_terms or len(cvm_terms) != 2:
+                    raise ArgumentUsageError(
+                        "usage error: {} is an invalid target region cvm encryption. "
+                        "Both os_cvm_encryption_type and os_cvm_des parameters are required.".format(cvm_terms))
+
+                storage_profile_types = [profile_type.value for profile_type in ConfidentialVMEncryptionType]
+                storage_profile_types_str = ", ".join(storage_profile_types)
+                if cvm_terms[0] not in storage_profile_types:
+                    raise ArgumentUsageError(
+                        "usage error: {} is an invalid os_cvm_encryption_type. "
+                        "The valid values for os_cvm_encryption_type are {}".format(
+                            cvm_terms, storage_profile_types_str))
+                cvm_des_id = None
+                if cvm_terms[1]:
+                    cvm_des_id = _disk_encryption_set_format(cmd, namespace, cvm_terms[1])
+                security_profile = OSDiskImageSecurityProfile(confidential_vm_encryption_type=cvm_terms[0],
+                                                              secure_vm_disk_encryption_set_id=cvm_des_id)
+                if os_disk_image:
+                    os_disk_image.security_profile = security_profile
                 else:
-                    data_disk_images = None
+                    os_disk_image = OSDiskImageEncryption(security_profile=security_profile)
+
+            if os_disk_image or data_disk_images:
                 encryption = EncryptionImages(os_disk_image=os_disk_image, data_disk_images=data_disk_images)
 
             # At least the region is specified
@@ -2034,6 +2220,108 @@ def process_gallery_image_version_namespace(cmd, namespace):
                                                  encryption=encryption))
 
         namespace.target_regions = regions_info
+
+    if hasattr(namespace, 'target_edge_zones') and namespace.target_edge_zones:
+        if len(namespace.target_edge_zones) == 1 and namespace.target_edge_zones[0].lower() == 'none':
+            namespace.target_edge_zones = []
+            return
+        if hasattr(namespace, 'target_zone_encryption') and namespace.target_zone_encryption:
+            if len(namespace.target_edge_zones) != len(namespace.target_zone_encryption):
+                raise InvalidArgumentValueError(
+                    'usage error: Length of --target-edge-zone-encryption '
+                    'should be as same as length of --target-edge-zones')
+
+        storage_account_types_list = [item.lower() for item in
+                                      ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS', 'StandardSSD_LRS']]
+        storage_account_types_str = ", ".join(storage_account_types_list)
+
+        edge_zone_info = []
+        for i, t in enumerate(namespace.target_edge_zones):
+            parts = t.split('=', 3)
+            # At least the region and edge zone are specified
+            if len(parts) < 2:
+                continue
+
+            region = parts[0]
+            edge_zone = parts[1]
+            replica_count = None
+            storage_account_type = None
+
+            # Both "region" and "edge zone" are specified,
+            # but only one of "replica count" and "storage account type" is specified
+            if len(parts) == 3:
+                try:
+                    replica_count = int(parts[2])
+                except ValueError:
+                    storage_account_type = parts[2]
+                    if parts[2].lower() not in storage_account_types_list:
+                        raise ArgumentUsageError(
+                            "usage error: {} is an invalid target edge zone argument. "
+                            "The third part is neither an integer replica count or a valid storage account type. "
+                            "Storage account types must be one of {}.".format(t, storage_account_types_str))
+
+            # Not only "region" and "edge zone" are specified,
+            # but also "replica count" and "storage account type" are specified
+            elif len(parts) == 4:
+                try:
+                    replica_count = int(parts[2])  # raises ValueError if this is not a replica count, try other order.
+                    storage_account_type = parts[3]
+                    if storage_account_type not in storage_account_types_list:
+                        raise ArgumentUsageError(
+                            "usage error: {} is an invalid target edge zone argument. "
+                            "The forth part is not a valid storage account type. "
+                            "Storage account types must be one of {}.".format(t, storage_account_types_str))
+                except ValueError:
+                    raise ArgumentUsageError(
+                        "usage error: {} is an invalid target edge zone argument. "
+                        "The third part must be a valid integer replica count.".format(t))
+
+            # Parse target edge zone encryption,
+            # example: ['microsoftlosangeles1', 'des1, 0, des2, 1, des3', 'null', 'des4']
+            encryption = None
+            os_disk_image = None
+            data_disk_images = None
+            if hasattr(namespace, 'target_zone_encryption') and namespace.target_zone_encryption:
+                terms = namespace.target_zone_encryption[i].split(',')
+                if len(terms) < 2:
+                    break
+                # OS disk
+                os_disk_image = terms[1]
+                if os_disk_image == 'null':
+                    os_disk_image = None
+                else:
+                    des_id = _disk_encryption_set_format(cmd, namespace, os_disk_image)
+                    os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id)
+                # Data disk
+                if len(terms) > 2:
+                    data_disk_images = terms[2:]
+                    data_disk_images_len = len(data_disk_images)
+                    if data_disk_images_len % 2 != 0:
+                        raise ArgumentUsageError(
+                            'usage error: LUN and disk encryption set for data disk should appear in pair in '
+                            '--target-edge-zone-encryption. Example: 1,osdes,0,datades0,1,datades1')
+                    data_disk_image_encryption_list = []
+                    for j in range(int(data_disk_images_len / 2)):
+                        lun = data_disk_images[j * 2]
+                        des_id = data_disk_images[j * 2 + 1]
+                        des_id = _disk_encryption_set_format(cmd, namespace, des_id)
+                        data_disk_image_encryption_list.append(DataDiskImageEncryption(
+                            lun=lun, disk_encryption_set_id=des_id))
+                    data_disk_images = data_disk_image_encryption_list
+
+            if os_disk_image or data_disk_images:
+                encryption = EncryptionImages(os_disk_image=os_disk_image, data_disk_images=data_disk_images)
+
+            extended_location = GalleryExtendedLocation(name=edge_zone, type='EdgeZone')
+
+            edge_zone_info.append(
+                GalleryTargetExtendedLocation(name=region, extended_location_replica_count=replica_count,
+                                              extended_location=extended_location,
+                                              storage_account_type=storage_account_type,
+                                              encryption=encryption)
+            )
+
+        namespace.target_edge_zones = edge_zone_info
 
 
 def _disk_encryption_set_format(cmd, namespace, name):
@@ -2052,7 +2340,18 @@ def _disk_encryption_set_format(cmd, namespace, name):
 # endregion
 
 
+def process_ppg_create_namespace(namespace):
+    validate_tags(namespace)
+    # The availability zone can be provided only when an intent is provided
+    if namespace.zone and not namespace.intent_vm_sizes:
+        raise RequiredArgumentMissingError('The --zone can be provided only when an intent is provided. '
+                                           'Please use parameter --intent-vm-sizes to specify possible sizes of '
+                                           'virtual machines that can be created in the proximity placement group.')
+# endregion
+
+
 def process_image_version_create_namespace(cmd, namespace):
+    validate_tags(namespace)
     process_gallery_image_version_namespace(cmd, namespace)
     process_image_resource_id_namespace(namespace)
 # endregion
@@ -2268,3 +2567,12 @@ def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
     if not prompt_y_n(msg, default="y"):
         import sys
         sys.exit(0)
+
+
+def validate_secure_vm_guest_state_sas(cmd, namespace):
+    compute_client = _compute_client_factory(cmd.cli_ctx)
+    disk_info = compute_client.disks.get(namespace.resource_group_name, namespace.disk_name)
+    DiskCreateOption = cmd.get_models('DiskCreateOption')
+
+    if disk_info.creation_data and disk_info.creation_data.create_option == DiskCreateOption.upload_prepared_secure:
+        namespace.secure_vm_guest_state_sas = True

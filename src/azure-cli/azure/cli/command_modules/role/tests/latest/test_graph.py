@@ -2,19 +2,15 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
 import json
-import os
-import sys
-from unittest import mock
 import unittest
-import datetime
-import dateutil
-import dateutil.parser
+from unittest import mock
+
+from azure.cli.testsdk import MSGraphNameReplacer
+from ..util import MSGraphUpnReplacer
+from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk.scenario_tests.const import MOCKED_TENANT_ID
-from azure.cli.testsdk import ScenarioTest, MSGraphNameReplacer, MOCKED_USER_NAME
-from knack.util import CLIError
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 
 
 # This test example is from
@@ -200,40 +196,6 @@ class GraphScenarioTestBase(ScenarioTest):
         self.cmd('ad {object_type} credential reset --id {app_id} --end-date "2100-12-31"')
         self.cmd('ad {object_type} credential list --id {app_id}',
                  checks=self.check('[0].endDateTime', '2100-12-31T00:00:00Z'))
-
-    def _test_federated_credential(self, object_type):
-        self.kwargs['object_type'] = object_type
-        self.kwargs['parameters'] = TEST_FEDERATED_IDENTITY_CREDENTIAL
-        self.kwargs['name'] = 'Testing'
-
-        # Create credential
-        result = self.cmd("ad {object_type} federated-credential create --id {app_id} --parameters '{parameters}'",
-                          checks=[self.check('name', '{name}')]).get_output_in_json()
-        self.kwargs['credential_id'] = result['id']
-
-        # List credential
-        self.cmd("ad {object_type} federated-credential list --id {app_id}",
-                 checks=[self.check('length(@)', 1)])
-
-        # Show credential with credential ID
-        self.cmd("ad {object_type} federated-credential show --id {app_id} --credential-id {credential_id}",
-                 checks=[self.check('name', '{name}')])
-        # Show with credential name
-        self.cmd("ad {object_type} federated-credential show --id {app_id} --credential-id {name}",
-                 checks=[self.check('name', '{name}')])
-
-        # Update credential's subject
-        update_subject = "repo:octo-org/octo-repo:environment:Staging"
-        self.kwargs['update_json'] = json.dumps({'subject': update_subject})
-        self.cmd("ad {object_type} federated-credential update --id {app_id} --credential-id {credential_id} "
-                 "--parameters '{update_json}'")
-        self.cmd("ad {object_type} federated-credential show --id {app_id} --credential-id {credential_id}",
-                 checks=self.check('subject', update_subject))
-
-        # Delete credential
-        self.cmd("ad {object_type} federated-credential delete --id {app_id} --credential-id {credential_id}")
-        self.cmd("ad {object_type} federated-credential list --id {app_id}",
-                 checks=[self.check('length(@)', 0)])
 
 
 class ApplicationScenarioTest(GraphScenarioTestBase):
@@ -643,7 +605,37 @@ class ApplicationScenarioTest(GraphScenarioTestBase):
 
     def test_app_federated_credential(self):
         self._create_app()
-        self._test_federated_credential('app')
+        self.kwargs['parameters'] = TEST_FEDERATED_IDENTITY_CREDENTIAL
+        self.kwargs['name'] = 'Testing'
+
+        # Create credential
+        result = self.cmd("ad app federated-credential create --id {app_id} --parameters '{parameters}'",
+                          checks=[self.check('name', '{name}')]).get_output_in_json()
+        self.kwargs['credential_id'] = result['id']
+
+        # List credential
+        self.cmd("ad app federated-credential list --id {app_id}",
+                 checks=[self.check('length(@)', 1)])
+
+        # Show credential with credential ID
+        self.cmd("ad app federated-credential show --id {app_id} --federated-credential-id {credential_id}",
+                 checks=[self.check('name', '{name}')])
+        # Show with credential name
+        self.cmd("ad app federated-credential show --id {app_id} --federated-credential-id {name}",
+                 checks=[self.check('name', '{name}')])
+
+        # Update credential's subject
+        update_subject = "repo:octo-org/octo-repo:environment:Staging"
+        self.kwargs['update_json'] = json.dumps({'subject': update_subject})
+        self.cmd("ad app federated-credential update --id {app_id} --federated-credential-id {credential_id} "
+                 "--parameters '{update_json}'")
+        self.cmd("ad app federated-credential show --id {app_id} --federated-credential-id {credential_id}",
+                 checks=self.check('subject', update_subject))
+
+        # Delete credential
+        self.cmd("ad app federated-credential delete --id {app_id} --federated-credential-id {credential_id}")
+        self.cmd("ad app federated-credential list --id {app_id}",
+                 checks=[self.check('length(@)', 0)])
 
 
 class ServicePrincipalScenarioTest(GraphScenarioTestBase):
@@ -940,7 +932,7 @@ class GroupScenarioTest(GraphScenarioTestBase):
 
 
 class MiscellaneousScenarioTest(GraphScenarioTestBase):
-    def test_special_characters(self):
+    def test_special_characters_in_query(self):
         # Test special characters in object names. Ensure these characters are correctly percent-encoded.
         # For example, displayName with +(%2B), /(%2F)
         from azure.cli.testsdk.scenario_tests.utilities import create_random_name
@@ -966,6 +958,40 @@ class MiscellaneousScenarioTest(GraphScenarioTestBase):
         self.cmd('ad group delete --group {display_name}')
         self.cmd('ad group list --display-name {display_name}',
                  checks=self.check('length(@)', 0))
+
+    def test_special_characters_in_upn(self):
+        # Test special characters in upn
+        from azure.cli.testsdk.scenario_tests.utilities import create_random_name
+        prefix = '$azure-cli-test-user#'
+        mock_name = prefix + '000001'
+        if self.in_recording:
+            display_name = create_random_name(prefix=prefix, length=32)
+            self.recording_processors.append(MSGraphNameReplacer(display_name, mock_name))
+            self.recording_processors.append(MSGraphUpnReplacer(display_name, mock_name))
+        else:
+            display_name = mock_name
+
+        self.kwargs = {
+            'display_name': display_name,
+            'upn': f'{display_name}@AzureSDKTeam.onmicrosoft.com',
+            'password': self.create_random_name(prefix='password-', length=40),
+        }
+        self.cmd('ad user create --display-name {display_name} --password {password} '
+                 '--user-principal-name {upn}',
+                 checks=self.check('displayName', '{display_name}'))
+
+        self.cmd('ad user update --id {upn} --force-change-password-next-sign-in true')
+
+        self.cmd('ad user show --id {upn}',
+                 checks=self.check('displayName', '{display_name}'))
+
+        self.cmd('ad user list --display-name {display_name}',
+                 checks=self.check('[0].displayName', '{display_name}'))
+
+        self.cmd('ad user get-member-groups --id {upn}',
+                 checks=self.is_empty())
+
+        self.cmd('ad user delete --id {upn}')
 
 
 def _get_id_from_value(permissions, value):

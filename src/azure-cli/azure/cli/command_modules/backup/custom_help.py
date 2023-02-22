@@ -221,6 +221,17 @@ def get_sub_protection_policy(policy, sub_policy_type):
     return None
 
 
+def replace_min_value_in_subtask(response):
+    # For a task in progress: replace min_value in start and end times with null.
+    tasks_list = response.properties.extended_info.tasks_list
+    for task in tasks_list:
+        if task.start_time == datetime.min:
+            task.start_time = None
+        if task.end_time == datetime.min:
+            task.end_time = None
+    return response
+
+
 def validate_container(container):
     validate_object(container, "Container not found. Please provide a valid container_name.")
 

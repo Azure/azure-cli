@@ -15,7 +15,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.checkers import (
     StringContainCheck, StringContainCheckIgnoreCase)
 from azure.cli.command_modules.acs._format import version_to_tuple
-from .recording_processors import KeyReplacer
+from azure.cli.command_modules.acs.tests.hybrid_2020_09_01.recording_processors import KeyReplacer
 
 # flake8: noqa
 

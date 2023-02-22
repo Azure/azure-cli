@@ -116,6 +116,17 @@ def validate_sqlmanagement(namespace):
 
 
 # pylint: disable=too-many-statements,line-too-long
+def validate_least_privilege_mode(namespace):
+    '''
+    Validates if least privilege mode provided, management mode is Full
+    '''
+    least_privilege_mode = namespace.least_privilege_mode
+
+    if (least_privilege_mode == "Enabled" and (namespace.sql_management_mode is None or namespace.sql_management_mode != "Full")):
+        raise RequiredArgumentMissingError("usage error: --least-privilege-mode Enabled --sql-mgmt-type Full")
+
+
+# pylint: disable=too-many-statements,line-too-long
 def validate_expand(namespace):
     '''
     Concatenates expand parameters

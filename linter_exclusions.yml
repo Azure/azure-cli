@@ -38,6 +38,16 @@ acr manifest list:
     repo_id:
       rule_exclusions:
       - no_positional_parameters
+acr manifest list-deleted:
+  parameters:
+    repo_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest list-deleted-tags:
+  parameters:
+    perm_repo_id:
+      rule_exclusions:
+      - no_positional_parameters
 acr manifest list-referrers:
   parameters:
     manifest_id:
@@ -59,6 +69,11 @@ acr manifest metadata show:
       rule_exclusions:
       - no_positional_parameters
 acr manifest metadata update:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest restore:
   parameters:
     manifest_id:
       rule_exclusions:
@@ -312,6 +327,12 @@ aks create:
     enable_msi_auth_for_monitoring:
       rule_exclusions:
       - option_length_too_long
+    enable_syslog:
+      rule_exclusions:
+      - option_length_too_long
+    data_collection_settings:
+      rule_exclusions:
+      - option_length_too_long
     node_osdisk_diskencryptionset_id:
       rule_exclusions:
       - option_length_too_long
@@ -321,12 +342,30 @@ aks create:
     assign_kubelet_identity:
       rule_exclusions:
       - option_length_too_long
+    enable_azure_keyvault_kms:
+      rule_exclusions:
+        - option_length_too_long
+    azure_keyvault_kms_key_id:
+      rule_exclusions:
+        - option_length_too_long
+    azure_keyvault_kms_key_vault_network_access:
+      rule_exclusions:
+        - option_length_too_long
+    azure_keyvault_kms_key_vault_resource_id:
+      rule_exclusions:
+        - option_length_too_long
 aks enable-addons:
   parameters:
     workspace_resource_id:
       rule_exclusions:
       - option_length_too_long
     enable_msi_auth_for_monitoring:
+      rule_exclusions:
+      - option_length_too_long
+    enable_syslog:
+      rule_exclusions:
+      - option_length_too_long
+    data_collection_settings:
       rule_exclusions:
       - option_length_too_long
 aks install-cli:
@@ -371,6 +410,21 @@ aks update:
     enable_managed_identity:
       rule_exclusions:
       - option_length_too_long
+    enable_azure_keyvault_kms:
+      rule_exclusions:
+        - option_length_too_long
+    disable_azure_keyvault_kms:
+      rule_exclusions:
+        - option_length_too_long
+    azure_keyvault_kms_key_id:
+      rule_exclusions:
+        - option_length_too_long
+    azure_keyvault_kms_key_vault_network_access:
+      rule_exclusions:
+        - option_length_too_long
+    azure_keyvault_kms_key_vault_resource_id:
+      rule_exclusions:
+        - option_length_too_long
 aks update-credentials:
   parameters:
     aad_server_app_secret:
@@ -868,6 +922,9 @@ backup restore restore-disks:
       rule_exclusions:
       - option_length_too_long
     target_vnet_resource_group:
+      rule_exclusions:
+      - option_length_too_long
+    storage_account_resource_group:
       rule_exclusions:
       - option_length_too_long
 backup vault backup-properties set:
@@ -1504,6 +1561,9 @@ disk create:
       rule_exclusions:
       - option_length_too_long
     source_storage_account_id:
+      rule_exclusions:
+      - option_length_too_long
+    secure_vm_disk_encryption_set:
       rule_exclusions:
       - option_length_too_long
 disk update:
@@ -2853,6 +2913,16 @@ openshift create:
     customer_admin_group_id:
       rule_exclusions:
       - option_length_too_long
+policy attestation create:
+  parameters:
+    definition_reference_id:
+      rule_exclusions:
+        - option_length_too_long
+policy attestation update:
+  parameters:
+    definition_reference_id:
+      rule_exclusions:
+        - option_length_too_long
 policy assignment list:
   parameters:
     disable_scope_strict_match:
@@ -2970,21 +3040,6 @@ relay wcfrelay update:
     relay_type:
       rule_exclusions:
       - no_parameter_defaults_for_update_commands
-reservations catalog show:
-  parameters:
-    reserved_resource_type:
-      rule_exclusions:
-      - option_length_too_long
-reservations reservation-order calculate:
-  parameters:
-    reserved_resource_type:
-      rule_exclusions:
-      - option_length_too_long
-reservations reservation-order purchase:
-  parameters:
-    reserved_resource_type:
-      rule_exclusions:
-      - option_length_too_long
 resource move:
   parameters:
     destination_subscription_id:

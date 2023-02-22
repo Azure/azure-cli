@@ -159,6 +159,9 @@ examples:
   - name: List encryption scopes within storage account.
     text: |
         az storage account encryption-scope list --account-name mystorageaccount -g MyResourceGroup
+  - name: List encryption scopes starting with specific name.
+    text: |
+        az storage account encryption-scope list --account-name mystorageaccount -g myresourcegroup --filter 'startswith(name, value)'
 """
 
 helps['storage account encryption-scope show'] = """
@@ -656,6 +659,79 @@ short-summary: Stop the enabling hierarchical namespace migration of a storage a
 examples:
   - name: Stop the enabling hierarchical namespace migration of a storage account.
     text: az storage account hns-migration stop --name mystorageaccount --resource-group myresourcegroup
+"""
+
+helps['storage account local-user'] = """
+    type: group
+    short-summary: Manage storage account local users.
+"""
+
+helps['storage account local-user create'] = """
+    type: command
+    short-summary: Create a local user for a given storage account.
+    examples:
+        - name: Create a local-user with two permission scopes and an ssh-authorized-key
+          text: >
+              az storage account local-user create --account-name {account-name} -g {resource-group} -n {username}
+              --home-directory home --permission-scope permissions=r service=blob resource-name=container1
+              --permission-scope permissions=rw service=file resource-name=share2 --ssh-authorized-key key="ssh-rsa a2V5"
+              --has-ssh-key true --has-ssh-password --has-shared-key false
+"""
+
+helps['storage account local-user update'] = """
+    type: command
+    short-summary: Update properties for a local user.
+    examples:
+        - name: Update a local-user with one permission scopes and no ssh-key
+          text: >
+              az storage account local-user update --account-name {account-name} -g {resource-group} -n {username}
+              --permission-scope permissions=rw service=file resource-name=share2
+              --has-ssh-key false
+"""
+
+helps['storage account local-user delete'] = """
+    type: command
+    short-summary: Delete a local user.
+    examples:
+        - name: Delete a local-user
+          text: >
+              az storage account local-user delete --account-name {account-name} -g {resource-group} -n {username}
+"""
+
+helps['storage account local-user list'] = """
+    type: command
+    short-summary: List local users for a storage account.
+    examples:
+        - name: List local-user for a storage account
+          text: >
+              az storage account local-user list --account-name {account-name} -g {resource-group}
+"""
+
+helps['storage account local-user show'] = """
+    type: command
+    short-summary: Show info for a local user.
+    examples:
+        - name: Show info for a local-user
+          text: >
+              az storage account local-user show --account-name {account-name} -g {resource-group} -n {username}
+"""
+
+helps['storage account local-user list-keys'] = """
+    type: command
+    short-summary: List sharedkeys and sshAuthorizedKeys for a local user.
+    examples:
+        - name: List sharedkeys and sshAuthorizedKeys for a local-user
+          text: >
+              az storage account local-user list-keys --account-name {account-name} -g {resource-group} -n {username}
+"""
+
+helps['storage account local-user regenerate-password'] = """
+    type: command
+    short-summary: Regenerate sshPassword for a local user.
+    examples:
+        - name: Regenerate sshPassword for a local-user
+          text: >
+              az storage account local-user regenerate-password --account-name {account-name} -g {resource-group} -n {username}
 """
 
 helps['storage blob'] = """

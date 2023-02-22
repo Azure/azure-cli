@@ -5,13 +5,12 @@
 import time
 import unittest
 from unittest import mock
-from knack.testsdk import record_only
-from knack.util import CLIError
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
 from azure.core.exceptions import HttpResponseError
-
+from knack.util import CLIError
 from msrestazure.tools import parse_resource_id
+
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
 
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
@@ -226,6 +225,104 @@ class ImageTemplateTest(ScenarioTest):
         self.cmd('image builder list -g {rg}', checks=self.check('length(@)', 2))
         self.cmd('image builder delete -n {tmpl_02} -g {rg}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_image_builder_template_validator_', location='westus')
+    def test_image_builder_template_validator(self, resource_group):
+        self._identity_role(resource_group)
+
+        subscription_id = '0b1f6471-1bf0-4dda-aec3-cb9272f09590'
+        self.kwargs.update({
+            'loc': 'westus',
+            'tmpl_01': 'template01',
+            'tmpl_02': 'template02',
+            'img_src': LINUX_IMAGE_SOURCE,
+            'script': TEST_SHELL_SCRIPT_URL,
+            'gallery': self.create_random_name('gallery', 15),
+            'image_def': 'def',
+        })
+
+        staging_resource_group_name1 = self.create_random_name('img_tmp_group1', 20)
+        staging_resource_group_name2 = self.create_random_name('img_tmp_group2', 20)
+        staging_resource_group1 = "subscriptions/{}/resourceGroups/{}".format(
+            subscription_id, staging_resource_group_name1)
+        staging_resource_group2 = "subscriptions/{}/resourceGroups/{}".format(
+            subscription_id, staging_resource_group_name2)
+        self.kwargs.update({
+            'staging_resource_group_name1': staging_resource_group_name1,
+            'staging_resource_group_name2': staging_resource_group_name2,
+            'staging_resource_group1': staging_resource_group1,
+            'staging_resource_group2': staging_resource_group2
+        })
+
+        # create a sig
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image_def} '
+                 '--os-type linux -p publisher1 -f offer1 -s sku1')
+
+        self.kwargs['sig_out'] = "{}/{}=eastus".format(self.kwargs['gallery'], self.kwargs['image_def'])
+
+        # test creating image template with staging resource group
+        self.cmd('image builder create -n {tmpl_01} -g {rg} --scripts {script} --image-source {img_src} '
+                 '--shared-image-destinations {sig_out} --identity {ide} '
+                 '--staging-resource-group {staging_resource_group1}',
+                 checks=[
+                     self.check('stagingResourceGroup', '{staging_resource_group1}')
+                 ])
+
+        # create image template in local cache
+        self.cmd('image builder create -n {tmpl_02} -g {rg} --scripts {script} --image-source {img_src} '
+                 '--managed-image-destinations {image_def}={loc} --identity {ide} --defer '
+                 '--staging-resource-group {staging_resource_group2}',
+                 checks=[
+                     self.check('properties.stagingResourceGroup', '{staging_resource_group2}')
+                 ])
+
+        # add validate to template
+        self.cmd('image builder validator add -n {tmpl_02} -g {rg} '
+                 '--continue-distribute-on-failure true --source-validation-only true --defer',
+                 checks=[
+                     self.check('properties.validate.continueDistributeOnFailure', 'True'),
+                     self.check('properties.validate.sourceValidationOnly', 'True')
+                 ])
+
+        # add validate to template
+        self.cmd('image builder validator add -n {tmpl_02} -g {rg} --source-validation-only true --defer',
+                 checks=[
+                     self.check('properties.validate.continueDistributeOnFailure', 'False'),
+                     self.check('properties.validate.sourceValidationOnly', 'True')
+                 ])
+
+        # remove validate from template
+        self.cmd('image builder validator remove -n {tmpl_02} -g {rg} --defer',
+                 checks=[
+                     self.check('properties.validate', 'None')
+                 ])
+
+        # add validate to template
+        self.cmd('image builder validator add -n {tmpl_02} -g {rg} --defer',
+                 checks=[
+                     self.check('properties.validate.continueDistributeOnFailure', 'False'),
+                     self.check('properties.validate.sourceValidationOnly', 'False')
+                 ])
+
+        # show validate of template
+        self.cmd('image builder validator show -n {tmpl_02} -g {rg} --defer',
+                 checks=[
+                     self.check('continueDistributeOnFailure', 'False'),
+                     self.check('sourceValidationOnly', 'False')
+                 ])
+
+        # create image template from cache
+        self.cmd('image builder update -n {tmpl_02} -g {rg}', checks=[
+            self.check('validate.continueDistributeOnFailure', 'False'),
+            self.check('validate.sourceValidationOnly', 'False'),
+            self.check('stagingResourceGroup', '{staging_resource_group2}')
+        ])
+
+        # delete resource group
+        self.cmd('group delete -n {staging_resource_group_name1} --yes')
+        self.cmd('group delete -n {staging_resource_group_name2} --yes')
+
     @ResourceGroupPreparer(name_prefix='img_tmpl_basic_2', location="westus2")
     def test_image_builder_basic_sig(self, resource_group):
         self._identity_role(resource_group)
@@ -354,6 +451,69 @@ class ImageTemplateTest(ScenarioTest):
 
         self.assertEqual(img_tmpl['source']['imageVersionId'].lower(), self.kwargs['image_id'].lower())
         self.assertEqual(img_tmpl['source']['type'].lower(), 'sharedimageversion')
+
+    @ResourceGroupPreparer(name_prefix='img_tmpl_identity_')
+    def test_image_build_identity(self, resource_group):
+        self._identity_role(resource_group)
+
+        self.kwargs.update({
+            'img_src': LINUX_IMAGE_SOURCE,
+            'gallery': self.create_random_name("sig_", 10),
+            'sig1': 'image1',
+            'tmpl': 'template01',
+            'script': TEST_SHELL_SCRIPT_URL
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1} '
+                 '--os-type linux -p publisher1 -f offer1 -s sku1')
+
+        self.cmd(
+            'image builder create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --identity {ide} --defer')
+        self.cmd('image builder output add -n {tmpl} -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1}'
+                 ' --gallery-replication-regions westus --defer')
+
+        # send put request using cached template object
+        self.cmd('image builder update -n {tmpl} -g {rg}')
+
+        ide_id = self.cmd('identity show -n {ide} -g {rg}').get_output_in_json()['id']
+
+        # remove identity
+        self.cmd('image builder identity remove -n {tmpl} -g {rg} --user-assigned --yes',
+                 checks=[
+                     self.check('type', 'None'),
+                     self.check('userAssignedIdentities', None)
+                 ])
+
+        # assign identity
+        result = self.cmd('image builder identity assign -n {tmpl} -g {rg} --user-assigned {ide}',
+                          checks=[
+                              self.check('type', 'UserAssigned')
+                          ]).get_output_in_json()
+        result_identities = [x.lower() for x in result['userAssignedIdentities'].keys()]
+        self.assertEqual(result_identities, [ide_id.lower()])
+
+        # show identity
+        result = self.cmd('image builder identity show -n {tmpl} -g {rg}',
+                          checks=[
+                              self.check('type', 'UserAssigned')
+                          ]).get_output_in_json()
+        result_identities = [x.lower() for x in result['userAssignedIdentities'].keys()]
+        self.assertEqual(result_identities, [ide_id.lower()])
+
+        # remove identity
+        self.cmd('image builder identity remove -n {tmpl} -g {rg} --user-assigned {ide} --yes',
+                 checks=[
+                     self.check('type', 'None'),
+                     self.check('userAssignedIdentities', None)
+                 ])
+
+        # show identity
+        self.cmd('image builder identity show -n {tmpl} -g {rg}',
+                 checks=[
+                     self.check('type', 'None'),
+                     self.check('userAssignedIdentities', None)
+                 ])
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_customizers')
     def test_image_builder_customizers(self, resource_group, resource_group_location):

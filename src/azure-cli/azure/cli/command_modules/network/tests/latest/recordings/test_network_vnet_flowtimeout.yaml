@@ -13,12 +13,12 @@ interactions:
       ParameterSetName:
       - -g -n --flowtimeout
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_vnet_flowtimeout000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_vnet_flowtimeout000001","name":"test_network_vnet_flowtimeout000001","type":"Microsoft.Resources/resourceGroups","location":"centraluseuap","tags":{"product":"azurecli","cause":"automation","date":"2022-05-12T13:42:04Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_vnet_flowtimeout000001","name":"test_network_vnet_flowtimeout000001","type":"Microsoft.Resources/resourceGroups","location":"centraluseuap","tags":{"product":"azurecli","cause":"automation","date":"2022-11-17T03:30:07Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 13:42:10 GMT
+      - Thu, 17 Nov 2022 03:30:14 GMT
       expires:
       - '-1'
       pragma:
@@ -42,9 +42,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "centraluseuap", "tags": {}, "properties": {"addressSpace":
-      {"addressPrefixes": ["10.0.0.0/16"]}, "dhcpOptions": {}, "flowTimeoutInMinutes":
-      10}}'
+    body: '{"location": "centraluseuap", "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "enableDdosProtection": false, "enableVmProtection": false,
+      "flowTimeoutInMinutes": 10}}'
     headers:
       Accept:
       - application/json
@@ -55,39 +55,38 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '158'
+      - '187'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --flowtimeout
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_vnet_flowtimeout000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_vnet_flowtimeout000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_vnet_flowtimeout000001/providers/Microsoft.Network/virtualNetworks/vnet\",\r\n
-        \ \"etag\": \"W/\\\"0cc927ce-ca6e-4aec-9dce-ee02d67fa67f\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"12ea574d-f7bc-4830-adc9-885e1928dec2\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"9f8ab256-d602-4908-b83c-525153c867e4\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"flowTimeoutInMinutes\": 10,\r\n    \"subnets\": [],\r\n    \"virtualNetworkPeerings\":
-        [],\r\n    \"enableDdosProtection\": false\r\n  }\r\n}"
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"59f8c7b5-77a2-434a-b34a-9e916d2fcf38\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"flowTimeoutInMinutes\":
+        10,\r\n    \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f64ca931-1ac6-47a5-b1f0-a23e3ea03a57?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/ed1a0f10-f148-4c01-9915-0f676e40ee84?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '730'
+      - '661'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 13:42:18 GMT
+      - Thu, 17 Nov 2022 03:30:24 GMT
       expires:
       - '-1'
       pragma:
@@ -100,12 +99,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7b8ae931-e65a-4529-bd7c-e19151d240cf
+      - cc1c307e-f1ad-41cf-8c1e-336269a002a0
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1199'
     status:
       code: 201
-      message: Created
+      message: ''
 - request:
     body: null
     headers:
@@ -120,9 +119,9 @@ interactions:
       ParameterSetName:
       - -g -n --flowtimeout
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f64ca931-1ac6-47a5-b1f0-a23e3ea03a57?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/ed1a0f10-f148-4c01-9915-0f676e40ee84?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -134,7 +133,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 13:42:22 GMT
+      - Thu, 17 Nov 2022 03:30:27 GMT
       expires:
       - '-1'
       pragma:
@@ -151,10 +150,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - dafd6c22-e4b4-4767-9906-a6a9197650d9
+      - 9551f6c0-2a72-46a7-ab97-403430aa9b72
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -169,31 +168,30 @@ interactions:
       ParameterSetName:
       - -g -n --flowtimeout
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_vnet_flowtimeout000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_vnet_flowtimeout000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_vnet_flowtimeout000001/providers/Microsoft.Network/virtualNetworks/vnet\",\r\n
-        \ \"etag\": \"W/\\\"a8f3225c-15e3-476a-8bd1-b7b851b7d0db\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"3bfebef2-55ff-4045-b430-df2740b1c471\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"9f8ab256-d602-4908-b83c-525153c867e4\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"flowTimeoutInMinutes\": 10,\r\n    \"subnets\": [],\r\n    \"virtualNetworkPeerings\":
-        [],\r\n    \"enableDdosProtection\": false\r\n  }\r\n}"
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"59f8c7b5-77a2-434a-b34a-9e916d2fcf38\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"flowTimeoutInMinutes\":
+        10,\r\n    \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '731'
+      - '662'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 13:42:22 GMT
+      - Thu, 17 Nov 2022 03:30:28 GMT
       etag:
-      - W/"a8f3225c-15e3-476a-8bd1-b7b851b7d0db"
+      - W/"3bfebef2-55ff-4045-b430-df2740b1c471"
       expires:
       - '-1'
       pragma:
@@ -210,10 +208,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 68e2cf88-277b-4ce7-b0d8-ec2093596589
+      - 171155e0-0e7b-4885-a730-a98f98fa54be
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -228,31 +226,30 @@ interactions:
       ParameterSetName:
       - -g -n --flowtimeout
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_vnet_flowtimeout000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_vnet_flowtimeout000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_vnet_flowtimeout000001/providers/Microsoft.Network/virtualNetworks/vnet\",\r\n
-        \ \"etag\": \"W/\\\"a8f3225c-15e3-476a-8bd1-b7b851b7d0db\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"3bfebef2-55ff-4045-b430-df2740b1c471\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"9f8ab256-d602-4908-b83c-525153c867e4\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"flowTimeoutInMinutes\": 10,\r\n    \"subnets\": [],\r\n    \"virtualNetworkPeerings\":
-        [],\r\n    \"enableDdosProtection\": false\r\n  }\r\n}"
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"59f8c7b5-77a2-434a-b34a-9e916d2fcf38\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"flowTimeoutInMinutes\":
+        10,\r\n    \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '731'
+      - '662'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 13:42:24 GMT
+      - Thu, 17 Nov 2022 03:30:30 GMT
       etag:
-      - W/"a8f3225c-15e3-476a-8bd1-b7b851b7d0db"
+      - W/"3bfebef2-55ff-4045-b430-df2740b1c471"
       expires:
       - '-1'
       pragma:
@@ -269,15 +266,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5cd422c8-8400-4b28-ae21-865500d92598
+      - bdc27760-1533-4dac-95e2-6c8f91473f1a
     status:
       code: 200
       message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_vnet_flowtimeout000001/providers/Microsoft.Network/virtualNetworks/vnet",
-      "location": "centraluseuap", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "dhcpOptions": {"dnsServers": []}, "flowTimeoutInMinutes":
-      20, "subnets": [], "virtualNetworkPeerings": [], "enableDdosProtection": false}}'
+      "location": "centraluseuap", "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "enableDdosProtection": false, "flowTimeoutInMinutes": 20,
+      "subnets": [], "virtualNetworkPeerings": []}}'
     headers:
       Accept:
       - application/json
@@ -288,39 +285,38 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '411'
+      - '364'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --flowtimeout
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_vnet_flowtimeout000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_vnet_flowtimeout000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_vnet_flowtimeout000001/providers/Microsoft.Network/virtualNetworks/vnet\",\r\n
-        \ \"etag\": \"W/\\\"b04cb7cc-5a52-43cc-99b4-577ac9d25bde\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"8ddadd65-14a0-4ad2-897e-5fd93e5d01c8\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"9f8ab256-d602-4908-b83c-525153c867e4\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"flowTimeoutInMinutes\": 20,\r\n    \"subnets\": [],\r\n    \"virtualNetworkPeerings\":
-        [],\r\n    \"enableDdosProtection\": false\r\n  }\r\n}"
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"59f8c7b5-77a2-434a-b34a-9e916d2fcf38\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"flowTimeoutInMinutes\":
+        20,\r\n    \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/c75f81f4-5ac1-458a-a249-6a083cfa074b?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/0607937e-64d3-4c97-8503-dc2001673f75?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '730'
+      - '661'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 13:42:26 GMT
+      - Thu, 17 Nov 2022 03:30:32 GMT
       expires:
       - '-1'
       pragma:
@@ -337,9 +333,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b50a8053-7bcb-4cf3-a5d4-70f13c728f19
+      - 8988228f-a303-4f10-a80b-1499cbd2c853
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1192'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -357,9 +353,9 @@ interactions:
       ParameterSetName:
       - -g -n --flowtimeout
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/c75f81f4-5ac1-458a-a249-6a083cfa074b?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/0607937e-64d3-4c97-8503-dc2001673f75?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -371,7 +367,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 13:42:30 GMT
+      - Thu, 17 Nov 2022 03:30:37 GMT
       expires:
       - '-1'
       pragma:
@@ -388,7 +384,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ff74a81c-da20-4b52-9e64-4e1841ba9625
+      - 50f079a6-5b89-4143-b104-6b1591898b9a
     status:
       code: 200
       message: OK
@@ -406,31 +402,30 @@ interactions:
       ParameterSetName:
       - -g -n --flowtimeout
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.42.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_vnet_flowtimeout000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_vnet_flowtimeout000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_vnet_flowtimeout000001/providers/Microsoft.Network/virtualNetworks/vnet\",\r\n
-        \ \"etag\": \"W/\\\"4969785a-ef7d-4497-a264-cea141f0b527\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"3c5d64d6-b643-424e-88fa-d98b8e37e8d3\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centraluseuap\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"9f8ab256-d602-4908-b83c-525153c867e4\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"flowTimeoutInMinutes\": 20,\r\n    \"subnets\": [],\r\n    \"virtualNetworkPeerings\":
-        [],\r\n    \"enableDdosProtection\": false\r\n  }\r\n}"
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"59f8c7b5-77a2-434a-b34a-9e916d2fcf38\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"flowTimeoutInMinutes\":
+        20,\r\n    \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '731'
+      - '662'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 13:42:30 GMT
+      - Thu, 17 Nov 2022 03:30:37 GMT
       etag:
-      - W/"4969785a-ef7d-4497-a264-cea141f0b527"
+      - W/"3c5d64d6-b643-424e-88fa-d98b8e37e8d3"
       expires:
       - '-1'
       pragma:
@@ -447,7 +442,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1796cb5a-51de-4f9b-99ff-6a617b8c25ea
+      - 081eee40-1e27-42ae-bb42-af33efa4dadb
     status:
       code: 200
       message: OK

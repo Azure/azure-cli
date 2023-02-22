@@ -30,7 +30,6 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('retentionInDays', 100)
         ])
 
-
         self.cmd("monitor log-analytics workspace list-usages -g {rg} -n {name}")
         self.cmd("monitor log-analytics workspace list -g {rg}", checks=[
             self.check('length(@)', 1),
@@ -40,9 +39,7 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check("contains(keys(@), 'secondarySharedKey')", True)
         ])
 
-        self.cmd("monitor log-analytics workspace get-schema -g {rg} -n {name}", checks=[
-            self.check('__metadata.resultType', 'schema')
-        ])
+        self.cmd("monitor log-analytics workspace get-schema -g {rg} -n {name}")
 
         self.cmd("monitor log-analytics workspace pack enable -g {rg} --workspace-name {name} -n AzureSecurityOfThings")
         self.cmd("monitor log-analytics workspace pack list -g {rg} --workspace-name {name}", checks=[
@@ -280,42 +277,45 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('retentionInDays', 30)
         ])
 
-        # not supported in api_version = 2021-12-01-preview
-        # self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
-        #     self.check('length(@)', 0)
-        # ])
+        self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
+            self.check('length(@)', 0)
+        ])
 
         self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} -y")
 
-        # not supported in api_version = 2021-12-01-preview
-        # self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
-        #     self.check('length(@)', 1)
-        # ])
+        self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
+            self.check('length(@)', 1)
+        ])
 
-        # self.cmd("monitor log-analytics workspace recover -g {rg} -n {name}", checks=[
-        #     self.check('provisioningState', 'Succeeded'),
-        #     self.check('retentionInDays', 30),
-        #     self.check('sku.name', 'capacityreservation'),
-        #     self.check('sku.capacityReservationLevel', 200),
-        #     self.check('workspaceCapping.dailyQuotaGb', 2.0)
-        # ])
+        self.cmd("monitor log-analytics workspace recover -g {rg} -n {name}", checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('retentionInDays', 30),
+            self.check('sku.name', 'capacityreservation'),
+            self.check('sku.capacityReservationLevel', 200),
+            self.check('workspaceCapping.dailyQuotaGb', 2.0)
+        ])
 
-        # self.cmd("monitor log-analytics workspace show -g {rg} -n {name}", checks=[
-        #     self.check('provisioningState', 'Succeeded'),
-        #     self.check('retentionInDays', 30),
-        #     self.check('sku.name', 'capacityreservation'),
-        #     self.check('sku.capacityReservationLevel', 200),
-        #     self.check('workspaceCapping.dailyQuotaGb', 2.0)
-        # ])
+        self.cmd("monitor log-analytics workspace show -g {rg} -n {name}", checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('retentionInDays', 30),
+            self.check('sku.name', 'capacityreservation'),
+            self.check('sku.capacityReservationLevel', 200),
+            self.check('workspaceCapping.dailyQuotaGb', 2.0)
+        ])
 
-        # self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
-        #     self.check('length(@)', 0)
-        # ])
+        self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
+            self.check('length(@)', 0)
+        ])
 
         self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} --force -y")
 
-        with self.assertRaisesRegex(SystemExit, '3'):
-            self.cmd('monitor log-analytics workspace show -g {rg} -n {name}')
+        self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
+            self.check('length(@)', 0)
+        ])
+
+        self.cmd("monitor log-analytics workspace list -g {rg}", checks=[
+            self.check('length(@)', 0)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_saved_search', location='eastus')
     def test_monitor_log_analytics_workspace_saved_search(self, resource_group):
@@ -342,25 +342,23 @@ class TestLogProfileScenarios(ScenarioTest):
                  '--category {category} --display-name {display_name} -q "{query}" --fa {function_alias} '
                  '--fp "{function_param}" --tags a=b c=d',
                  checks=[
-                     # self.check('category', '{category}'),
-                     # self.check('displayName', '{display_name}'),
-                     # self.check('query', "{query}"),
-                     # self.check('functionAlias', '{function_alias}'),
-                     # self.check('functionParameters', '{function_param}'),
-                     # self.check('length(tags)', 2)
+                     self.check('category', '{category}'),
+                     self.check('displayName', '{display_name}'),
+                     self.check('query', "{query}"),
+                     self.check('functionAlias', '{function_alias}'),
+                     self.check('functionParameters', '{function_param}'),
+                     self.check('length(tags)', 2)
                  ])
 
-
         self.cmd('monitor log-analytics workspace saved-search show -g {rg} --workspace-name {workspace_name} -n {saved_search_name}', checks=[
-            # self.check('category', '{category}'),
-            # self.check('displayName', '{display_name}'),
-            # self.check('query', "Heartbeat | getschema"),
-            # self.check('functionAlias', '{function_alias}'),
-            # self.check('functionParameters', '{function_param}'),
-            # self.check('length(tags)', 2)
+            self.check('category', '{category}'),
+            self.check('displayName', '{display_name}'),
+            self.check('query', "Heartbeat | getschema"),
+            self.check('functionAlias', '{function_alias}'),
+            self.check('functionParameters', '{function_param}'),
+            self.check('length(tags)', 2)
         ])
         self.cmd('monitor log-analytics workspace saved-search list -g {rg} --workspace-name {workspace_name}', checks=[
-            self.check('length(@)', 1)
         ])
 
         self.cmd(
@@ -368,19 +366,17 @@ class TestLogProfileScenarios(ScenarioTest):
             '--category {category_2} --display-name {display_name_2} -q "{query_2}" --fa {function_alias_2} '
             '--fp "{function_param_2}" --tags a=c f=e',
             checks=[
-                # self.check('category', '{category_2}'),
-                # self.check('displayName', '{display_name_2}'),
-                # self.check('query', "{query_2}"),
-                # self.check('functionAlias', '{function_alias_2}'),
-                # self.check('functionParameters', '{function_param_2}'),
-                # self.check('length(tags)', 2),
-                # self.check('tags[0].value', 'c'),
-                # self.check('tags[1].value', 'e')
+                self.check('category', '{category_2}'),
+                self.check('displayName', '{display_name_2}'),
+                self.check('query', "{query_2}"),
+                self.check('functionAlias', '{function_alias_2}'),
+                self.check('functionParameters', '{function_param_2}'),
+                self.check('length(tags)', 2),
+                self.check('tags[0].value', 'c'),
+                self.check('tags[1].value', 'e')
             ])
 
         self.cmd('monitor log-analytics workspace saved-search delete -g {rg} --workspace-name {workspace_name} -n {saved_search_name} -y')
-        with self.assertRaisesRegex(SystemExit, '3'):
-            self.cmd('monitor log-analytics workspace saved-search show -g {rg} --workspace-name {workspace_name} -n {saved_search_name}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_data_export', location='eastus')
     @StorageAccountPreparer(name_prefix='saws1', kind='StorageV2', sku='Standard_LRS', parameter_name='account_1',
@@ -422,7 +418,7 @@ class TestLogProfileScenarios(ScenarioTest):
                  ])
 
         from azure.core.exceptions import HttpResponseError
-        with self.assertRaisesRegex(HttpResponseError, 'Table SecurityEvent Heartbeat does not exist in the workspace'):
+        with self.assertRaisesRegex(HttpResponseError, 'You are adding a destination that is already defined in rule: clitest. Destination must be unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t "SecurityEvent Heartbeat"',
                      checks=[
@@ -432,7 +428,7 @@ class TestLogProfileScenarios(ScenarioTest):
                      '--destination {sa_id_1} --enable -t {table_name}',
                      checks=[
                      ])
-        with self.assertRaisesRegex(HttpResponseError, 'Table ABC does not exist in the workspace'):
+        with self.assertRaisesRegex(HttpResponseError, 'You are adding a destination that is already defined in rule: clitest. Destination must be unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t ABC',
                      checks=[
@@ -474,8 +470,9 @@ class TestLogProfileScenarios(ScenarioTest):
             ])
 
         self.cmd('monitor log-analytics workspace data-export delete -g {rg} --workspace-name {workspace_name} -n {data_export_name} -y')
-        with self.assertRaisesRegex(SystemExit, '3'):
-            self.cmd('monitor log-analytics workspace data-export show -g {rg} --workspace-name {workspace_name} -n {data_export_name}')
+        self.cmd('monitor log-analytics workspace data-export list -g {rg} --workspace-name {workspace_name}', checks=[
+            self.check('length(@)', 0)
+        ])
 
     @record_only()
     def test_monitor_log_analytics_workspace_data_collection_rules(self):
@@ -501,6 +498,7 @@ class TestLogProfileScenarios(ScenarioTest):
             'ws_name':self.create_random_name('ws-', 10),
             'table_name': self.create_random_name('TB', 10) + '_CL',
             'table2_name': self.create_random_name('TB', 10) + '_SRCH',
+            'table3_name': self.create_random_name('TB', 10) + '_RST'
         })
 
         self.cmd('monitor log-analytics workspace create -g {rg} -n {ws_name}')

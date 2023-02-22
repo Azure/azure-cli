@@ -19,6 +19,7 @@ import signal
 import sys
 import threading
 import time
+import re
 try:
     import termios
     import tty
@@ -356,6 +357,28 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
     return None, {}
 
 
+yaml_env_var_matcher = re.compile(r'.*\$\{([^}^{]+)\}')
+
+
+def yaml_env_var_constructor(loader, node):
+    ''' Extract the matched value, expand env variable, and replace the match '''
+    env_matcher = re.compile(r"\$\{([^}^{]+)\}")
+    value = node.value
+    match = env_matcher.findall(value)
+    if match:
+        full_value = value
+        for env_var in match:
+            full_value = full_value.replace(
+                f'${{{env_var}}}', os.environ.get(env_var, env_var)
+            )
+        return full_value
+    return value
+
+
+yaml.add_implicit_resolver('!env_var', yaml_env_var_matcher, None, yaml.SafeLoader)
+yaml.add_constructor('!env_var', yaml_env_var_constructor, yaml.SafeLoader)
+
+
 # pylint: disable=unsupported-assignment-operation,protected-access
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file, no_wait):
     resource_client = cf_resource(cli_ctx)
@@ -592,12 +615,14 @@ def container_export(cmd, resource_group_name, name, file):
         identity = resource['identity'].type
         if identity != ResourceIdentityType.none:
             resource['identity'] = resource['identity'].__dict__
-            identity_entry = {'type': resource['identity']['type'].value}
+            identity_entry = {'type': resource['identity']['type']}
             if resource['identity']['user_assigned_identities']:
                 identity_entry['user_assigned_identities'] = {k: {} for k in resource['identity']['user_assigned_identities']}
             resource['identity'] = identity_entry
+        else:
+            resource.pop('identity', None)
     except (KeyError, AttributeError):
-        resource.pop('indentity', None)
+        resource.pop('identity', None)
 
     # Remove container instance views
     for i in range(len(resource['properties']['containers'])):

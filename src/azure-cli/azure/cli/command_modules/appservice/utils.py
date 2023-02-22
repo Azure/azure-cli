@@ -19,6 +19,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._client_factory import web_client_factory
+from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND
 
 logger = get_logger(__name__)
 
@@ -77,15 +78,19 @@ def get_sku_tier(name):  # pylint: disable=too-many-return-statements
         return 'PREMIUM'
     if name in ['P1V2', 'P2V2', 'P3V2']:
         return 'PREMIUMV2'
+    if name in ['P0V3']:
+        return 'PREMIUM0V3'
     if name in ['P1V3', 'P2V3', 'P3V3']:
         return 'PREMIUMV3'
+    if name in ['P1MV3', 'P2MV3', 'P3MV3', 'P4MV3', 'P5MV3']:
+        return 'PREMIUMMV3'
     if name in ['PC2', 'PC3', 'PC4']:
         return 'PremiumContainer'
     if name in ['EP1', 'EP2', 'EP3']:
         return 'ElasticPremium'
     if name in ['I1', 'I2', 'I3']:
         return 'Isolated'
-    if name in ['I1V2', 'I2V2', 'I3V2']:
+    if name in ['I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2']:
         return 'IsolatedV2'
     if name in ['WS1', 'WS2', 'WS3']:
         return 'WorkflowStandard'
@@ -137,6 +142,14 @@ def raise_missing_token_suggestion():
     raise RequiredArgumentMissingError("GitHub access token is required to authenticate to your repositories. "
                                        "If you need to create a Github Personal Access Token, "
                                        "please run with the '--login-with-github' flag or follow "
+                                       "the steps found at the following link:\n{0}".format(pat_documentation))
+
+
+def raise_missing_ado_token_suggestion():
+    pat_documentation = ("https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-"
+                         "tokens-to-authenticate?view=azure-devops&tabs=Windows#create-a-pat")
+    raise RequiredArgumentMissingError("If this repo is an Azure Dev Ops repo, please provide a Personal Access Token."
+                                       "Please run with the '--login-with-ado' flag or follow "
                                        "the steps found at the following link:\n{0}".format(pat_documentation))
 
 
@@ -222,8 +235,57 @@ def get_app_service_plan_from_webapp(cmd, webapp, api_version=None):
     return client.app_service_plans.get(plan['resource_group'], plan['name'])
 
 
+def app_service_plan_exists(cmd, resource_group_name, plan, api_version=None):
+    from azure.core.exceptions import ResourceNotFoundError as RNFR
+    exists = True
+    try:
+        client = web_client_factory(cmd.cli_ctx, api_version=api_version)
+        client.app_service_plans.get(resource_group_name, plan)
+    except RNFR:
+        exists = False
+    return exists
+
+
 # Allows putting additional properties on an SDK model instance
 def use_additional_properties(resource):
     resource.enable_additional_properties_sending()
     existing_properties = resource.serialize().get("properties")
     resource.additional_properties["properties"] = {} if existing_properties is None else existing_properties
+
+
+def repo_url_to_name(repo_url):
+    repo = None
+    repo = [s for s in repo_url.split('/') if s]
+    if len(repo) >= 2:
+        repo = '/'.join(repo[-2:])
+    return repo
+
+
+def get_token(cmd, repo, token):
+    from ._github_oauth import load_github_token_from_cache, get_github_access_token
+    if not repo:
+        return None
+    if token:
+        return token
+    token = load_github_token_from_cache(cmd, repo)
+    if not token:
+        token = get_github_access_token(cmd, ["admin:repo_hook", "repo", "workflow"], token)
+    return token
+
+
+def is_logicapp(app):
+    if app is None or app.kind is None:
+        return False
+    return LOGICAPP_KIND in app.kind
+
+
+def is_functionapp(app):
+    if app is None or app.kind is None:
+        return False
+    return not is_logicapp(app) and FUNCTIONAPP_KIND in app.kind
+
+
+def is_webapp(app):
+    if app is None or app.kind is None:
+        return False
+    return not is_logicapp(app) and not is_functionapp(app) and "app" in app.kind

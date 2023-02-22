@@ -254,6 +254,34 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         # test cache
         self.assertEqual(ctx_1.get_snapshot(), mock_snapshot)
 
+    def common_get_host_group_id(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "host_group_id": None,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_host_group_id(), None)
+        # custom
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "host_group_id": "test_host_group_id",
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_host_group_id(), "test_host_group_id")
+
     def common_get_kubernetes_version(self):
         # default
         ctx_1 = AKSAgentPoolContext(
@@ -1239,6 +1267,19 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_no_wait(), False)
 
+    def common_get_gpu_instance_profile(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"gpu_instance_profile": None}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_gpu_instance_profile(), None)
+        agentpool_1 = self.create_initialized_agentpool_instance(gpu_instance_profile="test_gpu_instance_profile")
+        ctx_1.attach_agentpool(agentpool_1)
+        self.assertEqual(ctx_1.get_gpu_instance_profile(), "test_gpu_instance_profile")
 
 class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
@@ -1316,6 +1357,9 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_snapshot(self):
         self.common_get_snapshot()
 
+    def test_get_host_group_id(self):
+        self.common_get_host_group_id()
+
     def test_get_kubernetes_version(self):
         self.common_get_kubernetes_version()
 
@@ -1414,6 +1458,8 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_no_wait(self):
         self.common_get_no_wait()
 
+    def test_get_gpu_instance_profile(self):
+        self.common_get_gpu_instance_profile()
 
 class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
@@ -1465,6 +1511,9 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
     def test_get_snapshot(self):
         self.common_get_snapshot()
 
+    def test_get_host_group_id(self):
+        self.common_get_host_group_id()
+
     def test_get_kubernetes_version(self):
         self.common_get_kubernetes_version()
 
@@ -1563,6 +1612,8 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
     def test_get_no_wait(self):
         self.common_get_no_wait()
 
+    def test_get_gpu_instance_profile(self):
+        self.common_get_gpu_instance_profile()
 
 class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
     def _remove_defaults_in_agentpool(self, agentpool):
@@ -1959,6 +2010,25 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
+    def common_set_up_gpu_propertes(self):
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"gpu_instance_profile": "test_gpu_instance_profile"},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_gpu_properties(None)
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_gpu_properties(agentpool_1)
+        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            gpu_instance_profile="test_gpu_instance_profile",
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
 class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCommonTestCase):
     def setUp(self):
@@ -2066,6 +2136,7 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             enable_fips=False,
             mode=CONST_NODEPOOL_MODE_USER,
             scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
+            host_group_id=None,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
@@ -2100,6 +2171,8 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             headers={},
         )
 
+    def test_set_up_gpu_propertes(self):
+        self.common_set_up_gpu_propertes()
 
 class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecoratorCommonTestCase):
     def setUp(self):
@@ -2207,11 +2280,14 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             enable_ultra_ssd=False,
             enable_fips=False,
             mode=CONST_NODEPOOL_MODE_SYSTEM,
+            host_group_id=None,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
         dec_1.context.raw_param.print_usage_statistics()
 
+    def test_set_up_gpu_propertes(self):
+        self.common_set_up_gpu_propertes()
 
 class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
     def _remove_defaults_in_agentpool(self, agentpool):

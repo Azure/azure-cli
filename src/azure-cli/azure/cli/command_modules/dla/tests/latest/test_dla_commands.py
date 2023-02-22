@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long
 from unittest import mock
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 
 from knack.util import CLIError
 
@@ -321,13 +321,15 @@ CREATE PROCEDURE {0}.dbo.{4}() AS BEGIN CREATE VIEW {0}.dbo.{3} AS SELECT * FROM
         assert len(result['runs']) >= 1
 
     @ResourceGroupPreparer(name_prefix='cli_test_adla_mgmt')
-    def test_adla_account_mgmt(self, resource_group):
+    @StorageAccountPreparer(name_prefix='cliwasb', length=12, sku='Standard_GRS')
+    def test_adla_account_mgmt(self, resource_group, storage_account_info):
 
         self.kwargs.update({
             'dls1': self.create_random_name('cliadls', 12),
             'dls2': self.create_random_name('cliadls', 12),
             'dla': self.create_random_name('cliadla', 12),
-            'wasb': self.create_random_name('cliwasb', 12),
+            'wasb': storage_account_info[0],
+            'wasb_key': storage_account_info[1],
             'loc': 'eastus2',
             # compute policy variables
             'user_policy': 'pycliuserpolicy',
@@ -339,10 +341,7 @@ CREATE PROCEDURE {0}.dbo.{4}() AS BEGIN CREATE VIEW {0}.dbo.{3} AS SELECT * FROM
         # create ADLS accounts
         self.cmd('dls account create -g {rg} -n {dls1} -l {loc} --disable-encryption')
         self.cmd('dls account create -g {rg} -n {dls2} -l {loc} --disable-encryption')
-        self.cmd('storage account create -g {rg} -n {wasb} -l {loc} --sku Standard_GRS')
 
-        result = self.cmd('storage account keys list -g {rg} -n {wasb}').get_output_in_json()
-        self.kwargs['wasb_key'] = result[0]['value']
         # test create keyvault with default access policy set
         self.cmd('dla account create -g {rg} -n {dla} -l {loc} --default-data-lake-store {dls1}', checks=[
             self.check('name', '{dla}'),

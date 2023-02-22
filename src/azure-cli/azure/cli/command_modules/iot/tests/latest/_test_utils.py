@@ -50,12 +50,24 @@ def _create_test_cert(cert_file, key_file, subject, valid_days, serial_number):
         f.write(key_dump)
 
 
-def _delete_test_cert(cert_file, key_file, verification_file):
-    if exists(cert_file) and exists(key_file):
-        os.remove(cert_file)
-        os.remove(key_file)
-    if exists(verification_file):
-        os.remove(verification_file)
+def _create_fake_chain_cert(cert_file, chain_file):
+    # get the contents of a certificate
+    certificate = ""
+    with open(cert_file, "rb") as c:
+        certificate = c.read()
+        certificate = certificate.decode("utf-8")
+
+    # write it twice to a file to create a chain cert
+    with open(chain_file, "wt", encoding="utf-8") as f:
+        f.write(certificate)
+        f.write("\n")
+        f.write(certificate)
+
+
+def _delete_test_cert(cert_files):
+    for cert_file in cert_files:
+        if exists(cert_file):
+            os.remove(cert_file)
 
 
 def _create_verification_cert(cert_file, key_file, verification_file, nonce, valid_days, serial_number):

@@ -5,11 +5,6 @@
 # Turn off python byte compilation
 %global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
 
-# .el7.centos -> .el7
-%if 0%{?rhel}
-  %define dist .el%{?rhel}
-%endif
-
 # The Python package name for dnf/yum/tdnf, such as python39, python3
 %define python_package %{getenv:PYTHON_PACKAGE}
 # The Python executable name, such as python3.9, python3
@@ -27,7 +22,6 @@ Name:           %{name}
 Version:        %{version}
 Release:        %{release}
 Url:            https://docs.microsoft.com/cli/azure/install-azure-cli
-BuildArch:      x86_64
 Requires:       %{python_package}
 Prefix:         /usr
 Prefix:         /etc
@@ -36,6 +30,12 @@ BuildRequires:  gcc, libffi-devel, openssl-devel, perl
 BuildRequires:  %{python_package}-devel
 
 %global _python_bytecompile_errors_terminate_build 0
+
+# To get rid of `cannot open linker script file` error on Fedora36. If %_package_note_file is undefined, the
+# linker script will not be generated. Related bug: https://bugzilla.redhat.com/show_bug.cgi?id=2043092
+# Ref: https://src.fedoraproject.org/rpms/ruby/c/a0bcb33eaa666d3e1d08ca45e77161ca05611487?branch=rawhide
+#      https://src.fedoraproject.org/rpms/redhat-rpm-config//blob/rawhide/f/buildflags.md
+%undefine _package_note_file
 
 %description
 A great cloud needs great tools; we're excited to introduce Azure CLI,

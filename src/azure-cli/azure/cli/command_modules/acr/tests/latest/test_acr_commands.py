@@ -50,6 +50,15 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr config content-trust show -n {}'.format(registry_name),
                  checks=[self.check('status', "enabled")])
 
+        # test soft-delete
+        self.cmd('acr config soft-delete update -r {} --status enabled --days 30 --yes'.format(registry_name),
+                checks=[self.check('status', 'enabled'),
+                        self.check('retentionDays', 30)])
+
+        self.cmd('acr config soft-delete show -r {}'.format(registry_name),
+                checks=[self.check('status', 'enabled'),
+                        self.check('retentionDays', 30)])
+
         # test credential module
         credential = self.cmd(
             'acr credential show -n {} -g {}'.format(registry_name, resource_group)).get_output_in_json()
@@ -261,7 +270,7 @@ class AcrCommandsTests(ScenarioTest):
         # create a resource group for the source registry
         self.cmd('group create -n {source_registry_rg} -l {source_loc}')
 
-        # create a source registry 
+        # create a source registry
         self.cmd('acr create -n {source_registry_name} -g {source_registry_rg} -l {source_loc} --sku {sku}',
                  checks=[self.check('name', '{source_registry_name}'),
                          self.check('location', '{source_loc}'),
@@ -440,7 +449,7 @@ class AcrCommandsTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer()
-    @KeyVaultPreparer()
+    @KeyVaultPreparer(additional_params='--enable-purge-protection')
     def test_acr_encryption_with_cmk(self, key_vault, resource_group):
         self.kwargs.update({
             'key_vault': key_vault,
@@ -451,8 +460,7 @@ class AcrCommandsTests(ScenarioTest):
             'registry_name': self.create_random_name('testreg', 20),
         })
 
-        # update kv key protection settings and create a new key
-        self.cmd('keyvault update --name {key_vault} --enable-soft-delete --enable-purge-protection')
+        # create a new key
         result = self.cmd('keyvault key create --name {key_name} --vault-name {key_vault}')
         self.kwargs['key_id'] = result.get_output_in_json()['key']['kid']
 
@@ -599,6 +607,32 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr create --name {registry_2_name} --resource-group {rg} --sku premium --public-network-enabled false --allow-trusted-services false',
                  checks=[self.check('publicNetworkAccess', 'Disabled'),
                          self.check('networkRuleBypassOptions', 'None')])
+        
+        
+    @ResourceGroupPreparer()
+    def test_acr_with_public_network_access_disabled(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('testreg', 20),
+        })
+
+        # test defaults
+        self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium',
+                 checks=[self.check('publicNetworkAccess', 'Enabled'),
+                         self.check('networkRuleBypassOptions', 'AzureServices'),
+                         self.check('networkRuleSet.defaultAction', 'Allow')])
+
+        # public network access disabled
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --public-network-enabled false',
+                 checks=[self.check('publicNetworkAccess', 'Disabled'),
+                         self.check('networkRuleBypassOptions', 'AzureServices'),
+                         self.check('networkRuleSet.defaultAction', 'Deny')])
+
+        # public network access enabled
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --public-network-enabled true',
+                 checks=[self.check('publicNetworkAccess', 'Enabled'),
+                         self.check('networkRuleBypassOptions', 'AzureServices'),
+                         self.check('networkRuleSet.defaultAction', 'Deny')])
+
 
     @ResourceGroupPreparer()
     def test_acr_with_anonymous_pull(self, resource_group, resource_group_location):

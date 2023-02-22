@@ -82,5 +82,5 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('create', 'sqlvm_aglistener_create', transform=transform_aglistener_output, table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
 
-    with self.command_group('sql vm', is_preview=True):
+    with self.command_group('sql vm'):
         pass

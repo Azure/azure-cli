@@ -3,8 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-LOCATION = "southcentralusstage"
-VNET_LOCATION = "southcentralus"
+LOCATION = "westus2"
+VNET_LOCATION = "westus2"
 
 
 class AzureNetAppFilesVaultServiceScenarioTest(ScenarioTest):

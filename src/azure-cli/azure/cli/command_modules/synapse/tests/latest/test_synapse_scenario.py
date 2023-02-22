@@ -1156,7 +1156,6 @@ class SynapseScenarioTests(ScenarioTest):
             self.check('managedVirtualNetwork', 'default')
         ])
 
-    #@record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_spark_pool(self):
@@ -1203,13 +1202,15 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update spark pool
         self.cmd('az synapse spark pool update --ids {pool-id} --tags key1=value1'
-                 ' --spark-config-file-path "{file}"',
+                 ' --spark-config-file-path "{file}"'
+                 ' --enable-dynamic-exec --min-executors 1 --max-executors 2',
                  checks=[
                     self.check('tags.key1', 'value1'),
                     self.check('name', self.kwargs['spark-pool']),
                     self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
                     self.check('provisioningState', 'Succeeded'),
-                    self.check('sparkConfigProperties.filename','sparkconfigfile')
+                    self.check('sparkConfigProperties.filename','sparkconfigfile'),
+                    self.check('dynamicExecutorAllocation.maxExecutors',2)
                  ])
 
         # delete spark pool with spark pool name
@@ -1320,7 +1321,7 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('managedVirtualNetworkSettings.allowedAadTenantIdsForLinking[0]', "72f988bf-86f1-41af-91ab-2d7cd011db47")
             ])
 
-    @record_only()
+    #@record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_sql_pool(self):
@@ -1329,7 +1330,8 @@ class SynapseScenarioTests(ScenarioTest):
             'workspace': 'testsynapseworkspace',
             'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
             'performance-level': 'DW400c',
-            'storage-type': 'GRS'
+            'storage-type': 'GRS',
+            'collation':'SQL_Latin1_General_CP1_CS_AS'
         })
 
         # create a workspace
@@ -1343,12 +1345,13 @@ class SynapseScenarioTests(ScenarioTest):
         # create sql pool
         sql_pool = self.cmd(
             'az synapse sql pool create --name {sql-pool} --performance-level {performance-level} '
-            '--workspace {workspace} --resource-group {rg} --storage-type {storage-type}', checks=[
+            '--workspace {workspace} --resource-group {rg} --storage-type {storage-type} --collation {collation}', checks=[
                 self.check('name', self.kwargs['sql-pool']),
                 self.check('type', 'Microsoft.Synapse/workspaces/sqlPools'),
                 self.check('provisioningState', 'Succeeded'),
                 self.check('status', 'Online'),
-                self.check('storageAccountType', 'GRS')
+                self.check('storageAccountType', 'GRS'),
+                self.check('collation', self.kwargs['collation'])
             ]).get_output_in_json()
 
         self.kwargs['pool-id'] = sql_pool['id']
@@ -2169,16 +2172,40 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('state', 'killed')
                  ])
 
-    @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_access_control(self):
         self.kwargs.update({
-            'workspace': 'clitestsynapseworkspace',
             'role': 'Synapse Contributor',
             'userPrincipal': 'username@contoso.com',
             'servicePrincipal': 'testsynapsecli',
+            'sparkpool': 'test',
+            'sparkversion': '2.4',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sparkconfigfile.txt'),
             'scopeName': 'workspaces/{workspaceName}/bigDataPools/{bigDataPoolName}',
             'itemType': 'bigDataPools',
-            'item': 'testitem'})
+            'item': 'test'})
+
+         # create a workspace
+        self._create_workspace()
+
+        # create firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
+            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+        import time
+        time.sleep(20)
+
+        #create spark pool
+        self.cmd('az synapse spark pool create --name {sparkpool} --spark-version {sparkversion}'
+                 ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium'
+                 ' --spark-config-file-path "{file}"',
+                 checks=[self.check('name', self.kwargs['sparkpool']),
+                         self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
+                         self.check('provisioningState', 'Succeeded')])
 
         self.cmd(
             'az synapse role scope list --workspace-name {workspace} ',
@@ -2195,7 +2222,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # get role definition
         role_definition_get = self.cmd(
-            'az synapse role definition show --workspace-name {workspace} --role "{role}" ',
+            'az synapse role definition show --workspace-name {workspace} --role "{role}"',
             checks=[
                 self.check('name', self.kwargs['role'])
             ]).get_output_in_json()
@@ -2630,7 +2657,6 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse notebook show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    @unittest.skip('UnicodeDecodeError')
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_workspace_package(self):
@@ -2983,5 +3009,106 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse sql-script delete --workspace-name {workspace} --name {name}')
         self.cmd(
             'az synapse sql-script show --workspace-name {workspace} --name {name}',
+            expect_failure=True)
+
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_ad_only_auth(self):
+        self.kwargs.update({
+        })
+
+        # create a workspace
+        self._create_workspace()
+
+        self.cmd(
+            'az synapse ad-only-auth get --resource-group {rg} --workspace-name {workspace}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/azureADOnlyAuthentications')
+            ]
+        )
+
+        self.cmd(
+            'az synapse ad-only-auth disable --resource-group {rg} --workspace-name {workspace}',
+            checks=[
+                self.check('azureAdOnlyAuthentication', False)
+            ]
+        )
+
+        self.cmd(
+            'az synapse ad-only-auth enable --resource-group {rg} --workspace-name {workspace}',
+            checks=[
+                self.check('azureAdOnlyAuthentication', True)
+            ]
+        )
+
+    @record_only()
+    def test_link_connection(self):
+        self.kwargs.update({
+            'workspace_name': 'xiaoyuxingtestne',
+            'link_connection_name': 'linkconnectionfortest',
+            'link_table_id': '887e9d4df0fa4afaaad0d7a2c7f42d88',
+            'edit_table_file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'link-connection-table.json'),
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'linkconnectionfortest.json')
+        })
+        # create link connnection
+        self.cmd(
+            'az synapse link-connection create --workspace-name {workspace_name} '
+            '--name {link_connection_name} --file @"{file}" ',
+            checks=[
+                self.check('name', self.kwargs['link_connection_name'])
+            ])
+
+        time.sleep(600)
+        # get link connnection
+        self.cmd(
+            'az synapse link-connection show --workspace-name {workspace_name} --name {link_connection_name}',
+            checks=[
+                self.check('name', self.kwargs['link_connection_name'])
+            ])
+
+        # list link connnection
+        self.cmd(
+            'az synapse link-connection list --workspace-name {workspace_name}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/linkconnections')
+            ])
+
+        # edit link tables
+        self.cmd(
+            'az synapse link-connection edit-link-tables --workspace-name {workspace_name} --n {link_connection_name} --file @"{edit_table_file}" ')
+        
+        time.sleep(600)
+        # start a link connnection
+        self.cmd(
+            'az synapse link-connection start --workspace-name {workspace_name} --name {link_connection_name}')
+        self.cmd(
+            'az synapse link-connection get-status --workspace-name {workspace_name} --name {link_connection_name}',
+            checks=[
+                self.check('status', 'Starting')
+            ])
+
+        time.sleep(120)
+        # stop a link connnection
+        self.cmd(
+            'az synapse link-connection stop --workspace-name {workspace_name} --name {link_connection_name}')
+        self.cmd(
+            'az synapse link-connection get-status --workspace-name {workspace_name} --name {link_connection_name}',
+            checks=[
+                self.check('status', 'Stopping')
+            ])
+
+         # list link tables
+        self.cmd(
+            'az synapse link-connection list-link-tables --workspace-name {workspace_name} --n {link_connection_name} ',
+            checks=[
+                self.check('[0].id', self.kwargs['link_table_id'])
+            ])
+
+        time.sleep(300)
+        #delete a link connnection
+        self.cmd(
+            'az synapse link-connection delete --workspace-name {workspace_name} --name {link_connection_name}')
+        self.cmd(
+            'az synapse link-connection show --workspace-name {workspace_name} --name {link_connection_name}',
             expect_failure=True)
 

@@ -15,7 +15,7 @@ from azure.mgmt.privatedns.models import PrivateZone
 from azure.mgmt.privatedns.models import SubResource
 from azure.mgmt.privatedns.models import VirtualNetworkLink
 from ._client_factory import resource_client_factory, network_client_factory, private_dns_client_factory, private_dns_link_client_factory
-from ._flexible_server_util import get_id_components, check_existence, _is_resource_name, parse_public_access_input, get_user_confirmation
+from ._flexible_server_util import get_id_components, check_existence, _is_resource_name, parse_public_access_input, get_user_confirmation, _check_resource_group_existence
 from .validators import validate_private_dns_zone, validate_vnet_location
 
 logger = get_logger(__name__)
@@ -75,7 +75,7 @@ def prepare_private_network(cmd, resource_group_name, server_name, vnet, subnet,
 def process_private_network_with_id_input(cmd, rid, nw_client, resource_client, server_name, location, delegation_service_name, vnet_address_pref, subnet_address_pref, yes):
     id_subscription, id_resource_group, id_vnet, id_subnet = get_id_components(rid)
     nw_client, resource_client = _change_client_with_different_subscription(cmd, id_subscription, nw_client, resource_client)
-    _create_and_verify_resource_group(resource_client, id_resource_group, location, yes)
+    _create_and_verify_resource_group(cmd, resource_client, id_resource_group, location, yes)
     if id_subnet is None:
         id_subnet = 'Subnet' + server_name
 
@@ -92,8 +92,8 @@ def _change_client_with_different_subscription(cmd, subscription, nw_client, res
     return nw_client, resource_client
 
 
-def _create_and_verify_resource_group(resource_client, resource_group, location, yes):
-    if not resource_client.resource_groups.check_existence(resource_group):
+def _create_and_verify_resource_group(cmd, resource_client, resource_group, location, yes):
+    if not _check_resource_group_existence(cmd, resource_group, resource_client):
         logger.warning("Provided resource group in the resource ID doesn't exist.")
         user_confirmation("Do you want to create a new resource group {0}".format(resource_group), yes=yes)
         resource_client.resource_groups.create_or_update(resource_group, {'location': location})
@@ -212,7 +212,7 @@ def prepare_private_dns_zone(db_context, database_engine, resource_group, server
 
     # check existence DNS zone and change resource group
     if dns_rg is not None:
-        _create_and_verify_resource_group(dns_sub_resource_client, dns_rg, location, yes)
+        _create_and_verify_resource_group(cmd, dns_sub_resource_client, dns_rg, location, yes)
 
     # decide which resource group the dns zone provision
     zone_exist_flag = False

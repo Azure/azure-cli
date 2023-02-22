@@ -184,10 +184,10 @@ short-summary: Create a linked IoT hub in an Azure IoT Hub Device Provisioning S
 examples:
   - name: Create a linked IoT hub in an Azure IoT Hub Device Provisioning Service instance
     text: >
-        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0= --location westus
+        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string "HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0=" --location westus
   - name: Create a linked IoT hub in an Azure IoT Hub Device Provisioning Service which applies allocation weight and weight being 10
     text: >
-        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0= --location westus --allocation-weight 10 --apply-allocation-policy True
+        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string "HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0=" --location westus --allocation-weight 10 --apply-allocation-policy True
 """
 
 helps['iot dps linked-hub delete'] = """
@@ -842,6 +842,21 @@ examples:
   - name: Update the IoT Hub local authentication, device SAS, and module SAS settings
     text: >
         az iot hub update -n MyIoTHub --disable-local-auth --disable-device-sas false --disable-module-sas true
+"""
+
+helps['iot hub wait'] = """
+type: command
+short-summary: Wait until an operation on an IoT Hub instance is complete.
+examples:
+  - name: Wait until an existing IoT Hub instance is created
+    text: >
+        az iot hub wait -n MyIoTHub --created
+  - name: Wait until an IoT Hub instance is deleted
+    text: >
+        az iot hub wait -n MyIoTHub --deleted
+  - name: Wait until an existing IoT Hub instance has an Active state
+    text: >
+        az iot hub wait -n MyIoTHub --custom "properties.state=='Active'"
 """
 
 helps['iot central'] = """

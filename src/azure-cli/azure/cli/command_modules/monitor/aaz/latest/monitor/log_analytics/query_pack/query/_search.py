@@ -102,7 +102,17 @@ class Search(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         self.QueriesSearch(ctx=self.ctx)()
+        self.post_operations()
+
+    # @register_callback
+    def pre_operations(self):
+        pass
+
+    # @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
@@ -208,7 +218,7 @@ class Search(AAZCommand):
 
             tags = _builder.get(".tags")
             if tags is not None:
-                tags.set_elements(AAZListType)
+                tags.set_elements(AAZListType, ".")
 
             _elements = _builder.get(".tags{}")
             if _elements is not None:

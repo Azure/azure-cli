@@ -59,6 +59,11 @@ def storage_remove(cmd, client, service, target, recursive=None, exclude_pattern
     if exclude_path is not None:
         flags.append('--exclude-path=' + exclude_path)
 
+    if service == 'file':
+        flags.append('--from-to=FileTrash')
+    elif service == 'blob':
+        flags.append('--from-to=BlobTrash')
+
     sas_token = client.sas_token
 
     if not sas_token and client.account_key:

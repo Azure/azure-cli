@@ -45,3 +45,7 @@ def load_arguments(self, _):
 
     with self.argument_context('demo secret-store save') as c:
         c.positional('key_value', nargs='+', help="Space-separated data: <key>=<value> [<key>=<value> ...]")
+
+    with self.argument_context('demo byo-access-token') as c:
+        c.argument('access_token', help="Your own access token")
+        c.argument('subscription_id', help="Subscription ID under which to list resource groups")

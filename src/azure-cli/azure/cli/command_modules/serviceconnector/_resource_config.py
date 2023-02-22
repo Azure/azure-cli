@@ -9,7 +9,8 @@ from .action import (
     AddSecretAuthInfoAuto,
     AddUserAssignedIdentityAuthInfo,
     AddSystemAssignedIdentityAuthInfo,
-    AddServicePrincipalAuthInfo
+    AddServicePrincipalAuthInfo,
+    AddUserAccountAuthInfo
 )
 # pylint: disable=line-too-long
 
@@ -17,6 +18,7 @@ from .action import (
 # The dict defines the resource types, including both source resources and target resources.
 # The enum value will be used in command name
 class RESOURCE(Enum):
+    Local = 'connection'
     WebApp = 'webapp'
     # `az spring-cloud` migrated to `az spring`
     SpringCloud = 'spring'
@@ -47,19 +49,30 @@ class RESOURCE(Enum):
     WebPubSub = 'webpubsub'
     ConfluentKafka = 'confluent-cloud'
 
+    @classmethod
+    def value_of(cls, value):
+        for _, v in cls.__members__.items():
+            if v.value == value:
+                return v
+
+        raise ValueError(f"'{cls.__name__}' enum not found for '{value}'")
 
 # The dict defines the auth types
+
+
 class AUTH_TYPE(Enum):
     Secret = 'secret'
     SecretAuto = 'secret(auto)'  # secret which don't need user provide name & password
     SystemIdentity = 'system-managed-identity'
     UserIdentity = 'user-managed-identity'
     ServicePrincipalSecret = 'service-principal'
+    UserAccount = 'user-account'
 
 
 # The dict defines the client types
 class CLIENT_TYPE(Enum):
     Dotnet = 'dotnet'
+    DotnetConnectionString = 'dotnet-connectionString'
     Java = 'java'
     Nodejs = 'nodejs'
     Python = 'python'
@@ -67,6 +80,7 @@ class CLIENT_TYPE(Enum):
     Php = 'php'
     Ruby = 'ruby'
     SpringBoot = 'springBoot'
+    KafkaSpringBoot = 'kafka-springBoot'
     Django = 'django'
     Blank = 'none'
 
@@ -80,6 +94,9 @@ SOURCE_RESOURCES_USERTOKEN = [RESOURCE.KubernetesCluster]
 # The target resources using user token
 TARGET_RESOURCES_USERTOKEN = [RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible, RESOURCE.KeyVault]
 
+# The target resources could be set to connection string
+TARGET_RESOURCES_CONNECTION_STRING = [RESOURCE.Sql, RESOURCE.Mysql, RESOURCE.MysqlFlexible, RESOURCE.Postgres, RESOURCE.PostgresFlexible]
+
 # The dict defines the resource id pattern of source resources.
 SOURCE_RESOURCES = {
     RESOURCE.WebApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}',
@@ -89,6 +106,7 @@ SOURCE_RESOURCES = {
     RESOURCE.ContainerApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.App/containerApps/{app}'
 }
 
+LOCAL_CONNECTION_RESOURCE = '/subscriptions/{subscriptionId}/resourceGroups/{resource_group}/providers/Microsoft.ServiceLinker/locations/{location}/connectors/{connection_name}'
 
 # The dict defines the resource id pattern of target resources.
 TARGET_RESOURCES = {
@@ -121,17 +139,32 @@ TARGET_RESOURCES = {
 }
 
 
+LOCAL_CONNECTION_PARAMS = {
+    'connection_name': {
+        'options': ['--connection'],
+        'type': str,
+        'help': 'Name of the connection.',
+    },
+    'resource_group_name': {
+        'options': ['--resource-group', '-g'],
+        'help': 'The resource group which contains the connection.'
+    },
+    'location': {
+    }
+}
 # The dict defines the parameters used to position the source resources.
 # The parmaters should include all variables defined in source resource id expect
 # for 'subscription', which will be dealt by CLI core as a default parameter.
 SOURCE_RESOURCES_PARAMS = {
     RESOURCE.WebApp: {
         'source_resource_group': {
+            'configured_default': 'group',
             'options': ['--resource-group', '-g'],
             'help': 'The resource group which contains the webapp',
             'placeholder': 'WebAppRG'
         },
         'site': {
+            'configured_default': 'web',
             'options': ['--name', '-n'],
             'help': 'Name of the webapp',
             'placeholder': 'MyWebApp'
@@ -140,17 +173,17 @@ SOURCE_RESOURCES_PARAMS = {
     RESOURCE.SpringCloud: {
         'source_resource_group': {
             'options': ['--resource-group', '-g'],
-            'help': 'The resource group which contains the spring-cloud',
+            'help': 'The resource group which contains app in the Azure Spring Apps',
             'placeholder': 'SpringCloudRG'
         },
         'spring': {
             'options': ['--service'],
-            'help': 'Name of the spring-cloud service',
+            'help': 'Name of the the Azure Spring Apps resource',
             'placeholder': 'MySpringService'
         },
         'app': {
             'options': ['--app'],
-            'help': 'Name of the spring-cloud app',
+            'help': 'Name of the app in the Azure Spring Apps',
             'placeholder': 'MyApp'
         },
         'deployment': {
@@ -299,6 +332,7 @@ TARGET_RESOURCES_PARAMS = {
             'placeholder': 'SqlRG'
         },
         'server': {
+            'configured_default': 'sql-server',
             'options': ['--server'],
             'help': 'Name of the sql server',
             'placeholder': 'MyServer'
@@ -635,6 +669,13 @@ AUTH_TYPE_PARAMS = {
             'help': 'The service principal auth info',
             'action': AddServicePrincipalAuthInfo
         }
+    },
+    AUTH_TYPE.UserAccount: {
+        'user_account_auth_info': {
+            'options': ['--user-account'],
+            'help': 'The local user account auth info',
+            'action': AddUserAccountAuthInfo
+        }
     }
 }
 
@@ -642,12 +683,40 @@ AUTH_TYPE_PARAMS = {
 # The dict defines the supported auth type of each source-target resource pair
 # The first one will be used as the default auth type
 SUPPORTED_AUTH_TYPE = {
-    RESOURCE.WebApp: {
-        RESOURCE.Postgres: [AUTH_TYPE.Secret],
-        RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret],
+    RESOURCE.Local: {
+        RESOURCE.Postgres: [AUTH_TYPE.Secret, AUTH_TYPE.UserAccount],
+        RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret, AUTH_TYPE.UserAccount],
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
-        RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
-        RESOURCE.Sql: [AUTH_TYPE.Secret],
+        RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret, AUTH_TYPE.UserAccount],
+        RESOURCE.Sql: [AUTH_TYPE.Secret, AUTH_TYPE.UserAccount],
+        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
+
+        RESOURCE.CosmosCassandra: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosGremlin: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosMongo: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosTable: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.CosmosSql: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
+
+        RESOURCE.StorageBlob: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.StorageQueue: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.StorageFile: [AUTH_TYPE.SecretAuto],
+        RESOURCE.StorageTable: [AUTH_TYPE.SecretAuto],
+
+        RESOURCE.KeyVault: [AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.AppConfig: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.EventHub: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.ServiceBus: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.SignalR: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.WebPubSub: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
+    },
+    RESOURCE.WebApp: {
+        RESOURCE.Postgres: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity],
+        RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity],
+        RESOURCE.Mysql: [AUTH_TYPE.Secret],
+        RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity],
+        RESOURCE.Sql: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity],
         RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
@@ -671,11 +740,11 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
     },
     RESOURCE.SpringCloud: {
-        RESOURCE.Postgres: [AUTH_TYPE.Secret],
-        RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret],
+        RESOURCE.Postgres: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity],
+        RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity],
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
-        RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
-        RESOURCE.Sql: [AUTH_TYPE.Secret],
+        RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity],
+        RESOURCE.Sql: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity],
         RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
@@ -727,11 +796,11 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
     },
     RESOURCE.ContainerApp: {
-        RESOURCE.Postgres: [AUTH_TYPE.Secret],
-        RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret],
+        RESOURCE.Postgres: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity],
+        RESOURCE.PostgresFlexible: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity],
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
-        RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
-        RESOURCE.Sql: [AUTH_TYPE.Secret],
+        RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity],
+        RESOURCE.Sql: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity],
         RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
@@ -935,6 +1004,7 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Nodejs,
             CLIENT_TYPE.Go,
             CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.KafkaSpringBoot,
             CLIENT_TYPE.Blank
         ],
         RESOURCE.ServiceBus: [
@@ -972,3 +1042,4 @@ SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloud] = SUPPORTED_CLIENT_TYPE[RESOURCE.Web
 SUPPORTED_CLIENT_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
 SUPPORTED_CLIENT_TYPE[RESOURCE.KubernetesCluster] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
 SUPPORTED_CLIENT_TYPE[RESOURCE.ContainerApp] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]
+SUPPORTED_CLIENT_TYPE[RESOURCE.Local] = SUPPORTED_CLIENT_TYPE[RESOURCE.WebApp]

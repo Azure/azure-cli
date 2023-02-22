@@ -46,7 +46,7 @@ class Show(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.cluster_name = AAZStrArg(
             options=["-n", "--name", "--cluster-name"],
-            help="The name of the Log Analytics cluster.",
+            help="Name of the Log Analytics Cluster.",
             required=True,
             id_part="name",
         )
@@ -56,7 +56,17 @@ class Show(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         self.ClustersGet(ctx=self.ctx)()
+        self.post_operations()
+
+    # @register_callback
+    def pre_operations(self):
+        pass
+
+    # @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -226,7 +236,9 @@ class Show(AAZCommand):
             )
 
             associated_workspaces = cls._schema_on_200.properties.associated_workspaces
-            associated_workspaces.Element = AAZObjectType()
+            associated_workspaces.Element = AAZObjectType(
+                flags={"read_only": True},
+            )
 
             _element = cls._schema_on_200.properties.associated_workspaces.Element
             _element.associate_date = AAZStrType(

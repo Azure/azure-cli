@@ -10,12 +10,16 @@
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-return-statements
 import re
+from knack.log import get_logger
 from azure.cli.core.profiles import ResourceType
+
+logger = get_logger(__name__)
 
 
 # Namespace Region
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
-                         capacity=None, zone_redundant=None, default_action=None, mi_system_assigned=None, mi_user_assigned=None, encryption_config=None):
+                         capacity=None, zone_redundant=None, mi_system_assigned=None,
+                         mi_user_assigned=None, encryption_config=None, minimum_tls_version=None):
 
     SBSku = cmd.get_models('SBSku', resource_type=ResourceType.MGMT_SERVICEBUS)
     SBNamespace = cmd.get_models('SBNamespace', resource_type=ResourceType.MGMT_SERVICEBUS)
@@ -51,23 +55,19 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
         parameter.encryption = Encryption()
         parameter.encryption.key_vault_properties = encryption_config
 
+    if minimum_tls_version:
+        parameter.minimum_tls_version = minimum_tls_version
+
     client.begin_create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
         parameters=parameter
     ).result()
 
-    if default_action:
-        netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
-        netwrokruleset.default_action = default_action
-        client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
-
     return client.get(resource_group_name, namespace_name)
 
 
-def cli_namespace_update(client, instance, tags=None, sku=None, capacity=None, default_action=None):
-    from msrestazure.tools import parse_resource_id
-
+def cli_namespace_update(instance, tags=None, sku=None, capacity=None, minimum_tls_version=None):
     if tags is not None:
         instance.tags = tags
 
@@ -78,11 +78,8 @@ def cli_namespace_update(client, instance, tags=None, sku=None, capacity=None, d
     if capacity is not None:
         instance.sku.capacity = capacity
 
-    if default_action:
-        resourcegroup = parse_resource_id(instance.id)['resource_group']
-        netwrokruleset = client.get_network_rule_set(resourcegroup, instance.name)
-        netwrokruleset.default_action = default_action
-        client.create_or_update_network_rule_set(resourcegroup, instance.name, netwrokruleset)
+    if minimum_tls_version:
+        instance.minimum_tls_version = minimum_tls_version
 
     return instance
 
@@ -134,7 +131,8 @@ def cli_sbqueue_create(cmd, client, resource_group_name, namespace_name, queue_n
                        default_message_time_to_live=None, dead_lettering_on_message_expiration=None,
                        duplicate_detection_history_time_window=None, max_delivery_count=None, status=None,
                        auto_delete_on_idle=None, enable_partitioning=None, enable_express=None,
-                       forward_to=None, forward_dead_lettered_messages_to=None, enable_batched_operations=None):
+                       forward_to=None, forward_dead_lettered_messages_to=None, enable_batched_operations=None,
+                       max_message_size_in_kilobytes=None):
 
     SBQueue = cmd.get_models('SBQueue', resource_type=ResourceType.MGMT_SERVICEBUS)
 
@@ -152,7 +150,8 @@ def cli_sbqueue_create(cmd, client, resource_group_name, namespace_name, queue_n
         enable_express=enable_express,
         forward_to=forward_to,
         forward_dead_lettered_messages_to=forward_dead_lettered_messages_to,
-        enable_batched_operations=enable_batched_operations
+        enable_batched_operations=enable_batched_operations,
+        max_message_size_in_kilobytes=max_message_size_in_kilobytes
     )
 
     if lock_duration:
@@ -179,7 +178,8 @@ def cli_sbqueue_update(instance, lock_duration=None,
                        default_message_time_to_live=None, dead_lettering_on_message_expiration=None,
                        duplicate_detection_history_time_window=None, max_delivery_count=None, status=None,
                        auto_delete_on_idle=None, enable_partitioning=None, enable_express=None,
-                       forward_to=None, forward_dead_lettered_messages_to=None, enable_batched_operations=None):
+                       forward_to=None, forward_dead_lettered_messages_to=None, enable_batched_operations=None,
+                       max_message_size_in_kilobytes=None):
 
     from datetime import timedelta
     from azure.cli.command_modules.servicebus.constants import DURATION_LIMIT
@@ -237,6 +237,9 @@ def cli_sbqueue_update(instance, lock_duration=None,
     if enable_batched_operations is not None:
         instance.enable_batched_operations = enable_batched_operations
 
+    if max_message_size_in_kilobytes is not None:
+        instance.max_message_size_in_kilobytes = max_message_size_in_kilobytes
+
     return instance
 
 
@@ -267,7 +270,7 @@ def cli_sbtopic_create(cmd, client, resource_group_name, namespace_name, topic_n
                        max_size_in_megabytes=None, requires_duplicate_detection=None,
                        duplicate_detection_history_time_window=None,
                        enable_batched_operations=None, status=None, support_ordering=None, auto_delete_on_idle=None,
-                       enable_partitioning=None, enable_express=None):
+                       enable_partitioning=None, enable_express=None, max_message_size_in_kilobytes=None):
     SBTopic = cmd.get_models('SBTopic', resource_type=ResourceType.MGMT_SERVICEBUS)
 
     if max_size_in_megabytes:
@@ -280,7 +283,8 @@ def cli_sbtopic_create(cmd, client, resource_group_name, namespace_name, topic_n
         status=status,
         support_ordering=support_ordering,
         enable_partitioning=enable_partitioning,
-        enable_express=enable_express
+        enable_express=enable_express,
+        max_message_size_in_kilobytes=max_message_size_in_kilobytes
     )
 
     if default_message_time_to_live:
@@ -303,7 +307,7 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
                        max_size_in_megabytes=None, requires_duplicate_detection=None,
                        duplicate_detection_history_time_window=None,
                        enable_batched_operations=None, status=None, support_ordering=None, auto_delete_on_idle=None,
-                       enable_partitioning=None, enable_express=None):
+                       enable_partitioning=None, enable_express=None, max_message_size_in_kilobytes=None):
 
     from datetime import timedelta
     from azure.cli.command_modules.servicebus.constants import DURATION_LIMIT
@@ -344,6 +348,9 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
     if enable_express is not None:
         instance.enable_express = enable_express
 
+    if max_message_size_in_kilobytes is not None:
+        instance.max_message_size_in_kilobytes = max_message_size_in_kilobytes
+
     return instance
 
 
@@ -373,9 +380,12 @@ def cli_topicauthokey_renew(cmd, client, resource_group_name, namespace_name, to
 def cli_sbsubscription_create(cmd, client, resource_group_name, namespace_name, topic_name, subscription_name, lock_duration=None,
                               requires_session=None, default_message_time_to_live=None, dead_lettering_on_message_expiration=None,
                               max_delivery_count=None, status=None, enable_batched_operations=None,
-                              auto_delete_on_idle=None, forward_to=None, forward_dead_lettered_messages_to=None, dead_lettering_on_filter_evaluation_exceptions=None):
+                              auto_delete_on_idle=None, forward_to=None, forward_dead_lettered_messages_to=None, dead_lettering_on_filter_evaluation_exceptions=None,
+                              is_client_affine=None, client_id=None, is_shared=None, is_durable=None):
 
     SBSubscription = cmd.get_models('SBSubscription', resource_type=ResourceType.MGMT_SERVICEBUS)
+    SBClientAffineProperties = cmd.get_models('SBClientAffineProperties', resource_type=ResourceType.MGMT_SERVICEBUS)
+
     subscription_params = SBSubscription(
         requires_session=requires_session,
         dead_lettering_on_message_expiration=dead_lettering_on_message_expiration,
@@ -384,7 +394,8 @@ def cli_sbsubscription_create(cmd, client, resource_group_name, namespace_name, 
         enable_batched_operations=enable_batched_operations,
         forward_to=forward_to,
         forward_dead_lettered_messages_to=forward_dead_lettered_messages_to,
-        dead_lettering_on_filter_evaluation_exceptions=dead_lettering_on_filter_evaluation_exceptions
+        dead_lettering_on_filter_evaluation_exceptions=dead_lettering_on_filter_evaluation_exceptions,
+        is_client_affine=is_client_affine
     )
 
     if default_message_time_to_live:
@@ -395,6 +406,13 @@ def cli_sbsubscription_create(cmd, client, resource_group_name, namespace_name, 
 
     if auto_delete_on_idle:
         subscription_params.auto_delete_on_idle = return_valid_duration(update_value=auto_delete_on_idle)
+
+    if (client_id is not None) or (is_shared is not None) or (is_durable is not None):
+        subscription_params.client_affine_properties = SBClientAffineProperties(
+            client_id=client_id,
+            is_shared=is_shared,
+            is_durable=is_durable
+        )
 
     return client.create_or_update(
         resource_group_name=resource_group_name,
@@ -429,7 +447,7 @@ def cli_sbsubscription_update(instance, lock_duration=None,
     if dead_lettering_on_message_expiration is not None:
         instance.dead_lettering_on_message_expiration = dead_lettering_on_message_expiration
 
-    if max_delivery_count:
+    if max_delivery_count is not None:
         instance.max_delivery_count = max_delivery_count
 
     if status:
@@ -460,7 +478,7 @@ def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_nam
                      action_sql_expression=None, action_compatibility_level=None, action_requires_preprocessing=None,
                      filter_sql_expression=None, filter_requires_preprocessing=None, correlation_id=None,
                      message_id=None, to=None, reply_to=None, label=None, session_id=None, reply_to_session_id=None,
-                     content_type=None, requires_preprocessing=None, filter_type=None):
+                     content_type=None, requires_preprocessing=None, filter_type=None, tags=None):
 
     Rule = cmd.get_models('Rule', resource_type=ResourceType.MGMT_SERVICEBUS)
     Action = cmd.get_models('Action', resource_type=ResourceType.MGMT_SERVICEBUS)
@@ -478,6 +496,7 @@ def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_nam
 
     if filter_type == 'CorrelationFilter':
         parameters.correlation_filter = CorrelationFilter(
+            properties=tags,
             correlation_id=correlation_id,
             to=to,
             message_id=message_id,
@@ -494,7 +513,6 @@ def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_nam
             compatibility_level=action_compatibility_level,
             requires_preprocessing=action_requires_preprocessing
         )
-
     return client.create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
@@ -509,7 +527,7 @@ def cli_rules_update(cmd, instance,
                      action_sql_expression=None, action_compatibility_level=None, action_requires_preprocessing=None,
                      filter_sql_expression=None, filter_requires_preprocessing=None, correlation_id=None,
                      message_id=None, to=None, reply_to=None, label=None, session_id=None, reply_to_session_id=None,
-                     content_type=None, requires_preprocessing=None):
+                     content_type=None, requires_preprocessing=None, tags=None):
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
         if action_sql_expression:
@@ -529,6 +547,9 @@ def cli_rules_update(cmd, instance,
 
     if correlation_id:
         instance.correlation_filter.correlation_id = correlation_id
+
+    if tags:
+        instance.correlation_filter.properties = tags
 
     if to:
         instance.correlation_filter.to = to
@@ -610,6 +631,10 @@ def cli_migration_complete(client, resource_group_name, namespace_name, config_n
     return client.complete_migration(resource_group_name, namespace_name, config_name)
 
 
+def revert(client, resource_group_name, namespace_name, config_name="$default"):
+    return client.revert(resource_group_name, namespace_name, config_name)
+
+
 iso8601pattern = re.compile("^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\d+H)?(\\d+M)?(\\d+.)?(\\d+S)?)?$")
 timedeltapattern = re.compile("^\\d+:\\d+:\\d+$")
 
@@ -643,6 +668,7 @@ def return_valid_duration(update_value, current_value=None):
         return value_toreturn
 
     if timedeltapattern.match(value_toreturn):
+        logger.warning('Please use ISO8601 duration for timespan inputs. Timespan inputs of format (days:min:seconds) would be deprecated from version 2.49.0.')
         day, minute, seconds = value_toreturn.split(":")
         if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) <= timedelta(days=DURATION_DAYS,
                                                                                             minutes=DURATION_MIN,
@@ -666,6 +692,7 @@ def return_valid_duration_create(update_value):
                     'duration value should be less than (days:min:secs) 10675199:10085:477581')
 
         if timedeltapattern.match(update_value):
+            logger.warning('Please use ISO8601 duration for timespan inputs. Timespan inputs of format (days:min:seconds) would be deprecated from version 2.49.0.')
             day, minute, seconds = update_value.split(":")
             if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
                 update_value = timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
@@ -697,6 +724,22 @@ def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_nam
         netwrokruleset.ip_rules.append(NWRuleSetIpRules(ip_mask=ip_mask, action=action))
 
     return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
+
+
+def cli_networkrule_update(client, resource_group_name, namespace_name, public_network_access=None, trusted_service_access_enabled=None,
+                           default_action=None):
+    networkruleset = client.get_network_rule_set(resource_group_name, namespace_name)
+
+    if trusted_service_access_enabled is not None:
+        networkruleset.trusted_service_access_enabled = trusted_service_access_enabled
+
+    if public_network_access:
+        networkruleset.public_network_access = public_network_access
+
+    if default_action:
+        networkruleset.default_action = default_action
+
+    return client.create_or_update_network_rule_set(resource_group_name, namespace_name, networkruleset)
 
 
 def cli_networkrule_delete(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None):

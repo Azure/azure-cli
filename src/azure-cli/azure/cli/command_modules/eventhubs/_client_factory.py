@@ -40,3 +40,7 @@ def private_link_mgmt_client_factory(cli_ctx, _):
 
 def schema_registry_mgmt_client_factory(cli_ctx, _):
     return cf_eventhub(cli_ctx).schema_registry
+
+
+def application_group_mgmt_client_factory(cli_ctx, _):
+    return cf_eventhub(cli_ctx).application_group

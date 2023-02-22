@@ -35,19 +35,21 @@ class TestRecordsCollection(unittest.TestCase):
         # take snapshot and move the files
         collection.snapshot_and_read()
 
-        # all but one file, the 'cache' file, is moved.
-        self.assert_cache_files_count(1)
+        # all files are moved, including the 'cache' file.
+        self.assert_cache_files_count(0)
 
         # total records
-        self.assertEqual(1750, len([r for r in collection]))
+        self.assertEqual(1758, len([r for r in collection]))
 
     def test_create_records_collection_with_last_send(self):
-        last_send = datetime.datetime(year=2018, month=6, day=5, hour=16, minute=36, second=7)
+        last_send = datetime.datetime.now() - datetime.timedelta(hours=6)
         collection = RecordsCollection(last_send, self.work_dir)
         collection.snapshot_and_read()
 
+        # the threshold for pushing 'cache' file is 24, so 'cache' file should not be moved
         self.assert_cache_files_count(1)
-        self.assertEqual(453, len([r for r in collection]))
+        # no new records since last_send
+        self.assertEqual(0, len([r for r in collection]))
 
     def test_create_records_collection_against_missing_config_folder(self):
         collection = RecordsCollection(datetime.datetime.min, tempfile.mktemp())

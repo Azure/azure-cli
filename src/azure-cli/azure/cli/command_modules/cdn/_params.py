@@ -554,7 +554,7 @@ def configure_rule_parameters(c, is_afdx):
     c.argument('operator', arg_group="Match Condition", help='Operator of the match condition.')
     c.argument('selector', arg_group="Match Condition", help='Selector of the match condition.')
     c.argument('match_values', arg_group="Match Condition", nargs='+',
-               help='Match values of the match condition.')
+               help='Match values of the match condition. e.g, space separated values "GET" "HTTP"')
 
     if not is_afdx:
         c.argument('transform', arg_group="Match Condition", arg_type=get_enum_type(['Lowercase', 'Uppercase']),

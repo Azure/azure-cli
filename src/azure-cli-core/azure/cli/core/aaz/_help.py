@@ -21,7 +21,7 @@ except ImportError:
 
 shorthand_help_messages = {
     "show-help": 'Try `??` to show more.',
-    "short-summary": 'Shorthand syntax supported.',
+    "short-summary": 'Support shorthand-syntax, json-file and yaml-file.',
     "long-summary": 'See https://github.com/Azure/azure-cli/tree/dev/doc/shorthand_syntax.md '
                     'for more about shorthand syntax.'
 }
@@ -35,7 +35,7 @@ class AAZShowHelp(BaseException):
         self.schema = None
 
     def show(self):
-        from ._arg import AAZObjectArg, AAZDictArg, AAZListArg, AAZBaseArg
+        from ._arg import AAZObjectArg, AAZDictArg, AAZFreeFormDictArg, AAZListArg, AAZBaseArg
         assert self.schema is not None and isinstance(self.schema, AAZBaseArg)
         schema = self.schema
         schema_key = self.keys[0]
@@ -49,7 +49,7 @@ class AAZShowHelp(BaseException):
                     # show the help of current schema
                     break
                 key = f'.{key}'
-            elif isinstance(schema, AAZDictArg):
+            elif isinstance(schema, (AAZDictArg, AAZFreeFormDictArg)):
                 try:
                     schema = schema.Element
                 except AAZUnknownFieldError:
@@ -109,6 +109,10 @@ class AAZShowHelp(BaseException):
         max_header_len = 0
 
         for prop_schema in schema._fields.values():
+            if not prop_schema._registered:
+                # ignore unregistered args
+                continue
+
             prop_tags = cls._build_schema_tags(prop_schema)
             prop_name = ' '.join(prop_schema._options)
 

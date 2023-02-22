@@ -177,13 +177,14 @@ def load_command_table(self, _):
         g.custom_command('start', 'cli_migration_start')
         g.custom_show_command('show', 'cli_migration_show')
         g.custom_command('complete', 'cli_migration_complete')
-        g.command('abort', 'revert')
+        g.custom_command('abort', 'revert')
 
 # NetwrokRuleSet Region
     with self.command_group('servicebus namespace network-rule', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
         g.custom_command('add', 'cli_networkrule_createupdate', validator=validate_subnet)
         g.command('list', 'get_network_rule_set')
         g.custom_command('remove', 'cli_networkrule_delete', validator=validate_subnet)
+        g.custom_command('update', 'cli_networkrule_update')
 
 # Identity Region
     with self.command_group('servicebus namespace identity', sb_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_SERVICEBUS, client_factory=namespaces_mgmt_client_factory) as g:

@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command_group(
     "monitor log-analytics query-pack",
+    is_preview=True,
 )
 class __CMDGroup(AAZCommandGroup):
     """Manage Azure log analytics query pack.

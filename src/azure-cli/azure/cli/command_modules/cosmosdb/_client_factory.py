@@ -148,3 +148,7 @@ def cf_cassandra_cluster(cli_ctx, _):
 
 def cf_cassandra_data_center(cli_ctx, _):
     return cf_cosmosdb(cli_ctx).cassandra_data_centers
+
+
+def cf_service(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).service

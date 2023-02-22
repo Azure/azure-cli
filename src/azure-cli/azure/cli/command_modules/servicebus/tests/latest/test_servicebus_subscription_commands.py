@@ -244,7 +244,6 @@ class SBSubscriptionCRUDScenarioTest(ScenarioTest):
 
         self.assertOnUpdate(sub, self.kwargs)
 
-
         # Create Subscription
         self.cmd(
             'servicebus topic subscription create --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {subscriptionname}',
@@ -282,6 +281,35 @@ class SBSubscriptionCRUDScenarioTest(ScenarioTest):
 
         # Delete Namespace
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_sb_subscription')
+    def test_sb_client_affine_subscription(self, resource_group):
+        self.kwargs.update({
+            'namespacename': self.create_random_name(prefix='sb-nscli', length=20),
+            'topicname': self.create_random_name(prefix='sb-topiccli', length=20),
+            'subname': "s$$D",
+        })
+        # Create Namespace
+        self.cmd(
+            'servicebus namespace create --resource-group {rg} --name {namespacename} --sku Premium')
+
+        # Create Topic
+        self.cmd('servicebus topic create --resource-group {rg} --namespace-name {namespacename} --name {topicname}',
+                 checks=[self.check('name', '{topicname}')])
+
+        sub = self.cmd('servicebus topic subscription create --resource-group {rg} --namespace-name {namespacename} '
+                       '--name {subname} --topic-name {topicname} --is-client-affine --client-id testid '
+                       '--is-durable --is-shared').get_output_in_json()
+
+        self.assertEqual(self.kwargs['subname'], sub['name'])
+        self.assertEqual(True, sub['isClientAffine'])
+        self.assertEqual('testid', sub['clientAffineProperties']['clientId'])
+        self.assertEqual(True, sub['clientAffineProperties']['isDurable'])
+        self.assertEqual(True, sub['clientAffineProperties']['isShared'])
+
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')
+
 
     def assertOnUpdate(self, actual, expected):
         self.assertEqual(actual['autoDeleteOnIdle'], self.kwargs['autoDeleteOnIdle'])

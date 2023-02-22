@@ -2,7 +2,8 @@ interactions:
 - request:
     body: '{"location": "eastus", "sku": {"name": "Standard_S1", "capacity": 1}, "properties":
       {"features": [{"flag": "ServiceMode", "value": "Default"}, {"flag": "EnableMessagingLogs",
-      "value": "False"}], "cors": {}, "networkACLs": {"defaultAction": "Allow"}}}'
+      "value": "False"}], "cors": {}, "networkACLs": {"defaultAction": "Allow"}, "publicNetworkAccess":
+      "Enabled", "disableLocalAuth": false, "disableAadAuth": false}}'
     headers:
       Accept:
       - application/json
@@ -13,33 +14,34 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '250'
+      - '336'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --sku -l
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2022-02-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Creating","externalIP":null,"hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0-preview","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]}},"kind":"SignalR","systemData":{"createdBy":"ethanyang@microsoft.com","createdByType":"User","createdAt":"2022-05-12T19:28:28.5060824Z","lastModifiedBy":"ethanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T19:28:28.5060824Z"},"location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Creating","externalIP":null,"hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0-preview","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-08-26T06:10:11.7662121Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T06:10:11.7662121Z"},"location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/b681cd88-edc6-4594-bbff-a5c1560c7701?api-version=2021-04-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/6b48df43-8dc7-4450-ad26-e3126fb82f24?api-version=2022-02-01
       cache-control:
       - no-cache
       content-length:
-      - '1226'
+      - '1412'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:28:32 GMT
+      - Fri, 26 Aug 2022 06:10:14 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationResults/b681cd88-edc6-4594-bbff-a5c1560c7701?api-version=2021-04-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationResults/6b48df43-8dc7-4450-ad26-e3126fb82f24?api-version=2022-02-01
       pragma:
       - no-cache
       server:
@@ -49,9 +51,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1197'
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 201
       message: Created
@@ -69,12 +71,13 @@ interactions:
       ParameterSetName:
       - -n -g --sku -l
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/b681cd88-edc6-4594-bbff-a5c1560c7701?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/6b48df43-8dc7-4450-ad26-e3126fb82f24?api-version=2022-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/b681cd88-edc6-4594-bbff-a5c1560c7701","name":"b681cd88-edc6-4594-bbff-a5c1560c7701","status":"Running","startTime":"2022-05-12T19:28:30.5050148Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/6b48df43-8dc7-4450-ad26-e3126fb82f24","name":"6b48df43-8dc7-4450-ad26-e3126fb82f24","status":"Running","startTime":"2022-08-26T06:10:13.6122274Z"}'
     headers:
       cache-control:
       - no-cache
@@ -83,7 +86,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:29:02 GMT
+      - Fri, 26 Aug 2022 06:10:43 GMT
       expires:
       - '-1'
       pragma:
@@ -99,7 +102,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -117,12 +120,13 @@ interactions:
       ParameterSetName:
       - -n -g --sku -l
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/b681cd88-edc6-4594-bbff-a5c1560c7701?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/6b48df43-8dc7-4450-ad26-e3126fb82f24?api-version=2022-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/b681cd88-edc6-4594-bbff-a5c1560c7701","name":"b681cd88-edc6-4594-bbff-a5c1560c7701","status":"Running","startTime":"2022-05-12T19:28:30.5050148Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/6b48df43-8dc7-4450-ad26-e3126fb82f24","name":"6b48df43-8dc7-4450-ad26-e3126fb82f24","status":"Running","startTime":"2022-08-26T06:10:13.6122274Z"}'
     headers:
       cache-control:
       - no-cache
@@ -131,7 +135,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:29:32 GMT
+      - Fri, 26 Aug 2022 06:11:14 GMT
       expires:
       - '-1'
       pragma:
@@ -147,7 +151,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -165,12 +169,13 @@ interactions:
       ParameterSetName:
       - -n -g --sku -l
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/b681cd88-edc6-4594-bbff-a5c1560c7701?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/6b48df43-8dc7-4450-ad26-e3126fb82f24?api-version=2022-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/b681cd88-edc6-4594-bbff-a5c1560c7701","name":"b681cd88-edc6-4594-bbff-a5c1560c7701","status":"Succeeded","startTime":"2022-05-12T19:28:30.5050148Z","endTime":"2022-05-12T19:29:52.2684476Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/6b48df43-8dc7-4450-ad26-e3126fb82f24","name":"6b48df43-8dc7-4450-ad26-e3126fb82f24","status":"Succeeded","startTime":"2022-08-26T06:10:13.6122274Z","endTime":"2022-08-26T06:11:36.4179792Z"}'
     headers:
       cache-control:
       - no-cache
@@ -179,7 +184,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:30:03 GMT
+      - Fri, 26 Aug 2022 06:11:44 GMT
       expires:
       - '-1'
       pragma:
@@ -195,7 +200,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -213,21 +218,22 @@ interactions:
       ParameterSetName:
       - -n -g --sku -l
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2022-02-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.62.133.90","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]}},"kind":"SignalR","systemData":{"createdBy":"ethanyang@microsoft.com","createdByType":"User","createdAt":"2022-05-12T19:28:28.5060824Z","lastModifiedBy":"ethanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T19:28:28.5060824Z"},"location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.88.155.5","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-08-26T06:10:11.7662121Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T06:10:11.7662121Z"},"location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1229'
+      - '1414'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:30:03 GMT
+      - Fri, 26 Aug 2022 06:11:44 GMT
       expires:
       - '-1'
       pragma:
@@ -243,14 +249,14 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
 - request:
     body: '{"location": "eastus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
       ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name": "subnet1", "properties":
-      {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies": "Enabled",
+      {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies": "Disabled",
       "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
     headers:
       Accept:
@@ -262,30 +268,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '298'
+      - '299'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n -l --subnet-name
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"1fa7b301-c8ef-4b07-956d-c66e2f027318\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"59dc4280-a5a7-4bad-af0a-bf1134162593\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"9965cde9-9669-4172-a9b8-f82ec9e924c6\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"25d09308-6b5f-42be-90d7-06ef14b44854\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"1fa7b301-c8ef-4b07-956d-c66e2f027318\\\"\",\r\n
+        \       \"etag\": \"W/\\\"59dc4280-a5a7-4bad-af0a-bf1134162593\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
@@ -293,15 +300,15 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/ea5bffe7-9da2-4888-b17b-afa2d4c6787d?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/16134502-14a8-4edd-b4b5-6accf656b28a?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '1285'
+      - '1286'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:30:10 GMT
+      - Fri, 26 Aug 2022 06:11:46 GMT
       expires:
       - '-1'
       pragma:
@@ -314,9 +321,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f925c5e4-6b55-40db-99d5-7b36b01509fa
+      - b65befbd-31b0-49e1-8b98-069c6a79b576
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1192'
     status:
       code: 201
       message: Created
@@ -334,9 +341,10 @@ interactions:
       ParameterSetName:
       - -g -n -l --subnet-name
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/ea5bffe7-9da2-4888-b17b-afa2d4c6787d?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/16134502-14a8-4edd-b4b5-6accf656b28a?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -348,7 +356,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:30:14 GMT
+      - Fri, 26 Aug 2022 06:11:49 GMT
       expires:
       - '-1'
       pragma:
@@ -365,7 +373,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6a152ec1-9ccd-462b-b9c2-4b15c0684898
+      - e65febaf-8100-45ec-9ee2-17ebd2e6c4a0
     status:
       code: 200
       message: OK
@@ -383,24 +391,25 @@ interactions:
       ParameterSetName:
       - -g -n -l --subnet-name
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"9b2b2a9e-9e4a-450b-b72b-bfdb9c3b4578\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"7d4fe4c4-e53c-475f-9240-eca2af499282\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"9965cde9-9669-4172-a9b8-f82ec9e924c6\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"25d09308-6b5f-42be-90d7-06ef14b44854\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"9b2b2a9e-9e4a-450b-b72b-bfdb9c3b4578\\\"\",\r\n
+        \       \"etag\": \"W/\\\"7d4fe4c4-e53c-475f-9240-eca2af499282\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
@@ -408,13 +417,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1287'
+      - '1288'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:30:15 GMT
+      - Fri, 26 Aug 2022 06:11:49 GMT
       etag:
-      - W/"9b2b2a9e-9e4a-450b-b72b-bfdb9c3b4578"
+      - W/"7d4fe4c4-e53c-475f-9240-eca2af499282"
       expires:
       - '-1'
       pragma:
@@ -431,7 +440,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a2dcea2e-ebb8-4e97-bbec-76ebc55ec2c5
+      - 9571d6f5-efdb-47ff-bc95-1d48c62ea3a3
     status:
       code: 200
       message: OK
@@ -449,28 +458,29 @@ interactions:
       ParameterSetName:
       - --name --resource-group --vnet-name --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"subnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \ \"etag\": \"W/\\\"9b2b2a9e-9e4a-450b-b72b-bfdb9c3b4578\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"7d4fe4c4-e53c-475f-9240-eca2af499282\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
-        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '527'
+      - '528'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:30:17 GMT
+      - Fri, 26 Aug 2022 06:11:50 GMT
       etag:
-      - W/"9b2b2a9e-9e4a-450b-b72b-bfdb9c3b4578"
+      - W/"7d4fe4c4-e53c-475f-9240-eca2af499282"
       expires:
       - '-1'
       pragma:
@@ -487,7 +497,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 283ce921-31b2-4c00-9640-90b8556d13d4
+      - 85287eaf-987a-4693-9a25-db8e33264f4a
     status:
       code: 200
       message: OK
@@ -512,28 +522,29 @@ interactions:
       ParameterSetName:
       - --name --resource-group --vnet-name --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"subnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \ \"etag\": \"W/\\\"5df8191a-e28c-4497-a3b2-cbdf25ed840c\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \ \"etag\": \"W/\\\"e5d3a8d8-6580-48b2-a053-a5ed227b0158\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/774d7699-4308-41fb-a915-5075e377f5fd?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/da333c66-1bca-49e4-9e92-0b23a17706b7?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '527'
+      - '528'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:30:18 GMT
+      - Fri, 26 Aug 2022 06:11:49 GMT
       expires:
       - '-1'
       pragma:
@@ -550,9 +561,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5f28ffa1-0375-4170-8a8e-71b076c30809
+      - abf9dce6-0d51-4c53-8e42-ade45afa0dd0
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1192'
     status:
       code: 200
       message: OK
@@ -570,9 +581,10 @@ interactions:
       ParameterSetName:
       - --name --resource-group --vnet-name --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/774d7699-4308-41fb-a915-5075e377f5fd?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/da333c66-1bca-49e4-9e92-0b23a17706b7?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -584,7 +596,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:30:21 GMT
+      - Fri, 26 Aug 2022 06:12:20 GMT
       expires:
       - '-1'
       pragma:
@@ -601,7 +613,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7e1237bd-149f-4fc8-9483-99d27b742997
+      - 8597b47b-2a07-4e2f-b1a0-4dd5816e4f10
     status:
       code: 200
       message: OK
@@ -619,13 +631,14 @@ interactions:
       ParameterSetName:
       - --name --resource-group --vnet-name --disable-private-endpoint-network-policies
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"subnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \ \"etag\": \"W/\\\"4f1b9fd7-ce3c-4e7a-8961-fa22985cb61f\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"e5d3a8d8-6580-48b2-a053-a5ed227b0158\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -638,9 +651,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:30:22 GMT
+      - Fri, 26 Aug 2022 06:12:20 GMT
       etag:
-      - W/"4f1b9fd7-ce3c-4e7a-8961-fa22985cb61f"
+      - W/"e5d3a8d8-6580-48b2-a053-a5ed227b0158"
       expires:
       - '-1'
       pragma:
@@ -657,13 +670,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 12914c98-be0b-4d43-a909-719a44519564
+      - 9f23fd96-ea85-4608-a098-39c5cb57958c
     status:
       code: 200
       message: OK
 - request:
     body: '{"location": "eastus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1",
-      "properties": {"privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "properties": {"privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
       "Enabled"}}, "manualPrivateLinkServiceConnections": [{"name": "private_endpoint_connection1",
       "properties": {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002",
       "groupIds": ["signalr"]}}]}}'
@@ -677,26 +690,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '610'
+      - '611'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --vnet-name --subnet --name --private-connection-resource-id
         --group-ids --connection-name --location --manual-request
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"private_endpoint1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1\",\r\n
-        \ \"etag\": \"W/\\\"7a1abbc2-b9b6-425b-873e-e291f51c574d\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"dbe591a4-e017-4e99-9f42-d0d180ec0948\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"eastus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"6ab763ff-a103-40b3-a38e-14232304580f\",\r\n    \"privateLinkServiceConnections\":
+        \"648e7907-8584-484a-a563-d37abcbfd9b3\",\r\n    \"privateLinkServiceConnections\":
         [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
         \"private_endpoint_connection1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1/manualPrivateLinkServiceConnections/private_endpoint_connection1\",\r\n
-        \       \"etag\": \"W/\\\"7a1abbc2-b9b6-425b-873e-e291f51c574d\\\"\",\r\n
+        \       \"etag\": \"W/\\\"dbe591a4-e017-4e99-9f42-d0d180ec0948\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002\",\r\n
         \         \"groupIds\": [\r\n            \"signalr\"\r\n          ],\r\n          \"privateLinkServiceConnectionState\":
@@ -706,13 +720,13 @@ interactions:
         \     }\r\n    ],\r\n    \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\":
         {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
         \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
-        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/private_endpoint1.nic.3de196a9-f471-4a76-bc54-f5ea789a1ec1\"\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/private_endpoint1.nic.29c6bcbf-8f63-45a9-aad8-9fc7ced41642\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/c392e906-c445-4316-9332-e1fae9274369?api-version=2021-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/7c106987-3bd0-4ee4-9145-66a616a865c1?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
@@ -720,7 +734,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:30:28 GMT
+      - Fri, 26 Aug 2022 06:12:22 GMT
       expires:
       - '-1'
       pragma:
@@ -733,9 +747,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - acf62069-c03a-4fc4-8f86-665c8d6111c1
+      - 515cadb2-e8ac-4e00-b314-a56cc2d6f09a
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1191'
     status:
       code: 201
       message: Created
@@ -754,9 +768,10 @@ interactions:
       - --resource-group --vnet-name --subnet --name --private-connection-resource-id
         --group-ids --connection-name --location --manual-request
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/c392e906-c445-4316-9332-e1fae9274369?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/7c106987-3bd0-4ee4-9145-66a616a865c1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -768,7 +783,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:30:39 GMT
+      - Fri, 26 Aug 2022 06:12:32 GMT
       expires:
       - '-1'
       pragma:
@@ -785,7 +800,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 078abc22-b188-428e-b9c4-096b878dac4a
+      - 38b72c7f-5872-4dfb-a526-9bc66570be4c
     status:
       code: 200
       message: OK
@@ -804,9 +819,10 @@ interactions:
       - --resource-group --vnet-name --subnet --name --private-connection-resource-id
         --group-ids --connection-name --location --manual-request
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/c392e906-c445-4316-9332-e1fae9274369?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/7c106987-3bd0-4ee4-9145-66a616a865c1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -818,7 +834,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:30:49 GMT
+      - Fri, 26 Aug 2022 06:12:42 GMT
       expires:
       - '-1'
       pragma:
@@ -835,7 +851,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 36400717-573f-4219-9902-1a68aaab5ee7
+      - fcca8a48-2c56-4159-9dac-04094afa58c7
     status:
       code: 200
       message: OK
@@ -854,9 +870,10 @@ interactions:
       - --resource-group --vnet-name --subnet --name --private-connection-resource-id
         --group-ids --connection-name --location --manual-request
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/c392e906-c445-4316-9332-e1fae9274369?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/7c106987-3bd0-4ee4-9145-66a616a865c1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -868,7 +885,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:31:10 GMT
+      - Fri, 26 Aug 2022 06:13:02 GMT
       expires:
       - '-1'
       pragma:
@@ -885,7 +902,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 3f2899f7-451a-4800-8154-c9d2dbb614e2
+      - e8e51f16-fe73-453f-b077-1747ad33d217
     status:
       code: 200
       message: OK
@@ -904,19 +921,20 @@ interactions:
       - --resource-group --vnet-name --subnet --name --private-connection-resource-id
         --group-ids --connection-name --location --manual-request
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1?api-version=2021-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"private_endpoint1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1\",\r\n
-        \ \"etag\": \"W/\\\"251832b6-313e-4e3e-b726-46af4a8bab64\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"12012c9c-5234-47f2-8a2a-a82fec1dc7c6\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"eastus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"6ab763ff-a103-40b3-a38e-14232304580f\",\r\n    \"privateLinkServiceConnections\":
+        \"648e7907-8584-484a-a563-d37abcbfd9b3\",\r\n    \"privateLinkServiceConnections\":
         [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
         \"private_endpoint_connection1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1/manualPrivateLinkServiceConnections/private_endpoint_connection1\",\r\n
-        \       \"etag\": \"W/\\\"251832b6-313e-4e3e-b726-46af4a8bab64\\\"\",\r\n
+        \       \"etag\": \"W/\\\"12012c9c-5234-47f2-8a2a-a82fec1dc7c6\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002\",\r\n
         \         \"groupIds\": [\r\n            \"signalr\"\r\n          ],\r\n          \"privateLinkServiceConnectionState\":
@@ -926,7 +944,7 @@ interactions:
         \     }\r\n    ],\r\n    \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\":
         {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
         \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
-        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/private_endpoint1.nic.3de196a9-f471-4a76-bc54-f5ea789a1ec1\"\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/private_endpoint1.nic.29c6bcbf-8f63-45a9-aad8-9fc7ced41642\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       cache-control:
@@ -936,9 +954,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:31:10 GMT
+      - Fri, 26 Aug 2022 06:13:02 GMT
       etag:
-      - W/"251832b6-313e-4e3e-b726-46af4a8bab64"
+      - W/"12012c9c-5234-47f2-8a2a-a82fec1dc7c6"
       expires:
       - '-1'
       pragma:
@@ -955,7 +973,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - cb77de90-528f-4dd4-8f8e-df3f91573773
+      - 212880d2-0346-4aee-b45d-30b26fde7d59
     status:
       code: 200
       message: OK
@@ -973,7 +991,8 @@ interactions:
       ParameterSetName:
       - -n -g --type
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+      - python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) AZURECLI/2.39.0
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateLinkResources?api-version=2020-05-01
   response:
@@ -987,7 +1006,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:31:12 GMT
+      - Fri, 26 Aug 2022 06:13:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1003,7 +1022,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -1021,21 +1040,22 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2022-02-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.62.133.90","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[{"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Pending","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[{"name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null}]}},"kind":"SignalR","systemData":{"createdBy":"ethanyang@microsoft.com","createdByType":"User","createdAt":"2022-05-12T19:28:28.5060824Z","lastModifiedBy":"ethanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T19:28:28.5060824Z"},"location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.88.155.5","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[{"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"groupIds":["signalr"],"privateLinkServiceConnectionState":{"status":"Pending","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[{"name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null}]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-08-26T06:10:11.7662121Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T06:10:11.7662121Z"},"location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2046'
+      - '2254'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:31:15 GMT
+      - Fri, 26 Aug 2022 06:13:04 GMT
       expires:
       - '-1'
       pragma:
@@ -1051,7 +1071,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -1069,12 +1089,13 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+      - python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) AZURECLI/2.39.0
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5?api-version=2020-05-01
   response:
     body:
-      string: '{"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Pending","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
+      string: '{"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Pending","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
@@ -1083,7 +1104,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:31:17 GMT
+      - Fri, 26 Aug 2022 06:13:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1099,7 +1120,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -1117,21 +1138,22 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+      - python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) AZURECLI/2.39.0
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002?api-version=2020-05-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.62.133.90","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[{"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Pending","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}],"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[{"name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null}]}},"kind":"SignalR","location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.88.155.5","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[{"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Pending","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}],"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[{"name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null}]}},"kind":"SignalR","location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1742'
+      - '1741'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:31:19 GMT
+      - Fri, 26 Aug 2022 06:13:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1147,7 +1169,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -1165,12 +1187,13 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+      - python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) AZURECLI/2.39.0
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5?api-version=2020-05-01
   response:
     body:
-      string: '{"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Pending","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
+      string: '{"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Pending","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
@@ -1179,7 +1202,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:31:21 GMT
+      - Fri, 26 Aug 2022 06:13:04 GMT
       expires:
       - '-1'
       pragma:
@@ -1195,7 +1218,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -1203,8 +1226,8 @@ interactions:
     body: '{"properties": {"provisioningState": "Succeeded", "privateEndpoint": {"id":
       "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},
       "privateLinkServiceConnectionState": {"status": "Approved", "description": null,
-      "actionsRequired": "None"}}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1",
-      "name": "signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1", "type": "Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
+      "actionsRequired": "None"}}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5",
+      "name": "signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5", "type": "Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
     headers:
       Accept:
       - '*/*'
@@ -1221,15 +1244,16 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+      - python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) AZURECLI/2.39.0
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5?api-version=2020-05-01
   response:
     body:
-      string: '{"properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Approved","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
+      string: '{"properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Approved","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/23500c1c-b43d-4347-bde4-2832e340c239?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/043445f3-b065-45ca-be39-e48408213a40?api-version=2020-05-01
       cache-control:
       - no-cache
       content-length:
@@ -1237,7 +1261,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:31:23 GMT
+      - Fri, 26 Aug 2022 06:13:04 GMT
       expires:
       - '-1'
       pragma:
@@ -1253,9 +1277,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1193'
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -1273,12 +1297,13 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+      - python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) AZURECLI/2.39.0
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5?api-version=2020-05-01
   response:
     body:
-      string: '{"properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Approved","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
+      string: '{"properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Approved","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
@@ -1287,7 +1312,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:31:36 GMT
+      - Fri, 26 Aug 2022 06:13:15 GMT
       expires:
       - '-1'
       pragma:
@@ -1303,7 +1328,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -1321,12 +1346,13 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+      - python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) AZURECLI/2.39.0
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5?api-version=2020-05-01
   response:
     body:
-      string: '{"properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Approved","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
+      string: '{"properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Approved","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
@@ -1335,7 +1361,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:31:47 GMT
+      - Fri, 26 Aug 2022 06:13:25 GMT
       expires:
       - '-1'
       pragma:
@@ -1351,7 +1377,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -1369,12 +1395,62 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+      - python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) AZURECLI/2.39.0
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5?api-version=2020-05-01
   response:
     body:
-      string: '{"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Approved","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
+      string: '{"properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Approved","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '678'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 26 Aug 2022 06:13:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) AZURECLI/2.39.0
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5?api-version=2020-05-01
+  response:
+    body:
+      string: '{"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Approved","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
@@ -1383,7 +1459,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:31:59 GMT
+      - Fri, 26 Aug 2022 06:13:46 GMT
       expires:
       - '-1'
       pragma:
@@ -1399,7 +1475,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -1417,12 +1493,13 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+      - python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) AZURECLI/2.39.0
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5?api-version=2020-05-01
   response:
     body:
-      string: '{"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Approved","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
+      string: '{"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Approved","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
@@ -1431,7 +1508,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:32:02 GMT
+      - Fri, 26 Aug 2022 06:13:46 GMT
       expires:
       - '-1'
       pragma:
@@ -1447,7 +1524,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -1455,8 +1532,8 @@ interactions:
     body: '{"properties": {"provisioningState": "Succeeded", "privateEndpoint": {"id":
       "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},
       "privateLinkServiceConnectionState": {"status": "Rejected", "description": null,
-      "actionsRequired": "None"}}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1",
-      "name": "signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1", "type": "Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
+      "actionsRequired": "None"}}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5",
+      "name": "signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5", "type": "Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
     headers:
       Accept:
       - '*/*'
@@ -1473,15 +1550,16 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+      - python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) AZURECLI/2.39.0
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5?api-version=2020-05-01
   response:
     body:
-      string: '{"properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Rejected","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
+      string: '{"properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Rejected","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/a2dee9b8-ca0c-40f5-9263-8b80273ca128?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/6bbb2d5f-6aa7-4e7a-adda-84c6d1a4f3bf?api-version=2020-05-01
       cache-control:
       - no-cache
       content-length:
@@ -1489,7 +1567,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:32:04 GMT
+      - Fri, 26 Aug 2022 06:13:47 GMT
       expires:
       - '-1'
       pragma:
@@ -1507,7 +1585,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes:
       - '1197'
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -1525,12 +1603,13 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+      - python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) AZURECLI/2.39.0
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5?api-version=2020-05-01
   response:
     body:
-      string: '{"properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Rejected","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
+      string: '{"properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Rejected","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
@@ -1539,7 +1618,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:32:16 GMT
+      - Fri, 26 Aug 2022 06:13:57 GMT
       expires:
       - '-1'
       pragma:
@@ -1555,7 +1634,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -1573,12 +1652,13 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+      - python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) AZURECLI/2.39.0
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5?api-version=2020-05-01
   response:
     body:
-      string: '{"properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Rejected","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
+      string: '{"properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Rejected","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
@@ -1587,7 +1667,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:32:27 GMT
+      - Fri, 26 Aug 2022 06:14:08 GMT
       expires:
       - '-1'
       pragma:
@@ -1603,7 +1683,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -1621,12 +1701,13 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+      - python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) AZURECLI/2.39.0
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5?api-version=2020-05-01
   response:
     body:
-      string: '{"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Rejected","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
+      string: '{"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Rejected","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
@@ -1635,7 +1716,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:32:40 GMT
+      - Fri, 26 Aug 2022 06:14:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1651,7 +1732,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -1669,21 +1750,22 @@ interactions:
       ParameterSetName:
       - --public-network -n -g --allow
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2022-02-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.62.133.90","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[{"systemData":{"createdBy":"ethanyang@microsoft.com","createdByType":"User","createdAt":"2022-05-12T19:32:03.4496731Z","lastModifiedBy":"ethanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T19:32:03.4496731Z"},"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Rejected","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[{"name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null}]}},"kind":"SignalR","systemData":{"createdBy":"ethanyang@microsoft.com","createdByType":"User","createdAt":"2022-05-12T19:28:28.5060824Z","lastModifiedBy":"ethanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T19:28:28.5060824Z"},"location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.88.155.5","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[{"systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-08-26T06:13:47.3540542Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T06:13:47.3540542Z"},"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"groupIds":["signalr"],"privateLinkServiceConnectionState":{"status":"Rejected","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[{"name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null}]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-08-26T06:10:11.7662121Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T06:10:11.7662121Z"},"location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2285'
+      - '2537'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:32:42 GMT
+      - Fri, 26 Aug 2022 06:14:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1699,14 +1781,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
 - request:
     body: '{"properties": {"networkACLs": {"defaultAction": "Allow", "publicNetwork":
       {"allow": ["RESTAPI"], "deny": []}, "privateEndpoints": [{"allow": ["ServerConnection",
-      "ClientConnection", "RESTAPI", "Trace"], "name": "signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1"}]}}}'
+      "ClientConnection", "RESTAPI", "Trace"], "name": "signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5"}]},
+      "publicNetworkAccess": "Enabled", "disableLocalAuth": false, "disableAadAuth":
+      false}}'
     headers:
       Accept:
       - application/json
@@ -1717,31 +1801,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '269'
+      - '355'
       Content-Type:
       - application/json
       ParameterSetName:
       - --public-network -n -g --allow
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2022-02-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/bbbd9601-ccfb-451e-acd7-f7d326f8076e?api-version=2021-04-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/fd5c88f2-990b-4537-99a1-a19da5667313?api-version=2022-02-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 12 May 2022 19:32:43 GMT
+      - Fri, 26 Aug 2022 06:14:18 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationResults/bbbd9601-ccfb-451e-acd7-f7d326f8076e?api-version=2021-04-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationResults/fd5c88f2-990b-4537-99a1-a19da5667313?api-version=2022-02-01
       pragma:
       - no-cache
       server:
@@ -1751,9 +1836,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1198'
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 202
       message: Accepted
@@ -1771,12 +1856,13 @@ interactions:
       ParameterSetName:
       - --public-network -n -g --allow
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/bbbd9601-ccfb-451e-acd7-f7d326f8076e?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/fd5c88f2-990b-4537-99a1-a19da5667313?api-version=2022-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/bbbd9601-ccfb-451e-acd7-f7d326f8076e","name":"bbbd9601-ccfb-451e-acd7-f7d326f8076e","status":"Running","startTime":"2022-05-12T19:32:43.6852602Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/fd5c88f2-990b-4537-99a1-a19da5667313","name":"fd5c88f2-990b-4537-99a1-a19da5667313","status":"Running","startTime":"2022-08-26T06:14:19.0677553Z"}'
     headers:
       cache-control:
       - no-cache
@@ -1785,7 +1871,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:33:14 GMT
+      - Fri, 26 Aug 2022 06:14:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1801,7 +1887,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -1819,12 +1905,13 @@ interactions:
       ParameterSetName:
       - --public-network -n -g --allow
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/bbbd9601-ccfb-451e-acd7-f7d326f8076e?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/fd5c88f2-990b-4537-99a1-a19da5667313?api-version=2022-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/bbbd9601-ccfb-451e-acd7-f7d326f8076e","name":"bbbd9601-ccfb-451e-acd7-f7d326f8076e","status":"Running","startTime":"2022-05-12T19:32:43.6852602Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/fd5c88f2-990b-4537-99a1-a19da5667313","name":"fd5c88f2-990b-4537-99a1-a19da5667313","status":"Running","startTime":"2022-08-26T06:14:19.0677553Z"}'
     headers:
       cache-control:
       - no-cache
@@ -1833,7 +1920,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:33:45 GMT
+      - Fri, 26 Aug 2022 06:15:19 GMT
       expires:
       - '-1'
       pragma:
@@ -1849,7 +1936,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -1867,12 +1954,13 @@ interactions:
       ParameterSetName:
       - --public-network -n -g --allow
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/bbbd9601-ccfb-451e-acd7-f7d326f8076e?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/fd5c88f2-990b-4537-99a1-a19da5667313?api-version=2022-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/bbbd9601-ccfb-451e-acd7-f7d326f8076e","name":"bbbd9601-ccfb-451e-acd7-f7d326f8076e","status":"Succeeded","startTime":"2022-05-12T19:32:43.6852602Z","endTime":"2022-05-12T19:33:56.6303127Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/fd5c88f2-990b-4537-99a1-a19da5667313","name":"fd5c88f2-990b-4537-99a1-a19da5667313","status":"Succeeded","startTime":"2022-08-26T06:14:19.0677553Z","endTime":"2022-08-26T06:15:32.0631346Z"}'
     headers:
       cache-control:
       - no-cache
@@ -1881,7 +1969,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:34:15 GMT
+      - Fri, 26 Aug 2022 06:15:49 GMT
       expires:
       - '-1'
       pragma:
@@ -1897,7 +1985,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -1915,21 +2003,22 @@ interactions:
       ParameterSetName:
       - --public-network -n -g --allow
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2022-02-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.62.133.90","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[{"systemData":{"createdBy":"ethanyang@microsoft.com","createdByType":"User","createdAt":"2022-05-12T19:32:03.4496731Z","lastModifiedBy":"ethanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T19:32:03.4496731Z"},"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Rejected","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["RESTAPI"],"deny":[]},"privateEndpoints":[{"name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null}]}},"kind":"SignalR","systemData":{"createdBy":"ethanyang@microsoft.com","createdByType":"User","createdAt":"2022-05-12T19:28:28.5060824Z","lastModifiedBy":"ethanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T19:32:43.5532795Z"},"location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.88.155.5","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[{"systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-08-26T06:13:47.3540542Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T06:13:47.3540542Z"},"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"groupIds":["signalr"],"privateLinkServiceConnectionState":{"status":"Rejected","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["RESTAPI"],"deny":[]},"privateEndpoints":[{"name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null}]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-08-26T06:10:11.7662121Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T06:14:19.0177739Z"},"location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2237'
+      - '2489'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:34:15 GMT
+      - Fri, 26 Aug 2022 06:15:49 GMT
       expires:
       - '-1'
       pragma:
@@ -1945,7 +2034,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -1963,21 +2052,22 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2022-02-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.62.133.90","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[{"systemData":{"createdBy":"ethanyang@microsoft.com","createdByType":"User","createdAt":"2022-05-12T19:32:03.4496731Z","lastModifiedBy":"ethanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T19:32:03.4496731Z"},"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Rejected","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["RESTAPI"],"deny":[]},"privateEndpoints":[{"name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null}]}},"kind":"SignalR","systemData":{"createdBy":"ethanyang@microsoft.com","createdByType":"User","createdAt":"2022-05-12T19:28:28.5060824Z","lastModifiedBy":"ethanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T19:32:43.5532795Z"},"location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.88.155.5","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[{"systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-08-26T06:13:47.3540542Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T06:13:47.3540542Z"},"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"groupIds":["signalr"],"privateLinkServiceConnectionState":{"status":"Rejected","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["RESTAPI"],"deny":[]},"privateEndpoints":[{"name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null}]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-08-26T06:10:11.7662121Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T06:14:19.0177739Z"},"location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2237'
+      - '2489'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:34:17 GMT
+      - Fri, 26 Aug 2022 06:15:49 GMT
       expires:
       - '-1'
       pragma:
@@ -1993,7 +2083,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -2011,21 +2101,22 @@ interactions:
       ParameterSetName:
       - --connection-name -n -g --allow
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2022-02-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.62.133.90","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[{"systemData":{"createdBy":"ethanyang@microsoft.com","createdByType":"User","createdAt":"2022-05-12T19:32:03.4496731Z","lastModifiedBy":"ethanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T19:32:03.4496731Z"},"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Rejected","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["RESTAPI"],"deny":[]},"privateEndpoints":[{"name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null}]}},"kind":"SignalR","systemData":{"createdBy":"ethanyang@microsoft.com","createdByType":"User","createdAt":"2022-05-12T19:28:28.5060824Z","lastModifiedBy":"ethanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T19:32:43.5532795Z"},"location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.88.155.5","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[{"systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-08-26T06:13:47.3540542Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T06:13:47.3540542Z"},"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"groupIds":["signalr"],"privateLinkServiceConnectionState":{"status":"Rejected","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["RESTAPI"],"deny":[]},"privateEndpoints":[{"name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null}]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-08-26T06:10:11.7662121Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T06:14:19.0177739Z"},"location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2237'
+      - '2489'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:34:19 GMT
+      - Fri, 26 Aug 2022 06:15:49 GMT
       expires:
       - '-1'
       pragma:
@@ -2041,14 +2132,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
 - request:
     body: '{"properties": {"networkACLs": {"defaultAction": "Allow", "publicNetwork":
       {"allow": ["RESTAPI"], "deny": []}, "privateEndpoints": [{"allow": ["RESTAPI"],
-      "deny": [], "name": "signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1"}]}}}'
+      "deny": [], "name": "signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5"}]},
+      "publicNetworkAccess": "Enabled", "disableLocalAuth": false, "disableAadAuth":
+      false}}'
     headers:
       Accept:
       - application/json
@@ -2059,31 +2152,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '232'
+      - '318'
       Content-Type:
       - application/json
       ParameterSetName:
       - --connection-name -n -g --allow
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2022-02-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/959299d9-bad0-4a66-8196-b863c763a371?api-version=2021-04-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/42945e8a-92fa-42f1-bbc6-9751dec3d713?api-version=2022-02-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 12 May 2022 19:34:20 GMT
+      - Fri, 26 Aug 2022 06:15:50 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationResults/959299d9-bad0-4a66-8196-b863c763a371?api-version=2021-04-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationResults/42945e8a-92fa-42f1-bbc6-9751dec3d713?api-version=2022-02-01
       pragma:
       - no-cache
       server:
@@ -2093,9 +2187,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1190'
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 202
       message: Accepted
@@ -2113,12 +2207,13 @@ interactions:
       ParameterSetName:
       - --connection-name -n -g --allow
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/959299d9-bad0-4a66-8196-b863c763a371?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/42945e8a-92fa-42f1-bbc6-9751dec3d713?api-version=2022-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/959299d9-bad0-4a66-8196-b863c763a371","name":"959299d9-bad0-4a66-8196-b863c763a371","status":"Running","startTime":"2022-05-12T19:34:21.3700352Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/42945e8a-92fa-42f1-bbc6-9751dec3d713","name":"42945e8a-92fa-42f1-bbc6-9751dec3d713","status":"Running","startTime":"2022-08-26T06:15:50.4626637Z"}'
     headers:
       cache-control:
       - no-cache
@@ -2127,7 +2222,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:34:51 GMT
+      - Fri, 26 Aug 2022 06:16:19 GMT
       expires:
       - '-1'
       pragma:
@@ -2143,7 +2238,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -2161,12 +2256,13 @@ interactions:
       ParameterSetName:
       - --connection-name -n -g --allow
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/959299d9-bad0-4a66-8196-b863c763a371?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/42945e8a-92fa-42f1-bbc6-9751dec3d713?api-version=2022-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/959299d9-bad0-4a66-8196-b863c763a371","name":"959299d9-bad0-4a66-8196-b863c763a371","status":"Running","startTime":"2022-05-12T19:34:21.3700352Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/42945e8a-92fa-42f1-bbc6-9751dec3d713","name":"42945e8a-92fa-42f1-bbc6-9751dec3d713","status":"Running","startTime":"2022-08-26T06:15:50.4626637Z"}'
     headers:
       cache-control:
       - no-cache
@@ -2175,7 +2271,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:35:22 GMT
+      - Fri, 26 Aug 2022 06:16:50 GMT
       expires:
       - '-1'
       pragma:
@@ -2191,7 +2287,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -2209,12 +2305,13 @@ interactions:
       ParameterSetName:
       - --connection-name -n -g --allow
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/959299d9-bad0-4a66-8196-b863c763a371?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/42945e8a-92fa-42f1-bbc6-9751dec3d713?api-version=2022-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/959299d9-bad0-4a66-8196-b863c763a371","name":"959299d9-bad0-4a66-8196-b863c763a371","status":"Succeeded","startTime":"2022-05-12T19:34:21.3700352Z","endTime":"2022-05-12T19:35:34.1703739Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/42945e8a-92fa-42f1-bbc6-9751dec3d713","name":"42945e8a-92fa-42f1-bbc6-9751dec3d713","status":"Succeeded","startTime":"2022-08-26T06:15:50.4626637Z","endTime":"2022-08-26T06:17:03.1496022Z"}'
     headers:
       cache-control:
       - no-cache
@@ -2223,7 +2320,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:35:52 GMT
+      - Fri, 26 Aug 2022 06:17:20 GMT
       expires:
       - '-1'
       pragma:
@@ -2239,7 +2336,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -2257,21 +2354,22 @@ interactions:
       ParameterSetName:
       - --connection-name -n -g --allow
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.39.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31)
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2021-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2022-02-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.62.133.90","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[{"systemData":{"createdBy":"ethanyang@microsoft.com","createdByType":"User","createdAt":"2022-05-12T19:32:03.4496731Z","lastModifiedBy":"ethanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T19:32:03.4496731Z"},"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"privateLinkServiceConnectionState":{"status":"Rejected","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["RESTAPI"],"deny":[]},"privateEndpoints":[{"name":"signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1","allow":["RESTAPI"],"deny":[]}]}},"kind":"SignalR","systemData":{"createdBy":"ethanyang@microsoft.com","createdByType":"User","createdAt":"2022-05-12T19:28:28.5060824Z","lastModifiedBy":"ethanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-12T19:34:21.2168421Z"},"location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.88.155.5","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[{"systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-08-26T06:13:47.3540542Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T06:13:47.3540542Z"},"properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/private_endpoint1"},"groupIds":["signalr"],"privateLinkServiceConnectionState":{"status":"Rejected","description":null,"actionsRequired":"None"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","type":"Microsoft.SignalRService/SignalR/privateEndpointConnections"}],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["RESTAPI"],"deny":[]},"privateEndpoints":[{"name":"signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5","allow":["RESTAPI"],"deny":[]}]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2022-08-26T06:10:11.7662121Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-26T06:15:50.4000646Z"},"location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2189'
+      - '2441'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:35:53 GMT
+      - Fri, 26 Aug 2022 06:17:20 GMT
       expires:
       - '-1'
       pragma:
@@ -2287,7 +2385,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK
@@ -2307,25 +2405,26 @@ interactions:
       ParameterSetName:
       - --id -y
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+      - python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) AZURECLI/2.39.0
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.6ffd5240-e26e-4ac9-a77b-40e80cdf11f1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002/privateEndpointConnections/signalr000002.e14c46b7-fd95-4961-9536-e7ad7c2e6eb5?api-version=2020-05-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/8194193d-9808-49a5-8586-9ab7250bdc38?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/9bcbdf3f-b3e7-4996-bd32-b8c3592f2615?api-version=2020-05-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 12 May 2022 19:35:55 GMT
+      - Fri, 26 Aug 2022 06:17:20 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationResults/8194193d-9808-49a5-8586-9ab7250bdc38?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationResults/9bcbdf3f-b3e7-4996-bd32-b8c3592f2615?api-version=2020-05-01
       pragma:
       - no-cache
       server:
@@ -2337,7 +2436,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 202
       message: Accepted
@@ -2355,21 +2454,22 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - python/3.8.10 (Windows-10-10.0.19044-SP0) AZURECLI/2.36.0
+      - python/3.10.6 (Linux-5.15.0-1017-azure-x86_64-with-glibc2.31) AZURECLI/2.39.0
+        VSTS_0fb41ef4-5012-48a9-bf39-4ee3de03ee35_build_4949_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalr/signalr000002?api-version=2020-05-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.62.133.90","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[],"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["RESTAPI"],"deny":[]},"privateEndpoints":[]}},"kind":"SignalR","location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.88.155.5","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[],"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Default","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"cors":{"allowedOrigins":["*"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Allow","publicNetwork":{"allow":["RESTAPI"],"deny":[]},"privateEndpoints":[]}},"kind":"SignalR","location":"eastus","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '877'
+      - '876'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 12 May 2022 19:36:27 GMT
+      - Fri, 26 Aug 2022 06:17:51 GMT
       expires:
       - '-1'
       pragma:
@@ -2385,7 +2485,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-rp-server-mvid:
-      - e58ba2c2-e450-4347-b66c-f3ad6f1de555
+      - 67d45020-a2ac-43bb-9a4f-b19c1b24a46b
     status:
       code: 200
       message: OK

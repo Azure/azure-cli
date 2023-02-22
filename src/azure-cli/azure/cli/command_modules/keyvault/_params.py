@@ -37,12 +37,13 @@ key_format_values = certificate_format_values = ['PEM', 'DER']
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
-    (JsonWebKeyOperation, JsonWebKeyType, SasTokenType,
+    (JsonWebKeyOperation, SasTokenType,
      SasDefinitionAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes) = self.get_models(
-         'JsonWebKeyOperation', 'JsonWebKeyType', 'SasTokenType',
+         'JsonWebKeyOperation', 'SasTokenType',
          'SasDefinitionAttributes', 'SecretAttributes', 'CertificateAttributes', 'StorageAccountAttributes',
          resource_type=ResourceType.DATA_KEYVAULT)
 
+    JsonWebKeyType = self.get_sdk('KeyType', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_enums')
     KeyCurveName = self.get_sdk('KeyCurveName', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_enums')
     EncryptionAlgorithm = self.get_sdk('EncryptionAlgorithm', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='crypto._enums')
 
@@ -58,16 +59,6 @@ def load_arguments(self, _):
 
     JsonWebKeyOperation = CLIJsonWebKeyOperation  # TODO: Remove this patch when new SDK is released
 
-    class CLIJsonWebKeyType(str, Enum):
-        ec = "EC"  #: Elliptic Curve.
-        ec_hsm = "EC-HSM"  #: Elliptic Curve with a private key which is not exportable from the HSM.
-        rsa = "RSA"  #: RSA (https://tools.ietf.org/html/rfc3447)
-        rsa_hsm = "RSA-HSM"  #: RSA with a private key which is not exportable from the HSM.
-        oct = "oct"  #: Octet sequence (used to represent symmetric keys)
-        oct_hsm = "oct-HSM"  #: Oct with a private key which is not exportable from the HSM.
-
-    JsonWebKeyType = CLIJsonWebKeyType  # TODO: Remove this patch when new SDK is released
-
     class CLIKeyTypeForBYOKImport(str, Enum):
         ec = "EC"  #: Elliptic Curve.
         rsa = "RSA"  #: RSA (https://tools.ietf.org/html/rfc3447)
@@ -76,6 +67,7 @@ def load_arguments(self, _):
     class CLISecurityDomainOperation(str, Enum):
         download = "download"  #: Download operation
         upload = "upload"  #: Upload operation
+        restore_blob = "restore_blob"  #: Restore blob operation
 
     (KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
      NetworkRuleBypassOptions, NetworkRuleAction, PublicNetworkAccess) = self.get_models(
@@ -131,16 +123,19 @@ def load_arguments(self, _):
         c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag(),
                    help='[Vault Only] Property to specify whether Azure Resource Manager is permitted to retrieve '
                         'secrets from the key vault.')
-        c.argument('enable_rbac_authorization', arg_type=get_three_state_flag())
-        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), deprecate_info=c.deprecate(
-            message_func=lambda x: 'Warning! The ability to create new key vaults with soft delete disabled will be '
-                                   'deprecated by December 2020. All key vaults will be required to have soft delete '
-                                   'enabled. Please see the following documentation for additional guidance.\n'
-                                   'https://docs.microsoft.com/azure/key-vault/general/soft-delete-change'),
-                   help='[Vault Only] Property to specify whether the \'soft delete\' functionality is enabled for '
-                        'this key vault. If it\'s not set to any value (true or false) when creating new key vault, it '
-                        'will be set to true by default. Once set to true, it cannot be reverted to false.')
-        c.argument('enable_purge_protection', arg_type=get_three_state_flag())
+        c.argument('enable_rbac_authorization', arg_type=get_three_state_flag(),
+                   help='Property that controls how data actions are authorized. When true, the key vault will use '
+                        'Role Based Access Control (RBAC) for authorization of data actions, and the access policies '
+                        'specified in vault properties will be ignored. When false, the key vault will use the access '
+                        'policies specified in vault properties, and any policy stored on Azure Resource Manager will '
+                        'be ignored. If null or not specified, the vault is created with the default value of false. '
+                        'Note that management actions are always authorized with RBAC.')
+        c.argument('enable_purge_protection', arg_type=get_three_state_flag(),
+                   help='Property specifying whether protection against purge is enabled for this vault/managed HSM '
+                        'pool. Setting this property to true activates protection against purge for this vault/managed '
+                        'HSM pool and its content - only the Key Vault/Managed HSM service may initiate a hard, '
+                        'irrecoverable deletion. The setting is effective only if soft delete is also enabled. '
+                        'Enabling this functionality is irreversible.')
         c.argument('public_network_access', arg_type=get_enum_type(PublicNetworkAccess),
                    help="Property to specify whether the vault will accept traffic from public internet. If set to "
                         "'disabled' all traffic except private endpoint traffic and that originates from trusted "
@@ -152,6 +147,11 @@ def load_arguments(self, _):
                    help='Bypass traffic for space-separated uses.')
         c.argument('default_action', arg_type=get_enum_type(NetworkRuleAction),
                    help='Default action to apply when no rule matches.')
+
+    with self.argument_context('keyvault check-name') as c:
+        c.argument('name', options_list=['--name', '-n'],
+                   help='The name of the HSM within the specified resource group')
+        c.argument('resource_type', arg_type=get_enum_type(['hsm']), help='Type of resource. ')
 
     for item in ['show', 'delete', 'create']:
         with self.argument_context('keyvault {}'.format(item)) as c:
@@ -532,7 +532,7 @@ def load_arguments(self, _):
 
     # region KeyVault Secret
     with self.argument_context('keyvault secret set') as c:
-        c.argument('content_type', options_list=['--description'],
+        c.argument('content_type', options_list=['--description', '--content-type'],
                    help='Description of the secret contents (e.g. password, connection string, etc)')
         c.attributes_argument('secret', SecretAttributes, create=True)
 
@@ -584,12 +584,24 @@ def load_arguments(self, _):
     with self.argument_context('keyvault security-domain upload') as c:
         c.argument('sd_file', help='This file contains security domain encrypted using SD Exchange file downloaded '
                                    'in security-domain init-recovery command.')
+        c.argument('restore_blob', help='Indicator if blob is already restored.')
         c.argument('sd_exchange_key', help='The exchange key for security domain.')
         c.argument('sd_wrapping_keys', nargs='*',
                    help='Space-separated file paths to PEM files containing private keys.')
         c.argument('passwords', nargs='*', help='Space-separated password list for --sd-wrapping-keys. '
                                                 'CLI will match them in order. Can be omitted if your keys are without '
                                                 'password protection.')
+
+    with self.argument_context('keyvault security-domain restore-blob') as c:
+        c.argument('sd_file', help='This file contains security domain encrypted using SD Exchange file downloaded '
+                                   'in security-domain init-recovery command.')
+        c.argument('sd_exchange_key', help='The exchange key for security domain.')
+        c.argument('sd_wrapping_keys', nargs='*',
+                   help='Space-separated file paths to PEM files containing private keys.')
+        c.argument('passwords', nargs='*', help='Space-separated password list for --sd-wrapping-keys. '
+                                                'CLI will match them in order. Can be omitted if your keys are without '
+                                                'password protection.')
+        c.argument('sd_file_restore_blob', help='Local file path to store the security domain encrypted with the exchange key.')
 
     with self.argument_context('keyvault security-domain download') as c:
         c.argument('sd_wrapping_keys', nargs='*',

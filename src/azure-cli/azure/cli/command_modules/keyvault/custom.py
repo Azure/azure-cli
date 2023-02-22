@@ -11,7 +11,6 @@ import math
 import os
 import re
 import struct
-import sys
 import time
 import uuid
 from ipaddress import ip_network
@@ -518,7 +517,6 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                         enabled_for_disk_encryption=None,
                         enabled_for_template_deployment=None,
                         enable_rbac_authorization=None,
-                        enable_soft_delete=None,
                         enable_purge_protection=None,
                         retention_days=None,
                         network_acls=None,
@@ -542,7 +540,6 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                             enabled_for_disk_encryption=enabled_for_disk_encryption,
                             enabled_for_template_deployment=enabled_for_template_deployment,
                             enable_rbac_authorization=enable_rbac_authorization,
-                            enable_soft_delete=enable_soft_delete,
                             enable_purge_protection=enable_purge_protection,
                             retention_days=retention_days,
                             network_acls=network_acls,
@@ -635,7 +632,6 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                  enabled_for_disk_encryption=None,
                  enabled_for_template_deployment=None,
                  enable_rbac_authorization=None,
-                 enable_soft_delete=None,
                  enable_purge_protection=None,
                  retention_days=None,
                  network_acls=None,
@@ -753,11 +749,6 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
     if not sku:
         sku = 'standard'
 
-    if enable_soft_delete is False:  # ignore '--enable-soft-delete false'
-        enable_soft_delete = True
-        print('"--enable-soft-delete false" has been deprecated, you cannot disable Soft Delete via CLI. '
-              'The value will be changed to true.', file=sys.stderr)
-
     properties = VaultProperties(tenant_id=tenant_id,
                                  sku=Sku(name=sku, family='A'),
                                  access_policies=access_policies,
@@ -766,7 +757,6 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                                  enabled_for_disk_encryption=enabled_for_disk_encryption,
                                  enabled_for_template_deployment=enabled_for_template_deployment,
                                  enable_rbac_authorization=enable_rbac_authorization,
-                                 enable_soft_delete=enable_soft_delete,
                                  enable_purge_protection=enable_purge_protection,
                                  soft_delete_retention_in_days=int(retention_days),
                                  public_network_access=public_network_access)
@@ -817,7 +807,6 @@ def update_vault(cmd, instance,
                  enabled_for_disk_encryption=None,
                  enabled_for_template_deployment=None,
                  enable_rbac_authorization=None,
-                 enable_soft_delete=None,
                  enable_purge_protection=None,
                  retention_days=None,
                  bypass=None,
@@ -834,13 +823,6 @@ def update_vault(cmd, instance,
 
     if enable_rbac_authorization is not None:
         instance.properties.enable_rbac_authorization = enable_rbac_authorization
-
-    if enable_soft_delete is not None:
-        if enable_soft_delete is False:  # ignore '--enable-soft-delete false'
-            enable_soft_delete = True
-            print('"--enable-soft-delete false" has been deprecated, you cannot disable Soft Delete via CLI. '
-                  'The value will be changed to true.', file=sys.stderr)
-        instance.properties.enable_soft_delete = enable_soft_delete
 
     if enable_purge_protection is not None:
         instance.properties.enable_purge_protection = enable_purge_protection
@@ -2421,6 +2403,8 @@ def _security_domain_gen_share_arrays(sd_wrapping_keys, passwords, shared_keys, 
         with open(private_key_path, 'rb') as f:
             pem_data = f.read()
             password = passwords[private_key_index] if private_key_index < len(passwords) else None
+            if password and not isinstance(password, bytes):
+                password = password.encode(encoding="utf-8")
             private_key = load_pem_private_key(pem_data, password=password, backend=default_backend())
 
         with open(cert_path, 'rb') as f:
@@ -2484,8 +2468,13 @@ def _security_domain_gen_blob(sd_exchange_key, share_arrays, enc_data, required)
     return json.dumps(security_domain_restore_data.to_json())
 
 
-def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_wrapping_keys, passwords=None,
-                           identifier=None, vault_base_url=None, no_wait=False):  # pylint: disable=unused-argument
+def _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, passwords=None):
+
+    if not sd_exchange_key:
+        raise RequiredArgumentMissingError('Please specify --sd-exchange-key')
+    if not sd_wrapping_keys:
+        raise RequiredArgumentMissingError('Please specify --sd-wrapping-keys')
+
     resource_paths = [sd_file, sd_exchange_key]
     for p in resource_paths:
         if not os.path.exists(p):
@@ -2522,10 +2511,15 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_w
         shared_keys=shared_keys,
         required=required
     )
-    SecurityDomainObject = cmd.get_models('SecurityDomainObject', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+    return restore_blob_value
+
+
+def _security_domain_upload_blob(cmd, client, hsm_name, restore_blob_value, identifier=None,
+                                 vault_base_url=None, no_wait=False):
+    SecurityDomainObject = cmd.get_models('SecurityDomainObject',
+                                          resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
     security_domain = SecurityDomainObject(value=restore_blob_value)
     retval = client.upload(vault_base_url=hsm_name or vault_base_url, security_domain=security_domain)
-
     if no_wait:
         return retval
 
@@ -2535,6 +2529,34 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_w
     if new_retval:
         return new_retval
     return retval
+
+
+def security_domain_upload(cmd, client, hsm_name, sd_file, restore_blob=False, sd_exchange_key=None,
+                           sd_wrapping_keys=None, passwords=None, identifier=None, vault_base_url=None,
+                           no_wait=False):  # pylint: disable=unused-argument
+    if not restore_blob:
+        restore_blob_value = _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys)
+    else:
+        with open(sd_file, 'r') as f:
+            restore_blob_value = f.read()
+            if not restore_blob_value:
+                raise CLIError('Empty restore_blob_value.')
+    retval = _security_domain_upload_blob(cmd, client, hsm_name, restore_blob_value,
+                                          identifier, vault_base_url, no_wait)
+    return retval
+
+
+def security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, sd_file_restore_blob,
+                                 passwords=None):  # pylint: disable=unused-argument
+    restore_blob_value = _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys,
+                                                       passwords)
+    try:
+        with open(sd_file_restore_blob, 'w') as f:
+            f.write(restore_blob_value)
+    except Exception as ex:  # pylint: disable=broad-except
+        if os.path.isfile(sd_file_restore_blob):
+            os.remove(sd_file_restore_blob)
+        raise ex
 
 
 def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_domain_file, sd_quorum,
@@ -2607,4 +2629,10 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
         return polling_ret
 
     _save_to_local_file(security_domain_file, ret)
+
+
+def check_name_availability(cmd, client, name, resource_type='hsm'):
+    CheckNameAvailabilityParameters = cmd.get_models('CheckMhsmNameAvailabilityParameters')
+    check_name = CheckNameAvailabilityParameters(name=name)
+    return client.check_mhsm_name_availability(check_name)
 # endregion

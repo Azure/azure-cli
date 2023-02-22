@@ -2,8 +2,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import copy
 
 from ._base import AAZBaseValue, AAZValuePatch, AAZUndefined
+from .exceptions import AAZInvalidValueError
+import abc
 
 
 class AAZSimpleValue(AAZBaseValue):
@@ -57,7 +60,7 @@ class AAZObject(AAZBaseValue):
 
     def __init__(self, schema, data):
         super().__init__(schema, data)
-        assert isinstance(self._data, dict) or self._data is None
+        assert isinstance(self._data, dict) or self._data is None or self._data == AAZUndefined
 
     def __getitem__(self, key):
         attr_schema, name = self._get_attr_schema_and_name(key)
@@ -70,19 +73,12 @@ class AAZObject(AAZBaseValue):
     def __setitem__(self, key, data):
         assert not key.startswith('_')
         attr_schema, name = self._get_attr_schema_and_name(key)
-        if name is None:
-            # ignore undefined key
-            return
-
         self._data[name] = attr_schema.process_data(data, key=name)
 
     def __delitem__(self, key):
         _, name = self._get_attr_schema_and_name(key)
-
         if name in self._data:
             del self._data[name]
-        elif name is None:
-            raise KeyError(f"Attribute {key} not exist")
 
     def __getattr__(self, key) -> AAZBaseValue:
         return self[key]
@@ -101,9 +97,12 @@ class AAZObject(AAZBaseValue):
 
     def __eq__(self, other):
         if isinstance(other, AAZBaseValue):
-            other = other._data
+            return self._data == other._data
+
+        # other is buld-in type value
         if other is None:
             return self._data is None
+
         if (not isinstance(other, dict)) or len(other) != len(self._data):
             return False
 
@@ -116,9 +115,10 @@ class AAZObject(AAZBaseValue):
         return not self == other
 
     def to_serialized_data(self, processor=None, **kwargs):
-        if self._data is None:
+        if self._data == AAZUndefined:
+            result = AAZUndefined
+        elif self._data is None:
             result = None
-
         else:
             result = {}
             schemas = [self._schema]
@@ -129,15 +129,16 @@ class AAZObject(AAZBaseValue):
 
             for schema in schemas:
                 for name, field_schema in schema._fields.items():
-                    v = self[name].to_serialized_data(processor=processor, **kwargs)
-                    if v == AAZUndefined:
-                        continue
-                    if field_schema._serialized_name:   # pylint: disable=protected-access
-                        name = field_schema._serialized_name  # pylint: disable=protected-access
-                    result[name] = v
+                    if name in self._data:
+                        v = self[name].to_serialized_data(processor=processor, **kwargs)
+                        if v == AAZUndefined:
+                            continue
+                        if field_schema._serialized_name:   # pylint: disable=protected-access
+                            name = field_schema._serialized_name  # pylint: disable=protected-access
+                        result[name] = v
 
         if not result and self._is_patch:
-            return AAZUndefined
+            result = AAZUndefined
 
         if processor:
             result = processor(self._schema, result)
@@ -147,36 +148,29 @@ class AAZObject(AAZBaseValue):
         """ get attribute schema and it's name based in key """
         disc_schema = self._schema.get_discriminator(self._data)
         if not hasattr(self._schema, key) and disc_schema is not None:
-            attr_schema = disc_schema[key]
+            attr_schema = disc_schema[key]  # will raise error if key not exist
             schema = disc_schema
         else:
-            attr_schema = self._schema[key]
+            attr_schema = self._schema[key]  # will raise error if key not exist
             schema = self._schema
         name = schema.get_attr_name(key)
+        assert name is not None
         return attr_schema, name
 
 
-class AAZDict(AAZBaseValue):
+class AAZBaseDictValue(AAZBaseValue):
 
     def __init__(self, schema, data):
-        from ._field_type import AAZDictType
-        assert isinstance(schema, AAZDictType)
         super().__init__(schema, data)
-        assert isinstance(self._data, dict) or self._data is None
+        assert isinstance(self._data, dict) or self._data is None or self._data == AAZUndefined
 
+    @abc.abstractmethod
     def __getitem__(self, key) -> AAZBaseValue:
-        item_schema = self._schema.Element
-        if key not in self._data:
-            self._data[key] = AAZValuePatch.build(item_schema)
-        return item_schema._ValueCls(item_schema, self._data[key])  # return as AAZValue
+        raise NotImplementedError()
 
+    @abc.abstractmethod
     def __setitem__(self, key, data):
-        try:
-            item_schema = self._schema.Element
-        except AttributeError:
-            # ignore undefined element
-            return
-        self._data[key] = item_schema.process_data(data, key=key)
+        raise NotImplementedError()
 
     def __delitem__(self, key):
         del self._data[key]
@@ -193,7 +187,9 @@ class AAZDict(AAZBaseValue):
 
     def __eq__(self, other):
         if isinstance(other, AAZBaseValue):
-            other = other._data
+            return self._data == other._data
+
+        # other is buld-in type value
         if other is None:
             return self._data is None
 
@@ -222,8 +218,32 @@ class AAZDict(AAZBaseValue):
         for key in self._data:
             yield key, self[key]
 
+
+class AAZDict(AAZBaseDictValue):
+
+    def __init__(self, schema, data):
+        from ._field_type import AAZDictType
+        assert isinstance(schema, AAZDictType)
+        super().__init__(schema, data)
+
+    def __getitem__(self, key) -> AAZBaseValue:
+        item_schema = self._schema[key]
+        if key not in self._data:
+            self._data[key] = AAZValuePatch.build(item_schema)
+        return item_schema._ValueCls(item_schema, self._data[key])  # return as AAZValue
+
+    def __setitem__(self, key, data):
+        try:
+            item_schema = self._schema[key]
+        except AttributeError:
+            # ignore undefined element
+            return
+        self._data[key] = item_schema.process_data(data, key=key)
+
     def to_serialized_data(self, processor=None, **kwargs):
-        if self._data is None:
+        if self._data == AAZUndefined:
+            result = AAZUndefined
+        elif self._data is None:
             result = None
         else:
             result = {}
@@ -234,7 +254,63 @@ class AAZDict(AAZBaseValue):
                 result[key] = v
 
         if not result and self._is_patch:
-            return AAZUndefined
+            result = AAZUndefined
+
+        if processor:
+            result = processor(self._schema, result)
+        return result
+
+
+class AAZFreeFormDict(AAZBaseDictValue):
+
+    def __init__(self, schema, data):
+        from ._field_type import AAZFreeFormDictType
+        assert isinstance(schema, AAZFreeFormDictType)
+        super().__init__(schema, data)
+
+    def __getitem__(self, key) -> AAZBaseValue:
+        item_schema = self._schema[key]
+        if item_schema is None:
+            # free form
+            return self._data[key]
+        if key not in self._data:
+            self._data[key] = AAZValuePatch.build(item_schema)
+        return item_schema._ValueCls(item_schema, self._data[key])  # return as AAZValue
+
+    def __setitem__(self, key, data):
+        item_schema = self._schema[key]
+        if item_schema is None:
+            # free form
+            if isinstance(data, AAZValuePatch):
+                raise AAZInvalidValueError("Not support value patch for Free-Form dict key")
+            if isinstance(data, AAZBaseValue):
+                if data._is_patch:
+                    raise AAZInvalidValueError("Not support value patch for Free-Form dict key")
+                data = data._data
+            assert not isinstance(data, AAZBaseValue)
+            self._data[key] = copy.deepcopy(data)
+            return
+
+        # For fixed key properties usage
+        self._data[key] = item_schema.process_data(data, key=key)
+
+    def to_serialized_data(self, processor=None, **kwargs):
+        if self._data == AAZUndefined:
+            result = AAZUndefined
+        elif self._data is None:
+            result = None
+        else:
+            result = {}
+            for key, v in self.items():
+                if isinstance(v, AAZBaseValue):
+                    v = v.to_serialized_data(processor=processor, **kwargs)
+                    if v == AAZUndefined:
+                        continue
+                result[key] = v
+
+        if not result and self._is_patch:
+            result = AAZUndefined
+
         if processor:
             result = processor(self._schema, result)
         return result
@@ -246,9 +322,9 @@ class AAZList(AAZBaseValue):
         from ._field_type import AAZListType
         assert isinstance(schema, AAZListType)
         super().__init__(schema, data)
-        assert isinstance(self._data, dict) or self._data is None  # the key is the idx
+        assert isinstance(self._data, dict) or self._data is None or self._data == AAZUndefined  # the key is the idx
         self._len = 0
-        if self._data is not None:
+        if self._data is not None and self._data != AAZUndefined:
             for idx in self._data:
                 if idx + 1 > self._len:
                     self._len = idx + 1
@@ -318,6 +394,7 @@ class AAZList(AAZBaseValue):
         if isinstance(other, AAZBaseValue):
             return self._data == other._data
 
+        # other is buld-in type value
         if other is None:
             return self._data is None
 
@@ -345,7 +422,9 @@ class AAZList(AAZBaseValue):
 
     def to_serialized_data(self, processor=None, keep_undefined_in_list=False,  # pylint: disable=arguments-differ
                            **kwargs):
-        if self._data is None:
+        if self._data == AAZUndefined:
+            result = AAZUndefined
+        elif self._data is None:
             result = None
         else:
             result = []
@@ -364,7 +443,8 @@ class AAZList(AAZBaseValue):
                 result = []
 
         if not result and self._is_patch:
-            return AAZUndefined
+            result = AAZUndefined
+
         if processor:
             result = processor(self._schema, result)
         return result

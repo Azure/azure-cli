@@ -10,15 +10,15 @@ from .preparers import (StorageAccountPreparer, ResourceGroupPreparer, RoleBased
                         KeyVaultPreparer, ManagedHSMPreparer, ManagedApplicationPreparer, VirtualNetworkPreparer,
                         VnetNicPreparer, LogAnalyticsWorkspacePreparer)
 from .exceptions import CliTestError
-from .checkers import (JMESPathCheck, JMESPathCheckExists, JMESPathCheckGreaterThan, NoneCheck, StringCheck,
-                       StringContainCheck)
+from .checkers import (JMESPathCheck, JMESPathCheckNotExists, JMESPathCheckExists, JMESPathCheckGreaterThan,
+                       NoneCheck, StringCheck, StringContainCheck)
 from .decorators import api_version_constraint
 from .utilities import create_random_name, MSGraphNameReplacer
 from .patches import MOCKED_USER_NAME
 
 __all__ = ['ScenarioTest', 'LiveScenarioTest', 'ResourceGroupPreparer', 'StorageAccountPreparer',
            'RoleBasedServicePrincipalPreparer', 'KeyVaultPreparer', 'ManagedHSMPreparer',
-           'ManagedApplicationPreparer', 'CliTestError', 'JMESPathCheck',
+           'ManagedApplicationPreparer', 'CliTestError', 'JMESPathCheck', 'JMESPathCheckNotExists',
            'JMESPathCheckExists', 'NoneCheck', 'live_only', 'record_only', 'StringCheck', 'StringContainCheck',
            'get_sha1_hash', 'KeyVaultPreparer', 'JMESPathCheckGreaterThan', 'api_version_constraint',
            'create_random_name', 'MOCKED_USER_NAME', 'MSGraphNameReplacer', 'LocalContextScenarioTest',

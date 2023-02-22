@@ -13,12 +13,13 @@ interactions:
       ParameterSetName:
       - --resource-group --name --gateway-ip-address --local-address-prefixes --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/local_gateway_scenario000001?api-version=2018-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001","name":"local_gateway_scenario000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-05-29T04:31:47Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001","name":"local_gateway_scenario000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-20T06:34:32Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +28,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 May 2022 04:31:52 GMT
+      - Mon, 20 Feb 2023 06:34:42 GMT
       expires:
       - '-1'
       pragma:
@@ -42,11 +43,11 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "tags": {"foo": "doo"}, "properties": {"localNetworkAddressSpace":
-      {"addressPrefixes": ["10.0.1.0/24"]}, "gatewayIpAddress": "10.1.1.1"}}'
+    body: '{"location": "westus", "properties": {"gatewayIpAddress": "10.1.1.1", "localNetworkAddressSpace":
+      {"addressPrefixes": ["10.0.1.0/24"]}}, "tags": {"foo": "doo"}}'
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -60,23 +61,23 @@ interactions:
       ParameterSetName:
       - --resource-group --name --gateway-ip-address --local-address-prefixes --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1?api-version=2017-10-01
   response:
     body:
       string: "{\r\n  \"name\": \"lgw1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1\",\r\n
-        \ \"etag\": \"W/\\\"ff16ba71-9253-4d8a-88ef-c5d854f64588\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"9fbfb17b-adbd-494e-8c36-6f892b30ef8a\\\"\",\r\n  \"type\":
         \"Microsoft.Network/localNetworkGateways\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Updating\",\r\n    \"resourceGuid\": \"7b217bb7-6ed0-419c-aa08-916b39f7afb2\",\r\n
+        \"Updating\",\r\n    \"resourceGuid\": \"867d10ca-bb10-44d3-9d13-3952616b17fd\",\r\n
         \   \"localNetworkAddressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.1.0/24\"\r\n
         \     ]\r\n    },\r\n    \"gatewayIpAddress\": \"10.1.1.1\"\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f3b7f2d7-77c1-4388-8dd9-ce84f9b285e3?api-version=2017-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5a270793-a279-42df-b2b2-73dedda24962?api-version=2017-10-01
       cache-control:
       - no-cache
       content-length:
@@ -84,7 +85,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 May 2022 04:32:00 GMT
+      - Mon, 20 Feb 2023 06:34:50 GMT
       expires:
       - '-1'
       pragma:
@@ -97,7 +98,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 00957099-7092-4003-81e9-1529456e30a5
+      - 0742dd2b-0585-49d3-b98f-af1b1d8bb5ab
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -117,21 +118,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --gateway-ip-address --local-address-prefixes --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f3b7f2d7-77c1-4388-8dd9-ce84f9b285e3?api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5a270793-a279-42df-b2b2-73dedda24962?api-version=2017-10-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '30'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 May 2022 04:32:09 GMT
+      - Mon, 20 Feb 2023 06:35:01 GMT
       expires:
       - '-1'
       pragma:
@@ -148,7 +149,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b7d01514-094f-4fe8-9001-e14c3771cfd2
+      - e1a035ab-de75-4c44-aaff-dc4e67631350
     status:
       code: 200
       message: OK
@@ -166,29 +167,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --gateway-ip-address --local-address-prefixes --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1?api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5a270793-a279-42df-b2b2-73dedda24962?api-version=2017-10-01
   response:
     body:
-      string: "{\r\n  \"name\": \"lgw1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1\",\r\n
-        \ \"etag\": \"W/\\\"e2f1ff30-4a9d-497f-a45c-8c01bfbf6bb9\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/localNetworkGateways\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"7b217bb7-6ed0-419c-aa08-916b39f7afb2\",\r\n
-        \   \"localNetworkAddressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.1.0/24\"\r\n
-        \     ]\r\n    },\r\n    \"gatewayIpAddress\": \"10.1.1.1\"\r\n  }\r\n}"
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '620'
+      - '29'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 May 2022 04:32:10 GMT
-      etag:
-      - W/"e2f1ff30-4a9d-497f-a45c-8c01bfbf6bb9"
+      - Mon, 20 Feb 2023 06:35:12 GMT
       expires:
       - '-1'
       pragma:
@@ -205,7 +198,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5d799f32-fc1b-48ef-b19e-8985758eed63
+      - ea9b0a5a-7d57-4c36-8a13-73ce8f54ae5f
     status:
       code: 200
       message: OK
@@ -213,7 +206,64 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json, text/json
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network local-gateway create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --gateway-ip-address --local-address-prefixes --tags
+      User-Agent:
+      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1?api-version=2017-10-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"lgw1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1\",\r\n
+        \ \"etag\": \"W/\\\"3b3f908b-7c9d-46a7-850e-826c7887b860\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/localNetworkGateways\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"867d10ca-bb10-44d3-9d13-3952616b17fd\",\r\n
+        \   \"localNetworkAddressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.1.0/24\"\r\n
+        \     ]\r\n    },\r\n    \"gatewayIpAddress\": \"10.1.1.1\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '620'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Feb 2023 06:35:12 GMT
+      etag:
+      - W/"3b3f908b-7c9d-46a7-850e-826c7887b860"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 55a6c0e3-449b-4079-9b5b-6b8b17747c64
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -223,16 +273,16 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1?api-version=2017-10-01
   response:
     body:
       string: "{\r\n  \"name\": \"lgw1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1\",\r\n
-        \ \"etag\": \"W/\\\"e2f1ff30-4a9d-497f-a45c-8c01bfbf6bb9\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"3b3f908b-7c9d-46a7-850e-826c7887b860\\\"\",\r\n  \"type\":
         \"Microsoft.Network/localNetworkGateways\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"7b217bb7-6ed0-419c-aa08-916b39f7afb2\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"867d10ca-bb10-44d3-9d13-3952616b17fd\",\r\n
         \   \"localNetworkAddressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.1.0/24\"\r\n
         \     ]\r\n    },\r\n    \"gatewayIpAddress\": \"10.1.1.1\"\r\n  }\r\n}"
     headers:
@@ -243,9 +293,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 May 2022 04:32:11 GMT
+      - Mon, 20 Feb 2023 06:35:14 GMT
       etag:
-      - W/"e2f1ff30-4a9d-497f-a45c-8c01bfbf6bb9"
+      - W/"3b3f908b-7c9d-46a7-850e-826c7887b860"
       expires:
       - '-1'
       pragma:
@@ -262,18 +312,18 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7d2cbf46-d0ef-48d6-b2fb-ac761f73c5b2
+      - f0c25336-b2bb-421c-bda1-3a3674504497
     status:
       code: 200
       message: OK
 - request:
-    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1",
-      "location": "westus", "tags": {"foo": "boo"}, "etag": "W/\"e2f1ff30-4a9d-497f-a45c-8c01bfbf6bb9\"",
-      "properties": {"localNetworkAddressSpace": {"addressPrefixes": ["10.0.1.0/24"]},
-      "gatewayIpAddress": "10.1.1.1", "resourceGuid": "7b217bb7-6ed0-419c-aa08-916b39f7afb2"}}'
+    body: '{"etag": "W/\"3b3f908b-7c9d-46a7-850e-826c7887b860\"", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1",
+      "location": "westus", "properties": {"gatewayIpAddress": "10.1.1.1", "localNetworkAddressSpace":
+      {"addressPrefixes": ["10.0.1.0/24"]}, "resourceGuid": "867d10ca-bb10-44d3-9d13-3952616b17fd"},
+      "tags": {"foo": "boo"}}'
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -287,23 +337,23 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1?api-version=2017-10-01
   response:
     body:
       string: "{\r\n  \"name\": \"lgw1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1\",\r\n
-        \ \"etag\": \"W/\\\"a01a386e-5f16-4977-8c6d-e94c32486945\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"063ad0d4-db02-48a5-80d1-e46cc565fdb0\\\"\",\r\n  \"type\":
         \"Microsoft.Network/localNetworkGateways\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {\r\n    \"foo\": \"boo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"7b217bb7-6ed0-419c-aa08-916b39f7afb2\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"867d10ca-bb10-44d3-9d13-3952616b17fd\",\r\n
         \   \"localNetworkAddressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.1.0/24\"\r\n
         \     ]\r\n    },\r\n    \"gatewayIpAddress\": \"10.1.1.1\"\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/9fbe1c23-b6a5-4030-8d4f-c2fe92cd1671?api-version=2017-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/313af1ee-795e-4c47-8526-55ff6784d584?api-version=2017-10-01
       cache-control:
       - no-cache
       content-length:
@@ -311,7 +361,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 May 2022 04:32:17 GMT
+      - Mon, 20 Feb 2023 06:35:18 GMT
       expires:
       - '-1'
       pragma:
@@ -328,7 +378,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 19fffe81-a218-4680-996c-1fddacae1474
+      - b1a0dfee-057c-4c8b-bf03-e199c4b218e1
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -348,9 +398,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/9fbe1c23-b6a5-4030-8d4f-c2fe92cd1671?api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/313af1ee-795e-4c47-8526-55ff6784d584?api-version=2017-10-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -362,7 +412,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 May 2022 04:32:47 GMT
+      - Mon, 20 Feb 2023 06:35:48 GMT
       expires:
       - '-1'
       pragma:
@@ -379,7 +429,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 3fec2271-10c8-49da-8859-13083c402472
+      - 0ec286b7-c5a0-44d3-afde-6c889abdf313
     status:
       code: 200
       message: OK
@@ -397,16 +447,16 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1?api-version=2017-10-01
   response:
     body:
       string: "{\r\n  \"name\": \"lgw1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1\",\r\n
-        \ \"etag\": \"W/\\\"a01a386e-5f16-4977-8c6d-e94c32486945\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"063ad0d4-db02-48a5-80d1-e46cc565fdb0\\\"\",\r\n  \"type\":
         \"Microsoft.Network/localNetworkGateways\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {\r\n    \"foo\": \"boo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"7b217bb7-6ed0-419c-aa08-916b39f7afb2\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"867d10ca-bb10-44d3-9d13-3952616b17fd\",\r\n
         \   \"localNetworkAddressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.1.0/24\"\r\n
         \     ]\r\n    },\r\n    \"gatewayIpAddress\": \"10.1.1.1\"\r\n  }\r\n}"
     headers:
@@ -417,9 +467,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 May 2022 04:32:47 GMT
+      - Mon, 20 Feb 2023 06:35:48 GMT
       etag:
-      - W/"a01a386e-5f16-4977-8c6d-e94c32486945"
+      - W/"063ad0d4-db02-48a5-80d1-e46cc565fdb0"
       expires:
       - '-1'
       pragma:
@@ -436,7 +486,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4d6f6618-1d2f-4653-91e6-68fc132bb270
+      - c40176c3-abd9-4bee-bcdc-274a0da269fe
     status:
       code: 200
       message: OK
@@ -444,7 +494,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -454,16 +504,16 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1?api-version=2017-10-01
   response:
     body:
       string: "{\r\n  \"name\": \"lgw1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1\",\r\n
-        \ \"etag\": \"W/\\\"a01a386e-5f16-4977-8c6d-e94c32486945\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"063ad0d4-db02-48a5-80d1-e46cc565fdb0\\\"\",\r\n  \"type\":
         \"Microsoft.Network/localNetworkGateways\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {\r\n    \"foo\": \"boo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"7b217bb7-6ed0-419c-aa08-916b39f7afb2\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"867d10ca-bb10-44d3-9d13-3952616b17fd\",\r\n
         \   \"localNetworkAddressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.1.0/24\"\r\n
         \     ]\r\n    },\r\n    \"gatewayIpAddress\": \"10.1.1.1\"\r\n  }\r\n}"
     headers:
@@ -474,9 +524,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 May 2022 04:32:48 GMT
+      - Mon, 20 Feb 2023 06:35:51 GMT
       etag:
-      - W/"a01a386e-5f16-4977-8c6d-e94c32486945"
+      - W/"063ad0d4-db02-48a5-80d1-e46cc565fdb0"
       expires:
       - '-1'
       pragma:
@@ -493,7 +543,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - dc119470-5aa2-424b-a487-35b16b118c8d
+      - def8c09e-1089-4fb6-a501-4303d0593a30
     status:
       code: 200
       message: OK
@@ -511,12 +561,13 @@ interactions:
       ParameterSetName:
       - --resource-group --name --gateway-ip-address --local-address-prefixes
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/local_gateway_scenario000001?api-version=2018-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001","name":"local_gateway_scenario000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-05-29T04:31:47Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001","name":"local_gateway_scenario000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-20T06:34:32Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -525,7 +576,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 May 2022 04:32:49 GMT
+      - Mon, 20 Feb 2023 06:35:52 GMT
       expires:
       - '-1'
       pragma:
@@ -540,11 +591,11 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "properties": {"localNetworkAddressSpace": {"addressPrefixes":
-      ["10.0.2.0/24"]}, "gatewayIpAddress": "10.1.1.2"}}'
+    body: '{"location": "westus", "properties": {"gatewayIpAddress": "10.1.1.2", "localNetworkAddressSpace":
+      {"addressPrefixes": ["10.0.2.0/24"]}}}'
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -558,23 +609,23 @@ interactions:
       ParameterSetName:
       - --resource-group --name --gateway-ip-address --local-address-prefixes
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw2?api-version=2017-10-01
   response:
     body:
       string: "{\r\n  \"name\": \"lgw2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw2\",\r\n
-        \ \"etag\": \"W/\\\"f5d69249-fe5b-4579-8d84-7b6c487099e0\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"85665572-d1f4-4155-82ee-368ddb76237a\\\"\",\r\n  \"type\":
         \"Microsoft.Network/localNetworkGateways\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"c005e51d-252a-4965-9a87-95f1f8f1af12\",\r\n    \"localNetworkAddressSpace\":
+        \"3962b668-2b38-486b-a7ac-839030d00b0d\",\r\n    \"localNetworkAddressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.2.0/24\"\r\n      ]\r\n
         \   },\r\n    \"gatewayIpAddress\": \"10.1.1.2\"\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6272d06b-d8fe-4051-83c0-22b84d88a72a?api-version=2017-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ca4557bb-2701-4888-8c61-9ff50823b9cc?api-version=2017-10-01
       cache-control:
       - no-cache
       content-length:
@@ -582,7 +633,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 May 2022 04:32:52 GMT
+      - Mon, 20 Feb 2023 06:35:57 GMT
       expires:
       - '-1'
       pragma:
@@ -595,9 +646,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 63896683-25ad-40ea-916f-61c264154079
+      - 1a0148cf-de86-4127-a1c2-5649be822899
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -615,9 +666,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --gateway-ip-address --local-address-prefixes
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6272d06b-d8fe-4051-83c0-22b84d88a72a?api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ca4557bb-2701-4888-8c61-9ff50823b9cc?api-version=2017-10-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -629,7 +680,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 May 2022 04:33:02 GMT
+      - Mon, 20 Feb 2023 06:36:07 GMT
       expires:
       - '-1'
       pragma:
@@ -646,7 +697,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6f28aa0a-c345-4825-b7c1-e6986bb8f91f
+      - 9d2cf588-cee8-4a63-b4d7-3867b5edbd78
     status:
       code: 200
       message: OK
@@ -664,16 +715,16 @@ interactions:
       ParameterSetName:
       - --resource-group --name --gateway-ip-address --local-address-prefixes
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw2?api-version=2017-10-01
   response:
     body:
       string: "{\r\n  \"name\": \"lgw2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw2\",\r\n
-        \ \"etag\": \"W/\\\"56fcaad0-bcc3-41d4-b592-2495240ac4e9\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"61f1f03a-8590-4c1f-87f0-dbdd3e5743b7\\\"\",\r\n  \"type\":
         \"Microsoft.Network/localNetworkGateways\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"c005e51d-252a-4965-9a87-95f1f8f1af12\",\r\n    \"localNetworkAddressSpace\":
+        \"3962b668-2b38-486b-a7ac-839030d00b0d\",\r\n    \"localNetworkAddressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.2.0/24\"\r\n      ]\r\n
         \   },\r\n    \"gatewayIpAddress\": \"10.1.1.2\"\r\n  }\r\n}"
     headers:
@@ -684,9 +735,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 May 2022 04:33:02 GMT
+      - Mon, 20 Feb 2023 06:36:07 GMT
       etag:
-      - W/"56fcaad0-bcc3-41d4-b592-2495240ac4e9"
+      - W/"61f1f03a-8590-4c1f-87f0-dbdd3e5743b7"
       expires:
       - '-1'
       pragma:
@@ -703,7 +754,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 59993021-31a3-457b-9c6a-d533e61f3028
+      - 98e8dd94-45c9-4117-b6d5-3ab08e2ed3fa
     status:
       code: 200
       message: OK
@@ -711,7 +762,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -721,25 +772,25 @@ interactions:
       ParameterSetName:
       - --resource-group
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways?api-version=2017-10-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"lgw1\",\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1\",\r\n
-        \     \"etag\": \"W/\\\"a01a386e-5f16-4977-8c6d-e94c32486945\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"063ad0d4-db02-48a5-80d1-e46cc565fdb0\\\"\",\r\n      \"type\":
         \"Microsoft.Network/localNetworkGateways\",\r\n      \"location\": \"westus\",\r\n
         \     \"tags\": {\r\n        \"foo\": \"boo\"\r\n      },\r\n      \"properties\":
         {\r\n        \"provisioningState\": \"Succeeded\",\r\n        \"resourceGuid\":
-        \"7b217bb7-6ed0-419c-aa08-916b39f7afb2\",\r\n        \"localNetworkAddressSpace\":
+        \"867d10ca-bb10-44d3-9d13-3952616b17fd\",\r\n        \"localNetworkAddressSpace\":
         {\r\n          \"addressPrefixes\": [\r\n            \"10.0.1.0/24\"\r\n          ]\r\n
         \       },\r\n        \"gatewayIpAddress\": \"10.1.1.1\"\r\n      }\r\n    },\r\n
         \   {\r\n      \"name\": \"lgw2\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw2\",\r\n
-        \     \"etag\": \"W/\\\"56fcaad0-bcc3-41d4-b592-2495240ac4e9\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"61f1f03a-8590-4c1f-87f0-dbdd3e5743b7\\\"\",\r\n      \"type\":
         \"Microsoft.Network/localNetworkGateways\",\r\n      \"location\": \"westus\",\r\n
         \     \"properties\": {\r\n        \"provisioningState\": \"Succeeded\",\r\n
-        \       \"resourceGuid\": \"c005e51d-252a-4965-9a87-95f1f8f1af12\",\r\n        \"localNetworkAddressSpace\":
+        \       \"resourceGuid\": \"3962b668-2b38-486b-a7ac-839030d00b0d\",\r\n        \"localNetworkAddressSpace\":
         {\r\n          \"addressPrefixes\": [\r\n            \"10.0.2.0/24\"\r\n          ]\r\n
         \       },\r\n        \"gatewayIpAddress\": \"10.1.1.2\"\r\n      }\r\n    }\r\n
         \ ]\r\n}"
@@ -751,7 +802,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 May 2022 04:33:03 GMT
+      - Mon, 20 Feb 2023 06:36:09 GMT
       expires:
       - '-1'
       pragma:
@@ -768,7 +819,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 30846dad-9e7e-49b8-83f8-5a602c2961b4
+      - a46be60b-36fd-489c-858f-27bd207eaea1
     status:
       code: 200
       message: OK
@@ -788,7 +839,7 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1?api-version=2017-10-01
   response:
@@ -798,17 +849,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6a87ab43-e38b-41c9-b03a-c6cd947a8217?api-version=2017-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0def4651-8e6f-4de9-8a21-a70f7a3f04d4?api-version=2017-10-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Sun, 29 May 2022 04:33:05 GMT
+      - Mon, 20 Feb 2023 06:36:11 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/6a87ab43-e38b-41c9-b03a-c6cd947a8217?api-version=2017-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/0def4651-8e6f-4de9-8a21-a70f7a3f04d4?api-version=2017-10-01
       pragma:
       - no-cache
       server:
@@ -819,7 +870,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c7cdae3f-b553-4349-975d-5f2049df1aa4
+      - ce4d917b-f618-4e5d-9ee0-f430bc91945c
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
     status:
@@ -839,9 +890,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6a87ab43-e38b-41c9-b03a-c6cd947a8217?api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0def4651-8e6f-4de9-8a21-a70f7a3f04d4?api-version=2017-10-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -853,7 +904,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 May 2022 04:33:15 GMT
+      - Mon, 20 Feb 2023 06:36:23 GMT
       expires:
       - '-1'
       pragma:
@@ -870,7 +921,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 528478ff-f279-4821-a5a3-464286154f7c
+      - 95cbd9a7-d579-495b-88d1-89f90cd854be
     status:
       code: 200
       message: OK
@@ -888,9 +939,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/6a87ab43-e38b-41c9-b03a-c6cd947a8217?api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/0def4651-8e6f-4de9-8a21-a70f7a3f04d4?api-version=2017-10-01
   response:
     body:
       string: ''
@@ -898,17 +949,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6a87ab43-e38b-41c9-b03a-c6cd947a8217?api-version=2017-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0def4651-8e6f-4de9-8a21-a70f7a3f04d4?api-version=2017-10-01
       cache-control:
       - no-cache
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 May 2022 04:33:15 GMT
+      - Mon, 20 Feb 2023 06:36:23 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/6a87ab43-e38b-41c9-b03a-c6cd947a8217?api-version=2017-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/0def4651-8e6f-4de9-8a21-a70f7a3f04d4?api-version=2017-10-01
       pragma:
       - no-cache
       server:
@@ -919,7 +970,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c7cdae3f-b553-4349-975d-5f2049df1aa4
+      - ce4d917b-f618-4e5d-9ee0-f430bc91945c
     status:
       code: 204
       message: No Content
@@ -927,7 +978,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json, text/json
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -937,17 +988,17 @@ interactions:
       ParameterSetName:
       - --resource-group
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-network/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.45.0 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways?api-version=2017-10-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"lgw2\",\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw2\",\r\n
-        \     \"etag\": \"W/\\\"56fcaad0-bcc3-41d4-b592-2495240ac4e9\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"61f1f03a-8590-4c1f-87f0-dbdd3e5743b7\\\"\",\r\n      \"type\":
         \"Microsoft.Network/localNetworkGateways\",\r\n      \"location\": \"westus\",\r\n
         \     \"properties\": {\r\n        \"provisioningState\": \"Succeeded\",\r\n
-        \       \"resourceGuid\": \"c005e51d-252a-4965-9a87-95f1f8f1af12\",\r\n        \"localNetworkAddressSpace\":
+        \       \"resourceGuid\": \"3962b668-2b38-486b-a7ac-839030d00b0d\",\r\n        \"localNetworkAddressSpace\":
         {\r\n          \"addressPrefixes\": [\r\n            \"10.0.2.0/24\"\r\n          ]\r\n
         \       },\r\n        \"gatewayIpAddress\": \"10.1.1.2\"\r\n      }\r\n    }\r\n
         \ ]\r\n}"
@@ -959,7 +1010,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 May 2022 04:33:17 GMT
+      - Mon, 20 Feb 2023 06:36:24 GMT
       expires:
       - '-1'
       pragma:
@@ -976,7 +1027,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 78f755e4-1bbf-4e91-9a40-0dd478e25043
+      - ffa4742e-4b86-4713-84bf-ee4a622f6555
     status:
       code: 200
       message: OK

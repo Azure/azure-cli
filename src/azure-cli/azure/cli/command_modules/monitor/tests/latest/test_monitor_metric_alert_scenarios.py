@@ -117,7 +117,7 @@ class MonitorTests(ScenarioTest):
         self.kwargs.update({
             'alert': 'alert1',
         })
-        self.cmd('network application-gateway create -g {rg} -n ag1 --public-ip-address ip1')
+        self.cmd('network application-gateway create -g {rg} -n ag1 --public-ip-address ip1 --priority 1001')
         gateway_json = self.cmd('network application-gateway show -g {rg} -n ag1').get_output_in_json()
         self.kwargs.update({
             'ag_id': gateway_json['id'],
@@ -266,7 +266,7 @@ class MonitorTests(ScenarioTest):
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v1_2')
-    @SqlServerPreparer(name_prefix='clitestservermatricalertA', parameter_name='server1')
+    @SqlServerPreparer(name_prefix='clitestservermatricalertA', parameter_name='server1', location='eastus')
     def test_metric_alert_for_sql_database_scope(self, resource_group, resource_group_location, server1):
         self.kwargs.update({
             'alert': 'alert1',
@@ -572,6 +572,30 @@ class MonitorTests(ScenarioTest):
                      self.check('length(criteria.allOf)', 1),
                      self.check('criteria.allOf[0].skipMetricValidation', True)
                  ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_namespace_special_character')
+    @StorageAccountPreparer()
+    def test_metric_namespace_special_character(self, resource_group, storage_account):
+        from azure.mgmt.core.tools import resource_id
+        self.kwargs.update({
+            'alert': 'alert1',
+            'sa_id': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=storage_account,
+                namespace='Microsoft.Storage',
+                type='storageAccounts')
+        })
+        self.cmd(
+            'monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --region westus --description "Test"'
+            ' --condition "avg My-Ns.UnemittedMetric >= 10 with skipMetricValidation"',
+            checks=[
+                self.check('description', 'Test'),
+                self.check('length(criteria.allOf)', 1),
+                self.check('criteria.allOf[0].metricNamespace', 'My-Ns'),
+                self.check('criteria.allOf[0].metricName', 'UnemittedMetric'),
+                self.check('criteria.allOf[0].skipMetricValidation', True)
+            ])
 
 
 if __name__ == '__main__':

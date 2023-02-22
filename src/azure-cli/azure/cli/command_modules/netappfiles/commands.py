@@ -6,7 +6,8 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands import CliCommandType
-from ._client_factory import (
+
+from azure.cli.command_modules.netappfiles._client_factory import (
     accounts_mgmt_client_factory,
     pools_mgmt_client_factory,
     volumes_mgmt_client_factory,
@@ -17,8 +18,11 @@ from ._client_factory import (
     backup_policies_mgmt_client_factory,
     vaults_mgmt_client_factory,
     subvolumes_mgmt_client_factory,
-    volume_groups_mgmt_client_factory)
-from ._exception_handler import netappfiles_exception_handler
+    volume_groups_mgmt_client_factory,
+    netapp_resource_mgmt_client_factory,
+    volume_quota_rules_mgmt_client_factory)
+
+from azure.cli.command_modules.netappfiles._exception_handler import netappfiles_exception_handler
 
 
 def load_command_table(self, _):
@@ -99,6 +103,20 @@ def load_command_table(self, _):
     )
     load_volume_groups_command_groups(self, netappfiles_volume_groups_sdk)
 
+    netappfiles_resource_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.netapp.operations._net_app_resource_operations#NetAppResourceOperations.{}',
+        client_factory=netapp_resource_mgmt_client_factory,
+        exception_handler=netappfiles_exception_handler
+    )
+    load_net_app_resource_command_groups(self, netappfiles_resource_sdk)
+
+    netappfiles_volume_quota_rules_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.netapp.operations._volume_quota_rules_operations#VolumeQuotaRulesOperations.{}',
+        client_factory=volume_quota_rules_mgmt_client_factory,
+        exception_handler=netappfiles_exception_handler
+    )
+    load_volume_quota_rules_command_group(self, netappfiles_volume_quota_rules_sdk)
+
     with self.command_group('netappfiles', is_preview=False):
         pass
 
@@ -123,6 +141,7 @@ def load_accounts_command_groups(self, netappfiles_accounts_sdk):
                                  setter_arg_name='body',
                                  doc_string_source='azure.mgmt.netapp.models#NetAppAccountPatch',
                                  exception_handler=netappfiles_exception_handler)
+        g.command('renew-credentials', 'begin_renew_credentials', supports_no_wait=True, is_preview=True)
         g.wait_command('wait')
 
     with self.command_group('netappfiles account ad', netappfiles_accounts_sdk) as g:
@@ -369,5 +388,30 @@ def load_volume_groups_command_groups(self, netappfiles_volume_groups_sdk):
                          supports_no_wait=True,
                          doc_string_source='azure.mgmt.netapp.models#VolumeGroupDetails',
                          exception_handler=netappfiles_exception_handler)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
+        g.wait_command('wait')
+
+
+def load_net_app_resource_command_groups(self, netappfiles_resource_sdk):
+    with self.command_group('netappfiles resource', netappfiles_resource_sdk) as g:
+        g.command('query-region-info', 'query_region_info')
+
+
+def load_volume_quota_rules_command_group(self, netappfiles_volume_quota_rules_sdk):
+    with self.command_group('netappfiles volume quota-rule', netappfiles_volume_quota_rules_sdk) as g:
+        g.show_command('show', 'get')
+        g.command('list', 'list_by_volume')
+        g.custom_command('create', 'create_volume_quota_rule',
+                         client_factory=volume_quota_rules_mgmt_client_factory,
+                         supports_no_wait=True,
+                         doc_string_source='azure.mgmt.netapp.models#VolumeQuotaRule',
+                         exception_handler=netappfiles_exception_handler)
+        g.generic_update_command('update',
+                                 setter_name='begin_update',
+                                 custom_func_name='update_volume_quota_rule',
+                                 supports_no_wait=True,
+                                 setter_arg_name='body',
+                                 doc_string_source='azure.mgmt.netapp.models#VolumeQuotaRulePatch',
+                                 exception_handler=netappfiles_exception_handler)
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')

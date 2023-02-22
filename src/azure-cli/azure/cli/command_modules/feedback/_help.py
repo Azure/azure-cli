@@ -15,3 +15,11 @@ long-summary: >-
     web browser to open GitHub issue creation page with the body auto-generated and pre-filled.
     You will have a chance to edit the issue body before submitting it.
 """
+
+helps['survey'] = """
+type: command
+short-summary: Take Azure CLI survey.
+long-summary: >-
+    Help us improve Azure CLI by sharing your experience. This survey should take about 3 minutes.
+    Learn more at https://go.microsoft.com/fwlink/?linkid=2203309.
+"""

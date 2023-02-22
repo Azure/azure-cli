@@ -18,7 +18,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
 from .utils import (_normalize_sku, get_sku_tier, _normalize_location, get_resource_name_and_group,
-                    get_resource_if_exists)
+                    get_resource_if_exists, is_functionapp, is_logicapp, is_webapp)
 
 logger = get_logger(__name__)
 
@@ -87,10 +87,11 @@ def validate_ase_create(cmd, namespace):
 
 
 def _validate_asp_sku(sku, app_service_environment, zone_redundant):
-    if zone_redundant and get_sku_tier(sku.upper()) not in ['PREMIUMV2', 'PREMIUMV3']:
+    supported_skus = ['PREMIUMV2', 'PREMIUMV3', 'PREMIUMMV3', 'PREMIUM0V3', 'ISOLATEDV2']
+    if zone_redundant and get_sku_tier(sku).upper() not in supported_skus:
         raise ValidationError("Zone redundancy cannot be enabled for sku {}".format(sku))
     # Isolated SKU is supported only for ASE
-    if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2']:
+    if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2']:
         if not app_service_environment:
             raise ValidationError("The pricing tier 'Isolated' is not allowed for this app service plan. "
                                   "Use this link to learn more: "
@@ -220,7 +221,7 @@ def _validate_ip_address_format(namespace):
         validated_ips = ''
         for ip in input_ips:
             # Use ipaddress library to validate ip network format
-            ip_obj = ipaddress.ip_network(ip)
+            ip_obj = ipaddress.ip_network(ip, False)
             validated_ips += str(ip_obj) + ','
         namespace.ip_address = validated_ips[:-1]
 
@@ -336,7 +337,7 @@ def validate_vnet_integration(cmd, namespace):
                                                      resource_group_name=namespace.resource_group_name)
 
         sku_name = plan_info.sku.name
-        disallowed_skus = {'FREE', 'SHARED', 'BASIC', 'ElasticPremium', 'PremiumContainer', 'Isolated', 'IsolatedV2'}
+        disallowed_skus = {'FREE', 'SHARED', 'PremiumContainer', 'Isolated', 'IsolatedV2'}
         if get_sku_tier(sku_name) in disallowed_skus:
             raise ArgumentUsageError("App Service Plan has invalid sku for vnet integration: {}."
                                      "Plan sku cannot be one of: {}. "
@@ -390,3 +391,33 @@ def validate_webapp_up(cmd, namespace):
         ase = client.app_service_environments.get(resource_group_name=ase_rg, name=ase_name)
         _validate_ase_is_v3(ase)
         _validate_ase_not_ilb(ase)
+
+
+def _get_app_name(namespace):
+    if hasattr(namespace, "name"):
+        return namespace.name
+    if hasattr(namespace, "webapp"):
+        return namespace.webapp
+    return None
+
+
+def validate_app_is_webapp(cmd, namespace):
+    client = web_client_factory(cmd.cli_ctx)
+    name = _get_app_name(namespace)
+    rg = namespace.resource_group
+    app = get_resource_if_exists(client.web_apps, name=name, resource_group_name=rg)
+    if is_functionapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' is a function app.")
+    if is_logicapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' is a logic app.")
+
+
+def validate_app_is_functionapp(cmd, namespace):
+    client = web_client_factory(cmd.cli_ctx)
+    name = _get_app_name(namespace)
+    rg = namespace.resource_group
+    app = get_resource_if_exists(client.web_apps, name=name, resource_group_name=rg)
+    if is_logicapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' is a logic app.")
+    if is_webapp(app):
+        raise ValidationError(f"App '{name}' in group '{rg}' is a web app.")

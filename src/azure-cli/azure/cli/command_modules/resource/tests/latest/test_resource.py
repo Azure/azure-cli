@@ -200,7 +200,7 @@ class ResourceScenarioTest(ScenarioTest):
                  checks=self.check('tags', {}))
 
         # delete and verify
-        self.cmd('resource delete -n {vnet} -g {rg} --resource-type {rt}')
+        self.cmd('resource delete -n {vnet} -g {rg} --resource-type {rt} --no-wait')
         time.sleep(10)
         self.cmd('resource list', checks=self.check("length([?name=='{vnet}'])", 0))
 
@@ -452,7 +452,7 @@ class TagScenarioTest(ScenarioTest):
             self.cmd('resource tag --ids {vault_id} --tags "" -i ')
         self.cmd('resource tag --ids {vault_id} --tags', checks=self.check('tags', {}))
 
-        self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
+        self.cmd('resource delete --id {vault_id} --no-wait', checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_tag_default_location_scenario', location='westus')
     def test_tag_default_location_scenario(self, resource_group, resource_group_location):
@@ -1524,6 +1524,28 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
         ])
 
         # clean
+        self.cmd('account management-group delete -n {mg}')
+
+
+    def test_management_group_deployment_create_mode(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'management_group_level_template.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'management_group_level_parameters.json').replace('\\', '\\\\'),
+            'mg': self.create_random_name('mg', 10),
+            'dn': self.create_random_name('depname', 20),
+            'sub-rg': self.create_random_name('sub-group', 20),
+            'storage-account-name': self.create_random_name('armbuilddemo', 20)
+        })
+
+        self.cmd('account management-group create --name {mg}')
+        self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn} --template-file "{tf}" '
+                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters storageAccountName="{storage-account-name}" --mode Incremental', checks=[
+            self.check('name', '{dn}'),
+            self.check('properties.mode', 'Incremental')
+        ])
+
         self.cmd('account management-group delete -n {mg}')
 
 

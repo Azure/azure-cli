@@ -80,6 +80,15 @@ examples:
   - name: Create a disk and associate it with a disk access resource.
     text: >
         az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --network-access-policy AllowPrivate --disk-access MyDiskAccessID
+  - name: Create a disk from the blob URI for VM guest state VHD.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --security-data-uri GuestStateDiskVhdUri --security-type TrustedLaunch --hyper-v-generation V2
+  - name: Create a standard disk for uploading blobs.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --upload-size-bytes 20972032 --upload-type Upload
+  - name: Create an OS disk for uploading along with VM guest state.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --upload-size-bytes 20972032 --upload-type UploadWithSecurityData --security-type TrustedLaunch --hyper-v-generation V2
 """
 
 helps['disk delete'] = """
@@ -100,6 +109,9 @@ examples:
     text: |
         az disk grant-access --access-level Read --duration-in-seconds 3600 --name MyManagedDisk --resource-group MyResourceGroup
     crafted: true
+  - name: Grant a resource read access to a disk to generate access SAS and security data access SAS
+    text: |
+        az disk grant-access --access-level Read --duration-in-seconds 3600 --name MyDisk --resource-group MyResourceGroup --secure-vm-guest-state-sas
 """
 
 helps['disk list'] = """
@@ -218,6 +230,14 @@ short-summary: Create a disk encryption set.
 examples:
   - name: Create a disk encryption set.
     text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault
+  - name: Create a disk encryption set with a system assigned identity.
+    text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --mi-system-assigned
+  - name: Create a disk encryption set with a user assigned identity.
+    text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --mi-user-assigned myAssignedId
+  - name: Create a disk encryption set with system assigned identity and a user assigned identity.
+    text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --mi-system-assigned --mi-user-assigned myAssignedId
+  - name: Create a disk encryption set with multi-tenant application client id to access key vault in a different tenant.
+    text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --federated-client-id myFederatedClientId
   - name: Create a disk encryption set that supports double encryption.
     text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --encryption-type EncryptionAtRestWithPlatformAndCustomerKeys
 """
@@ -255,6 +275,56 @@ examples:
     text: |
         az disk-encryption-set update --name MyDiskEncryptionSet --resource-group MyResourceGroup --key-url MyKey --source-vault MyVault
     crafted: true
+  - name: Update multi-tenant application client id of a disk encryption set.
+    text: |
+        az disk-encryption-set update --name MyDiskEncryptionSet --resource-group MyResourceGroup --key-url MyKey --source-vault MyVault --federated-client-id myFederatedClientId
+  - name: Clear multi-tenant application client id of a disk encryption set.
+    text: |
+        az disk-encryption-set update --name MyDiskEncryptionSet --resource-group MyResourceGroup --key-url MyKey --source-vault MyVault --federated-client-id None
+"""
+
+helps['disk-encryption-set identity'] = """
+type: group
+short-summary: Manage identities of a disk encryption set.
+"""
+
+helps['disk-encryption-set identity assign'] = """
+type: command
+short-summary: Add managed identities to an existing disk encryption set.
+examples:
+  - name: Add a system assigned managed identity to an existing disk encryption set.
+    text: >
+        az disk-encryption-set identity assign --name MyDiskEncryptionSet --resource-group MyResourceGroup --system-assigned
+  - name: Add a user assigned managed identity to an existing disk encryption set.
+    text: >
+        az disk-encryption-set identity assign --name MyDiskEncryptionSet --resource-group MyResourceGroup --user-assigned MyAssignedId
+  - name: Add system assigned identity and a user assigned managed identity to an existing disk encryption set.
+    text: >
+        az disk-encryption-set identity assign --name MyDiskEncryptionSet --resource-group MyResourceGroup --system-assigned --user-assigned MyAssignedId
+"""
+
+helps['disk-encryption-set identity remove'] = """
+type: command
+short-summary: Remove managed identities from an existing disk encryption set.
+examples:
+  - name: Remove a system assigned managed identity from an existing disk encryption set.
+    text: >
+        az disk-encryption-set identity remove --name MyDiskEncryptionSet --resource-group MyResourceGroup --system-assigned
+  - name: Remove a user assigned managed identity from an existing disk encryption set.
+    text: >
+        az disk-encryption-set identity remove --name MyDiskEncryptionSet --resource-group MyResourceGroup --user-assigned MyAssignedId
+  - name: Remove all user assigned managed identities from an existing disk encryption set.
+    text: >
+        az disk-encryption-set identity remove --name MyDiskEncryptionSet --resource-group MyResourceGroup --user-assigned
+"""
+
+helps['disk-encryption-set identity show'] = """
+type: command
+short-summary: Display managed identities of a disk encryption set.
+examples:
+  - name: Display managed identities of a disk encryption set.
+    text: |
+        az disk-encryption-set identity show --name MyDiskEncryptionSet --resource-group MyResourceGroup
 """
 
 helps['image'] = """
@@ -293,19 +363,19 @@ parameters:
       - az vm image list
       - az vm image show
 examples:
-  - name: Create an image builder template from an UbuntuLTS 18.04 image. Distribute it as a managed image and a shared image gallery image version
+  - name: Create an image builder template from an UbuntuLTS 18.04 image. Distribute it as a managed image and a shared image gallery image version. Specify the staging resource group id as the image template that will be used to build the image.
     text: |
         scripts="https://my-script-url.net/customize_script.sh"
         imagesource="Canonical:UbuntuServer:18.04-LTS:18.04.201903060"
 
-        az image builder create --image-source $imagesource -n mytemplate -g my-group \\
+        az image builder create --image-source $imagesource -n myTemplate -g myGroup \\
             --scripts $scripts --managed-image-destinations image_1=westus \\
             --shared-image-destinations my_shared_gallery/linux_image_def=westus,brazilsouth \\
-            --identity myidentity
+            --identity myIdentity --staging-resource-group myStagingResourceGroup
 
   - name: Create an image builder template using an image template file.
     text: |
-        az image builder create -g my-group -n mytemplate --image-template filename
+        az image builder create -g my-group -n myTemplate --image-template filename
 
   - name: >
         [Advanced] Create an image template with multiple customizers and distributors using the CLI's object cache via --defer. Supports features such as: customizer and output names, powershell exit codes, inline scripts, windows restart, file customizers, artifact tags and vhd output distributors.
@@ -315,32 +385,32 @@ examples:
 
         # create and update template object in local cli cache. Defers put request to ARM
         # Cache object ttl set via az configure.
-        az image builder create --image-source $imagesource -n mytemplate \\
-            -g my-group --scripts $script --identity myidentity --defer
+        az image builder create --image-source $imagesource -n myTemplate \\
+            -g myGroup --scripts $script --identity myIdentity --defer
 
         # add customizers
-        az image builder customizer add -n mytemplate -g my-group  \\
-            --customizer-name my-pwsh-script --exit-codes 0 1 --inline-script \\
+        az image builder customizer add -n myTemplate -g myGroup  \\
+            --customizer-name myPwshScript --exit-codes 0 1 --inline-script \\
             "mkdir c:\\buildActions" "echo Azure-Image-Builder-Was-Here \\
              > c:\\buildActions\\Output.txt" --type powershell --defer
 
-        az image builder customizer add -n mytemplate -g my-group \\
-            --customizer-name my-file-customizer --type file \\
+        az image builder customizer add -n myTemplate -g myGroup \\
+            --customizer-name myFileCustomizer --type file \\
             --file-source "https://my-file-source.net/file.txt"  \\
             --dest-path "c:\\buildArtifacts\\file.txt" --defer
 
         # add distributors
-        az image builder output add -n mytemplate -g my-group --is-vhd \\
-            --output-name my-win-image-vhd --artifact-tags "is_vhd=True" --defer
+        az image builder output add -n myTemplate -g myGroup --is-vhd \\
+            --output-name myWinImageVhd --artifact-tags "is_vhd=True" --defer
 
-        az image builder output add -n mytemplate -g my-group \\
-            --output-name my-win-image-managed --managed-image winImage \\
+        az image builder output add -n myTemplate -g myGroup \\
+            --output-name myWinImageManaged --managed-image winImage \\
             --managed-image-location eastus \\
             --artifact-tags "is_vhd=False" --defer
 
         # Stop deferring put request to ARM. Create the template from the object cache.
         # Cache object will be deleted.
-        az image builder update -n mytemplate -g my-group
+        az image builder update -n myTemplate -g myGroup
 """
 
 helps['image builder customizer'] = """
@@ -355,28 +425,28 @@ long-summary: Must be used with --defer
 examples:
   - name: Add an inline shell customizer to an image template in the cli object cache
     text: |
-        az image builder customizer add -n mytemplate -g my-group \\
+        az image builder customizer add -n myTemplate -g myGroup \\
             --inline-script "sudo mkdir /buildArtifacts" \\
                             "sudo cp /tmp/index.html /buildArtifacts/index.html" \\
-            --customizer-name shell-script-inline --type shell --defer
+            --customizer-name shellScriptInline --type shell --defer
 
   - name: Add a file customizer to an image template in the cli object cache
     text: |
-        az image builder customizer add -n mytemplate -g my-group \\
-            --customizer-name my-file --type file \\
+        az image builder customizer add -n myTemplate -g myGroup \\
+            --customizer-name myFile --type file \\
             --file-source "https://my-remote-file.html" --dest-path "/tmp/index.html" --defer
 
   - name: Add a windows restart customizer to an image template in the cli object cache
     text: |
-        az image builder customizer add -n mytemplate -g my-group \\
-        --customizer-name shell-script-url \\
+        az image builder customizer add -n myTemplate -g myGroup \\
+        --customizer-name shellScriptUrl \\
         --restart-check-command "echo Azure-Image-Builder-Restarted-the-VM  > \\
                                 c:\\buildArtifacts\\restart.txt" \\
             --type windows-restart --restart-timeout 10m --defer
 
   - name: Add a windows update customizer to an image template in the cli object cache.
     text: |
-        az image builder customizer add -n mytemplate -g my-group --customizer-name win_update --type windows-update --search-criteria IsInstalled=0 --filters "exclude:\\$_.Title -like \\'*Preview*\\'" "include:\\$true" --update-limit 20 --defer
+        az image builder customizer add -n myTemplate -g myGroup --customizer-name winUpdate --type windows-update --search-criteria IsInstalled=0 --filters "exclude:\\$_.Title -like \\'*Preview*\\'" "include:\\$true" --update-limit 20 --defer
 """
 
 helps['image builder customizer clear'] = """
@@ -389,6 +459,86 @@ helps['image builder customizer remove'] = """
 type: command
 short-summary: Remove an image builder customizer from an image builder template.
 long-summary: Must be used with --defer
+"""
+
+helps['image builder validator'] = """
+type: group
+short-summary: Manage image builder template validate.
+"""
+
+helps['image builder validator add'] = """
+type: command
+short-summary: Add validate to an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Add validate with continue distribute on failure set to true. If not specified, the default value of continue distribute on failure is false.
+        If validation fails and this field is set to false, output image(s) will not be distributed.
+    text: |
+        az image builder validator add -n myTemplate -g myGroup --continue-distribute-on-failure true --defer
+
+  - name: Add validate with source validation only set to true. If not specified, the default value of source validation only is false.
+        If this field is set to true, the image specified in the source section will directly be validated.
+    text: |
+        az image builder validator add -n myTemplate -g myGroup --source-validation-only true --defer
+
+  - name: Add validate with source validation only and continue distribute on failure set to false.
+    text: |
+        az image builder validator add -n myTemplate -g myGroup --defer
+"""
+
+helps['image builder validator remove'] = """
+type: command
+short-summary: Remove validate from an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Remove validate from an existing image builder template.
+    text: |
+        az image builder validator remove -n myTemplate -g myGroup --defer
+"""
+
+helps['image builder validator show'] = """
+type: command
+short-summary: Show validate of an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Show validate of an existing image builder template.
+    text: |
+        az image builder validator show -n myTemplate -g myGroup --defer
+"""
+
+helps['image builder identity'] = """
+type: group
+short-summary: Manage identities of an image builder template.
+"""
+
+helps['image builder identity assign'] = """
+type: command
+short-summary: Add managed identities to an existing image builder template. Currently, only one user identity is supported.
+examples:
+  - name: Add a user assigned managed identity to an existing image builder template.
+    text: >
+        az image builder identity assign --name MyImageBuilderTemplate --resource-group MyResourceGroup --user-assigned MyAssignedId
+"""
+
+helps['image builder identity remove'] = """
+type: command
+short-summary: Remove managed identities from an existing image builder template.
+examples:
+  - name: Remove a user assigned managed identity from an existing image builder template.
+    text: >
+        az image builder identity remove --name MyImageBuilderTemplate --resource-group MyResourceGroup --user-assigned MyAssignedId
+  - name: Remove all user assigned managed identities from an existing image builder.
+    text: >
+        az image builder identity remove --name MyImageBuilderTemplate --resource-group MyResourceGroup --user-assigned
+"""
+
+helps['image builder identity show'] = """
+type: command
+short-summary: Display managed identities of a image builder template.
+examples:
+  - name: Display managed identities of a image builder template.
+    text: |
+        az image builder identity show --name MyImageBuilderTemplate --resource-group MyResourceGroup
 """
 
 helps['image builder delete'] = """
@@ -458,7 +608,7 @@ examples:
         az image builder run -n mytemplate -g my-group --no-wait
 
         az image builder wait -n mytemplate -g aibmdi \\
-            --custom "lastRunStatus.runState!='running'"
+            --custom "lastRunStatus.runState!='Running'"
 
         az image builder show -n mytemplate -g my-group
 """
@@ -491,7 +641,7 @@ examples:
         az image builder run -n mytemplate -g my-group --no-wait
 
         az image builder wait -n mytemplate -g aibmdi \\
-            --custom "lastRunStatus.runState!='running'"
+            --custom "lastRunStatus.runState!='Running'"
 
         az image builder show-runs -n mytemplate -g my-group
 """
@@ -531,7 +681,7 @@ examples:
         az image builder run -n mytemplate -g my-group --no-wait
 
         az image builder wait -n mytemplate -g aibmdi \\
-            --custom "lastRunStatus.runState!='running'"
+            --custom "lastRunStatus.runState!='Running'"
 
         az image builder show -n mytemplate -g my-group
 """
@@ -559,6 +709,14 @@ examples:
     text: |
         az ppg create --name MyProximityPlacementGroup --resource-group MyResourceGroup
     crafted: true
+  - name: Create a proximity placement group with specifying VM sizes that can be created.
+    text: |
+        az ppg create --name MyProximityPlacementGroup --resource-group MyResourceGroup \\
+            --intent-vm-sizes Standard_E64s_v4 Standard_M416ms_v2
+  - name: Create a proximity placement group with specifying VM sizes that can be created and availability zone.
+    text: |
+        az ppg create --name MyProximityPlacementGroup --resource-group MyResourceGroup \\
+            --intent-vm-sizes Standard_E64s_v4 Standard_M416ms_v2 --zone 1
 """
 
 helps['ppg list'] = """
@@ -584,6 +742,11 @@ examples:
 helps['ppg update'] = """
 type: command
 short-summary: Update a proximity placement group
+examples:
+  - name: Update a proximity placement group with specifying VM sizes that can be created.
+    text: |
+        az ppg update --name MyProximityPlacementGroup --resource-group MyResourceGroup \\
+            --intent-vm-sizes Standard_E64s_v4 Standard_M416ms_v2
 """
 
 helps['sig'] = """
@@ -659,13 +822,6 @@ examples:
         --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
         --os-type linux --os-state Specialized \\
         --features IsAcceleratedNetworkSupported=true
-  - name: Create an image definition for images that can be used to create Trusted VMs
-    text: |
-        az sig image-definition create --resource-group MyResourceGroup \\
-        --gallery-name MyGallery --gallery-image-definition MyImage \\
-        --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
-        --os-type linux --os-state Specialized \\
-        --features SecurityType=TrustedLaunchSupported
   - name: Create an image definition for images that can only be used to create Trusted VMs. Only Trusted VMs can be created from this image.
     text: |
         az sig image-definition create --resource-group MyResourceGroup \\
@@ -687,20 +843,6 @@ examples:
         --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
         --os-type linux --os-state Specialized \\
         --features SecurityType=ConfidentialVM
-  - name: Create an image definition for images that can be used to create Trusted or Confidential VMs
-    text: |
-        az sig image-definition create --resource-group MyResourceGroup \\
-        --gallery-name MyGallery --gallery-image-definition MyImage \\
-        --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
-        --os-type linux --os-state Specialized \\
-        --features SecurityType=TrustedLaunchAndConfidentialVmSupported
-  - name: Create an image definition for images that can be used to create Trusted or Confidential VMs
-    text: |
-        az sig image-definition create --resource-group MyResourceGroup \\
-        --gallery-name MyGallery --gallery-image-definition MyImage \\
-        --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
-        --os-type linux --os-state Specialized \\
-        --features SecurityType=TrustedLaunchAndConfidentialVmSupported
   - name: Create an image definition and indicate end of life date
     text: |
         az sig image-definition create --resource-group MyResourceGroup \\
@@ -735,8 +877,8 @@ examples:
 
 helps['sig image-definition list-shared'] = """
 type: command
-short-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant (preview).
-long-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant  (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+short-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant
+long-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant
 examples:
   - name: List an image definition in a gallery shared directly to your subscription in the given location.
     text: |
@@ -750,8 +892,8 @@ examples:
 
 helps['sig image-definition show-shared'] = """
 type: command
-short-summary: Get a shared gallery image (preview).
-long-summary: Get a shared gallery image that has been shared directly to your subscription or tenant (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+short-summary: Get a shared gallery image
+long-summary: Get a shared gallery image that has been shared directly to your subscription or tenant
 examples:
   - name: Get an image definition in a gallery shared directly to your subscription or tenant in the given location.
     text: |
@@ -779,8 +921,8 @@ examples:
 
 helps['sig image-definition list-community'] = """
 type: command
-short-summary: List VM Image definitions in a gallery community (preview).
-long-summary: List VM Image definitions in a gallery community (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+short-summary: List VM Image definitions in a gallery community
+long-summary: List VM Image definitions in a gallery community
 examples:
   - name: List an image definition in a gallery community.
     text: |
@@ -887,6 +1029,22 @@ examples:
         --target-regions westus=2=standard eastus \\
         --target-region-encryption WestUSDiskEncryptionSet1,0,WestUSDiskEncryptionSet2 \\
         EastUSDiskEncryptionSet1,0,EastUSDiskEncryptionSet2
+  - name: Add a new image version and copy it to extended locations.
+    text: |
+        az sig image-version create --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --gallery-image-version 1.0.0 --replica-count 1 \\
+        --storage-account-type Standard_ZRS --managed-image image-name \\
+        --target-edge-zones westus=microsoftlosangeles1 eastus=microsoftlosangeles2=1 \\
+        brazilsouth=2=standard_lrs
+  - name: Add a new image version and copy it to extended locations with encryption using a disk encryption set.
+    text: |
+        az sig image-version create --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --gallery-image-version 1.0.0 \\
+        --virtual-machine /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
+        --target-edge-zones westus=microsoftlosangeles1 \\
+        --target-edge-zone-encryption microsoftlosangeles1,WestUSDiskEncryptionSet1,0,WestUSDiskEncryptionSet2
   - name: Add a new image version and don't wait on it. Later you can invoke "az sig image-version wait" command when ready to create a vm from the gallery image version
     text: |
         az sig image-version create --resource-group MyResourceGroup \\
@@ -912,8 +1070,8 @@ examples:
 
 helps['sig image-version list-shared'] = """
 type: command
-short-summary: List VM Image Versions in a gallery shared directly to your subscription or tenant (preview).
-long-summary: List VM Image Versions in a gallery shared directly to your subscription or tenant  (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+short-summary: List VM Image Versions in a gallery shared directly to your subscription or tenant
+long-summary: List VM Image Versions in a gallery shared directly to your subscription or tenant
 examples:
   - name: List image versions in a gallery shared directly to your subscription in the given location and image definition.
     text: |
@@ -927,8 +1085,8 @@ examples:
 
 helps['sig image-version show-shared'] = """
 type: command
-short-summary: Get an image version in a gallery shared directly to your subscription or tenant (preview).
-long-summary: Get an image version in a gallery shared directly to your subscription or tenant  (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+short-summary: Get an image version in a gallery shared directly to your subscription or tenant
+long-summary: Get an image version in a gallery shared directly to your subscription or tenant
 examples:
   - name: Get an image version in a gallery shared directly to your subscription or tenant in the given location.
     text: |
@@ -946,13 +1104,25 @@ examples:
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.0.0 \\
         --target-regions westcentralus=2 eastus2
-  - name: Replicate to an additional region. Optional, you can set the replica count for the region.
+  - name: Change the replication extended locations
+    text: |
+        az sig image-version update --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --gallery-image-version 1.0.0 \\
+        --target-edge-zones westus=microsoftlosangeles1 eastus=microsoftlosangeles2=1
+  - name: Clear the replication extended locations
+    text: |
+        az sig image-version update --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --gallery-image-version 1.0.0 \\
+        --target-edge-zones None
+  - name: Replicate to an additional region. Optional, you can set the replica count for the region and exclude this image when using the latest version of the image definition.
     text: |
         az sig image-version update --resource-group MyResourceGroup \\
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.0.0 \\
         --add publishingProfile.targetRegions name=westcentralus \\
-        regionalReplicaCount=3
+        regionalReplicaCount=3 excludeFromLatest=true
   - name: Change whether an image should be included in consideration for latest version in the image definition. Setting this value to true excludes the image from consideration and setting this value to false includes the image for consideration.
     text: |
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
@@ -963,12 +1133,17 @@ examples:
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
         --gallery-image-definition MyImage --gallery-image-version 1.0.0 \\
         --set publishingProfile.endOfLifeDate=2024-08-02T00:00:00+00:00
+  - name: Allow to remove the gallery image version from replicated regions.
+    text: |
+        az sig image-version update -g MyResourceGroup --gallery-name MyGallery \\
+        --gallery-image-definition MyImage --gallery-image-version 1.0.0 \\
+        --set safetyProfile.allowDeletionOfReplicatedLocations=true
 """
 
 helps['sig image-version list-community'] = """
 type: command
-short-summary: List VM Image Versions in a gallery community (preview).
-long-summary: List VM Image Versions in a gallery community (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+short-summary: List VM Image Versions in a gallery community
+long-summary: List VM Image Versions in a gallery community
 examples:
   - name: List an image versions in a gallery community.
     text: |
@@ -995,15 +1170,28 @@ examples:
 
 helps['sig list-shared'] = """
 type: command
-short-summary: List all galleries shared directly to your subscription or tenant (preview).
-long-summary: List all galleries shared directly to your subscription or tenant (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+short-summary: List all shared galleries shared directly to your subscription or tenant
+long-summary: List all shared galleries shared directly to your subscription or tenant
 examples:
-  - name: List galleries shared directly to your subscription in a given location
+  - name: List shared galleries shared directly to your subscription in a given location
     text: |
         az sig list-shared --location myLocation
-  - name: List galleries shared directly to your tenant in a given location
+  - name: List shared galleries shared directly to your tenant in a given location
     text: |
         az sig list-shared --location myLocation --shared-to tenant
+"""
+
+helps['sig list-community'] = """
+type: command
+short-summary: List all community galleries shared directly to your subscription or tenant
+long-summary: List all community galleries shared directly to your subscription or tenant
+examples:
+  - name: List community galleries shared directly to your subscription in a given location
+    text: |
+        az sig list-community --location myLocation
+  - name: List paging community galleries shared directly to your tenant in a given location according to next marker
+    text: |
+        az sig list-community --location myLocation --marker nextMarker
 """
 
 helps['sig list'] = """
@@ -1026,8 +1214,7 @@ short-summary: Share gallery with subscriptions and tenants
 examples:
   - name: Share entire gallery with all members of a subscription and/or tenant.
     text: |
-        az sig share add --resource-group MyResourceGroup --gallery-name MyGallery
-        --gallery-image-definition MyImage \\
+        az sig share add --resource-group MyResourceGroup --gallery-name MyGallery \\
         --subscription-ids subId1 subId2 --tenant-ids tenantId1 tenantId2
 """
 
@@ -1070,8 +1257,8 @@ examples:
 
 helps['sig show-shared'] = """
 type: command
-short-summary: Get a gallery that has been shared directly to your subscription or tenant (preview).
-long-summary: Get a gallery that has been shared directly to your subscription or tenant  (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+short-summary: Get a gallery that has been shared directly to your subscription or tenant
+long-summary: Get a gallery that has been shared directly to your subscription or tenant
 examples:
   - name: Get a gallery that has been shared directly to your subscription or tenant in the given location.
     text: |
@@ -1084,8 +1271,13 @@ short-summary: update a share image gallery.
 examples:
   - name: Enable gallery to be shared to subscription or tenant
     text: |
-        az sig update --resource-group myresourcegroup --gallery-name mygallery \\
+        az sig update --resource-group myResourceGroup --gallery-name myGallery \\
         --permissions groups
+  - name: Update gallery from private to community
+    text: |
+        az sig update -g myResourceGroup --gallery-name myGallery --permissions Community \\
+        --publisher-uri myPublisherUri --publisher-email myPublisherEmail \\
+        --eula myEula --public-name-prefix myPublicNamePrefix
 """
 
 helps['sig gallery-application'] = """
@@ -1464,6 +1656,9 @@ examples:
   - name: Create a VM by attaching to a managed operating system disk.
     text: >
         az vm create -g MyResourceGroup -n MyVm --attach-os-disk MyOsDisk --os-type linux
+  - name: Create a VM by attaching to an unmanaged operating system disk from a VHD blob uri.
+    text: >
+        az vm create -g MyResourceGroup -n MyVm --attach-os-disk https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd --os-type linux --use-unmanaged-disk
   - name: 'Create an Ubuntu Linux VM using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/linux/using-cloud-init.'
     text: >
         az vm create -g MyResourceGroup -n MyVm --image debian --custom-data MyCloudInitScript.yml
@@ -1506,17 +1701,17 @@ examples:
   - name: Create multiple VMs. In this example, 3 VMs are created. They are MyVm0, MyVm1, MyVm2.
     text: >
         az vm create -n MyVm -g MyResourceGroup --image centos --count 3
-  - name: Create a VM from shared gallery image (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+  - name: Create a VM from shared gallery image
     text: >
         az vm create -n MyVm -g MyResourceGroup --image /SharedGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
-  - name: Create a VM from community gallery image (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+  - name: Create a VM from community gallery image
     text: >
         az vm create -n MyVm -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
 """
 
 helps['vm deallocate'] = """
 type: command
-short-summary: Deallocate a VM so that computing resources are no longer allocated (charged no longer apply). The status will change from 'Stopped' to 'Stopped (Deallocated)'.
+short-summary: Deallocate a VM so that computing resources are no longer allocated (charges no longer apply). The status will change from 'Stopped' to 'Stopped (Deallocated)'.
 long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/capture-image'
 examples:
   - name: Deallocate, generalize, and capture a stopped virtual machine.
@@ -1680,6 +1875,9 @@ examples:
   - name: Detach a data disk from a VM.
     text: >
         az vm disk detach -g MyResourceGroup --vm-name MyVm --name disk_name
+  - name: Force detach a data disk from a VM.
+    text: >
+        az vm disk detach -g MyResourceGroup --vm-name MyVm --name disk_name --force-detach
 """
 
 helps['vm encryption'] = """
@@ -1799,7 +1997,7 @@ examples:
   - name: Find the available versions for the Docker extension.
     text: >
         az vm extension image list-versions --publisher Microsoft.Azure.Extensions \\
-            -l westus -n DockerExtension -otable
+            -l westus -n DockerExtension -o table
 """
 
 helps['vm extension image show'] = """
@@ -1962,22 +2160,6 @@ examples:
   - name: Create a dedicated host group. (autogenerated)
     text: |
         az vm host group create --name MyDedicatedHostGroup --platform-fault-domain-count 2 --resource-group MyResourceGroup
-    crafted: true
-"""
-
-helps['vm host group list'] = """
-type: command
-short-summary: List dedicated host groups.
-long-summary: Lists dedicated host groups by subscription. If resource group is specified, lists dedicated host groups by resource group.
-"""
-
-helps['vm host group show'] = """
-type: command
-short-summary: Get the details of a dedicated host group.
-examples:
-  - name: Get the details of a dedicated host group (autogenerated)
-    text: |
-        az vm host group show --name MyDedicatedHostGroup --resource-group MyResourceGroup
     crafted: true
 """
 
@@ -2450,100 +2632,114 @@ examples:
 """
 
 helps['vm run-command show'] = """
-    type: command
-    short-summary: "The operation to get the run command. And Gets specific run command for a subscription in a \
-location."
-    examples:
-      - name: Get the run commands in the virtual machine.
-        text: |-
-               az vm run-command show --resource-group "myResourceGroup" --run-command-name \
+type: command
+short-summary: Get specific run command
+long-summary: You can specify "--resource-group", "--run-command-name" and "--vm-name" to get run command in a virtual machine. Or you can specify "--command-id" and "--location" to get run command for a subscription in a location.
+examples:
+  - name: Get the run commands in a virtual machine.
+    text: |-
+           az vm run-command show --resource-group "myResourceGroup" --run-command-name \
 "myRunCommand" --vm-name "myVM"
-      - name: Get specific run command for a subscription in a location.
-        text: |-
-               az vm run-command show --command-id "RunPowerShellScript" --location "SoutheastAsia"
+  - name: Get specific run command for a subscription in a location.
+    text: |-
+           az vm run-command show --command-id "RunPowerShellScript" --location "SoutheastAsia"
 """
 
 
 helps['vm run-command create'] = """
-    type: command
-    short-summary: "The operation to create the run command."
-    parameters:
-      - name: --script
-        short-summary: "Specify the script content to be executed on the VM."
-      - name: --script-uri
-        short-summary: "Specify the script download location."
-      - name: --command-id
-        short-summary: "Specify a commandId of predefined built-in script."
-      - name: --parameters
-        short-summary: "The parameters used by the script."
-        long-summary: |
-            Usage: --parameters arg1=XX arg2=XX
-      - name: --protected-parameters
-        short-summary: "The parameters used by the script."
-        long-summary: |
-            Usage: --protected-parameters credentials=somefoo secret=somebar
-    examples:
-      - name: Create a run command.
-        text: |-
-               az vm run-command create --resource-group "myResourceGroup" --location "West US" \
+type: command
+short-summary: "The operation to create the run command."
+parameters:
+  - name: --script
+    short-summary: "Specify the script content to be executed on the VM."
+  - name: --script-uri
+    short-summary: "Specify the script download location."
+  - name: --command-id
+    short-summary: "Specify a commandId of predefined built-in script."
+  - name: --output-blob-uri
+    short-summary: "Specify the Azure storage blob (SAS URI) where script output stream will be uploaded."
+  - name: --parameters
+    short-summary: "The parameters used by the script."
+    long-summary: |
+        Usage: --parameters arg1=XX arg2=XX
+  - name: --protected-parameters
+    short-summary: "The parameters used by the script."
+    long-summary: |
+        Usage: --protected-parameters credentials=somefoo secret=somebar
+examples:
+  - name: Create a run command.
+    text: |-
+           az vm run-command create --resource-group "myResourceGroup" --location "West US" \
 --async-execution false --parameters arg1=param1 arg2=value1 --run-as-password "<runAsPassword>" \
 --run-as-user "user1" --script "Write-Host Hello World!" --timeout-in-seconds 3600 \
 --run-command-name "myRunCommand" --vm-name "myVM"
+  - name: Create a run command with uploading script output stream to Azure storage blob (SAS URI).
+    text: |-
+           az vm run-command create --resource-group "myResourceGroup" --location "West US" \
+--script "Write-Host Hello World!" --run-command-name "myRunCommand" --vm-name "myVM" --output-blob-uri \
+"https://mystorageaccount.blob.core.windows.net/mycontainer/RuncommandOutput.txt?sp=racw&st=2022-10-17T19:02:15Z&se=2022-10-18T03:02:15Z&spr=https&sv=2021-06-08&sr=b&sig=3BxtEasfdasdfasdfdYki9yvYsqc60V0%3D"
 """
 
 helps['vm run-command update'] = """
-    type: command
-    short-summary: "The operation to update the run command."
-    parameters:
-      - name: --script
-        short-summary: "Specify the script content to be executed on the VM."
-      - name: --script-uri
-        short-summary: "Specify the script download location."
-      - name: --command-id
-        short-summary: "Specify a commandId of predefined built-in script."
-      - name: --parameters
-        short-summary: "The parameters used by the script."
-        long-summary: |
-            Usage: --parameters arg1=XX arg2=XX
-      - name: --protected-parameters
-        short-summary: "The parameters used by the script."
-        long-summary: |
-            Usage: --protected-parameters credentials=somefoo secret=somebar
-    examples:
-      - name: Update a run command.
-        text: |-
-               az vm run-command update --resource-group "myResourceGroup" --location "West US" \
+type: command
+short-summary: "The operation to update the run command."
+parameters:
+  - name: --script
+    short-summary: "Specify the script content to be executed on the VM."
+  - name: --script-uri
+    short-summary: "Specify the script download location."
+  - name: --command-id
+    short-summary: "Specify a commandId of predefined built-in script."
+  - name: --output-blob-uri
+    short-summary: "Specify the Azure storage blob (SAS URI) where script output stream will be uploaded."
+  - name: --parameters
+    short-summary: "The parameters used by the script."
+    long-summary: |
+        Usage: --parameters arg1=XX arg2=XX
+  - name: --protected-parameters
+    short-summary: "The parameters used by the script."
+    long-summary: |
+        Usage: --protected-parameters credentials=somefoo secret=somebar
+examples:
+  - name: Update a run command.
+    text: |-
+           az vm run-command update --resource-group "myResourceGroup" --location "West US" \
 --async-execution false --parameters arg1=param1 arg2=value1 --run-as-password "<runAsPassword>" \
 --run-as-user "user1" --script "Write-Host Hello World!" --timeout-in-seconds 3600 \
 --run-command-name "myRunCommand" --vm-name "myVM"
+  - name: Update a run command with uploading script output stream to Azure storage blob (SAS URI).
+    text: |-
+           az vm run-command update --resource-group "myResourceGroup" --location "West US" \
+--script "Write-Host Hello World!" --run-command-name "myRunCommand" --vm-name "myVM" --output-blob-uri \
+"https://mystorageaccount.blob.core.windows.net/mycontainer/RuncommandOutput.txt?sp=racw&st=2022-10-17T19:02:15Z&se=2022-10-18T03:02:15Z&spr=https&sv=2021-06-08&sr=b&sig=3BxtEasfdasdfasdfdYki9yvYsqc60V0%3D"
 """
 
 helps['vm run-command delete'] = """
-    type: command
-    short-summary: "The operation to delete the run command."
-    examples:
-      - name: Delete a run command.
-        text: |-
-               az vm run-command delete --resource-group "myResourceGroup" --run-command-name \
+type: command
+short-summary: "The operation to delete the run command."
+examples:
+  - name: Delete a run command.
+    text: |-
+           az vm run-command delete --resource-group "myResourceGroup" --run-command-name \
 "myRunCommand" --vm-name "myVM"
 """
 
 helps['vm run-command wait'] = """
-    type: command
-    short-summary: Place the CLI in a waiting state until a condition of the res virtual-machine-run-command is met.
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the res virtual-machine-run-command is met.
 """
 
 helps['vm run-command list'] = """
-    type: command
-    short-summary: "The operation to get all run commands of a Virtual Machine. And Lists all available run commands \
-for a subscription in a location."
-    examples:
-      - name: List run commands in a Virtual Machine.
-        text: |-
-               az vm run-command list --resource-group "myResourceGroup" --vm-name "myVM"
-      - name: List all available run commands for a subscription in a location.
-        text: |-
-               az vm run-command list --location "SoutheastAsia"
+type: command
+short-summary: List run commands from a VM or a location
+long-summary: You can specify "--resource-group" and "--vm-name" to get all run commands of a virtual machine. Or you can specify "--location" to list all available run commands for a subscription in a location.
+examples:
+  - name: List run commands in a virtual machine.
+    text: |-
+           az vm run-command list --resource-group "myResourceGroup" --vm-name "myVM"
+  - name: List all available run commands for a subscription in a location.
+    text: |-
+           az vm run-command list --location "SoutheastAsia"
 """
 
 helps['vm secret'] = """
@@ -2883,10 +3079,10 @@ examples:
   - name: Create a VMSS that supports SpotRestore.
     text: >
         az vmss create -n MyVmss -g MyResourceGroup  --location NorthEurope --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --single-placement-group --enable-spot-restore True --spot-restore-timeout PT1H
-  - name: Create a VMSS from shared gallery image. (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+  - name: Create a VMSS from shared gallery image.
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image /SharedGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
-  - name: Create a VMSS from community gallery image (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+  - name: Create a VMSS from community gallery image.
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
   - name: Create a Windows VMSS with patch mode 'Manual' (Currently patch mode 'AutomaticByPlatform' is not supported during VMSS creation as health extension which is required for 'AutomaticByPlatform' mode cannot be set during VMSS creation).
@@ -3197,22 +3393,19 @@ examples:
     crafted: true
 """
 
-helps['vmss nic'] = """
-type: group
-short-summary: Manage network interfaces of a VMSS.
-"""
-
 helps['vmss reimage'] = """
 type: command
 short-summary: Reimage VMs within a VMSS.
-parameters:
-  - name: --instance-id
-    short-summary: VM instance ID. If missing, reimage all instances.
 examples:
-  - name: Reimage VMs within a VMSS. (autogenerated)
+  - name: Reimage a VM instance within a VMSS.
     text: |
-        az vmss reimage --instance-id 1 --name MyScaleSet --resource-group MyResourceGroup --subscription MySubscription
-    crafted: true
+        az vmss reimage --instance-ids 1 --name MyScaleSet --resource-group MyResourceGroup --subscription MySubscription
+  - name: Reimage a batch of VM instances within a VMSS.
+    text: |
+        az vmss reimage --instance-ids 1 2 3 --name MyScaleSet --resource-group MyResourceGroup --subscription MySubscription
+  - name: Reimage all the VM instances within a VMSS.
+    text: |
+        az vmss reimage --name MyScaleSet --resource-group MyResourceGroup --subscription MySubscription
 """
 
 helps['vmss restart'] = """
@@ -3584,14 +3777,6 @@ examples:
     text: az capacity reservation group update -n ReservationGroupName -g MyResourceGroup --tags key=val
 """
 
-helps['capacity reservation group delete'] = """
-type: command
-short-summary: Delete capacity reservation group.
-examples:
-  - name: Delete a capacity reservation group.
-    text: az capacity reservation group delete -n ReservationGroupName -g MyResourceGroup --yes
-"""
-
 helps['capacity reservation group show'] = """
 type: command
 short-summary: Show capacity reservation group.
@@ -3647,16 +3832,6 @@ examples:
             -g MyResourceGroup --capacity 5 --tags key=val
 """
 
-helps['capacity reservation delete'] = """
-type: command
-short-summary: Delete capacity reservation.
-examples:
-  - name: Delete a capacity reservation.
-    text: |
-        az capacity reservation delete -c ReservationGroupName -n ReservationName \\
-            -g MyResourceGroup --yes
-"""
-
 helps['capacity reservation show'] = """
 type: command
 short-summary: Show capacity reservation.
@@ -3679,14 +3854,6 @@ examples:
     text: |
         az capacity reservation show -c ReservationGroupName -n ReservationName \\
             -g MyResourceGroup --instance-view
-"""
-
-helps['capacity reservation list'] = """
-type: command
-short-summary: List capacity reservation.
-examples:
-  - name: List the capacity reservations.
-    text: az capacity reservation list -c ReservationGroupName -g MyResourceGroup
 """
 
 helps['vmss list-instances'] = """
@@ -3717,7 +3884,7 @@ helps['restore-point create'] = """
         short-summary: "List of disk resource ids that the customer wishes to exclude from the restore point. If no \
 disks are specified, all disks will be included."
         long-summary: |
-            Usage: --exclude-disks id=XX
+            Usage: --exclude-disks XX XX
             id: The ARM resource id in the form of /subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroupName}/.\
 ..
             Multiple actions can be specified by using more than one --exclude-disks argument.
@@ -3727,11 +3894,15 @@ disks are specified, all disks will be included."
                az restore-point create --exclude-disks "/subscriptions/{subscription-id}/resourceGroups/myResour\
                ceGroup/providers/Microsoft.Compute/disks/disk123" --resource-group "myResourceGroup" \
                --collection-name "rpcName" --name "rpName"
-"""
+      - name: Create a restore point with --consistency-mode CrashConsistent
+        text: |-
+               az vm create -n vm -g rg --image UbuntuLTS --tag EnableCrashConsistentRestorePoint=True
 
-helps['restore-point delete'] = """
-    type: command
-    short-summary: "Delete the restore point."
+               az restore-point collection create --source-id "/subscriptions/{subscription-id}/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM"\
+                -g rg --collection-name "myRpc"
+
+               az restore-point create --exclude-disks "/subscriptions/{subscription-id}/resourceGroups/myResourceGroup/providers/Microsoft.Compute/disks/disk123" \
+               --resource-group "myResourceGroup" --collection-name "rpcName" --name "rpName"
 """
 
 helps['restore-point wait'] = """

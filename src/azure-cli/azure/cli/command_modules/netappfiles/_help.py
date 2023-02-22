@@ -171,8 +171,6 @@ parameters:
     short-summary: The name of the ANF account
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
-  - name: --encryption
-    short-summary: Encryption settings
 examples:
   - name: Create an ANF account
     text: >
@@ -382,6 +380,14 @@ type: command
 short-summary: Wait for a account backup-policy operation.
 """
 
+helps['netappfiles account renew-credentials'] = """
+type: command
+short-summary: Renew identity credentials that are used to authenticate to key vault, for customer-managed key encryption. If encryption.identity.principalId does not match identity.principalId, running this operation will fix it.
+examples:
+  - name: Renew identity credentials for account
+    text: >
+        az netappfiles account renew-credentials -g mygroup --account-name myaccname
+"""
 
 helps['netappfiles pool'] = """
 type: group
@@ -468,6 +474,8 @@ parameters:
     short-summary: The qos type of the ANF pool
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
+  - name: --cool-access
+    short-summary: If enabled (true) the pool can contain cool Access enabled volumes
 examples:
   - name: Update specific values for an ANF pool
     text: >
@@ -605,9 +613,9 @@ parameters:
   - name: --file-path
     short-summary: A 1-80 character long alphanumeric string value that identifies a unique file share or mount point in the target delegate subnet
   - name: --vnet
-    short-summary: The ARM Id or name of the vnet for the volume
+    short-summary: Name or Resource ID of the vnet. If you want to use a vnet in other resource group or subscription, please provide the Resource ID instead of the name of the vnet.
   - name: --subnet
-    short-summary: The ARM Id or name of the delegated subnet for the vnet. If omitted 'default' will be used
+    short-summary: The name of the subnet for the volume.
   - name: --protocol-types
     short-summary: Space separated list of protocols that the volume can use, available protocols are "NFSv4.1", "NFSv3", "CIFS"
   - name: --volume-type
@@ -655,7 +663,7 @@ parameters:
   - name: --kerberos5p-rw
     short-summary: Kerberos5p Read and write access
   - name: --has-root-access
-    short-summary: Has root access to volume
+    short-summary: Has root access to volume. Possible values are True or False
   - name: --smb-encryption
     short-summary: Enables encryption for in-flight smb3 data. Only applicable for SMB/DualProtocol volume. To be used with swagger version 2020-08-01 or later. Default value is False
   - name: --smb-continuously-avl
@@ -665,7 +673,7 @@ parameters:
   - name: --allowed-clients
     short-summary: Client ingress specification as comma separated string with IPv4 CIDRs, IPv4 host addresses and host names
   - name: --cifs
-    short-summary: Allows NFSv3 protocol. Enable only for NFSv3 type volumes
+    short-summary: Allows CIFS protocol. Enable only for CIFS type volumes
   - name: --rule-index
     short-summary: Order index
   - name: --unix-read-only
@@ -696,10 +704,19 @@ parameters:
     short-summary: Flag indicating whether subvolume operations are enabled on the volume. Possible values are Enabled and Disabled. Default value is Disabled
   - name: --zones
     short-summary: Availability Zone
+  - name: --kv-private-endpoint-id
+    short-summary: The resource ID of private endpoint for KeyVault. It must reside in the same VNET as the volume. Only applicable if encryptionKeySource = 'Microsoft.KeyVault'.
+  - name: --kerberos-enabled
+    short-summary: Describe if a volume is KerberosEnabled
+
 examples:
   - name: Create an ANF volume
     text: >
         az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --file-path "unique-file-path" --vnet myvnet --subnet mysubnet --protocol-types NFSv3 NFSv4.1
+
+  - name: Create an ANF volume with zones (Availability Zone) specified
+    text: >
+        az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --file-path "unique-file-path" --vnet myvnet --subnet mysubnet --protocol-types NFSv3 --zones zone1
 """
 
 helps['netappfiles volume delete'] = """
@@ -906,8 +923,8 @@ parameters:
     short-summary: Kerberos5p Read only access
   - name: --kerberos5p-rw
     short-summary: Kerberos5p Read and write access
-  - name: --has-root-access
-    short-summary: Has root access to volume
+#  - name: --has-root-access
+    #short-summary: Has root access to volume. Possible values are True or False
   - name: --chown-mode
     short-summary: This parameter specifies who is authorized to change the ownership of a file. restricted - Only root user can change the ownership of the file. unrestricted - Non-root users can change ownership of files that they own. Possible values include- Restricted, Unrestricted. Default value- Restricted.
 examples:
@@ -1022,6 +1039,10 @@ parameters:
     short-summary: Maximum throughput in Mibps that can be achieved by this volume and this will be accepted as input only for manual qosType volume
   - name: --unix-permissions
     short-summary: UNIX permissions for NFS volume accepted in octal 4 digit format. First digit selects the set user ID(4), set group ID (2) and sticky (1) attributes. Second digit selects permission for the owner of the file- read (4), write (2) and execute (1). Third selects permissions for other users in the same group. the fourth for other users not in the group. 0755 - gives read/write/execute permissions to owner and read/execute to group and other users.
+  - name: --cool-access
+    short-summary: If enabled (true) the pool can contain cool Access enabled volumes
+  - name: --coolness-period
+    short-summary: Specifies the number of days after which data that is not accessed by clients will be tiered.
 examples:
   - name: Update an ANF volume
     text: >
@@ -1117,7 +1138,7 @@ parameters:
   - name: --pool-name -p
     short-summary: The name of the ANF pool
   - name: --name --volume-name -n -v
-    short-summary: The name of the ANF pool
+    short-summary: The name of the ANF volume
 examples:
   - name: List the ANF backups of the volume
     text: >
@@ -1199,6 +1220,87 @@ examples:
 helps['netappfiles volume backup wait'] = """
 type: command
 short-summary: Wait for a volume backup operation.
+"""
+
+helps['netappfiles volume quota-rule'] = """
+type: group
+short-summary: Manage Azure NetApp Files (ANF) Volume Quota Rules Resources.
+"""
+
+helps['netappfiles volume quota-rule show'] = """
+type: command
+short-summary: Get ANF Volume Quota Rule for Volume.
+examples:
+  - name: Get a ANF Volume quote rule
+    text: >
+        az netappfiles volume quota-rule show -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --quota-rule-name myrulename
+"""
+
+helps['netappfiles volume quota-rule create'] = """
+type: command
+short-summary: Create a ANF Volume Quota Rule.
+parameters:
+  - name: --tags
+    short-summary: Resource tags.
+  - name: --quota-rule-name
+    short-summary: Name of Quota rule.
+  - name: --quota-size
+    short-summary: Size of quota.
+  - name: --quota-type
+    short-summary: Type of quota. Known values are "DefaultUserQuota", "DefaultGroupQuota", "IndividualUserQuota", and "IndividualGroupQuota".
+  - name: --quota-target
+    short-summary: UserID/GroupID/SID based on the quota target type. UserID and groupID can be found by running ‘id’ or ‘getent’ command for the user or group and SID can be found by running :code:`<wmic useraccount where name='user-name' get sid>`.
+examples:
+  - name: Create an ANF Volume quote rule
+    text: >
+        az netappfiles volume quota-rule create -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --quota-rule-name myrulename --quota-type DefaultGroupQuota --quota-size 100006 --quota-target ''
+"""
+
+
+helps['netappfiles volume quota-rule update'] = """
+type: command
+short-summary: Update a specified ANF Volume Quota Rule.
+parameters:
+  - name: --quota-size
+    short-summary: Size of quota.
+  - name: --quota-type
+    short-summary: Type of quota. Known values are "DefaultUserQuota", "DefaultGroupQuota", "IndividualUserQuota", and "IndividualGroupQuota".
+  - name: --quota-target
+    short-summary: UserID/GroupID/SID based on the quota target type. UserID and groupID can be found by running ‘id’ or ‘getent’ command for the user or group and SID can be found by running :code:`<wmic useraccount where name='user-name' get sid>`.
+examples:
+  - name: Update a specified ANF Volume quote rule
+    text: >
+        az netappfiles volume quota-rule update -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --quota-rule-name myrulename --quota-size 100006
+"""
+
+helps['netappfiles volume quota-rule delete'] = """
+type: command
+short-summary: Delete a specified ANF Volume Quota Rule for Volume.
+examples:
+  - name: Delete a specified ANF Volume quote rule
+    text: >
+        az netappfiles volume quota-rule delete -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --quota-rule-name myrulename
+"""
+
+helps['netappfiles volume quota-rule list'] = """
+type: command
+short-summary: Get all ANF Volume Quota Rule for specified Volume.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the ANF volume
+examples:
+  - name: Get all ANF Volume Quota Rule for specified Volume
+    text: >
+        az netappfiles volume quota-rule list -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname
+"""
+
+helps['netappfiles volume quota-rule wait'] = """
+type: command
+short-summary: Wait for a volume quota-rule operation.
 """
 
 
@@ -1563,6 +1665,8 @@ parameters:
     short-summary: Replication Schedule for log backup volume
   - name: --log-backup-src-id
     short-summary: ResourceId of the log backup source volume
+  - name: --kv-private-endpoint-id
+    short-summary: The resource ID of private endpoint for KeyVault. It must reside in the same VNET as the volume. Only applicable if encryptionKeySource = 'Microsoft.KeyVault'.
 examples:
   - name: Create ANF volume group
     text: >
@@ -1572,4 +1676,21 @@ examples:
 helps['netappfiles volume-group wait'] = """
 type: command
 short-summary: Wait for a volume group to be created.
+"""
+
+helps['netappfiles resource'] = """
+type: group
+short-summary: Provides operations for Azure NetApp Files (ANF) Account Resources.
+"""
+
+helps['netappfiles resource query-region-info'] = """
+type: command
+short-summary: Provides storage to network proximity and logical zone mapping information.
+parameters:
+  - name: --location -l
+    short-summary: The location
+examples:
+  - name: Describes region specific information.
+    text: >
+        az netappfiles resource query-region-info -l location
 """

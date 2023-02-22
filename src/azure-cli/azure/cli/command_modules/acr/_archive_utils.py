@@ -132,6 +132,9 @@ class IgnoreRule:  # pylint: disable=too-few-public-methods
             # environments (interferes with dockerignore file)
             if rule.startswith('/'):
                 rule = rule[1:]  # remove beginning '/'
+            # remove trailing slash if included (in parity with docker)
+            while rule[-1] == "/":
+                rule = rule[:-1]
 
         self.pattern = "^"
         tokens = rule.split('/')

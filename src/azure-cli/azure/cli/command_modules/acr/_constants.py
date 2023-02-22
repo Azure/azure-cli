@@ -27,6 +27,14 @@ ACR_TASK_QUICKTASK = 'quicktask'
 
 ACR_RUN_DEFAULT_TIMEOUT_IN_SEC = 60 * 60  # 60 minutes
 
+ACR_AUDIENCE_RESOURCE_NAME = "containerregistry"
+
+ALLOWED_TASK_FILE_TYPES = ('.yaml', '.yml', '.toml', '.json', '.sh', '.bash', '.zsh', '.ps1',
+                           '.ps', '.cmd', '.bat', '.ts', '.js', '.php', '.py', '.rb', '.lua')
+
+# https://github.com/opencontainers/distribution-spec/blob/main/spec.md#listing-referrers
+REF_KEY = "manifests"
+
 
 def get_classic_sku(cmd):
     SkuName = cmd.get_models('SkuName')

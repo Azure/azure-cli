@@ -24,3 +24,11 @@ def cf_private_link_resources(cli_ctx, *_):
 
 def cf_usage(cli_ctx, *_):
     return _signalr_client_factory(cli_ctx).usages
+
+
+def cf_custom_domains(cli_ctx, *_):
+    return _signalr_client_factory(cli_ctx).signal_rcustom_domains
+
+
+def cf_custom_certificates(cli_ctx, *_):
+    return _signalr_client_factory(cli_ctx).signal_rcustom_certificates

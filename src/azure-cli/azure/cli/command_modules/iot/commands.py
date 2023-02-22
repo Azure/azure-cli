@@ -36,6 +36,9 @@ class RouteUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-f
 class HubDeleteResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
         from azure.cli.core.util import CLIError
+        # if no wait, return right away
+        if not poller:
+            return poller
         try:
             super(HubDeleteResultTransform, self).__call__(poller)
         except CLIError as e:
@@ -122,14 +125,16 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     # iot hub commands
     with self.command_group('iot hub', client_factory=iot_hub_service_factory) as g:
-        g.custom_command('create', 'iot_hub_create')
+        g.custom_command('create', 'iot_hub_create', supports_no_wait=True)
         g.custom_command('list', 'iot_hub_list')
         g.custom_command('show-connection-string', 'iot_hub_show_connection_string',
                          deprecate_info=self.deprecate(redirect=CS_DEPRECATION_INFO))
         g.custom_show_command('show', 'iot_hub_get')
         g.generic_update_command('update', getter_name='iot_hub_get', setter_name='iot_hub_update',
                                  command_type=update_custom_util, custom_func_name='update_iot_hub_custom')
-        g.custom_command('delete', 'iot_hub_delete', transform=HubDeleteResultTransform(self.cli_ctx))
+        g.custom_command('delete', 'iot_hub_delete', transform=HubDeleteResultTransform(self.cli_ctx),
+                         supports_no_wait=True)
+        g.custom_wait_command('wait', 'iot_hub_get')
         g.custom_command('list-skus', 'iot_hub_sku_list')
         g.custom_command('show-quota-metrics', 'iot_hub_get_quota_metrics')
         g.custom_command('show-stats', 'iot_hub_get_stats')
@@ -184,7 +189,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     # iot hub device stream commands
     with self.command_group('iot hub devicestream', client_factory=iot_hub_service_factory,
-                            min_api="2019-07-01-preview") as g:
+                            min_api="2019-07-01-preview", is_preview=True) as g:
         g.custom_show_command('show', 'iot_hub_devicestream_show')
 
     # iot central commands

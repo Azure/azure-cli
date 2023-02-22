@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"kind": "TextAnalytics", "sku": {"name": "S"}, "location": "westeurope",
+    body: '{"kind": "TextAnalytics", "sku": {"name": "S"}, "location": "SOUTHCENTRALUS",
       "properties": {}}'
     headers:
       Accept:
@@ -12,37 +12,38 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '91'
+      - '95'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --kind --sku -l
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"7f000fb0-0000-0d00-0000-624238520000\"","location":"westeurope","sku":{"name":"S"},"kind":"TextAnalytics","properties":{"endpoint":"https://westeurope.api.cognitive.microsoft.com/","internalId":"c2d21ddc625c4e8c9fa1350b4abd01dc","dateCreated":"2022-03-28T22:36:02.3378194Z","apiProperties":{"qnaAzureSearchEndpointKey":null},"callRateLimit":{"rules":[{"key":"workflow.endpoint.postcalls","renewalPeriod":60,"count":60,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"/language/:analyze-conversations","method":"*"}]},{"key":"textAnalytics.authoring.customtext.getcalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.updatecalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.internal.getcalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.internal.updatecalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.getCalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.updateCalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.getCalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.updateCalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"*"}]},{"key":"textAnalytics.customText","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1-preview.ct.1/analyze/*","method":"*"}]},{"key":"textAnalytics.analyze","renewalPeriod":60,"count":300,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.2/analyze/*","method":"*"}]},{"key":"textAnalytics.healthcare","renewalPeriod":60,"count":300,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1/entities/health/*","method":"*"},{"path":"text/analytics/v3.2-preview.1/health/*","method":"*"},{"path":"text/analytics/v3.2-preview.2/health/*","method":"*"}]},{"key":"textAnalytics","renewalPeriod":60,"count":1000,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"questionanswering","renewalPeriod":60,"count":600,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"qnamaker/*","method":"*"}]},{"key":"unifiedlanguage.questionanswering","renewalPeriod":60,"count":600,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/query-knowledgebases/*","method":"*"},{"path":"language/:query-*","method":"*"}]},{"key":"textAnalytics.analyze.internal.autoTagging","renewalPeriod":60,"count":150,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"TextAnalytics/ct-auto-tagging","method":"*"}]},{"key":"default","renewalPeriod":1,"count":20,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"quotaLimit":{"rules":[{"key":"workflow.endpoint.postcalls","renewalPeriod":2592000,"count":100000,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"/language/:analyze-conversations","method":"*"}]}]},"backupUpperLimit":20,"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"CustomerManagedStorage"},{"name":"Container","value":"TextAnalytics.*,TextAnalytics.Healthcare,TextAnalytics.HealthcareFhir,TextAnalytics.Keyphrase,TextAnalytics.KeyphraseV2,TextAnalytics.KeyPhraseONNX,TextAnalytics.LanguageFastText,TextAnalytics.Language,TextAnalytics.LanguageV2,TextAnalytics.Sentiment,TextAnalytics.SentimentV2,TextAnalytics.SentimentV3,TextAnalytics.SentimentV3Preview"},{"name":"Cloud","value":"TextAnalytics.Healthcare,TextAnalytics.Analyze,QuestionAnswer.AllApis,LanguageService.QuestionAnsweringApis"}],"endpoints":{"Text
-        Analytics":"https://westeurope.api.cognitive.microsoft.com/","LanguageAuthoring":"https://westeurope.api.cognitive.microsoft.com/","ConversationalLanguageUnderstanding":"https://westeurope.api.cognitive.microsoft.com/","Custom
-        Text Authoring Internal APIs":"https://westeurope.api.cognitive.microsoft.com/","Conversational
-        Language Understanding Authoring Internal APIs":"https://westeurope.api.cognitive.microsoft.com/","Custom
-        Text Authoring":"https://westeurope.api.cognitive.microsoft.com/","Conversational
-        Language Understanding Authoring":"https://westeurope.api.cognitive.microsoft.com/","ConversationalLURuntime":"https://westeurope.api.cognitive.microsoft.com/","Language":"https://westeurope.api.cognitive.microsoft.com/","QnAMaker":"https://westeurope.api.cognitive.microsoft.com/","turing":"https://westeurope.api.cognitive.microsoft.com/","Turing
-        DeepWrite":"https://westeurope.api.cognitive.microsoft.com/","QuestionAnswering":"https://westeurope.api.cognitive.microsoft.com/","QuestionAnsweringBizQA":"https://westeurope.api.cognitive.microsoft.com/","QuestionAnsweringQnAGen":"https://westeurope.api.cognitive.microsoft.com/","LUIS.Authoring":"https://westeurope.api.cognitive.microsoft.com/"},"provisioningState":"Creating"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-03-28T22:36:01.7610623Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-28T22:36:01.7610623Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"1700636c-0000-0500-0000-6358a6310000\"","location":"SOUTHCENTRALUS","sku":{"name":"S"},"kind":"TextAnalytics","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","internalId":"cc45b04c049b4fd9b1a2199dc18fabd7","dateCreated":"2022-10-26T03:14:57.2341354Z","apiProperties":{"qnaAzureSearchEndpointKey":null},"callRateLimit":{"rules":[{"key":"workflow.endpoint.postcalls","renewalPeriod":60,"count":1000,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/:analyze-conversations","method":"*"}]},{"key":"textAnalytics.conversations.jobs.getcalls","renewalPeriod":60,"count":1000,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/jobs/*","method":"*"}]},{"key":"textAnalytics.conversations.jobs.postcalls","renewalPeriod":60,"count":1000,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/jobs","method":"*"}]},{"key":"textAnalytics.authoring.customtext.getcalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.updatecalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.march.getcalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/authoring/analyze-text/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.march.updatecalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/authoring/analyze-text/projects/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.internal.getcalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.internal.updatecalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.getCalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.updateCalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.march.getCalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/authoring/analyze-conversations/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.march.updateCalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/authoring/analyze-conversations/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.getCalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.updateCalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"*"}]},{"key":"textAnalytics.customText","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1-preview.ct.1/analyze/*","method":"*"}]},{"key":"textAnalytics.analyze","renewalPeriod":60,"count":300,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"text/analytics/v3.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.2/analyze/*","method":"*"}]},{"key":"textAnalytics.healthcare","renewalPeriod":60,"count":300,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1/entities/health/*","method":"*"},{"path":"text/analytics/v3.2-preview.1/health/*","method":"*"},{"path":"text/analytics/v3.2-preview.2/health/*","method":"*"}]},{"key":"textAnalytics","renewalPeriod":60,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"text/analytics/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"questionanswering","renewalPeriod":60,"count":600,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"qnamaker/*","method":"*"}]},{"key":"unifiedlanguage.questionanswering","renewalPeriod":60,"count":600,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/query-knowledgebases/*","method":"*"},{"path":"language/:query-*","method":"*"}]},{"key":"textAnalytics.analyze.internal.autoTagging","renewalPeriod":60,"count":150,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"TextAnalytics/ct-auto-tagging","method":"*"}]},{"key":"textAnalytics.analyze.internal.evaluation","renewalPeriod":60,"count":150,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"TextAnalytics/ct-evaluation","method":"*"}]},{"key":"default","renewalPeriod":1,"count":20,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"quotaLimit":{"rules":[{"key":"workflow.endpoint.postcalls","renewalPeriod":2592000,"count":100000,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"/language/:analyze-conversations","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"CustomerManagedStorage"},{"name":"Container","value":"TextAnalytics.*,TextAnalytics.Healthcare,TextAnalytics.HealthcareFhir,TextAnalytics.Keyphrase,TextAnalytics.KeyphraseV2,TextAnalytics.KeyPhraseONNX,TextAnalytics.LanguageFastText,TextAnalytics.Language,TextAnalytics.LanguageV2,TextAnalytics.Sentiment,TextAnalytics.SentimentV2,TextAnalytics.SentimentV3,TextAnalytics.SentimentV3Preview"},{"name":"Cloud","value":"TextAnalytics.Healthcare,TextAnalytics.Analyze,QuestionAnswer.AllApis,LanguageService.QuestionAnsweringApis"}],"endpoints":{"Text
+        Analytics":"https://southcentralus.api.cognitive.microsoft.com/","Custom Text
+        Authoring":"https://southcentralus.api.cognitive.microsoft.com/","Conversational
+        Language Understanding Authoring":"https://southcentralus.api.cognitive.microsoft.com/","Custom
+        Question Answering Authoring":"https://southcentralus.api.cognitive.microsoft.com/","Custom
+        Question Answering":"https://southcentralus.api.cognitive.microsoft.com/","ConversationalLURuntime":"https://southcentralus.api.cognitive.microsoft.com/","Language":"https://southcentralus.api.cognitive.microsoft.com/","Language-2022-05-01":"https://southcentralus.api.cognitive.microsoft.com/","QnAMaker":"https://southcentralus.api.cognitive.microsoft.com/","turing":"https://southcentralus.api.cognitive.microsoft.com/","Turing
+        DeepWrite":"https://southcentralus.api.cognitive.microsoft.com/","QuestionAnswering":"https://southcentralus.api.cognitive.microsoft.com/","QuestionAnsweringBizQA":"https://southcentralus.api.cognitive.microsoft.com/","QuestionAnsweringQnAGen":"https://southcentralus.api.cognitive.microsoft.com/","QuestionAnswering
+        Generate":"https://southcentralus.api.cognitive.microsoft.com/","LUIS.Authoring":"https://southcentralus.api.cognitive.microsoft.com/"},"provisioningState":"Creating"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:14:57.0308379Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:14:57.0308379Z"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westeurope/operationResults/b976819c-f2ba-4259-ae3a-55122c96b1b6?api-version=2017-04-18
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/baaec2a7-63b0-4c56-a26b-1bfac406b585?api-version=2017-04-18
       cache-control:
       - no-cache
       content-length:
-      - '6612'
+      - '8084'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 22:36:03 GMT
+      - Wed, 26 Oct 2022 03:14:58 GMT
       etag:
-      - '"7f000fb0-0000-0d00-0000-624238520000"'
+      - '"1700636c-0000-0500-0000-6358a6310000"'
       expires:
       - '-1'
       pragma:
@@ -54,7 +55,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '460'
+      - '676'
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -74,21 +75,21 @@ interactions:
       ParameterSetName:
       - -n -g --kind --sku -l
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westeurope/operationResults/b976819c-f2ba-4259-ae3a-55122c96b1b6?api-version=2017-04-18
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/baaec2a7-63b0-4c56-a26b-1bfac406b585?api-version=2017-04-18
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westeurope/operationResults/b976819c-f2ba-4259-ae3a-55122c96b1b6","name":"b976819c-f2ba-4259-ae3a-55122c96b1b6","status":"Creating","startTime":"2022-03-28T22:36:02Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/baaec2a7-63b0-4c56-a26b-1bfac406b585","name":"baaec2a7-63b0-4c56-a26b-1bfac406b585","status":"Creating","startTime":"2022-10-26T03:14:57Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '274'
+      - '278'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 22:36:32 GMT
+      - Wed, 26 Oct 2022 03:15:28 GMT
       expires:
       - '-1'
       pragma:
@@ -104,7 +105,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '68'
+      - '7'
     status:
       code: 200
       message: OK
@@ -122,21 +123,21 @@ interactions:
       ParameterSetName:
       - -n -g --kind --sku -l
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westeurope/operationResults/b976819c-f2ba-4259-ae3a-55122c96b1b6?api-version=2017-04-18
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/baaec2a7-63b0-4c56-a26b-1bfac406b585?api-version=2017-04-18
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westeurope/operationResults/b976819c-f2ba-4259-ae3a-55122c96b1b6","name":"b976819c-f2ba-4259-ae3a-55122c96b1b6","status":"Succeeded","startTime":"2022-03-28T22:36:02Z","endTime":"2022-03-28T22:36:35Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/SOUTHCENTRALUS/operationResults/baaec2a7-63b0-4c56-a26b-1bfac406b585","name":"baaec2a7-63b0-4c56-a26b-1bfac406b585","status":"Succeeded","startTime":"2022-10-26T03:14:57Z","endTime":"2022-10-26T03:15:29Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '308'
+      - '312'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 22:37:03 GMT
+      - Wed, 26 Oct 2022 03:15:57 GMT
       expires:
       - '-1'
       pragma:
@@ -152,7 +153,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '48'
+      - '6'
     status:
       code: 200
       message: OK
@@ -170,29 +171,30 @@ interactions:
       ParameterSetName:
       - -n -g --kind --sku -l
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"7f00e4b0-0000-0d00-0000-624238730000\"","location":"westeurope","sku":{"name":"S"},"kind":"TextAnalytics","properties":{"endpoint":"https://westeurope.api.cognitive.microsoft.com/","internalId":"c2d21ddc625c4e8c9fa1350b4abd01dc","dateCreated":"2022-03-28T22:36:02.3378194Z","apiProperties":{"qnaAzureSearchEndpointKey":null},"callRateLimit":{"rules":[{"key":"workflow.endpoint.postcalls","renewalPeriod":60,"count":60,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"/language/:analyze-conversations","method":"*"}]},{"key":"textAnalytics.authoring.customtext.getcalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.updatecalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.internal.getcalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.internal.updatecalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.getCalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.updateCalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.getCalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.updateCalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"*"}]},{"key":"textAnalytics.customText","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1-preview.ct.1/analyze/*","method":"*"}]},{"key":"textAnalytics.analyze","renewalPeriod":60,"count":300,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.2/analyze/*","method":"*"}]},{"key":"textAnalytics.healthcare","renewalPeriod":60,"count":300,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1/entities/health/*","method":"*"},{"path":"text/analytics/v3.2-preview.1/health/*","method":"*"},{"path":"text/analytics/v3.2-preview.2/health/*","method":"*"}]},{"key":"textAnalytics","renewalPeriod":60,"count":1000,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"questionanswering","renewalPeriod":60,"count":600,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"qnamaker/*","method":"*"}]},{"key":"unifiedlanguage.questionanswering","renewalPeriod":60,"count":600,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/query-knowledgebases/*","method":"*"},{"path":"language/:query-*","method":"*"}]},{"key":"textAnalytics.analyze.internal.autoTagging","renewalPeriod":60,"count":150,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"TextAnalytics/ct-auto-tagging","method":"*"}]},{"key":"default","renewalPeriod":1,"count":20,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"quotaLimit":{"rules":[{"key":"workflow.endpoint.postcalls","renewalPeriod":2592000,"count":100000,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"/language/:analyze-conversations","method":"*"}]}]},"backupUpperLimit":20,"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"CustomerManagedStorage"},{"name":"Container","value":"TextAnalytics.*,TextAnalytics.Healthcare,TextAnalytics.HealthcareFhir,TextAnalytics.Keyphrase,TextAnalytics.KeyphraseV2,TextAnalytics.KeyPhraseONNX,TextAnalytics.LanguageFastText,TextAnalytics.Language,TextAnalytics.LanguageV2,TextAnalytics.Sentiment,TextAnalytics.SentimentV2,TextAnalytics.SentimentV3,TextAnalytics.SentimentV3Preview"},{"name":"Cloud","value":"TextAnalytics.Healthcare,TextAnalytics.Analyze,QuestionAnswer.AllApis,LanguageService.QuestionAnsweringApis"}],"endpoints":{"Text
-        Analytics":"https://westeurope.api.cognitive.microsoft.com/","LanguageAuthoring":"https://westeurope.api.cognitive.microsoft.com/","ConversationalLanguageUnderstanding":"https://westeurope.api.cognitive.microsoft.com/","Custom
-        Text Authoring Internal APIs":"https://westeurope.api.cognitive.microsoft.com/","Conversational
-        Language Understanding Authoring Internal APIs":"https://westeurope.api.cognitive.microsoft.com/","Custom
-        Text Authoring":"https://westeurope.api.cognitive.microsoft.com/","Conversational
-        Language Understanding Authoring":"https://westeurope.api.cognitive.microsoft.com/","ConversationalLURuntime":"https://westeurope.api.cognitive.microsoft.com/","Language":"https://westeurope.api.cognitive.microsoft.com/","QnAMaker":"https://westeurope.api.cognitive.microsoft.com/","turing":"https://westeurope.api.cognitive.microsoft.com/","Turing
-        DeepWrite":"https://westeurope.api.cognitive.microsoft.com/","QuestionAnswering":"https://westeurope.api.cognitive.microsoft.com/","QuestionAnsweringBizQA":"https://westeurope.api.cognitive.microsoft.com/","QuestionAnsweringQnAGen":"https://westeurope.api.cognitive.microsoft.com/","LUIS.Authoring":"https://westeurope.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-03-28T22:36:01.7610623Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-28T22:36:01.7610623Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"1700a26c-0000-0500-0000-6358a6510000\"","location":"SOUTHCENTRALUS","sku":{"name":"S"},"kind":"TextAnalytics","properties":{"endpoint":"https://southcentralus.api.cognitive.microsoft.com/","internalId":"cc45b04c049b4fd9b1a2199dc18fabd7","dateCreated":"2022-10-26T03:14:57.2341354Z","apiProperties":{"qnaAzureSearchEndpointKey":null},"callRateLimit":{"rules":[{"key":"workflow.endpoint.postcalls","renewalPeriod":60,"count":1000,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/:analyze-conversations","method":"*"}]},{"key":"textAnalytics.conversations.jobs.getcalls","renewalPeriod":60,"count":1000,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/jobs/*","method":"*"}]},{"key":"textAnalytics.conversations.jobs.postcalls","renewalPeriod":60,"count":1000,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/jobs","method":"*"}]},{"key":"textAnalytics.authoring.customtext.getcalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.updatecalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.march.getcalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/authoring/analyze-text/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.march.updatecalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/authoring/analyze-text/projects/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.internal.getcalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.internal.updatecalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.getCalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.updateCalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.march.getCalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/authoring/analyze-conversations/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.march.updateCalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/authoring/analyze-conversations/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.getCalls","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.updateCalls","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"*"}]},{"key":"textAnalytics.customText","renewalPeriod":60,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1-preview.ct.1/analyze/*","method":"*"}]},{"key":"textAnalytics.analyze","renewalPeriod":60,"count":300,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"text/analytics/v3.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.2/analyze/*","method":"*"}]},{"key":"textAnalytics.healthcare","renewalPeriod":60,"count":300,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"text/analytics/v3.1/entities/health/*","method":"*"},{"path":"text/analytics/v3.2-preview.1/health/*","method":"*"},{"path":"text/analytics/v3.2-preview.2/health/*","method":"*"}]},{"key":"textAnalytics","renewalPeriod":60,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"text/analytics/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"questionanswering","renewalPeriod":60,"count":600,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"qnamaker/*","method":"*"}]},{"key":"unifiedlanguage.questionanswering","renewalPeriod":60,"count":600,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"language/query-knowledgebases/*","method":"*"},{"path":"language/:query-*","method":"*"}]},{"key":"textAnalytics.analyze.internal.autoTagging","renewalPeriod":60,"count":150,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"TextAnalytics/ct-auto-tagging","method":"*"}]},{"key":"textAnalytics.analyze.internal.evaluation","renewalPeriod":60,"count":150,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"TextAnalytics/ct-evaluation","method":"*"}]},{"key":"default","renewalPeriod":1,"count":20,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"quotaLimit":{"rules":[{"key":"workflow.endpoint.postcalls","renewalPeriod":2592000,"count":100000,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"/language/:analyze-conversations","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"DynamicThrottling"},{"name":"VirtualNetworks"},{"name":"CustomerManagedKey"},{"name":"CustomerManagedStorage"},{"name":"Container","value":"TextAnalytics.*,TextAnalytics.Healthcare,TextAnalytics.HealthcareFhir,TextAnalytics.Keyphrase,TextAnalytics.KeyphraseV2,TextAnalytics.KeyPhraseONNX,TextAnalytics.LanguageFastText,TextAnalytics.Language,TextAnalytics.LanguageV2,TextAnalytics.Sentiment,TextAnalytics.SentimentV2,TextAnalytics.SentimentV3,TextAnalytics.SentimentV3Preview"},{"name":"Cloud","value":"TextAnalytics.Healthcare,TextAnalytics.Analyze,QuestionAnswer.AllApis,LanguageService.QuestionAnsweringApis"}],"endpoints":{"Text
+        Analytics":"https://southcentralus.api.cognitive.microsoft.com/","Custom Text
+        Authoring":"https://southcentralus.api.cognitive.microsoft.com/","Conversational
+        Language Understanding Authoring":"https://southcentralus.api.cognitive.microsoft.com/","Custom
+        Question Answering Authoring":"https://southcentralus.api.cognitive.microsoft.com/","Custom
+        Question Answering":"https://southcentralus.api.cognitive.microsoft.com/","ConversationalLURuntime":"https://southcentralus.api.cognitive.microsoft.com/","Language":"https://southcentralus.api.cognitive.microsoft.com/","Language-2022-05-01":"https://southcentralus.api.cognitive.microsoft.com/","QnAMaker":"https://southcentralus.api.cognitive.microsoft.com/","turing":"https://southcentralus.api.cognitive.microsoft.com/","Turing
+        DeepWrite":"https://southcentralus.api.cognitive.microsoft.com/","QuestionAnswering":"https://southcentralus.api.cognitive.microsoft.com/","QuestionAnsweringBizQA":"https://southcentralus.api.cognitive.microsoft.com/","QuestionAnsweringQnAGen":"https://southcentralus.api.cognitive.microsoft.com/","QuestionAnswering
+        Generate":"https://southcentralus.api.cognitive.microsoft.com/","LUIS.Authoring":"https://southcentralus.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2022-10-26T03:14:57.0308379Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-10-26T03:14:57.0308379Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '6613'
+      - '8085'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 22:37:03 GMT
+      - Wed, 26 Oct 2022 03:15:58 GMT
       etag:
-      - '"7f00e4b0-0000-0d00-0000-624238730000"'
+      - '"1700a26c-0000-0500-0000-6358a6510000"'
       expires:
       - '-1'
       pragma:
@@ -208,7 +210,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '14'
+      - '10'
     status:
       code: 200
       message: OK
@@ -226,21 +228,21 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-cognitiveservices/13.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.41.0 azsdk-python-mgmt-cognitiveservices/13.3.0 Python/3.9.13 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/usages?api-version=2022-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002/usages?api-version=2022-10-01
   response:
     body:
-      string: '{"value":[{"name":{"value":"TextAnalytics.CtAutoTagging","localizedValue":"TextAnalytics.CtAutoTagging"},"status":"Included","currentValue":0.0,"limit":5000.0,"nextResetTime":"0001-01-01T00:00:00Z","quotaPeriod":"30.00:00:00","unit":"Count"}]}'
+      string: '{"value":[{"name":{"value":"TextAnalytics.CtAutoTagging","localizedValue":"TextAnalytics.CtAutoTagging"},"status":"Included","currentValue":0.0,"limit":5000.0,"nextResetTime":"0001-01-01T00:00:00Z","quotaPeriod":"30.00:00:00","unit":"Count"},{"name":{"value":"TextAnalytics.CtEvaluation","localizedValue":"TextAnalytics.CtEvaluation"},"status":"Included","currentValue":0.0,"limit":5000.0,"nextResetTime":"0001-01-01T00:00:00Z","quotaPeriod":"30.00:00:00","unit":"Count"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '243'
+      - '473'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 28 Mar 2022 22:37:04 GMT
+      - Wed, 26 Oct 2022 03:15:58 GMT
       expires:
       - '-1'
       pragma:
@@ -256,7 +258,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-envoy-upstream-service-time:
-      - '40'
+      - '226'
     status:
       code: 200
       message: OK

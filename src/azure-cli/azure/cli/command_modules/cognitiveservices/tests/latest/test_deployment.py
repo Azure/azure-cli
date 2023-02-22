@@ -20,7 +20,7 @@ class CognitiveServicesDeploymentTests(ScenarioTest):
             'sname': sname,
             'kind': 'OpenAI',
             'sku': 'S0',
-            'location': 'westus2'
+            'location': 'SOUTHCENTRALUS'
         })
 
         # test to create cognitive services account
@@ -34,13 +34,13 @@ class CognitiveServicesDeploymentTests(ScenarioTest):
 
         self.assertEqual(self.cmd('az cognitiveservices account deployment list -n {sname} -g {rg}').get_output_in_json(), [])
 
-        deployment = self.cmd('az cognitiveservices account deployment create -n {sname} -g {rg} --deployment-name dpy --model-name ada --model-version "1" --model-format OpenAI --scale-settings-capacity 1 --scale-settings-scale-type "Manual"').get_output_in_json()
+        deployment = self.cmd('az cognitiveservices account deployment create -n {sname} -g {rg} --deployment-name dpy --model-name text-ada-001 --model-version "1" --model-format OpenAI --scale-settings-scale-type "Standard"').get_output_in_json()
 
         deployments = self.cmd('az cognitiveservices account deployment list -n {sname} -g {rg}').get_output_in_json()
         self.assertTrue(len(deployments) > 0)
         deployment = self.cmd('az cognitiveservices account deployment show -n {sname} -g {rg} --deployment-name dpy').get_output_in_json()
         self.assertEqual(deployment['name'], 'dpy')
-        self.assertEqual(deployment['properties']['model']['name'], 'ada')
+        self.assertEqual(deployment['properties']['model']['name'], 'text-ada-001')
 
         self.cmd('az cognitiveservices account deployment delete -n {sname} -g {rg} --deployment-name dpy')
         self.assertEqual(self.cmd('az cognitiveservices account deployment list -n {sname} -g {rg}').get_output_in_json(), [])

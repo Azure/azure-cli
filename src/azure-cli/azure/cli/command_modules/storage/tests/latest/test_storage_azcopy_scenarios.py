@@ -214,7 +214,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
     @StorageAccountPreparer()
     @StorageTestFilesPreparer()
     def test_storage_blob_azcopy_remove(self, resource_group, storage_account_info, test_dir):
-        storage_account, _ = storage_account_info
+        storage_account, account_key = storage_account_info
         container = self.create_container(storage_account_info)
 
         # sync directory
@@ -293,6 +293,18 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 0))
+        connection_string = self.cmd('storage account show-connection-string -n {} -g {} -otsv'
+                                     .format(storage_account, resource_group)).output
+
+        # sync directory
+        self.cmd('storage blob sync -s "{}" -c {} --connection-string {}'.format(
+            test_dir, container, connection_string))
+        self.cmd('storage blob list -c {} --connection-string {}'.format(
+            container, connection_string), checks=JMESPathCheck('length(@)', 41))
+        self.cmd('storage remove -c {} -n readme --connection-string {}'.format(
+            container, connection_string))
+        self.cmd('storage blob list -c {} --connection-string {}'.format(
+            container, connection_string), checks=JMESPathCheck('length(@)', 40))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()

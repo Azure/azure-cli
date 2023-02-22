@@ -9,7 +9,10 @@ import json
 import re
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
+from azure.cli.core.azclierror import (InvalidArgumentValueError,
+                                       RequiredArgumentMissingError,
+                                       MutuallyExclusiveArgumentError,
+                                       ArgumentUsageError)
 
 from ._utils import is_valid_connection_string, resolve_store_metadata, get_store_name_from_connection_string
 from ._models import QueryFields
@@ -51,18 +54,18 @@ def validate_import_depth(namespace):
         try:
             depth = int(depth)
             if depth < 1:
-                raise CLIError('Depth should be at least 1.')
+                raise InvalidArgumentValueError('Depth should be at least 1.')
         except ValueError:
-            raise CLIError("Depth is not a number.")
+            raise InvalidArgumentValueError("Depth is not a number.")
 
 
 def validate_separator(namespace):
     if namespace.separator is not None:
         if namespace.format_ == "properties":
-            raise CLIError("Separator is not needed for properties file.")
+            raise ArgumentUsageError("Separator is not needed for properties file.")
         valid_separators = ['.', ',', ';', '-', '_', '__', '/', ':']
         if namespace.separator not in valid_separators:
-            raise CLIError(
+            raise InvalidArgumentValueError(
                 "Unsupported separator, allowed values: '.', ',', ';', '-', '_', '__', '/', ':'.")
 
 
@@ -172,13 +175,13 @@ def validate_filter_parameter(string):
                     # Ensure that provided value of this filter parameter is valid JSON. Error out if value is invalid JSON.
                     filter_param_value = json.loads(filter_param_value)
                 except ValueError:
-                    raise CLIError('Filter parameter value must be a JSON escaped string. "{}" is not a valid JSON object.'.format(filter_param_value))
+                    raise InvalidArgumentValueError('Filter parameter value must be a JSON escaped string. "{}" is not a valid JSON object.'.format(filter_param_value))
                 result = (comps[0], filter_param_value)
             else:
                 result = (string, '')
         else:
             # Error out on invalid arguments like '=value' or '='
-            raise CLIError('Invalid filter parameter "{}". Parameter name cannot be empty.'.format(string))
+            raise InvalidArgumentValueError('Invalid filter parameter "{}". Parameter name cannot be empty.'.format(string))
     return result
 
 
@@ -199,7 +202,7 @@ def validate_identity(namespace):
             continue
 
         if identity != '[system]' and not is_valid_resource_id(identity):
-            raise CLIError("Invalid identity '{}'. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity.".format(identity))
+            raise InvalidArgumentValueError("Invalid identity '{}'. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity.".format(identity))
 
 
 def validate_secret_identifier(namespace):
@@ -218,16 +221,16 @@ def validate_key(namespace):
     if namespace.key:
         input_key = str(namespace.key).lower()
         if input_key == '.' or input_key == '..' or '%' in input_key:
-            raise CLIError("Key is invalid. Key cannot be a '.' or '..', or contain the '%' character.")
+            raise InvalidArgumentValueError("Key is invalid. Key cannot be a '.' or '..', or contain the '%' character.")
     else:
-        raise CLIError("Key cannot be empty.")
+        raise RequiredArgumentMissingError("Key cannot be empty.")
 
 
 def validate_resolve_keyvault(namespace):
     if namespace.resolve_keyvault:
         identifier = getattr(namespace, 'destination', None)
         if identifier and identifier != "file":
-            raise CLIError("--resolve-keyvault is only applicable for exporting to file.")
+            raise InvalidArgumentValueError("--resolve-keyvault is only applicable for exporting to file.")
 
 
 def validate_feature(namespace):
@@ -274,7 +277,7 @@ def validate_export_profile(namespace):
         if namespace.destination != 'file':
             raise InvalidArgumentValueError("The profile '{}' only supports exporting to a file.".format(ImportExportProfiles.KVSET))
         if namespace.format_ != 'json':
-            raise CLIError("The profile '{}' only supports exporting in the JSON format".format(ImportExportProfiles.KVSET))
+            raise InvalidArgumentValueError("The profile '{}' only supports exporting in the JSON format".format(ImportExportProfiles.KVSET))
         if namespace.prefix is not None and namespace.prefix != '':
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='prefix')
         if namespace.dest_label is not None:
@@ -291,6 +294,12 @@ def validate_strict_import(namespace):
             raise MutuallyExclusiveArgumentError("The option '--skip-features' cannot be used with the '--strict' option.")
         if namespace.source != 'file':
             raise InvalidArgumentValueError("The option '--strict' can only be used when importing from a file.")
+
+
+def validate_export_as_reference(namespace):
+    if namespace.export_as_reference:
+        if namespace.destination != 'appservice':
+            raise InvalidArgumentValueError("The option '--export-as-reference' can only be used when exporting to app service.")
 
 
 def __construct_kvset_invalid_argument_error(is_exporting, argument):

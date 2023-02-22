@@ -17,8 +17,8 @@ def load_arguments_eh(self, _):
     from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace, validate_rights
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
-    (KeyType, AccessRights, SkuName, KeySource) = self.get_models('KeyType', 'AccessRights', 'SkuName', 'KeySource', resource_type=ResourceType.MGMT_EVENTHUB)
-    from azure.cli.command_modules.eventhubs.action import AlertAddEncryption
+    (KeyType, AccessRights, SkuName, TlsVersion) = self.get_models('KeyType', 'AccessRights', 'SkuName', 'TlsVersion', resource_type=ResourceType.MGMT_EVENTHUB)
+    from azure.cli.command_modules.eventhubs.action import AlertAddEncryption, ConstructPolicy
 
     rights_arg_type = CLIArgumentType(options_list=['--rights'], nargs='+', arg_type=get_enum_type(AccessRights), validator=validate_rights, help='Space-separated list of Authorization rule rights')
     key_arg_type = CLIArgumentType(options_list=['--key'], arg_type=get_enum_type(KeyType), help='specifies Primary or Secondary key needs to be reset')
@@ -43,14 +43,8 @@ def load_arguments_eh(self, _):
         c.argument('capacity', type=int, help='Capacity for Sku')
         c.argument('is_auto_inflate_enabled', options_list=['--enable-auto-inflate'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether AutoInflate is enabled for eventhub namespace.')
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
-        c.argument('default_action', arg_group='networkrule', options_list=['--default-action'], arg_type=get_enum_type(['Allow', 'Deny']),
-                   help='Default Action for Network Rule Set.')
-        c.argument('trusted_service_access_enabled', options_list=['--enable-trusted-service-access', '-t'], arg_type=get_three_state_flag(),
-                   help='A boolean value that indicates whether Trusted Service Access is enabled for Network Rule Set.')
         c.argument('zone_redundant', options_list=['--zone-redundant'], is_preview=True, arg_type=get_three_state_flag(),
                    help='Enabling this property creates a Standard EventHubs Namespace in regions supported availability zones')
-        c.argument('identity', arg_group='Managed Identity', options_list=['--assign-identity'], is_preview=True, arg_type=get_three_state_flag(),
-                   help='A boolean value that indicates whether Managed Identity is enabled.')
         c.argument('disable_local_auth', options_list=['--disable-local-auth'], is_preview=True, arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether SAS authentication is enabled/disabled for the Event Hubs')
         c.argument('mi_system_assigned', arg_group='Managed Identity',
@@ -58,20 +52,14 @@ def load_arguments_eh(self, _):
                    help='Enable System Assigned Identity')
         c.argument('mi_user_assigned', arg_group='Managed Identity', nargs='+', help='List of User Assigned Identity ids.')
         c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')
+        c.argument('minimum_tls_version', arg_type=get_enum_type(TlsVersion), options_list=['--minimum-tls-version', '--min-tls'], help='The minimum TLS version for the cluster to support, e.g. 1.2')
+        c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'], is_preview=True,
+                   arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption) is enabled/disabled')
 
     with self.argument_context('eventhubs namespace create', min_api='2021-06-01-preview') as c:
         c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], is_preview=True, help='Cluster ARM ID of the Namespace')
 
-    with self.argument_context('eventhubs namespace update', arg_group='Managed Identity', min_api='2021-06-01-preview') as c:
-        c.argument('key_source', options_list=['--key-source'], is_preview=True, arg_type=get_enum_type(KeySource),
-                   help='Encryption key source. Possible values include: \'Microsoft.KeyVault\'.')
-        c.argument('key_name', is_preview=True, help='The name of the KeyVault key.', )
-        c.argument('key_vault_uri', is_preview=True, help='The Uri of the KeyVault.')
-        c.argument('key_version', is_preview=True,
-                   help='The version of the KeyVault key to use.')
-        c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'], is_preview=True,
-                   arg_type=get_three_state_flag(),
-                   help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption) is enabled/disabled')
 
 # Cluster region
     for scope in ['eventhubs cluster', 'eventhubs cluster namespace list']:
@@ -79,12 +67,13 @@ def load_arguments_eh(self, _):
             c.argument('cluster_name', arg_type=name_type, id_part=None, help='Name of Cluster')
 
     with self.argument_context('eventhubs cluster create') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part=None, help='Location of the Cluster, for locations of available pre-provision clusters, please check az evetnhubs ')
-        c.argument('capacity', type=int, help='Capacity for Sku, allowed value : 1')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part=None, help='Location of the Cluster, for locations of available pre-provision clusters, please check az event hubs ')
+        c.argument('supports_scaling', arg_type=get_three_state_flag(), help='A value that indicates whether Scaling is Supported.')
 
     for scope in ['eventhubs cluster create', 'eventhubs cluster update']:
         with self.argument_context(scope) as c:
             c.argument('tags', arg_type=tags_type)
+            c.argument('capacity', type=int, help='Capacity for Sku, allowed value : 1')
 
     # region Namespace Authorizationrule
     with self.argument_context('eventhubs namespace authorization-rule list') as c:
@@ -204,6 +193,15 @@ def load_arguments_eh(self, _):
             c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
             c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network')
 
+    with self.argument_context('eventhubs namespace network-rule update', resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:
+        c.argument('public_network_access', options_list=['--public-network-access', '--public-network'], arg_type=get_enum_type(['Enabled', 'Disabled']), help='This determines if traffic is allowed over public network. By default it is enabled. If value is SecuredByPerimeter then Inbound and Outbound communication is controlled by the network security perimeter and profile\' access rules.')
+        c.argument('trusted_service_access_enabled', options_list=['--enable-trusted-service-access', '-t'],
+                   arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether Trusted Service Access is enabled for Network Rule Set.')
+        c.argument('default_action', arg_group='networkrule', options_list=['--default-action'],
+                   arg_type=get_enum_type(['Allow', 'Deny']),
+                   help='Default Action for Network Rule Set.')
+
     with self.argument_context('eventhubs namespace network-rule add', resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:
         c.argument('ignore_missing_vnet_service_endpoint', arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
         c.argument('action', arg_group='IP Address Rule', options_list=['--action'], arg_type=get_enum_type(['Allow']), help='Action of the IP rule')
@@ -247,9 +245,12 @@ def load_arguments_eh(self, _):
     with self.argument_context('eventhubs namespace encryption', resource_type=ResourceType.MGMT_EVENTHUB) as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
 
-    for scope in ['eventhubs namespace encryption add', 'eventhubs namespace identity remove']:
+    for scope in ['eventhubs namespace encryption add', 'eventhubs namespace encryption remove']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_EVENTHUB) as c:
             c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')
+            c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'], is_preview=True,
+                       arg_type=get_three_state_flag(),
+                       help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption) is enabled/disabled')
 
 # Schema Registry
     with self.argument_context('eventhubs namespace schema-registry list') as c:
@@ -265,3 +266,26 @@ def load_arguments_eh(self, _):
             c.argument('schema_type', options_list=['--schema-type'], arg_type=get_enum_type(['Avro']), help='Type of Schema')
             c.argument('tags', options_list=['--group-properties'], arg_type=tags_type,
                        help='Type of Schema')
+
+# Application Group
+    with self.argument_context('eventhubs namespace application-group') as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], arg_type=namespace_name_arg_type, help='Name of Namespace')
+        c.argument('application_group_name', arg_type=name_type, id_part='child_name_1', help='Name of Application Group')
+
+    for scope in ['eventhubs namespace application-group create', 'eventhubs namespace application-group list']:
+        with self.argument_context(scope) as c:
+            c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
+            c.argument('application_group_name', arg_type=name_type, id_part=None, help='Name of Application Group')
+
+    for scope in ['eventhubs namespace application-group create', 'eventhubs namespace application-group update']:
+        with self.argument_context(scope) as c:
+            c.argument('is_enabled', arg_type=get_three_state_flag(),
+                       help='Determines if Application Group is allowed to create connection with namespace or not. '
+                            'Once the isEnabled is set to false, all the existing connections of application group gets dropped and no new connections will be allowed')
+
+    with self.argument_context('eventhubs namespace application-group create') as c:
+        c.argument('client_app_group_identifier', options_list=['--client-app-group-identifier', '--client-app-group-id'], help='The Unique identifier for application group.Supports SAS(NamespaceSASKeyName=KeyName or EntitySASKeyName=KeyName) or AAD(AADAppID=Guid)')
+
+    for scope in ['eventhubs namespace application-group policy add', 'eventhubs namespace application-group policy remove', 'eventhubs namespace application-group create']:
+        with self.argument_context(scope) as c:
+            c.argument('throttling_policy_config', action=ConstructPolicy, options_list=['--throttling-policy-config', '--throttling-policy', '--policy-config'], nargs='+', help='List of Throttling Policy Objects')
