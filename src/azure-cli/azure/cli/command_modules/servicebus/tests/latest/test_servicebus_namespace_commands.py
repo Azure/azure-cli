@@ -109,7 +109,7 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
         self.assertEqual(0, len(namespace['tags']))
 
         # Delete Namespace list by ResourceGroup
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename} --yes')
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename1} --yes')
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename2} --yes')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename} ')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename1} ')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename2} ')
 

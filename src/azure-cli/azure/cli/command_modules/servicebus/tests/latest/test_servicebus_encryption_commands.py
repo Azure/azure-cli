@@ -152,3 +152,5 @@ class SBNamespaceMSITesting(ScenarioTest):
         n = [i for i in namespace['encryption']['keyVaultProperties']]
         assert len(n) == 3
 
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename1}')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')

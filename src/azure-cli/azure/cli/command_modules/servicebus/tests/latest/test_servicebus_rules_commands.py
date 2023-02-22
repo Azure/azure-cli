@@ -125,4 +125,4 @@ class SBRulesCRUDScenarioTest(ScenarioTest):
         self.cmd('servicebus topic delete --resource-group {rg} --namespace-name {namespacename} --name {topicname}')
 
         # Delete Namespace
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename} --yes')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')

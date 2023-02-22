@@ -140,5 +140,5 @@ class SBNamespaceMSITesting(ScenarioTest):
         self.assertEqual('identity' in namespace, False)
 
         # Delete Namespace list by ResourceGroup
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename} --yes')
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename1} --yes')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename} ')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename1} ')

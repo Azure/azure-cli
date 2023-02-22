@@ -345,7 +345,7 @@ class SBQueueScenarioTest(ScenarioTest):
         self.cmd('servicebus queue delete --resource-group {rg} --namespace-name {namespacename} --name {queuename}')
 
         # Delete Namespace
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename} --yes')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')
 
 
     @AllowLargeResponse()
@@ -369,7 +369,7 @@ class SBQueueScenarioTest(ScenarioTest):
         topic = self.cmd('servicebus topic update --resource-group {rg} --namespace-name {namespacename} --name {topicname} --max-message-size 102400').get_output_in_json()
         self.assertEqual(topic['maxMessageSizeInKilobytes'], 102400)
 
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename} --yes')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')
 
 
     def assertOnUpdate(self, actual, expected):

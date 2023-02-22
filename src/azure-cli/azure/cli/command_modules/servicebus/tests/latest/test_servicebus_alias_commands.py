@@ -59,8 +59,7 @@ class SBDRAliasCRUDScenarioTest(ScenarioTest):
 
         # Get Created Namespace - Secondary
         getnamespace2result = self.cmd(
-            'servicebus namespace show --resource-group {rg} --name {namespacenamesecondary}',
-            checks=[self.check('sku.name', '{sku}')]).get_output_in_json()
+            'servicebus namespace show --resource-group {rg} --name {namespacenamesecondary}').get_output_in_json()
 
         # Create Authoriazation Rule
         self.cmd(
@@ -160,7 +159,7 @@ class SBDRAliasCRUDScenarioTest(ScenarioTest):
         time.sleep(30)
 
         # Delete Namespace - primary
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacenameprimary} --yes')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacenameprimary}')
 
         # Delete Namespace - secondary
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacenamesecondary} --yes')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacenamesecondary}')

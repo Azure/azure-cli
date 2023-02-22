@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "servicebus namespace delete",
-    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
     """Delete an existing namespace. This operation also removes all associated resources under the namespace.
