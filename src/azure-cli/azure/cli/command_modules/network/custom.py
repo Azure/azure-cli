@@ -109,7 +109,7 @@ from .aaz.latest.network.vpn_connection import Update as _VpnConnectionUpdate, \
 from .aaz.latest.network.vpn_connection.ipsec_policy import Add as _VpnConnIpsecPolicyAdd
 from .aaz.latest.network.vpn_connection.packet_capture import Start as _VpnConnPackageCaptureStart, \
     Stop as _VpnConnPackageCaptureStop
-from .aaz.latest.network.vpn_connection.shared_key import Update as _SharedKeyUpdate
+from .aaz.latest.network.vpn_connection.shared_key import Update as _VpnConnSharedKeyUpdate
 
 logger = get_logger(__name__)
 
@@ -7221,23 +7221,23 @@ class VpnConnIpsecPolicyAdd(_VpnConnIpsecPolicyAdd):
 
 
 def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_wait=False):
-
     class VpnConnIpsecPoliciesClear(_VpnConnectionUpdate):
+
+        def _output(self, *args, **kwargs):
+            result = self.deserialize_output(self.ctx.vars.instance.properties.ipsec_policies, client_flatten=True)
+            return result
+
         def pre_operations(self):
             args = self.ctx.args
-            args.no_wait = no_wait
+            args.ipsec_policies = None
+            args.use_policy_based_traffic_selectors = False
 
-        def pre_instance_update(self, instance):
-            instance.properties.ipsec_policies = None
-            instance.properties.use_policy_based_traffic_selectors = None
-
-    ipsec_policies_args = {"resource_group": resource_group_name,
-                           "name": connection_name}
-    from azure.cli.core.commands import LongRunningOperation
-    if no_wait:
-        return VpnConnIpsecPoliciesClear(cli_ctx=cmd.cli_ctx)(command_args=ipsec_policies_args)
-    poller = VpnConnIpsecPoliciesClear(cli_ctx=cmd.cli_ctx)(command_args=ipsec_policies_args)
-    return LongRunningOperation(cmd.cli_ctx)(poller)['ipsecPolicies']
+    ipsec_policies_args = {
+        "resource_group": resource_group_name,
+        "name": connection_name,
+        "no_wait": no_wait,
+    }
+    return VpnConnIpsecPoliciesClear(cli_ctx=cmd.cli_ctx)(command_args=ipsec_policies_args)
 
 
 class VnetGatewayAadAssign(_VnetGatewayAadAssign):
@@ -7731,7 +7731,7 @@ def delete_virtual_router_peering(cmd, resource_group_name, virtual_router_name,
 
 
 # region network gateway connection
-class SharedKeyUpdate(_SharedKeyUpdate):
+class VpnConnSharedKeyUpdate(_VpnConnSharedKeyUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
