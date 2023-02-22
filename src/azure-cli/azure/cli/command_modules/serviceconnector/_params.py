@@ -150,8 +150,8 @@ def add_client_type_argument(context, source, target):
 
 def add_customized_keys_argument(context):
     context.argument('customized_keys', options_list=['--customized-keys'], action=AddCustomizedKeys, nargs='*',
-                     help='The customized key used to change generated configurations. Key is the original name, '
-                     'value is the customized name.')
+                     help='The customized key used to change default configuration names. Key is the original '
+                     'name, value is the customized name.')
 
 
 def add_target_type_argument(context, source):

@@ -289,6 +289,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       service_endpoint=None,
                       private_endpoint=None,
                       store_in_connection_string=False,
+                      customized_keys=None,
                       new_addon=False, no_wait=False,
                       cluster=None, scope=None, enable_csi=False,            # Resource.KubernetesCluster
                       site=None,                                             # Resource.WebApp
@@ -301,7 +302,6 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       namespace=None,                                        # Resource.EventHub
                       webpubsub=None,                                        # Resource.WebPubSub
                       signalr=None,                                          # Resource.SignalR
-                      customized_keys=None,
                       ):
 
     auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
@@ -343,6 +343,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                   )
 
 
+# The function is used in extension, new feature must be added in the end for backward compatibility
 def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-many-statements
                            connection_name=None, client_type=None,
                            source_resource_group=None, source_id=None,
@@ -355,8 +356,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                            private_endpoint=None,
                            store_in_connection_string=False,
                            new_addon=False, no_wait=False,
-                           # Resource.KubernetesCluster
-                           cluster=None, scope=None, enable_csi=False,
+                           cluster=None, scope=None, enable_csi=False,            # Resource.KubernetesCluster
                            site=None,                                             # Resource.WebApp
                            spring=None, app=None, deployment='default',           # Resource.SpringCloud
                            # Resource.*Postgres, Resource.*Sql*
@@ -475,9 +475,9 @@ def local_connection_create(cmd, client,  # pylint: disable=too-many-locals,too-
                             secret_auth_info=None, secret_auth_info_auto=None,
                             user_account_auth_info=None,                      # new auth info
                             service_principal_auth_info_secret=None,
+                            customized_keys=None,
                             no_wait=False,
-                            # Resource.*Postgres, Resource.*Sql*
-                            server=None, database=None,
+                            server=None, database=None,                            # Resource.*Postgres, Resource.*Sql*
                             vault=None,                                            # Resource.KeyVault
                             account=None,                                          # Resource.Storage*
                             key_space=None, graph=None, table=None,                # Resource.Cosmos*,
@@ -485,7 +485,6 @@ def local_connection_create(cmd, client,  # pylint: disable=too-many-locals,too-
                             namespace=None,                                        # Resource.EventHub
                             webpubsub=None,                                        # Resource.WebPubSub
                             signalr=None,                                          # Resource.SignalR
-                            customized_keys=None,
                             ):
     auth_info = get_local_conn_auth_info(secret_auth_info, secret_auth_info_auto,
                                          user_account_auth_info, service_principal_auth_info_secret)
@@ -519,6 +518,7 @@ def local_connection_create(cmd, client,  # pylint: disable=too-many-locals,too-
                                         customized_keys=customized_keys)
 
 
+# The function is used in extension, new feature must be added in the end for backward compatibility
 def local_connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-many-statements
                                  resource_group_name,
                                  connection_name=None,
@@ -775,7 +775,7 @@ def local_connection_create_kafka(cmd, client,  # pylint: disable=too-many-local
                                   connection_name=None,
                                   location=None,
                                   client_type=None,
-                                  customized_keys=None,):
+                                  customized_keys=None):
 
     from ._transformers import transform_linker_properties
     # validation
@@ -874,7 +874,7 @@ def local_connection_update_kafka(cmd, client,  # pylint: disable=too-many-local
                                   schema_key=None,
                                   schema_secret=None,
                                   client_type=None,
-                                  customized_keys=None,):
+                                  customized_keys=None):
 
     # use the suffix to decide the connection type
     if connection_name.endswith('_schema'):  # the schema registry connection
@@ -926,7 +926,7 @@ def local_connection_update_kafka(cmd, client,  # pylint: disable=too-many-local
                                           location=location,
                                           connector_name=connection_name))
         if schema_linker.get('configurationInfo') and schema_linker.get('configurationInfo').get('customizedKeys'):
-            schema_linker = customized_keys or schema_linker.get('configurationInfo').get('customizedKeys')
+            customized_keys = customized_keys or schema_linker.get('configurationInfo').get('customizedKeys')
 
         parameters = {
             'targetService': schema_linker.get('targetService'),
