@@ -138,6 +138,7 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
 
         os.chmod(installation_path, os.stat(installation_path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
+        _logger.warning("The configuration value of bicep.use_binary_from_path has been set to 'false'.")
         cli_ctx.config.set_value("bicep", "use_binary_from_path", "false")
 
         if stdout:
