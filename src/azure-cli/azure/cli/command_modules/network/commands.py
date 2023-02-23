@@ -67,11 +67,6 @@ def load_command_table(self, _):
         min_api='2018-05-01'
     )
 
-    network_watcher_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#NetworkWatchersOperations.{}',
-        client_factory=cf_network_watcher
-    )
-
     network_watcher_cm_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#ConnectionMonitorsOperations.{}',
         client_factory=cf_connection_monitor
@@ -533,16 +528,15 @@ def load_command_table(self, _):
     # endregion
 
     # region NetworkWatchers
-    with self.command_group("network watcher", network_watcher_sdk, client_factory=cf_network_watcher) as g:
-        from .operations.watcher import TestIPFlow, ShowNextHop, ShowSecurityGroupView
-        self.command_table["network watcher test-ip-flow"] = TestIPFlow(loader=self)
+    with self.command_group("network watcher") as g:
+        from .operations.watcher import RunConfigurationDiagnostic, ShowNextHop, ShowSecurityGroupView, ShowTopology, TestConnectivity, TestIPFlow
+        self.command_table["network watcher run-configuration-diagnostic"] = RunConfigurationDiagnostic(loader=self)
         self.command_table["network watcher show-next-hop"] = ShowNextHop(loader=self)
         self.command_table["network watcher show-security-group-view"] = ShowSecurityGroupView(loader=self)
+        self.command_table["network watcher show-topology"] = ShowTopology(loader=self)
+        self.command_table["network watcher test-connectivity"] = TestConnectivity(loader=self)
+        self.command_table["network watcher test-ip-flow"] = TestIPFlow(loader=self)
         g.custom_command("configure", "configure_network_watcher")
-
-        g.custom_command('test-connectivity', 'check_nw_connectivity', client_factory=cf_network_watcher, validator=process_nw_test_connectivity_namespace, is_preview=True)
-        g.custom_command('show-topology', 'show_topology_watcher', validator=process_nw_topology_namespace)
-        g.custom_command('run-configuration-diagnostic', 'run_network_configuration_diagnostic', client_factory=cf_network_watcher, min_api='2018-06-01', validator=process_nw_config_diagnostic_namespace)
 
     with self.command_group('network watcher connection-monitor', network_watcher_cm_sdk, client_factory=cf_connection_monitor, min_api='2018-01-01') as g:
         g.custom_command('create', 'create_nw_connection_monitor', validator=process_nw_cm_v2_create_namespace)

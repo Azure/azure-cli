@@ -665,7 +665,6 @@ def load_arguments(self, _):
         with self.argument_context('network nsg rule {}'.format(item), min_api='2017-09-01') as c:
             c.argument('source_asgs', nargs='+', help="Space-separated list of application security group names or IDs. Limited by backend server, temporarily this argument only supports one application security group name or ID", arg_group='Source', validator=get_asg_validator(self, 'source_asgs'))
             c.argument('destination_asgs', nargs='+', help="Space-separated list of application security group names or IDs. Limited by backend server, temporarily this argument only supports one application security group name or ID", arg_group='Destination', validator=get_asg_validator(self, 'destination_asgs'))
-
     # endregion
 
     # region NetworkWatchers
@@ -970,15 +969,6 @@ def load_arguments(self, _):
         c.argument('locations', get_location_type(self.cli_ctx), options_list=['--locations', '-l'], nargs='+')
         c.argument('enabled', arg_type=get_three_state_flag())
 
-    with self.argument_context('network watcher show-topology') as c:
-        c.extra('location')
-
-    with self.argument_context('network watcher show-topology', arg_group='Target') as c:
-        c.ignore('network_watcher_name', 'resource_group_name')
-        c.argument('target_resource_group_name', options_list=['--resource-group', '-g'], completer=get_resource_group_completion_list)
-        c.argument('target_vnet', options_list=['--vnet'], help='Name or ID of the virtual network to target.')
-        c.argument('target_subnet', options_list=['--subnet'], help='Name or ID of the subnet to target. If name is used, --vnet NAME must also be supplied.')
-
     with self.argument_context('network watcher create') as c:
         c.argument('location', validator=get_default_location_from_resource_group)
 
@@ -996,18 +986,6 @@ def load_arguments(self, _):
         c.argument('target', help='Name or ID of the target, it could be virtual machine or virtual machine scale sets')
         c.argument('include', nargs='+', help='Space-separated list of VMSS Instances to include in Packet capture like 0 1 2')
         c.argument('exclude', nargs='+', help='Space-separated list of VMSS Instances to exclude in Packet capture')
-
-    with self.argument_context('network watcher test-connectivity') as c:
-        c.argument('source_port', type=int)
-        c.argument('dest_resource', arg_group='Destination')
-        c.argument('dest_address', arg_group='Destination')
-        c.argument('dest_port', type=int, arg_group='Destination')
-        c.argument('protocol', arg_type=get_enum_type(Protocol), help='Protocol to test on.')
-
-    with self.argument_context('network watcher test-connectivity', arg_group='HTTP Configuration') as c:
-        c.argument('method', arg_type=get_enum_type(HTTPMethod), help='HTTP method to use.')
-        c.argument('headers', nargs='+', help='Space-separated list of headers in `KEY=VALUE` format.')
-        c.argument('valid_status_codes', nargs='+', type=int, help='Space-separated list of HTTP status codes considered valid.')
 
     with self.argument_context('network watcher packet-capture') as c:
         c.argument('capture_name', name_arg_type, help='Name of the packet capture session.')
@@ -1060,20 +1038,6 @@ def load_arguments(self, _):
     with self.argument_context('network watcher troubleshooting') as c:
         c.argument('resource', help='Name or ID of the resource to troubleshoot.')
         c.argument('resource_type', help='The resource type', options_list=['--resource-type', '-t'], id_part='resource_type', arg_type=get_enum_type(['vnetGateway', 'vpnConnection']))
-
-    with self.argument_context('network watcher run-configuration-diagnostic', arg_group='Target') as c:
-        c.argument('resource', help='Name or ID of the target resource to diagnose. If an ID is given, other resource arguments should not be given.')
-        c.argument('resource_type', help='The resource type', options_list=['--resource-type', '-t'], id_part='resource_type', arg_type=get_enum_type(['virtualMachines', 'networkInterfaces', 'applicationGateways']))
-        c.argument('parent', help='The parent path. (ex: virtualMachineScaleSets/vmss1)')
-        c.argument('resource_group_name')
-
-    with self.argument_context('network watcher run-configuration-diagnostic', arg_group='Query') as c:
-        c.argument('queries', help='JSON list of queries to use. Use `@{path}` to load from a file.', type=get_json_object)
-        c.argument('direction', arg_type=get_enum_type(Direction), help='Direction of the traffic.')
-        c.argument('protocol', arg_type=get_enum_type(Protocol), help='Protocol to be verified on.')
-        c.argument('destination', help="Traffic destination. Accepted values are '*', IP address/CIDR, or service tag.")
-        c.argument('source', help="Traffic source. Accepted values are '*', IP address/CIDR, or service tag.")
-        c.argument('destination_port', options_list='--port', help="Traffic destination port. Accepted values are '*', port number (3389) or port range (80-100).")
     # endregion
 
     # region PublicIPAddresses
