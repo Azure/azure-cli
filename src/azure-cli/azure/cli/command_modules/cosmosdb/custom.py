@@ -2551,6 +2551,7 @@ def cli_cosmosdb_managed_cassandra_datacenter_update(client,
                                                      cluster_name,
                                                      data_center_name,
                                                      node_count=None,
+                                                     sku=None,
                                                      base64_encoded_cassandra_yaml_fragment=None,
                                                      managed_disk_customer_key_uri=None,
                                                      backup_storage_customer_key_uri=None):
@@ -2561,6 +2562,9 @@ def cli_cosmosdb_managed_cassandra_datacenter_update(client,
 
     if node_count is None:
         node_count = data_center_resource.properties.node_count
+
+    if sku is None:
+        sku = data_center_resource.properties.sku
 
     if base64_encoded_cassandra_yaml_fragment is None:
         base64_encoded_cassandra_yaml_fragment = data_center_resource.properties.base64_encoded_cassandra_yaml_fragment
@@ -2575,6 +2579,7 @@ def cli_cosmosdb_managed_cassandra_datacenter_update(client,
         data_center_location=data_center_resource.properties.data_center_location,
         delegated_subnet_id=data_center_resource.properties.delegated_subnet_id,
         node_count=node_count,
+        sku=sku,
         seed_nodes=data_center_resource.properties.seed_nodes,
         base64_encoded_cassandra_yaml_fragment=base64_encoded_cassandra_yaml_fragment,
         managed_disk_customer_key_uri=managed_disk_customer_key_uri,

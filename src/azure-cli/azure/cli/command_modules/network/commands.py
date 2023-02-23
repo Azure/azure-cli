@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 # pylint: disable=line-too-long,too-many-lines
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation
@@ -12,27 +11,16 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
 
 from azure.cli.command_modules.network._client_factory import (
-    cf_application_gateways,
-    cf_load_balancers,
-    cf_network_interfaces, cf_network_watcher, cf_packet_capture,
-    cf_virtual_network_gateway_connections,
-    cf_virtual_network_gateways,
+    cf_network_watcher, cf_packet_capture,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_public_ip_addresses, cf_connection_monitor,
+    cf_connection_monitor,
     cf_dns_references,
-    cf_app_gateway_waf_policy,
-    cf_virtual_router, cf_virtual_router_peering, cf_flow_logs,
-    cf_load_balancer_backend_pools)
-from azure.cli.command_modules.network._util import (
-    list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
-    delete_lb_resource_property_entry)
+    cf_virtual_router, cf_virtual_router_peering, cf_flow_logs)
 from azure.cli.command_modules.network._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
     transform_public_ip_create_output,
-    transform_traffic_manager_create_output, transform_nic_create_output,
-    transform_vnet_gateway_create_output,
-    transform_vpn_connection, transform_vpn_connection_list,
+    transform_traffic_manager_create_output,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
     transform_network_usage_table, transform_nsg_rule_table_output,
@@ -40,8 +28,7 @@ from azure.cli.command_modules.network._format import (
     transform_vnet_gateway_routes_table, transform_vnet_gateway_bgp_peer_table)
 from azure.cli.command_modules.network._validators import (
     get_network_watcher_from_location,
-    process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace, process_ag_settings_create_namespace, process_ag_http_settings_create_namespace,
-    process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_nic_create_namespace,
+    process_ag_create_namespace,
     process_lb_create_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
@@ -49,9 +36,8 @@ from azure.cli.command_modules.network._validators import (
     process_nw_packet_capture_create_namespace, process_nw_test_connectivity_namespace, process_nw_topology_namespace,
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
     process_public_ip_create_namespace,
-    process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
     process_vpn_connection_create_namespace,
-    process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace,
+    process_nw_config_diagnostic_namespace,
     process_appgw_waf_policy_update, process_cross_region_lb_create_namespace)
 
 NETWORK_VROUTER_DEPRECATION_INFO = 'network routeserver'
@@ -62,21 +48,6 @@ NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
 def load_command_table(self, _):
 
     # region Command Types
-    network_ag_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ApplicationGatewaysOperations.{}',
-        client_factory=cf_application_gateways
-    )
-
-    network_ag_waf_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#WebApplicationFirewallPoliciesOperations.{}',
-        client_factory=cf_app_gateway_waf_policy
-    )
-
-    network_util = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network._util#{}',
-        client_factory=None
-    )
-
     network_dns_zone_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.dns.operations#ZonesOperations.{}',
         client_factory=cf_dns_mgmt_zones,
@@ -94,37 +65,6 @@ def load_command_table(self, _):
         client_factory=cf_dns_references,
         resource_type=ResourceType.MGMT_NETWORK_DNS,
         min_api='2018-05-01'
-    )
-
-    network_lb_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#LoadBalancersOperations.{}',
-        client_factory=cf_load_balancers
-    )
-
-    network_lb_backend_pool_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#LoadBalancerBackendAddressPoolsOperations.{}',
-        client_factory=cf_load_balancer_backend_pools,
-        min_api='2020-04-01'
-    )
-
-    network_nic_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#NetworkInterfacesOperations.{}',
-        client_factory=cf_network_interfaces
-    )
-
-    network_public_ip_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#PublicIPAddressesOperations.{}',
-        client_factory=cf_public_ip_addresses
-    )
-
-    network_vgw_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualNetworkGatewaysOperations.{}',
-        client_factory=cf_virtual_network_gateways
-    )
-
-    network_vpn_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualNetworkGatewayConnectionsOperations.{}',
-        client_factory=cf_virtual_network_gateway_connections
     )
 
     network_watcher_sdk = CliCommandType(
@@ -175,17 +115,6 @@ def load_command_table(self, _):
         client_factory=cf_virtual_router_peering,
         min_api='2019-08-01'
     )
-
-    network_load_balancers_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
-        client_factory=cf_load_balancers,
-        min_api='2020-08-01'
-    )
-
-    network_nic_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
-        client_factory=cf_network_interfaces
-    )
     # endregion
 
     # region NetworkRoot
@@ -196,55 +125,16 @@ def load_command_table(self, _):
     # endregion
 
     # region ApplicationGateways
-    with self.command_group('network application-gateway') as g:
-        g.custom_command('create', 'create_application_gateway',
+    with self.command_group("network application-gateway") as g:
+        from .custom import ApplicationGatewayUpdate
+        self.command_table["network application-gateway update"] = ApplicationGatewayUpdate(loader=self)
+        g.custom_command("show-backend-health", "show_ag_backend_health")
+        g.custom_command("create", "create_application_gateway",
                          transform=DeploymentOutputLongRunningOperation(self.cli_ctx),
                          supports_no_wait=True,
                          table_transformer=deployment_validate_table_format,
                          validator=process_ag_create_namespace,
                          exception_handler=handle_template_based_exception)
-        g.custom_command('show-backend-health', 'show_ag_backend_health')
-
-        from .custom import ApplicationGatewayUpdate
-        self.command_table["network application-gateway update"] = ApplicationGatewayUpdate(loader=self)
-
-    subresource_properties = [
-        {'prop': 'frontend_ip_configurations', 'name': 'frontend-ip'},
-        {'prop': 'frontend_ports', 'name': 'frontend-port'},
-        {'prop': 'backend_http_settings_collection', 'name': 'http-settings', 'validator': process_ag_http_settings_create_namespace},
-        {'prop': 'http_listeners', 'name': 'http-listener', 'validator': process_ag_http_listener_create_namespace},
-        {'prop': 'request_routing_rules', 'name': 'rule', 'validator': process_ag_rule_create_namespace},
-        {'prop': 'probes', 'name': 'probe'},
-        {'prop': 'rewrite_rule_sets', 'name': 'rewrite-rule set'}
-    ]
-    if self.supported_api_version(min_api='2021-08-01'):
-        subresource_properties.append({'prop': 'backend_settings_collection', 'name': 'settings', 'validator': process_ag_settings_create_namespace})
-        subresource_properties.append({'prop': 'listeners', 'name': 'listener', 'validator': process_ag_listener_create_namespace})
-        subresource_properties.append({'prop': 'routing_rules', 'name': 'routing-rule', 'validator': process_ag_routing_rule_create_namespace})
-
-    def _make_singular(value):
-        try:
-            if value.endswith('ies'):
-                value = value[:-3] + 'y'
-            elif value.endswith('s'):
-                value = value[:-1]
-            return value
-        except AttributeError:
-            return value
-
-    for kwargs in subresource_properties:
-        alias = kwargs['name']
-        subresource = kwargs['prop']
-        create_validator = kwargs.get('validator', None)
-        with self.command_group('network application-gateway {}'.format(alias), network_util) as g:
-            g.command('list', list_network_resource_property('application_gateways', subresource))
-            g.show_command('show', get_network_resource_property_entry('application_gateways', subresource))
-            g.command('delete', delete_network_resource_property_entry('application_gateways', subresource), supports_no_wait=True)
-            g.custom_command('create', 'create_ag_{}'.format(_make_singular(subresource)), supports_no_wait=True, validator=create_validator)
-            g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
-                                     setter_name='begin_create_or_update',
-                                     custom_func_name='update_ag_{}'.format(_make_singular(subresource)),
-                                     child_collection_prop_name=subresource, validator=create_validator)
 
     with self.command_group("network application-gateway address-pool"):
         from .custom import AddressPoolCreate, AddressPoolUpdate
@@ -256,57 +146,72 @@ def load_command_table(self, _):
         self.command_table["network application-gateway auth-cert create"] = AuthCertCreate(loader=self)
         self.command_table["network application-gateway auth-cert update"] = AuthCertUpdate(loader=self)
 
+    with self.command_group("network application-gateway root-cert"):
+        from .custom import RootCertCreate, RootCertUpdate
+        self.command_table["network application-gateway root-cert create"] = RootCertCreate(loader=self)
+        self.command_table["network application-gateway root-cert update"] = RootCertUpdate(loader=self)
+
     with self.command_group("network application-gateway client-cert"):
         from .custom import ClientCertAdd, ClientCertRemove, ClientCertUpdate
         self.command_table["network application-gateway client-cert add"] = ClientCertAdd(loader=self)
         self.command_table["network application-gateway client-cert remove"] = ClientCertRemove(loader=self)
         self.command_table["network application-gateway client-cert update"] = ClientCertUpdate(loader=self)
 
-    with self.command_group("network application-gateway root-cert"):
-        from .custom import RootCertCreate, RootCertUpdate
-        self.command_table["network application-gateway root-cert create"] = RootCertCreate(loader=self)
-        self.command_table["network application-gateway root-cert update"] = RootCertUpdate(loader=self)
+    with self.command_group("network application-gateway frontend-ip"):
+        from .custom import FrontedIPCreate, FrontedIPUpdate
+        self.command_table["network application-gateway frontend-ip create"] = FrontedIPCreate(loader=self)
+        self.command_table["network application-gateway frontend-ip update"] = FrontedIPUpdate(loader=self)
 
-    with self.command_group('network application-gateway rewrite-rule', network_ag_sdk, min_api='2018-12-01') as g:
-        g.custom_command('create', 'create_ag_rewrite_rule', supports_no_wait=True)
-        g.custom_show_command('show', 'show_ag_rewrite_rule')
-        g.custom_command('list', 'list_ag_rewrite_rules')
-        g.custom_command('delete', 'delete_ag_rewrite_rule', supports_no_wait=True)
-        g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='update_ag_rewrite_rule',
-                                 child_collection_prop_name='rewrite_rule_sets.rewrite_rules',
-                                 child_collection_key='name.name',
-                                 child_arg_name='rule_set_name.rule_name')
+    with self.command_group("network application-gateway settings"):
+        from .custom import SettingsCreate, SettingsUpdate
+        self.command_table["network application-gateway settings create"] = SettingsCreate(loader=self)
+        self.command_table["network application-gateway settings update"] = SettingsUpdate(loader=self)
 
-    with self.command_group('network application-gateway rewrite-rule condition', network_ag_sdk, min_api='2018-12-01') as g:
-        g.custom_command('create', 'create_ag_rewrite_rule_condition', supports_no_wait=True)
-        g.custom_show_command('show', 'show_ag_rewrite_rule_condition')
-        g.custom_command('list', 'list_ag_rewrite_rule_conditions')
-        g.custom_command('delete', 'delete_ag_rewrite_rule_condition', supports_no_wait=True)
-        g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='update_ag_rewrite_rule_condition',
-                                 child_collection_prop_name='rewrite_rule_sets.rewrite_rules.conditions',
-                                 child_collection_key='name.name.variable',
-                                 child_arg_name='rule_set_name.rule_name.variable')
+    with self.command_group("network application-gateway http-settings"):
+        from .custom import HTTPSettingsCreate, HTTPSettingsUpdate
+        self.command_table["network application-gateway http-settings create"] = HTTPSettingsCreate(loader=self)
+        self.command_table["network application-gateway http-settings update"] = HTTPSettingsUpdate(loader=self)
 
-    with self.command_group('network application-gateway redirect-config', network_util, min_api='2017-06-01') as g:
-        subresource = 'redirect_configurations'
-        g.command('list', list_network_resource_property('application_gateways', subresource))
-        g.show_command('show', get_network_resource_property_entry('application_gateways', subresource))
-        g.command('delete', delete_network_resource_property_entry('application_gateways', subresource), supports_no_wait=True)
-        g.custom_command('create', 'create_ag_{}'.format(_make_singular(subresource)), supports_no_wait=True, doc_string_source='ApplicationGatewayRedirectConfiguration')
-        g.generic_update_command('update', command_type=network_ag_sdk,
-                                 client_factory=cf_application_gateways, supports_no_wait=True,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='update_ag_{}'.format(_make_singular(subresource)),
-                                 child_collection_prop_name=subresource, doc_string_source='ApplicationGatewayRedirectConfiguration')
+    with self.command_group("network application-gateway listener"):
+        from .custom import ListenerCreate, ListenerUpdate
+        self.command_table["network application-gateway listener create"] = ListenerCreate(loader=self)
+        self.command_table["network application-gateway listener update"] = ListenerUpdate(loader=self)
 
-    with self.command_group('network application-gateway rewrite-rule', network_ag_sdk, min_api='2018-12-01') as g:
-        g.command('condition list-server-variables', 'list_available_server_variables')
-        g.command('list-request-headers', 'list_available_request_headers')
-        g.command('list-response-headers', 'list_available_response_headers')
+    with self.command_group("network application-gateway http-listener"):
+        from .custom import HTTPListenerCreate, HTTPListenerUpdate
+        self.command_table["network application-gateway http-listener create"] = HTTPListenerCreate(loader=self)
+        self.command_table["network application-gateway http-listener update"] = HTTPListenerUpdate(loader=self)
+
+    with self.command_group("network application-gateway identity") as g:
+        from .custom import IdentityAssign
+        self.command_table["network application-gateway identity assign"] = IdentityAssign(loader=self)
+        g.custom_command("remove", "remove_ag_identity", supports_no_wait=True)
+
+    with self.command_group("network application-gateway private-link"):
+        from .custom import AGPrivateLinkAdd, AGPrivateLinkRemove, AGPrivateLinkIPConfigAdd
+        self.command_table["network application-gateway private-link add"] = AGPrivateLinkAdd(loader=self)
+        self.command_table["network application-gateway private-link remove"] = AGPrivateLinkRemove(loader=self)
+        self.command_table["network application-gateway private-link ip-config add"] = AGPrivateLinkIPConfigAdd(loader=self)
+
+    with self.command_group("network application-gateway redirect-config"):
+        from .custom import RedirectConfigCreate, RedirectConfigUpdate
+        self.command_table["network application-gateway redirect-config create"] = RedirectConfigCreate(loader=self)
+        self.command_table["network application-gateway redirect-config update"] = RedirectConfigUpdate(loader=self)
+
+    with self.command_group("network application-gateway rewrite-rule"):
+        from .custom import AGRewriteRuleCreate, AGRewriteRuleUpdate
+        self.command_table["network application-gateway rewrite-rule create"] = AGRewriteRuleCreate(loader=self)
+        self.command_table["network application-gateway rewrite-rule update"] = AGRewriteRuleUpdate(loader=self)
+
+    with self.command_group("network application-gateway routing-rule"):
+        from .custom import RoutingRuleCreate, RoutingRuleUpdate
+        self.command_table["network application-gateway routing-rule create"] = RoutingRuleCreate(loader=self)
+        self.command_table["network application-gateway routing-rule update"] = RoutingRuleUpdate(loader=self)
+
+    with self.command_group("network application-gateway rule"):
+        from .custom import RuleCreate, RuleUpdate
+        self.command_table["network application-gateway rule create"] = RuleCreate(loader=self)
+        self.command_table["network application-gateway rule update"] = RuleUpdate(loader=self)
 
     with self.command_group("network application-gateway ssl-cert"):
         from .custom import SSLCertCreate, SSLCertUpdate
@@ -333,69 +238,36 @@ def load_command_table(self, _):
         g.custom_command("list-rule-sets", "list_ag_waf_rule_sets", table_transformer=transform_waf_rule_sets_table_output)
         g.custom_command("set", "set_ag_waf_config", supports_no_wait=True)
         g.custom_show_command("show", "show_ag_waf_config")
-
-    with self.command_group('network application-gateway identity', command_type=network_ag_sdk, min_api='2018-12-01') as g:
-        g.custom_command('assign', 'assign_ag_identity', supports_no_wait=True)
-        g.custom_command('remove', 'remove_ag_identity', supports_no_wait=True)
-        g.custom_show_command('show', 'show_ag_identity')
-
-    with self.command_group('network application-gateway private-link',
-                            command_type=network_ag_sdk,
-                            min_api='2020-05-01',
-                            is_preview=True) as g:
-        g.custom_command('add', 'add_ag_private_link', supports_no_wait=True)
-        g.custom_command('remove', 'remove_ag_private_link', confirmation=True, supports_no_wait=True)
-        g.custom_show_command('show', 'show_ag_private_link')
-        g.custom_command('list', 'list_ag_private_link')
-        g.wait_command('wait')
-
-    with self.command_group('network application-gateway private-link ip-config',
-                            command_type=network_ag_sdk,
-                            min_api='2020-05-01',
-                            is_preview=True) as g:
-        g.custom_command('add', 'add_ag_private_link_ip', supports_no_wait=True)
-        g.custom_command('remove', 'remove_ag_private_link_ip', confirmation=True, supports_no_wait=True)
-        g.custom_show_command('show', 'show_ag_private_link_ip')
-        g.custom_command('list', 'list_ag_private_link_ip')
-        g.wait_command('wait')
     # endregion
 
     # region ApplicationGatewayWAFPolicy
-    with self.command_group('network application-gateway waf-policy', min_api='2018-12-01') as g:
-        g.custom_command('create', 'create_ag_waf_policy')
-
-    with self.command_group('network application-gateway waf-policy policy-setting', network_ag_waf_sdk,
-                            client_factory=cf_app_gateway_waf_policy,
-                            min_api='2019-09-01') as g:
-        g.custom_command('list', 'list_waf_policy_setting')
-        g.generic_update_command('update',
-                                 command_type=network_ag_waf_sdk,
-                                 client_factory=cf_app_gateway_waf_policy,
-                                 custom_func_name='update_waf_policy_setting')
+    with self.command_group("network application-gateway waf-policy"):
+        from .custom import WAFCreate
+        self.command_table["network application-gateway waf-policy create"] = WAFCreate(loader=self)
 
     with self.command_group("network application-gateway waf-policy custom-rule match-condition"):
         from .custom import WAFCustomRuleMatchConditionAdd
         self.command_table["network application-gateway waf-policy custom-rule match-condition add"] = WAFCustomRuleMatchConditionAdd(loader=self)
 
-    with self.command_group('network application-gateway waf-policy managed-rule rule-set', min_api='2019-09-01') as g:
-        g.custom_command('add', 'add_waf_managed_rule_set')
-        g.custom_command('remove', 'remove_waf_managed_rule_set')
-        g.custom_command('list', 'list_waf_managed_rule_set')
-        g.custom_command('update', 'update_waf_managed_rule_set', validator=process_appgw_waf_policy_update)
+    with self.command_group("network application-gateway waf-policy managed-rule exclusion") as g:
+        g.custom_command("remove", "remove_waf_managed_rule_exclusion")
+        g.custom_command("list", "list_waf_managed_rules")
 
-    with self.command_group('network application-gateway waf-policy managed-rule exclusion', network_ag_waf_sdk,
-                            client_factory=cf_app_gateway_waf_policy,
-                            min_api='2019-09-01') as g:
-        g.custom_command('add', 'add_waf_managed_rule_exclusion')
-        g.custom_command('remove', 'remove_waf_managed_rule_exclusion')
-        g.custom_command('list', 'list_waf_managed_rule_exclusion')
+    with self.command_group("network application-gateway waf-policy managed-rule exclusion rule-set") as g:
+        g.custom_command("add", "add_waf_exclusion_rule_set")
+        g.custom_command("remove", "remove_waf_exclusion_rule_set")
+        g.custom_command("list", "list_waf_managed_rules")
 
-    with self.command_group('network application-gateway waf-policy managed-rule exclusion rule-set', network_ag_waf_sdk,
-                            client_factory=cf_app_gateway_waf_policy,
-                            min_api='2021-05-01') as g:
-        g.custom_command('add', 'add_waf_exclusion_rule_set')
-        g.custom_command('remove', 'remove_waf_exclusion_rule_set')
-        g.custom_command('list', 'list_waf_exclusion_rule_set')
+    with self.command_group("network application-gateway waf-policy managed-rule rule-set") as g:
+        g.custom_command("add", "add_waf_managed_rule_set")
+        g.custom_command("remove", "remove_waf_managed_rule_set")
+        g.custom_command("list", "list_waf_managed_rules")
+        g.custom_command("update", "update_waf_managed_rule_set", validator=process_appgw_waf_policy_update)
+
+    with self.command_group("network application-gateway waf-policy policy-setting") as g:
+        from .custom import WAFPolicySettingUpdate
+        self.command_table["network application-gateway waf-policy policy-setting update"] = WAFPolicySettingUpdate(loader=self)
+        g.custom_command("list", "list_waf_policy_setting")
     # endregion
 
     # region DdosProtectionPlans
@@ -533,84 +405,44 @@ def load_command_table(self, _):
                          exception_handler=handle_template_based_exception)
         g.custom_command('list-mapping', 'list_load_balancer_mapping')
 
-    property_map = {
-        # 'frontend_ip_configurations': 'frontend-ip',
-        'inbound_nat_rules': 'inbound-nat-rule',
-        'inbound_nat_pools': 'inbound-nat-pool',
-        'load_balancing_rules': 'rule'
-    }
-    for subresource, alias in property_map.items():
-        with self.command_group('network lb {}'.format(alias), network_util) as g:
-            g.command('list', list_network_resource_property('load_balancers', subresource))
-            g.show_command('show', get_network_resource_property_entry('load_balancers', subresource))
-            g.command('delete', delete_lb_resource_property_entry('load_balancers', subresource))
-
     from .operations.load_balancer import LBFrontendIPCreate, LBFrontendIPUpdate
     self.command_table["network lb frontend-ip create"] = LBFrontendIPCreate(loader=self)
     self.command_table["network lb frontend-ip update"] = LBFrontendIPUpdate(loader=self)
 
-    with self.command_group('network lb inbound-nat-rule', network_lb_sdk) as g:
-        g.custom_command('create', 'create_lb_inbound_nat_rule')
-        g.generic_update_command('update', child_collection_prop_name='inbound_nat_rules',
-                                 getter_name='lb_get',
-                                 getter_type=network_load_balancers_custom,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_lb_inbound_nat_rule')
+    from .operations.load_balancer import LBInboundNatRuleCreate, LBInboundNatRuleUpdate
+    self.command_table["network lb inbound-nat-rule create"] = LBInboundNatRuleCreate(loader=self)
+    self.command_table["network lb inbound-nat-rule update"] = LBInboundNatRuleUpdate(loader=self)
 
-    with self.command_group('network lb inbound-nat-pool', network_lb_sdk) as g:
-        g.custom_command('create', 'create_lb_inbound_nat_pool')
-        g.generic_update_command('update', child_collection_prop_name='inbound_nat_pools',
-                                 getter_name='lb_get',
-                                 getter_type=network_load_balancers_custom,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_lb_inbound_nat_pool')
+    from .operations.load_balancer import LBInboundNatPoolCreate, LBInboundNatPoolUpdate
+    self.command_table["network lb inbound-nat-pool create"] = LBInboundNatPoolCreate(loader=self)
+    self.command_table["network lb inbound-nat-pool update"] = LBInboundNatPoolUpdate(loader=self)
 
-    with self.command_group('network lb outbound-rule', network_lb_sdk, min_api='2018-07-01') as g:
-        g.custom_command('create', 'create_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
-        g.generic_update_command('update', child_collection_prop_name='outbound_rules',
-                                 getter_name='lb_get',
-                                 getter_type=network_load_balancers_custom,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
+    from .operations.load_balancer import LBRuleCreate, LBRuleUpdate
+    self.command_table["network lb rule create"] = LBRuleCreate(loader=self)
+    self.command_table["network lb rule update"] = LBRuleUpdate(loader=self)
 
-    with self.command_group('network lb outbound-rule', network_util, min_api='2018-07-01') as g:
-        g.command('list', list_network_resource_property('load_balancers', 'outbound_rules'))
-        g.show_command('show', get_network_resource_property_entry('load_balancers', 'outbound_rules'))
-        g.command('delete', delete_lb_resource_property_entry('load_balancers', 'outbound_rules'))
+    from .operations.load_balancer import LBOutboundRuleCreate, LBOutboundRuleUpdate
+    self.command_table["network lb outbound-rule create"] = LBOutboundRuleCreate(loader=self)
+    self.command_table["network lb outbound-rule update"] = LBOutboundRuleUpdate(loader=self)
 
-    with self.command_group('network lb rule', network_lb_sdk) as g:
-        g.custom_command('create', 'create_lb_rule')
-        g.generic_update_command('update', child_collection_prop_name='load_balancing_rules',
-                                 getter_name='lb_get',
-                                 getter_type=network_load_balancers_custom,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_lb_rule')
+    from .operations.load_balancer import LBAddressPoolCreate, LBAddressPoolDelete, LBAddressPoolUpdate
+    self.command_table["network lb address-pool create"] = LBAddressPoolCreate(loader=self)
+    self.command_table["network lb address-pool delete"] = LBAddressPoolDelete(loader=self)
+    self.command_table["network lb address-pool update"] = LBAddressPoolUpdate(loader=self)
 
-    with self.command_group("network lb probe") as g:
-        g.custom_command("create", "create_lb_probe")
-        g.custom_command("update", "update_lb_probe")
+    from .operations.load_balancer import LBAddressPoolAddressAdd, LBAddressPoolAddressRemove, LBAddressPoolAddressUpdate
+    self.command_table["network lb address-pool address add"] = LBAddressPoolAddressAdd(loader=self)
+    self.command_table["network lb address-pool address remove"] = LBAddressPoolAddressRemove(loader=self)
+    self.command_table["network lb address-pool address update"] = LBAddressPoolAddressUpdate(loader=self)
 
-    with self.command_group('network lb probe', network_util) as g:
-        g.command('delete', delete_lb_resource_property_entry('load_balancers', 'probes'))
+    from .operations.load_balancer import LBAddressPoolTunnelInterfaceAdd, LBAddressPoolTunnelInterfaceRemove, LBAddressPoolTunnelInterfaceUpdate
+    self.command_table["network lb address-pool tunnel-interface add"] = LBAddressPoolTunnelInterfaceAdd(loader=self)
+    self.command_table["network lb address-pool tunnel-interface remove"] = LBAddressPoolTunnelInterfaceRemove(loader=self)
+    self.command_table["network lb address-pool tunnel-interface update"] = LBAddressPoolTunnelInterfaceUpdate(loader=self)
 
-    with self.command_group('network lb address-pool', network_lb_backend_pool_sdk) as g:
-        g.custom_command('create', 'create_lb_backend_address_pool')
-        g.generic_update_command('update', setter_name='begin_create_or_update',
-                                 custom_func_name='set_lb_backend_address_pool')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.custom_command('delete', 'delete_lb_backend_address_pool')
-
-    with self.command_group('network lb address-pool address', network_lb_backend_pool_sdk, is_preview=True) as g:
-        g.custom_command('add', 'add_lb_backend_address_pool_address')
-        g.custom_command('remove', 'remove_lb_backend_address_pool_address')
-        g.custom_command('list', 'list_lb_backend_address_pool_address')
-
-    with self.command_group('network lb address-pool tunnel-interface', network_lb_backend_pool_sdk, min_api='2021-02-01', is_preview=True) as g:
-        g.custom_command('add', 'add_lb_backend_address_pool_tunnel_interface')
-        g.custom_command('update', 'update_lb_backend_address_pool_tunnel_interface')
-        g.custom_command('remove', 'remove_lb_backend_address_pool_tunnel_interface')
-        g.custom_command('list', 'list_lb_backend_address_pool_tunnel_interface')
+    from .operations.load_balancer import LBProbeCreate, LBProbeUpdate
+    self.command_table["network lb probe create"] = LBProbeCreate(loader=self)
+    self.command_table["network lb probe update"] = LBProbeUpdate(loader=self)
 
     # endregion
 
@@ -634,40 +466,29 @@ def load_command_table(self, _):
         self.command_table['network cross-region-lb frontend-ip create'] = CrossRegionLoadBalancerFrontendIPCreate(loader=self)
         self.command_table['network cross-region-lb frontend-ip update'] = CrossRegionLoadBalancerFrontendIPUpdate(loader=self)
 
-    cross_region_lb_property_map = {
-        # 'frontend_ip_configurations': 'frontend-ip',
-        'load_balancing_rules': 'rule',
-        'probes': 'probe',
-    }
+    with self.command_group('network cross-region-lb rule') as g:
+        from .operations.load_balancer import CrossRegionLoadBalancerRuleShow, CrossRegionLoadBalancerRuleDelete, CrossRegionLoadBalancerRuleList, CrossRegionLoadBalancerRuleCreate, CrossRegionLoadBalancerRuleUpdate
+        self.command_table['network cross-region-lb rule show'] = CrossRegionLoadBalancerRuleShow(loader=self)
+        self.command_table['network cross-region-lb rule delete'] = CrossRegionLoadBalancerRuleDelete(loader=self)
+        self.command_table['network cross-region-lb rule list'] = CrossRegionLoadBalancerRuleList(loader=self)
+        self.command_table['network cross-region-lb rule create'] = CrossRegionLoadBalancerRuleCreate(loader=self)
+        self.command_table['network cross-region-lb rule update'] = CrossRegionLoadBalancerRuleUpdate(loader=self)
 
-    for subresource, alias in cross_region_lb_property_map.items():
-        with self.command_group('network cross-region-lb {}'.format(alias), network_util) as g:
-            g.command('list', list_network_resource_property('load_balancers', subresource))
-            g.show_command('show', get_network_resource_property_entry('load_balancers', subresource))
-            g.command('delete', delete_lb_resource_property_entry('load_balancers', subresource))
+    with self.command_group('network cross-region-lb address-pool') as g:
+        from .operations.load_balancer import CrossRegionLoadBalancerAddressPoolCreate, CrossRegionLoadBalancerAddressPoolUpdate, CrossRegionLoadBalancerAddressPoolList, CrossRegionLoadBalancerAddressPoolDelete, CrossRegionLoadBalancerAddressPoolShow
+        self.command_table['network cross-region-lb address-pool show'] = CrossRegionLoadBalancerAddressPoolShow(loader=self)
+        self.command_table['network cross-region-lb address-pool delete'] = CrossRegionLoadBalancerAddressPoolDelete(loader=self)
+        self.command_table['network cross-region-lb address-pool list'] = CrossRegionLoadBalancerAddressPoolList(loader=self)
+        self.command_table['network cross-region-lb address-pool create'] = CrossRegionLoadBalancerAddressPoolCreate(loader=self)
+        self.command_table['network cross-region-lb address-pool update'] = CrossRegionLoadBalancerAddressPoolUpdate(loader=self)
 
-    with self.command_group('network cross-region-lb address-pool', network_lb_backend_pool_sdk) as g:
-        g.custom_command('create', 'create_cross_region_lb_backend_address_pool')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.custom_command('delete', 'delete_cross_region_lb_backend_address_pool')
-
-    with self.command_group('network cross-region-lb address-pool address', network_lb_backend_pool_sdk, is_preview=True) as g:
-        g.custom_command('add', 'add_cross_region_lb_backend_address_pool_address')
-        g.custom_command('remove', 'remove_lb_backend_address_pool_address')
-        g.custom_command('list', 'list_lb_backend_address_pool_address')
-
-    with self.command_group('network cross-region-lb rule', network_lb_sdk) as g:
-        g.custom_command('create', 'create_cross_region_lb_rule')
-        g.generic_update_command('update', child_collection_prop_name='load_balancing_rules',
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_cross_region_lb_rule')
-
-    with self.command_group('network cross-region-lb probe', network_lb_sdk) as g:
-        g.custom_command('create', 'create_cross_lb_probe')
-        g.generic_update_command('update', child_collection_prop_name='probes',
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='set_cross_lb_probe')
+    with self.command_group('network cross-region-lb address-pool address') as g:
+        from .operations.load_balancer import CrossRegionLoadBalancerAddressPoolAddressAdd, CrossRegionLoadBalancerAddressPoolAddressUpdate, CrossRegionLoadBalancerAddressPoolAddressRemove, CrossRegionLoadBalancerAddressPoolAddressList, CrossRegionLoadBalancerAddressPoolAddressShow
+        self.command_table['network cross-region-lb address-pool address add'] = CrossRegionLoadBalancerAddressPoolAddressAdd(loader=self)
+        self.command_table['network cross-region-lb address-pool address remove'] = CrossRegionLoadBalancerAddressPoolAddressRemove(loader=self)
+        self.command_table['network cross-region-lb address-pool address update'] = CrossRegionLoadBalancerAddressPoolAddressUpdate(loader=self)
+        self.command_table['network cross-region-lb address-pool address list'] = CrossRegionLoadBalancerAddressPoolAddressList(loader=self)
+        self.command_table['network cross-region-lb address-pool address show'] = CrossRegionLoadBalancerAddressPoolAddressShow(loader=self)
     # endregion
 
     # region LocalGateways
@@ -677,36 +498,24 @@ def load_command_table(self, _):
     # endregion
 
     # region NetworkInterfaces: (NIC)
-    with self.command_group('network nic', network_nic_sdk) as g:
-        g.custom_command('create', 'create_nic', transform=transform_nic_create_output, validator=process_nic_create_namespace, supports_no_wait=True)
-        g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_nics')
-        g.command('show-effective-route-table', 'begin_get_effective_route_table', min_api='2016-09-01', table_transformer=transform_effective_route_table)
-        g.command('list-effective-nsg', 'begin_list_effective_network_security_groups', min_api='2016-09-01', table_transformer=transform_effective_nsg)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_nic', supports_no_wait=True)
-        g.wait_command('wait')
+    with self.command_group("network nic"):
+        from .aaz.latest.network.nic import ListEffectiveNsg, ShowEffectiveRouteTable
+        from .custom import NICCreate, NICUpdate
+        self.command_table["network nic create"] = NICCreate(loader=self)
+        self.command_table["network nic update"] = NICUpdate(loader=self)
+        self.command_table["network nic list-effective-nsg"] = ListEffectiveNsg(loader=self, table_transformer=transform_effective_nsg)
+        self.command_table["network nic show-effective-route-table"] = ShowEffectiveRouteTable(loader=self, table_transformer=transform_effective_route_table)
 
-    resource = 'network_interfaces'
-    subresource = 'ip_configurations'
-    with self.command_group('network nic ip-config', network_nic_sdk) as g:
-        g.custom_command('create', 'create_nic_ip_config')
-        g.generic_update_command('update',
-                                 child_collection_prop_name='ip_configurations', child_arg_name='ip_config_name',
-                                 setter_name='update_nic_ip_config_setter',
-                                 setter_type=network_nic_custom,
-                                 custom_func_name='set_nic_ip_config')
-        g.command('list', list_network_resource_property(resource, subresource), command_type=network_util)
-        g.show_command('show', get_network_resource_property_entry(resource, subresource), command_type=network_util)
-        g.command('delete', delete_network_resource_property_entry(resource, subresource), command_type=network_util)
+    with self.command_group("network nic ip-config"):
+        from .custom import NICIPConfigCreate, NICIPConfigUpdate, NICIPConfigNATAdd, NICIPConfigNATRemove
+        self.command_table["network nic ip-config create"] = NICIPConfigCreate(loader=self)
+        self.command_table["network nic ip-config update"] = NICIPConfigUpdate(loader=self)
+        self.command_table["network nic ip-config inbound-nat-rule add"] = NICIPConfigNATAdd(loader=self)
+        self.command_table["network nic ip-config inbound-nat-rule remove"] = NICIPConfigNATRemove(loader=self)
 
-    with self.command_group('network nic ip-config address-pool') as g:
-        g.custom_command('add', 'add_nic_ip_config_address_pool')
-        g.custom_command('remove', 'remove_nic_ip_config_address_pool')
-
-    with self.command_group('network nic ip-config inbound-nat-rule') as g:
-        g.custom_command('add', 'add_nic_ip_config_inbound_nat_rule')
-        g.custom_command('remove', 'remove_nic_ip_config_inbound_nat_rule')
+    with self.command_group("network nic ip-config address-pool") as g:
+        g.custom_command("add", "add_nic_ip_config_address_pool")
+        g.custom_command("remove", "remove_nic_ip_config_address_pool")
     # endregion
 
     # region NetworkSecurityGroups
@@ -724,24 +533,35 @@ def load_command_table(self, _):
     # endregion
 
     # region NetworkWatchers
-    with self.command_group('network watcher', network_watcher_sdk, client_factory=cf_network_watcher, min_api='2016-09-01') as g:
-        g.custom_command('configure', 'configure_network_watcher')
-        g.command('list', 'list_all')
-        g.custom_command('test-ip-flow', 'check_nw_ip_flow', client_factory=cf_network_watcher)
+    with self.command_group("network watcher", network_watcher_sdk, client_factory=cf_network_watcher) as g:
+        from .operations.watcher import TestIPFlow, ShowNextHop, ShowSecurityGroupView
+        self.command_table["network watcher test-ip-flow"] = TestIPFlow(loader=self)
+        self.command_table["network watcher show-next-hop"] = ShowNextHop(loader=self)
+        self.command_table["network watcher show-security-group-view"] = ShowSecurityGroupView(loader=self)
+        g.custom_command("configure", "configure_network_watcher")
+
         g.custom_command('test-connectivity', 'check_nw_connectivity', client_factory=cf_network_watcher, validator=process_nw_test_connectivity_namespace, is_preview=True)
-        g.custom_command('show-next-hop', 'show_nw_next_hop', client_factory=cf_network_watcher)
-        g.custom_command('show-security-group-view', 'show_nw_security_view', client_factory=cf_network_watcher)
         g.custom_command('show-topology', 'show_topology_watcher', validator=process_nw_topology_namespace)
         g.custom_command('run-configuration-diagnostic', 'run_network_configuration_diagnostic', client_factory=cf_network_watcher, min_api='2018-06-01', validator=process_nw_config_diagnostic_namespace)
 
     with self.command_group('network watcher connection-monitor', network_watcher_cm_sdk, client_factory=cf_connection_monitor, min_api='2018-01-01') as g:
         g.custom_command('create', 'create_nw_connection_monitor', validator=process_nw_cm_v2_create_namespace)
-        g.command('delete', 'begin_delete')
-        g.show_command('show', 'get')
-        g.command('stop', 'begin_stop')
-        g.command('start', 'begin_start')
-        g.command('query', 'begin_query')
-        g.command('list', 'list')
+        # g.command('delete', 'begin_delete')
+        # g.show_command('show', 'get')
+        # g.command('stop', 'begin_stop')
+        # g.command('start', 'begin_start')
+        # g.command('query', 'begin_query')
+        # g.command('list', 'list')
+
+    from .operations.watcher import WatcherConnectionMonitorStart, WatcherConnectionMonitorStop, \
+        WatcherConnectionMonitorList, WatcherConnectionMonitorQuery, WatcherConnectionMonitorShow, \
+        WatcherConnectionMonitorDelete
+    self.command_table["network watcher connection-monitor start"] = WatcherConnectionMonitorStart(loader=self)
+    self.command_table["network watcher connection-monitor stop"] = WatcherConnectionMonitorStop(loader=self)
+    self.command_table["network watcher connection-monitor list"] = WatcherConnectionMonitorList(loader=self)
+    self.command_table["network watcher connection-monitor query"] = WatcherConnectionMonitorQuery(loader=self)
+    self.command_table["network watcher connection-monitor delete"] = WatcherConnectionMonitorDelete(loader=self)
+    self.command_table["network watcher connection-monitor show"] = WatcherConnectionMonitorShow(loader=self)
 
     with self.command_group('network watcher connection-monitor endpoint',
                             network_watcher_cm_sdk,
@@ -829,8 +649,10 @@ def load_command_table(self, _):
     public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Address:ipAddress, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
     public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ' if self.supported_api_version(min_api='2017-06-01') else ' ')
 
-    with self.command_group('network public-ip', network_public_ip_sdk) as g:
+    with self.command_group('network public-ip') as g:
         from .aaz.latest.network.public_ip import List, Show
+        from .custom import PublicIPUpdate
+        self.command_table['network public-ip update'] = PublicIPUpdate(loader=self)
         self.command_table['network public-ip list'] = List(loader=self, table_transformer='[].' + public_ip_show_table_transform)
         self.command_table['network public-ip show'] = Show(loader=self, table_transformer=public_ip_show_table_transform)
         g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
@@ -881,87 +703,81 @@ def load_command_table(self, _):
     # endregion
 
     # region VirtualNetworkGateways
-    with self.command_group('network vnet-gateway', network_vgw_sdk, min_api='2016-09-01') as g:
-        g.custom_command('create', 'create_vnet_gateway', supports_no_wait=True, transform=transform_vnet_gateway_create_output, validator=process_vnet_gateway_create_namespace)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vnet_gateway', supports_no_wait=True, validator=process_vnet_gateway_update_namespace)
-        g.wait_command('wait')
-        g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.command('reset', 'begin_reset')
-        g.command('list-bgp-peer-status', 'begin_get_bgp_peer_status', table_transformer=transform_vnet_gateway_bgp_peer_table)
-        g.command('list-advertised-routes', 'begin_get_advertised_routes', table_transformer=transform_vnet_gateway_routes_table)
-        g.command('list-learned-routes', 'begin_get_learned_routes', table_transformer=transform_vnet_gateway_routes_table)
-        g.command('show-supported-devices', 'supported_vpn_devices', is_preview=True, min_api='2017-09-01')
-        g.custom_command('disconnect-vpn-connections', 'disconnect_vnet_gateway_vpn_connections', client_factory=cf_virtual_network_gateways, supports_no_wait=True, is_preview=True, min_api='2019-11-01')
+    with self.command_group('network vnet-gateway'):
+        from .custom import VnetGatewayCreate, VnetGatewayUpdate, VnetGatewayVpnConnectionsDisconnect
+        from .aaz.latest.network.vnet_gateway import ListBgpPeerStatus, ListAdvertisedRoutes, ListLearnedRoutes
+        self.command_table['network vnet-gateway create'] = VnetGatewayCreate(loader=self)
+        self.command_table['network vnet-gateway update'] = VnetGatewayUpdate(loader=self)
+        self.command_table['network vnet-gateway disconnect-vpn-connections'] = VnetGatewayVpnConnectionsDisconnect(loader=self)
+        self.command_table['network vnet-gateway list-bgp-peer-status'] = ListBgpPeerStatus(loader=self, table_transformer=transform_vnet_gateway_bgp_peer_table)
+        self.command_table['network vnet-gateway list-advertised-routes'] = ListAdvertisedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
+        self.command_table['network vnet-gateway list-learned-routes'] = ListLearnedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
 
-    with self.command_group('network vnet-gateway packet-capture', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2019-07-01') as g:
-        g.custom_command('start', 'start_vnet_gateway_package_capture', supports_no_wait=True)
-        g.custom_command('stop', 'stop_vnet_gateway_package_capture', supports_no_wait=True)
-        g.wait_command('wait')
+    with self.command_group('network vnet-gateway packet-capture'):
+        from .custom import VnetGatewayPackageCaptureStart, VnetGatewayPackageCaptureStop
+        from .aaz.latest.network.vnet_gateway import Wait
+        self.command_table['network vnet-gateway packet-capture start'] = VnetGatewayPackageCaptureStart(loader=self)
+        self.command_table['network vnet-gateway packet-capture stop'] = VnetGatewayPackageCaptureStop(loader=self)
+        self.command_table['network vnet-gateway packet-capture wait'] = Wait(loader=self)
 
-    with self.command_group('network vnet-gateway vpn-client', network_vgw_sdk, client_factory=cf_virtual_network_gateways) as g:
+    with self.command_group('network vnet-gateway vpn-client') as g:
+        from .custom import VpnProfilePackageUrlShow, VpnClientConnectionHealthShow
+        self.command_table['network vnet-gateway vpn-client show-url'] = VpnProfilePackageUrlShow(loader=self)
+        self.command_table['network vnet-gateway vpn-client show-health'] = VpnClientConnectionHealthShow(loader=self)
         g.custom_command('generate', 'generate_vpn_client')
-        g.command('show-url', 'begin_get_vpn_profile_package_url', min_api='2017-08-01')
-        g.command('show-health', 'begin_get_vpnclient_connection_health', is_preview=True, min_api='2019-04-01')
 
-    with self.command_group('network vnet-gateway vpn-client ipsec-policy', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2018-02-01') as g:
-        g.custom_command('set', 'set_vpn_client_ipsec_policy', supports_no_wait=True)
-        g.show_command('show', 'begin_get_vpnclient_ipsec_parameters')
-        g.wait_command('wait')
+    with self.command_group('network vnet-gateway vpn-client ipsec-policy'):
+        from .aaz.latest.network.vnet_gateway import Wait
+        self.command_table['network vnet-gateway vpn-client ipsec-policy wait'] = Wait(loader=self)
 
-    with self.command_group('network vnet-gateway revoked-cert', network_vgw_sdk) as g:
-        g.custom_command('create', 'create_vnet_gateway_revoked_cert')
-        g.custom_command('delete', 'delete_vnet_gateway_revoked_cert')
+    with self.command_group('network vnet-gateway revoked-cert'):
+        from .custom import VnetGatewayRevokedCertCreate
+        self.command_table['network vnet-gateway revoked-cert create'] = VnetGatewayRevokedCertCreate(loader=self)
 
-    with self.command_group('network vnet-gateway root-cert', network_vgw_sdk) as g:
-        g.custom_command('create', 'create_vnet_gateway_root_cert')
-        g.custom_command('delete', 'delete_vnet_gateway_root_cert')
+    with self.command_group('network vnet-gateway root-cert'):
+        from .custom import VnetGatewayRootCertCreate
+        self.command_table['network vnet-gateway root-cert create'] = VnetGatewayRootCertCreate(loader=self)
 
-    with self.command_group('network vnet-gateway ipsec-policy', network_vgw_sdk, min_api='2018-02-01') as g:
-        g.custom_command('add', 'add_vnet_gateway_ipsec_policy', supports_no_wait=True, doc_string_source='IpsecPolicy')
-        g.custom_command('list', 'list_vnet_gateway_ipsec_policies')
+    with self.command_group('network vnet-gateway ipsec-policy') as g:
+        from .custom import VnetGatewayIpsecPolicyAdd
+        self.command_table['network vnet-gateway ipsec-policy add'] = VnetGatewayIpsecPolicyAdd(loader=self)
         g.custom_command('clear', 'clear_vnet_gateway_ipsec_policies', supports_no_wait=True)
 
-    with self.command_group('network vnet-gateway aad', network_vgw_sdk, min_api='2019-04-01') as g:
-        g.custom_command('assign', 'assign_vnet_gateway_aad', supports_no_wait=True)
-        g.custom_show_command('show', 'show_vnet_gateway_aad')
+    with self.command_group('network vnet-gateway aad') as g:
+        from .custom import VnetGatewayAadAssign
+        self.command_table['network vnet-gateway aad assign'] = VnetGatewayAadAssign(loader=self)
         g.custom_command('remove', 'remove_vnet_gateway_aad', supports_no_wait=True)
 
-    with self.command_group('network vnet-gateway nat-rule', network_vgw_sdk, min_api='2021-02-01', is_preview=True) as g:
-        g.custom_command('add', 'add_vnet_gateway_nat_rule', supports_no_wait=True)
-        g.custom_show_command('list', 'show_vnet_gateway_nat_rule')
-        g.custom_command('remove', 'remove_vnet_gateway_nat_rule', supports_no_wait=True)
-        g.wait_command('wait')
+    with self.command_group('network vnet-gateway nat-rule'):
+        from .custom import VnetGatewayNatRuleAdd, VnetGatewayNatRuleShow, VnetGatewayNatRuleRemove
+        self.command_table['network vnet-gateway nat-rule add'] = VnetGatewayNatRuleAdd(loader=self)
+        self.command_table['network vnet-gateway nat-rule list'] = VnetGatewayNatRuleShow(loader=self)
+        self.command_table['network vnet-gateway nat-rule remove'] = VnetGatewayNatRuleRemove(loader=self)
     # endregion
 
     # region VirtualNetworkGatewayConnections
-    with self.command_group('network vpn-connection', network_vpn_sdk) as g:
+    with self.command_group('network vpn-connection') as g:
+        from .custom import VpnConnectionUpdate, VpnConnectionDeviceConfigScriptShow
+        self.command_table['network vpn-connection update'] = VpnConnectionUpdate(loader=self)
+        self.command_table['network vpn-connection show-device-config-script'] = VpnConnectionDeviceConfigScriptShow(loader=self)
         g.custom_command('create', 'create_vpn_connection', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), table_transformer=deployment_validate_table_format, validator=process_vpn_connection_create_namespace, exception_handler=handle_template_based_exception)
-        g.command('delete', 'begin_delete')
-        g.show_command('show', 'get', transform=transform_vpn_connection)
-        g.custom_command('list', 'list_vpn_connections', transform=transform_vpn_connection_list)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vpn_connection')
-        g.command('list-ike-sas', 'begin_get_ike_sas', is_preview=True, min_api='2020-08-01')
-        g.custom_command('show-device-config-script', 'show_vpn_connection_device_config_script', client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2017-09-01')
+        g.custom_command('list', 'list_vpn_connections')
 
-    with self.command_group('network vpn-connection shared-key', network_vpn_sdk, client_factory=cf_virtual_network_gateway_connections) as g:
-        g.show_command('show', 'get_shared_key')
-        g.custom_command('reset', 'reset_shared_key')
-        g.generic_update_command('update',
-                                 getter_name='get_shared_key',
-                                 custom_func_name='update_shared_key',
-                                 setter_name='begin_set_shared_key')
+    with self.command_group('network vpn-connection shared-key'):
+        from .custom import VpnConnSharedKeyUpdate
+        self.command_table['network vpn-connection shared-key update'] = VpnConnSharedKeyUpdate(loader=self)
 
-    with self.command_group('network vpn-connection ipsec-policy', network_vpn_sdk, client_factory=cf_virtual_network_gateway_connections, min_api='2017-03-01') as g:
-        g.custom_command('add', 'add_vpn_conn_ipsec_policy', supports_no_wait=True, doc_string_source='IpsecPolicy')
-        g.custom_command('list', 'list_vpn_conn_ipsec_policies')
+    with self.command_group('network vpn-connection ipsec-policy') as g:
+        from .custom import VpnConnIpsecPolicyAdd
+        self.command_table['network vpn-connection ipsec-policy add'] = VpnConnIpsecPolicyAdd(loader=self)
         g.custom_command('clear', 'clear_vpn_conn_ipsec_policies', supports_no_wait=True)
 
-    with self.command_group('network vpn-connection packet-capture', network_vpn_sdk, client_factory=cf_virtual_network_gateway_connections, is_preview=True, min_api='2019-07-01') as g:
-        g.custom_command('start', 'start_vpn_conn_package_capture', supports_no_wait=True)
-        g.custom_command('stop', 'stop_vpn_conn_package_capture', supports_no_wait=True)
-        g.wait_command('wait')
+    with self.command_group('network vpn-connection packet-capture'):
+        from .custom import VpnConnPackageCaptureStart, VpnConnPackageCaptureStop
+        from .aaz.latest.network.vpn_connection import Wait
+        self.command_table['network vpn-connection packet-capture start'] = VpnConnPackageCaptureStart(loader=self)
+        self.command_table['network vpn-connection packet-capture stop'] = VpnConnPackageCaptureStop(loader=self)
+        self.command_table['network vpn-connection packet-capture wait'] = Wait(loader=self)
     # endregion
 
     # region VirtualRouter

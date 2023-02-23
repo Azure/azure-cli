@@ -73,8 +73,6 @@ jobs:
         Target: cosmosdb
       databoxedge:
         Target: databoxedge
-      deploymentmanager:
-        Target: deploymentmanager
       dla:
         Target: dla
       dls:
@@ -361,7 +359,7 @@ jobs:
         # pip install -e azure-cli-dev-tools
         pip install pytest-json-report
         pip install pytest-html
-        pip install pytest-rerunfailures
+        pip install pytest-rerunfailures==11.0
 
         azdev setup -c azure-cli -r azure-cli-extensions
 
@@ -464,7 +462,7 @@ jobs:
         ls $(System.ArtifactsDirectory)
         pwd
         commit_id=`git ls-remote https://github.com/Azure/azure-cli.git HEAD`
-        pip install sendgrid
+        pip install azure-communication-email
         pip install mysql-connector-python
         pip install requests
         # pip install certifi

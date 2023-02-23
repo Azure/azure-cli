@@ -75,12 +75,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @ResourceGroupPreparer(location="eastus")
     @VaultPreparer(parameter_name='vault1')
     @VaultPreparer(parameter_name='vault2')
+    # @PolicyPreparer(parameter_name='policy')
     def test_backup_vault(self, resource_group, resource_group_location, vault1, vault2):
 
         self.kwargs.update({
             'loc': resource_group_location,
             'vault1': vault1,
-            'vault2': vault2
+            'vault2': vault2,
+            # 'policy': policy
         })
 
         self.kwargs['vault3'] = self.create_random_name('clitest-vault', 50)
@@ -89,16 +91,23 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('resourceGroup', '{rg}'),
             self.check('location', '{loc}'),
             self.check('properties.provisioningState', 'Succeeded'),
+            self.check('properties.publicNetworkAccess', 'Enabled'),
             self.check('properties.monitoringSettings.azureMonitorAlertSettings.alertsForAllJobFailures', 'Enabled'),
             self.check('properties.monitoringSettings.classicAlertSettings.alertsForCriticalOperations', 'Enabled')
         ])
 
         self.kwargs['vault4'] = self.create_random_name('clitest-vault', 50)
-        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc}', checks=[
+        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --public-network-access Disable --immutability-state Unlocked', checks=[
             self.check('name', '{vault4}'),
             self.check('resourceGroup', '{rg}'),
             self.check('location', '{loc}'),
-            self.check('properties.provisioningState', 'Succeeded')
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('properties.publicNetworkAccess', 'Disabled'),
+            self.check('properties.securitySettings.immutabilitySettings.state', 'Unlocked'),
+        ])
+
+        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --public-network-access Enable', checks=[
+            self.check('properties.publicNetworkAccess', 'Enabled')
         ])
 
         number_of_test_vaults = 4
@@ -158,6 +167,32 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.monitoringSettings.azureMonitorAlertSettings.alertsForAllJobFailures', 'Disabled'),
             self.check('properties.monitoringSettings.classicAlertSettings.alertsForCriticalOperations', 'Disabled')
         ])
+
+        # self.kwargs['policy_json'] = self.cmd('backup policy show -g {rg} -v {vault4} -n DefaultPolicy', checks=[
+        #     self.check('name', 'DefaultPolicy'),
+        #     self.check('resourceGroup', '{rg}')
+        # ]).get_output_in_json()
+        
+        # self.kwargs['policy_json']['properties']["retentionPolicy"] = {}
+        # self.kwargs['policy_json']['properties']['retentionPolicy']['dailySchedule'] = {}
+        # self.kwargs['policy_json']['properties']['retentionPolicy']['dailySchedule']['retentionDuration'] = {"count": 20, "durationType": "Days"}
+
+        # Immutable vault testing.
+        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --immutability-state Disabled', checks=[
+            self.check('properties.securitySettings.immutabilitySettings.state', 'Disabled')
+        ])
+
+        # self.cmd('backup policy set -g {rg} -v {vault4} --policy {policy_json}', checks=[
+        #     self.check('properties.retentionPolicy.dailySchedule.retentionDuration.count', 20)
+        # ])
+
+        # self.kwargs['policy_json']['properties']['retentionPolicy']['dailySchedule']['retentionDuration']['count'] = 10
+
+        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --immutability-state Unlocked', checks=[
+            self.check('properties.securitySettings.immutabilitySettings.state', 'Unlocked')
+        ])
+
+        # self.cmd('backup policy set -g {rg} -v {vault4} --policy {policy_json}', expect_failure=True)
 
         self.cmd('backup vault delete -n {vault4} -g {rg} -y')
 
@@ -1332,7 +1367,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-    #@unittest.skip('ServiceResourceNotEmptyWithBackendMessage: Recovery Services vault cannot be deleted as there are backup items still present in soft delete state. Visit the following link for the steps to permanently delete soft deleted items: https://aka.ms/undeletesoftdeleteditems.  : clitest-vm000003. Please ensure all containers have been unregistered from the vault and all private endpoints associated with the vault have been deleted, and retry operation.')
     @ResourceGroupPreparer(location="centraluseuap")
     @VaultPreparer(soft_delete=False)
     @VMPreparer(parameter_name='vm1')

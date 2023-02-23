@@ -1139,6 +1139,7 @@ class TestAAZArg(unittest.TestCase):
         )
         schema.properties.vnets = AAZListArg(
             options=["vnets"],
+            singular_options=["vnet"],
             nullable=True
         )
         schema.properties.vnets.Element = AAZObjectArg()
@@ -1183,8 +1184,25 @@ class TestAAZArg(unittest.TestCase):
             "pt": 12.123
         })
 
+        action.setup_operations(dest_ops, ["vnet.id=223", "vnet={id:456}"])
+        self.assertEqual(len(dest_ops._ops), 3)
+        dest_ops.apply(v, "properties")
+        self.assertEqual(v.properties.to_serialized_data(), {
+            "enable": False,
+            "tags": {
+                "a": 1,
+                "3": 2,
+            },
+            "vnets": [
+                {"id": "/123"},
+                {"id": "223"},
+                {"id": "456"}
+            ],
+            "pt": 12.123
+        })
+
         action.setup_operations(dest_ops, ["pt=", "enable=null", "vnets=[]"])
-        self.assertEqual(len(dest_ops._ops), 4)
+        self.assertEqual(len(dest_ops._ops), 6)
         dest_ops.apply(v, "properties")
         self.assertEqual(v.properties, {
             "enable": None,
@@ -1197,7 +1215,7 @@ class TestAAZArg(unittest.TestCase):
         })
 
         action.setup_operations(dest_ops, ["{enable:false,pt,tags:{a:1,3:2,c},vnets:[{id}],identities:{a:{},'http://b/c/d/e'}}"])
-        self.assertEqual(len(dest_ops._ops), 5)
+        self.assertEqual(len(dest_ops._ops), 7)
         dest_ops.apply(v, "properties")
         self.assertEqual(v.properties, {
             "enable": False,
@@ -1217,7 +1235,7 @@ class TestAAZArg(unittest.TestCase):
         })
 
         action.setup_operations(dest_ops, ["identities.'http://b.p['/]/c'=", "identities.a=null"])
-        self.assertEqual(len(dest_ops._ops), 7)
+        self.assertEqual(len(dest_ops._ops), 9)
         dest_ops.apply(v, "properties")
         self.assertEqual(v.properties, {
             "enable": False,
@@ -1238,17 +1256,17 @@ class TestAAZArg(unittest.TestCase):
         })
 
         action.setup_operations(dest_ops, ["{}"])
-        self.assertEqual(len(dest_ops._ops), 8)
+        self.assertEqual(len(dest_ops._ops), 10)
         dest_ops.apply(v, "properties")
         self.assertEqual(v.properties, {})
 
         action.setup_operations(dest_ops, ["null"])
-        self.assertEqual(len(dest_ops._ops), 9)
+        self.assertEqual(len(dest_ops._ops), 11)
         dest_ops.apply(v, "properties")
         self.assertEqual(v.properties, None)
 
         action.setup_operations(dest_ops, ["{enable:True,tags:null,vnets:null,pt:12.123,newIPv6:'00:00:00'}"])
-        self.assertEqual(len(dest_ops._ops), 10)
+        self.assertEqual(len(dest_ops._ops), 12)
         dest_ops.apply(v, "properties")
         self.assertEqual(v.properties, {
             "enable": True,
