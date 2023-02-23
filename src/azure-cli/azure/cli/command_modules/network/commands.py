@@ -626,19 +626,22 @@ def load_command_table(self, _):
                             client_factory=cf_flow_logs,
                             min_api='2019-11-01',
                             validator=get_network_watcher_from_location(remove=False)) as g:
+        from azure.cli.command_modules.network.operations.watcher import NwFlowLogCreate, NwFlowLogUpdate
+        self.command_table["network watcher flow-log create"] = NwFlowLogCreate(loader=self)
+        self.command_table["network watcher flow-log update"] = NwFlowLogUpdate(loader=self)
         g.custom_command('list', 'list_nw_flow_log', validator=get_network_watcher_from_location(remove=False))
         g.custom_command('delete', 'delete_nw_flow_log', validator=get_network_watcher_from_location(remove=False))
-        g.custom_command('create',
-                         'create_nw_flow_log',
-                         client_factory=cf_flow_logs,
-                         validator=process_nw_flow_log_create_namespace)
-        g.generic_update_command('update',
-                                 getter_name='update_nw_flow_log_getter',
-                                 getter_type=network_watcher_flow_log_update_sdk,
-                                 setter_name='update_nw_flow_log_setter',
-                                 setter_type=network_watcher_flow_log_update_sdk,
-                                 custom_func_name='update_nw_flow_log',
-                                 validator=process_nw_flow_log_create_namespace)
+        # g.custom_command('create',
+        #                  'create_nw_flow_log',
+        #                  client_factory=cf_flow_logs,
+        #                  validator=process_nw_flow_log_create_namespace)
+        # g.generic_update_command('update',
+        #                          getter_name='update_nw_flow_log_getter',
+        #                          getter_type=network_watcher_flow_log_update_sdk,
+        #                          setter_name='update_nw_flow_log_setter',
+        #                          setter_type=network_watcher_flow_log_update_sdk,
+        #                          custom_func_name='update_nw_flow_log',
+        #                          validator=process_nw_flow_log_create_namespace)
 
     with self.command_group('network watcher troubleshooting', client_factory=cf_network_watcher, min_api='2016-09-01') as g:
         g.custom_command('start', 'start_nw_troubleshooting', supports_no_wait=True, validator=process_nw_troubleshooting_start_namespace)

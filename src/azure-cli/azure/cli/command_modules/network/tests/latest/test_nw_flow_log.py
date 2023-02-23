@@ -9,8 +9,8 @@ from azure.cli.testsdk.scenario_tests.decorators import AllowLargeResponse
 
 class NWFlowLogScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='centraluseuap')
-    @StorageAccountPreparer(name_prefix='testflowlog', location='centraluseuap', kind='StorageV2')
+    @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='westcentralus')
+    @StorageAccountPreparer(name_prefix='testflowlog', location='westcentralus', kind='StorageV2')
     def test_nw_flow_log_create_vnetfl(self, resource_group, resource_group_location, storage_account):
         self.kwargs.update({
             'rg': resource_group,
@@ -26,7 +26,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
         })
 
         # enable network watcher
-        # self.cmd('network watcher configure -g {rg} --locations {location} --enabled')
+        self.cmd('network watcher configure -g {rg} --locations {location} --enabled')
 
         # prepare the target resource
         self.cmd('network vnet create -g {rg} -n {vnet}')

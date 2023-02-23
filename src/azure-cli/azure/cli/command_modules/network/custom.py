@@ -5779,72 +5779,121 @@ def create_nw_packet_capture(cmd, client, resource_group_name, capture_name,
     return client.begin_create(watcher_rg, watcher_name, capture_name, capture_params)
 
 
-def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_account=None,
+def set_nsg_flow_logging(cmd, watcher_rg, watcher_name, nsg, storage_account=None,
                          resource_group_name=None, enabled=None, retention=0, log_format=None, log_version=None,
                          traffic_analytics_workspace=None, traffic_analytics_interval=None,
                          traffic_analytics_enabled=None):
     from azure.cli.core.commands import LongRunningOperation
-    flowlog_status_parameters = cmd.get_models('FlowLogStatusParameters')(target_resource_id=nsg)
-    config = LongRunningOperation(cmd.cli_ctx)(client.begin_get_flow_log_status(watcher_rg,
-                                                                                watcher_name,
-                                                                                flowlog_status_parameters))
+    from .aaz.latest.network.watcher.flow_log import ConfigureFlowLog
+    poller = ConfigureFlowLog(cli_ctx=cmd.cli_ctx)(command_args={"network_watcher_name": watcher_name,
+                                                                 "resource_group": watcher_rg,
+                                                                 "target_resource_id": nsg})
+    config = LongRunningOperation(cmd.cli_ctx)(poller)
+    nsg_flow_logging = {}
     try:
-        if not config.flow_analytics_configuration.network_watcher_flow_analytics_configuration.workspace_id:
-            config.flow_analytics_configuration = None
-    except AttributeError:
-        config.flow_analytics_configuration = None
-
-    with cmd.update_context(config) as c:
-        c.set_param('enabled', enabled if enabled is not None else config.enabled)
-        c.set_param('storage_id', storage_account or config.storage_id)
+        if not config['flowAnalyticsConfiguration']['networkWatcherFlowAnalyticsConfiguration']['workspaceId']:
+            config['flowAnalyticsConfiguration'] = None
+    except KeyError:
+        config['flowAnalyticsConfiguration'] = None
+    if enabled is not None:
+        enum = {'true': True, 'True': True, 'false': False, 'False': False}
+        nsg_flow_logging['enabled'] = enum['{}'.format(enabled)]
+    else:
+        nsg_flow_logging['enabled'] = config['enabled']
+    nsg_flow_logging['storage_account'] = storage_account or config['storageId']
+    nsg_flow_logging['target_resource_id'] = config['targetResourceId']
     if retention is not None:
-        config.retention_policy = {
-            'days': retention,
-            'enabled': int(retention) > 0
-        }
-    if cmd.supported_api_version(min_api='2018-10-01') and (log_format or log_version):
-        config.format = {
-            'type': log_format,
-            'version': log_version
-        }
+        enabled = int(retention) > 0
+        nsg_flow_logging['retention_policy'] = {"days": retention, 'enabled': enabled}
+    if log_format or log_version:
+        nsg_flow_logging['format'] = log_format
+        nsg_flow_logging['log_version'] = log_version
 
-    if cmd.supported_api_version(min_api='2018-10-01') and \
-            any([traffic_analytics_workspace is not None, traffic_analytics_enabled is not None]):
-        workspace = None
-
+    if any([traffic_analytics_workspace is not None, traffic_analytics_enabled is not None]):
         if traffic_analytics_workspace:
             from azure.cli.core.commands.arm import get_arm_resource_by_id
             workspace = get_arm_resource_by_id(cmd.cli_ctx, traffic_analytics_workspace)
 
-        if not config.flow_analytics_configuration:
-            # must create whole object
-            if not workspace:
-                raise CLIError('usage error (analytics not already configured): --workspace NAME_OR_ID '
-                               '[--enabled {true|false}]')
-            if traffic_analytics_enabled is None:
-                traffic_analytics_enabled = True
-            config.flow_analytics_configuration = {
-                'network_watcher_flow_analytics_configuration': {
+            if not config['flowAnalyticsConfiguration']:
+                # must create whole object
+                if not workspace:
+                    raise CLIError('usage error (analytics not already configured): --workspace NAME_OR_ID '
+                                   '[--enabled {true|false}]')
+                if traffic_analytics_enabled is None:
+                    traffic_analytics_enabled = True
+                nsg_flow_logging['flow_analytics_configuration'] = {
                     'enabled': traffic_analytics_enabled,
                     'workspace_id': workspace.properties['customerId'],
                     'workspace_region': workspace.location,
                     'workspace_resource_id': traffic_analytics_workspace,
                     'traffic_analytics_interval': traffic_analytics_interval
                 }
-            }
-        else:
-            with cmd.update_context(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
-                # update object
-                c.set_param('enabled', traffic_analytics_enabled)
+            else:
+                nsg_flow_logging['flow_analytics_configuration'] = \
+                    config['flowAnalyticsConfiguration']['networkWatcherFlowAnalyticsConfiguration']
+                nsg_flow_logging['flow_analytics_configuration']['enabled'] = traffic_analytics_enabled
                 if traffic_analytics_workspace == "":
-                    config.flow_analytics_configuration = None
+                    nsg_flow_logging['flow_analytics_configuration'] = None
                 elif workspace:
-                    c.set_param('workspace_id', workspace.properties['customerId'])
-                    c.set_param('workspace_region', workspace.location)
-                    c.set_param('workspace_resource_id', traffic_analytics_workspace)
-                    c.set_param('traffic_analytics_interval', traffic_analytics_interval)
+                    nsg_flow_logging['flow_analytics_configuration']['workspace_id'] = workspace.properties['customerId']
+                    nsg_flow_logging['flow_analytics_configuration']['workspace_region'] = workspace.location
+                    nsg_flow_logging['flow_analytics_configuration']['workspace_resource_id'] = traffic_analytics_workspace
+                    nsg_flow_logging['flow_analytics_configuration']['traffic_analytics_interval'] = traffic_analytics_interval
+    nsg_flow_logging['network_watcher_name'] = watcher_name
+    nsg_flow_logging['resource_group'] = watcher_rg
+    from .aaz.latest.network.watcher.flow_log import Configure
+    return Configure(cli_ctx=cmd.cli_ctx)(command_args=nsg_flow_logging)
+    # with cmd.update_context(config) as c:
+    #     c.set_param('enabled', enabled if enabled is not None else config.enabled)
+    #     c.set_param('storage_id', storage_account or config.storage_id)
+    # if retention is not None:
+    #     config.retention_policy = {
+    #         'days': retention,
+    #         'enabled': int(retention) > 0
+    #     }
+    # if cmd.supported_api_version(min_api='2018-10-01') and (log_format or log_version):
+    #     config.format = {
+    #         'type': log_format,
+    #         'version': log_version
+    #     }
 
-    return client.begin_set_flow_log_configuration(watcher_rg, watcher_name, config)
+    # if cmd.supported_api_version(min_api='2018-10-01') and \
+    #         any([traffic_analytics_workspace is not None, traffic_analytics_enabled is not None]):
+    #     workspace = None
+
+    #     if traffic_analytics_workspace:
+    #         from azure.cli.core.commands.arm import get_arm_resource_by_id
+    #         workspace = get_arm_resource_by_id(cmd.cli_ctx, traffic_analytics_workspace)
+
+    #     if not config.flow_analytics_configuration:
+    #         # must create whole object
+    #         if not workspace:
+    #             raise CLIError('usage error (analytics not already configured): --workspace NAME_OR_ID '
+    #                            '[--enabled {true|false}]')
+    #         if traffic_analytics_enabled is None:
+    #             traffic_analytics_enabled = True
+    #         config.flow_analytics_configuration = {
+    #             'network_watcher_flow_analytics_configuration': {
+    #                 'enabled': traffic_analytics_enabled,
+    #                 'workspace_id': workspace.properties['customerId'],
+    #                 'workspace_region': workspace.location,
+    #                 'workspace_resource_id': traffic_analytics_workspace,
+    #                 'traffic_analytics_interval': traffic_analytics_interval
+    #             }
+    #         }
+    #     else:
+    #         with cmd.update_context(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
+    #             # update object
+    #             c.set_param('enabled', traffic_analytics_enabled)
+    #             if traffic_analytics_workspace == "":
+    #                 config.flow_analytics_configuration = None
+    #             elif workspace:
+    #                 c.set_param('workspace_id', workspace.properties['customerId'])
+    #                 c.set_param('workspace_region', workspace.location)
+    #                 c.set_param('workspace_resource_id', traffic_analytics_workspace)
+    #                 c.set_param('traffic_analytics_interval', traffic_analytics_interval)
+
+    # return client.begin_set_flow_log_configuration(watcher_rg, watcher_name, config)
 
 
 # combination of resource_group_name and nsg is for old output
