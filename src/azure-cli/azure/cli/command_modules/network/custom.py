@@ -5530,46 +5530,6 @@ def list_nw_connection_monitor_v2_test_group(client,
     return connection_monitor.test_groups
 
 
-def add_nw_connection_monitor_v2_output(cmd,
-                                        client,
-                                        watcher_rg,
-                                        watcher_name,
-                                        connection_monitor_name,
-                                        location,
-                                        out_type,
-                                        workspace_id=None):
-    output = _create_nw_connection_monitor_v2_output(cmd, out_type, workspace_id)
-
-    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
-
-    if connection_monitor.outputs is None:
-        connection_monitor.outputs = []
-
-    connection_monitor.outputs.append(output)
-
-    return client.begin_create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
-
-
-def remove_nw_connection_monitor_v2_output(client,
-                                           watcher_rg,
-                                           watcher_name,
-                                           connection_monitor_name,
-                                           location):
-    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
-    connection_monitor.outputs = []
-
-    return client.begin_create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
-
-
-def list_nw_connection_monitor_v2_output(client,
-                                         watcher_rg,
-                                         watcher_name,
-                                         connection_monitor_name,
-                                         location):
-    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
-    return connection_monitor.outputs
-
-
 # combination of resource_group_name and nsg is for old output
 # combination of location and flow_log_name is for new output
 def show_nw_flow_logging(cmd, watcher_rg, watcher_name, location=None, resource_group_name=None, nsg=None,

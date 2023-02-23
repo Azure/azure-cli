@@ -1109,7 +1109,6 @@ class WatcherConnectionMonitorOutputAdd(_WatcherConnectionMonitorOutputAdd):
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
-        args_schema.migrate._registered = False
 
         args_schema.output_type._required = True
         args_schema.location = AAZResourceLocationArg(
