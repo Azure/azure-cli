@@ -33,11 +33,10 @@ from azure.cli.command_modules.network._validators import (
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
     process_nw_flow_log_set_namespace, process_nw_flow_log_create_namespace, process_nw_flow_log_show_namespace,
-    process_nw_packet_capture_create_namespace, process_nw_test_connectivity_namespace, process_nw_topology_namespace,
+    process_nw_packet_capture_create_namespace,
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
     process_public_ip_create_namespace,
     process_vpn_connection_create_namespace,
-    process_nw_config_diagnostic_namespace,
     process_appgw_waf_policy_update, process_cross_region_lb_create_namespace)
 
 NETWORK_VROUTER_DEPRECATION_INFO = 'network routeserver'

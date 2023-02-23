@@ -10,8 +10,7 @@ from knack.arguments import CLIArgumentType, ignore_type
 
 from azure.cli.core.commands.parameters import (get_location_type, get_resource_name_completion_list,
                                                 tags_type, zone_type, zones_type,
-                                                file_type, get_resource_group_completion_list,
-                                                get_three_state_flag, get_enum_type)
+                                                file_type, get_three_state_flag, get_enum_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
@@ -46,18 +45,14 @@ def load_arguments(self, _):
 
     (ApplicationGatewayProtocol,
      ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySkuName, ApplicationGatewaySslProtocol,
-     Direction,
-     FlowLogFormatType, HTTPMethod, IPAllocationMethod,
-     IPVersion, Protocol, PublicIPAddressSkuName, PublicIPAddressSkuTier,
+     FlowLogFormatType, IPAllocationMethod, IPVersion, PublicIPAddressSkuName, PublicIPAddressSkuTier,
      SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
      ConnectionMonitorEndpointFilterType, ConnectionMonitorTestConfigurationProtocol,
      PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType,
      PacketCaptureTargetType) = self.get_models(
          'ApplicationGatewayProtocol',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol',
-         'Direction',
-         'FlowLogFormatType', 'HTTPMethod', 'IPAllocationMethod',
-         'IPVersion', 'Protocol', 'PublicIPAddressSkuName', 'PublicIPAddressSkuTier',
+         'FlowLogFormatType', 'IPAllocationMethod', 'IPVersion', 'PublicIPAddressSkuName', 'PublicIPAddressSkuTier',
          'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
          'ConnectionMonitorEndpointFilterType', 'ConnectionMonitorTestConfigurationProtocol',
          'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType', 'DestinationPortBehavior', 'CoverageLevel', 'EndpointType',

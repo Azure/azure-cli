@@ -136,7 +136,7 @@ class RunConfigurationDiagnostic(_RunConfigurationDiagnostic):
                 "networkInterfaces": "Microsoft.Network",
             }
             resource_namespace = NAMESPACES[args.resource_type.to_serialized_data()]
-            if has_value(parent):
+            if has_value(args.parent):
                 # special case for virtualMachineScaleSets/NetworkInterfaces, since it is
                 # the only one to need `--parent`
                 resource_namespace = "Microsoft.Compute"
