@@ -29,7 +29,7 @@ from azure.cli.command_modules.network._validators import (
     process_ag_create_namespace,
     process_lb_create_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
-    process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
+    process_nw_cm_v2_test_group,
     process_nw_flow_log_show_namespace,
     process_public_ip_create_namespace,
     process_vpn_connection_create_namespace,

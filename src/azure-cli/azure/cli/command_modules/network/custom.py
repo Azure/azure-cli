@@ -6937,7 +6937,5 @@ def remove_nw_connection_monitor_output(cmd, connection_monitor_name, location):
         'connection_monitor_name': connection_monitor_name,
         'location': location
     }
-    from azure.cli.core.commands import LongRunningOperation
     from .operations.watcher import WatcherConnectionMonitorOutputRemove
-    poller = WatcherConnectionMonitorOutputRemove(cli_ctx=cmd.cli_ctx)(command_args=update_args)
-    return LongRunningOperation(cmd.cli_ctx)(poller)
+    return WatcherConnectionMonitorOutputRemove(cli_ctx=cmd.cli_ctx)(command_args=update_args)

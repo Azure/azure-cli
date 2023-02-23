@@ -1110,8 +1110,6 @@ class WatcherConnectionMonitorOutputAdd(_WatcherConnectionMonitorOutputAdd):
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
         args_schema.migrate._registered = False
-        args_schema.output_index._registered = False
-        args_schema.no_wait._registered = False
 
         args_schema.output_type._required = True
         args_schema.location = AAZResourceLocationArg(
@@ -1123,7 +1121,10 @@ class WatcherConnectionMonitorOutputAdd(_WatcherConnectionMonitorOutputAdd):
         return args_schema
 
     def pre_operations(self):
-        process_nw_cm_v2_output_namespace(self)
+        args = self.ctx.args
+        if has_value(args.out_type) and not has_value(args.workspace_id):
+            raise ValidationError('usage error: --type is specified but no other resource id provided')
+        get_network_watcher_from_location(self)
 
 
 class WatcherConnectionMonitorOutputList(_WatcherConnectionMonitorOutputList):
@@ -1149,7 +1150,7 @@ class WatcherConnectionMonitorOutputList(_WatcherConnectionMonitorOutputList):
         return args_schema
 
     def pre_operations(self):
-        process_nw_cm_v2_output_namespace(self)
+        get_network_watcher_from_location(self)
 
 
 class WatcherConnectionMonitorOutputRemove(_WatcherConnectionMonitorUpdate):
