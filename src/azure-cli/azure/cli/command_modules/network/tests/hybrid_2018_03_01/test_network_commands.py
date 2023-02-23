@@ -51,16 +51,17 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
 
         self.kwargs.update({
             'lb': 'lb1',
+            'sku': 'standard',
             'zone': '2',
             'location': 'eastus2',
             'ip': 'pubip1'
         })
 
         # LB with public ip
-        self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-zone {zone} --public-ip-address {ip}')
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --sku {sku} --public-ip-zone {zone} --public-ip-address {ip}')
         # No zone on LB and its front-ip-config
         self.cmd('network lb show -g {rg} -n {lb}', checks=[
-            self.check("frontendIpConfigurations[0].zones", None),
+            self.check("frontendIPConfigurations[0].zones", None),
             self.check("zones", None)
         ])
         # Zone on public-ip which LB uses to infer the zone
@@ -70,10 +71,10 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
 
         # LB w/o public ip, so called ILB
         self.kwargs['lb'] = 'lb2'
-        self.cmd('network lb create -g {rg} -l {location} -n {lb} --frontend-ip-zone {zone} --public-ip-address "" --vnet-name vnet1 --subnet subnet1')
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --sku {sku} --frontend-ip-zone {zone} --public-ip-address "" --vnet-name vnet1 --subnet subnet1')
         # Zone on front-ip-config, and still no zone on LB resource
         self.cmd('network lb show -g {rg} -n {lb}', checks=[
-            self.check("frontendIpConfigurations[0].zones[0]", self.kwargs['zone']),
+            self.check("frontendIPConfigurations[0].zones[0]", self.kwargs['zone']),
             self.check("zones", None)
         ])
         # add a second frontend ip configuration
@@ -863,12 +864,12 @@ class NetworkLoadBalancerIpConfigScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 2))
         self.cmd('network lb frontend-ip update -g {rg} --lb-name lb1 -n ipconfig1 --public-ip-address publicip3')
         self.cmd('network lb frontend-ip show -g {rg} --lb-name lb1 -n ipconfig1',
-                 checks=self.check("publicIpAddress.contains(id, 'publicip3')", True))
+                 checks=self.check("publicIPAddress.contains(id, 'publicip3')", True))
 
         # test generic update
         self.kwargs['ip2_id'] = resource_id(subscription=self.get_subscription_id(), resource_group=self.kwargs['rg'], namespace='Microsoft.Network', type='publicIPAddresses', name='publicip2')
-        self.cmd('network lb frontend-ip update -g {rg} --lb-name lb1 -n ipconfig1 --set publicIpAddress.id="{ip2_id}"',
-                 checks=self.check("publicIpAddress.contains(id, 'publicip2')", True))
+        self.cmd('network lb frontend-ip update -g {rg} --lb-name lb1 -n ipconfig1 --set publicIPAddress.id="{ip2_id}"',
+                 checks=self.check("publicIPAddress.contains(id, 'publicip2')", True))
         self.cmd('network lb frontend-ip delete -g {rg} --lb-name lb1 -n ipconfig1')
         self.cmd('network lb frontend-ip list -g {rg} --lb-name lb1',
                  checks=self.check('length(@)', 1))
@@ -897,7 +898,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 3))
         self.cmd('network lb inbound-nat-rule update -g {rg} --lb-name {lb} -n rule1 --floating-ip true --idle-timeout 10')
         self.cmd('network lb inbound-nat-rule show -g {rg} --lb-name {lb} -n rule1', checks=[
-            self.check('enableFloatingIp', True),
+            self.check('enableFloatingIP', True),
             self.check('idleTimeoutInMinutes', 10)
         ])
         # test generic update
@@ -998,7 +999,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb rule update -g {rg} --lb-name {lb} -n rule1 --floating-ip true --idle-timeout 20 --load-distribution sourceip --protocol udp')
         self.cmd('network lb rule update -g {rg} --lb-name {lb} -n rule2 --backend-pool-name bap2 --load-distribution sourceipprotocol')
         self.cmd('network lb rule show -g {rg} --lb-name {lb} -n rule1', checks=[
-            self.check('enableFloatingIp', True),
+            self.check('enableFloatingIP', True),
             self.check('idleTimeoutInMinutes', 20),
             self.check('loadDistribution', 'SourceIP'),
             self.check('protocol', 'Udp')
@@ -1559,9 +1560,9 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
         self.cmd('network vpn-connection create -g {rg} -n {conn1} --vnet-gateway1 {gw1} --local-gateway2 {lgw1} --shared-key AzureA1b2C3')
 
         self.cmd('network vpn-connection ipsec-policy add -g {rg} --connection-name {conn1} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048')
-        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
+        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}', checks=self.check('length(@)', 1))
         self.cmd('network vpn-connection ipsec-policy clear -g {rg} --connection-name {conn1}')
-        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
+        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}', checks=self.check('length(@)', 0))
 
 
 class NetworkSubnetSetScenarioTest(ScenarioTest):

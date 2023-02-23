@@ -105,7 +105,7 @@ def load_arguments(self, _):
     bicep_stdout_type = CLIArgumentType(options_list=['--stdout'], action='store_true', help="When set, prints all output to stdout instead of corresponding files.")
     bicep_target_platform_type = CLIArgumentType(options_list=['--target-platform', '-t'],
                                                  arg_type=get_enum_type(
-                                                     ["win-x64", "linux-musl-x64", "linux-x64", "osx-x64"]),
+                                                     ["win-x64", "linux-musl-x64", "linux-x64", "osx-x64", "linux-arm64", "osx-arm64"]),
                                                  help="The platform the Bicep CLI will be running on. Set this to skip automatic platform detection if it does not work properly.")
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
@@ -277,6 +277,10 @@ def load_arguments(self, _):
         c.argument('tag', tag_type)
         c.argument('tags', tags_type)
         c.argument('resource_group_name', resource_group_name_type, options_list=['--name', '-n', '--resource-group', '-g'])
+
+    with self.argument_context('group update') as c:
+        c.argument('properties_to_add', deprecate_info=c.deprecate(hide=True))
+        c.argument('properties_to_remove', deprecate_info=c.deprecate(hide=True))
 
     with self.argument_context('group deployment') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
@@ -540,6 +544,9 @@ def load_arguments(self, _):
     with self.argument_context('group lock') as c:
         c.argument('resource_group', resource_group_name_type, validator=validate_group_lock, id_part=None)
 
+    with self.argument_context('group lock list') as c:
+        c.argument('resource_group', resource_group_name_type, id_part=None, required=True)
+
     with self.argument_context('group lock create') as c:
         c.argument('resource_group', required=True)
 
@@ -666,6 +673,8 @@ def load_arguments(self, _):
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep module file to publish in the file system.")
         c.argument('target', arg_type=CLIArgumentType(options_list=['--target', '-t'],
                                                       help="The target location where the Bicep module will be published."))
+        c.argument('documentationUri', arg_type=CLIArgumentType(options_list=['--documentationUri', '-d'],
+                                                                help="The documentation uri of the Bicep module."))
 
     with self.argument_context('bicep install') as c:
         c.argument('version', options_list=['--version', '-v'], help='The version of Bicep CLI to be installed. Default to the latest if not specified.')

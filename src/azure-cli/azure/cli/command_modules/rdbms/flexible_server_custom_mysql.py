@@ -17,10 +17,10 @@ from azure.mgmt.rdbms import mysql_flexibleservers
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, \
     cf_mysql_flexible_db, cf_mysql_check_resource_availability, \
     cf_mysql_check_resource_availability_without_location, cf_mysql_flexible_private_dns_zone_suffix_operations, \
-    cf_mysql_flexible_servers, cf_mysql_flexible_replica
+    cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_config
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, \
     generate_password, parse_maintenance_window, replace_memory_optimized_tier, build_identity_and_data_encryption, \
-    get_identity_and_data_encryption
+    get_identity_and_data_encryption, get_tenant_id
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from .validators import mysql_arguments_validator, validate_mysql_replica, validate_server_name, validate_georestore_location, \
@@ -45,7 +45,7 @@ def flexible_server_create(cmd, client,
                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
-                           iops=None, auto_grow=None, geo_redundant_backup=None,
+                           iops=None, auto_grow=None, auto_scale_iops=None, geo_redundant_backup=None,
                            byok_identity=None, backup_byok_identity=None, byok_key=None, backup_byok_key=None,
                            yes=False):
     # Generate missing parameters
@@ -82,7 +82,9 @@ def flexible_server_create(cmd, client,
                               byok_identity=byok_identity,
                               backup_byok_identity=backup_byok_identity,
                               byok_key=byok_key,
-                              backup_byok_key=backup_byok_key)
+                              backup_byok_key=backup_byok_key,
+                              auto_io_scaling=auto_scale_iops,
+                              iops=iops)
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
     iops_info = list_skus_info['iops_info']
 
@@ -110,7 +112,8 @@ def flexible_server_create(cmd, client,
 
     storage = mysql_flexibleservers.models.Storage(storage_size_gb=storage_gb,
                                                    iops=iops,
-                                                   auto_grow=auto_grow)
+                                                   auto_grow=auto_grow,
+                                                   auto_io_scaling=auto_scale_iops)
 
     backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                  geo_redundant_backup=geo_redundant_backup)
@@ -329,6 +332,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        storage_gb=None,
                                        auto_grow=None,
                                        iops=None,
+                                       auto_scale_iops=None,
                                        backup_retention=None,
                                        geo_redundant_backup=None,
                                        administrator_login_password=None,
@@ -367,7 +371,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
                               backup_byok_identity=backup_byok_identity,
                               byok_key=byok_key,
                               backup_byok_key=backup_byok_key,
-                              disable_data_encryption=disable_data_encryption)
+                              disable_data_encryption=disable_data_encryption,
+                              auto_io_scaling=auto_scale_iops,
+                              iops=iops)
 
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location, server_name=instance.name if instance else None)
     iops_info = list_skus_info['iops_info']
@@ -443,6 +449,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     if storage_gb:
         instance.storage.storage_size_gb = storage_gb
+
+    if auto_scale_iops:
+        instance.storage.auto_io_scaling = auto_scale_iops
 
     if not iops:
         iops = instance.storage.iops
@@ -808,6 +817,222 @@ def get_free_iops(storage_in_mb, iops_info, tier, sku_name):
     max_supported_iops = iops_info[tier][sku_name]  # free iops cannot exceed maximum supported iops for the sku
 
     return min(free_iops, max_supported_iops)
+
+
+# Custom functions for identity
+def flexible_server_identity_assign(cmd, client, resource_group_name, server_name, identities):
+    instance = client.get(resource_group_name, server_name)
+    if instance.replication_role == 'Replica':
+        raise CLIError("Cannot assign identities to a server with replication role. Use the primary server instead.")
+
+    identities_map = {}
+    for identity in identities:
+        identities_map[identity] = {}
+
+    parameters = {
+        'identity': mysql_flexibleservers.models.Identity(
+            user_assigned_identities=identities_map,
+            type="UserAssigned")}
+
+    replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
+
+    replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
+    for replica in replicas:
+        resolve_poller(
+            client.begin_update(
+                resource_group_name=resource_group_name,
+                server_name=replica.name,
+                parameters=parameters),
+            cmd.cli_ctx, 'Adding identities to replica {}'.format(replica.name)
+        )
+
+    result = resolve_poller(
+        client.begin_update(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            parameters=parameters),
+        cmd.cli_ctx, 'Adding identities to server {}'.format(server_name)
+    )
+
+    return result.identity
+
+
+def flexible_server_identity_remove(cmd, client, resource_group_name, server_name, identities):
+    instance = client.get(resource_group_name, server_name)
+
+    if instance.replication_role == 'Replica':
+        raise CLIError("Cannot remove identities from a server with replication role. Use the primary server instead.")
+
+    if instance.data_encryption:
+        primary_id = instance.data_encryption.primary_user_assigned_identity_id
+        backup_id = instance.data_encryption.geo_backup_user_assigned_identity_id
+
+        if primary_id and primary_id.lower() in [identity.lower() for identity in identities]:
+            raise CLIError("Cannot remove identity {} because it's used for data encryption.".format(primary_id))
+
+        if backup_id and backup_id.lower() in [identity.lower() for identity in identities]:
+            raise CLIError("Cannot remove identity {} because it's used for data encryption.".format(backup_id))
+
+    admin_operations_client = cf_mysql_flexible_adadmin(cmd.cli_ctx, '_')
+
+    admins = admin_operations_client.list_by_server(resource_group_name, server_name)
+    common_identities = [identity for identity in identities if identity.lower() in [admin.identity_resource_id.lower() for admin in admins]]
+    if len(common_identities) > 0:
+        raise CLIError("Cannot remove identities {} because they're used for server admin.".format(common_identities))
+
+    identities_map = {}
+    for identity in identities:
+        identities_map[identity] = None
+
+    if not (instance.identity and instance.identity.user_assigned_identities) or \
+       all(key.lower() in [identity.lower() for identity in identities] for key in instance.identity.user_assigned_identities.keys()):
+        parameters = {
+            'identity': mysql_flexibleservers.models.Identity(
+                type="None")}
+    else:
+        parameters = {
+            'identity': mysql_flexibleservers.models.Identity(
+                user_assigned_identities=identities_map,
+                type="UserAssigned")}
+
+    replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
+
+    replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
+    for replica in replicas:
+        resolve_poller(
+            client.begin_update(
+                resource_group_name=resource_group_name,
+                server_name=replica.name,
+                parameters=parameters),
+            cmd.cli_ctx, 'Removing identities from replica {}'.format(replica.name)
+        )
+
+    result = resolve_poller(
+        client.begin_update(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            parameters=parameters),
+        cmd.cli_ctx, 'Removing identities from server {}'.format(server_name)
+    )
+
+    return result.identity or mysql_flexibleservers.models.Identity()
+
+
+def flexible_server_identity_list(client, resource_group_name, server_name):
+    server = client.get(resource_group_name, server_name)
+    return server.identity or mysql_flexibleservers.models.Identity()
+
+
+def flexible_server_identity_show(client, resource_group_name, server_name, identity):
+    server = client.get(resource_group_name, server_name)
+
+    for key, value in server.identity.user_assigned_identities.items():
+        if key.lower() == identity.lower():
+            return value
+
+    raise CLIError("Identity '{}' does not exist in server {}.".format(identity, server_name))
+
+
+# Custom functions for ad-admin
+def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, login, sid, identity):
+    server_operations_client = cf_mysql_flexible_servers(cmd.cli_ctx, '_')
+    replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
+
+    instance = server_operations_client.get(resource_group_name, server_name)
+
+    if instance.replication_role == 'Replica':
+        raise CLIError("Cannot create an AD admin on a server with replication role. Use the primary server instead.")
+
+    parameters = {
+        'identity': mysql_flexibleservers.models.Identity(
+            user_assigned_identities={identity: {}},
+            type="UserAssigned")}
+
+    replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
+    for replica in replicas:
+        if not (replica.identity and replica.identity.user_assigned_identities and
+           identity.lower() in [key.lower() for key in replica.identity.user_assigned_identities.keys()]):
+            resolve_poller(
+                server_operations_client.begin_update(
+                    resource_group_name=resource_group_name,
+                    server_name=replica.name,
+                    parameters=parameters),
+                cmd.cli_ctx, 'Adding identity {} to replica {}'.format(identity, replica.name)
+            )
+
+    if not (instance.identity and instance.identity.user_assigned_identities and
+       identity.lower() in [key.lower() for key in instance.identity.user_assigned_identities.keys()]):
+        resolve_poller(
+            server_operations_client.begin_update(
+                resource_group_name=resource_group_name,
+                server_name=server_name,
+                parameters=parameters),
+            cmd.cli_ctx, 'Adding identity {} to server {}'.format(identity, server_name))
+
+    parameters = {
+        'administratorType': 'ActiveDirectory',
+        'login': login,
+        'sid': sid,
+        'tenant_id': get_tenant_id(),
+        'identity_resource_id': identity
+    }
+
+    return client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        administrator_name='ActiveDirectory',
+        parameters=parameters)
+
+
+def flexible_server_ad_admin_delete(cmd, client, resource_group_name, server_name):
+    server_operations_client = cf_mysql_flexible_servers(cmd.cli_ctx, '_')
+
+    instance = server_operations_client.get(resource_group_name, server_name)
+
+    if instance.replication_role == 'Replica':
+        raise CLIError("Cannot delete an AD admin on a server with replication role. Use the primary server instead.")
+
+    replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
+    config_operations_client = cf_mysql_flexible_config(cmd.cli_ctx, '_')
+
+    resolve_poller(
+        client.begin_delete(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            administrator_name='ActiveDirectory'),
+        cmd.cli_ctx, 'Dropping AD admin in server {}'.format(server_name))
+
+    configuration_name = 'aad_auth_only'
+    parameters = mysql_flexibleservers.models.Configuration(
+        name=configuration_name,
+        value='OFF',
+        source='user-override'
+    )
+
+    replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
+    for replica in replicas:
+        if config_operations_client.get(resource_group_name, replica.name, configuration_name).value == "ON":
+            resolve_poller(
+                config_operations_client.begin_update(resource_group_name, replica.name, configuration_name, parameters),
+                cmd.cli_ctx, 'Disabling aad_auth_only in replica {}'.format(replica.name))
+
+    if config_operations_client.get(resource_group_name, server_name, configuration_name).value == "ON":
+        resolve_poller(
+            config_operations_client.begin_update(resource_group_name, server_name, configuration_name, parameters),
+            cmd.cli_ctx, 'Disabling aad_auth_only in server {}'.format(server_name))
+
+
+def flexible_server_ad_admin_list(client, resource_group_name, server_name):
+    return client.list_by_server(
+        resource_group_name=resource_group_name,
+        server_name=server_name)
+
+
+def flexible_server_ad_admin_show(client, resource_group_name, server_name):
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        administrator_name='ActiveDirectory')
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance

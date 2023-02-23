@@ -20,7 +20,7 @@ def register_providers():
     _register_one_provider('Microsoft.Authorization/resourceManagementPrivateLinks', '2020-05-01', True)
     _register_one_provider('Microsoft.ApiManagement/service', '2021-08-01', True)
     _register_one_provider('Microsoft.AppConfiguration/configurationStores', '2020-06-01', True)
-    _register_one_provider("Microsoft.Batch/batchAccounts", "2022-06-01", True)
+    _register_one_provider("Microsoft.Batch/batchAccounts", "2022-10-01", True)
     _register_one_provider("Microsoft.BotService/botServices", "2021-03-01", True)
     _register_one_provider("Microsoft.Cache/Redis", "2021-06-01", True)
     # "Microsoft.Cache/redisEnterprise", "2021-03-01", True
@@ -51,6 +51,7 @@ def register_providers():
     # _register_one_provider("Microsoft.Media/videoanalyzers", "2021-11-01-preview", True)
     # "Microsoft.Migrate/assessmentProjects", "2020-05-01-preview", False
     # "Microsoft.Migrate/migrateProjects", "2020-06-01-preview", False
+    _register_one_provider("Microsoft.Monitor/accounts", "2021-06-03-preview", True)
     _register_one_provider('Microsoft.Network/applicationGateways', '2020-05-01', True)
     _register_one_provider('Microsoft.Network/privateLinkServices', '2021-05-01', True)
     # "Microsoft.OffAzure/masterSites", "2020-07-07", False
@@ -72,6 +73,7 @@ def register_providers():
     _register_one_provider('Microsoft.Kusto/clusters', '2021-08-27', True)
     _register_one_provider("Microsoft.KubernetesConfiguration/privateLinkScopes", '2022-04-02-preview', True)
     _register_one_provider("Microsoft.OpenEnergyPlatform/energyServices", '2022-04-04-preview', True)
+    _register_one_provider("Microsoft.MachineLearningServices/registries", '2022-10-01-preview', True)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long

@@ -9,7 +9,6 @@ from azure.cli.core import AzCommandsLoader, ModExtensionSuppress
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.aro._client_factory import cf_aro  # pylint: disable=unused-import
-
 from azure.cli.command_modules.aro._help import helps  # pylint: disable=unused-import
 
 

@@ -14,7 +14,7 @@ from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccou
     BackupPolicyPatch, VolumePatchPropertiesDataProtection, AccountEncryption, KeyVaultProperties, EncryptionIdentity, AuthorizeRequest, \
     BreakReplicationRequest, PoolChangeRequest, VolumeRevert, Backup, BackupPatch, LdapSearchScopeOpt, SubvolumeInfo, \
     SubvolumePatchRequest, SnapshotRestoreFiles, PlacementKeyValuePairs, VolumeGroupMetaData, VolumeGroupDetails, \
-    VolumeGroupVolumeProperties
+    VolumeGroupVolumeProperties, VolumeQuotaRule, VolumeQuotaRulePatch
 from azure.mgmt.netapp.models._net_app_management_client_enums import EncryptionKeySource
 from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -327,18 +327,22 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
 
 
 # -- volume update
-def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, vault_id=None, backup_enabled=False,
-                 backup_policy_id=None, policy_enforced=False, throughput_mibps=None, snapshot_policy_id=None,
+def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, vault_id=None, backup_enabled=None,
+                 backup_policy_id=None, policy_enforced=None, throughput_mibps=None, snapshot_policy_id=None,
                  is_def_quota_enabled=None, default_user_quota=None, default_group_quota=None, unix_permissions=None,
                  cool_access=None, coolness_period=None):
     data_protection = None
     backup = None
     snapshot = None
-    if vault_id is not None:
+    # if vault_id is not None:
+    if any(x is not None for x in [vault_id, backup_policy_id, backup_enabled, policy_enforced]):
         backup = VolumeBackupProperties(vault_id=vault_id, backup_enabled=backup_enabled,
                                         backup_policy_id=backup_policy_id, policy_enforced=policy_enforced)
-    if snapshot_policy_id is not None:
+        logger.debug("ANF Log: backup set")
+
+    if any(x is not None for x in [backup, snapshot]):
         snapshot = VolumeSnapshotProperties(snapshot_policy_id=snapshot_policy_id)
+        logger.debug("ANF Log: DataProtection props set")
 
     if backup is not None or snapshot is not None:
         data_protection = VolumePatchPropertiesDataProtection(backup=backup, snapshot=snapshot)
@@ -568,6 +572,32 @@ def create_subvolume(client, resource_group_name, account_name, pool_name, volum
 def patch_subvolume(instance, path=None, size=None):
     body = SubvolumePatchRequest(path=path, size=size)
     _update_mapper(instance, body, ['path', 'size'])
+    return body
+
+
+# ---- VOLUME QUOTA RULES ----
+def create_volume_quota_rule(cmd, client, resource_group_name, account_name, pool_name, volume_name,
+                             volume_quota_rule_name, location=None, tags=None, quota_size=None,
+                             quota_type=None, quota_target=None, no_wait=False):
+    location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+    body = VolumeQuotaRule(
+        location=location,
+        tags=tags,
+        quota_size_in_ki_bs=quota_size,
+        quota_type=quota_type,
+        quota_target=quota_target
+    )
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, account_name, pool_name, volume_name,
+                       volume_quota_rule_name, body)
+
+
+def update_volume_quota_rule(instance, quota_size=None, quota_type=None, quota_target=None):
+    body = VolumeQuotaRulePatch(
+        quota_size_in_ki_bs=quota_size,
+        quota_type=quota_type,
+        quota_target=quota_target
+    )
+    _update_mapper(instance, body, ['quota_size_in_ki_bs', 'quota_type', 'quota_target'])
     return body
 
 

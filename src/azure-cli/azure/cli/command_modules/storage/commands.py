@@ -116,14 +116,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          'show_storage_account_connection_string')
         g.generic_update_command('update', getter_name='get_properties', setter_name='update',
                                  custom_func_name='update_storage_account', min_api='2016-12-01')
-        failover_confirmation = """
-        The secondary cluster will become the primary cluster after failover. Please understand the following impact to your storage account before you initiate the failover:
-            1. Please check the Last Sync Time using `az storage account show` with `--expand geoReplicationStats` and check the "geoReplicationStats" property. This is the data you may lose if you initiate the failover.
-            2. After the failover, your storage account type will be converted to locally redundant storage (LRS). You can convert your account to use geo-redundant storage (GRS).
-            3. Once you re-enable GRS/GZRS for your storage account, Microsoft will replicate data to your new secondary region. Replication time is dependent on the amount of data to replicate. Please note that there are bandwidth charges for the bootstrap. Please refer to doc: https://azure.microsoft.com/pricing/details/bandwidth/
-        """
-        g.command('failover', 'begin_failover', supports_no_wait=True, is_preview=True, min_api='2018-07-01',
-                  confirmation=failover_confirmation)
+        g.custom_command('failover', 'begin_failover', supports_no_wait=True, is_preview=True, min_api='2018-07-01')
         g.command('hns-migration start', 'begin_hierarchical_namespace_migration',
                   supports_no_wait=True, min_api='2021-06-01')
         g.command('hns-migration stop', 'begin_abort_hierarchical_namespace_migration',
@@ -184,7 +177,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
         g.custom_command('create', 'create_encryption_scope')
         g.show_command('show', 'get')
-        g.command('list', 'list')
+        g.custom_command('list', 'list_encryption_scope')
         g.custom_command('update', 'update_encryption_scope')
 
     management_policy_sdk = CliCommandType(
@@ -538,12 +531,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             min_api='2018-02-01') as g:
         from azure.cli.command_modules.storage._transformers import transform_immutability_policy
 
-        from ._validators import validate_allow_protected_append_writes_all
-
         g.show_command('show', 'get_immutability_policy',
                        transform=transform_immutability_policy)
-        g.custom_command('create', 'create_or_update_immutability_policy',
-                         validator=validate_allow_protected_append_writes_all)
+        g.custom_command('create', 'create_or_update_immutability_policy')
         g.command('delete', 'delete_immutability_policy',
                   transform=lambda x: None)
         g.command('lock', 'lock_immutability_policy')

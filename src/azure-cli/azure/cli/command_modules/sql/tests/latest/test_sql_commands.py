@@ -28,6 +28,7 @@ from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
 from azure.cli.command_modules.sql.custom import (
+    AlwaysEncryptedEnclaveType,
     ClientAuthenticationType,
     ClientType,
     ComputeModelType,
@@ -77,6 +78,7 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     subscription_id = '8313371e-0879-428e-b1da-6353575a9192'
+    existing_mi_name = 'autobot-managed-instance'
     group = 'CustomerExperienceTeam_RG'
     location = 'westcentralus'
     vnet_name = 'vnet-mi-tooling'
@@ -108,7 +110,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=managed_instance_name_prefix, parameter_name='mi', admin_user='admin123',
                  minimalTlsVersion='', user_assigned_identity_id='', identity_type='', pid='', otherParams='',
                  admin_password='SecretPassword123SecretPassword', public=True, tags='', is_geo_secondary=False,
-                 skip_delete=False):
+                 skip_delete=False, vnet_name = 'vnet-mi-tooling'):
         super(ManagedInstancePreparer, self).__init__(name_prefix, server_name_max_length)
         self.parameter_name = parameter_name
         self.admin_user = admin_user
@@ -122,6 +124,8 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         self.pid = pid
         self.otherParams = otherParams
         self.is_geo_secondary = is_geo_secondary
+        self.subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(self.subscription_id, self.group, vnet_name, self.subnet_name)
+
 
     def create_resource(self, name, **kwargs):
         location = self.location
@@ -524,6 +528,89 @@ class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server), checks=[NoneCheck()])
 
 
+class SqlServerIPv6FirewallMgmtScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    @SqlServerPreparer(location='eastus')
+    def test_sql_ipv6_firewall_mgmt(self, resource_group, resource_group_location, server):
+        ipv6_firewall_rule_1 = 'rule1'
+        start_ipv6_address_1 = '0229:e3a4:e0d7:36d3:d228:73fa:12fc:ae30'
+        end_ipv6_address_1 = '0229:e3a4:e0d7:36d3:d228:73fa:12fc:ae30'
+        ipv6_firewall_rule_2 = 'rule2'
+        start_ipv6_address_2 = '8798:d2cb:efea:2d56:0d4a:41fb:c61d:e532'
+        end_ipv6_address_2 = '8798:d2cb:efea:2d56:0d4a:41fb:c61d:e532'
+
+        # test sql server ipv6-firewall-rule create
+        ipv6fw_rule_1 = self.cmd('sql server ipv6-firewall-rule create -n {} -g {} -s {} '
+                             '--start-ipv6-address {} --end-ipv6-address {}'
+                             .format(ipv6_firewall_rule_1, resource_group, server,
+                                     start_ipv6_address_1, end_ipv6_address_1),
+                             checks=[
+                                 JMESPathCheck('name', ipv6_firewall_rule_1),
+                                 JMESPathCheck('resourceGroup', resource_group),
+                                 JMESPathCheck('startIPv6Address', start_ipv6_address_1),
+                                 JMESPathCheck('endIPv6Address', end_ipv6_address_1)]).get_output_in_json()
+
+        # test sql server ipv6-firewall-rule show by group/server/name
+        self.cmd('sql server ipv6-firewall-rule show --name {} -g {} --server {}'
+                 .format(ipv6_firewall_rule_1, resource_group, server),
+                 checks=[
+                     JMESPathCheck('name', ipv6_firewall_rule_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('startIPv6Address', start_ipv6_address_1),
+                     JMESPathCheck('endIPv6Address', end_ipv6_address_1)])
+
+        # test sql server ipv6-firewall-rule show by id
+        self.cmd('sql server ipv6-firewall-rule show --id {}'
+                 .format(ipv6fw_rule_1['id']),
+                 checks=[
+                     JMESPathCheck('name', ipv6_firewall_rule_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('startIPv6Address', start_ipv6_address_1),
+                     JMESPathCheck('endIPv6Address', end_ipv6_address_1)])
+
+        # test sql server ipv6-firewall-rule update by group/server/name
+        self.cmd('sql server ipv6-firewall-rule update --name {} -g {} --server {} '
+                 '--start-ipv6-address {} --end-ipv6-address {}'
+                 .format(ipv6_firewall_rule_1, resource_group, server,
+                         start_ipv6_address_2, end_ipv6_address_2),
+                 checks=[
+                     JMESPathCheck('name', ipv6_firewall_rule_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('startIPv6Address', start_ipv6_address_2),
+                     JMESPathCheck('endIPv6Address', end_ipv6_address_2)])
+
+        # test sql server ipv6-firewall-rule update by id
+        self.cmd('sql server ipv6-firewall-rule update --id {} '
+                 '--start-ipv6-address {} --end-ipv6-address {}'
+                 .format(ipv6fw_rule_1['id'], start_ipv6_address_1, end_ipv6_address_1),
+                 checks=[
+                     JMESPathCheck('name', ipv6_firewall_rule_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('startIPv6Address', start_ipv6_address_1),
+                     JMESPathCheck('endIPv6Address', end_ipv6_address_1)])
+
+        # test sql server ipv6-firewall-rule create another rule
+        self.cmd('sql server ipv6-firewall-rule create --name {} -g {} --server {} '
+                 '--start-ipv6-address {} --end-ipv6-address {}'
+                 .format(ipv6_firewall_rule_2, resource_group, server,
+                         start_ipv6_address_2, end_ipv6_address_2),
+                 checks=[
+                     JMESPathCheck('name', ipv6_firewall_rule_2),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('startIPv6Address', start_ipv6_address_2),
+                     JMESPathCheck('endIPv6Address', end_ipv6_address_2)])
+
+        # test sql server ipv6-firewall-rule list
+        self.cmd('sql server ipv6-firewall-rule list -g {} -s {}'
+                 .format(resource_group, server), checks=[JMESPathCheck('length(@)', 2)])
+
+        # test sql server ipv6-firewall-rule delete
+        self.cmd('sql server ipv6-firewall-rule delete --name {} -g {} -s {}'
+                 .format(ipv6_firewall_rule_2, resource_group, server), checks=NoneCheck())
+        self.cmd('sql server ipv6-firewall-rule list -g {} --server {}'
+                 .format(resource_group, server), checks=[JMESPathCheck('length(@)', 1)])
+
+
 class SqlServerOutboundFirewallMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
     @SqlServerPreparer(location='eastus')
@@ -833,6 +920,48 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('ledgerOn', True)])
 
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
+    def test_sql_db_preferred_enclave_type(self, resource_group, resource_group_location, server):
+        database_name_one = "cliautomationdb01"
+        database_name_two = "cliautomationdb02"
+        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default
+        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs
+
+        # test sql db is created with default enclave type
+        self.cmd('sql db create -g {} --server {} --name {} --preferred-enclave-type {} --yes'
+                 .format(resource_group, server, database_name_one, preferred_enclave_type_default),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server, database_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
+        # test sql db is created with vbs enclave type
+        self.cmd('sql db create -g {} --server {} --name {} --preferred-enclave-type {} --yes'
+                 .format(resource_group, server, database_name_two, preferred_enclave_type_vbs),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)])
+
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server, database_name_two),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)])
+
 
 class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westeurope')
@@ -1113,6 +1242,45 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             checks=[NoneCheck()])
 
 
+class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
+    @record_only()
+    # using fixed resources because of long time preperation for geo-redundant backup
+    # need to change resources for others who want to rerecord this test
+    def test_sql_db_geo_restore(
+            self):
+        self.kwargs.update({
+            'rg': 'rebeccaxu-test',
+            'loc': 'eastus',
+            'server_name': 'rebeccaxu-eastus-svr',
+            'database_name': 'cli-test-hs',
+        })
+
+        # test list geo backups for database
+        self.cmd(
+            'sql db geo-backup list -g {rg} -s {server_name}',
+            checks=[
+                self.greater_than('length(@)', 0)])
+
+        # setup for test show geo backup
+        backup = self.cmd(
+            'sql db geo-backup show -s {server_name} -d {database_name} -g {rg}').get_output_in_json()
+        
+        backup_id = backup['id']
+
+        self.kwargs.update({
+            'backup_id': backup_id,
+            'dest_database_name': "cli-georestore"
+        })
+
+        self.cmd(
+            'sql db geo-backup restore --geo-backup-id {backup_id} --dest-database {dest_database_name}'
+            ' --dest-server {server_name} --resource-group {rg}',
+            checks=[
+                self.check('name', '{dest_database_name}')])
+                
+        self.cmd('sql db delete -g {rg} -s {server_name} -n {dest_database_name} --yes')
+
+
 class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
     @ManagedInstancePreparer()
@@ -1379,12 +1547,13 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
                  .format(resource_group, server, elastic_pool))
 
         # Create database and wait for first backup to exist
-        _create_db_wait_for_first_backup(self, resource_group, server, database_name)
+        db = _create_db_wait_for_first_backup(self, resource_group, server, database_name)
+        timestamp = _get_earliest_restore_date(db)
 
         # Restore to standalone db
         self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
                  ' --service-objective {} --edition {}'
-                 .format(resource_group, server, database_name, datetime.utcnow().isoformat(),
+                 .format(resource_group, server, database_name, timestamp.isoformat(),
                          restore_standalone_database_name, restore_service_objective,
                          restore_edition),
                  checks=[
@@ -1398,7 +1567,7 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
         # in transform func which only runs after `show`/`list` commands.
         self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
                  ' --elastic-pool {}'
-                 .format(resource_group, server, database_name, datetime.utcnow().isoformat(),
+                 .format(resource_group, server, database_name, timestamp.isoformat(),
                          restore_pool_database_name, elastic_pool),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -1417,7 +1586,7 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
         bsr_database = 'bsr_database'
         backup_storage_redundancy = 'geo'
         self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {} --backup-storage-redundancy {}'
-                 .format(resource_group, server, database_name, datetime.utcnow().isoformat(),
+                 .format(resource_group, server, database_name, timestamp.isoformat(),
                          bsr_database, backup_storage_redundancy),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -1956,6 +2125,227 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('isAzureMonitorTargetEnabled', False)])
 
 
+class SqlServerAdvancedThreatProtectionSettingsScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='westeurope')
+    @SqlServerPreparer(location='westeurope')
+    def test_sql_server_advanced_threat_protection(self, resource_group,
+                                                   resource_group_location, server):
+        state_enabled = 'Enabled'
+        state_disabled = 'Disabled'
+
+        # get advanced threat protection settings
+        self.cmd('sql server advanced-threat-protection-setting show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # update advanced threat protection settings - enable
+        self.cmd('sql server advanced-threat-protection-setting update -g {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, server, state_enabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get advanced threat protection settings after enabling
+        self.cmd('sql server advanced-threat-protection-setting show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # update advanced threat protection settings - disable
+        self.cmd('sql server advanced-threat-protection-setting update -g {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, server, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # get advanced threat protection settings after disabling back
+        self.cmd('sql server advanced-threat-protection-setting show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+
+class SqlDbAdvancedThreatProtectionSettingsScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='westeurope')
+    @SqlServerPreparer(location='westeurope')
+    def test_sql_db_advanced_threat_protection(self, resource_group,
+                                               resource_group_location, server):
+        database_name = "cliautomationdb01"
+        state_enabled = 'Enabled'
+        state_disabled = 'Disabled'
+
+        # create db
+        self.cmd('sql db create -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('status', 'Online')])
+
+        # get advanced threat protection settings
+        self.cmd('sql db advanced-threat-protection-setting show -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # update advanced threat protection settings - enable
+        self.cmd('sql db advanced-threat-protection-setting update -g {} -s {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, server, database_name, state_enabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get advanced threat protection settings after enabling
+        self.cmd('sql db advanced-threat-protection-setting show -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # update advanced threat protection settings - disable
+        self.cmd('sql db advanced-threat-protection-setting update -g {} -s {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, server, database_name, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # get advanced threat protection settings after disabling back
+        self.cmd('sql db advanced-threat-protection-setting show -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+
+class SqlManagedInstanceAdvancedThreatProtectionSettingsScenarioTest(ScenarioTest):
+    @ManagedInstancePreparer()
+    def test_sql_mi_advanced_threat_protection(self, mi, rg):
+        managed_instance_name = mi
+        resource_group = rg
+        edition_updated = 'BusinessCritical'
+        v_core_update = 4
+        state_enabled = 'Enabled'
+        state_disabled = 'Disabled'
+
+        # Managed instance becomes ready before the operation is completed. For that reason, we should wait
+        # for the operation to complete in order to proceed with testing.
+        time.sleep(120)
+
+        # get advanced threat protection settings
+        self.cmd('sql mi advanced-threat-protection-setting show -g {} -n {}'
+                 .format(resource_group, managed_instance_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # update advanced threat protection settings - enable
+        self.cmd('sql mi advanced-threat-protection-setting update -g {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, managed_instance_name, state_enabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get advanced threat protection settings after enabling
+        self.cmd('sql mi advanced-threat-protection-setting show -g {} -n {}'
+                 .format(resource_group, managed_instance_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # update advanced threat protection settings - disable
+        self.cmd('sql mi advanced-threat-protection-setting update -g {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, managed_instance_name, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # get advanced threat protection settings after disabling back
+        self.cmd('sql mi advanced-threat-protection-setting show -g {} -n {}'
+                 .format(resource_group, managed_instance_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+
+class SqlManagedDatabaseAdvancedThreatProtectionSettingsScenarioTest(ScenarioTest):
+    @ManagedInstancePreparer()
+    def test_sql_midb_advanced_threat_protection(self, mi, rg):
+        managed_instance_name = mi
+        dbname = "cliautomationdb01"
+        resource_group = rg
+        edition_updated = 'BusinessCritical'
+        v_core_update = 4
+        state_enabled = 'Enabled'
+        state_disabled = 'Disabled'
+
+        # Managed instance becomes ready before the operation is completed. For that reason, we should wait
+        # for the operation to complete in order to proceed with testing.
+        time.sleep(120)
+
+        self.kwargs.update({
+            'loc': ManagedInstancePreparer.location,
+            'rg': rg,
+            'managed_instance_name': mi,
+            'database_name': dbname,
+            'collation': ManagedInstancePreparer.collation,
+        })
+
+        # create database
+        self.cmd('sql midb create -g {rg} --mi {managed_instance_name} -n {database_name} --collation {collation}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('name', '{database_name}'),
+                     self.check('location', '{loc}'),
+                     self.check('collation', '{collation}'),
+                     self.check('status', 'Online')])
+
+        # get advanced threat protection settings
+        self.cmd('sql midb advanced-threat-protection-setting show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, dbname),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # update advanced threat protection settings - enable
+        self.cmd('sql midb advanced-threat-protection-setting update -g {} --mi {} -n {} --state {}'
+                 .format(resource_group, managed_instance_name, dbname, state_enabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get advanced threat protection settings after enabling
+        self.cmd('sql midb advanced-threat-protection-setting show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, dbname),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # update advanced threat protection settings - disable
+        self.cmd('sql midb advanced-threat-protection-setting update -g {} --mi {} -n {} --state {}'
+                 .format(resource_group, managed_instance_name, dbname, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # get advanced threat protection settings after disabling back
+        self.cmd('sql midb advanced-threat-protection-setting show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, dbname),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+
 class SqlServerMSSupportScenarioTest(ScenarioTest):
     def _get_storage_endpoint(self, storage_account, resource_group):
         return self.cmd('storage account show -g {} -n {}'
@@ -2371,206 +2761,206 @@ class SqlServerDnsAliasMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('length(@)', 0)
                  ])
 
-      # ===========================================
-        # || NEED TO BE UPDATED || #
-      # ===========================================
-#class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
-#    # create 2 servers in the same resource group, and 1 server in a different resource group
-#    @ResourceGroupPreparer(parameter_name="resource_group_1",
-#                           parameter_name_for_location="resource_group_location_1",
-#                           location='westeurope')
-#    @ResourceGroupPreparer(parameter_name="resource_group_2",
-#                           parameter_name_for_location="resource_group_location_2",
-#                           location='westeurope')
-#    @SqlServerPreparer(parameter_name="server_name_1",
-#                       resource_group_parameter_name="resource_group_1",
-#                       location='westeurope')
-#    @SqlServerPreparer(parameter_name="server_name_2",
-#                       resource_group_parameter_name="resource_group_1",
-#                       location='westeurope')
-#    @SqlServerPreparer(parameter_name="server_name_3",
-#                       resource_group_parameter_name="resource_group_2",
-#                       location='westeurope')
-#    @AllowLargeResponse()
-#    def test_sql_db_replica_mgmt(self,
-#                                 resource_group_1, resource_group_location_1,
-#                                 resource_group_2, resource_group_location_2,
-#                                 server_name_1, server_name_2, server_name_3):
-#
-#        database_name = "cliautomationdb01"
-#        target_database_name = "cliautomationdb02"
-#        hs_database_name = "cliautomationhs03"
-#        hs_target_database_name = "cliautomationnr04"
-#        service_objective = 'GP_Gen5_8'
-#        hs_service_objective = 'HS_Gen5_8'
-#
-#        # helper class so that it's clear which servers are in which groups
-#        class ServerInfo(object):  # pylint: disable=too-few-public-methods
-#            def __init__(self, name, group, location):
-#                self.name = name
-#                self.group = group
-#                self.location = location
-#
-#        s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
-#        s2 = ServerInfo(server_name_2, resource_group_1, resource_group_location_1)
-#        s3 = ServerInfo(server_name_3, resource_group_2, resource_group_location_2)
-#
-#        # verify setup
-#        for s in (s1, s2, s3):
-#            self.cmd('sql server show -g {} -n {}'
-#                     .format(s.group, s.name),
-#                     checks=[
-#                         JMESPathCheck('name', s.name),
-#                         JMESPathCheck('resourceGroup', s.group)])
-#
-#        # create db in first server
-#        self.cmd('sql db create -g {} -s {} -n {} --yes'
-#                 .format(s1.group, s1.name, database_name),
-#                 checks=[
-#                     JMESPathCheck('name', database_name),
-#                     JMESPathCheck('resourceGroup', s1.group)])
-#
-#        # create hs db in first server
-#        self.cmd('sql db create -g {} -s {} -n {} --service-objective {} --yes'
-#                 .format(s1.group, s1.name, hs_database_name, hs_service_objective),
-#                 checks=[
-#                     JMESPathCheck('name', hs_database_name),
-#                     JMESPathCheck('resourceGroup', s1.group)])
-#
-#        # create replica in second server with min params
-#        # partner resource group unspecified because s1.group == s2.group
-#        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
-#                 .format(s1.group, s1.name, database_name,
-#                         s2.name),
-#                 checks=[
-#                     JMESPathCheck('name', database_name),
-#                     JMESPathCheck('resourceGroup', s2.group)])
-#
-#        # create replica in second server with backup storage redundancy
-#        backup_storage_redundancy = "zone"
-#        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} --backup-storage-redundancy {}'
-#                 .format(s1.group, s1.name, database_name,
-#                         s2.name, backup_storage_redundancy),
-#                 checks=[
-#                     JMESPathCheck('name', database_name),
-#                     JMESPathCheck('resourceGroup', s2.group),
-#                     JMESPathCheck('requestedBackupStorageRedundancy', 'Zone')])
-#
-#        # check that the replica was created in the correct server
-#        self.cmd('sql db show -g {} -s {} -n {}'
-#                 .format(s2.group, s2.name, database_name),
-#                 checks=[
-#                     JMESPathCheck('name', database_name),
-#                     JMESPathCheck('resourceGroup', s2.group)])
-#
-#        # Delete replica in second server and recreate with explicit service objective and name
-#        self.cmd('sql db delete -g {} -s {} -n {} --yes'
-#                 .format(s2.group, s2.name, database_name))
-#
-#        secondary_type = "Geo"
-#        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} '
-#                 ' --service-objective {} --partner-database {} --secondary-type {}'
-#                 .format(s1.group, s1.name, database_name,
-#                         s2.name, service_objective, target_database_name, secondary_type),
-#                 checks=[
-#                     JMESPathCheck('name', target_database_name),
-#                     JMESPathCheck('resourceGroup', s2.group),
-#                     JMESPathCheck('requestedServiceObjectiveName', service_objective),
-#                     JMESPathCheck('secondaryType', secondary_type)])
-#
-#        # Create a named replica
-#        secondary_type = "Named"
-#        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} '
-#                 ' --service-objective {} --partner-resource-group {} --partner-database {} --secondary-type {} --ha-replicas {}'
-#                 .format(s1.group, s1.name, hs_database_name,
-#                         s1.name, hs_service_objective, s1.group, hs_target_database_name, secondary_type, 2),
-#                 checks=[
-#                     JMESPathCheck('name', hs_target_database_name),
-#                     JMESPathCheck('resourceGroup', s1.group),
-#                     JMESPathCheck('requestedServiceObjectiveName', hs_service_objective),
-#                     JMESPathCheck('secondaryType', secondary_type),
-#                     JMESPathCheck('highAvailabilityReplicaCount', 2)])
-#
-#        # Create replica in pool in third server with max params (except service objective)
-#        pool_name = 'pool1'
-#        pool_edition = 'GeneralPurpose'
-#        self.cmd('sql elastic-pool create -g {} --server {} --name {} '
-#                 ' --edition {}'
-#                 .format(s3.group, s3.name, pool_name, pool_edition))
-#
-#        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
-#                 ' --partner-resource-group {} --elastic-pool {}'
-#                 .format(s1.group, s1.name, database_name,
-#                         s3.name, s3.group, pool_name),
-#                 checks=[
-#                     JMESPathCheck('name', database_name),
-#                     JMESPathCheck('resourceGroup', s3.group),
-#                     JMESPathCheck('elasticPoolName', pool_name)])
-#
-#        # check that the replica was created in the correct server
-#        self.cmd('sql db show -g {} -s {} -n {}'
-#                 .format(s3.group, s3.name, database_name),
-#                 checks=[
-#                     JMESPathCheck('name', database_name),
-#                     JMESPathCheck('resourceGroup', s3.group)])
-#
-#        # list replica links on s1 - it should link to s2 and s3
-#        self.cmd('sql db replica list-links -g {} -s {} -n {}'
-#                 .format(s1.group, s1.name, database_name),
-#                 checks=[JMESPathCheck('length(@)', 2)])
-#
-#        # list replica links on s3 - it should link only to s1
-#        self.cmd('sql db replica list-links -g {} -s {} -n {}'
-#                 .format(s3.group, s3.name, database_name),
-#                 checks=[
-#                     JMESPathCheck('length(@)', 1),
-#                     JMESPathCheck('[0].role', 'Secondary'),
-#                     JMESPathCheck('[0].partnerRole', 'Primary')])
-#
-#        # Failover to s3.
-#        self.cmd('sql db replica set-primary -g {} -s {} -n {}'
-#                 .format(s3.group, s3.name, database_name),
-#                 checks=[NoneCheck()])
-#
-#        # list replica links on s3 - it should link to s1 and s2
-#        self.cmd('sql db replica list-links -g {} -s {} -n {}'
-#                 .format(s3.group, s3.name, database_name),
-#                 checks=[JMESPathCheck('length(@)', 2)])
-#
-#        # Stop replication from s3 to s2 twice. Second time should be no-op.
-#        for _ in range(2):
-#            # Delete link
-#            self.cmd('sql db replica delete-link -g {} -s {} -n {} --partner-resource-group {}'
-#                     ' --partner-server {} --yes'
-#                     .format(s3.group, s3.name, database_name, s2.group, s2.name),
-#                     checks=[NoneCheck()])
-#
-#            # Verify link was deleted. s3 should still be the primary.
-#            self.cmd('sql db replica list-links -g {} -s {} -n {}'
-#                     .format(s3.group, s3.name, database_name),
-#                     checks=[
-#                         JMESPathCheck('length(@)', 1),
-#                         JMESPathCheck('[0].role', 'Primary'),
-#                         JMESPathCheck('[0].partnerRole', 'Secondary')])
-#
-#        # Failover to s3 again (should be no-op, it's already primary)
-#        self.cmd('sql db replica set-primary -g {} -s {} -n {} --allow-data-loss'
-#                 .format(s3.group, s3.name, database_name),
-#                 checks=[NoneCheck()])
-#
-#        # s3 should still be the primary.
-#        self.cmd('sql db replica list-links -g {} -s {} -n {}'
-#                 .format(s3.group, s3.name, database_name),
-#                 checks=[
-#                     JMESPathCheck('length(@)', 1),
-#                     JMESPathCheck('[0].role', 'Primary'),
-#                     JMESPathCheck('[0].partnerRole', 'Secondary')])
-#
-#        # Force failover back to s1
-#        self.cmd('sql db replica set-primary -g {} -s {} -n {} --allow-data-loss'
-#                 .format(s1.group, s1.name, database_name),
-#                 checks=[NoneCheck()])
+class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
+    # create 2 servers in the same resource group, and 1 server in a different resource group
+    @ResourceGroupPreparer(parameter_name="resource_group_1",
+                           parameter_name_for_location="resource_group_location_1",
+                           location='westeurope')
+    @ResourceGroupPreparer(parameter_name="resource_group_2",
+                           parameter_name_for_location="resource_group_location_2",
+                           location='westeurope')
+    @SqlServerPreparer(parameter_name="server_name_1",
+                       resource_group_parameter_name="resource_group_1",
+                       location='westeurope')
+    @SqlServerPreparer(parameter_name="server_name_2",
+                       resource_group_parameter_name="resource_group_1",
+                       location='westeurope')
+    @SqlServerPreparer(parameter_name="server_name_3",
+                       resource_group_parameter_name="resource_group_2",
+                       location='westeurope')
+    @AllowLargeResponse()
+    def test_sql_db_replica_mgmt(self,
+                                 resource_group_1, resource_group_location_1,
+                                 resource_group_2, resource_group_location_2,
+                                 server_name_1, server_name_2, server_name_3):
 
+        database_name = "cliautomationdb01"
+        target_database_name = "cliautomationdb02"
+        hs_database_name = "cliautomationhs03"
+        hs_target_database_name = "cliautomationnr04"
+        service_objective = 'GP_Gen5_8'
+        hs_service_objective = 'HS_Gen5_8'
+
+        # helper class so that it's clear which servers are in which groups
+        class ServerInfo(object):  # pylint: disable=too-few-public-methods
+            def __init__(self, name, group, location):
+                self.name = name
+                self.group = group
+                self.location = location
+
+        s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
+        s2 = ServerInfo(server_name_2, resource_group_1, resource_group_location_1)
+        s3 = ServerInfo(server_name_3, resource_group_2, resource_group_location_2)
+
+        # verify setup
+        for s in (s1, s2, s3):
+            self.cmd('sql server show -g {} -n {}'
+                     .format(s.group, s.name),
+                     checks=[
+                         JMESPathCheck('name', s.name),
+                         JMESPathCheck('resourceGroup', s.group)])
+
+        # create db in first server
+        self.cmd('sql db create -g {} -s {} -n {} --yes'
+                 .format(s1.group, s1.name, database_name),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s1.group)])
+
+        # create hs db in first server
+        self.cmd('sql db create -g {} -s {} -n {} --service-objective {} --yes'
+                 .format(s1.group, s1.name, hs_database_name, hs_service_objective),
+                 checks=[
+                     JMESPathCheck('name', hs_database_name),
+                     JMESPathCheck('resourceGroup', s1.group)])
+
+        # create replica in second server with min params
+        # partner resource group unspecified because s1.group == s2.group
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
+                 .format(s1.group, s1.name, database_name,
+                         s2.name),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s2.group)])
+
+        # create replica in second server with backup storage redundancy
+        backup_storage_redundancy = "zone"
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} --backup-storage-redundancy {}'
+                 .format(s1.group, s1.name, database_name,
+                         s2.name, backup_storage_redundancy),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s2.group),
+                     JMESPathCheck('requestedBackupStorageRedundancy', 'Zone')])
+
+        # check that the replica was created in the correct server
+        self.cmd('sql db show -g {} -s {} -n {}'
+                 .format(s2.group, s2.name, database_name),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s2.group)])
+
+        # Delete replica in second server and recreate with explicit service objective and name
+        self.cmd('sql db delete -g {} -s {} -n {} --yes'
+                 .format(s2.group, s2.name, database_name))
+
+        secondary_type = "Geo"
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} '
+                 ' --service-objective {} --partner-database {} --secondary-type {}'
+                 .format(s1.group, s1.name, database_name,
+                         s2.name, service_objective, target_database_name, secondary_type),
+                 checks=[
+                     JMESPathCheck('name', target_database_name),
+                     JMESPathCheck('resourceGroup', s2.group),
+                     JMESPathCheck('requestedServiceObjectiveName', service_objective),
+                     JMESPathCheck('secondaryType', secondary_type)])
+
+        # Create a named replica
+        secondary_type = "Named"
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} '
+                 ' --service-objective {} --partner-resource-group {} --partner-database {} --secondary-type {} --ha-replicas {}'
+                 .format(s1.group, s1.name, hs_database_name,
+                         s1.name, hs_service_objective, s1.group, hs_target_database_name, secondary_type, 2),
+                 checks=[
+                     JMESPathCheck('name', hs_target_database_name),
+                     JMESPathCheck('resourceGroup', s1.group),
+                     JMESPathCheck('requestedServiceObjectiveName', hs_service_objective),
+                     JMESPathCheck('secondaryType', secondary_type),
+                     JMESPathCheck('highAvailabilityReplicaCount', 2)])
+
+        # Create replica in pool in third server with max params (except service objective)
+        pool_name = 'pool1'
+        pool_edition = 'GeneralPurpose'
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} '
+                 ' --edition {}'
+                 .format(s3.group, s3.name, pool_name, pool_edition))
+
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
+                 ' --partner-resource-group {} --elastic-pool {}'
+                 .format(s1.group, s1.name, database_name,
+                         s3.name, s3.group, pool_name),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s3.group),
+                     JMESPathCheck('elasticPoolName', pool_name)])
+
+        # check that the replica was created in the correct server
+        self.cmd('sql db show -g {} -s {} -n {}'
+                 .format(s3.group, s3.name, database_name),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s3.group)])
+
+        # list replica links on s1 - it should link to s2 and s3
+        self.cmd('sql db replica list-links -g {} -s {} -n {}'
+                 .format(s1.group, s1.name, database_name),
+                 checks=[JMESPathCheck('length(@)', 2)])
+
+        # list replica links on s3 - it should link only to s1
+        self.cmd('sql db replica list-links -g {} -s {} -n {}'
+                 .format(s3.group, s3.name, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].role', 'Secondary'),
+                     JMESPathCheck('[0].partnerRole', 'Primary')])
+
+        # Failover to s3.
+        self.cmd('sql db replica set-primary -g {} -s {} -n {}'
+                 .format(s3.group, s3.name, database_name),
+                 checks=[
+                     JMESPathCheck('role', 'Primary'),
+                     JMESPathCheck('partnerRole', 'Secondary')])
+
+        # list replica links on s3 - it should link to s1 and s2
+        self.cmd('sql db replica list-links -g {} -s {} -n {}'
+                 .format(s3.group, s3.name, database_name),
+                 checks=[JMESPathCheck('length(@)', 2)])
+
+        # Stop replication from s3 to s2 twice. Second time should be no-op.
+        for _ in range(2):
+            # Delete link
+            self.cmd('sql db replica delete-link -g {} -s {} -n {} --partner-resource-group {}'
+                     ' --partner-server {} --yes'
+                     .format(s3.group, s3.name, database_name, s2.group, s2.name),
+                     checks=[NoneCheck()])
+
+            # Verify link was deleted. s3 should still be the primary.
+            self.cmd('sql db replica list-links -g {} -s {} -n {}'
+                     .format(s3.group, s3.name, database_name),
+                     checks=[
+                         JMESPathCheck('length(@)', 1),
+                         JMESPathCheck('[0].role', 'Primary'),
+                         JMESPathCheck('[0].partnerRole', 'Secondary')])
+
+        # Failover to s3 again (should be no-op, it's already primary)
+        self.cmd('sql db replica set-primary -g {} -s {} -n {} --allow-data-loss'
+                 .format(s3.group, s3.name, database_name),
+                 checks=[NoneCheck()])
+
+        # s3 should still be the primary.
+        self.cmd('sql db replica list-links -g {} -s {} -n {}'
+                 .format(s3.group, s3.name, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].role', 'Primary'),
+                     JMESPathCheck('[0].partnerRole', 'Secondary')])
+
+        # Force failover back to s1
+        self.cmd('sql db replica set-primary -g {} -s {} -n {} --allow-data-loss'
+                 .format(s1.group, s1.name, database_name),
+                 checks=[
+                     JMESPathCheck('role', 'Primary'),
+                     JMESPathCheck('partnerRole', 'Secondary')])
 
 class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
     def __init__(self, method_name):
@@ -6279,3 +6669,94 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
         # list 0 instance links
         self.cmd('sql mi link list -g {rg} --instance-name {mi}',
                     checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+
+
+class SqlManagedInstanceRestoreCrossSubscriptionScenarioTest(ScenarioTest):
+    @ManagedInstancePreparer()
+    def test_sql_managed_deleted_cross_subscription_restore(self, mi, rg):
+        from datetime import datetime, timezone, timedelta
+        resource_prefix = 'MIRestoreCrossSubDB'
+
+        self.kwargs.update({
+            'rg': rg,
+            'managed_instance_name': mi,
+            'database_name': self.create_random_name(resource_prefix, 50),
+            'source_sub': "62e48210-5e43-423e-889b-c277f3e08c39",
+            'source_rg': "gen4-testing-RG",
+            'source_mi': "filiptanic-gen4-on-gen7-different-subnet",
+            'source_db': "cross-sub-restored",
+            'pit': (datetime.now(timezone.utc) + timedelta(minutes=-15)).isoformat()
+        })
+
+        # test restore deleted database
+        self.cmd(
+            'sql midb restore --dest-name {database_name} --dest-mi {managed_instance_name} --dest-resource-group {rg} --source-sub {source_sub} --mi {source_mi} -g {source_rg} -n {source_db} --time {pit}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('name', '{database_name}'),
+                self.check('status', 'Online')])
+
+
+class SqlManagedInstanceDtcScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    @ManagedInstancePreparer(parameter_name = 'mi', vnet_name='vnet-managed-instance-v2')
+    def test_sql_mi_dtc_mgmt(self, mi, rg):
+        self.kwargs.update({
+            'rg': rg,
+            'mi': mi
+        })
+        # check if test MI got created
+        self.cmd('sql mi show -g {rg} -n {mi}',
+        checks=[
+            JMESPathCheck('name', mi),
+            JMESPathCheck('resourceGroup', rg)])
+        
+        dtc = self.cmd('sql mi dtc show -g {rg} --mi {mi}',
+        checks=[
+            JMESPathCheck('name', 'current'),
+            JMESPathCheck('resourceGroup', rg),
+            JMESPathCheck('type', 'Microsoft.Sql/managedInstances/dtc')
+        ]).get_output_in_json()
+
+        # negate some parameters and set them as update parameters
+        dtcEnabled = not dtc['dtcEnabled']
+        xaTransactionsEnabled = not dtc['securitySettings']['xaTransactionsEnabled']
+        allowInboundEnabled = not dtc['securitySettings']['transactionManagerCommunicationSettings']['allowInboundEnabled']
+        self.kwargs.update({
+            'dtcEnabled': dtcEnabled,
+            'xaTransactionsEnabled': xaTransactionsEnabled,
+            'allowInboundEnabled': allowInboundEnabled
+        })
+        self.cmd('sql mi dtc update -g {rg} --mi {mi} --dtc-enabled {dtcEnabled} --xa-transactions-enabled {xaTransactionsEnabled} --allow-inbound-enabled {allowInboundEnabled}')
+
+        # get DTC and check if parameters were updated successfully
+        dtc = self.cmd('sql mi dtc show -g {rg} --mi {mi}').get_output_in_json()
+        self.assertEqual(dtc['dtcEnabled'], dtcEnabled)
+        self.assertEqual(dtc['securitySettings']['xaTransactionsEnabled'], xaTransactionsEnabled)
+        self.assertEqual(dtc['securitySettings']['transactionManagerCommunicationSettings']['allowInboundEnabled'], allowInboundEnabled)
+
+
+class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
+    def test_sql_midb_recover(self):
+        self.kwargs.update({
+            'rg': ManagedInstancePreparer.group,
+            'mi': ManagedInstancePreparer.existing_mi_name
+        })
+
+        # Due to long creation of geo backups, use existing MI
+        backups_list = self.cmd('sql recoverable-midb list -g {rg} --mi {mi}').get_output_in_json()
+        database_name = backups_list[0]['name']
+        self.kwargs.update({
+            'geodb': database_name
+        })
+
+        recoverable_db = self.cmd('sql recoverable-midb show -g {rg} --mi {mi} -n {geodb}',
+                    checks=[
+                        JMESPathCheck('name', database_name),
+                        JMESPathCheck('resourceGroup',  ManagedInstancePreparer.group)]).get_output_in_json()
+        self.kwargs.update({
+            'recoverable_db': recoverable_db['id']
+        })
+        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db -r {recoverable_db}',
+                checks=[
+                    JMESPathCheck('name', "recovered_db")])

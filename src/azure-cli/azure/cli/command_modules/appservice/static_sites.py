@@ -3,16 +3,20 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.util import sdk_no_wait, send_raw_request
 
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.azclierror import (ResourceNotFoundError, ValidationError, RequiredArgumentMissingError,
                                        InvalidArgumentValueError, UnauthorizedError)
 from knack.log import get_logger
 from msrestazure.tools import parse_resource_id
+from urllib.parse import urlparse
+import uuid
+from datetime import datetime, timedelta
 
-from .utils import normalize_sku_for_staticapp, raise_missing_token_suggestion
+from .utils import normalize_sku_for_staticapp, raise_missing_token_suggestion, raise_missing_ado_token_suggestion
 from .custom import show_app, _build_identities_info
 from ._client_factory import providers_client_factory
 
@@ -130,7 +134,7 @@ def set_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_wait
                                                                     name, hostname, domain_envelope)
 
     if validation_method.lower() == "dns-txt-token":
-        validation_cmd = ("az staticwebapp hostname get -n {} -g {} "
+        validation_cmd = ("az staticwebapp hostname show -n {} -g {} "
                           "--hostname {} --query \"validationToken\"".format(name,
                                                                              resource_group_name,
                                                                              hostname))
@@ -365,10 +369,37 @@ def update_staticsite_users(cmd, name, roles, authentication_provider=None, user
                                           static_site_user_envelope=user_envelope)
 
 
+def _get_ado_token(cmd, source):
+    ado_organization = [p for p in urlparse(source).path.split("/") if p][0]
+    resource = cmd.cli_ctx.cloud.endpoints.active_directory_resource_id
+
+    url = "https://app.vssps.visualstudio.com/_apis/profile/profiles/me?api-version=5.1"
+    user_id = send_raw_request(cmd.cli_ctx, "GET", url, resource=resource).json()["id"]
+
+    url = f"https://app.vssps.visualstudio.com/_apis/accounts?api-version=5.1&memberId={user_id}"
+    orgs = send_raw_request(cmd.cli_ctx, "GET", url, resource=resource).json()["value"]
+    org_id = [o for o in orgs if o["accountName"].lower() == ado_organization.lower()][0]["accountId"]
+
+    url = f"https://vssps.dev.azure.com/{ado_organization}/_apis/tokens/pats?api-version=7.1-preview.1"
+    body = {
+        "displayName": f"SWA Deployment Token (created via the Azure CLI) - {uuid.uuid4().hex}",
+        "scope": "vso.build_execute vso.code_full vso.variablegroups_manage",
+        "validTo": (datetime.utcnow() + timedelta(days=6 * 30)).isoformat(),
+        "allOrgs": False,
+        "targetAccounts": [org_id],
+    }
+    return send_raw_request(cmd.cli_ctx,
+                            "POST",
+                            url,
+                            resource=resource,
+                            body=json.dumps(body)).json()["patToken"]["token"]
+
+
 def create_staticsites(cmd, resource_group_name, name, location="centralus",  # pylint: disable=too-many-locals,
                        source=None, branch=None, token=None,
                        app_location="/", api_location=None, output_location=None,
-                       tags=None, no_wait=False, sku='Free', login_with_github=False, format_output=True):
+                       tags=None, no_wait=False, sku='Free', login_with_github=False, login_with_ado=False,
+                       format_output=True):
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
 
     try:
@@ -378,19 +409,33 @@ def create_staticsites(cmd, resource_group_name, name, location="centralus",  # 
     except _ResourceNotFoundError:
         pass
 
-    if source or branch or login_with_github or token:
+    is_github = source and "github.com/" in source
+
+    if source and ("https://" not in source and "http://" not in source):
+        source = f"https://{source}"  # urlparse doesn't split the url properly without a scheme
+
+    if source or branch or login_with_github or login_with_ado or token:
         if not source:
-            raise ValidationError("--source is required to make a static web app connected to a github repo")
+            raise ValidationError("--source is required to make a static web app connected to a repo")
         if not branch:
-            raise ValidationError("--branch is required to make a static web app connected to a github repo")
-        if not token and not login_with_github:
-            raise_missing_token_suggestion()
+            raise ValidationError("--branch is required to make a static web app connected to a repo")
+        if not token and not (login_with_github or login_with_ado):
+            if is_github:
+                raise_missing_token_suggestion()
+            else:
+                raise_missing_ado_token_suggestion()
         elif not token:
-            from ._github_oauth import get_github_access_token
-            scopes = ["admin:repo_hook", "repo", "workflow"]
-            token = get_github_access_token(cmd, scopes)
-        elif token and login_with_github:
-            logger.warning("Both token and --login-with-github flag are provided. Will use provided token")
+            if login_with_github:
+                from ._github_oauth import get_github_access_token
+                scopes = ["admin:repo_hook", "repo", "workflow"]
+                token = get_github_access_token(cmd, scopes)
+            if login_with_ado:
+                token = _get_ado_token(cmd, source)
+        else:
+            if login_with_github:
+                logger.warning("Both token and --login-with-github flag are provided. Will use provided token")
+            if login_with_ado:
+                logger.warning("Both token and --login-with-ado flag are provided. Will use provided token")
 
     StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription = cmd.get_models(
         'StaticSiteARMResource', 'StaticSiteBuildProperties', 'SkuDescription')
@@ -562,7 +607,14 @@ def reset_staticsite_api_key(cmd, name, resource_group_name=None):
                                             reset_properties_envelope=reset_envelope)
 
 
-def link_user_function(cmd, name, resource_group_name, function_resource_id, force=False):
+def link_user_function(
+    cmd,
+    name,
+    resource_group_name,
+    function_resource_id,
+    environment_name=None,
+    force=False,
+):
     from azure.mgmt.web.models import StaticSiteUserProvidedFunctionAppARMResource
 
     if force:
@@ -577,10 +629,20 @@ def link_user_function(cmd, name, resource_group_name, function_resource_id, for
     function = StaticSiteUserProvidedFunctionAppARMResource(function_app_resource_id=function_resource_id,
                                                             function_app_region=function_location)
 
-    return client.begin_register_user_provided_function_app_with_static_site(
+    if environment_name is None:
+        # Special casing since the type of the created resource differ
+        return client.begin_register_user_provided_function_app_with_static_site(
+            name=name,
+            resource_group_name=resource_group_name,
+            function_app_name=function_name,
+            static_site_user_provided_function_envelope=function,
+            is_forced=force)
+
+    return client.begin_register_user_provided_function_app_with_static_site_build(
         name=name,
         resource_group_name=resource_group_name,
         function_app_name=function_name,
+        environment_name=environment_name,
         static_site_user_provided_function_envelope=function,
         is_forced=force)
 

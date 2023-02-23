@@ -2166,6 +2166,12 @@ def validate_policy(namespace):
                        "policy.")
 
 
+def validate_allow_blob_public_access():
+    logger.warning("The public access to all blobs or containers in the storage account will be "
+                   "disallowed by default in the future, which means default value for --allow-blob-public-access "
+                   "is still null but will be equivalent to false.")
+
+
 def validate_immutability_arguments(namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
     if not namespace.enable_alw:

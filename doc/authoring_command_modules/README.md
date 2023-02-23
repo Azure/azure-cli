@@ -160,7 +160,7 @@ Style Checks
 ------------
 
 ```
-azdev style --module <module> [--pylint] [--pep8]
+azdev style <module> [--pylint] [--pep8]
 ```
 
 Submitting Pull Requests
