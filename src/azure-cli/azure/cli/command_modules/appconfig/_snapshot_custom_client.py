@@ -259,21 +259,20 @@ class AppConfigSnapshotClient:
             if_none_match=None,
             **kwargs):
         """
-        Poll after a given interval (default 5s) to ensure that the snapshot is in 'ready' status.
+        Poll after a given interval (default 1s) to ensure that the snapshot is in 'ready' status.
         The request times out after 30s by default unless specified otherwise.
         """
         timeout = kwargs.pop("timeout", 30)
-        polling_interval = kwargs.pop("polling_interval", 5)
+        polling_interval = kwargs.pop("polling_interval", 1)
 
         from datetime import datetime
-        from knack.log import get_logger
+        from azure.cli.core.commands.progress import IndeterminateStandardOut
 
         def _get_elapsed_time(start_time: datetime):
             return (datetime.now() - start_time).total_seconds()
 
-        logger = get_logger(__name__)
-
-        logger.warning("Starting...")
+        progress = IndeterminateStandardOut()
+        progress.write({"message": "Starting"})
         current_state = self.create_snapshot(
             name,
             filters,
@@ -285,17 +284,19 @@ class AppConfigSnapshotClient:
             **kwargs
         )
 
-        logger.warning("Provisioning...")
-
         import time
         start_time = datetime.now()
+
         while current_state.status == ProvisioningStatus.PROVISIONING:
+            progress.spinner.step(label="Provisioning")
             if _get_elapsed_time(start_time) > timeout:
+                progress.clear()
                 raise TimeoutError("The create request timed out.")
 
             time.sleep(polling_interval)
             current_state = self.get_snapshot(name)
 
+        progress.clear()
         if current_state.status == ProvisioningStatus.READY:
             return current_state
 
