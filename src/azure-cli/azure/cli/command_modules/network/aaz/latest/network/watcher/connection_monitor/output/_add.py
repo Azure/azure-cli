@@ -59,12 +59,9 @@ class Add(AAZCommand):
             help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
-        _args_schema.migrate = AAZStrArg(
-            options=["--migrate"],
-            help="Value indicating whether connection monitor V1 should be migrated to V2 format.",
-        )
         _args_schema.output_index = AAZIntArg(
             options=["--output-index"],
+            help="output-index",
         )
         _args_schema.output_type = AAZStrArg(
             options=["--type", "--output-type"],
@@ -286,9 +283,6 @@ class Add(AAZCommand):
         @property
         def query_parameters(self):
             parameters = {
-                **self.serialize_query_param(
-                    "migrate", self.ctx.args.migrate,
-                ),
                 **self.serialize_query_param(
                     "api-version", "2022-01-01",
                     required=True,

@@ -5781,19 +5781,9 @@ type: group
 short-summary: Manage output of connection monitor
 """
 
-helps['network watcher connection-monitor output add'] = """
-type: command
-short-summary: Add an output to a connection monitor
-"""
-
 helps['network watcher connection-monitor output remove'] = """
 type: command
 short-summary: Remove all outputs from a connection monitor
-"""
-
-helps['network watcher connection-monitor output list'] = """
-type: command
-short-summary: List all output from a connection monitor
 """
 
 helps['network watcher flow-log'] = """
