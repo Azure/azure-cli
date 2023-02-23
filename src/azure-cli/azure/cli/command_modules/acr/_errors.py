@@ -117,6 +117,11 @@ CONNECTIVITY_REFRESH_TOKEN_ERROR = ErrorClass(
     "Access to registry '{}' was denied. Response code: {}. Please try running 'az login' again to refresh permissions."
 )
 
+CONNECTIVITY_REFRESH_TOKEN_TOOMANYREQUESTS_ERROR = ErrorClass(
+    "CONNECTIVITY_REFRESH_TOKEN_TOOMANYREQUESTS_ERROR",
+    "Too many requests, access to registry '{}' was denied. Response code: 429. Please wait a moment before trying again."
+)
+
 
 CONNECTIVITY_ACCESS_TOKEN_ERROR = ErrorClass(
     "CONNECTIVITY_ACCESS_TOKEN_ERROR",

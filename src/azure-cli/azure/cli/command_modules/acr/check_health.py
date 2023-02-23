@@ -251,7 +251,8 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
 
 def _get_endpoint_and_token_status(cmd, login_server, ignore_errors):
     from ._errors import CONNECTIVITY_CHALLENGE_ERROR, CONNECTIVITY_AAD_LOGIN_ERROR, \
-        CONNECTIVITY_REFRESH_TOKEN_ERROR, CONNECTIVITY_ACCESS_TOKEN_ERROR
+        CONNECTIVITY_REFRESH_TOKEN_ERROR, CONNECTIVITY_ACCESS_TOKEN_ERROR, \
+        CONNECTIVITY_REFRESH_TOKEN_TOOMANYREQUESTS_ERROR
 
     # Check access to login endpoint
     url = 'https://' + login_server + '/v2/'
@@ -269,6 +270,10 @@ def _get_endpoint_and_token_status(cmd, login_server, ignore_errors):
             return
 
         if result_from_token.error_title == CONNECTIVITY_REFRESH_TOKEN_ERROR.error_title:
+            _handle_error(result_from_token, ignore_errors)
+            return
+        
+        if result_from_token.error_title == CONNECTIVITY_REFRESH_TOKEN_TOOMANYREQUESTS_ERROR.error_title:
             _handle_error(result_from_token, ignore_errors)
             return
 
