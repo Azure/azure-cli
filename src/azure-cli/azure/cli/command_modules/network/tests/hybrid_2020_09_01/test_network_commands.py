@@ -395,3 +395,148 @@ class NetworkLocalGatewayScenarioTest(ScenarioTest):
         self.cmd('network local-gateway delete --resource-group {rg} --name {lgw1}')
         self.cmd('network local-gateway list --resource-group {rg}',
                  checks=self.check('length(@)', 1))
+
+
+class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vpn_connection_ipsec')
+    def test_network_vpn_connection_ipsec(self, resource_group):
+
+        self.kwargs.update({
+            'vnet1': 'vnet1',
+            'vnet_prefix1': '10.11.0.0/16',
+            'vnet_prefix2': '10.12.0.0/16',
+            'fe_sub1': 'FrontEnd',
+            'fe_sub_prefix1': '10.11.0.0/24',
+            'be_sub1': 'BackEnd',
+            'be_sub_prefix1': '10.12.0.0/24',
+            'gw_sub1': 'GatewaySubnet',
+            'gw_sub_prefix1': '10.12.255.0/27',
+            'gw1ip': 'pip1',
+            'gw1': 'gw1',
+            'gw1_sku': 'Standard',
+            'lgw1': 'lgw1',
+            'lgw1ip': '131.107.72.22',
+            'lgw1_prefix1': '10.61.0.0/16',
+            'lgw1_prefix2': '10.62.0.0/16',
+            'conn1': 'conn1'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet1} --address-prefix {vnet_prefix1} {vnet_prefix2}')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet1} -n {fe_sub1} --address-prefix {fe_sub_prefix1}')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet1} -n {be_sub1} --address-prefix {be_sub_prefix1}')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet1} -n {gw_sub1} --address-prefix {gw_sub_prefix1}')
+        self.cmd('network public-ip create -g {rg} -n {gw1ip}')
+
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --public-ip-address {gw1ip} --vnet {vnet1} --sku {gw1_sku}')
+        self.cmd('network local-gateway create -g {rg} -n {lgw1} --gateway-ip-address {lgw1ip} --local-address-prefixes {lgw1_prefix1} {lgw1_prefix2}')
+        self.cmd('network vpn-connection create -g {rg} -n {conn1} --vnet-gateway1 {gw1} --local-gateway2 {lgw1} --shared-key AzureA1b2C3')
+
+        self.cmd('network vpn-connection ipsec-policy add -g {rg} --connection-name {conn1} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048')
+        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}', checks=self.check('length(@)', 1))
+        self.cmd('network vpn-connection ipsec-policy clear -g {rg} --connection-name {conn1}')
+        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}', checks=self.check('length(@)', 0))
+
+
+class NetworkActiveActiveCrossPremiseScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
+
+    @ResourceGroupPreparer(name_prefix='cli_test_active_active_cross_premise_connection')
+    def test_network_active_active_cross_premise_connection(self, resource_group):
+
+        self.kwargs.update({
+            'vnet1': 'vnet1',
+            'vnet_prefix1': '10.11.0.0/16',
+            'vnet_prefix2': '10.12.0.0/16',
+            'vnet1_asn': 65010,
+            'gw_subnet': 'GatewaySubnet',
+            'gw_subnet_prefix': '10.12.255.0/27',
+            'gw_ip1': 'gwip1',
+            'gw_ip2': 'gwip2',
+            'gw1': 'gw1',
+            'lgw2': 'lgw2',
+            'lgw_ip': '131.107.72.22',
+            'lgw_prefix': '10.52.255.253/32',
+            'bgp_peer1': '10.52.255.253',
+            'lgw_asn': 65050,
+            'lgw_loc': 'eastus',
+            'conn_151': 'Vnet1toSite5_1',
+            'conn_152': 'Vnet1toSite5_2',
+            'shared_key': 'abc123',
+            'shared_key2': 'a1b2c3',
+            'lgw3': 'lgw3',
+            'lgw3_ip': '131.107.72.23',
+            'lgw3_prefix': '10.52.255.254/32',
+            'bgp_peer2': '10.52.255.254'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet1} --address-prefix {vnet_prefix1} {vnet_prefix2} --subnet-name {gw_subnet} --subnet-prefix {gw_subnet_prefix}')
+        self.cmd('network public-ip create -g {rg} -n {gw_ip1}')
+        self.cmd('network public-ip create -g {rg} -n {gw_ip2}')
+
+        # create the vnet gateway with active-active feature
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1} --sku HighPerformance --asn {vnet1_asn} --public-ip-addresses {gw_ip1} {gw_ip2} --tags foo=doo')
+
+        # switch to active-standby
+        self.cmd('network vnet-gateway update -g {rg} -n {gw1} --vnet {vnet1} --sku HighPerformance --asn {vnet1_asn} --public-ip-addresses {gw_ip1} --no-wait --tags foo=boo')
+
+        # create and connect first local-gateway
+        self.cmd('network local-gateway create -g {rg} -n {lgw2} -l {lgw_loc} --gateway-ip-address {lgw_ip} --local-address-prefixes {lgw_prefix} --asn {lgw_asn} --bgp-peering-address {bgp_peer1}')
+        self.cmd('network vpn-connection create -g {rg} -n {conn_151} --vnet-gateway1 {gw1} --local-gateway2 {lgw2} --shared-key {shared_key} --enable-bgp')
+        self.cmd('network vpn-connection shared-key reset -g {rg} --connection-name {conn_151} --key-length 128')
+        sk1 = self.cmd('network vpn-connection shared-key show -g {rg} --connection-name {conn_151}').get_output_in_json()
+        self.cmd('network vpn-connection shared-key update -g {rg} --connection-name {conn_151} --value {shared_key2}').get_output_in_json()
+        sk2 = self.cmd('network vpn-connection shared-key show -g {rg} --connection-name {conn_151}',
+                       checks=self.check('value', '{shared_key2}'))
+        self.assertNotEqual(sk1, sk2)
+
+        # create and connect second local-gateway
+        self.cmd('network local-gateway create -g {rg} -n {lgw3} -l {lgw_loc} --gateway-ip-address {lgw3_ip} --local-address-prefixes {lgw3_prefix} --asn {lgw_asn} --bgp-peering-address {bgp_peer2}')
+        self.cmd('network vpn-connection create -g {rg} -n {conn_152} --vnet-gateway1 {gw1} --local-gateway2 {lgw3} --shared-key {shared_key} --enable-bgp')
+
+
+class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
+
+    @ResourceGroupPreparer(name_prefix='cli_test_active_active_vnet_vnet_connection')
+    def test_network_active_active_vnet_connection(self, resource_group):
+
+        self.kwargs.update({
+            'subnet': 'GatewaySubnet',
+            'vnet1': 'vnet1',
+            'vnet1_prefix': '10.21.0.0/16',
+            'vnet1_asn': 65010,
+            'gw1': 'vgw1',
+            'gw1_prefix': '10.21.255.0/27',
+            'gw1_ip1': 'gw1ip1',
+            'gw1_ip2': 'gw1ip2',
+            'vnet2': 'vnet2',
+            'vnet2_prefix': '10.22.0.0/16',
+            'vnet2_asn': 65020,
+            'gw2': 'vgw2',
+            'gw2_prefix': '10.22.255.0/27',
+            'gw2_ip1': 'gw2ip1',
+            'gw2_ip2': 'gw2ip2',
+            'key': 'abc123',
+            'conn12': 'vnet1to2',
+            'conn21': 'vnet2to1'
+        })
+
+        # Create one VNet with two public IPs
+        self.cmd('network vnet create -g {rg} -n {vnet1} --address-prefix {vnet1_prefix} --subnet-name {subnet} --subnet-prefix {gw1_prefix}')
+        self.cmd('network public-ip create -g {rg} -n {gw1_ip1}')
+        self.cmd('network public-ip create -g {rg} -n {gw1_ip2}')
+
+        # Create second VNet with two public IPs
+        self.cmd('network vnet create -g {rg} -n {vnet2} --address-prefix {vnet2_prefix} --subnet-name {subnet} --subnet-prefix {gw2_prefix}')
+        self.cmd('network public-ip create -g {rg} -n {gw2_ip1}')
+        self.cmd('network public-ip create -g {rg} -n {gw2_ip2}')
+
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1} --sku HighPerformance --asn {vnet1_asn} --public-ip-addresses {gw1_ip1} {gw1_ip2} --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2} --sku HighPerformance --asn {vnet2_asn} --public-ip-addresses {gw2_ip1} {gw2_ip2} --no-wait')
+
+        # wait for gateway completion to finish
+        self.cmd('network vnet-gateway wait -g {rg} -n {gw1} --created')
+        self.cmd('network vnet-gateway wait -g {rg} -n {gw2} --created')
+
+        # create and connect the VNet gateways
+        self.cmd('network vpn-connection create -g {rg} -n {conn12} --vnet-gateway1 {gw1} --vnet-gateway2 {gw2} --shared-key {key} --enable-bgp')
+        self.cmd('network vpn-connection create -g {rg} -n {conn21} --vnet-gateway1 {gw2} --vnet-gateway2 {gw1} --shared-key {key} --enable-bgp')

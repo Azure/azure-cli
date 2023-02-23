@@ -757,8 +757,8 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_vpn_connections')
 
     with self.command_group('network vpn-connection shared-key'):
-        from .custom import SharedKeyUpdate
-        self.command_table['network vpn-connection shared-key update'] = SharedKeyUpdate(loader=self)
+        from .custom import VpnConnSharedKeyUpdate
+        self.command_table['network vpn-connection shared-key update'] = VpnConnSharedKeyUpdate(loader=self)
 
     with self.command_group('network vpn-connection ipsec-policy') as g:
         from .custom import VpnConnIpsecPolicyAdd
