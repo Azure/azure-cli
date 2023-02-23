@@ -23,7 +23,6 @@ from azure.cli.testsdk.checkers import StringCheck, StringContainCheck, StringCo
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.acs.tests.latest.mocks import MockCLI, MockCmd
 from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
-from azure.cli.command_modules.acs.addonconfiguration import getRegionCodeForAzureRegion, sanitize_dcr_name
 from knack.util import CLIError
 # flake8: noqa
 
@@ -2468,6 +2467,58 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                            '-n {node_pool_name} '
         self.cmd(get_nodepool_cmd, checks=[
             self.check('provisioningState', 'UpgradingNodeImageVersion')
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_upgrade_kubernetes_version_nodepool(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        node_pool_name = self.create_random_name('c', 6)
+        create_version, upgrade_version = self._get_versions(resource_group_location)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'node_pool_name': node_pool_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'create_version': create_version,
+            'upgrade_version': upgrade_version
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--vm-set-type VirtualMachineScaleSets --node-count=1 ' \
+                     '--ssh-key-value={ssh_key_value} --kubernetes-version {upgrade_version} ' \
+                     '-o json'
+
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        create_nodepool_cmd = 'aks nodepool add ' \
+                              '--resource-group={resource_group} ' \
+                              '--cluster-name={name} ' \
+                              '-n {node_pool_name} ' \
+                              '--node-count=1 ' \
+                              '--kubernetes-version {create_version} '
+        self.cmd(create_nodepool_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        upgrade_kubernetes_version_nodepool_cmd = 'aks nodepool upgrade ' \
+                                               '--resource-group={resource_group} ' \
+                                               '--cluster-name={name} --nodepool-name {node_pool_name} ' \
+                                               '--kubernetes-version {upgrade_version} --yes ' \
+                                               '--no-wait'
+        self.cmd(upgrade_kubernetes_version_nodepool_cmd)
+
+        get_nodepool_cmd = 'aks nodepool show ' \
+                           '--resource-group={resource_group} ' \
+                           '--cluster-name={name} ' \
+                           '-n {node_pool_name} '
+        self.cmd(get_nodepool_cmd, checks=[
+            self.check('provisioningState', 'Upgrading')
         ])
 
     @AllowLargeResponse()
@@ -5566,6 +5617,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('servicePrincipalProfile.clientId', sp_name)
         ])
 
+         # add Mariner node pool
+        node_pool_cmd = 'aks nodepool add --resource-group={resource_group} --cluster-name={name} ' \
+                        '-n marinerpool --os-sku mariner'
+        self.cmd(node_pool_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
         # install kubectl
         try:
             subprocess.call(["az", "aks", "install-cli"])
@@ -5596,7 +5654,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             finally:
                 os.close(fd)
             # get node name
-            k_get_node_cmd = ["kubectl", "get", "node", "-o", "name", "--kubeconfig", browse_path]
+            k_get_node_cmd = ["kubectl", "get", "node", "-l", "kubernetes.azure.com/os-sku=Ubuntu", "-o", "name", "--kubeconfig", browse_path]
             k_get_node_output = subprocess.check_output(
                 k_get_node_cmd,
                 universal_newlines=True,
@@ -5609,10 +5667,31 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                     "node_name": node_name,
                 }
             )
-            # check acr
+            # check acr from Ubuntu node
             check_cmd = "aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io --node-name {node_name}"
             self.cmd(
                 check_cmd,
+                checks=[
+                    StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
+                ],
+            )
+            # check acr from Mariner node
+            k_get_mariner_node_cmd = ["kubectl", "get", "node", "-l", "kubernetes.azure.com/os-sku=Mariner", "-o", "name", "--kubeconfig", browse_path]
+            k_get_node_output = subprocess.check_output(
+                k_get_mariner_node_cmd,
+                universal_newlines=True,
+                stderr=subprocess.STDOUT,
+            )
+            mariner_node_names = k_get_node_output.split("\n")
+            mariner_node_name = mariner_node_names[0].strip().strip("node/").strip()
+            self.kwargs.update(
+                {
+                    "mariner_node_name": mariner_node_name,
+                }
+            )
+            check_mariner_cmd = "aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io --node-name {mariner_node_name}"
+            self.cmd(
+                check_mariner_cmd,
                 checks=[
                     StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
                 ],
@@ -6756,7 +6835,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd = 'aks create --resource-group {resource_group} --name {aks_name2} --location {location} ' \
                      '--nodepool-name {nodepool_name} ' \
                      '--node-count 1 --snapshot-id {snapshot_resource_id} ' \
-                     '-k {k8s_version} ' \
                      '--ssh-key-value={ssh_key_value} -o json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -6765,7 +6843,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # add a new nodepool to this cluster using this snapshot
         add_nodepool_cmd = 'aks nodepool add --resource-group={resource_group} --cluster-name={aks_name2} --name={nodepool_name2} --node-count 1 ' \
-                           '-k {k8s_version} ' \
                            '--snapshot-id {snapshot_resource_id} -o json'
         self.cmd(add_nodepool_cmd,
             checks=[
@@ -6789,14 +6866,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(get_nodepool_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('creationData.sourceResourceId', snapshot_resource_id)
-        ])
-
-        # upgrade this cluster (snapshot is not allowed for cluster upgrading), snapshot info is reset
-        create_cmd = 'aks upgrade --resource-group {resource_group} --name {aks_name2} -k {upgrade_k8s_version} --yes -o json'
-        self.cmd(create_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('agentPoolProfiles[0].creationData', None),
-            self.check('agentPoolProfiles[1].creationData', None)
         ])
 
         # delete the 2nd AKS cluster
@@ -6981,8 +7050,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         workspace_resource_id = response["addonProfiles"]["omsagent"]["config"]["logAnalyticsWorkspaceResourceID"]
 
         # check that the DCR was created
-        region_code = getRegionCodeForAzureRegion(MockCmd(MockCLI()), resource_group_location)
-        dataCollectionRuleName = sanitize_dcr_name(f"MSCI-{region_code}-{aks_name}")
+        location = resource_group_location
+        dataCollectionRuleName = f"MSCI-{location}-{aks_name}"
+        dataCollectionRuleName = dataCollectionRuleName[0:64]
         dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
         get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
         self.cmd(get_cmd, checks=[
@@ -7090,8 +7160,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         workspace_resource_group = workspace_resource_id.split("/")[4]
 
         # check that the DCR was created
-        region_code = getRegionCodeForAzureRegion(MockCmd(MockCLI()), resource_group_location)
-        dataCollectionRuleName = sanitize_dcr_name(f"MSCI-{region_code}-{aks_name}")
+        location = resource_group_location
+        dataCollectionRuleName = f"MSCI-{location}-{aks_name}"
         dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
         get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
         self.cmd(get_cmd, checks=[
@@ -7150,8 +7220,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         try:
             # check that the DCR was created
-            region_code = getRegionCodeForAzureRegion(MockCmd(MockCLI()), resource_group_location)
-            dataCollectionRuleName = sanitize_dcr_name(f"MSCI-{region_code}-{aks_name}")
+            location = resource_group_location
+            dataCollectionRuleName = f"MSCI-{location}-{aks_name}"
+            dataCollectionRuleName = dataCollectionRuleName[0:64]
             dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
             get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
             self.cmd(get_cmd, checks=[

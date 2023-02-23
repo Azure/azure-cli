@@ -131,7 +131,8 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
                               server_name=None, zone=None, standby_availability_zone=None, high_availability=None,
                               subnet=None, public_access=None, version=None, auto_grow=None, replication_role=None,
                               geo_redundant_backup=None, byok_identity=None, backup_byok_identity=None, byok_key=None,
-                              backup_byok_key=None, disable_data_encryption=None, instance=None):
+                              backup_byok_key=None, disable_data_encryption=None, iops=None, auto_io_scaling=None,
+                              instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location, server_name=instance.name if instance else None)
@@ -155,6 +156,7 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
     _mysql_auto_grow_validator(auto_grow, replication_role, high_availability, instance)
     _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_byok_key,
                           disable_data_encryption, geo_redundant_backup, instance)
+    _mysql_iops_validator(iops, auto_io_scaling, instance)
 
 
 def _mysql_retention_validator(backup_retention, sku_info, tier):
@@ -272,6 +274,15 @@ def _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_
     if (instance and instance.replication_role == "Replica") and (disable_data_encryption or byok_key):
         raise CLIError("Data encryption cannot be modified on a server with replication role. "
                        "Use the primary server instead.")
+
+
+def _mysql_iops_validator(iops, auto_io_scaling, instance):
+    if iops is None:
+        return
+    if instance is not None:
+        auto_io_scaling = instance.storage.auto_io_scaling if auto_io_scaling is None else auto_io_scaling
+    if auto_io_scaling.lower() == 'enabled':
+        logger.warning("The server has enabled the auto scale iops. So the iops will be ignored.")
 
 
 def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, zone=None,
@@ -475,8 +486,9 @@ def _valid_range(addr_range):
 
 def firewall_rule_name_validator(ns):
     if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{1,126}[_a-zA-Z0-9]$', ns.firewall_rule_name):
-        raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\' "
-                              "and the name cannot exceed 126 characters. ")
+        raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
+                              "Additionally, the name of the firewall rule must be at least 3 characters "
+                              "and no more than 128 characters in length. ")
 
 
 def validate_server_name(db_context, server_name, type_):
@@ -530,18 +542,11 @@ def validate_vnet_location(vnet, location):
         raise ValidationError("The location of Vnet should be same as the location of the server")
 
 
-def validate_mysql_replica(cmd, server):
+def validate_mysql_replica(server):
     # Tier validation
     if server.sku.tier == 'Burstable':
         raise ValidationError("Read replica is not supported for the Burstable pricing tier. "
                               "Scale up the source server to General Purpose or Memory Optimized. ")
-
-    # single az validation
-    list_skus_info = get_mysql_list_skus_info(cmd, server.location)
-    single_az = list_skus_info['single_az']
-    if single_az:
-        raise ValidationError("Replica can only be created for multi-availability zone regions. "
-                              "The location of the source server is in a single availability zone region.")
 
 
 def validate_postgres_replica(cmd, server):

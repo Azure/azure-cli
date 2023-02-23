@@ -19,7 +19,7 @@ from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZ
 from ._field_value import AAZObject
 from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AAZFreeFormDictArgFormat, \
     AAZSubscriptionIdArgFormat, AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat, AAZDateFormat, \
-    AAZTimeFormat, AAZDateTimeFormat, AAZDurationFormat
+    AAZTimeFormat, AAZDateTimeFormat, AAZDurationFormat, AAZFileArgTextFormat
 from .exceptions import AAZUnregisteredArg
 
 # pylint: disable=redefined-builtin, protected-access, too-few-public-methods
@@ -518,6 +518,13 @@ class AAZSubscriptionIdArg(AAZStrArg):
         arg = super().to_cmd_arg(name, **kwargs)
         arg.completer = get_subscription_id_list
         return arg
+
+
+class AAZFileArg(AAZStrArg):
+
+    def __init__(self, fmt=None, **kwargs):
+        fmt = fmt or AAZFileArgTextFormat()
+        super().__init__(fmt=fmt, **kwargs)
 
 
 # Generic Update arguments
