@@ -7,9 +7,11 @@ from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id
 
+
 from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZResourceLocationArgFormat
 from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 from azure.cli.core.commands.arm import get_arm_resource_by_id
+
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 
@@ -17,12 +19,7 @@ from ..aaz.latest.network.watcher import RunConfigurationDiagnostic as _RunConfi
 from ..aaz.latest.network.watcher import ShowNextHop as _ShowNextHop, ShowSecurityGroupView as _ShowSecurityGroupView, \
     ShowTopology as _ShowTopology
 from ..aaz.latest.network.watcher import TestConnectivity as _TestConnectivity, TestIpFlow as _TestIPFlow
-from ..aaz.latest.network.watcher.connection_monitor import Start as _WatcherConnectionMonitorStart
-from ..aaz.latest.network.watcher.connection_monitor import Stop as _WatcherConnectionMonitorStop
-from ..aaz.latest.network.watcher.connection_monitor import Show as _WatcherConnectionMonitorShow
-from ..aaz.latest.network.watcher.connection_monitor import List as _WatcherConnectionMonitorList
-from ..aaz.latest.network.watcher.connection_monitor import Delete as _WatcherConnectionMonitorDelete
-from ..aaz.latest.network.watcher.connection_monitor import Query as _WatcherConnectionMonitorQuery
+
 from ..aaz.latest.network.watcher.flow_log import Create as _NwFlowLogCreate, Update as _NwFlowLogUpdate, \
     List as _NwFlowLogList, Delete as _NwFlowLogDelete
 from ..aaz.latest.network.watcher.troubleshooting import Start as _NwTroubleshootingStart, \
@@ -31,9 +28,15 @@ from ..aaz.latest.network.watcher.packet_capture import Create as _PacketCapture
 from ..aaz.latest.network.watcher.packet_capture import Delete as _PacketCaptureDelete, List as _PacketCaptureList, \
     Show as _PacketCaptureShow, ShowStatus as _PacketCaptureShowStatus, Stop as _PacketCaptureStop
 
+from ..aaz.latest.network.watcher.connection_monitor import Start as _WatcherConnectionMonitorStart
+from ..aaz.latest.network.watcher.connection_monitor import Stop as _WatcherConnectionMonitorStop
+from ..aaz.latest.network.watcher.connection_monitor import Show as _WatcherConnectionMonitorShow
+from ..aaz.latest.network.watcher.connection_monitor import List as _WatcherConnectionMonitorList
+from ..aaz.latest.network.watcher.connection_monitor import Delete as _WatcherConnectionMonitorDelete
+from ..aaz.latest.network.watcher.connection_monitor import Query as _WatcherConnectionMonitorQuery
+from ..aaz.latest.network.watcher.connection_monitor import Update as _WatcherConnectionMonitorUpdate
 from ..aaz.latest.network.watcher.connection_monitor.output import Add as _WatcherConnectionMonitorOutputAdd
 from ..aaz.latest.network.watcher.connection_monitor.output import List as _WatcherConnectionMonitorOutputList
-from ..aaz.latest.network.watcher.connection_monitor.output import Delete as _WatcherConnectionMonitorOutputDelete
 
 logger = get_logger(__name__)
 
@@ -1098,14 +1101,18 @@ def process_nw_cm_v2_output_namespace(cmd):
 
 
 class WatcherConnectionMonitorOutputAdd(_WatcherConnectionMonitorOutputAdd):
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False
-        args_schema.resource_group._registered = False
-        args_schema.resource_group._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_rg._required = False
         args_schema.migrate._registered = False
+        args_schema.output_index._registered = False
+        args_schema.no_wait._registered = False
+
         args_schema.output_type._required = True
         args_schema.location = AAZResourceLocationArg(
             options=["-l", "--location"],
@@ -1126,8 +1133,8 @@ class WatcherConnectionMonitorOutputList(_WatcherConnectionMonitorOutputList):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False
-        args_schema.resource_group._registered = False
-        args_schema.resource_group._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_rg._required = False
 
         args_schema.location = AAZResourceLocationArg(
             options=["-l", "--location"],
@@ -1145,29 +1152,14 @@ class WatcherConnectionMonitorOutputList(_WatcherConnectionMonitorOutputList):
         process_nw_cm_v2_output_namespace(self)
 
 
-class WatcherConnectionMonitorOutputRemove(_WatcherConnectionMonitorOutputDelete):
+class WatcherConnectionMonitorOutputRemove(_WatcherConnectionMonitorUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.watcher_name._registered = False
-        args_schema.watcher_name._required = False
-        args_schema.resource_group._registered = False
-        args_schema.resource_group._required = False
-
-        args_schema.location = AAZResourceLocationArg(
-            options=["-l", "--location"],
-            help="Location. Values from: `az account list-locations`. "
-                 "You can configure the default location "
-                 "using `az configure --defaults location=<location>`.",
-            required=True,
-        )
         return args_schema
 
     def pre_operations(self):
-        process_nw_cm_v2_output_namespace(self)
-
-    def pre_instance_delete(self):
-        instance = self.ctx.vars.instance
-        instance.properties.outputs = []
-
+        get_network_watcher_from_location(self)
+        args = self.ctx.args
+        args.outputs = []

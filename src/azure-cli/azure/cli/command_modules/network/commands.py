@@ -550,12 +550,14 @@ def load_command_table(self, _):
     #     c.custom_command('add', 'add_nw_connection_monitor_v2_output')
     #     c.custom_command('remove', 'remove_nw_connection_monitor_v2_output')
     #     c.custom_command('list', 'list_nw_connection_monitor_v2_output')
-    from .operations.watcher import WatcherConnectionMonitorOutputAdd, WatcherConnectionMonitorOutputList, \
-        WatcherConnectionMonitorOutputRemove
-    self.command_table["network watcher connection-monitor output add"] = WatcherConnectionMonitorOutputAdd(loader=self)
-    self.command_table["network watcher connection-monitor output list"] = WatcherConnectionMonitorOutputList(loader=self)
-    self.command_table["network watcher connection-monitor output remove"] = WatcherConnectionMonitorOutputRemove(loader=self)
 
+    with self.command_group('network watcher connection-monitor output', is_preview=True) as c:
+        from .operations.watcher import WatcherConnectionMonitorOutputAdd, WatcherConnectionMonitorOutputList
+        self.command_table["network watcher connection-monitor output add"] = WatcherConnectionMonitorOutputAdd(
+            loader=self)
+        self.command_table["network watcher connection-monitor output list"] = WatcherConnectionMonitorOutputList(
+            loader=self)
+        c.custom_command('remove', 'remove_nw_connection_monitor_output')
 
     with self.command_group("network watcher packet-capture"):
         from .operations.watcher import PacketCaptureCreate, PacketCaptureDelete, PacketCaptureList, PacketCaptureShow, PacketCaptureShowStatus, PacketCaptureStop

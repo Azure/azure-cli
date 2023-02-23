@@ -43,8 +43,8 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.connection_monitor_name = AAZStrArg(
-            options=["--connection-monitor", "--connection-monitor-name"],
+        _args_schema.connection_monitor = AAZStrArg(
+            options=["--connection-monitor"],
             help="Connection monitor name.",
             required=True,
         )
@@ -53,8 +53,8 @@ class List(AAZCommand):
             help="The name of the Network Watcher resource.",
             required=True,
         )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
-            options=["-g", "--watcher-rg", "--resource-group"],
+        _args_schema.watcher_rg = AAZResourceGroupNameArg(
+            options=["-g", "--watcher-rg"],
             help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
@@ -118,7 +118,7 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "connectionMonitorName", self.ctx.args.connection_monitor_name,
+                    "connectionMonitorName", self.ctx.args.connection_monitor,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -126,7 +126,7 @@ class List(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "resourceGroupName", self.ctx.args.watcher_rg,
                     required=True,
                 ),
                 **self.serialize_url_param(
