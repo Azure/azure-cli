@@ -7,7 +7,6 @@
 # pylint: disable=too-many-lines
 # pylint: disable=inconsistent-return-statements
 # pylint: disable=too-many-locals
-import warnings
 
 from azure.cli.core.profiles import ResourceType
 from knack.log import get_logger
