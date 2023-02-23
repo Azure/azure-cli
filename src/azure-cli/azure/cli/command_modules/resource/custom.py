@@ -3673,6 +3673,7 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
     if stdout:
         print(output)
 
+
 def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, indent_kind=None, indent_size=None, insert_final_newline=None):
     ensure_bicep_installation()
 
@@ -3704,6 +3705,7 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
 
 def publish_bicep_file(cmd, file, target):
     ensure_bicep_installation()
+
 
 def publish_bicep_file(cmd, file, target, documentationUri=None):
     minimum_supported_version = "0.4.1008"
