@@ -11,7 +11,7 @@ from ._client_factory import cf_web_client, cf_plans, cf_webapps
 from ._validators import (validate_onedeploy_params, validate_staticsite_link_function, validate_staticsite_sku,
                           validate_vnet_integration, validate_asp_create, validate_functionapp_asp_create,
                           validate_webapp_up, validate_app_exists, validate_add_vnet, validate_app_is_functionapp,
-                          validate_app_is_webapp)
+                          validate_app_is_webapp, validate_functionapp_on_containerapp_vnet, validate_functionapp_on_containerapp_vnet_add)
 
 
 def output_slots_in_table(slots):
@@ -292,9 +292,9 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_vnet_integration')
 
     with self.command_group('functionapp vnet-integration') as g:
-        g.custom_command('add', 'add_functionapp_vnet_integration', validator=validate_add_vnet, exception_handler=ex_handler_factory())
-        g.custom_command('list', 'list_vnet_integration')
-        g.custom_command('remove', 'remove_vnet_integration')
+        g.custom_command('add', 'add_functionapp_vnet_integration', validator=validate_functionapp_on_containerapp_vnet_add, exception_handler=ex_handler_factory())
+        g.custom_command('list', 'list_functionapp_vnet_integration', validator=validate_functionapp_on_containerapp_vnet, exception_handler=ex_handler_factory())
+        g.custom_command('remove', 'remove_functionapp_vnet_integration', validator=validate_functionapp_on_containerapp_vnet, exception_handler=ex_handler_factory())
 
     with self.command_group('appservice plan', appservice_plan_sdk) as g:
         g.custom_command('create', 'create_app_service_plan', supports_no_wait=True,

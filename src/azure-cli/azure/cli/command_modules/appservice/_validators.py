@@ -7,7 +7,7 @@ import ipaddress
 
 
 from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageError, RequiredArgumentMissingError,
-                                       ResourceNotFoundError, ValidationError, MutuallyExclusiveArgumentError)
+                                       ResourceNotFoundError, ValidationError, MutuallyExclusiveArgumentError, UnsupportOperationError)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import validate_tags
@@ -128,6 +128,18 @@ def validate_app_exists(cmd, namespace):
     if not app:
         raise ResourceNotFoundError("'{}' app not found in ResourceGroup '{}'".format(app, resource_group_name))
 
+def validate_functionapp_on_containerapp_vnet_add(cmd, namespace):
+    validate_functionapp_on_containerapp_vnet(cmd, namespace)
+    validate_add_vnet(cmd, namespace)
+
+def validate_functionapp_on_containerapp_vnet(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    slot = namespace.slot
+    function_app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if function_app.managed_environment_id is not None:
+        raise UnsupportOperationError('Config vnet for a function app on container app environment is not supported', 
+        'This function app is created in an App Environment. Go to App environment to configure Networking')
 
 def validate_add_vnet(cmd, namespace):
     from azure.core.exceptions import ResourceNotFoundError as ResNotFoundError
