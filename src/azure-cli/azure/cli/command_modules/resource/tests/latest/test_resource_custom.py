@@ -25,6 +25,7 @@ from azure.cli.command_modules.resource.custom import (
     deploy_arm_template_at_subscription_scope,
     deploy_arm_template_at_management_group,
     deploy_arm_template_at_tenant_scope,
+    format_bicep_file,
 )
 
 from azure.cli.core.mock import DummyCli
