@@ -303,3 +303,21 @@ def transform_vnet_gateway_bgp_peer_table(result):
             ('MessagesReceived', item.get('messagesReceived', ''))
         ]))
     return transformed
+
+
+def transform_vnet_table_output(result):
+
+    def _transform(result):
+        item = OrderedDict()
+        item['Name'] = result['name']
+        item['ResourceGroup'] = result['resourceGroup']
+        item['Location'] = result['location']
+        item['NumSubnets'] = len(result.get('subnets', []))
+        item['Prefixes'] = ', '.join(result['addressSpace']['addressPrefixes']) or ' '
+        item['DnsServers'] = ', '.join((result.get('dhcpOptions') or {}).get('dnsServers', [])) or ' '
+        item['DDOSProtection'] = result['enableDdosProtection']
+        item['VMProtection'] = result['enableVmProtection']
+        return item
+    if isinstance(result, list):
+        return [_transform(r) for r in result]
+    return _transform(result)
