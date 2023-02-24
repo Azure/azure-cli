@@ -3,13 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
-from knack.log import get_logger
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
-from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.util import sdk_no_wait
-from ._utils import validate_premium_registry, get_registry_by_name
-
+from ._utils import get_registry_by_name, get_resource_group_name_by_registry_name
+from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.core.serialization import NULL as AzureCoreNull
 
 
 def acr_cache_show(cmd,
@@ -17,30 +13,34 @@ def acr_cache_show(cmd,
                    registry_name,
                    name):
 
-    _, rg = get_registry_by_name(
-        cmd.cli_ctx, registry_name, None)
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
 
-    return client.cache_rules.get(resource_group_name=rg,
-                                  registry_name=registry_name,
-                                  cache_rule_name=name)
+    return client.get(resource_group_name=rg,
+                      registry_name=registry_name,
+                      cache_rule_name=name)
+
 
 def acr_cache_list(cmd,
                    client,
                    registry_name):
-    _, rg = get_registry_by_name(
-        cmd.cli_ctx, registry_name, None)
-    return client.cache_rules.list(resource_group_name=rg,
-                                  registry_name=registry_name)
+
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
+
+    return client.list(resource_group_name=rg,
+                       registry_name=registry_name)
+
 
 def acr_cache_delete(cmd,
-                   client,
-                   registry_name,
-                   name):
-    _, rg = get_registry_by_name(
-        cmd.cli_ctx, registry_name, None)
-    return client.cache_rules.begin_delete(resource_group_name=rg,
-                                  registry_name=registry_name,
-                                  cache_rule_name=name)
+                     client,
+                     registry_name,
+                     name):
+
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
+
+    return client.begin_delete(resource_group_name=rg,
+                               registry_name=registry_name,
+                               cache_rule_name=name)
+
 
 def acr_cache_create(cmd,
                      client,
@@ -50,44 +50,59 @@ def acr_cache_create(cmd,
                      target_repo,
                      cred_set=None):
 
-    registry, rg = get_registry_by_name(
-        cmd.cli_ctx, registry_name, None)
+    registry, rg = get_registry_by_name(cmd.cli_ctx, registry_name, None)
 
-    cred_set_id = None if not cred_set else f'{registry.id}/credentialSets/{cred_set}'
+    cred_set_id = AzureCoreNull if not cred_set else f'{registry.id}/credentialSets/{cred_set}'
 
-    cache_rule_create_parameters = {
-                    "name": name,
-                    "properties": {
-                        "sourceRepository": source_repo,
-                        "targetRepository": target_repo,
-                        "credentialSetResourceId": cred_set_id
-                    }
-                }
-    return client.cache_rules.begin_create(resource_group_name=rg,
-                                  registry_name=registry_name,
-                                  cache_rule_name=name,
-                                  cache_rule_create_parameters=cache_rule_create_parameters)
+    CacheRuleCreateParameters = cmd.get_models('CacheRule', operation_group='cache_rules')
 
-def acr_cache_update(cmd,
-                   client,
-                   registry_name,
-                   name,
-                   cred_set=None,
-                   remove_cred_set=False):
+    cache_rule_create_params = CacheRuleCreateParameters()
+    cache_rule_create_params.name = name
+    cache_rule_create_params.source_repository = source_repo
+    cache_rule_create_params.target_repository = target_repo
+    cache_rule_create_params.credential_set_resource_id = cred_set_id
 
-    registry, rg = get_registry_by_name(
-        cmd.cli_ctx, registry_name, None)
+    return client.begin_create(resource_group_name=rg,
+                               registry_name=registry_name,
+                               cache_rule_name=name,
+                               cache_rule_create_parameters=cache_rule_create_params)
 
-    cred_set_id = None if remove_cred_set else f'{registry.id}/credentialSets/{cred_set}'
 
-    cache_rule_update_parameters = {
-                    "name": name,
-                    "properties": {
-                        "credentialSetResourceId": cred_set_id
-                    }
-                }
+def acr_cache_update_custom(cmd,
+                            instance,
+                            registry_name,
+                            cred_set=None,
+                            remove_cred_set=False):
 
-    return client.cache_rules.begin_update(resource_group_name=rg,
-                                  registry_name=registry_name,
-                                  cache_rule_name=name,
-                                  cache_rule_update_parameters=cache_rule_update_parameters)
+    if cred_set is None and remove_cred_set is False:
+        raise InvalidArgumentValueError("You must either update the credential set ID or remove it.")
+
+    registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name, None)
+
+    cred_set_id = AzureCoreNull if remove_cred_set else f'{registry.id}/credentialSets/{cred_set}'
+
+    instance.credential_set_resource_id = cred_set_id
+
+    return instance
+
+
+def acr_cache_update_get(cmd):
+    """Returns an empty CacheRuleUpdateParameters object.
+    """
+
+    CacheRuleUpdateParameters = cmd.get_models('CacheRuleUpdateParameters', operation_group='cache_rules')
+
+    return CacheRuleUpdateParameters()
+
+
+def acr_cache_update_set(cmd,
+                         client,
+                         registry_name,
+                         name,
+                         parameters=None):
+
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name)
+    return client.begin_update(resource_group_name=rg,
+                               registry_name=registry_name,
+                               cache_rule_name=name,
+                               cache_rule_update_parameters=parameters)

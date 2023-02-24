@@ -45,7 +45,8 @@ from ._client_factory import (
     cf_acr_agentpool,
     cf_acr_connected_registries,
     cf_acr_network_rules,
-    cf_acr_cache
+    cf_acr_cache,
+    cf_acr_cred_sets
 )
 
 
@@ -184,7 +185,7 @@ def load_command_table(self, _):
 
     acr_cred_set_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.credential_set#{}',
-        client_factory=cf_acr_cache
+        client_factory=cf_acr_cred_sets
     )
 
     with self.command_group('acr', acr_custom_util) as g:
@@ -240,15 +241,24 @@ def load_command_table(self, _):
         g.command('create', 'acr_cache_create')
         g.command('list', 'acr_cache_list')
         g.command('delete', 'acr_cache_delete')
-        g.command('update', 'acr_cache_update')
+        g.generic_update_command('update',
+                                 getter_name='acr_cache_update_get',
+                                 setter_name='acr_cache_update_set',
+                                 custom_func_name='acr_cache_update_custom',
+                                 custom_func_type=acr_cache_util,
+                                 client_factory=cf_acr_cache)
 
     with self.command_group('acr credential-set', acr_cred_set_util) as g:
         g.show_command('show', 'acr_cred_set_show')
         g.command('create', 'acr_cred_set_create')
         g.command('list', 'acr_cred_set_list')
         g.command('delete', 'acr_cred_set_delete')
-        g.command('update', 'acr_cred_set_update')
-
+        g.generic_update_command('update',
+                                 getter_name='acr_cred_set_update_get',
+                                 setter_name='acr_cred_set_update_set',
+                                 custom_func_name='acr_cred_set_update_custom',
+                                 custom_func_type=acr_cred_set_util,
+                                 client_factory=cf_acr_cred_sets)
 
     with self.command_group('acr webhook', acr_webhook_util) as g:
         g.command('list', 'acr_webhook_list')

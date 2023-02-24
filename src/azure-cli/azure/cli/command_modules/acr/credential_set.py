@@ -3,114 +3,121 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
-from knack.log import get_logger
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
-from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import InvalidArgumentValueError
-from ._utils import validate_premium_registry, get_registry_by_name
-
+from ._utils import get_resource_group_name_by_registry_name
 
 
 def acr_cred_set_show(cmd,
-                   client,
-                   registry_name,
-                   name):
+                      client,
+                      registry_name,
+                      name):
 
-    _, rg = get_registry_by_name(
-        cmd.cli_ctx, registry_name, None)
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
 
-    return client.credential_sets.get(resource_group_name=rg,
-                                  registry_name=registry_name,
-                                  credential_set_name=name)
+    return client.get(resource_group_name=rg,
+                      registry_name=registry_name,
+                      credential_set_name=name)
+
 
 def acr_cred_set_list(cmd,
-                   client,
-                   registry_name):
-    _, rg = get_registry_by_name(
-        cmd.cli_ctx, registry_name, None)
-    return client.credential_sets.list(resource_group_name=rg,
-                                  registry_name=registry_name)
+                      client,
+                      registry_name):
+
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
+
+    return client.list(resource_group_name=rg,
+                       registry_name=registry_name)
+
 
 def acr_cred_set_delete(cmd,
-                   client,
-                   registry_name,
-                   name):
-    _, rg = get_registry_by_name(
-        cmd.cli_ctx, registry_name, None)
-    return client.credential_sets.begin_delete(resource_group_name=rg,
-                                  registry_name=registry_name,
-                                  credential_set_name=name)
+                        client,
+                        registry_name,
+                        name):
+
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
+
+    return client.begin_delete(resource_group_name=rg,
+                               registry_name=registry_name,
+                               credential_set_name=name)
+
 
 def acr_cred_set_create(cmd,
-                     client,
-                     registry_name,
-                     name,
-                     password_id,
-                     username_id,
-                     login_server):
+                        client,
+                        registry_name,
+                        name,
+                        password_id,
+                        username_id,
+                        login_server):
 
-    registry, rg = get_registry_by_name(
-        cmd.cli_ctx, registry_name, None)
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
 
-    credential_set_create_parameters = {
-                    "name": name,  # Optional. The name of the resource.
-                    "identity":{
-                        "type": "SystemAssigned"
-                    },
-                    "properties": {
-                        "authCredentials": [
-                            {
-                                "name": "Credential1",
-                                "passwordSecretIdentifier": password_id,  # Optional.
-                                "usernameSecretIdentifier": username_id  # Optional.
-                            }
-                        ],
-                        "loginServer": login_server,  # Optional. The credentials are stored for
+    CredSet = cmd.get_models('CredentialSet', operation_group='credential_sets')
+    AuthCred = cmd.get_models('AuthCredential', operation_group='credential_sets')
+    IdentityProperties = cmd.get_models('IdentityProperties', operation_group='credential_sets')
 
-                    }
-                }
-    return client.credential_sets.begin_create(resource_group_name=rg,
-                                  registry_name=registry_name,
-                                  credential_set_name=name,
-                                  credential_set_create_parameters=credential_set_create_parameters)
+    identity_props = IdentityProperties(type='SystemAssigned')
 
-def acr_cred_set_update(cmd,
-                   client,
-                   registry_name,
-                   name,
-                   password_id=None,
-                   username_id=None):
+    auth_creds = AuthCred(name='Credential1')
+    auth_creds.username_secret_identifier = username_id
+    auth_creds.password_secret_identifier = password_id
+
+    cred_set = CredSet()
+    cred_set.name = name
+    cred_set.login_server = login_server
+    cred_set.auth_credentials = [auth_creds]
+    cred_set.identity = identity_props
+
+    return client.begin_create(resource_group_name=rg,
+                               registry_name=registry_name,
+                               credential_set_name=name,
+                               credential_set_create_parameters=cred_set)
+
+
+def acr_cred_set_update_custom(cmd,
+                               client,
+                               instance,
+                               registry_name,
+                               name,
+                               password_id=None,
+                               username_id=None):
+
     if password_id is None and username_id is None:
         raise InvalidArgumentValueError("You must update either the username secret ID, password secret ID, or both.")
 
-    registry, rg = get_registry_by_name(
-        cmd.cli_ctx, registry_name, None)
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
 
-    cred_set = client.credential_sets.get(resource_group_name=rg,
-                                  registry_name=registry_name,
-                                  credential_set_name=name)
+    cred_set = client.get(resource_group_name=rg,
+                          registry_name=registry_name,
+                          credential_set_name=name)
 
+    password_id = password_id if password_id is not None else cred_set.auth_credentials[0].password_secret_identifier
+    username_id = username_id if username_id is not None else cred_set.auth_credentials[0].username_secret_identifier
 
-    password_id = password_id if password_id is not None else cred_set['properties']['authCredentials'][0]['passwordSecretIdentifier']
-    username_id = username_id if username_id is not None else cred_set['properties']['authCredentials'][0]['usernameSecretIdentifier']
+    auth_creds = cred_set.auth_credentials[0]
+    auth_creds.username_secret_identifier = username_id
+    auth_creds.password_secret_identifier = password_id
+    instance.auth_credentials = [auth_creds]
 
-    credential_set_update_parameters = {
-                        "name": name,  # Optional. The name of the resource
-                        "properties": {
-                            "authCredentials": [
-                                {
-                                    "name": "Credential1",
-                                    "passwordSecretIdentifier": password_id,  # Optional.
-                                    "usernameSecretIdentifier": username_id  # Optional.
-                                }
-                            ]
-                        }
-                    }
+    return instance
 
 
-    return client.credential_sets.begin_update(resource_group_name=rg,
-                                  registry_name=registry_name,
-                                  credential_set_name=name,
-                                  credential_set_update_parameters=credential_set_update_parameters)
+def acr_cred_set_update_get(cmd):
+    """Returns an empty CredentialSetUpdateParameters object.
+    """
+
+    CredSetUpdateParameters = cmd.get_models('CredentialSetUpdateParameters', operation_group='credential_sets')
+
+    return CredSetUpdateParameters()
+
+
+def acr_cred_set_update_set(cmd,
+                            client,
+                            registry_name,
+                            name,
+                            parameters=None):
+
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name)
+    return client.begin_update(resource_group_name=rg,
+                               registry_name=registry_name,
+                               credential_set_name=name,
+                               credential_set_update_parameters=parameters)

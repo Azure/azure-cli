@@ -22,12 +22,14 @@ def get_acr_service_client(cli_ctx, api_version=None):
 def cf_acr_registries(cli_ctx, *_):
     return get_acr_service_client(cli_ctx, VERSION_2022_02_01_PREVIEW).registries
 
-def cf_acr_cache(cli_ctx, *_):
-    from ..acr.sdk.v2023_01_01_preview._container_registry_management_client import ContainerRegistryManagementClient
-    return get_mgmt_service_client(cli_ctx, ContainerRegistryManagementClient)
 
-#def cf_acr_cache(cli_ctx, *_):
- #   return get_acr_service_client(cli_ctx, api_version=VERSION_2023_01_01_PREVIEW).cache_rules
+def cf_acr_cache(cli_ctx, *_):
+    return get_acr_service_client(cli_ctx, api_version=VERSION_2023_01_01_PREVIEW).cache_rules
+
+
+def cf_acr_cred_sets(cli_ctx, *_):
+    return get_acr_service_client(cli_ctx, api_version=VERSION_2023_01_01_PREVIEW).credential_sets
+
 
 def cf_acr_network_rules(cli_ctx, *_):
     return get_acr_service_client(cli_ctx, api_version=VERSION_2021_08_01_PREVIEW).registries
