@@ -156,7 +156,7 @@ def create_afd_endpoint(client: AFDEndpointsOperations, resource_group_name, pro
     # Force location to global
     endpoint = AFDEndpoint(location="global",
                            enabled_state=enabled_state,
-                           auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope,
+                           auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope.upper(),
                            tags=tags)
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, profile_name, endpoint_name, endpoint)
