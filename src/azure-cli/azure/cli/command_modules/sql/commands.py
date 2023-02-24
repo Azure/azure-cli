@@ -256,7 +256,7 @@ def load_command_table(self, _):
                             client_factory=get_sql_restorable_dropped_databases_operations) as g:
 
         g.command('list-deleted', 'list_by_server')
-        g.custom_show_command('show deleted', 'restorable_databases_get')
+        g.custom_show_command('show-deleted', 'restorable_databases_get')
 
     restorable_dropped_managed_databases_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#RestorableDroppedManagedDatabasesOperations.{}',
