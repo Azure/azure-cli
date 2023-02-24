@@ -47,6 +47,7 @@ from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_
 from ._client_factory import (_compute_client_factory, cf_public_ip_addresses, cf_vm_image_term,
                               _dev_test_labs_client_factory)
 from .aaz.latest.vmss.nic import List as _VMSSNICList, ListVmNics as _VMSSNICListVMNICs, Show as _VMSSNICShow
+from .aaz.latest.ppg import Show as _PPGShow
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
@@ -5705,3 +5706,17 @@ class VMSSNICShow(_VMSSNICShow):
         )
 
         return args_schema
+
+
+class PPGShow(_PPGShow):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        from azure.cli.core.aaz import AAZArgEnum
+        args_schema.include_colocation_status._blank = "True"
+        args_schema.include_colocation_status.enum = AAZArgEnum({"True": "True", "False": "False"})
+
+        return args_schema
+

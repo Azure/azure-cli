@@ -249,6 +249,16 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.compute.operations#CommunityGalleryImageVersionsOperations.{}',
         client_factory=cf_community_gallery_image_version)
 
+    with self.command_group("vmss nic"):
+        from .custom import VMSSNICList, VMSSNICListVMNICs, VMSSNICShow
+        self.command_table["vmss nic list"] = VMSSNICList(loader=self)
+        self.command_table["vmss nic list-vm-nics"] = VMSSNICListVMNICs(loader=self)
+        self.command_table["vmss nic show"] = VMSSNICShow(loader=self)
+
+    with self.command_group("ppg"):
+        from .custom import PPGShow
+        self.command_table["ppg show"] = PPGShow(loader=self)
+
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_show_table_output, validator=process_disk_create_namespace)
         g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
@@ -628,11 +638,11 @@ def load_command_table(self, _):
         g.custom_command('update', 'gallery_application_version_update', supports_no_wait=True)
 
     with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
-        g.show_command('show', 'get')
+        # g.show_command('show', 'get')
         g.custom_command('create', 'create_proximity_placement_group', validator=process_ppg_create_namespace)
         g.custom_command('list', 'list_proximity_placement_groups')
         g.generic_update_command('update', setter_name='create_or_update', custom_func_name='update_ppg')
-        g.command('delete', 'delete')
+        # g.command('delete', 'delete')
 
     with self.command_group('vm monitor log', client_factory=cf_log_analytics_data_plane) as g:
         g.custom_command('show', 'execute_query_for_vm', transform=transform_log_analytics_query_output)  # pylint: disable=show-command
