@@ -45,13 +45,15 @@ class Show(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.network_watcher_name = AAZStrArg(
-            options=["--network-watcher-name"],
-            help="The name of the network watcher resource.",
+        _args_schema.watcher_name = AAZStrArg(
+            options=["--watcher-name"],
+            help="Name of the network watcher.",
             required=True,
             id_part="name",
         )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
+        _args_schema.watcher_rg = AAZResourceGroupNameArg(
+            options=["--watcher-rg"],
+            help="Name of the resource group the watcher is in.",
             required=True,
         )
 
@@ -129,11 +131,11 @@ class Show(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "networkWatcherName", self.ctx.args.network_watcher_name,
+                    "networkWatcherName", self.ctx.args.watcher_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "resourceGroupName", self.ctx.args.watcher_rg,
                     required=True,
                 ),
                 **self.serialize_url_param(

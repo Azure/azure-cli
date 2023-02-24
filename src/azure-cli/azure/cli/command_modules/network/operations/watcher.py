@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 from knack.log import get_logger
+from knack.util import CLIError
 from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id
 
 from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZResourceLocationArgFormat
@@ -652,6 +653,7 @@ class NwFlowLogCreate(_NwFlowLogCreate):
                                              self.cli_ctx,
                                              watcher_name='network_watcher_name',
                                              rg_name='resource_group')
+
         if not has_value(args.enabled):
             args.enabled = True
         if sum(map(bool, [args.vnet, args.subnet, args.nic, args.nsg])) == 0:
@@ -864,13 +866,16 @@ class NwTroubleshootingStart(_NwTroubleshootingStart):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat, AAZStrArg
-
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.network_watcher_name._registered = False
-        args_schema.network_watcher_name._required = False
-        args_schema.resource_group._required = False
+        args_schema.watcher_name._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_rg._required = False
         args_schema.target_resource_id._registered = False
         args_schema.target_resource_id._required = False
+        args_schema.resource_group_name = AAZStrArg(
+            options=["-g", "--resource-group"],
+            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
+        )
         args_schema.resource_type = AAZStrArg(
             options=["-t", "--resource-type"],
             help="The type of target resource to troubleshoot, if resource ID is not specified.",
@@ -881,29 +886,26 @@ class NwTroubleshootingStart(_NwTroubleshootingStart):
             help="Name or ID of the resource to troubleshoot.",
             required=True,
             fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/{resource_type}/{}"
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/{resource_type}/{}"
             )
         )
         args_schema.storage_account._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{}"
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Storage/storageAccounts/{}"
         )
         args_schema.location = AAZResourceLocationArg(
-            options=["-l", "--location"],
-            help="Location to identify the exclusive Network Watcher under a region. "
-                 "Only one Network Watcher can be existed per subscription and region.",
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
+            registered=False,
         )
-        args_schema.location._registered = False
+
         return args_schema
 
     def pre_operations(self):
-        get_network_watcher_from_resource(self)
-        get_network_watcher_from_location(self, watcher_name='network_watcher_name', rg_name='resource_group')
         args = self.ctx.args
+        storage_usage = CLIError('usage error: --storage-account NAME_OR_ID [--storage-path PATH]')
+        if has_value(args.storage_path) and not has_value(args.storage_account):
+            raise storage_usage
         if has_value(args.resource):
             args.target_resource_id = args.resource
+        get_network_watcher_from_resource(self)
 
 
 class NwTroubleshootingShow(_NwTroubleshootingShow):
@@ -911,11 +913,15 @@ class NwTroubleshootingShow(_NwTroubleshootingShow):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.network_watcher_name._registered = False
-        args_schema.network_watcher_name._required = False
-        args_schema.resource_group._required = False
+        args_schema.watcher_name._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_rg._required = False
         args_schema.target_resource_id._registered = False
         args_schema.target_resource_id._required = False
+        args_schema.resource_group_name = AAZStrArg(
+            options=["-g", "--resource-group"],
+            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
+        )
         args_schema.resource_type = AAZStrArg(
             options=["-t", "--resource-type"],
             help="The resource type.",
@@ -926,23 +932,16 @@ class NwTroubleshootingShow(_NwTroubleshootingShow):
             help="Name or ID of the resource to troubleshoot.",
             required=True,
             fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/{resource_type}/{}"
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/{resource_type}/{}"
             )
         )
         args_schema.location = AAZResourceLocationArg(
-            options=["-l", "--location"],
-            help="Location to identify the exclusive Network Watcher under a region. "
-                 "Only one Network Watcher can be existed per subscription and region.",
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
+            registered=False,
         )
-        args_schema.location._registered = False
         return args_schema
 
     def pre_operations(self):
-        get_network_watcher_from_resource(self)
-        get_network_watcher_from_location(self, watcher_name='network_watcher_name', rg_name='resource_group')
         args = self.ctx.args
+        get_network_watcher_from_resource(self)
         if has_value(args.resource):
             args.target_resource_id = args.resource

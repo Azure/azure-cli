@@ -999,9 +999,6 @@ def load_arguments(self, _):
         c.argument('retention', type=int, help='Number of days to retain logs')
         c.argument('storage_account', help='Name or ID of the storage account in which to save the flow logs. '
                                            'Must be in the same region of flow log.')
-        c.argument('vnet', options_list=['--vnet'], help='Name or ID of the Virtual Network Resource.')
-        c.argument('subnet', options_list=['--subnet'], help='Name or ID of Subnet')
-        c.argument('nic', options_list=['--nic'], help='Name or ID of the Network Interface (NIC) Resource.')
 
     # temporary solution for compatible with old show command's parameter
     # after old show command's parameter is deprecated and removed,
@@ -1029,10 +1026,6 @@ def load_arguments(self, _):
             c.argument('packet_capture_name', name_arg_type)
             c.argument('network_watcher_name', ignore_type, options_list=['--network-watcher-name'], validator=get_network_watcher_from_location(remove=True, rg_name='resource_group_name', watcher_name='network_watcher_name'))
             c.ignore('resource_group_name')
-
-    with self.argument_context('network watcher troubleshooting') as c:
-        c.argument('resource', help='Name or ID of the resource to troubleshoot.')
-        c.argument('resource_type', help='The resource type', options_list=['--resource-type', '-t'], id_part='resource_type', arg_type=get_enum_type(['vnetGateway', 'vpnConnection']))
     # endregion
 
     # region PublicIPAddresses
