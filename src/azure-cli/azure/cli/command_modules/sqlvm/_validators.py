@@ -207,7 +207,10 @@ def validate_azure_ad_authentication(cmd, namespace):
         skip_client_validation = getattr(namespace, "skip_client_validation")
 
     if skip_client_validation is True:
+        print('Skipping client-side validation ...')
         return
+
+    logger.debug("Validate Azure AD authentication from client-side:")
 
     # SQL VM Azure AD authentication is currently only supported on Azure Public Cloud
     from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD
@@ -216,13 +219,15 @@ def validate_azure_ad_authentication(cmd, namespace):
 
     # validate the SQL VM supports Azure AD authentication, i.e. it is on Windows platform and is SQL 2022 or later
     _validate_azure_ad_authentication_supported_on_sqlvm(cmd.cli_ctx, namespace)
+    logger.debug("Validate Azure AD authentication: the SQL VM itself is suitable for Azure AD authentication.")
 
     # validate the MSI is valid on the Azure virtual machine
     principal_id = _validate_msi_valid_on_vm(cmd.cli_ctx, namespace)
+    logger.debug("Validate Azure AD authentication: the managed identity is valid with a principalId %s.", principal_id)
 
     # validate the MSI has appropriate permission to query Microsoft Graph API
     _validate_msi_with_enough_permission(cmd.cli_ctx, principal_id)
-
+    logger.debug("Validate Azure AD authentication: the managed identity has required Graph API permission.")
 
 def _validate_azure_ad_authentication_supported_on_sqlvm(cli_ctx, namespace):
     """ Validate this SQL VM instance supports Azure AD authentication, i.e. it is on Windows platform and is SQL 2022 or later
@@ -232,6 +237,8 @@ def _validate_azure_ad_authentication_supported_on_sqlvm(cli_ctx, namespace):
         :param namespace: The argparse namespace represents the arguments.
         :type namespace: argpase.Namespace.
     """
+    logger.debug("Validate Azure AD authentication against SQL VM instance.")
+
     # retrieve SQL VM client
     from ._util import get_sqlvirtualmachine_management_client
     sqlvm_ops = get_sqlvirtualmachine_management_client(cli_ctx).sql_virtual_machines
@@ -245,12 +252,14 @@ def _validate_azure_ad_authentication_supported_on_sqlvm(cli_ctx, namespace):
     except Exception as ex:
         raise InvalidArgumentValueError("Unable to validate Azure AD authentication due to retrieving SQL VM instance encountering an error: {}.".format(ex)) from ex
 
+    logger.debug("The SQL VM managment mode is %s.", sqlvm.sql_management)
     if sqlvm.sql_management != "Full":
         raise InvalidArgumentValueError("Enabling Azure AD authentication requires Full SQL VM management mode")
 
     # Construct error message for unsupported SQL server version or OS platform.
-    unsupported_error = "Azure AD authentication requires SQL Server 2022 on Windows platform but the SQL Image Offer of this SQL VM is {}".format(sqlvm.sql_image_offer)
+    unsupported_error = "Azure AD authentication requires SQL Server 2022 on Windows platform, but the SQL Image Offer of this SQL VM is {}".format(sqlvm.sql_image_offer)
 
+    logger.debug("The SQL VM sql_image_offer is %s.", sqlvm.sql_image_offer)
     if sqlvm.sql_image_offer is None:
         raise InvalidArgumentValueError(unsupported_error)
 
@@ -282,6 +291,7 @@ def _validate_msi_valid_on_vm(cli_ctx, namespace):
         :return: The principalId of the MSI if found on this VM.
         :rtype: str
     """
+    logger.debug("Validate Azure AD authentication regarding the validity of the managed identity.")
 
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
@@ -300,7 +310,7 @@ def _validate_msi_valid_on_vm(cli_ctx, namespace):
     # The system-assigned MSI case.
     if namespace.msi_client_id is None:
         if vm.identity is None or not hasattr(vm.identity, 'principal_id') or getattr(vm.identity, 'principal_id') is None:
-            raise InvalidArgumentValueError("Enable Azure AD authentication with system-assigned managed identity but the system-assgined managed identity is not enabled on this Azure VM")
+            raise InvalidArgumentValueError("Enable Azure AD authentication with system-assigned managed identity but the system-assigned managed identity is not enabled on this Azure VM")
         return vm.identity.principal_id
 
     # The user-assigned MSI case.
@@ -329,6 +339,7 @@ def _validate_msi_with_enough_permission(cli_ctx, principal_id):
         :param principal_id: The principalId of the MSI.
         :type principal_id: str.
     """
+    logger.debug("Validate Azure AD authentication regarding required Graph API permission.")
 
     directory_roles = _directory_role_list(cli_ctx, principal_id)
 
@@ -339,6 +350,7 @@ def _validate_msi_with_enough_permission(cli_ctx, principal_id):
     # If the MSI is not assigned the "Directory Readers" role, check the app roles.
     # Retrieve the app role Id for User.Read.All, Application.Read.All, GroupMember.Read.All roles.
     app_role_id_map = _find_role_id(cli_ctx)
+    logger.debug("Validate Azure AD authentication: app role to app role Id map:%s.", str(app_role_id_map))
 
     # Retrieve all the role assignments assigned to the MSI
     app_role_assignments = _app_role_assignment_list(cli_ctx, principal_id)
