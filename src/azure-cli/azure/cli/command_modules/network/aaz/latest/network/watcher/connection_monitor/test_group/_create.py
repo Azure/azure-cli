@@ -12,23 +12,17 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network watcher connection-monitor endpoint remove",
+    "network watcher connection-monitor test-group create",
     is_preview=True,
 )
-class Remove(AAZCommand):
-    """Remove an endpoint from a connection monitor.
-
-    :example: Remove endpoint from all test groups of a connection monitor
-        az network watcher connection-monitor endpoint remove --connection-monitor MyConnectionMonitor --location westus --name MyEndpoint
-
-    :example: Remove endpoint from two test groups of a connection monitor
-        az network watcher connection-monitor endpoint remove --connection-monitor MyConnectionMonitor --location westus --name MyEndpoint --test-groups DefaultTestGroup HealthCheckTestGroup
+class Create(AAZCommand):
+    """network watcher connection-monitor test-group create
     """
 
     _aaz_info = {
         "version": "2022-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/connectionmonitors/{}", "2022-01-01", "properties.endpoints[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/connectionmonitors/{}", "2022-01-01", "properties.testGroups[]"],
         ]
     }
 
@@ -37,7 +31,7 @@ class Remove(AAZCommand):
     def _handler(self, command_args):
         super()._handler(command_args)
         self.SubresourceSelector(ctx=self.ctx, name="subresource")
-        return self.build_lro_poller(self._execute_operations, None)
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -65,19 +59,56 @@ class Remove(AAZCommand):
             help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
-        _args_schema.endpoint_name = AAZStrArg(
-            options=["-n", "--name", "--endpoint-name"],
-            help="The name of the connection monitor endpoint.",
+
+        # define Arg Group "Parameters.properties.testGroups[]"
+
+        _args_schema = cls._args_schema
+        _args_schema.destinations = AAZListArg(
+            options=["--destinations"],
+            arg_group="Parameters.properties.testGroups[]",
+            help="List of destination endpoint names.",
             required=True,
         )
+        _args_schema.disable = AAZBoolArg(
+            options=["--disable"],
+            arg_group="Parameters.properties.testGroups[]",
+            help="Value indicating whether test group is disabled.",
+        )
+        _args_schema.name = AAZStrArg(
+            options=["--name"],
+            arg_group="Parameters.properties.testGroups[]",
+            help="The name of the connection monitor test group.",
+            required=True,
+        )
+        _args_schema.sources = AAZListArg(
+            options=["--sources"],
+            arg_group="Parameters.properties.testGroups[]",
+            help="List of source endpoint names.",
+            required=True,
+        )
+        _args_schema.test_configurations = AAZListArg(
+            options=["--test-configurations"],
+            arg_group="Parameters.properties.testGroups[]",
+            help="List of test configuration names.",
+            required=True,
+        )
+
+        destinations = cls._args_schema.destinations
+        destinations.Element = AAZStrArg()
+
+        sources = cls._args_schema.sources
+        sources.Element = AAZStrArg()
+
+        test_configurations = cls._args_schema.test_configurations
+        test_configurations.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.ConnectionMonitorsGet(ctx=self.ctx)()
-        self.pre_instance_delete()
-        self.InstanceDeleteByJson(ctx=self.ctx)()
-        self.post_instance_delete()
+        self.pre_instance_create()
+        self.InstanceCreateByJson(ctx=self.ctx)()
+        self.post_instance_create(self.ctx.selectors.subresource.required())
         yield self.ConnectionMonitorsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -90,21 +121,25 @@ class Remove(AAZCommand):
         pass
 
     @register_callback
-    def pre_instance_delete(self):
+    def pre_instance_create(self):
         pass
 
     @register_callback
-    def post_instance_delete(self):
+    def post_instance_create(self, instance):
         pass
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
+        return result
 
     class SubresourceSelector(AAZJsonSelector):
 
         def _get(self):
             result = self.ctx.vars.instance
-            result = result.properties.endpoints
+            result = result.properties.testGroups
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.endpoint_name,
+                lambda e: e[1].name == self.ctx.args.name,
                 filters
             )
             idx = next(filters)[0]
@@ -112,10 +147,10 @@ class Remove(AAZCommand):
 
         def _set(self, value):
             result = self.ctx.vars.instance
-            result = result.properties.endpoints
+            result = result.properties.testGroups
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.endpoint_name,
+                lambda e: e[1].name == self.ctx.args.name,
                 filters
             )
             idx = next(filters, [len(result)])[0]
@@ -205,7 +240,7 @@ class Remove(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _RemoveHelper._build_schema_connection_monitor_result_read(cls._schema_on_200)
+            _CreateHelper._build_schema_connection_monitor_result_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -320,18 +355,43 @@ class Remove(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _RemoveHelper._build_schema_connection_monitor_result_read(cls._schema_on_200_201)
+            _CreateHelper._build_schema_connection_monitor_result_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
-    class InstanceDeleteByJson(AAZJsonInstanceDeleteOperation):
+    class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
 
         def __call__(self, *args, **kwargs):
-            self.ctx.selectors.subresource.set(self._delete_instance())
+            self.ctx.selectors.subresource.set(self._create_instance())
+
+        def _create_instance(self):
+            _instance_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType
+            )
+            _builder.set_prop("destinations", AAZListType, ".destinations", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("disable", AAZBoolType, ".disable")
+            _builder.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("sources", AAZListType, ".sources", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("testConfigurations", AAZListType, ".test_configurations", typ_kwargs={"flags": {"required": True}})
+
+            destinations = _builder.get(".destinations")
+            if destinations is not None:
+                destinations.set_elements(AAZStrType, ".")
+
+            sources = _builder.get(".sources")
+            if sources is not None:
+                sources.set_elements(AAZStrType, ".")
+
+            test_configurations = _builder.get(".testConfigurations")
+            if test_configurations is not None:
+                test_configurations.set_elements(AAZStrType, ".")
+
+            return _instance_value
 
 
-class _RemoveHelper:
-    """Helper class for Remove"""
+class _CreateHelper:
+    """Helper class for Create"""
 
     _schema_connection_monitor_endpoint_scope_item_read = None
 
@@ -602,4 +662,4 @@ class _RemoveHelper:
         _schema.type = cls._schema_connection_monitor_result_read.type
 
 
-__all__ = ["Remove"]
+__all__ = ["Create"]

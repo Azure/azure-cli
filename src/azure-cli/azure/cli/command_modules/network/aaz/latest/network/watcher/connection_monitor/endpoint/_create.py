@@ -58,17 +58,15 @@ class Create(AAZCommand):
             help="Connection monitor name.",
             required=True,
         )
-        _args_schema.network_watcher_name = AAZStrArg(
-            options=["--network-watcher-name"],
+        _args_schema.watcher_name = AAZStrArg(
+            options=["--watcher-name"],
             help="The name of the Network Watcher resource.",
             required=True,
         )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
+        _args_schema.watcher_rg = AAZResourceGroupNameArg(
+            options=["-g", "--watcher-rg"],
+            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
-        )
-        _args_schema.migrate = AAZStrArg(
-            options=["--migrate"],
-            help="Value indicating whether connection monitor V1 should be migrated to V2 format.",
         )
         _args_schema.address = AAZStrArg(
             options=["--address"],
@@ -97,6 +95,14 @@ class Create(AAZCommand):
             options=["--resource-id"],
             help="Resource ID of the connection monitor endpoint.",
         )
+        _args_schema.scope_exclude = AAZListArg(
+            options=["--scope-exclude"],
+            help="List of items which needs to be excluded from the endpoint scope.",
+        )
+        _args_schema.scope_include = AAZListArg(
+            options=["--scope-include"],
+            help="List of items which needs to be included to the endpoint scope.",
+        )
         _args_schema.type = AAZStrArg(
             options=["--type"],
             help="The endpoint type.  Allowed values: AzureArcVM, AzureSubnet, AzureVM, AzureVMSS, AzureVNet, ExternalAddress, MMAWorkspaceMachine, MMAWorkspaceNetwork.",
@@ -117,58 +123,31 @@ class Create(AAZCommand):
             enum={"AgentAddress": "AgentAddress"},
         )
 
-        # define Arg Group "Parameters.properties.endpoints[]"
+        scope_exclude = cls._args_schema.scope_exclude
+        scope_exclude.Element = AAZObjectArg()
 
-        _args_schema = cls._args_schema
-        _args_schema.scope = AAZObjectArg(
-            options=["--scope"],
-            arg_group="Parameters.properties.endpoints[]",
-            help="Endpoint scope.",
-        )
-
-        scope = cls._args_schema.scope
-        scope.exclude = AAZListArg(
-            options=["exclude"],
-            help="List of items which needs to be excluded from the endpoint scope.",
-        )
-        scope.include = AAZListArg(
-            options=["include"],
-            help="List of items which needs to be included to the endpoint scope.",
-        )
-
-        exclude = cls._args_schema.scope.exclude
-        exclude.Element = AAZObjectArg()
-        cls._build_args_connection_monitor_endpoint_scope_item_update(exclude.Element)
-
-        include = cls._args_schema.scope.include
-        include.Element = AAZObjectArg()
-        cls._build_args_connection_monitor_endpoint_scope_item_update(include.Element)
-        return cls._args_schema
-
-    _args_connection_monitor_endpoint_scope_item_update = None
-
-    @classmethod
-    def _build_args_connection_monitor_endpoint_scope_item_update(cls, _schema):
-        if cls._args_connection_monitor_endpoint_scope_item_update is not None:
-            _schema.address = cls._args_connection_monitor_endpoint_scope_item_update.address
-            return
-
-        cls._args_connection_monitor_endpoint_scope_item_update = AAZObjectArg()
-
-        connection_monitor_endpoint_scope_item_update = cls._args_connection_monitor_endpoint_scope_item_update
-        connection_monitor_endpoint_scope_item_update.address = AAZStrArg(
+        _element = cls._args_schema.scope_exclude.Element
+        _element.address = AAZStrArg(
             options=["address"],
             help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
         )
 
-        _schema.address = cls._args_connection_monitor_endpoint_scope_item_update.address
+        scope_include = cls._args_schema.scope_include
+        scope_include.Element = AAZObjectArg()
+
+        _element = cls._args_schema.scope_include.Element
+        _element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
+        )
+        return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.ConnectionMonitorsGet(ctx=self.ctx)()
-        self.pre_instance_create() # insatnce
-        self.InstanceCreateByJson(ctx=self.ctx)() # subresource: endpoint
-        self.post_instance_create(self.ctx.selectors.subresource.required()) # endpoint and instance
+        self.pre_instance_create()
+        self.InstanceCreateByJson(ctx=self.ctx)()
+        self.post_instance_create(self.ctx.selectors.subresource.required())
         yield self.ConnectionMonitorsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -251,11 +230,11 @@ class Create(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "networkWatcherName", self.ctx.args.network_watcher_name,
+                    "networkWatcherName", self.ctx.args.watcher_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "resourceGroupName", self.ctx.args.watcher_rg,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -354,11 +333,11 @@ class Create(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "networkWatcherName", self.ctx.args.network_watcher_name,
+                    "networkWatcherName", self.ctx.args.watcher_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "resourceGroupName", self.ctx.args.watcher_rg,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -371,9 +350,6 @@ class Create(AAZCommand):
         @property
         def query_parameters(self):
             parameters = {
-                **self.serialize_query_param(
-                    "migrate", self.ctx.args.migrate,
-                ),
                 **self.serialize_query_param(
                     "api-version", "2022-01-01",
                     required=True,
@@ -437,7 +413,7 @@ class Create(AAZCommand):
             _builder.set_prop("filter", AAZObjectType)
             _builder.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("resourceId", AAZStrType, ".resource_id")
-            _builder.set_prop("scope", AAZObjectType, ".scope")
+            _builder.set_prop("scope", AAZObjectType)
             _builder.set_prop("type", AAZStrType, ".type")
 
             filter = _builder.get(".filter")
@@ -456,28 +432,30 @@ class Create(AAZCommand):
 
             scope = _builder.get(".scope")
             if scope is not None:
-                scope.set_prop("exclude", AAZListType, ".exclude")
-                scope.set_prop("include", AAZListType, ".include")
+                scope.set_prop("exclude", AAZListType, ".scope_exclude")
+                scope.set_prop("include", AAZListType, ".scope_include")
 
             exclude = _builder.get(".scope.exclude")
             if exclude is not None:
-                _CreateHelper._build_schema_connection_monitor_endpoint_scope_item_update(exclude.set_elements(AAZObjectType, "."))
+                exclude.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".scope.exclude[]")
+            if _elements is not None:
+                _elements.set_prop("address", AAZStrType, ".address")
 
             include = _builder.get(".scope.include")
             if include is not None:
-                _CreateHelper._build_schema_connection_monitor_endpoint_scope_item_update(include.set_elements(AAZObjectType, "."))
+                include.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".scope.include[]")
+            if _elements is not None:
+                _elements.set_prop("address", AAZStrType, ".address")
 
             return _instance_value
 
 
 class _CreateHelper:
     """Helper class for Create"""
-
-    @classmethod
-    def _build_schema_connection_monitor_endpoint_scope_item_update(cls, _builder):
-        if _builder is None:
-            return
-        _builder.set_prop("address", AAZStrType, ".address")
 
     _schema_connection_monitor_endpoint_scope_item_read = None
 

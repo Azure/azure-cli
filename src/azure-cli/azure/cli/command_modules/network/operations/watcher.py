@@ -35,11 +35,16 @@ from ..aaz.latest.network.watcher.connection_monitor import List as _WatcherConn
 from ..aaz.latest.network.watcher.connection_monitor import Delete as _WatcherConnectionMonitorDelete
 from ..aaz.latest.network.watcher.connection_monitor import Query as _WatcherConnectionMonitorQuery
 from ..aaz.latest.network.watcher.connection_monitor import Update as _WatcherConnectionMonitorUpdate
-from ..aaz.latest.network.watcher.connection_monitor.output import Add as _WatcherConnectionMonitorOutputAdd
-from ..aaz.latest.network.watcher.connection_monitor.output import List as _WatcherConnectionMonitorOutputList
-from ..aaz.latest.network.watcher.connection_monitor.endpoint import Show as _WatcherConnectionMonitorEndpointShow
-from ..aaz.latest.network.watcher.connection_monitor.endpoint import Remove as _WatcherConnectionMonitorEndpointRemove
-from ..aaz.latest.network.watcher.connection_monitor.endpoint import List as _WatcherConnectionMonitorEndpointList
+from ..aaz.latest.network.watcher.connection_monitor.output import Add as _WatcherConnectionMonitorOutputAdd, \
+    List as _WatcherConnectionMonitorOutputList
+from ..aaz.latest.network.watcher.connection_monitor.endpoint import Show as _WatcherConnectionMonitorEndpointShow, \
+    Remove as _WatcherConnectionMonitorEndpointRemove, List as _WatcherConnectionMonitorEndpointList
+
+from ..aaz.latest.network.watcher.connection_monitor.test_configuration import Show as _MonitorTestConfigurationShow, \
+    List as _MonitorTestConfigurationList, Remove as _MonitorTestConfigurationRemove
+
+from ..aaz.latest.network.watcher.connection_monitor.test_group import Show as _WatcherConnectionMonitorTestGroupShow, \
+    List as _WatcherConnectionMonitorTestGroupList, Remove as _WatcherConnectionMonitorTestGroupRemove
 
 logger = get_logger(__name__)
 
@@ -1146,7 +1151,7 @@ class WatcherConnectionMonitorOutputList(_WatcherConnectionMonitorOutputList):
                  "using `az configure --defaults location=<location>`.",
             required=True,
             fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
+                resource_group_arg="watcher_rg",
             ),
         )
         return args_schema
@@ -1185,7 +1190,7 @@ class WatcherConnectionMonitorEndpointShow(_WatcherConnectionMonitorEndpointShow
                  "using `az configure --defaults location=<location>`.",
             required=True,
             fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
+                resource_group_arg="watcher_rg",
             ),
         )
         return args_schema
@@ -1211,7 +1216,7 @@ class WatcherConnectionMonitorEndpointList(_WatcherConnectionMonitorEndpointList
                  "using `az configure --defaults location=<location>`.",
             required=True,
             fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
+                resource_group_arg="watcher_rg",
             ),
         )
         return args_schema
@@ -1238,7 +1243,7 @@ class WatcherConnectionMonitorEndpointRemove(_WatcherConnectionMonitorEndpointRe
                  "using `az configure --defaults location=<location>`.",
             required=True,
             fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
+                resource_group_arg="watcher_rg",
             ),
         )
         args_schema.test_groups = AAZListArg(
@@ -1259,7 +1264,7 @@ class WatcherConnectionMonitorEndpointRemove(_WatcherConnectionMonitorEndpointRe
         name = args.endpoint_name.to_serialized_data()
         # refresh test groups
 
-        temp_test_group = instance.properties.test_groups
+        temp_test_groups = instance.properties.test_groups
         if has_value(args.test_groups):
             temp_test_groups = [t for t in instance.properties.test_groups if t.name in args.test_groups]
 
@@ -1268,4 +1273,185 @@ class WatcherConnectionMonitorEndpointRemove(_WatcherConnectionMonitorEndpointRe
                 test_group.sources.remove(name)
             if name in test_group.destinations:
                 test_group.destinations.remove(name)
+
+
+class WatcherConnectionMonitorTestConfigurationShow(_MonitorTestConfigurationShow):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.watcher_name._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_rg._required = False
+
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location. Values from: `az account list-locations`. "
+                 "You can configure the default location "
+                 "using `az configure --defaults location=<location>`.",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="watcher_rg",
+            ),
+        )
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_location(self)
+
+
+class WatcherConnectionMonitorTestConfigurationList(_MonitorTestConfigurationList):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.watcher_name._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_rg._required = False
+
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location. Values from: `az account list-locations`. "
+                 "You can configure the default location "
+                 "using `az configure --defaults location=<location>`.",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="watcher_rg",
+            ),
+        )
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_location(self)
+
+
+class WatcherConnectionMonitorTestConfigurationRemove(_MonitorTestConfigurationRemove):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.watcher_name._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_rg._required = False
+
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location. Values from: `az account list-locations`. "
+                 "You can configure the default location "
+                 "using `az configure --defaults location=<location>`.",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="watcher_rg",
+            ),
+        )
+        args_schema.test_groups = AAZListArg(
+            options=["--test-groups"],
+            help="Space-separated list of names of test group which only need to "
+                 "be affected if specified.",
+        )
+        args_schema.test_groups.Element = AAZStrArg()
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_location(self)
+
+    def post_instance_delete(self):
+        args = self.ctx.args
+        instance = self.ctx.vars.instance
+        name = args.test_configuration_name.to_serialized_data()
+
+        # refresh test groups
+        temp_test_groups = instance.properties.test_groups
+        if has_value(args.test_groups):
+            temp_test_groups = [t for t in instance.properties.test_groups if t.name in args.test_groups]
+
+        for test_group in temp_test_groups:
+            test_group.test_configurations.remove(name)
+
+
+class WatcherConnectionMonitorTestGroupShow(_WatcherConnectionMonitorTestGroupShow):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.watcher_name._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_rg._required = False
+
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location. Values from: `az account list-locations`. "
+                 "You can configure the default location "
+                 "using `az configure --defaults location=<location>`.",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="watcher_rg",
+            ),
+        )
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_location(self)
+
+
+class WatcherConnectionMonitorTestGroupList(_WatcherConnectionMonitorTestGroupList):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.watcher_name._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_rg._required = False
+
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location. Values from: `az account list-locations`. "
+                 "You can configure the default location "
+                 "using `az configure --defaults location=<location>`.",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="watcher_rg",
+            ),
+        )
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_location(self)
+
+
+class WatcherConnectionMonitorTestGroupRemove(_WatcherConnectionMonitorTestGroupRemove):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.watcher_name._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_rg._required = False
+
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location. Values from: `az account list-locations`. "
+                 "You can configure the default location "
+                 "using `az configure --defaults location=<location>`.",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="watcher_rg",
+            ),
+        )
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_location(self)
+
+    def post_instance_delete(self):
+        args = self.ctx.args
+        instance = self.ctx.vars.instance
+        name = args.test_group_name.to_serialized_data()
 

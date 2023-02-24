@@ -12,32 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network watcher connection-monitor endpoint remove",
-    is_preview=True,
+    "network watcher connection-monitor test-configuration wait",
 )
-class Remove(AAZCommand):
-    """Remove an endpoint from a connection monitor.
-
-    :example: Remove endpoint from all test groups of a connection monitor
-        az network watcher connection-monitor endpoint remove --connection-monitor MyConnectionMonitor --location westus --name MyEndpoint
-
-    :example: Remove endpoint from two test groups of a connection monitor
-        az network watcher connection-monitor endpoint remove --connection-monitor MyConnectionMonitor --location westus --name MyEndpoint --test-groups DefaultTestGroup HealthCheckTestGroup
+class Wait(AAZWaitCommand):
+    """Place the CLI in a waiting state until a condition is met.
     """
 
     _aaz_info = {
-        "version": "2022-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/connectionmonitors/{}", "2022-01-01", "properties.endpoints[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/connectionmonitors/{}", "2022-01-01", "properties.testConfigurations[]"],
         ]
     }
 
-    AZ_SUPPORT_NO_WAIT = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
-        self.SubresourceSelector(ctx=self.ctx, name="subresource")
-        return self.build_lro_poller(self._execute_operations, None)
+        self._execute_operations()
+        return self._output()
 
     _args_schema = None
 
@@ -54,20 +44,17 @@ class Remove(AAZCommand):
             options=["--connection-monitor"],
             help="Connection monitor name.",
             required=True,
+            id_part="child_name_1",
         )
         _args_schema.watcher_name = AAZStrArg(
             options=["--watcher-name"],
             help="The name of the Network Watcher resource.",
             required=True,
+            id_part="name",
         )
         _args_schema.watcher_rg = AAZResourceGroupNameArg(
             options=["-g", "--watcher-rg"],
             help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
-            required=True,
-        )
-        _args_schema.endpoint_name = AAZStrArg(
-            options=["-n", "--name", "--endpoint-name"],
-            help="The name of the connection monitor endpoint.",
             required=True,
         )
         return cls._args_schema
@@ -75,10 +62,6 @@ class Remove(AAZCommand):
     def _execute_operations(self):
         self.pre_operations()
         self.ConnectionMonitorsGet(ctx=self.ctx)()
-        self.pre_instance_delete()
-        self.InstanceDeleteByJson(ctx=self.ctx)()
-        self.post_instance_delete()
-        yield self.ConnectionMonitorsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -89,38 +72,9 @@ class Remove(AAZCommand):
     def post_operations(self):
         pass
 
-    @register_callback
-    def pre_instance_delete(self):
-        pass
-
-    @register_callback
-    def post_instance_delete(self):
-        pass
-
-    class SubresourceSelector(AAZJsonSelector):
-
-        def _get(self):
-            result = self.ctx.vars.instance
-            result = result.properties.endpoints
-            filters = enumerate(result)
-            filters = filter(
-                lambda e: e[1].name == self.ctx.args.endpoint_name,
-                filters
-            )
-            idx = next(filters)[0]
-            return result[idx]
-
-        def _set(self, value):
-            result = self.ctx.vars.instance
-            result = result.properties.endpoints
-            filters = enumerate(result)
-            filters = filter(
-                lambda e: e[1].name == self.ctx.args.endpoint_name,
-                filters
-            )
-            idx = next(filters, [len(result)])[0]
-            result[idx] = value
-            return
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+        return result
 
     class ConnectionMonitorsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -205,133 +159,13 @@ class Remove(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _RemoveHelper._build_schema_connection_monitor_result_read(cls._schema_on_200)
+            _WaitHelper._build_schema_connection_monitor_result_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
-    class ConnectionMonitorsCreateOrUpdate(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
 
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [202]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200, 201]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/connectionMonitors/{connectionMonitorName}",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "PUT"
-
-        @property
-        def error_format(self):
-            return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "connectionMonitorName", self.ctx.args.connection_monitor,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "networkWatcherName", self.ctx.args.watcher_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.watcher_rg,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "api-version", "2022-01-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=self.ctx.vars.instance,
-            )
-
-            return self.serialize_content(_content_value)
-
-        def on_200_201(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200_201
-            )
-
-        _schema_on_200_201 = None
-
-        @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
-
-            cls._schema_on_200_201 = AAZObjectType()
-            _RemoveHelper._build_schema_connection_monitor_result_read(cls._schema_on_200_201)
-
-            return cls._schema_on_200_201
-
-    class InstanceDeleteByJson(AAZJsonInstanceDeleteOperation):
-
-        def __call__(self, *args, **kwargs):
-            self.ctx.selectors.subresource.set(self._delete_instance())
-
-
-class _RemoveHelper:
-    """Helper class for Remove"""
+class _WaitHelper:
+    """Helper class for Wait"""
 
     _schema_connection_monitor_endpoint_scope_item_read = None
 
@@ -602,4 +436,4 @@ class _RemoveHelper:
         _schema.type = cls._schema_connection_monitor_result_read.type
 
 
-__all__ = ["Remove"]
+__all__ = ["Wait"]

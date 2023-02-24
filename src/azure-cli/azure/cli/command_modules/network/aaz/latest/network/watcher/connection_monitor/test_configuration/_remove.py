@@ -12,23 +12,23 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network watcher connection-monitor endpoint remove",
+    "network watcher connection-monitor test-configuration remove",
     is_preview=True,
 )
 class Remove(AAZCommand):
-    """Remove an endpoint from a connection monitor.
+    """Remove a test configuration from a connection monitor.
 
-    :example: Remove endpoint from all test groups of a connection monitor
-        az network watcher connection-monitor endpoint remove --connection-monitor MyConnectionMonitor --location westus --name MyEndpoint
+    :example: Remove a test configuration from all test groups of a connection monitor
+        az network watcher connection-monitor test-configuration remove --connection-monitor MyConnectionMonitor --location westus --name MyTCPTestConfiguration
 
-    :example: Remove endpoint from two test groups of a connection monitor
-        az network watcher connection-monitor endpoint remove --connection-monitor MyConnectionMonitor --location westus --name MyEndpoint --test-groups DefaultTestGroup HealthCheckTestGroup
+    :example: Remove a test configuration from two test groups of a connection monitor
+        az network watcher connection-monitor test-configuration remove --connection-monitor MyConnectionMonitor --location westus --name MyHTTPTestConfiguration --test-groups HTTPTestGroup DefaultTestGroup
     """
 
     _aaz_info = {
         "version": "2022-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/connectionmonitors/{}", "2022-01-01", "properties.endpoints[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/connectionmonitors/{}", "2022-01-01", "properties.testConfigurations[]"],
         ]
     }
 
@@ -65,9 +65,9 @@ class Remove(AAZCommand):
             help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
-        _args_schema.endpoint_name = AAZStrArg(
-            options=["-n", "--name", "--endpoint-name"],
-            help="The name of the connection monitor endpoint.",
+        _args_schema.test_configuration_name = AAZStrArg(
+            options=["-n", "--name", "--test-configuration-name"],
+            help="The name of the connection monitor test configuration.",
             required=True,
         )
         return cls._args_schema
@@ -101,10 +101,10 @@ class Remove(AAZCommand):
 
         def _get(self):
             result = self.ctx.vars.instance
-            result = result.properties.endpoints
+            result = result.properties.testConfigurations
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.endpoint_name,
+                lambda e: e[1].name == self.ctx.args.test_configuration_name,
                 filters
             )
             idx = next(filters)[0]
@@ -112,10 +112,10 @@ class Remove(AAZCommand):
 
         def _set(self, value):
             result = self.ctx.vars.instance
-            result = result.properties.endpoints
+            result = result.properties.testConfigurations
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.endpoint_name,
+                lambda e: e[1].name == self.ctx.args.test_configuration_name,
                 filters
             )
             idx = next(filters, [len(result)])[0]
