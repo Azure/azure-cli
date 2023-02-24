@@ -22,7 +22,7 @@ from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScena
 from azure.cli.testsdk.checkers import JMESPathCheckNotExists
 from azure.cli.command_modules.appservice.utils import get_pool_manager
 
-from azure.cli.core.azclierror import ResourceNotFoundError
+from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -1685,6 +1685,102 @@ class WebappUndeleteTest(ScenarioTest):
         self.cmd('webapp deleted list -g {}'.format(resource_group), checks=[
             JMESPathCheck('[0].deletedSiteName', webapp_name)
         ])
+    
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_deleted_restore_to_existing_site(self, resource_group):
+        plan = self.create_random_name(prefix='delete-me-plan', length=24)
+        webapp_1_name = self.create_random_name(prefix='delete-me-web', length=24)
+        webapp_2_name = self.create_random_name(prefix='delete-me-web', length=24)
+
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku B1 --tags plan=plan1')
+
+        # create webapp_1 and webapp_2
+        self.cmd(f'webapp create -g {resource_group} -n {webapp_1_name} --plan {plan}')
+        self.cmd(f'webapp create -g {resource_group} -n {webapp_2_name} --plan {plan}')
+
+        # delete webapp_1
+        self.cmd(f'webapp delete -g {resource_group} -n {webapp_1_name}')
+        
+        # collect list of deleted webapps
+        deleted_list = self.cmd(f'webapp deleted list -g {resource_group} -n {webapp_1_name}', checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].deletedSiteName', webapp_1_name)
+        ]).get_output_in_json()
+        deleted_id = deleted_list[0]["id"]
+
+        # restore deleted webapp to existing app i.e webapp_2
+        self.cmd(f'webapp deleted restore -g {resource_group} -n {webapp_2_name} --deleted-id "{deleted_id}"')
+
+        # list/get the restored webapp_2 
+        self.cmd(f'az webapp show --name {webapp_2_name} -g {resource_group}', checks=[
+            JMESPathCheck('name', webapp_2_name)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_deleted_restore_to_non_existent_site(self, resource_group):
+        plan = self.create_random_name(prefix='delete-me-plan', length=24)
+        webapp_1_name = self.create_random_name(prefix='delete-me-web', length=24)
+        placeholder_app = self.create_random_name(prefix='delete-me-web', length=24)
+        webapp_2_name = self.create_random_name(prefix='delete-me-web', length=24)
+
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku B1 --tags plan=plan1')
+
+        # create webapp_1
+        self.cmd(f'webapp create -g {resource_group} -n {webapp_1_name} --plan {plan}')
+        # create a placeholder/dummy app to make the ASP not auto deleted when
+        self.cmd(f'webapp create -g {resource_group} -n {placeholder_app} --plan {plan}')
+
+        # delete webapp_1
+        self.cmd(f'webapp delete -g {resource_group} -n {webapp_1_name}')
+        
+        # collect list of deleted webapps
+        deleted_list = self.cmd(f'webapp deleted list -g {resource_group} -n {webapp_1_name}', checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].deletedSiteName', webapp_1_name)
+        ]).get_output_in_json()
+        deleted_id = deleted_list[0]["id"]
+
+        # restore deleted webapp to non existent app i.e webapp_2
+        self.cmd(f'webapp deleted restore -g {resource_group} -n {webapp_2_name} --deleted-id "{deleted_id}" --target-app-svc-plan {plan}')
+
+        # get the details of the newly created webapp i.e webapp_2
+        self.cmd(f'az webapp show --name {webapp_2_name} -g {resource_group}', checks=[
+            JMESPathCheck('name', webapp_2_name)
+        ])
+    
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_deleted_restore_to_non_existent_site_fails_when_asp_argument_is_not_provided_or_does_not_exist(self, resource_group):
+        plan = self.create_random_name(prefix='delete-me-plan', length=24)
+        webapp_1_name = self.create_random_name(prefix='delete-me-web', length=24)
+        webapp_2_name = self.create_random_name(prefix='delete-me-web', length=24)
+
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku B1 --tags plan=plan1')
+
+        # create webapp_1
+        self.cmd(f'webapp create -g {resource_group} -n {webapp_1_name} --plan {plan}')
+
+        # delete webapp_1
+        self.cmd(f'webapp delete -g {resource_group} -n {webapp_1_name}')
+
+
+        # collect list of deleted webapps
+        deleted_list = self.cmd(f'webapp deleted list -g {resource_group} -n {webapp_1_name}', checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].deletedSiteName', webapp_1_name)
+        ]).get_output_in_json()
+        deleted_id = deleted_list[0]["id"]
+
+        # restore deleted webapp to non existent app i.e webapp_2 without ASP, raises ValidationError
+        with self.assertRaises(ValidationError) as ctx:
+             self.cmd(f'webapp deleted restore -g {resource_group} -n {webapp_2_name} --deleted-id "{deleted_id}"')
+
+        # # restore deleted webapp to non existent app i.e webapp_2 with non existent ASP, raises ValidationError
+        with self.assertRaises(ValidationError) as ctx:
+            self.cmd(f'webapp deleted restore -g {resource_group} -n {webapp_2_name} --deleted-id "{deleted_id}" --target-app-svc-plan idontexistplan')
+        
 
 
 class WebappAuthenticationTest(ScenarioTest):

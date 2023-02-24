@@ -82,7 +82,9 @@ def flexible_server_create(cmd, client,
                               byok_identity=byok_identity,
                               backup_byok_identity=backup_byok_identity,
                               byok_key=byok_key,
-                              backup_byok_key=backup_byok_key)
+                              backup_byok_key=backup_byok_key,
+                              auto_io_scaling=auto_scale_iops,
+                              iops=iops)
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
     iops_info = list_skus_info['iops_info']
 
@@ -369,7 +371,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
                               backup_byok_identity=backup_byok_identity,
                               byok_key=byok_key,
                               backup_byok_key=backup_byok_key,
-                              disable_data_encryption=disable_data_encryption)
+                              disable_data_encryption=disable_data_encryption,
+                              auto_io_scaling=auto_scale_iops,
+                              iops=iops)
 
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location, server_name=instance.name if instance else None)
     iops_info = list_skus_info['iops_info']
@@ -569,7 +573,7 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
 
 # Replica commands
 # Custom functions for server replica, will add MySQL part after backend ready in future
-def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, zone=None, no_wait=False):
+def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, location=None, zone=None, no_wait=False):
     provider = 'Microsoft.DBforMySQL'
     replica_name = replica_name.lower()
 
@@ -589,11 +593,13 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     source_server_id_parts = parse_resource_id(source_server_id)
     try:
         source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
-        validate_mysql_replica(cmd, source_server_object)
+        validate_mysql_replica(source_server_object)
     except Exception as e:
         raise ResourceNotFoundError(e)
 
-    location = source_server_object.location
+    if not location:
+        location = source_server_object.location
+
     sku_name = source_server_object.sku.name
     tier = source_server_object.sku.tier
     if not zone:

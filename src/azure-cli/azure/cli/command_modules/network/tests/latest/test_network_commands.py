@@ -3084,6 +3084,54 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
             self.check('routingConfiguration.propagatedRouteTables.labels[1]', 'label2')
         ])
 
+    @unittest.skip('The required extension command has not been release')
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route_gateway_connection_inbound_outbound_routemap')
+    def test_express_route_gateway_connection_inbound_outbound_routemap(self, resource_group):
+        self.kwargs.update({
+            'vwan': self.create_random_name('vwan', 10),
+            'vhub': self.create_random_name('vhub', 10),
+            'er': self.create_random_name("er", 10),
+            'ergateway': self.create_random_name("ergw", 16),
+            'ergatewayconn': self.create_random_name("ergw", 16),
+            "route_map_name": self.create_random_name("routemap-", 16),
+            "route_map_name_2": self.create_random_name("routemap-", 16),
+            "route_map_name_3": self.create_random_name("routemap-", 16),
+            "route_map_name_4": self.create_random_name("routemap-", 16)
+        })
+
+        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan}  --address-prefix 10.5.0.0/16 --sku Standard')
+        route_map_id = self.cmd("network vhub route-map create -n {route_map_name} -g {rg} --vhub-name {vhub}").get_output_in_json()['id']
+        route_map_id_2 = self.cmd("network vhub route-map create -n {route_map_name_2} -g {rg} --vhub-name {vhub}").get_output_in_json()['id']
+        route_map_id_3 = self.cmd("network vhub route-map create -n {route_map_name_3} -g {rg} --vhub-name {vhub}").get_output_in_json()['id']
+        route_map_id_4 = self.cmd("network vhub route-map create -n {route_map_name_4} -g {rg} --vhub-name {vhub}").get_output_in_json()['id']
+        self.kwargs.update({
+            'route_map_id': route_map_id,
+            'route_map_id_2': route_map_id_2,
+            'route_map_id_3': route_map_id_3,
+            'route_map_id_4': route_map_id_4
+        })
+        self.cmd('network express-route create -g {rg} -n {er} --bandwidth 50 --provider "Ibiza Test Provider" --peering-location Area51 --sku-tier Premium')
+        self.cmd('network express-route gateway create -g {rg} -n {ergateway} --virtual-hub {vhub}')
+        # self.cmd('network express-route peering create -g {rg} --circuit-name {er} --peering-type AzurePrivatePeering --peer-asn 10001 --vlan-id 101 --primary-peer-subnet 102.0.0.0/30 --secondary-peer-subnet 103.0.0.0/30')
+        peer_id = self.cmd('network express-route peering create -g {rg} --circuit-name {er} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30 --advertised-public-prefixes 104.0.0.0/30 --customer-asn 10000 --routing-registry-name level3').get_output_in_json()['id']
+        self.kwargs.update({
+            'peer_id': peer_id
+        })
+
+        with self.assertRaises(Exception):
+            self.cmd('network express-route gateway connection create -g {rg} -n {ergatewayconn} --gateway-name {ergateway} --peering {peer_id} --inbound-route-map {{id:{route_map_id}}} --outbound-route-map {{id:{route_map_id_2}}}')
+        self.cmd('network express-route gateway connection show -n {ergatewayconn} -g {rg} --gateway-name {ergateway}', checks=[
+            self.check('routingConfiguration.inboundRouteMap.id', '{route_map_id}'),
+            self.check('routingConfiguration.outboundRouteMap.id', '{route_map_id_2}')
+        ])
+        with self.assertRaises(Exception):
+            self.cmd('network express-route gateway connection update -g {rg} -n {ergatewayconn} --gateway-name {ergateway} --inbound-route-map {{id:{route_map_id_3}}} --outbound-route-map {{id:{route_map_id_4}}}')
+        self.cmd('network express-route gateway connection show -n {ergatewayconn} -g {rg} --gateway-name {ergateway}', checks=[
+            self.check('routingConfiguration.inboundRouteMap.id', '{route_map_id_3}'),
+            self.check('routingConfiguration.outboundRouteMap.id', '{route_map_id_4}')
+        ])
+
 
 class NetworkExpressRoutePortScenarioTest(ScenarioTest):
 
@@ -3412,40 +3460,6 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
                  checks=self.is_empty())
         self.cmd('network cross-region-lb address-pool list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 1))
-
-    @ResourceGroupPreparer(name_prefix='cli_test_cross_region_lb_probes', location='eastus2')
-    def test_network_cross_region_lb_probes(self, resource_group):
-
-        self.kwargs['lb'] = 'lb1'
-        self.kwargs['lb2'] = 'lb2'
-        self.cmd('network cross-region-lb create -g {rg} -n {lb}')
-
-        for i in range(1, 4):
-            self.cmd('network cross-region-lb probe create -g {{rg}} --lb-name {{lb}} -n probe{0} --port {0} --protocol http --path "/test{0}"'.format(i))
-        self.cmd('network cross-region-lb probe update -g {rg} --lb-name {lb} -n probe1 --interval 20 --threshold 5')
-        self.cmd('network cross-region-lb probe update -g {rg} --lb-name {lb} -n probe2 --protocol tcp --path ""')
-        self.cmd('network cross-region-lb probe show -g {rg} --lb-name {lb} -n probe1', checks=[
-            self.check('intervalInSeconds', 20),
-            self.check('numberOfProbes', 5)
-        ])
-        # test generic update
-        self.cmd('network cross-region-lb probe update -g {rg} --lb-name {lb} -n probe1 --set intervalInSeconds=15 --set numberOfProbes=3', checks=[
-            self.check('intervalInSeconds', 15),
-            self.check('numberOfProbes', 3)
-        ])
-
-        self.cmd('network cross-region-lb probe show -g {rg} --lb-name {lb} -n probe2', checks=[
-            self.check('protocol', 'Tcp'),
-            self.check('path', None)
-        ])
-        self.cmd('network cross-region-lb probe delete -g {rg} --lb-name {lb} -n probe3')
-        self.cmd('network cross-region-lb probe list -g {rg} --lb-name {lb}',
-                 checks=self.check('length(@)', 2))
-
-        # test standard LB supports https probe
-        self.cmd('network cross-region-lb create -g {rg} -n {lb2}')
-        self.cmd('network cross-region-lb probe create -g {rg} --lb-name {lb2} -n probe1 --port 443 --protocol https --path "/test1"')
-        self.cmd('network cross-region-lb probe list -g {rg} --lb-name {lb2}', checks=self.check('[0].protocol', 'Https'))
 
     @ResourceGroupPreparer(name_prefix='cli_test_cross_region_lb_rules')
     def test_network_cross_region_lb_rules(self, resource_group):
@@ -4019,14 +4033,14 @@ class NetworkNicScenarioTest(ScenarioTest):
 
         # create with minimum parameters
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet}', checks=[
-            self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
             self.check('NewNIC.provisioningState', 'Succeeded')
         ])
         # exercise optional parameters
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet_id} --ip-forwarding --private-ip-address {pri_ip} --public-ip-address {pub_ip} --internal-dns-name test --dns-servers 100.1.2.3 --lb-address-pools {address_pool_ids} --lb-inbound-nat-rules {rule_ids} --accelerated-networking --tags foo=doo', checks=[
-            self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Static'),
-            self.check('NewNIC.ipConfigurations[0].privateIpAddress', '{pri_ip}'),
-            self.check('NewNIC.enableIpForwarding', True),
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Static'),
+            self.check('NewNIC.ipConfigurations[0].privateIPAddress', '{pri_ip}'),
+            self.check('NewNIC.enableIPForwarding', True),
             self.check('NewNIC.enableAcceleratedNetworking', True),
             self.check('NewNIC.provisioningState', 'Succeeded'),
             self.check('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
@@ -4037,15 +4051,15 @@ class NetworkNicScenarioTest(ScenarioTest):
         ])
         # exercise creating with NSG
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet} --network-security-group {nsg1}', checks=[
-            self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
-            self.check('NewNIC.enableIpForwarding', False),
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
+            self.check('NewNIC.enableIPForwarding', False),
             self.check("NewNIC.networkSecurityGroup.contains(id, '{nsg1}')", True),
             self.check('NewNIC.provisioningState', 'Succeeded')
         ])
         # exercise creating with NSG and Public IP
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet} --network-security-group {nsg_id} --public-ip-address {pub_ip_id}', checks=[
-            self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
-            self.check('NewNIC.enableIpForwarding', False),
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
+            self.check('NewNIC.enableIPForwarding', False),
             self.check("NewNIC.networkSecurityGroup.contains(id, '{nsg1}')", True),
             self.check('NewNIC.provisioningState', 'Succeeded')
         ])
@@ -4065,15 +4079,15 @@ class NetworkNicScenarioTest(ScenarioTest):
             self.check('name', '{nic}')
         ])
         self.cmd('network nic update -g {rg} -n {nic} --internal-dns-name noodle --ip-forwarding true --accelerated-networking false --dns-servers "" --network-security-group {nsg2}', checks=[
-            self.check('enableIpForwarding', True),
+            self.check('enableIPForwarding', True),
             self.check('enableAcceleratedNetworking', False),
             self.check('dnsSettings.internalDnsNameLabel', 'noodle'),
             self.check('length(dnsSettings.dnsServers)', 0),
             self.check("networkSecurityGroup.contains(id, '{nsg2}')", True)
         ])
         # test generic update
-        self.cmd('network nic update -g {rg} -n {nic} --set dnsSettings.internalDnsNameLabel=doodle --set enableIpForwarding=false', checks=[
-            self.check('enableIpForwarding', False),
+        self.cmd('network nic update -g {rg} -n {nic} --set dnsSettings.internalDnsNameLabel=doodle --set enableIPForwarding=false', checks=[
+            self.check('enableIPForwarding', False),
             self.check('dnsSettings.internalDnsNameLabel', 'doodle')
         ])
 
@@ -4148,7 +4162,7 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 1))
         self.cmd('network nic ip-config show -g {rg} --nic-name {nic} -n ipconfig1', checks=[
             self.check('name', 'ipconfig1'),
-            self.check('privateIpAllocationMethod', 'Dynamic')
+            self.check('privateIPAllocationMethod', 'Dynamic')
         ])
         self.cmd('network nic ip-config create -g {rg} --nic-name {nic} -n ipconfig2 --make-primary',
                  checks=self.check('primary', True))
@@ -4181,11 +4195,11 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --lb-name {lb} --lb-address-pools {bap1_id} bap2 --lb-inbound-nat-rules {rule1_id} rule2 --private-ip-address {private_ip}', checks=[
             self.check('length(loadBalancerBackendAddressPools)', 2),
             self.check('length(loadBalancerInboundNatRules)', 2),
-            self.check('privateIpAddress', '{private_ip}'),
-            self.check('privateIpAllocationMethod', 'Static')])
+            self.check('privateIPAddress', '{private_ip}'),
+            self.check('privateIPAllocationMethod', 'Static')])
         # test generic update
-        self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --set privateIpAddress=10.0.0.50',
-                 checks=self.check('privateIpAddress', '10.0.0.50'))
+        self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --set privateIPAddress=10.0.0.50',
+                 checks=self.check('privateIPAddress', '10.0.0.50'))
 
         # test ability to add and remove IDs one at a time with subcommands
         self.cmd('network nic ip-config inbound-nat-rule remove -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --inbound-nat-rule rule1',
@@ -4199,8 +4213,8 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('length(loadBalancerBackendAddressPools)', 2))
 
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --private-ip-address "" --public-ip-address {ip_id}', checks=[
-            self.check('privateIpAllocationMethod', 'Dynamic'),
-            self.check("publicIpAddress.contains(id, '{ip_id}')", True)
+            self.check('privateIPAllocationMethod', 'Dynamic'),
+            self.check("publicIPAddress.contains(id, '{ip_id}')", True)
         ])
 
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --subnet {subnet} --vnet-name {vnet}',
@@ -4304,6 +4318,7 @@ class NetworkNicConvenienceCommandsScenarioTest(ScenarioTest):
                  checks=self.greater_than('length(@)', 0))
         self.cmd('network nic show-effective-route-table --ids {nic_id}',
                  checks=self.greater_than('length(@)', 0))
+        self.cmd('network nic show-effective-route-table --ids {nic_id} -o table')
 
 
 class NetworkExtendedNSGScenarioTest(ScenarioTest):
@@ -4374,6 +4389,7 @@ class NetworkSecurityGroupScenarioTest(ScenarioTest):
             self.check('length(@)', 1),
             self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
         ])
+        self.cmd('network nsg rule list --resource-group {rg} --nsg-name {nsg} -o table')
         self.cmd('network nsg rule show --resource-group {rg} --nsg-name {nsg} --name {rule}', checks=[
             self.check('type(@)', 'object'),
             self.check('resourceGroup', '{rg}'),
@@ -4884,9 +4900,9 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
                 self.check('length(@)', 10581)
             ])
         self.cmd('network vpn-connection ipsec-policy add -g {rg} --connection-name {conn1} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048')
-        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
+        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}', checks=self.check('length(@)', 1))
         self.cmd('network vpn-connection ipsec-policy clear -g {rg} --connection-name {conn1}')
-        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
+        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}', checks=self.check('length(@)', 0))
 
 
 class NetworkVpnConnectionNatRule(ScenarioTest):
@@ -5915,6 +5931,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             # self.check('flowAnalyticsConfiguration', None)
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log2', location='canadaeast')
     @StorageAccountPreparer(name_prefix='clitestnw', location='canadaeast', kind='StorageV2')
     def test_network_watcher_flow_log2(self, resource_group, resource_group_location, storage_account):
@@ -6163,6 +6180,7 @@ class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
         super(NetworkSecurityPartnerProviderScenarioTest, self).__init__(method_name)
         self.cmd('extension add -n virtual-wan')
 
+    @unittest.skip('Decouple with virtual-wan bump API version')
     @ResourceGroupPreparer(name_prefix='cli_test_security_partner_provider_', location='westus')
     @AllowLargeResponse()
     def test_network_security_partner_provider(self):
