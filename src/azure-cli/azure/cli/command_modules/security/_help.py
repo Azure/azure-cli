@@ -789,7 +789,7 @@ short-summary: Adaptive Application Controls - Get
 examples:
   - name: Get a single application control VM/server group.
     text: >
-        az security adaptive-application-controls show --group-name GROUP1
+        az security adaptive-application-controls show --group-name GROUP1 --location centralsus
 """
 
 helps['security allowed_connections'] = """

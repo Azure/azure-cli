@@ -81,29 +81,6 @@ def transform_local_gateway_table_output(result):
     return final_result
 
 
-def transform_vpn_connection_list(result):
-    return [transform_vpn_connection(v) for v in result]
-
-
-def transform_vpn_connection(result):
-    if result:
-        properties_to_strip = \
-            ['virtual_network_gateway1', 'virtual_network_gateway2', 'local_network_gateway2', 'peer']
-        for prop in properties_to_strip:
-            prop_val = getattr(result, prop, None)
-            if not prop_val:
-                delattr(result, prop)
-            else:
-                null_props = [key for key in prop_val.__dict__ if not prop_val.__dict__[key]]
-                for null_prop in null_props:
-                    delattr(prop_val, null_prop)
-    return result
-
-
-def transform_vnet_create_output(result):
-    return {'newVNet': result.result()}
-
-
 def transform_vnet_table_output(result):
 
     def _transform(result):
@@ -130,37 +107,22 @@ def transform_traffic_manager_create_output(result):
     return {'TrafficManagerProfile': result}
 
 
-def transform_nic_create_output(result):
-    if result:
-        return {'NewNIC': result.result()}
-    return None
-
-
-def transform_nsg_create_output(result):
-    return {'NewNSG': result.result()}
-
-
 def transform_nsg_rule_table_output(result):
     item = OrderedDict()
     item['Name'] = result['name']
     item['ResourceGroup'] = result['resourceGroup']
     item['Priority'] = result['priority']
-    item['SourcePortRanges'] = result['sourcePortRange'] or ' '.join(result['sourcePortRanges'])
-    item['SourceAddressPrefixes'] = result['sourceAddressPrefix'] or ' '.join(result['sourceAddressPrefixes'])
-    item['SourceASG'] = result['sourceApplicationSecurityGroups'] or 'None'
+    item['SourcePortRanges'] = result.get('sourcePortRange', ' '.join(result['sourcePortRanges']))
+    item['SourceAddressPrefixes'] = result.get('sourceAddressPrefix', ' '.join(result['sourceAddressPrefixes']))
+    item['SourceASG'] = result.get('sourceApplicationSecurityGroups', 'None')
     item['Access'] = result['access']
     item['Protocol'] = result['protocol']
     item['Direction'] = result['direction']
-    item['DestinationPortRanges'] = result['destinationPortRange'] or ' '.join(result['destinationPortRanges'])
-    item['DestinationAddressPrefixes'] = result['destinationAddressPrefix'] or \
-        ' '.join(result['destinationAddressPrefixes'])
-    item['DestinationASG'] = result['destinationApplicationSecurityGroups'] or 'None'
+    item['DestinationPortRanges'] = result.get('destinationPortRange', ' '.join(result['destinationPortRanges']))
+    item['DestinationAddressPrefixes'] = result.get('destinationAddressPrefix',
+                                                    ' '.join(result['destinationAddressPrefixes']))
+    item['DestinationASG'] = result.get('destinationApplicationSecurityGroups', 'None')
     return item
-
-
-def transform_vnet_gateway_create_output(result):
-    result = {'vnetGateway': result.result()} if result else result
-    return result
 
 
 def transform_geographic_hierachy_table_output(result):
@@ -214,15 +176,6 @@ def transform_waf_rule_sets_table_output(result):
     return transformed
 
 
-def transform_network_usage_list(result):
-    result = list(result)
-    for item in result:
-        item.current_value = str(item.current_value)
-        item.limit = str(item.limit)
-        item.local_name = item.name.localized_value
-    return result
-
-
 def transform_network_usage_table(result):
     transformed = []
     for item in result:
@@ -240,9 +193,9 @@ def transform_effective_route_table(result):
         transformed.append(OrderedDict([
             ('Source', item['source']),
             ('State', item['state']),
-            ('Address Prefix', ' '.join(item['addressPrefix'] or [])),
+            ('Address Prefix', ' '.join(item.get('addressPrefix', []))),
             ('Next Hop Type', item['nextHopType']),
-            ('Next Hop IP', ' '.join(item['nextHopIpAddress'] or []))
+            ('Next Hop IP', ' '.join(item.get('nextHopIpAddress', []))),
         ]))
     return transformed
 

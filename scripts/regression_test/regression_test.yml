@@ -36,7 +36,7 @@ jobs:
           git config --global user.name "Azure CLI Team"
           git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli.git
 
-          git checkout -b bump_version_$(Build.BuildId)
+          git checkout -b regression_test_$(Build.BuildId)
 
           echo package: $(PACKAGE) $(TARGET_PACKAGE_VERSION)
           echo resource_type: $(RESOURCE_TYPE) $(TARGET_API_VERSION)
@@ -57,7 +57,7 @@ jobs:
 
           git add .
           git commit -m "update version"
-          git push --set-upstream azclibot bump_version_$(Build.BuildId)
+          git push --set-upstream azclibot regression_test_$(Build.BuildId)
 
 - job: RerunTests
   displayName: CLI Regression tests
@@ -104,7 +104,7 @@ jobs:
             GITHUB_TOKEN=$(CUSTOM_GITHUB_TOKEN)
           else
             GITHUB_REPO="azclibot"
-            GITHUB_BRANCH="bump_version_$(Build.BuildId)"
+            GITHUB_BRANCH="regression_test_$(Build.BuildId)"
             GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
           fi
           git config --global user.email "AzPyCLI@microsoft.com"
@@ -127,7 +127,7 @@ jobs:
       displayName: "Rerun tests"
     - task: PublishTestResults@2
       inputs:
-        testResultsFiles: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
+        testResultsFiles: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
         testRunTitle: 'CLI Regression test results of instance $(Instance_idx)'
 
 - job: CreatePR

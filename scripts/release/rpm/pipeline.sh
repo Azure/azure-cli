@@ -39,7 +39,7 @@ docker build \
 id=$(docker create azure/azure-cli:${DOCKERFILE}-builder)
 # https://docs.docker.com/engine/reference/commandline/cp/
 # Append /. so that the x86_64 folder's content is copied, instead of x86_64 folder itself.
-docker cp $id:/root/rpmbuild/RPMS/x86_64/. ${BUILD_STAGINGDIRECTORY}
+docker cp $id:/out/. ${BUILD_STAGINGDIRECTORY}
 
 # Save these too a staging directory so that later build phases can choose to save them as Artifacts or publish them to
 # a registry.

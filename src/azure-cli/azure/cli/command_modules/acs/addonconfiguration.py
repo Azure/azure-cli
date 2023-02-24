@@ -278,38 +278,6 @@ def get_existing_container_insights_extension_dcr_tags(cmd, dcr_url):
     return tags
 
 
-def getRegionCodeForAzureRegion(cmd, cluster_region):
-    region_code = "EUS"
-    cloud_name = cmd.cli_ctx.cloud.name
-    if cloud_name.lower() == "azurecloud":
-        region_code = AzureCloudLocationToOmsRegionCodeMap.get(
-            cluster_region, "EUS"
-        )
-    elif cloud_name.lower() == "azurechinacloud":
-        region_code = AzureChinaLocationToOmsRegionCodeMap.get(
-            cluster_region, "EAST2"
-        )
-    elif cloud_name.lower() == "azureusgovernment":
-        region_code = AzureFairfaxLocationToOmsRegionCodeMap.get(
-            cluster_region, "USGV"
-        )
-    else:
-        logger.error(
-            "AKS Monitoring addon not supported in cloud : %s", cloud_name
-        )
-    return region_code
-
-
-def sanitize_dcr_name(name):
-    name = name[0:43]
-    lastIndexAlphaNumeric = len(name) - 1
-    while ((name[lastIndexAlphaNumeric].isalnum() is False) and lastIndexAlphaNumeric > -1):
-        lastIndexAlphaNumeric = lastIndexAlphaNumeric - 1
-    if lastIndexAlphaNumeric < 0:
-        return ""
-    return name[0:lastIndexAlphaNumeric + 1]
-
-
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements,line-too-long
 def ensure_container_insights_for_monitoring(
     cmd,
@@ -365,6 +333,7 @@ def ensure_container_insights_for_monitoring(
             "Could not locate resource group in workspace-resource-id URL."
         )
 
+    location = ""
     # region of workspace can be different from region of RG so find the location of the workspace_resource_id
     if not remove_monitoring:
         resources = get_resources_client(cmd.cli_ctx, subscription_id)
@@ -383,8 +352,9 @@ def ensure_container_insights_for_monitoring(
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.ContainerService/managedClusters/{cluster_name}"
         )
-        region_code = getRegionCodeForAzureRegion(cmd, cluster_region)
-        dataCollectionRuleName = sanitize_dcr_name(f"MSCI-{region_code}-{cluster_name}")
+        dataCollectionRuleName = f"MSCI-{location}-{cluster_name}"
+        # Max length of the DCR name is 64 chars
+        dataCollectionRuleName = dataCollectionRuleName[0:64]
         dcr_resource_id = (
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"

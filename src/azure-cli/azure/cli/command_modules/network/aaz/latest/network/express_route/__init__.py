@@ -15,6 +15,7 @@ from ._get_stats import *
 from ._list import *
 from ._list_arp_tables import *
 from ._list_route_tables import *
+from ._list_route_tables_summary import *
 from ._list_service_providers import *
 from ._show import *
 from ._update import *

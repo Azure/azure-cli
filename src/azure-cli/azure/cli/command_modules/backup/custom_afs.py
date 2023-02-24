@@ -290,14 +290,18 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
-def disable_protection(cmd, client, resource_group_name, vault_name, item):
+def disable_protection(cmd, client, resource_group_name, vault_name, item,
+                       retain_recovery_points_as_per_policy=False):
     # Get container and item URIs
     container_uri = helper.get_protection_container_uri_from_id(item.id)
     item_uri = helper.get_protected_item_uri_from_id(item.id)
 
     afs_item_properties = AzureFileshareProtectedItem()
     afs_item_properties.policy_id = ''
-    afs_item_properties.protection_state = ProtectionState.protection_stopped
+    if retain_recovery_points_as_per_policy:
+        afs_item_properties.protection_state = ProtectionState.backups_suspended
+    else:
+        afs_item_properties.protection_state = ProtectionState.protection_stopped
     afs_item_properties.source_resource_id = item.properties.source_resource_id
     afs_item = ProtectedItemResource(properties=afs_item_properties)
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,

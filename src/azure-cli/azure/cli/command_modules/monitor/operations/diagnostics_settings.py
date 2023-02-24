@@ -7,6 +7,7 @@ from ..aaz.latest.monitor.diagnostic_settings import Create as _DiagnosticSettin
 from ..aaz.latest.monitor.diagnostic_settings import List as _DiagnosticSettingsList
 from ..aaz.latest.monitor.diagnostic_settings import Show as _DiagnosticSettingsShow
 from ..aaz.latest.monitor.diagnostic_settings import Delete as _DiagnosticSettingsDelete
+from ..aaz.latest.monitor.diagnostic_settings import Update as _DiagnosticSettingsUpdate
 from ..aaz.latest.monitor.diagnostic_settings.categories import List as _DiagnosticSettingsCategoryList
 from ..aaz.latest.monitor.diagnostic_settings.categories import Show as _DiagnosticSettingsCategoryShow
 from knack.util import CLIError
@@ -183,6 +184,19 @@ class DiagnosticSettingsList(_DiagnosticSettingsList):
 
 
 class DiagnosticSettingsDelete(_DiagnosticSettingsDelete):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        arg_schema = super()._build_arguments_schema(*args, **kwargs)
+        create_resource_parameters(arg_schema, arg_group="Target Resource")
+        return arg_schema
+
+    def pre_operations(self):
+        ctx = self.ctx
+        update_resource_parameters(ctx)
+
+
+class DiagnosticSettingsUpdate(_DiagnosticSettingsUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
