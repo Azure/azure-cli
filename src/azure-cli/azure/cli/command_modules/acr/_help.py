@@ -611,7 +611,7 @@ examples:
     text: az acr credential-set show -r MyRegistry -n MyCredSet
 """
 
-helps['acr credential set list'] = """
+helps['acr credential-set list'] = """
 type: command
 short-summary: List the credential sets in an Azure Container Registry.
 examples:
