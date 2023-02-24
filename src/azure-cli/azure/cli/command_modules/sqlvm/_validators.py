@@ -229,6 +229,7 @@ def validate_azure_ad_authentication(cmd, namespace):
     _validate_msi_with_enough_permission(cmd.cli_ctx, principal_id)
     logger.debug("Validate Azure AD authentication: the managed identity has required Graph API permission.")
 
+
 def _validate_azure_ad_authentication_supported_on_sqlvm(cli_ctx, namespace):
     """ Validate this SQL VM instance supports Azure AD authentication, i.e. it is on Windows platform and is SQL 2022 or later
 

@@ -415,7 +415,7 @@ def sqlvm_enable_azure_ad_auth(client, cmd, sql_virtual_machine_name, resource_g
     '''
 
     sqlvm_object = client.get(resource_group_name, sql_virtual_machine_name)
-    
+
     if sqlvm_object.server_configurations_management_settings is None:
         sqlvm_object.server_configurations_management_settings = ServerConfigurationsManagementSettings()
 
