@@ -221,8 +221,6 @@ def create_container(cmd,
     if sku == "Confidential":
         sku = ContainerGroupSku.Confidential
         confidential_compute_properties = ConfidentialComputeProperties(cce_policy=cce_policy)
-    else:
-        sku = sku
 
     container = Container(name=name,
                           image=image,
