@@ -152,8 +152,8 @@ def import_config(cmd,
     # generate preview and wait for user confirmation
     need_kv_change = __print_kv_preview(
         old_json=__serialize_kv_list_to_comparable_json_object(keyvalues=dest_kvs, level=source),
-        new_json=__serialize_kv_list_to_comparable_json_object(keyvalues=src_kvs, level=source), 
-        strict=strict, 
+        new_json=__serialize_kv_list_to_comparable_json_object(keyvalues=src_kvs, level=source),
+        strict=strict,
         yes=yes)
 
     need_feature_change = False
@@ -293,25 +293,24 @@ def export_config(cmd,
     if destination == 'appconfig':
         # dest_kvs contains features and KV that match the label
         dest_kvs = __read_kv_from_config_store(dest_azconfig_client,
-                                                key=SearchFilterOptions.ANY_KEY,
-                                                label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL)
+                                               key=SearchFilterOptions.ANY_KEY,
+                                               label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL)
         __discard_features_from_retrieved_kv(dest_kvs)
 
         if not skip_features:
             # Append all features to dest_features list
             dest_features = list_feature(cmd,
-                                            feature='*',
-                                            label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL,
-                                            name=dest_name,
-                                            connection_string=dest_connection_string,
-                                            all_=True,
-                                            auth_mode=dest_auth_mode,
-                                            endpoint=dest_endpoint)
+                                         feature='*',
+                                         label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL,
+                                         name=dest_name,
+                                         connection_string=dest_connection_string,
+                                         all_=True,
+                                         auth_mode=dest_auth_mode,
+                                         endpoint=dest_endpoint)
 
     elif destination == 'appservice':
         dest_kvs = __read_kv_from_app_service(cmd, appservice_account=appservice_account)
 
-    
     need_kv_change = __print_kv_preview(
         old_json=__serialize_kv_list_to_comparable_json_object(keyvalues=dest_kvs, level=destination),
         new_json=__serialize_kv_list_to_comparable_json_object(keyvalues=src_kvs, level=destination),
@@ -323,7 +322,7 @@ def export_config(cmd,
             old_json=__serialize_feature_list_to_comparable_json_object(features=dest_features),
             new_json=__serialize_feature_list_to_comparable_json_object(features=src_features),
             yes=yes)
-    
+
     if not need_feature_change and not need_kv_change:
         return
     # if customer needs preview & confirmation

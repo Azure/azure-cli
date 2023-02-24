@@ -626,7 +626,7 @@ def __serialize_kv_list_to_comparable_json_list(keyvalues, profile=None):
 def __print_features_preview(old_json, new_json, strict=False, yes=False):
     if not yes:
         logger.warning('\n---------------- Feature Flags Preview -------------')
-    
+
     if not strict and not new_json:
         logger.warning('\nSource configuration is empty. No changes will be made.')
         return False
@@ -649,7 +649,7 @@ def __print_kv_preview(old_json, new_json, strict=False, yes=False):
     if not strict and not new_json:
         logger.warning('\nSource configuration is empty. No changes will be made.')
         return False
-    
+
     diff_output = __find_kv_diff(old_json=old_json, new_json=new_json, strict=strict)
 
     if diff_output == {}:
@@ -673,10 +673,10 @@ def __print_preview(diff_output):
         elif action in (JsonDiff.DELETE, JsonDiff.ADD):
             subtitle = 'Deleting' if action == JsonDiff.DELETE else 'Adding'
             logger.warning(f'\n{subtitle}:')
-            
+
             for record in changes:
                 logger.warning(json.dumps(record, ensure_ascii=False))
-        
+
     logger.warning("")  # printing an empty line for formatting purpose
 
 
@@ -1142,10 +1142,10 @@ def __import_kvset_from_file(client, path, strict, yes):
     kvset_to_import_list = __serialize_kv_list_to_comparable_json_list(kvset_to_import, ImportExportProfiles.KVSET)
 
     changes_detected = __print_kvset_json_diff(existing_kvset_list, kvset_to_import_list, yes=yes)
-    
+
     if not changes_detected:
         return
-    
+
     if not yes:
         user_confirmation('Do you want to continue?\n')
 
@@ -1265,7 +1265,7 @@ def __get_json_diff(old_obj=None, new_obj=None):
 
     differ = Differ()
     diff = list(differ.compare(old_json, new_json))
-    
+
     return diff
     
 def __print_kvset_json_diff(old_obj=None, new_obj=None, yes=False):
