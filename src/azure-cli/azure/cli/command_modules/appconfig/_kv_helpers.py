@@ -1269,6 +1269,8 @@ def __get_json_diff(old_obj=None, new_obj=None):
     return diff
     
 def __print_kvset_json_diff(old_obj=None, new_obj=None, yes=False):
+    if not yes:
+        logger.warning('\n---------------- KVSet Preview ----------------')
 
     diff = __get_json_diff(old_obj=old_obj, new_obj=new_obj)
     if not any(line.startswith('-') or line.startswith('+') for line in diff):
@@ -1276,8 +1278,6 @@ def __print_kvset_json_diff(old_obj=None, new_obj=None, yes=False):
         return False
 
     if not yes:
-        logger.warning('\n---------------- KVSet Preview ----------------')
-        
         # omit minuscule details of the diff outlining the characters that changed, and show rest of the diff.
         logger.warning(''.join(filter(lambda line: not line.startswith('?'), diff)))
         # print newline for readability
