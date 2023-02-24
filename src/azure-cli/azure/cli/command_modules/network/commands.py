@@ -11,7 +11,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
 
 from azure.cli.command_modules.network._client_factory import (
-    cf_network_watcher, cf_packet_capture,
+    cf_packet_capture,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_connection_monitor,
     cf_dns_references,
@@ -27,7 +27,6 @@ from azure.cli.command_modules.network._format import (
     transform_vnet_table_output, transform_effective_route_table, transform_effective_nsg,
     transform_vnet_gateway_routes_table, transform_vnet_gateway_bgp_peer_table)
 from azure.cli.command_modules.network._validators import (
-    get_network_watcher_from_location,
     process_ag_create_namespace,
     process_lb_create_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,

@@ -676,10 +676,8 @@ class NwFlowLogCreate(_NwFlowLogCreate):
 
         if has_value(args.traffic_analytics_workspace):
 
-            from azure.cli.core.commands.arm import get_arm_resource_by_id
             workspace = get_arm_resource_by_id(self.cli_ctx, args.traffic_analytics_workspace.to_serialized_data())
             if not workspace:
-                from knack.util import CLIError
                 raise CLIError('Name or ID of workspace is invalid')
 
             args.flow_analytics_configuration = {"workspace_id": workspace.properties['customerId'],
@@ -790,10 +788,8 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
             args.retention_policy = {"days": args.retention, "enabled": (args.retention > 0)}
 
         if has_value(args.traffic_analytics_workspace):
-            from azure.cli.core.commands.arm import get_arm_resource_by_id
             workspace = get_arm_resource_by_id(self.cli_ctx, args.traffic_analytics_workspace.to_serialized_data())
             if not workspace:
-                from knack.util import CLIError
                 raise CLIError('Name or ID of workspace is invalid')
 
             args.flow_analytics_configuration = {
