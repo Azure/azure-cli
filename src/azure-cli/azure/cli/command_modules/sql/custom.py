@@ -90,7 +90,6 @@ from ._util import (
     get_sql_managed_instances_operations,
     get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations,
     get_sql_managed_database_restore_details_operations,
-    get_sql_databases_operations,
 )
 
 
@@ -1826,14 +1825,7 @@ def db_update(  # pylint: disable=too-many-locals
             _get_database_identity_for_update(instance.identity, user_assigned_identity_id)
 
     if keys is not None or keys_to_remove is not None:
-        database_client = get_sql_databases_operations(cmd.cli_ctx, None)
-
-        database = database_client.get(resource_group_name=resource_group_name,
-                                       server_name=server_name,
-                                       database_name=instance.name,
-                                       expand="keys")
-
-        instance.keys = _get_database_keys_for_update(database.keys, keys, keys_to_remove)
+        instance.keys = _get_database_keys_for_update(keys, keys_to_remove)
 
     if encryption_protector is not None:
         instance.encryption_protector = encryption_protector
@@ -1875,22 +1867,19 @@ def _get_database_keys(akvKeys):
     return databaseKeys
 
 
-def _get_database_keys_for_update(existingAkvKeys, akvKeys, akvKeysToRemove=None):
+def _get_database_keys_for_update(akvKeys, akvKeysToRemove):
 
-    databaseKeys = None
+    databaseKeys = {}
 
-    if existingAkvKeys is not None:
-        if akvKeys is not None:
-            for akvKey in akvKeys:
-                existingAkvKeys.update({akvKey: DatabaseKey()})
+    if akvKeys is not None:
+        for akvKey in akvKeys:
+            if akvKey not in databaseKeys:
+                databaseKeys[akvKey] = DatabaseKey()  # pylint: disable=unsupported-assignment-operation
 
-        if akvKeysToRemove is not None:
-            for akvKey in akvKeysToRemove:
-                existingAkvKeys.update({akvKey: None})
-
-        databaseKeys = existingAkvKeys
-    else:
-        databaseKeys = _get_database_keys(akvKeys)
+    if akvKeysToRemove is not None:
+        for akvKey in akvKeysToRemove:
+            if akvKey not in databaseKeys:
+                databaseKeys[akvKey] = None
 
     return databaseKeys
 
