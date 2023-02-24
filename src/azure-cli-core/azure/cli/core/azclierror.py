@@ -158,6 +158,9 @@ class InvalidArgumentValueError(UserFault):
     """ Argument value is not valid. """
     pass
 
+class UnsupportOperationError(UserFault):
+    """ Operation is not supported"""
+    pass
 
 class ArgumentUsageError(UserFault):
     """ Fallback of the argument usage related errors.

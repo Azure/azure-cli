@@ -7,7 +7,8 @@ import ipaddress
 
 
 from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageError, RequiredArgumentMissingError,
-                                       ResourceNotFoundError, ValidationError, MutuallyExclusiveArgumentError)
+                                       ResourceNotFoundError, ValidationError, MutuallyExclusiveArgumentError,
+                                       UnsupportOperationError)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import validate_tags
@@ -118,6 +119,17 @@ def validate_functionapp_asp_create(namespace):
     if namespace.max_burst is not None:
         if tier.lower() != "elasticpremium":
             raise ArgumentUsageError("--max-burst is only supported for Elastic Premium (EP) plans")
+
+
+def validate_functionapp_on_containerapp_site_config(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    slot = namespace.slot
+    function_app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if function_app.managed_environment_id is not None:
+        raise UnsupportOperationError(
+            "This command is not supported for function apps deployed in managed environments.",
+            "Please view or update your function app's site configuration in the container app environment.")
 
 
 def validate_app_exists(cmd, namespace):
