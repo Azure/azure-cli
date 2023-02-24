@@ -242,7 +242,7 @@ database_keys_to_remove_param_type = CLIArgumentType(
     help='The list of AKV keys to remove from the SQL Database.')
 
 database_user_assigned_identity_param_type = CLIArgumentType(
-    options_list=['--user-assigned-identity-id'],
+    options_list=['--user-assigned-identity-id', '--umi'],
     nargs='+',
     help='The list of user assigned identity for the SQL Database.')
 
@@ -800,9 +800,9 @@ def load_arguments(self, _):
                    options_list=['--keys-filter'],
                    help='Expand the AKV keys for the database.')
 
-    with self.argument_context('sql db show deleted') as c:
+    with self.argument_context('sql db show-deleted') as c:
         c.argument('restorable_dropped_database_id',
-                   options_list=['--restorable-dropped-database-id'],
+                   options_list=['--restorable-dropped-database-id', '-r'],
                    help='Restorable dropped database id.')
 
         c.argument('expand_keys',
