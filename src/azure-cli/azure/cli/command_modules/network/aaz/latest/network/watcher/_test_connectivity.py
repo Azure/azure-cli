@@ -77,7 +77,7 @@ class TestConnectivity(AAZCommand):
         )
         _args_schema.source_resource = AAZStrArg(
             options=["--source-resource"],
-            help={"short-summary": "Name or ID of the resource from which to originate traffic.", "long-summary": "Currently only Virtual Machines are supported."},
+            help="Name or ID of the resource from which to originate traffic. Currently only Virtual Machines are supported.",
             required=True,
         )
 
@@ -101,7 +101,7 @@ class TestConnectivity(AAZCommand):
         _args_schema.dest_resource = AAZStrArg(
             options=["--dest-resource"],
             arg_group="Destination",
-            help={"short-summary": "Name or ID of the resource to receive traffic.", "long-summary": "Currently only Virtual Machines are supported."},
+            help="Name or ID of the resource to receive traffic. Currently only Virtual Machines are supported.",
         )
 
         # define Arg Group "HTTP Configuration"

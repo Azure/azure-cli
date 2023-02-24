@@ -529,12 +529,12 @@ def load_command_table(self, _):
     # region NetworkWatchers
     with self.command_group("network watcher") as g:
         from .operations.watcher import RunConfigurationDiagnostic, ShowNextHop, ShowSecurityGroupView, ShowTopology, TestConnectivity, TestIPFlow
-        self.command_table["network watcher run-configuration-diagnostic"] = RunConfigurationDiagnostic(loader=self)
+        self.command_table["network watcher test-ip-flow"] = TestIPFlow(loader=self)
         self.command_table["network watcher show-next-hop"] = ShowNextHop(loader=self)
         self.command_table["network watcher show-security-group-view"] = ShowSecurityGroupView(loader=self)
+        self.command_table["network watcher run-configuration-diagnostic"] = RunConfigurationDiagnostic(loader=self)
         self.command_table["network watcher show-topology"] = ShowTopology(loader=self)
         self.command_table["network watcher test-connectivity"] = TestConnectivity(loader=self)
-        self.command_table["network watcher test-ip-flow"] = TestIPFlow(loader=self)
         g.custom_command("configure", "configure_network_watcher")
 
     with self.command_group('network watcher connection-monitor', network_watcher_cm_sdk, client_factory=cf_connection_monitor, min_api='2018-01-01') as g:

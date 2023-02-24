@@ -42,13 +42,6 @@ def get_network_watcher_from_location(cmd, watcher_name="watcher_name", rg_name=
     setattr(args, watcher_name, id_parts["name"])
 
 
-def get_network_watcher_from_resource(cmd):
-    args = cmd.ctx.args
-    resource = get_arm_resource_by_id(cmd.cli_ctx, args.resource.to_serialized_data())
-    args.location = resource.location
-    get_network_watcher_from_location(cmd)
-
-
 def get_network_watcher_from_vm(cmd):
     args = cmd.ctx.args
     compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machines
@@ -56,6 +49,126 @@ def get_network_watcher_from_vm(cmd):
     vm = compute_client.get(args.resource_group_name, vm_name)
     args.location = vm.location
     get_network_watcher_from_location(cmd)
+
+
+def get_network_watcher_from_resource(cmd):
+    args = cmd.ctx.args
+    resource = get_arm_resource_by_id(cmd.cli_ctx, args.resource.to_serialized_data())
+    args.location = resource.location
+    get_network_watcher_from_location(cmd)
+
+
+class TestIPFlow(_TestIPFlow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.location = AAZResourceLocationArg(
+            registered=False,
+        )
+        args_schema.local = AAZStrArg(
+            options=["--local"],
+            help="Private IPv4 address for the VMs NIC and the port of the packet in X.X.X.X:PORT format. "
+                 "`*` can be used for port when direction is outbound.",
+            required=True,
+        )
+        args_schema.remote = AAZStrArg(
+            options=["--remote"],
+            help="IPv4 address and port for the remote side of the packet X.X.X.X:PORT format. "
+                 "`*` can be used for port when the direction is inbound.",
+            required=True,
+        )
+        args_schema.resource_group_name = AAZStrArg(
+            options=["-g", "--resource-group"],
+            help="Name of the resource group the target VM is in.",
+        )
+        args_schema.vm._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute"
+                     "/virtualMachines/{}",
+        )
+        args_schema.nic._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Network"
+                     "/networkInterfaces/{}",
+        )
+        args_schema.watcher_rg._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_name._registered = False
+        args_schema.local_ip_address._required = False
+        args_schema.local_ip_address._registered = False
+        args_schema.local_port._required = False
+        args_schema.local_port._registered = False
+        args_schema.remote_ip_address._required = False
+        args_schema.remote_ip_address._registered = False
+        args_schema.remote_port._required = False
+        args_schema.remote_port._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        try:
+            args.local_ip_address, args.local_port = args.local.to_serialized_data().split(":")
+            args.remote_ip_address, args.remote_port = args.remote.to_serialized_data().split(":")
+        except:
+            raise ValidationError("usage error: the format of the '--local' and '--remote' should be like x.x.x.x:port")
+
+        get_network_watcher_from_vm(self)
+
+
+class ShowNextHop(_ShowNextHop):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.location = AAZResourceLocationArg(
+            registered=False,
+        )
+        args_schema.resource_group_name = AAZStrArg(
+            options=["-g", "--resource-group"],
+            help="Name of the resource group the target VM is in.",
+        )
+        args_schema.vm._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute"
+                     "/virtualMachines/{}",
+        )
+        args_schema.nic._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Network"
+                     "/networkInterfaces/{}",
+        )
+        args_schema.watcher_rg._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_name._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_vm(self)
+
+
+class ShowSecurityGroupView(_ShowSecurityGroupView):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.location = AAZResourceLocationArg(
+            registered=False,
+        )
+        args_schema.resource_group_name = AAZStrArg(
+            options=["-g", "--resource-group"],
+            help="Name of the resource group the target VM is in.",
+        )
+        args_schema.vm._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute"
+                     "/virtualMachines/{}",
+        )
+        args_schema.watcher_rg._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_name._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_vm(self)
 
 
 class RunConfigurationDiagnostic(_RunConfigurationDiagnostic):
@@ -170,73 +283,15 @@ class RunConfigurationDiagnostic(_RunConfigurationDiagnostic):
         get_network_watcher_from_resource(self)
 
 
-class ShowNextHop(_ShowNextHop):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.location = AAZResourceLocationArg(
-            registered=False,
-        )
-        args_schema.resource_group_name = AAZStrArg(
-            options=["-g", "--resource-group"],
-            help="Name of the resource group the target VM is in.",
-        )
-        args_schema.vm._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute"
-                     "/virtualMachines/{}",
-        )
-        args_schema.nic._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Network"
-                     "/networkInterfaces/{}",
-        )
-        args_schema.watcher_rg._required = False
-        args_schema.watcher_rg._registered = False
-        args_schema.watcher_name._required = False
-        args_schema.watcher_name._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        get_network_watcher_from_vm(self)
-
-
-class ShowSecurityGroupView(_ShowSecurityGroupView):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.location = AAZResourceLocationArg(
-            registered=False,
-        )
-        args_schema.resource_group_name = AAZStrArg(
-            options=["-g", "--resource-group"],
-            help="Name of the resource group the target VM is in.",
-        )
-        args_schema.vm._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute"
-                     "/virtualMachines/{}",
-        )
-        args_schema.watcher_rg._required = False
-        args_schema.watcher_rg._registered = False
-        args_schema.watcher_name._required = False
-        args_schema.watcher_name._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        get_network_watcher_from_vm(self)
-
-
 class ShowTopology(_ShowTopology):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
-            help={
-                "short-summary": "Location. Defaults to the location of the target resource group.",
-                "long-summary": "Topology information is only shown for resources within the target resource group "
-                                "that are within the specified region."
-            },
+            help="Location. Defaults to the location of the target resource group. "
+                 "Topology information is only shown for resources within the target resource group "
+                 "that are within the specified region.",
         )
         args_schema.resource_group_name._options = ["-g", "--resource-group"]
         args_schema.vnet._fmt = AAZResourceIdArgFormat(
@@ -277,7 +332,7 @@ class ShowTopology(_ShowTopology):
 class TestConnectivity(_TestConnectivity):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        from azure.cli.core.aaz import AAZDictArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             registered=False,
@@ -286,7 +341,7 @@ class TestConnectivity(_TestConnectivity):
             options=["-g", "--resource-group"],
             help="Name of the resource group the target resource is in.",
         )
-        args_schema.headers = AAZListArg(
+        args_schema.headers = AAZDictArg(
             options=["--headers"],
             arg_group="HTTP Configuration",
             help="Space-separated list of headers in `KEY=VALUE` format.",
@@ -330,78 +385,8 @@ class TestConnectivity(_TestConnectivity):
                 name=args.dest_resource
             )
 
-        def header_trans(_, header):
-            parts = header.to_serialized_data().split("=")
-            if len(parts) != 2:
-                raise ValidationError(f"usage error '{header}': --headers KEY=VALUE [KEY=VALUE ...]")
-
-            return {
-                "name": parts[0],
-                "value": parts[1]
-            }
-
-        args.headers_obj = assign_aaz_list_arg(
-            args.headers_obj,
-            args.headers,
-            element_transformer=header_trans
-        )
-
-
-class TestIPFlow(_TestIPFlow):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.location = AAZResourceLocationArg(
-            registered=False,
-        )
-        args_schema.local = AAZStrArg(
-            options=["--local"],
-            help="Private IPv4 address for the VMs NIC and the port of the packet in X.X.X.X:PORT format. "
-                 "`*` can be used for port when direction is outbound.",
-            required=True,
-        )
-        args_schema.remote = AAZStrArg(
-            options=["--remote"],
-            help="IPv4 address and port for the remote side of the packet X.X.X.X:PORT format. "
-                 "`*` can be used for port when the direction is inbound.",
-            required=True,
-        )
-        args_schema.resource_group_name = AAZStrArg(
-            options=["-g", "--resource-group"],
-            help="Name of the resource group the target VM is in.",
-        )
-        args_schema.vm._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute"
-                     "/virtualMachines/{}",
-        )
-        args_schema.nic._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Network"
-                     "/networkInterfaces/{}",
-        )
-        args_schema.watcher_rg._required = False
-        args_schema.watcher_rg._registered = False
-        args_schema.watcher_name._required = False
-        args_schema.watcher_name._registered = False
-        args_schema.local_ip_address._required = False
-        args_schema.local_ip_address._registered = False
-        args_schema.local_port._required = False
-        args_schema.local_port._registered = False
-        args_schema.remote_ip_address._required = False
-        args_schema.remote_ip_address._registered = False
-        args_schema.remote_port._required = False
-        args_schema.remote_port._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        try:
-            args.local_ip_address, args.local_port = args.local.to_serialized_data().split(":")
-            args.remote_ip_address, args.remote_port = args.remote.to_serialized_data().split(":")
-        except:
-            raise ValidationError("usage error: the format of the '--local' and '--remote' should be like x.x.x.x:port")
-
-        get_network_watcher_from_vm(self)
+        if has_value(args.headers):
+            args.headers_obj = [{"name": k, "value": v} for k, v in args.headers.items()]
 
 
 def update_network_watcher_from_location(ctx, cli_ctx, watcher_name='watcher_name',
