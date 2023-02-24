@@ -73,7 +73,7 @@ class ImportExportProfiles:
     KVSET = "appconfig/kvset"
     DEFAULT = "appconfig/default"
 
-class ImportExportDiffKeys:
-    ADDED = "added"
-    DELETED = "deleted"
-    UPDATED = "updated"
+class JsonDiff:
+    ADD = "add"
+    DELETE = "delete"
+    UPDATE = "update"

@@ -29,7 +29,7 @@ from azure.cli.core.azclierror import (FileOperationError,
                                        AzureResponseError,
                                        RequiredArgumentMissingError)
 
-from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants, ImportExportDiffKeys)
+from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants, JsonDiff)
 from ._utils import prep_label_filter_for_url_encoding
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
@@ -664,14 +664,14 @@ def __print_kv_preview(old_json, new_json, strict=False, yes=False):
 def __print_preview(diff_output):
     # format result printing
     for action, changes in diff_output.items():
-        if action == ImportExportDiffKeys.UPDATED and len(changes) > 0:
+        if action == JsonDiff.UPDATE and len(changes) > 0:
             logger.warning('\nUpdating:')
             for update in changes:
                 logger.warning('- %s', json.dumps(update["old"], ensure_ascii=False))
                 logger.warning('+ %s', json.dumps(update["new"], ensure_ascii=False))
 
-        elif action in (ImportExportDiffKeys.DELETED, ImportExportDiffKeys.ADDED):
-            subtitle = 'Deleting' if action == ImportExportDiffKeys.DELETED else 'Adding'
+        elif action in (JsonDiff.DELETE, JsonDiff.ADD):
+            subtitle = 'Deleting' if action == JsonDiff.DELETE else 'Adding'
             logger.warning(f'\n{subtitle}:')
             
             for record in changes:
@@ -699,20 +699,20 @@ def __find_ff_diff(old_json, new_json, strict=False):
     for action, changes in res.items():
         if action.label == 'delete':
             if strict:
-                ff_diff[ImportExportDiffKeys.DELETED] = [{"key": key} for key in changes]
+                ff_diff[JsonDiff.DELETE] = [{"key": key} for key in changes]
             else:
                 continue  # we do not delete KVs while importing/exporting unless it is strict mode.
         if action.label == 'insert':
-            ff_diff[ImportExportDiffKeys.ADDED] = []
+            ff_diff[JsonDiff.ADD] = []
             for key, adding in changes.items():
                 record = {'feature': key}
                 for attribute, value in adding.items():
                     if attribute in ('description', 'conditions'):
                         continue
                     record[str(attribute)] = str(value)
-                ff_diff[ImportExportDiffKeys.ADDED].append(record)
+                ff_diff[JsonDiff.ADD].append(record)
         elif action.label == 'update':
-            ff_diff[ImportExportDiffKeys.UPDATED] = []
+            ff_diff[JsonDiff.UPDATE] = []
             for key, updates in changes.items():
                 updates = list(updates.values())[0]
                 attributes = list(updates.keys())
@@ -721,7 +721,7 @@ def __find_ff_diff(old_json, new_json, strict=False):
                 for attribute in attributes:
                     old_record[attribute] = old_json[key][attribute]
                     new_record[attribute] = new_json[key][attribute]
-                ff_diff[ImportExportDiffKeys.UPDATED].append({"old": old_record, "new": new_record})
+                ff_diff[JsonDiff.UPDATE].append({"old": old_record, "new": new_record})
     return ff_diff
 
 
@@ -744,18 +744,18 @@ def __find_kv_diff(old_json, new_json, strict=False):
     for action, changes in res.items():
         if action.label == 'delete':
             if strict:
-                kv_diff[ImportExportDiffKeys.DELETED] = [{"key": key} for key in changes]
+                kv_diff[JsonDiff.DELETE] = [{"key": key} for key in changes]
             else:
                 continue  # we do not delete KVs while importing/exporting unless it is strict mode.
         if action.label == 'insert':
-            kv_diff[ImportExportDiffKeys.ADDED] = []
+            kv_diff[JsonDiff.ADD] = []
             for key, adding in changes.items():
                 record = {'key': key}
                 for attribute, value in adding.items():
                     record[str(attribute)] = str(value)
-                kv_diff[ImportExportDiffKeys.ADDED].append(record)
+                kv_diff[JsonDiff.ADD].append(record)
         elif action.label == 'update':
-            kv_diff[ImportExportDiffKeys.UPDATED] = []
+            kv_diff[JsonDiff.UPDATE] = []
             for key, updates in changes.items():
                 updates = list(updates.values())[0]
                 attributes = list(updates.keys())
@@ -764,7 +764,7 @@ def __find_kv_diff(old_json, new_json, strict=False):
                 for attribute in attributes:
                     old_record[attribute] = old_json[key][attribute]
                     new_record[attribute] = new_json[key][attribute]
-                kv_diff[ImportExportDiffKeys.UPDATED].append({"old": old_record, "new": new_record})
+                kv_diff[JsonDiff.UPDATE].append({"old": old_record, "new": new_record})
     return kv_diff
 
 
