@@ -839,7 +839,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         memory = 1
         command = '"/bin/sh -c \'while true; do echo hello; sleep 20; done\'"'
         restart_policy = 'Never'
-        location = "eastus"
+        location = "northeurope"
         sku="Confidential"
         env = 'KEY1=VALUE1 KEY2=FOO=BAR='
 
