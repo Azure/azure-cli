@@ -56,12 +56,12 @@ class Start(AAZCommand):
         )
         _args_schema.storage_account = AAZStrArg(
             options=["--storage-account"],
-            help="Name or ID of the storage account in which to store the                                    troubleshooting results.",
+            help="Name or ID of the storage account in which to store the troubleshooting results.",
             required=True,
         )
         _args_schema.storage_path = AAZStrArg(
             options=["--storage-path"],
-            help="Fully qualified URI to the storage blob container in which to                                    store the troubleshooting results.",
+            help="Fully qualified URI to the storage blob container in which to store the troubleshooting results.",
             required=True,
         )
 

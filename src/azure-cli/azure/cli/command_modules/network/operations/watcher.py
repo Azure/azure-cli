@@ -56,7 +56,7 @@ def get_network_watcher_from_resource(cmd):
     args = cmd.ctx.args
     resource = get_arm_resource_by_id(cmd.cli_ctx, args.resource.to_serialized_data())
     args.location = resource.location  # pylint: disable=no-member
-    get_network_watcher_from_location(cmd)
+    # get_network_watcher_from_location(cmd)
 
 
 class TestIPFlow(_TestIPFlow):
@@ -403,7 +403,6 @@ class NwFlowLogCreate(_NwFlowLogCreate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
         args_schema.network_watcher_name._required = False
-        # args_schema.resource_group._registered = False
         args_schema.resource_group._required = False
         args_schema.location._required = True
         args_schema.flow_analytics_configuration._registered = False
@@ -473,7 +472,6 @@ class NwFlowLogCreate(_NwFlowLogCreate):
                                              self.cli_ctx,
                                              watcher_name='network_watcher_name',
                                              rg_name='resource_group')
-        # args = self.ctx.args
         if not has_value(args.enabled):
             args.enabled = True
         if sum(map(bool, [args.vnet, args.subnet, args.nic, args.nsg])) == 0:
@@ -520,12 +518,16 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
         args_schema.network_watcher_name._required = False
-        # args_schema.resource_group._registered = False
         args_schema.resource_group._required = False
         args_schema.location._required = True
         args_schema.flow_analytics_configuration._registered = False
         args_schema.retention_policy._registered = False
         args_schema.target_resource_id._registered = False
+        args_schema.retention = AAZIntArg(
+            options=['--retention'],
+            help="Number of days to retain logs.",
+            nullable=True,
+        )
         args_schema.traffic_analytics_interval = AAZIntArg(
             options=['--interval'], arg_group="Traffic Analytics",
             help="Interval in minutes at which to conduct flow analytics. Temporarily allowed values are 10 and 60.",
@@ -605,7 +607,7 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
         if args.retention > 0:
             args.retention_policy = {"days": args.retention, "enabled": (args.retention > 0)}
 
-        if args.traffic_analytics_workspace is not None:
+        if has_value(args.traffic_analytics_workspace):
             from azure.cli.core.commands.arm import get_arm_resource_by_id
             workspace = get_arm_resource_by_id(self.cli_ctx, args.traffic_analytics_workspace.to_serialized_data())
             if not workspace:
@@ -681,12 +683,11 @@ class NwTroubleshootingStart(_NwTroubleshootingStart):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat, AAZBoolArg, AAZStrArg
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat, AAZStrArg
 
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
         args_schema.network_watcher_name._required = False
-        # args_schema.resource_group._registered = False
         args_schema.resource_group._required = False
         args_schema.target_resource_id._registered = False
         args_schema.target_resource_id._required = False
@@ -706,6 +707,15 @@ class NwTroubleshootingStart(_NwTroubleshootingStart):
         args_schema.storage_account._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{}"
         )
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location to identify the exclusive Network Watcher under a region. "
+                 "Only one Network Watcher can be existed per subscription and region.",
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        args_schema.location._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -724,7 +734,6 @@ class NwTroubleshootingShow(_NwTroubleshootingShow):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
         args_schema.network_watcher_name._required = False
-        # args_schema.resource_group._registered = False
         args_schema.resource_group._required = False
         args_schema.target_resource_id._registered = False
         args_schema.target_resource_id._required = False
@@ -741,6 +750,15 @@ class NwTroubleshootingShow(_NwTroubleshootingShow):
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/{resource_type}/{}"
             )
         )
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location to identify the exclusive Network Watcher under a region. "
+                 "Only one Network Watcher can be existed per subscription and region.",
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        args_schema.location._registered = False
         return args_schema
 
     def pre_operations(self):
