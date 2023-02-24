@@ -3703,10 +3703,6 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
         logger.error("az bicep format could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
-def publish_bicep_file(cmd, file, target):
-    ensure_bicep_installation()
-
-
 def publish_bicep_file(cmd, file, target, documentationUri=None):
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
