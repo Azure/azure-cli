@@ -687,7 +687,7 @@ type: command
 short-summary: Create a new role assignment for a user, group, or service principal.
 long-summary: In a future release, --scope argument will become required for creating a role assignment. Please explicitly specify --scope.
 examples:
-  - name: Create role assignment to grant an assignee Reader role on a virtual machine.
+  - name: Create role assignment to grant the specified assignee the Reader role on an Azure virtual machine.
     text: az role assignment create --assignee sp_name --role Reader --scope /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/virtualMachines/MyVm
   - name: Create role assignment for an assignee with description and condition.
     text: >-
