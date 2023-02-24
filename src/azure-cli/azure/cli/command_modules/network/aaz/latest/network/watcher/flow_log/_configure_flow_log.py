@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network watcher flow-log configure-flow-log",
-)
 class ConfigureFlowLog(AAZCommand):
     """Configure flow logging on a network security group.
 

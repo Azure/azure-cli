@@ -20,7 +20,10 @@ from ..aaz.latest.network.watcher.connection_monitor import Show as _WatcherConn
 from ..aaz.latest.network.watcher.connection_monitor import List as _WatcherConnectionMonitorList
 from ..aaz.latest.network.watcher.connection_monitor import Delete as _WatcherConnectionMonitorDelete
 from ..aaz.latest.network.watcher.connection_monitor import Query as _WatcherConnectionMonitorQuery
-from ..aaz.latest.network.watcher.flow_log import Create as _NwFlowLogCreate, Update as _NwFlowLogUpdate
+from ..aaz.latest.network.watcher.flow_log import Create as _NwFlowLogCreate, Update as _NwFlowLogUpdate, \
+    List as _NwFlowLogList, Delete as _NwFlowLogDelete
+from ..aaz.latest.network.watcher.troubleshooting import Start as _NwTroubleshootingStart, \
+    Show as _NwTroubleshootingShow
 
 logger = get_logger(__name__)
 
@@ -46,6 +49,13 @@ def get_network_watcher_from_vm(cmd):
     vm_name = parse_resource_id(args.vm.to_serialized_data())["name"]
     vm = compute_client.get(args.resource_group_name, vm_name)
     args.location = vm.location
+
+
+def get_network_watcher_from_resource(cmd):
+    from azure.cli.core.commands.arm import get_arm_resource_by_id
+    args = cmd.ctx.args
+    resource = get_arm_resource_by_id(cmd.cli_ctx, args.resource.to_serialized_data())
+    args.location = resource.location  # pylint: disable=no-member
     get_network_watcher_from_location(cmd)
 
 
@@ -385,72 +395,6 @@ class WatcherConnectionMonitorDelete(_WatcherConnectionMonitorDelete):
                                              rg_name='resource_group_name')
 
 
-def create_nw_flow_log(cmd, location, flow_log_name, nsg=None, vnet=None, subnet=None,
-                       nic=None, storage_account=None, enabled=None, retention=0, log_format=None,
-                       log_version=None, traffic_analytics_workspace=None, traffic_analytics_interval=60,
-                       traffic_analytics_enabled=None, tags=None):
-    class NwFlowLogCreate(_NwFlowLogCreate):
-
-        @classmethod
-        def _build_arguments_schema(cls, *args, **kwargs):
-            from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZListArgFormat, \
-                AAZResourceIdArgFormat
-
-            args_schema = super()._build_arguments_schema(*args, **kwargs)
-            args_schema.network_watcher_name._registered = False
-            args_schema.network_watcher_name._required = False
-            args_schema.resource_group_name._registered = False
-            args_schema.resource_group_name._required = False
-            args_schema.location._required = True
-
-            return args_schema
-
-        def pre_operations(self):
-            update_network_watcher_from_location(self.ctx,
-                                                 self.cli_ctx,
-                                                 watcher_name='network_watcher_name',
-                                                 rg_name='resource_group')
-
-    if sum(map(bool, [vnet, subnet, nic, nsg])) == 0:
-        raise RequiredArgumentMissingError("Please enter atleast one target resource ID.")
-    if sum(map(bool, [vnet, nic, nsg])) > 1:
-        raise MutuallyExclusiveArgumentError("Please enter only one target resource ID.")
-    if subnet is not None:
-        target_resource_id = subnet
-    elif vnet is not None and subnet is None:
-        target_resource_id = vnet
-    elif nic is not None:
-        target_resource_id = nic
-    elif nsg is not None:
-        target_resource_id = nsg
-    flow_log_args = {"name": flow_log_name, "target_resource_id": target_resource_id, "location": location,
-                     "storage_id": storage_account, "enabled": enabled, "tags": tags}
-
-    if retention > 0:
-        flow_log_args['retention_policy'] = {"days": retention, "enabled": (retention > 0)}
-
-    if log_format is not None or log_version is not None:
-        flow_log_args['format'] = log_format
-        flow_log_args['log_version'] = log_version
-
-    if traffic_analytics_workspace is not None:
-
-        from azure.cli.core.commands.arm import get_arm_resource_by_id
-        workspace = get_arm_resource_by_id(cmd.cli_ctx, traffic_analytics_workspace)
-        if not workspace:
-            from knack.util import CLIError
-            raise CLIError('Name or ID of workspace is invalid')
-        flow_log_args['flow_analytics_configuration'] = {
-            "enabled": traffic_analytics_enabled,
-            "workspace_id": workspace.properties['customerId'],
-            "workspace_region": workspace.location,
-            "workspace_resource_id": workspace.id,
-            "traffic_analytics_interval": traffic_analytics_interval
-        }
-
-    return NwFlowLogCreate(cli_ctx=cmd.cli_ctx)(command_args=flow_log_args)
-
-
 class NwFlowLogCreate(_NwFlowLogCreate):
 
     @classmethod
@@ -462,6 +406,9 @@ class NwFlowLogCreate(_NwFlowLogCreate):
         # args_schema.resource_group._registered = False
         args_schema.resource_group._required = False
         args_schema.location._required = True
+        args_schema.flow_analytics_configuration._registered = False
+        args_schema.retention_policy._registered = False
+        args_schema.target_resource_id._registered = False
         args_schema.traffic_analytics_interval = AAZIntArg(
             options=['--interval'], arg_group="Traffic Analytics",
             help="Interval in minutes at which to conduct flow analytics. Temporarily allowed values are 10 and 60.",
@@ -514,6 +461,9 @@ class NwFlowLogCreate(_NwFlowLogCreate):
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/networkSecurityGroups/{}"
             )
         )
+        args_schema.storage_account._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{}"
+        )
 
         return args_schema
 
@@ -547,7 +497,7 @@ class NwFlowLogCreate(_NwFlowLogCreate):
         if has_value(args.traffic_analytics_workspace):
 
             from azure.cli.core.commands.arm import get_arm_resource_by_id
-            workspace = get_arm_resource_by_id(self.cli_ctx, args.traffic_analytics_workspace)
+            workspace = get_arm_resource_by_id(self.cli_ctx, args.traffic_analytics_workspace.to_serialized_data())
             if not workspace:
                 from knack.util import CLIError
                 raise CLIError('Name or ID of workspace is invalid')
@@ -573,6 +523,9 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
         # args_schema.resource_group._registered = False
         args_schema.resource_group._required = False
         args_schema.location._required = True
+        args_schema.flow_analytics_configuration._registered = False
+        args_schema.retention_policy._registered = False
+        args_schema.target_resource_id._registered = False
         args_schema.traffic_analytics_interval = AAZIntArg(
             options=['--interval'], arg_group="Traffic Analytics",
             help="Interval in minutes at which to conduct flow analytics. Temporarily allowed values are 10 and 60.",
@@ -625,12 +578,14 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/networkSecurityGroups/{}"
             )
         )
+        args_schema.storage_account._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{}"
+        )
 
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-
         update_network_watcher_from_location(self.ctx,
                                              self.cli_ctx,
                                              watcher_name='network_watcher_name',
@@ -648,20 +603,149 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
             args.target_resource_id = args.nsg
 
         if args.retention > 0:
-
             args.retention_policy = {"days": args.retention, "enabled": (args.retention > 0)}
 
         if args.traffic_analytics_workspace is not None:
             from azure.cli.core.commands.arm import get_arm_resource_by_id
-            workspace = get_arm_resource_by_id(self.cli_ctx, args.traffic_analytics_workspace)
+            workspace = get_arm_resource_by_id(self.cli_ctx, args.traffic_analytics_workspace.to_serialized_data())
             if not workspace:
                 from knack.util import CLIError
                 raise CLIError('Name or ID of workspace is invalid')
 
             args.flow_analytics_configuration = {
-                "enabled": args.traffic_analytics_enabled,
                 "workspace_id": workspace.properties['customerId'],
                 "workspace_region": workspace.location,
-                "workspace_resource_id": workspace.id,
-                "traffic_analytics_interval": args.traffic_analytics_interval
+                "workspace_resource_id": workspace.id
             }
+            if has_value(args.traffic_analytics_enabled):
+                args.flow_analytics_configuration['enabled'] = args.traffic_analytics_enabled
+            if has_value(args.traffic_analytics_interval):
+                args.flow_analytics_configuration['traffic_analytics_interval'] = args.traffic_analytics_interval
+
+
+class NwFlowLogList(_NwFlowLogList):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.network_watcher_name._registered = False
+        args_schema.network_watcher_name._required = False
+        args_schema.resource_group._registered = False
+        args_schema.resource_group._required = False
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location to identify the exclusive Network Watcher under a region. "
+                 "Only one Network Watcher can be existed per subscription and region.",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        return args_schema
+
+    def pre_operations(self):
+        update_network_watcher_from_location(self.ctx,
+                                             self.cli_ctx,
+                                             watcher_name='network_watcher_name',
+                                             rg_name='resource_group')
+
+
+class NwFlowLogDelete(_NwFlowLogDelete):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.network_watcher_name._registered = False
+        args_schema.network_watcher_name._required = False
+        args_schema.resource_group._registered = False
+        args_schema.resource_group._required = False
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location to identify the exclusive Network Watcher under a region. "
+                 "Only one Network Watcher can be existed per subscription and region.",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        return args_schema
+
+    def pre_operations(self):
+        update_network_watcher_from_location(self.ctx,
+                                             self.cli_ctx,
+                                             watcher_name='network_watcher_name',
+                                             rg_name='resource_group')
+
+
+class NwTroubleshootingStart(_NwTroubleshootingStart):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat, AAZBoolArg, AAZStrArg
+
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.network_watcher_name._registered = False
+        args_schema.network_watcher_name._required = False
+        # args_schema.resource_group._registered = False
+        args_schema.resource_group._required = False
+        args_schema.target_resource_id._registered = False
+        args_schema.target_resource_id._required = False
+        args_schema.resource_type = AAZStrArg(
+            options=["-t", "--resource-type"],
+            help="The type of target resource to troubleshoot, if resource ID is not specified.",
+            enum={"vnetGateway": "virtualNetworkGateways", "vpnConnection": "connections"},
+        )
+        args_schema.resource = AAZResourceIdArg(
+            options=["--resource"],
+            help="Name or ID of the resource to troubleshoot.",
+            required=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/{resource_type}/{}"
+            )
+        )
+        args_schema.storage_account._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{}"
+        )
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_resource(self)
+        get_network_watcher_from_location(self, watcher_name='network_watcher_name', rg_name='resource_group')
+        args = self.ctx.args
+        if has_value(args.resource):
+            args.target_resource_id = args.resource
+
+
+class NwTroubleshootingShow(_NwTroubleshootingShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat, AAZStrArg
+
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.network_watcher_name._registered = False
+        args_schema.network_watcher_name._required = False
+        # args_schema.resource_group._registered = False
+        args_schema.resource_group._required = False
+        args_schema.target_resource_id._registered = False
+        args_schema.target_resource_id._required = False
+        args_schema.resource_type = AAZStrArg(
+            options=["-t", "--resource-type"],
+            help="The resource type.",
+            enum={"vnetGateway": "virtualNetworkGateways", "vpnConnection": "connections"},
+        )
+        args_schema.resource = AAZResourceIdArg(
+            options=["--resource"],
+            help="Name or ID of the resource to troubleshoot.",
+            required=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/{resource_type}/{}"
+            )
+        )
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_resource(self)
+        get_network_watcher_from_location(self, watcher_name='network_watcher_name', rg_name='resource_group')
+        args = self.ctx.args
+        if has_value(args.resource):
+            args.target_resource_id = args.resource

@@ -90,7 +90,6 @@ class Update(AAZCommand):
         _args_schema.enabled = AAZBoolArg(
             options=["--enabled"],
             help="Enable logging.",
-            default=True,
             nullable=True,
         )
         _args_schema.storage_account = AAZStrArg(
@@ -108,6 +107,23 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        # define Arg Group "Format"
+
+        _args_schema = cls._args_schema
+        _args_schema.format = AAZStrArg(
+            options=["--format"],
+            arg_group="Format",
+            help="File type of the flow log.",
+            nullable=True,
+            enum={"JSON": "JSON"},
+        )
+        _args_schema.log_version = AAZIntArg(
+            options=["--log-version"],
+            arg_group="Format",
+            help="Version (revision) of the flow log.",
+            nullable=True,
+        )
+
         # define Arg Group "Parameters"
 
         # define Arg Group "Properties"
@@ -117,12 +133,6 @@ class Update(AAZCommand):
             options=["--flow-analytics-configuration"],
             arg_group="Properties",
             help="Parameters that define the configuration of traffic analytics.",
-            nullable=True,
-        )
-        _args_schema.format = AAZObjectArg(
-            options=["--format"],
-            arg_group="Properties",
-            help="Parameters that define the flow log format.",
             nullable=True,
         )
         _args_schema.retention_policy = AAZObjectArg(
@@ -138,49 +148,29 @@ class Update(AAZCommand):
         )
 
         flow_analytics_configuration = cls._args_schema.flow_analytics_configuration
-        flow_analytics_configuration.network_watcher_flow_analytics_configuration = AAZObjectArg(
-            options=["network-watcher-flow-analytics-configuration"],
-            help="Parameters that define the configuration of traffic analytics.",
-            nullable=True,
-        )
-
-        network_watcher_flow_analytics_configuration = cls._args_schema.flow_analytics_configuration.network_watcher_flow_analytics_configuration
-        network_watcher_flow_analytics_configuration.enabled = AAZBoolArg(
+        flow_analytics_configuration.enabled = AAZBoolArg(
             options=["enabled"],
             help="Flag to enable/disable traffic analytics.",
             nullable=True,
         )
-        network_watcher_flow_analytics_configuration.traffic_analytics_interval = AAZIntArg(
+        flow_analytics_configuration.traffic_analytics_interval = AAZIntArg(
             options=["traffic-analytics-interval"],
             help="The interval in minutes which would decide how frequently TA service should do flow analytics.",
             nullable=True,
         )
-        network_watcher_flow_analytics_configuration.workspace_id = AAZStrArg(
+        flow_analytics_configuration.workspace_id = AAZStrArg(
             options=["workspace-id"],
             help="The resource guid of the attached workspace.",
             nullable=True,
         )
-        network_watcher_flow_analytics_configuration.workspace_region = AAZStrArg(
+        flow_analytics_configuration.workspace_region = AAZStrArg(
             options=["workspace-region"],
             help="The location of the attached workspace.",
             nullable=True,
         )
-        network_watcher_flow_analytics_configuration.workspace_resource_id = AAZStrArg(
+        flow_analytics_configuration.workspace_resource_id = AAZStrArg(
             options=["workspace-resource-id"],
             help="Resource Id of the attached workspace.",
-            nullable=True,
-        )
-
-        format = cls._args_schema.format
-        format.type = AAZStrArg(
-            options=["type"],
-            help="The file type of flow log.",
-            nullable=True,
-            enum={"JSON": "JSON"},
-        )
-        format.version = AAZIntArg(
-            options=["version"],
-            help="The version (revision) of the flow log.",
             nullable=True,
         )
 
@@ -448,14 +438,14 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("enabled", AAZBoolType, ".enabled")
                 properties.set_prop("flowAnalyticsConfiguration", AAZObjectType, ".flow_analytics_configuration")
-                properties.set_prop("format", AAZObjectType, ".format")
+                properties.set_prop("format", AAZObjectType)
                 properties.set_prop("retentionPolicy", AAZObjectType, ".retention_policy")
                 properties.set_prop("storageId", AAZStrType, ".storage_account", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("targetResourceId", AAZStrType, ".target_resource_id", typ_kwargs={"flags": {"required": True}})
 
             flow_analytics_configuration = _builder.get(".properties.flowAnalyticsConfiguration")
             if flow_analytics_configuration is not None:
-                flow_analytics_configuration.set_prop("networkWatcherFlowAnalyticsConfiguration", AAZObjectType, ".network_watcher_flow_analytics_configuration")
+                flow_analytics_configuration.set_prop("networkWatcherFlowAnalyticsConfiguration", AAZObjectType)
 
             network_watcher_flow_analytics_configuration = _builder.get(".properties.flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration")
             if network_watcher_flow_analytics_configuration is not None:
@@ -467,8 +457,8 @@ class Update(AAZCommand):
 
             format = _builder.get(".properties.format")
             if format is not None:
-                format.set_prop("type", AAZStrType, ".type")
-                format.set_prop("version", AAZIntType, ".version")
+                format.set_prop("type", AAZStrType, ".format")
+                format.set_prop("version", AAZIntType, ".log_version")
 
             retention_policy = _builder.get(".properties.retentionPolicy")
             if retention_policy is not None:

@@ -87,7 +87,7 @@ class Create(AAZCommand):
         )
         _args_schema.enabled = AAZBoolArg(
             options=["--enabled"],
-            help="Enable logging.",
+            help="Enable logging. Default: true.",
         )
         _args_schema.storage_account = AAZStrArg(
             options=["--storage-account"],

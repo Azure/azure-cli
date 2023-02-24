@@ -5898,17 +5898,26 @@ def set_nsg_flow_logging(cmd, watcher_rg, watcher_name, nsg, storage_account=Non
 
 # combination of resource_group_name and nsg is for old output
 # combination of location and flow_log_name is for new output
-def show_nw_flow_logging(cmd, client, watcher_rg, watcher_name, location=None, resource_group_name=None, nsg=None,
+def show_nw_flow_logging(cmd, watcher_rg, watcher_name, location=None, resource_group_name=None, nsg=None,
                          flow_log_name=None):
     # deprecated approach to show flow log
     if nsg is not None:
-        flowlog_status_parameters = cmd.get_models('FlowLogStatusParameters')(target_resource_id=nsg)
-        return client.begin_get_flow_log_status(watcher_rg, watcher_name, flowlog_status_parameters)
+        from .aaz.latest.network.watcher.flow_log import ConfigureFlowLog
+        return ConfigureFlowLog(cli_ctx=cmd.cli_ctx)(command_args={"network_watcher_name": watcher_name,
+                                                                   "resource_group": watcher_rg,
+                                                                   "target_resource_id": nsg})
 
     # new approach to show flow log
-    from ._client_factory import cf_flow_logs
-    client = cf_flow_logs(cmd.cli_ctx, None)
-    return client.get(watcher_rg, watcher_name, flow_log_name)
+    from .aaz.latest.network.watcher.flow_log import Show
+    return Show(cli_ctx=cmd.cli_ctx)(command_args={"network_watcher_name": watcher_name,
+                                                   "resource_group": watcher_rg,
+                                                   "name": flow_log_name})
+    # if nsg is not None:
+    #     flowlog_status_parameters = cmd.get_models('FlowLogStatusParameters')(target_resource_id=nsg)
+    #     return client.begin_get_flow_log_status(watcher_rg, watcher_name, flowlog_status_parameters)
+    # from ._client_factory import cf_flow_logs
+    # client = cf_flow_logs(cmd.cli_ctx, None)
+    # return client.get(watcher_rg, watcher_name, flow_log_name)
 
 
 def create_nw_flow_log(cmd,

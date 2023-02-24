@@ -54,6 +54,16 @@ class Start(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+        _args_schema.storage_account = AAZStrArg(
+            options=["--storage-account"],
+            help="Name or ID of the storage account in which to store the                                    troubleshooting results.",
+            required=True,
+        )
+        _args_schema.storage_path = AAZStrArg(
+            options=["--storage-path"],
+            help="Fully qualified URI to the storage blob container in which to                                    store the troubleshooting results.",
+            required=True,
+        )
 
         # define Arg Group "Parameters"
 
@@ -62,22 +72,6 @@ class Start(AAZCommand):
             options=["--target-resource-id"],
             arg_group="Parameters",
             help="The target resource to troubleshoot.",
-            required=True,
-        )
-
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.storage_id = AAZStrArg(
-            options=["--storage-id"],
-            arg_group="Properties",
-            help="The ID for the storage account to save the troubleshoot result.",
-            required=True,
-        )
-        _args_schema.storage_path = AAZStrArg(
-            options=["--storage-path"],
-            arg_group="Properties",
-            help="The path to the blob to save the troubleshoot result in.",
             required=True,
         )
         return cls._args_schema
@@ -193,7 +187,7 @@ class Start(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("storageId", AAZStrType, ".storage_id", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("storageId", AAZStrType, ".storage_account", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("storagePath", AAZStrType, ".storage_path", typ_kwargs={"flags": {"required": True}})
 
             return self.serialize_content(_content_value)
