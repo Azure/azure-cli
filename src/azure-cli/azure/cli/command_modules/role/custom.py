@@ -50,6 +50,10 @@ CREDENTIAL_WARNING = (
     "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
     "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
 
+SCOPE_WARNING = (
+    "--scope argument will become required for creating a role assignment in the breaking change release of the fall "
+    "of 2023. Please explicitly specify --scope.")
+
 logger = get_logger(__name__)
 
 # pylint: disable=too-many-lines, protected-access
@@ -148,6 +152,9 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
                            scope=None, assignee_principal_type=None, description=None,
                            condition=None, condition_version=None, assignment_name=None):
     """Check parameters are provided correctly, then call _create_role_assignment."""
+    if not scope:
+        logger.warning(SCOPE_WARNING)
+
     if bool(assignee) == bool(assignee_object_id):
         raise CLIError('usage error: --assignee STRING | --assignee-object-id GUID')
 
