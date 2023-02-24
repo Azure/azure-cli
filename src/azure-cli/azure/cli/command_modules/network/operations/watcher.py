@@ -37,6 +37,9 @@ from ..aaz.latest.network.watcher.connection_monitor import Query as _WatcherCon
 from ..aaz.latest.network.watcher.connection_monitor import Update as _WatcherConnectionMonitorUpdate
 from ..aaz.latest.network.watcher.connection_monitor.output import Add as _WatcherConnectionMonitorOutputAdd
 from ..aaz.latest.network.watcher.connection_monitor.output import List as _WatcherConnectionMonitorOutputList
+from ..aaz.latest.network.watcher.connection_monitor.endpoint import Show as _WatcherConnectionMonitorEndpointShow
+from ..aaz.latest.network.watcher.connection_monitor.endpoint import Remove as _WatcherConnectionMonitorEndpointRemove
+from ..aaz.latest.network.watcher.connection_monitor.endpoint import List as _WatcherConnectionMonitorEndpointList
 
 logger = get_logger(__name__)
 
@@ -1107,7 +1110,6 @@ class WatcherConnectionMonitorOutputAdd(_WatcherConnectionMonitorOutputAdd):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False
-        
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
 
@@ -1164,3 +1166,106 @@ class WatcherConnectionMonitorOutputRemove(_WatcherConnectionMonitorUpdate):
         get_network_watcher_from_location(self)
         args = self.ctx.args
         args.outputs = []
+
+
+class WatcherConnectionMonitorEndpointShow(_WatcherConnectionMonitorEndpointShow):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.watcher_name._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_rg._required = False
+
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location. Values from: `az account list-locations`. "
+                 "You can configure the default location "
+                 "using `az configure --defaults location=<location>`.",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_location(self)
+
+
+class WatcherConnectionMonitorEndpointList(_WatcherConnectionMonitorEndpointList):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.watcher_name._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_rg._required = False
+
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location. Values from: `az account list-locations`. "
+                 "You can configure the default location "
+                 "using `az configure --defaults location=<location>`.",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_location(self)
+
+
+class WatcherConnectionMonitorEndpointRemove(_WatcherConnectionMonitorEndpointRemove):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.watcher_name._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_rg._required = False
+
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location. Values from: `az account list-locations`. "
+                 "You can configure the default location "
+                 "using `az configure --defaults location=<location>`.",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        args_schema.test_groups = AAZListArg(
+            options=["--test-groups"],
+            help="Space-separated list of names of test group which only need to "
+                 "be affected if specified.",
+            arg_group="V2 Test Group",
+        )
+        args_schema.test_groups.Element = AAZStrArg()
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_location(self)
+
+    def post_instance_delete(self):
+        args = self.ctx.args
+        instance = self.ctx.vars.instance
+        name = args.endpoint_name.to_serialized_data()
+        # refresh test groups
+
+        temp_test_group = instance.properties.test_groups
+        if has_value(args.test_groups):
+            temp_test_groups = [t for t in instance.properties.test_groups if t.name in args.test_groups]
+
+        for test_group in temp_test_groups:
+            if name in test_group.sources:
+                test_group.sources.remove(name)
+            if name in test_group.destinations:
+                test_group.destinations.remove(name)
+
