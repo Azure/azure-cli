@@ -164,10 +164,10 @@ def _get_aad_token_after_challenge(cli_ctx,
                              verify=(not should_disable_connection_verify()))
 
     if response.status_code == 429:
-        from ._errors import CONNECTIVITY_REFRESH_TOKEN_TOOMANYREQUESTS_ERROR
+        from ._errors import CONNECTIVITY_TOOMANYREQUESTS_ERROR
         if is_diagnostics_context:
-            return CONNECTIVITY_REFRESH_TOKEN_TOOMANYREQUESTS_ERROR.format_error_message(login_server)
-        raise CLIError(CONNECTIVITY_REFRESH_TOKEN_TOOMANYREQUESTS_ERROR.format_error_message(login_server)
+            return CONNECTIVITY_TOOMANYREQUESTS_ERROR.format_error_message(login_server)
+        raise CLIError(CONNECTIVITY_TOOMANYREQUESTS_ERROR.format_error_message(login_server)
                        .get_error_message())
     if response.status_code not in [200]:
         from ._errors import CONNECTIVITY_REFRESH_TOKEN_ERROR
@@ -411,8 +411,10 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
                                                             permission,
                                                             use_acr_audience=use_acr_audience)
         except CLIError as e:
-            logger.warning("%s: %s CLI will attempt to get the admin credentials (if enabled).",
-                           AAD_TOKEN_BASE_ERROR_MESSAGE, str(e))
+            if '429' in str(e):
+                raise CLIError("{}: {}".format(AAD_TOKEN_BASE_ERROR_MESSAGE, str(e)))
+            else:
+                logger.warning("%s: %s", AAD_TOKEN_BASE_ERROR_MESSAGE, str(e))
 
     # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
     if registry:
@@ -422,14 +424,11 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
                 cred = cf_acr_registries(cli_ctx).list_credentials(resource_group_name, registry_name)
                 return login_server, cred.username, cred.passwords[0].value
             except CLIError as e:
-                logger.warning("%s: %s CLI will attempt to get credentials with username and password.",
-                               ADMIN_USER_BASE_ERROR_MESSAGE, str(e))
+                logger.warning("%s: %s", ADMIN_USER_BASE_ERROR_MESSAGE, str(e))
         else:
-            logger.warning("%s: %s CLI will attempt to get credentials with username and password.",
-                           ADMIN_USER_BASE_ERROR_MESSAGE, "Admin user is disabled.")
+            logger.warning("%s: %s", ADMIN_USER_BASE_ERROR_MESSAGE, "Admin user is disabled.")
     else:
-        logger.warning("%s: %s  CLI will attempt to get credentials with username and password.",
-                       ADMIN_USER_BASE_ERROR_MESSAGE, resource_not_found)
+        logger.warning("%s: %s", ADMIN_USER_BASE_ERROR_MESSAGE, resource_not_found)
 
     # 4. if we still don't have credentials, prompt the user
     try:
