@@ -7,7 +7,6 @@ from knack.log import get_logger
 from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id
 
 from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZResourceLocationArgFormat
-from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.arm import get_arm_resource_by_id
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
