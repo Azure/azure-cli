@@ -103,6 +103,7 @@ adaptive_network_hardenings_resource_adaptive_network_hardenings_resource_name =
 
 # Adaptive Application Controls
 adaptive_application_controls_group_name = CLIArgumentType(option_list=('--group-name'), metave='GROUPNAME', help='Name of an application control VM/server group')
+adaptive_application_controls_location = CLIArgumentType(options_list=('--location', '-l'), metavar='LOCATION', help='Location of the resource. Possible values are "centralsus", "westeurope". Please use "list" operation to get all resources and locations')
 
 # Automations
 automation_scopes_arg_type = CLIArgumentType(options_list=('--scopes'), metavar='SCOPES', help='A collection of scopes on which the security automations logic is applied')
@@ -447,6 +448,9 @@ def load_arguments(self, _):
             c.argument(
                 'group_name',
                 arg_type=adaptive_application_controls_group_name)
+            c.argument(
+                'location',
+                arg_type=adaptive_application_controls_location)
 
     for scope in ['setting']:
         with self.argument_context('security {}'.format(scope)) as c:

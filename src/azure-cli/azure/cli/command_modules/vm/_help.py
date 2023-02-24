@@ -85,10 +85,10 @@ examples:
         az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --security-data-uri GuestStateDiskVhdUri --security-type TrustedLaunch --hyper-v-generation V2
   - name: Create a standard disk for uploading blobs.
     text: >
-        az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --upload-type Upload
+        az disk create -g MyResourceGroup -n MyDisk --upload-size-bytes 20972032 --upload-type Upload
   - name: Create an OS disk for uploading along with VM guest state.
     text: >
-        az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --upload-type UploadWithSecurityData --security-type TrustedLaunch --hyper-v-generation V2
+        az disk create -g MyResourceGroup -n MyDisk --upload-size-bytes 20972032 --upload-type UploadWithSecurityData --security-type TrustedLaunch --hyper-v-generation V2
 """
 
 helps['disk delete'] = """
@@ -504,6 +504,41 @@ examples:
   - name: Show validate of an existing image builder template.
     text: |
         az image builder validator show -n myTemplate -g myGroup --defer
+"""
+
+helps['image builder identity'] = """
+type: group
+short-summary: Manage identities of an image builder template.
+"""
+
+helps['image builder identity assign'] = """
+type: command
+short-summary: Add managed identities to an existing image builder template. Currently, only one user identity is supported.
+examples:
+  - name: Add a user assigned managed identity to an existing image builder template.
+    text: >
+        az image builder identity assign --name MyImageBuilderTemplate --resource-group MyResourceGroup --user-assigned MyAssignedId
+"""
+
+helps['image builder identity remove'] = """
+type: command
+short-summary: Remove managed identities from an existing image builder template.
+examples:
+  - name: Remove a user assigned managed identity from an existing image builder template.
+    text: >
+        az image builder identity remove --name MyImageBuilderTemplate --resource-group MyResourceGroup --user-assigned MyAssignedId
+  - name: Remove all user assigned managed identities from an existing image builder.
+    text: >
+        az image builder identity remove --name MyImageBuilderTemplate --resource-group MyResourceGroup --user-assigned
+"""
+
+helps['image builder identity show'] = """
+type: command
+short-summary: Display managed identities of a image builder template.
+examples:
+  - name: Display managed identities of a image builder template.
+    text: |
+        az image builder identity show --name MyImageBuilderTemplate --resource-group MyResourceGroup
 """
 
 helps['image builder delete'] = """
@@ -994,6 +1029,22 @@ examples:
         --target-regions westus=2=standard eastus \\
         --target-region-encryption WestUSDiskEncryptionSet1,0,WestUSDiskEncryptionSet2 \\
         EastUSDiskEncryptionSet1,0,EastUSDiskEncryptionSet2
+  - name: Add a new image version and copy it to extended locations.
+    text: |
+        az sig image-version create --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --gallery-image-version 1.0.0 --replica-count 1 \\
+        --storage-account-type Standard_ZRS --managed-image image-name \\
+        --target-edge-zones westus=microsoftlosangeles1 eastus=microsoftlosangeles2=1 \\
+        brazilsouth=2=standard_lrs
+  - name: Add a new image version and copy it to extended locations with encryption using a disk encryption set.
+    text: |
+        az sig image-version create --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --gallery-image-version 1.0.0 \\
+        --virtual-machine /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM \\
+        --target-edge-zones westus=microsoftlosangeles1 \\
+        --target-edge-zone-encryption microsoftlosangeles1,WestUSDiskEncryptionSet1,0,WestUSDiskEncryptionSet2
   - name: Add a new image version and don't wait on it. Later you can invoke "az sig image-version wait" command when ready to create a vm from the gallery image version
     text: |
         az sig image-version create --resource-group MyResourceGroup \\
@@ -1053,6 +1104,18 @@ examples:
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.0.0 \\
         --target-regions westcentralus=2 eastus2
+  - name: Change the replication extended locations
+    text: |
+        az sig image-version update --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --gallery-image-version 1.0.0 \\
+        --target-edge-zones westus=microsoftlosangeles1 eastus=microsoftlosangeles2=1
+  - name: Clear the replication extended locations
+    text: |
+        az sig image-version update --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --gallery-image-version 1.0.0 \\
+        --target-edge-zones None
   - name: Replicate to an additional region. Optional, you can set the replica count for the region and exclude this image when using the latest version of the image definition.
     text: |
         az sig image-version update --resource-group MyResourceGroup \\
@@ -1593,6 +1656,9 @@ examples:
   - name: Create a VM by attaching to a managed operating system disk.
     text: >
         az vm create -g MyResourceGroup -n MyVm --attach-os-disk MyOsDisk --os-type linux
+  - name: Create a VM by attaching to an unmanaged operating system disk from a VHD blob uri.
+    text: >
+        az vm create -g MyResourceGroup -n MyVm --attach-os-disk https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd --os-type linux --use-unmanaged-disk
   - name: 'Create an Ubuntu Linux VM using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/linux/using-cloud-init.'
     text: >
         az vm create -g MyResourceGroup -n MyVm --image debian --custom-data MyCloudInitScript.yml
@@ -1645,7 +1711,7 @@ examples:
 
 helps['vm deallocate'] = """
 type: command
-short-summary: Deallocate a VM so that computing resources are no longer allocated (charged no longer apply). The status will change from 'Stopped' to 'Stopped (Deallocated)'.
+short-summary: Deallocate a VM so that computing resources are no longer allocated (charges no longer apply). The status will change from 'Stopped' to 'Stopped (Deallocated)'.
 long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/capture-image'
 examples:
   - name: Deallocate, generalize, and capture a stopped virtual machine.
@@ -1931,7 +1997,7 @@ examples:
   - name: Find the available versions for the Docker extension.
     text: >
         az vm extension image list-versions --publisher Microsoft.Azure.Extensions \\
-            -l westus -n DockerExtension -otable
+            -l westus -n DockerExtension -o table
 """
 
 helps['vm extension image show'] = """
@@ -2094,22 +2160,6 @@ examples:
   - name: Create a dedicated host group. (autogenerated)
     text: |
         az vm host group create --name MyDedicatedHostGroup --platform-fault-domain-count 2 --resource-group MyResourceGroup
-    crafted: true
-"""
-
-helps['vm host group list'] = """
-type: command
-short-summary: List dedicated host groups.
-long-summary: Lists dedicated host groups by subscription. If resource group is specified, lists dedicated host groups by resource group.
-"""
-
-helps['vm host group show'] = """
-type: command
-short-summary: Get the details of a dedicated host group.
-examples:
-  - name: Get the details of a dedicated host group (autogenerated)
-    text: |
-        az vm host group show --name MyDedicatedHostGroup --resource-group MyResourceGroup
     crafted: true
 """
 
@@ -3343,22 +3393,19 @@ examples:
     crafted: true
 """
 
-helps['vmss nic'] = """
-type: group
-short-summary: Manage network interfaces of a VMSS.
-"""
-
 helps['vmss reimage'] = """
 type: command
 short-summary: Reimage VMs within a VMSS.
-parameters:
-  - name: --instance-id
-    short-summary: VM instance ID. If missing, reimage all instances.
 examples:
-  - name: Reimage VMs within a VMSS. (autogenerated)
+  - name: Reimage a VM instance within a VMSS.
     text: |
-        az vmss reimage --instance-id 1 --name MyScaleSet --resource-group MyResourceGroup --subscription MySubscription
-    crafted: true
+        az vmss reimage --instance-ids 1 --name MyScaleSet --resource-group MyResourceGroup --subscription MySubscription
+  - name: Reimage a batch of VM instances within a VMSS.
+    text: |
+        az vmss reimage --instance-ids 1 2 3 --name MyScaleSet --resource-group MyResourceGroup --subscription MySubscription
+  - name: Reimage all the VM instances within a VMSS.
+    text: |
+        az vmss reimage --name MyScaleSet --resource-group MyResourceGroup --subscription MySubscription
 """
 
 helps['vmss restart'] = """
@@ -3856,11 +3903,6 @@ disks are specified, all disks will be included."
 
                az restore-point create --exclude-disks "/subscriptions/{subscription-id}/resourceGroups/myResourceGroup/providers/Microsoft.Compute/disks/disk123" \
                --resource-group "myResourceGroup" --collection-name "rpcName" --name "rpName"
-"""
-
-helps['restore-point delete'] = """
-    type: command
-    short-summary: "Delete the restore point."
 """
 
 helps['restore-point wait'] = """

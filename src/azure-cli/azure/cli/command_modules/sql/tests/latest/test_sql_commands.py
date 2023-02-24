@@ -28,6 +28,7 @@ from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
 from azure.cli.command_modules.sql.custom import (
+    AlwaysEncryptedEnclaveType,
     ClientAuthenticationType,
     ClientType,
     ComputeModelType,
@@ -77,6 +78,7 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     subscription_id = '8313371e-0879-428e-b1da-6353575a9192'
+    existing_mi_name = 'autobot-managed-instance'
     group = 'CustomerExperienceTeam_RG'
     location = 'westcentralus'
     vnet_name = 'vnet-mi-tooling'
@@ -108,7 +110,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=managed_instance_name_prefix, parameter_name='mi', admin_user='admin123',
                  minimalTlsVersion='', user_assigned_identity_id='', identity_type='', pid='', otherParams='',
                  admin_password='SecretPassword123SecretPassword', public=True, tags='', is_geo_secondary=False,
-                 skip_delete=False):
+                 skip_delete=False, vnet_name = 'vnet-mi-tooling'):
         super(ManagedInstancePreparer, self).__init__(name_prefix, server_name_max_length)
         self.parameter_name = parameter_name
         self.admin_user = admin_user
@@ -122,6 +124,8 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         self.pid = pid
         self.otherParams = otherParams
         self.is_geo_secondary = is_geo_secondary
+        self.subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(self.subscription_id, self.group, vnet_name, self.subnet_name)
+
 
     def create_resource(self, name, **kwargs):
         location = self.location
@@ -916,6 +920,48 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('ledgerOn', True)])
 
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
+    def test_sql_db_preferred_enclave_type(self, resource_group, resource_group_location, server):
+        database_name_one = "cliautomationdb01"
+        database_name_two = "cliautomationdb02"
+        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default
+        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs
+
+        # test sql db is created with default enclave type
+        self.cmd('sql db create -g {} --server {} --name {} --preferred-enclave-type {} --yes'
+                 .format(resource_group, server, database_name_one, preferred_enclave_type_default),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server, database_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
+        # test sql db is created with vbs enclave type
+        self.cmd('sql db create -g {} --server {} --name {} --preferred-enclave-type {} --yes'
+                 .format(resource_group, server, database_name_two, preferred_enclave_type_vbs),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)])
+
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server, database_name_two),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)])
+
 
 class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westeurope')
@@ -1196,6 +1242,45 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             checks=[NoneCheck()])
 
 
+class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
+    @record_only()
+    # using fixed resources because of long time preperation for geo-redundant backup
+    # need to change resources for others who want to rerecord this test
+    def test_sql_db_geo_restore(
+            self):
+        self.kwargs.update({
+            'rg': 'rebeccaxu-test',
+            'loc': 'eastus',
+            'server_name': 'rebeccaxu-eastus-svr',
+            'database_name': 'cli-test-hs',
+        })
+
+        # test list geo backups for database
+        self.cmd(
+            'sql db geo-backup list -g {rg} -s {server_name}',
+            checks=[
+                self.greater_than('length(@)', 0)])
+
+        # setup for test show geo backup
+        backup = self.cmd(
+            'sql db geo-backup show -s {server_name} -d {database_name} -g {rg}').get_output_in_json()
+        
+        backup_id = backup['id']
+
+        self.kwargs.update({
+            'backup_id': backup_id,
+            'dest_database_name': "cli-georestore"
+        })
+
+        self.cmd(
+            'sql db geo-backup restore --geo-backup-id {backup_id} --dest-database {dest_database_name}'
+            ' --dest-server {server_name} --resource-group {rg}',
+            checks=[
+                self.check('name', '{dest_database_name}')])
+                
+        self.cmd('sql db delete -g {rg} -s {server_name} -n {dest_database_name} --yes')
+
+
 class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
     @ManagedInstancePreparer()
@@ -1462,12 +1547,13 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
                  .format(resource_group, server, elastic_pool))
 
         # Create database and wait for first backup to exist
-        _create_db_wait_for_first_backup(self, resource_group, server, database_name)
+        db = _create_db_wait_for_first_backup(self, resource_group, server, database_name)
+        timestamp = _get_earliest_restore_date(db)
 
         # Restore to standalone db
         self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
                  ' --service-objective {} --edition {}'
-                 .format(resource_group, server, database_name, datetime.utcnow().isoformat(),
+                 .format(resource_group, server, database_name, timestamp.isoformat(),
                          restore_standalone_database_name, restore_service_objective,
                          restore_edition),
                  checks=[
@@ -1481,7 +1567,7 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
         # in transform func which only runs after `show`/`list` commands.
         self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
                  ' --elastic-pool {}'
-                 .format(resource_group, server, database_name, datetime.utcnow().isoformat(),
+                 .format(resource_group, server, database_name, timestamp.isoformat(),
                          restore_pool_database_name, elastic_pool),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -1500,7 +1586,7 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
         bsr_database = 'bsr_database'
         backup_storage_redundancy = 'geo'
         self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {} --backup-storage-redundancy {}'
-                 .format(resource_group, server, database_name, datetime.utcnow().isoformat(),
+                 .format(resource_group, server, database_name, timestamp.isoformat(),
                          bsr_database, backup_storage_redundancy),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -2037,6 +2123,227 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('logAnalyticsTargetState', state_disabled),
                      JMESPathCheck('eventHubTargetState', state_disabled),
                      JMESPathCheck('isAzureMonitorTargetEnabled', False)])
+
+
+class SqlServerAdvancedThreatProtectionSettingsScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='westeurope')
+    @SqlServerPreparer(location='westeurope')
+    def test_sql_server_advanced_threat_protection(self, resource_group,
+                                                   resource_group_location, server):
+        state_enabled = 'Enabled'
+        state_disabled = 'Disabled'
+
+        # get advanced threat protection settings
+        self.cmd('sql server advanced-threat-protection-setting show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # update advanced threat protection settings - enable
+        self.cmd('sql server advanced-threat-protection-setting update -g {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, server, state_enabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get advanced threat protection settings after enabling
+        self.cmd('sql server advanced-threat-protection-setting show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # update advanced threat protection settings - disable
+        self.cmd('sql server advanced-threat-protection-setting update -g {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, server, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # get advanced threat protection settings after disabling back
+        self.cmd('sql server advanced-threat-protection-setting show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+
+class SqlDbAdvancedThreatProtectionSettingsScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='westeurope')
+    @SqlServerPreparer(location='westeurope')
+    def test_sql_db_advanced_threat_protection(self, resource_group,
+                                               resource_group_location, server):
+        database_name = "cliautomationdb01"
+        state_enabled = 'Enabled'
+        state_disabled = 'Disabled'
+
+        # create db
+        self.cmd('sql db create -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('status', 'Online')])
+
+        # get advanced threat protection settings
+        self.cmd('sql db advanced-threat-protection-setting show -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # update advanced threat protection settings - enable
+        self.cmd('sql db advanced-threat-protection-setting update -g {} -s {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, server, database_name, state_enabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get advanced threat protection settings after enabling
+        self.cmd('sql db advanced-threat-protection-setting show -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # update advanced threat protection settings - disable
+        self.cmd('sql db advanced-threat-protection-setting update -g {} -s {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, server, database_name, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # get advanced threat protection settings after disabling back
+        self.cmd('sql db advanced-threat-protection-setting show -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+
+class SqlManagedInstanceAdvancedThreatProtectionSettingsScenarioTest(ScenarioTest):
+    @ManagedInstancePreparer()
+    def test_sql_mi_advanced_threat_protection(self, mi, rg):
+        managed_instance_name = mi
+        resource_group = rg
+        edition_updated = 'BusinessCritical'
+        v_core_update = 4
+        state_enabled = 'Enabled'
+        state_disabled = 'Disabled'
+
+        # Managed instance becomes ready before the operation is completed. For that reason, we should wait
+        # for the operation to complete in order to proceed with testing.
+        time.sleep(120)
+
+        # get advanced threat protection settings
+        self.cmd('sql mi advanced-threat-protection-setting show -g {} -n {}'
+                 .format(resource_group, managed_instance_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # update advanced threat protection settings - enable
+        self.cmd('sql mi advanced-threat-protection-setting update -g {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, managed_instance_name, state_enabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get advanced threat protection settings after enabling
+        self.cmd('sql mi advanced-threat-protection-setting show -g {} -n {}'
+                 .format(resource_group, managed_instance_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # update advanced threat protection settings - disable
+        self.cmd('sql mi advanced-threat-protection-setting update -g {} -n {}'
+                 ' --state {}'
+                 .format(resource_group, managed_instance_name, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # get advanced threat protection settings after disabling back
+        self.cmd('sql mi advanced-threat-protection-setting show -g {} -n {}'
+                 .format(resource_group, managed_instance_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+
+class SqlManagedDatabaseAdvancedThreatProtectionSettingsScenarioTest(ScenarioTest):
+    @ManagedInstancePreparer()
+    def test_sql_midb_advanced_threat_protection(self, mi, rg):
+        managed_instance_name = mi
+        dbname = "cliautomationdb01"
+        resource_group = rg
+        edition_updated = 'BusinessCritical'
+        v_core_update = 4
+        state_enabled = 'Enabled'
+        state_disabled = 'Disabled'
+
+        # Managed instance becomes ready before the operation is completed. For that reason, we should wait
+        # for the operation to complete in order to proceed with testing.
+        time.sleep(120)
+
+        self.kwargs.update({
+            'loc': ManagedInstancePreparer.location,
+            'rg': rg,
+            'managed_instance_name': mi,
+            'database_name': dbname,
+            'collation': ManagedInstancePreparer.collation,
+        })
+
+        # create database
+        self.cmd('sql midb create -g {rg} --mi {managed_instance_name} -n {database_name} --collation {collation}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('name', '{database_name}'),
+                     self.check('location', '{loc}'),
+                     self.check('collation', '{collation}'),
+                     self.check('status', 'Online')])
+
+        # get advanced threat protection settings
+        self.cmd('sql midb advanced-threat-protection-setting show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, dbname),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # update advanced threat protection settings - enable
+        self.cmd('sql midb advanced-threat-protection-setting update -g {} --mi {} -n {} --state {}'
+                 .format(resource_group, managed_instance_name, dbname, state_enabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get advanced threat protection settings after enabling
+        self.cmd('sql midb advanced-threat-protection-setting show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, dbname),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # update advanced threat protection settings - disable
+        self.cmd('sql midb advanced-threat-protection-setting update -g {} --mi {} -n {} --state {}'
+                 .format(resource_group, managed_instance_name, dbname, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # get advanced threat protection settings after disabling back
+        self.cmd('sql midb advanced-threat-protection-setting show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, dbname),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
 
 
 class SqlServerMSSupportScenarioTest(ScenarioTest):
@@ -5727,16 +6034,22 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
         primary_location = ManagedInstancePreparer.location
         secondary_location = ManagedInstancePreparer.sec_location
 
+        secondary_type = "Standby"
+        self.kwargs.update({
+            'secondary_type': secondary_type
+        })
+
         # Create Failover Group
         self.cmd(
-            'sql instance-failover-group create -n {} -g {} --mi {} --partner-resource-group {} --partner-mi {} --failover-policy Automatic --grace-period 2'
+            'sql instance-failover-group create -n {} -g {} --mi {} --partner-resource-group {} --partner-mi {} --failover-policy Automatic --grace-period 2 --secondary-type {}'
                 .format(failover_group_name, resource_group_name, primary_name, secondary_group,
-                        secondary_name),
+                        secondary_name, secondary_type),
             checks=[
                 JMESPathCheck('name', failover_group_name),
                 JMESPathCheck('resourceGroup', resource_group_name),
                 JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
-                JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120)
+                JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
+                JMESPathCheck('secondaryType', secondary_type)
             ])
 
         # Get Instance Failover Group on a partner managed instance and check if role is secondary
@@ -5747,16 +6060,23 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
                      JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
                      JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
-                     JMESPathCheck('replicationRole', 'Secondary')
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('secondaryType', secondary_type)
                  ])
 
+        secondary_type = "Geo"
+        self.kwargs.update({
+            'secondary_type': secondary_type
+        })
+
         # Update Failover Group
-        self.cmd('sql instance-failover-group update -g {} -n {} -l {} --grace-period 3 '
-                 .format(resource_group_name, failover_group_name, primary_location),
+        self.cmd('sql instance-failover-group update -g {} -n {} -l {} --grace-period 3 --secondary-type {}'
+                 .format(resource_group_name, failover_group_name, primary_location, secondary_type),
                  checks=[
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
                      JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
-                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled')
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('secondaryType', secondary_type)
                  ])
 
         # Check if properties got propagated to secondary server
@@ -5767,7 +6087,8 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
                      JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
                      JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
-                     JMESPathCheck('replicationRole', 'Secondary')
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('secondaryType', secondary_type)
                  ])
 
         # Update Failover Group failover policy to Manual
@@ -6362,3 +6683,94 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
         # list 0 instance links
         self.cmd('sql mi link list -g {rg} --instance-name {mi}',
                     checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+
+
+class SqlManagedInstanceRestoreCrossSubscriptionScenarioTest(ScenarioTest):
+    @ManagedInstancePreparer()
+    def test_sql_managed_deleted_cross_subscription_restore(self, mi, rg):
+        from datetime import datetime, timezone, timedelta
+        resource_prefix = 'MIRestoreCrossSubDB'
+
+        self.kwargs.update({
+            'rg': rg,
+            'managed_instance_name': mi,
+            'database_name': self.create_random_name(resource_prefix, 50),
+            'source_sub': "62e48210-5e43-423e-889b-c277f3e08c39",
+            'source_rg': "gen4-testing-RG",
+            'source_mi': "filiptanic-gen4-on-gen7-different-subnet",
+            'source_db': "cross-sub-restored",
+            'pit': (datetime.now(timezone.utc) + timedelta(minutes=-15)).isoformat()
+        })
+
+        # test restore deleted database
+        self.cmd(
+            'sql midb restore --dest-name {database_name} --dest-mi {managed_instance_name} --dest-resource-group {rg} --source-sub {source_sub} --mi {source_mi} -g {source_rg} -n {source_db} --time {pit}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('name', '{database_name}'),
+                self.check('status', 'Online')])
+
+
+class SqlManagedInstanceDtcScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    @ManagedInstancePreparer(parameter_name = 'mi', vnet_name='vnet-managed-instance-v2')
+    def test_sql_mi_dtc_mgmt(self, mi, rg):
+        self.kwargs.update({
+            'rg': rg,
+            'mi': mi
+        })
+        # check if test MI got created
+        self.cmd('sql mi show -g {rg} -n {mi}',
+        checks=[
+            JMESPathCheck('name', mi),
+            JMESPathCheck('resourceGroup', rg)])
+        
+        dtc = self.cmd('sql mi dtc show -g {rg} --mi {mi}',
+        checks=[
+            JMESPathCheck('name', 'current'),
+            JMESPathCheck('resourceGroup', rg),
+            JMESPathCheck('type', 'Microsoft.Sql/managedInstances/dtc')
+        ]).get_output_in_json()
+
+        # negate some parameters and set them as update parameters
+        dtcEnabled = not dtc['dtcEnabled']
+        xaTransactionsEnabled = not dtc['securitySettings']['xaTransactionsEnabled']
+        allowInboundEnabled = not dtc['securitySettings']['transactionManagerCommunicationSettings']['allowInboundEnabled']
+        self.kwargs.update({
+            'dtcEnabled': dtcEnabled,
+            'xaTransactionsEnabled': xaTransactionsEnabled,
+            'allowInboundEnabled': allowInboundEnabled
+        })
+        self.cmd('sql mi dtc update -g {rg} --mi {mi} --dtc-enabled {dtcEnabled} --xa-transactions-enabled {xaTransactionsEnabled} --allow-inbound-enabled {allowInboundEnabled}')
+
+        # get DTC and check if parameters were updated successfully
+        dtc = self.cmd('sql mi dtc show -g {rg} --mi {mi}').get_output_in_json()
+        self.assertEqual(dtc['dtcEnabled'], dtcEnabled)
+        self.assertEqual(dtc['securitySettings']['xaTransactionsEnabled'], xaTransactionsEnabled)
+        self.assertEqual(dtc['securitySettings']['transactionManagerCommunicationSettings']['allowInboundEnabled'], allowInboundEnabled)
+
+
+class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
+    def test_sql_midb_recover(self):
+        self.kwargs.update({
+            'rg': ManagedInstancePreparer.group,
+            'mi': ManagedInstancePreparer.existing_mi_name
+        })
+
+        # Due to long creation of geo backups, use existing MI
+        backups_list = self.cmd('sql recoverable-midb list -g {rg} --mi {mi}').get_output_in_json()
+        database_name = backups_list[0]['name']
+        self.kwargs.update({
+            'geodb': database_name
+        })
+
+        recoverable_db = self.cmd('sql recoverable-midb show -g {rg} --mi {mi} -n {geodb}',
+                    checks=[
+                        JMESPathCheck('name', database_name),
+                        JMESPathCheck('resourceGroup',  ManagedInstancePreparer.group)]).get_output_in_json()
+        self.kwargs.update({
+            'recoverable_db': recoverable_db['id']
+        })
+        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db -r {recoverable_db}',
+                checks=[
+                    JMESPathCheck('name', "recovered_db")])

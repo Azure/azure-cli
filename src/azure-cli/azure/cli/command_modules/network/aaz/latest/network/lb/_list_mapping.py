@@ -217,46 +217,48 @@ class ListMapping(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_backend_address_inbound_nat_rule_port_mappings_read(cls._schema_on_200)
+            _ListMappingHelper._build_schema_backend_address_inbound_nat_rule_port_mappings_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
 
-_schema_backend_address_inbound_nat_rule_port_mappings_read = None
+class _ListMappingHelper:
+    """Helper class for ListMapping"""
 
+    _schema_backend_address_inbound_nat_rule_port_mappings_read = None
 
-def _build_schema_backend_address_inbound_nat_rule_port_mappings_read(_schema):
-    global _schema_backend_address_inbound_nat_rule_port_mappings_read
-    if _schema_backend_address_inbound_nat_rule_port_mappings_read is not None:
-        _schema.inbound_nat_rule_port_mappings = _schema_backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings
-        return
+    @classmethod
+    def _build_schema_backend_address_inbound_nat_rule_port_mappings_read(cls, _schema):
+        if cls._schema_backend_address_inbound_nat_rule_port_mappings_read is not None:
+            _schema.inbound_nat_rule_port_mappings = cls._schema_backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings
+            return
 
-    _schema_backend_address_inbound_nat_rule_port_mappings_read = AAZObjectType()
+        cls._schema_backend_address_inbound_nat_rule_port_mappings_read = _schema_backend_address_inbound_nat_rule_port_mappings_read = AAZObjectType()
 
-    backend_address_inbound_nat_rule_port_mappings_read = _schema_backend_address_inbound_nat_rule_port_mappings_read
-    backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings = AAZListType(
-        serialized_name="inboundNatRulePortMappings",
-    )
+        backend_address_inbound_nat_rule_port_mappings_read = _schema_backend_address_inbound_nat_rule_port_mappings_read
+        backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings = AAZListType(
+            serialized_name="inboundNatRulePortMappings",
+        )
 
-    inbound_nat_rule_port_mappings = _schema_backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings
-    inbound_nat_rule_port_mappings.Element = AAZObjectType()
+        inbound_nat_rule_port_mappings = _schema_backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings
+        inbound_nat_rule_port_mappings.Element = AAZObjectType()
 
-    _element = _schema_backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings.Element
-    _element.backend_port = AAZIntType(
-        serialized_name="backendPort",
-        flags={"read_only": True},
-    )
-    _element.frontend_port = AAZIntType(
-        serialized_name="frontendPort",
-        flags={"read_only": True},
-    )
-    _element.inbound_nat_rule_name = AAZStrType(
-        serialized_name="inboundNatRuleName",
-        flags={"read_only": True},
-    )
-    _element.protocol = AAZStrType()
+        _element = _schema_backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings.Element
+        _element.backend_port = AAZIntType(
+            serialized_name="backendPort",
+            flags={"read_only": True},
+        )
+        _element.frontend_port = AAZIntType(
+            serialized_name="frontendPort",
+            flags={"read_only": True},
+        )
+        _element.inbound_nat_rule_name = AAZStrType(
+            serialized_name="inboundNatRuleName",
+            flags={"read_only": True},
+        )
+        _element.protocol = AAZStrType()
 
-    _schema.inbound_nat_rule_port_mappings = _schema_backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings
+        _schema.inbound_nat_rule_port_mappings = cls._schema_backend_address_inbound_nat_rule_port_mappings_read.inbound_nat_rule_port_mappings
 
 
 __all__ = ["ListMapping"]

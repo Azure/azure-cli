@@ -7,18 +7,19 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network public-ip create
+      - network ddos-protection create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --protection-mode --sku
+      - -g -n
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_public_ip_ddos_settings000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001","name":"cli_test_public_ip_ddos_settings000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2022-10-19T05:52:26Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001","name":"cli_test_public_ip_ddos_settings000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2023-01-29T03:13:12Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +28,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 19 Oct 2022 05:52:33 GMT
+      - Sun, 29 Jan 2023 03:13:21 GMT
       expires:
       - '-1'
       pragma:
@@ -42,52 +43,45 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus2", "properties": {"ddosSettings": {"protectionMode":
-      "Enabled"}, "idleTimeoutInMinutes": 4, "publicIPAddressVersion": "IPv4", "publicIPAllocationMethod":
-      "Static"}, "sku": {"name": "Standard"}}'
+    body: '{"location": "eastus2"}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network public-ip create
+      - network ddos-protection create
       Connection:
       - keep-alive
       Content-Length:
-      - '214'
+      - '23'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g -n --protection-mode --sku
+      - -g -n
       User-Agent:
-      - AZURECLI/2.41.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/publicIPAddresses/pubipddos?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/ddosProtectionPlans/ddos1?api-version=2022-05-01
   response:
     body:
-      string: "{\r\n  \"name\": \"pubipddos\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/publicIPAddresses/pubipddos\",\r\n
-        \ \"etag\": \"W/\\\"0c0170e0-390f-4546-813c-e126531cfc7f\\\"\",\r\n  \"location\":
-        \"eastus2\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"cabaf1d2-b197-4b16-9fa1-77e20bc19b01\",\r\n    \"publicIPAddressVersion\":
-        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Static\",\r\n    \"idleTimeoutInMinutes\":
-        4,\r\n    \"ipTags\": [],\r\n    \"ddosSettings\": {\r\n      \"protectionMode\":
-        \"Enabled\"\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n
-        \ }\r\n}"
+      string: "{\r\n  \"name\": \"ddos1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/ddosProtectionPlans/ddos1\",\r\n
+        \ \"etag\": \"W/\\\"9109b734-caae-4969-8c5f-6aae6628652e\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/ddosProtectionPlans\",\r\n  \"location\": \"eastus2\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/30797c91-08c8-4bbc-8406-df78dac8675a?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/d5bfab5e-3c80-4aa1-af28-d95bc4f6d1d6?api-version=2022-05-01
       cache-control:
       - no-cache
       content-length:
-      - '723'
+      - '393'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 19 Oct 2022 05:52:39 GMT
+      - Sun, 29 Jan 2023 03:13:28 GMT
       expires:
       - '-1'
       pragma:
@@ -100,7 +94,220 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 144366bc-3d43-473f-a235-5935bb2e77f3
+      - ebcc4c11-cc19-4e58-bf3a-e2dddb4f33de
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network ddos-protection create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.44.1 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/d5bfab5e-3c80-4aa1-af28-d95bc4f6d1d6?api-version=2022-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 29 Jan 2023 03:13:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 81f9ebc3-73b5-4ac2-b47c-5143e8634bab
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network ddos-protection create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.44.1 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/ddosProtectionPlans/ddos1?api-version=2022-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"ddos1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/ddosProtectionPlans/ddos1\",\r\n
+        \ \"etag\": \"W/\\\"9109b734-caae-4969-8c5f-6aae6628652e\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/ddosProtectionPlans\",\r\n  \"location\": \"eastus2\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '393'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 29 Jan 2023 03:13:58 GMT
+      etag:
+      - W/"9109b734-caae-4969-8c5f-6aae6628652e"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - b74a738e-085a-440c-bafe-b09f1185a7a4
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network public-ip create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --protection-mode --sku --ddos-protection-plan
+      User-Agent:
+      - AZURECLI/2.44.1 (PIP) azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10
+        (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_public_ip_ddos_settings000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001","name":"cli_test_public_ip_ddos_settings000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2023-01-29T03:13:12Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '355'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 29 Jan 2023 03:13:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus2", "properties": {"ddosSettings": {"ddosProtectionPlan":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/ddosProtectionPlans/ddos1"},
+      "protectionMode": "Enabled"}, "idleTimeoutInMinutes": 4, "publicIPAddressVersion":
+      "IPv4", "publicIPAllocationMethod": "Static"}, "sku": {"name": "Standard"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network public-ip create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '407'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --protection-mode --sku --ddos-protection-plan
+      User-Agent:
+      - AZURECLI/2.44.1 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/publicIPAddresses/pubipddos?api-version=2022-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"pubipddos\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/publicIPAddresses/pubipddos\",\r\n
+        \ \"etag\": \"W/\\\"be78ede1-16b8-4873-81e2-e26be3362314\\\"\",\r\n  \"location\":
+        \"eastus2\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"59e4fa8b-55fd-4c69-b218-ea96d8ed06b6\",\r\n    \"publicIPAddressVersion\":
+        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Static\",\r\n    \"idleTimeoutInMinutes\":
+        4,\r\n    \"ipTags\": [],\r\n    \"ddosSettings\": {\r\n      \"protectionMode\":
+        \"Enabled\",\r\n      \"ddosProtectionPlan\": {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/ddosProtectionPlans/ddos1\"\r\n
+        \     }\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        \ \"sku\": {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n
+        \ }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/7b699166-e1e3-48be-9ef6-930b9ebd4fa1?api-version=2022-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '941'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 29 Jan 2023 03:14:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - f78bac9b-e424-41c7-b781-76b77d557a24
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -118,11 +325,11 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --protection-mode --sku
+      - -g -n --protection-mode --sku --ddos-protection-plan
       User-Agent:
-      - AZURECLI/2.41.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/30797c91-08c8-4bbc-8406-df78dac8675a?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/7b699166-e1e3-48be-9ef6-930b9ebd4fa1?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -134,7 +341,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 19 Oct 2022 05:52:40 GMT
+      - Sun, 29 Jan 2023 03:14:07 GMT
       expires:
       - '-1'
       pragma:
@@ -151,7 +358,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 3e984dbe-4148-49a2-b212-c9ba6563330f
+      - e9e668ae-2c83-4d95-a38b-fd03f980b761
     status:
       code: 200
       message: OK
@@ -167,33 +374,35 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --protection-mode --sku
+      - -g -n --protection-mode --sku --ddos-protection-plan
       User-Agent:
-      - AZURECLI/2.41.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/publicIPAddresses/pubipddos?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"pubipddos\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/publicIPAddresses/pubipddos\",\r\n
-        \ \"etag\": \"W/\\\"a723e562-929d-436c-869c-d54bb4dea6f8\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"230a5c7a-97bc-4286-b3cd-189a926143f9\\\"\",\r\n  \"location\":
         \"eastus2\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"cabaf1d2-b197-4b16-9fa1-77e20bc19b01\",\r\n    \"ipAddress\":
-        \"20.114.130.88\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
+        \   \"resourceGuid\": \"59e4fa8b-55fd-4c69-b218-ea96d8ed06b6\",\r\n    \"ipAddress\":
+        \"20.96.122.251\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
         \"Static\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": [],\r\n
-        \   \"ddosSettings\": {\r\n      \"protectionMode\": \"Enabled\"\r\n    }\r\n
-        \ },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n  \"sku\":
-        {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
+        \   \"ddosSettings\": {\r\n      \"protectionMode\": \"Enabled\",\r\n      \"ddosProtectionPlan\":
+        {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/ddosProtectionPlans/ddos1\"\r\n
+        \     }\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        \ \"sku\": {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '759'
+      - '977'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 19 Oct 2022 05:52:41 GMT
+      - Sun, 29 Jan 2023 03:14:08 GMT
       etag:
-      - W/"a723e562-929d-436c-869c-d54bb4dea6f8"
+      - W/"230a5c7a-97bc-4286-b3cd-189a926143f9"
       expires:
       - '-1'
       pragma:
@@ -210,7 +419,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5b08b16c-4a3f-4dd2-83a7-6672014e29db
+      - a4840916-6aa4-4a05-a072-65d52e17d2f5
     status:
       code: 200
       message: OK
@@ -226,33 +435,35 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --protection-mode
+      - -g -n --protection-mode --ddos-protection-plan
       User-Agent:
-      - AZURECLI/2.41.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/publicIPAddresses/pubipddos?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"pubipddos\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/publicIPAddresses/pubipddos\",\r\n
-        \ \"etag\": \"W/\\\"a723e562-929d-436c-869c-d54bb4dea6f8\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"230a5c7a-97bc-4286-b3cd-189a926143f9\\\"\",\r\n  \"location\":
         \"eastus2\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"cabaf1d2-b197-4b16-9fa1-77e20bc19b01\",\r\n    \"ipAddress\":
-        \"20.114.130.88\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
+        \   \"resourceGuid\": \"59e4fa8b-55fd-4c69-b218-ea96d8ed06b6\",\r\n    \"ipAddress\":
+        \"20.96.122.251\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
         \"Static\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": [],\r\n
-        \   \"ddosSettings\": {\r\n      \"protectionMode\": \"Enabled\"\r\n    }\r\n
-        \ },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n  \"sku\":
-        {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
+        \   \"ddosSettings\": {\r\n      \"protectionMode\": \"Enabled\",\r\n      \"ddosProtectionPlan\":
+        {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/ddosProtectionPlans/ddos1\"\r\n
+        \     }\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        \ \"sku\": {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '759'
+      - '977'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 19 Oct 2022 05:52:42 GMT
+      - Sun, 29 Jan 2023 03:14:09 GMT
       etag:
-      - W/"a723e562-929d-436c-869c-d54bb4dea6f8"
+      - W/"230a5c7a-97bc-4286-b3cd-189a926143f9"
       expires:
       - '-1'
       pragma:
@@ -269,14 +480,14 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - fc716a69-bbba-4685-9e17-b6bbd99e65f9
+      - 6f845e65-148f-4676-ae10-ee0e32ee527d
     status:
       code: 200
       message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/publicIPAddresses/pubipddos",
       "location": "eastus2", "properties": {"ddosSettings": {"protectionMode": "Disabled"},
-      "idleTimeoutInMinutes": 4, "ipAddress": "20.114.130.88", "ipTags": [], "publicIPAddressVersion":
+      "idleTimeoutInMinutes": 4, "ipAddress": "20.96.122.251", "ipTags": [], "publicIPAddressVersion":
       "IPv4", "publicIPAllocationMethod": "Static"}, "sku": {"name": "Standard", "tier":
       "Regional"}}'
     headers:
@@ -293,18 +504,18 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g -n --protection-mode
+      - -g -n --protection-mode --ddos-protection-plan
       User-Agent:
-      - AZURECLI/2.41.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/publicIPAddresses/pubipddos?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"pubipddos\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/publicIPAddresses/pubipddos\",\r\n
-        \ \"etag\": \"W/\\\"cca25e93-e104-4822-9191-9baa5f7faf76\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"c2d3aa47-dab1-4f09-b211-d21bf503fdd7\\\"\",\r\n  \"location\":
         \"eastus2\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"cabaf1d2-b197-4b16-9fa1-77e20bc19b01\",\r\n    \"ipAddress\":
-        \"20.114.130.88\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
+        \   \"resourceGuid\": \"59e4fa8b-55fd-4c69-b218-ea96d8ed06b6\",\r\n    \"ipAddress\":
+        \"20.96.122.251\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
         \"Static\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": [],\r\n
         \   \"ddosSettings\": {\r\n      \"protectionMode\": \"Disabled\"\r\n    }\r\n
         \ },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n  \"sku\":
@@ -313,7 +524,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/42b0f6f0-a707-47a8-9ba6-34e7ba56e6a6?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/b572a74a-5dbc-4d76-a3d8-31af990576d6?api-version=2022-05-01
       cache-control:
       - no-cache
       content-length:
@@ -321,7 +532,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 19 Oct 2022 05:52:47 GMT
+      - Sun, 29 Jan 2023 03:14:14 GMT
       expires:
       - '-1'
       pragma:
@@ -338,7 +549,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4725f91a-af4b-43d4-ac5f-6b47b5223383
+      - eb76dc50-a647-4020-8270-25667cdeabc0
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -356,11 +567,11 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --protection-mode
+      - -g -n --protection-mode --ddos-protection-plan
       User-Agent:
-      - AZURECLI/2.41.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/42b0f6f0-a707-47a8-9ba6-34e7ba56e6a6?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/b572a74a-5dbc-4d76-a3d8-31af990576d6?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -372,7 +583,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 19 Oct 2022 05:52:49 GMT
+      - Sun, 29 Jan 2023 03:14:16 GMT
       expires:
       - '-1'
       pragma:
@@ -389,7 +600,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 58faa6ef-470e-45bc-a35d-95865fd1b29b
+      - 66c838ca-5dfc-441e-a929-9a01f4a734a9
     status:
       code: 200
       message: OK
@@ -405,18 +616,18 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --protection-mode
+      - -g -n --protection-mode --ddos-protection-plan
       User-Agent:
-      - AZURECLI/2.41.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/publicIPAddresses/pubipddos?api-version=2022-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"pubipddos\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/publicIPAddresses/pubipddos\",\r\n
-        \ \"etag\": \"W/\\\"00ad5f14-9601-4eb2-876d-cef03903872f\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"df4303ad-9eb3-498a-91a1-64ecef901b53\\\"\",\r\n  \"location\":
         \"eastus2\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"cabaf1d2-b197-4b16-9fa1-77e20bc19b01\",\r\n    \"ipAddress\":
-        \"20.114.130.88\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
+        \   \"resourceGuid\": \"59e4fa8b-55fd-4c69-b218-ea96d8ed06b6\",\r\n    \"ipAddress\":
+        \"20.96.122.251\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
         \"Static\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": [],\r\n
         \   \"ddosSettings\": {\r\n      \"protectionMode\": \"Disabled\"\r\n    }\r\n
         \ },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n  \"sku\":
@@ -429,9 +640,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 19 Oct 2022 05:52:49 GMT
+      - Sun, 29 Jan 2023 03:14:16 GMT
       etag:
-      - W/"00ad5f14-9601-4eb2-876d-cef03903872f"
+      - W/"df4303ad-9eb3-498a-91a1-64ecef901b53"
       expires:
       - '-1'
       pragma:
@@ -448,10 +659,155 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 575af815-504a-408e-bc7e-f2a515bf0d48
+      - 6dedb32b-c9c4-43d4-bc9c-394c56413f31
     status:
       code: 200
       message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network ddos-protection delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.44.1 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/ddosProtectionPlans/ddos1?api-version=2022-05-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/f11b19c8-7e18-44c7-8d72-ff85f339cf10?api-version=2022-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Sun, 29 Jan 2023 03:14:19 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operationResults/f11b19c8-7e18-44c7-8d72-ff85f339cf10?api-version=2022-05-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 1f039d1b-bc7a-4421-90af-fc405a9e9d08
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network ddos-protection delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.44.1 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/f11b19c8-7e18-44c7-8d72-ff85f339cf10?api-version=2022-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 29 Jan 2023 03:14:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 9ed00ea2-ccbb-4b95-9951-e4bbfbeacf44
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network ddos-protection delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.44.1 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operationResults/f11b19c8-7e18-44c7-8d72-ff85f339cf10?api-version=2022-05-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 29 Jan 2023 03:14:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 1f039d1b-bc7a-4421-90af-fc405a9e9d08
+    status:
+      code: 204
+      message: No Content
 - request:
     body: null
     headers:
@@ -468,7 +824,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.41.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/publicIPAddresses/pubipddos?api-version=2022-05-01
   response:
@@ -478,17 +834,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/d1986a2d-ac46-4e5b-bec5-8a5491b13f90?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/f9142921-7366-4b71-b2f7-94f84b11bf1c?api-version=2022-05-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Wed, 19 Oct 2022 05:52:51 GMT
+      - Sun, 29 Jan 2023 03:14:32 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operationResults/d1986a2d-ac46-4e5b-bec5-8a5491b13f90?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operationResults/f9142921-7366-4b71-b2f7-94f84b11bf1c?api-version=2022-05-01
       pragma:
       - no-cache
       server:
@@ -499,7 +855,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 203b2037-c924-4dea-abc7-2a1895574038
+      - 300345af-bde6-411c-ae12-c45b8e9460cc
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
     status:
@@ -519,21 +875,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.41.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/d1986a2d-ac46-4e5b-bec5-8a5491b13f90?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/f9142921-7366-4b71-b2f7-94f84b11bf1c?api-version=2022-05-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '30'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 19 Oct 2022 05:53:01 GMT
+      - Sun, 29 Jan 2023 03:14:43 GMT
       expires:
       - '-1'
       pragma:
@@ -550,7 +906,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d660cb44-4428-48e6-a53a-7fa921547bef
+      - f2ce4dcc-ed8b-4b83-973a-a61793d42edd
     status:
       code: 200
       message: OK
@@ -568,9 +924,58 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.41.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operationResults/d1986a2d-ac46-4e5b-bec5-8a5491b13f90?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/f9142921-7366-4b71-b2f7-94f84b11bf1c?api-version=2022-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 29 Jan 2023 03:14:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - f6a62b23-1128-465d-9d39-cf78eae03164
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network public-ip delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.44.1 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operationResults/f9142921-7366-4b71-b2f7-94f84b11bf1c?api-version=2022-05-01
   response:
     body:
       string: ''
@@ -578,17 +983,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/d1986a2d-ac46-4e5b-bec5-8a5491b13f90?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/f9142921-7366-4b71-b2f7-94f84b11bf1c?api-version=2022-05-01
       cache-control:
       - no-cache
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 19 Oct 2022 05:53:01 GMT
+      - Sun, 29 Jan 2023 03:14:54 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operationResults/d1986a2d-ac46-4e5b-bec5-8a5491b13f90?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operationResults/f9142921-7366-4b71-b2f7-94f84b11bf1c?api-version=2022-05-01
       pragma:
       - no-cache
       server:
@@ -599,7 +1004,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 203b2037-c924-4dea-abc7-2a1895574038
+      - 300345af-bde6-411c-ae12-c45b8e9460cc
     status:
       code: 204
       message: No Content
@@ -617,7 +1022,7 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - AZURECLI/2.41.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.44.1 (PIP) (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_public_ip_ddos_settings000001/providers/Microsoft.Network/publicIPAddresses?api-version=2022-05-01
   response:
@@ -631,13 +1036,15 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 19 Oct 2022 05:53:03 GMT
+      - Sun, 29 Jan 2023 03:14:55 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:

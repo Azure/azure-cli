@@ -18,7 +18,7 @@ from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
 
 __author__ = "Microsoft Corporation <python@microsoft.com>"
-__version__ = "2.43.0"
+__version__ = "2.45.0"
 
 
 # A workaround for https://bugs.python.org/issue32502 (https://github.com/Azure/azure-cli/issues/5184)
@@ -42,6 +42,7 @@ telemetry.set_application(az_cli, ARGCOMPLETE_ENV_NAME)
 
 # Log the init finish time
 init_finish_time = timeit.default_timer()
+exit_code = None
 
 try:
     telemetry.start()
@@ -61,15 +62,12 @@ except SystemExit as ex:  # some code directly call sys.exit, this is to make su
     raise ex
 
 finally:
-    try:
-        # Log the invoke finish time
-        invoke_finish_time = timeit.default_timer()
-        logger.info("Command ran in %.3f seconds (init: %.3f, invoke: %.3f)",
-                    invoke_finish_time - start_time,
-                    init_finish_time - start_time,
-                    invoke_finish_time - init_finish_time)
-    except NameError:
-        pass
+    # Log the invoke finish time
+    invoke_finish_time = timeit.default_timer()
+    logger.info("Command ran in %.3f seconds (init: %.3f, invoke: %.3f)",
+                invoke_finish_time - start_time,
+                init_finish_time - start_time,
+                invoke_finish_time - init_finish_time)
 
     try:
         # check for new version auto-upgrade
@@ -91,6 +89,8 @@ finally:
                     update_all = az_cli.config.getboolean('auto-upgrade', 'all', True)
                     prompt = az_cli.config.getboolean('auto-upgrade', 'prompt', True)
                     cmd = ['az', 'upgrade', '--all', str(update_all)]
+                    az_upgrade_run = False
+                    upgrade_exit_code = None
                     if prompt:
                         from knack.prompting import verify_is_a_tty, NoTTYException  # pylint: disable=ungrouped-imports
                         az_upgrade_run = True

@@ -100,10 +100,6 @@ def cf_load_balancer_backend_pools(cli_ctx, _):
     return network_client_factory(cli_ctx).load_balancer_backend_address_pools
 
 
-def cf_local_network_gateways(cli_ctx, _):
-    return network_client_factory(cli_ctx).local_network_gateways
-
-
 def cf_network_interfaces(cli_ctx, _):
     return network_client_factory(cli_ctx).network_interfaces
 
@@ -188,10 +184,6 @@ def cf_virtual_hub(cli_ctx, _):
 
 def cf_virtual_router_peering(cli_ctx, _):
     return network_client_factory(cli_ctx).virtual_router_peerings
-
-
-def cf_bastion_hosts(cli_ctx, _):
-    return network_client_factory(cli_ctx).bastion_hosts
 
 
 def cf_custom_ip_prefixes(cli_ctx, _):

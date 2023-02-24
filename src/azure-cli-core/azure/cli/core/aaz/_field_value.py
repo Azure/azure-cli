@@ -73,19 +73,12 @@ class AAZObject(AAZBaseValue):
     def __setitem__(self, key, data):
         assert not key.startswith('_')
         attr_schema, name = self._get_attr_schema_and_name(key)
-        if name is None:
-            # ignore undefined key
-            return
-
         self._data[name] = attr_schema.process_data(data, key=name)
 
     def __delitem__(self, key):
         _, name = self._get_attr_schema_and_name(key)
-
         if name in self._data:
             del self._data[name]
-        elif name is None:
-            raise KeyError(f"Attribute {key} not exist")
 
     def __getattr__(self, key) -> AAZBaseValue:
         return self[key]
@@ -155,12 +148,13 @@ class AAZObject(AAZBaseValue):
         """ get attribute schema and it's name based in key """
         disc_schema = self._schema.get_discriminator(self._data)
         if not hasattr(self._schema, key) and disc_schema is not None:
-            attr_schema = disc_schema[key]
+            attr_schema = disc_schema[key]  # will raise error if key not exist
             schema = disc_schema
         else:
-            attr_schema = self._schema[key]
+            attr_schema = self._schema[key]  # will raise error if key not exist
             schema = self._schema
         name = schema.get_attr_name(key)
+        assert name is not None
         return attr_schema, name
 
 

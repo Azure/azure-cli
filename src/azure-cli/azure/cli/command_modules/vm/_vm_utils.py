@@ -457,7 +457,7 @@ def parse_gallery_image_id(image_reference):
         raise InvalidArgumentValueError(
             'Please pass in the gallery image id through the parameter --image')
 
-    image_info = re.search(r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/'
+    image_info = re.search(r'^/subscriptions/([^/]*)/resourceGroups/([^/]*)/providers/Microsoft.Compute/'
                            r'galleries/([^/]*)/images/([^/]*)/versions/.*$', image_reference, re.IGNORECASE)
     if not image_info or len(image_info.groups()) < 2:
         raise InvalidArgumentValueError(
@@ -465,8 +465,8 @@ def parse_gallery_image_id(image_reference):
             '/resourceGroups/{rg}/providers/Microsoft.Compute/galleries/{gallery_name}'
             '/Images/{gallery_image_name}/Versions/{image_version}"')
 
-    # Return the gallery unique name and gallery image name parsed from shared gallery image id
-    return image_info.group(1), image_info.group(2)
+    # Return the gallery subscription id, resource group name, gallery name and gallery image name.
+    return image_info.group(1), image_info.group(2), image_info.group(3), image_info.group(4)
 
 
 def parse_shared_gallery_image_id(image_reference):

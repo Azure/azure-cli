@@ -360,6 +360,80 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         self.check(cg_definition['properties']['containers'][0]['properties']['resources']['requests']['cpu'], 1.0)
         self.check(cg_definition['properties']['containers'][0]['properties']['resources']['requests']['memoryInGB'], 1.5)
 
+    # Test export container with identity.
+    @ResourceGroupPreparer()
+    def test_container_export_with_identity(self, resource_group, resource_group_location):
+        container_group_name1 = self.create_random_name('clicontainer', 16)
+        container_group_name2 = self.create_random_name('clicontainer', 16)
+        container_group_name3 = self.create_random_name('clicontainer', 16)
+        image = 'nginx:latest'
+        user_assigned_identity_name = self.create_random_name('cliaciidentity', 20)
+        system_assigned_identity = '[system]'
+
+        self.kwargs.update({
+            'user_assigned_identity_name': user_assigned_identity_name,
+        })
+
+        msi_identity_result = self.cmd('identity create -g {rg} -n {user_assigned_identity_name}').get_output_in_json()
+
+        _, output_file = tempfile.mkstemp()
+
+        def check_export_with_identity(container_group_name, identity_type):
+            cg_definition = None
+            with open(output_file, 'r') as f:
+                cg_definition = yaml.safe_load(f)
+
+            self.check(cg_definition["name"], container_group_name)
+            self.check(cg_definition['properties']['containers'][0]['properties']['image'], image)
+            self.check(cg_definition['location'], resource_group_location)
+            self.check(cg_definition['identity']['type'], identity_type)
+            if 'UserAssigned' in identity_type:
+                self.exists(cg_definition['identity']['user_assigned_identities'])
+
+        self.kwargs.update({
+            'container_group_name1': container_group_name1,
+            'container_group_name2': container_group_name2,
+            'container_group_name3': container_group_name3,
+            'resource_group_location': resource_group_location,
+            'output_file': output_file,
+            'image': image,
+            'user_assigned_identity': msi_identity_result['id'],
+            'system_assigned_identity': system_assigned_identity,
+        })
+
+        # Test create system assigned identity
+        self.cmd('container create -g {rg} -n {container_group_name1} --image {image} --assign-identity',
+                 checks=[self.check('name', '{container_group_name1}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', 'Linux'),
+                         self.check('containers[0].image', '{image}'),
+                         self.check('identity.type', 'SystemAssigned')])
+        self.cmd('container export -g {rg} -n {container_group_name1} -f "{output_file}"')
+        check_export_with_identity(container_group_name1, 'SystemAssigned')
+
+        # Test create user assigned identity
+        self.cmd('container create -g {rg} -n {container_group_name2} --image {image} --assign-identity {user_assigned_identity}',
+                 checks=[self.check('name', '{container_group_name2}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', 'Linux'),
+                         self.check('containers[0].image', '{image}'),
+                         self.check('identity.type', 'UserAssigned')])
+        self.cmd('container export -g {rg} -n {container_group_name2} -f "{output_file}"')
+        check_export_with_identity(container_group_name2, 'UserAssigned')
+
+        # Test create system user assigned identity
+        self.cmd('container create -g {rg} -n {container_group_name3} --image {image} --assign-identity {system_assigned_identity} {user_assigned_identity}',
+                 checks=[self.check('name', '{container_group_name3}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', 'Linux'),
+                         self.check('containers[0].image', '{image}'),
+                         self.check('identity.type', 'SystemAssigned, UserAssigned')])
+        self.cmd('container export -g {rg} -n {container_group_name3} -f "{output_file}"')
+        check_export_with_identity(container_group_name3, 'SystemAssigned, UserAssigned')
+
     # Test create container with azure file volume
     @ResourceGroupPreparer()
     @unittest.skip("Skip test as unable to re-record due to missing pre-req. resources.")

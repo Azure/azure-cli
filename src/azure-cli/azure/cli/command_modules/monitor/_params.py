@@ -270,64 +270,6 @@ def load_arguments(self, _):
         c.ignore('filter')
     # endregion
 
-    # region Diagnostic
-    with self.argument_context('monitor diagnostic-settings') as c:
-        c.argument('name', options_list=('--name', '-n'))
-
-    # with self.argument_context('monitor diagnostic-settings show') as c:
-    #     c.resource_parameter('resource_uri', required=True, arg_group='Target Resource')
-    #
-    # with self.argument_context('monitor diagnostic-settings list') as c:
-    #     c.resource_parameter('resource_uri', required=True)
-    #
-    # with self.argument_context('monitor diagnostic-settings delete') as c:
-    #     c.resource_parameter('resource_uri', required=True, arg_group='Target Resource')
-
-    with self.argument_context('monitor diagnostic-settings update') as c:
-        c.resource_parameter('resource_uri', required=True, arg_group='Target Resource')
-
-    # with self.argument_context('monitor diagnostic-settings create') as c:
-    #     c.resource_parameter('resource_uri', required=True, arg_group='Target Resource', skip_validator=True)
-    #     c.argument('logs', type=get_json_object, help="JSON encoded list of logs settings. Use '@{file}' to load from a file."
-    #                'For more information, visit: https://docs.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#logsettings')
-    #     c.argument('metrics', type=get_json_object, help="JSON encoded list of metric settings. Use '@{file}' to load from a file. "
-    #                'For more information, visit: https://docs.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#metricsettings')
-    #     c.argument('export_to_resource_specific', arg_type=get_three_state_flag(),
-    #                help='Indicate that the export to LA must be done to a resource specific table, '
-    #                     'a.k.a. dedicated or fixed schema table, '
-    #                     'as opposed to the default dynamic schema table called AzureDiagnostics. '
-    #                     'This argument is effective only when the argument --workspace is also given.')
-
-    # with self.argument_context('monitor diagnostic-settings categories list') as c:
-    #     c.resource_parameter('resource_uri', required=True)
-    #
-    # with self.argument_context('monitor diagnostic-settings categories show') as c:
-    #     c.resource_parameter('resource_uri', required=True)
-
-    # with self.argument_context('monitor diagnostic-settings subscription') as c:
-    #     import argparse
-    #     c.argument('subscription_id', validator=process_subscription_id, help=argparse.SUPPRESS, required=False)
-    #     c.argument('logs', type=get_json_object, help="JSON encoded list of logs settings. Use '@{file}' to load from a file.")
-    #     c.argument('name', help='The name of the diagnostic setting.', options_list=['--name', '-n'])
-    #     c.argument('event_hub_name', help='The name of the event hub. If none is specified, the default event hub will be selected.')
-    #     c.argument('event_hub_auth_rule', help='The resource Id for the event hub authorization rule.')
-    #     c.argument('workspace', help='The resource id of the log analytics workspace.')
-    #     c.argument('storage_account', help='The resource id of the storage account to which you would like to send the Activity Log.')
-    #     c.argument('service_bus_rule', help="The service bus rule ID of the service bus namespace in which you would like to have Event Hubs created for streaming the Activity Log. The rule ID is of the format '{service bus resource ID}/authorizationrules/{key name}'.")
-    # # endregion
-
-    # region LogProfiles
-    with self.argument_context('monitor log-profiles') as c:
-        c.argument('log_profile_name', options_list=['--name', '-n'])
-
-    with self.argument_context('monitor log-profiles create') as c:
-        c.argument('name', options_list=['--name', '-n'])
-        c.argument('categories', nargs='+')
-        c.argument('locations', nargs='+')
-        c.argument('days', type=int, arg_group='Retention Policy')
-        c.argument('enabled', arg_type=get_three_state_flag(), arg_group='Retention Policy')
-    # endregion
-
     # region ActivityLog
     with self.argument_context('monitor activity-log list') as c:
         activity_log_props = [x['key'] for x in EventData()._attribute_map.values()]  # pylint: disable=protected-access
