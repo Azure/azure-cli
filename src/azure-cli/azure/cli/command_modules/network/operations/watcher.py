@@ -1107,6 +1107,7 @@ class WatcherConnectionMonitorOutputAdd(_WatcherConnectionMonitorOutputAdd):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False
+        
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
 
