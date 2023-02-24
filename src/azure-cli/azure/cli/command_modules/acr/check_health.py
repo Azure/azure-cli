@@ -272,7 +272,7 @@ def _get_endpoint_and_token_status(cmd, login_server, ignore_errors):
         if result_from_token.error_title == CONNECTIVITY_REFRESH_TOKEN_ERROR.error_title:
             _handle_error(result_from_token, ignore_errors)
             return
-        
+
         if result_from_token.error_title == CONNECTIVITY_REFRESH_TOKEN_TOOMANYREQUESTS_ERROR.error_title:
             _handle_error(result_from_token, ignore_errors)
             return

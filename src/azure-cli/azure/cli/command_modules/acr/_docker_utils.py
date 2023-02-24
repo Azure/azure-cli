@@ -169,7 +169,7 @@ def _get_aad_token_after_challenge(cli_ctx,
             return CONNECTIVITY_REFRESH_TOKEN_TOOMANYREQUESTS_ERROR.format_error_message(login_server)
         raise CLIError(CONNECTIVITY_REFRESH_TOKEN_TOOMANYREQUESTS_ERROR.format_error_message(login_server)
                        .get_error_message())
-    elif response.status_code not in [200]:
+    if response.status_code not in [200]:
         from ._errors import CONNECTIVITY_REFRESH_TOKEN_ERROR
         if is_diagnostics_context:
             return CONNECTIVITY_REFRESH_TOKEN_ERROR.format_error_message(login_server, response.status_code)
@@ -412,7 +412,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
                                                             use_acr_audience=use_acr_audience)
         except CLIError as e:
             logger.warning("%s: %s CLI will attempt to get the admin credentials (if enabled).",
-                AAD_TOKEN_BASE_ERROR_MESSAGE, str(e))
+                           AAD_TOKEN_BASE_ERROR_MESSAGE, str(e))
 
     # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
     if registry:
@@ -423,13 +423,13 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
                 return login_server, cred.username, cred.passwords[0].value
             except CLIError as e:
                 logger.warning("%s: %s CLI will attempt to get credentials with username and password.",
-                    ADMIN_USER_BASE_ERROR_MESSAGE, str(e))
+                               ADMIN_USER_BASE_ERROR_MESSAGE, str(e))
         else:
             logger.warning("%s: %s CLI will attempt to get credentials with username and password.",
-                ADMIN_USER_BASE_ERROR_MESSAGE, "Admin user is disabled.")
+                           ADMIN_USER_BASE_ERROR_MESSAGE, "Admin user is disabled.")
     else:
         logger.warning("%s: %s  CLI will attempt to get credentials with username and password.",
-            ADMIN_USER_BASE_ERROR_MESSAGE, resource_not_found)
+                       ADMIN_USER_BASE_ERROR_MESSAGE, resource_not_found)
 
     # 4. if we still don't have credentials, prompt the user
     try:
