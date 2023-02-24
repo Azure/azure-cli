@@ -559,7 +559,7 @@ def _get_database_identity(
         else:
             umiDict[umi] = DatabaseUserIdentity()  # pylint: disable=unsupported-assignment-operation
 
-    from azure.mgmt.sql.models import DatabaseIdentity
+    from azure.mgmt.sql.models import DatabaseIdentity  # pylint: disable=redefined-outer-name
 
     databaseIdentity = DatabaseIdentity(type=ResourceIdType.user_assigned.value, user_assigned_identities=umiDict)
 
@@ -1691,7 +1691,7 @@ def db_list(
     return client.list_by_server(resource_group_name=resource_group_name, server_name=server_name)
 
 
-def db_update(
+def db_update(  # pylint: disable=too-many-locals
         cmd,
         instance,
         server_name,
