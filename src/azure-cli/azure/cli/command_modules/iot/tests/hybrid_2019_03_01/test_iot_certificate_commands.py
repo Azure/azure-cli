@@ -24,7 +24,7 @@ class IotHubCertificateTest(ScenarioTest):
         _create_test_cert(CERT_FILE, KEY_FILE, self.create_random_name(prefix='TESTCERT', length=24), 3, random.randint(0, MAX_INT))
 
     def tearDown(self):
-        _delete_test_cert([CERT_FILE, KEY_FILE, VERIFICATION_FILE])
+        _delete_test_cert(CERT_FILE, KEY_FILE, VERIFICATION_FILE)
         super(IotHubCertificateTest, self).tearDown()
 
     @ResourceGroupPreparer()
