@@ -1144,7 +1144,6 @@ def __import_kvset_from_file(client, path, strict, yes):
     changes_detected = __print_kvset_json_diff(existing_kvset_list, kvset_to_import_list, yes=yes)
     
     if not changes_detected:
-        logger.warning('Target configuration store already contains all configuration settings in source. No changes will be made.')
         return
     
     if not yes:
