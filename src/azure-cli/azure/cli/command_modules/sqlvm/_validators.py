@@ -255,7 +255,9 @@ def _validate_azure_ad_authentication_supported_on_sqlvm(cli_ctx, namespace):
 
     logger.debug("The SQL VM managment mode is %s.", sqlvm.sql_management)
     if sqlvm.sql_management != "Full":
-        raise InvalidArgumentValueError("Enabling Azure AD authentication requires Full SQL VM management mode")
+        az_error = InvalidArgumentValueError("Enabling Azure AD authentication requires Full SQL VM management mode")
+        az_error.set_recommendation("Upgrade SQL Server VM extension to Full mode.")
+        raise az_error
 
     # Construct error message for unsupported SQL server version or OS platform.
     unsupported_error = "Azure AD authentication requires SQL Server 2022 on Windows platform, but the SQL Image Offer of this SQL VM is {}".format(sqlvm.sql_image_offer)
@@ -278,7 +280,9 @@ def _validate_azure_ad_authentication_supported_on_sqlvm(cli_ctx, namespace):
         raise InvalidArgumentValueError(unsupported_error)
 
     if int_version < 2022 or not platform.startswith("WS"):
-        raise InvalidArgumentValueError(unsupported_error)
+        az_error = InvalidArgumentValueError(unsupported_error)
+        az_error.set_recommendation("Upgrade SQL server to SQL server 2022 or later.")
+        raise az_error
 
 
 def _validate_msi_valid_on_vm(cli_ctx, namespace):
@@ -303,26 +307,33 @@ def _validate_msi_valid_on_vm(cli_ctx, namespace):
     # to the caller directly, we will throw our own InvalidArgumentValueError with more context
     # information.
     try:
-        # Azure VM has the same name as the SQL VM
+        # Azure virtual machine has the same name as the SQL VM
         vm = compute_client.virtual_machines.get(namespace.resource_group_name, namespace.sql_virtual_machine_name)
     except Exception as ex:
-        raise InvalidArgumentValueError("Unable to validate Azure AD authentication due to retrieving the Azure VM instance encountering an error: {}.".format(ex)) from ex
+        raise InvalidArgumentValueError("Unable to validate Azure AD authentication due to retrieving the Azure virtual machine instance encountering an error: {}.".format(ex)) from ex
 
     # The system-assigned MSI case.
     if namespace.msi_client_id is None:
         if vm.identity is None or not hasattr(vm.identity, 'principal_id') or getattr(vm.identity, 'principal_id') is None:
-            raise InvalidArgumentValueError("Enable Azure AD authentication with system-assigned managed identity but the system-assigned managed identity is not enabled on this Azure VM")
+            az_error = InvalidArgumentValueError("Enable Azure AD authentication with system-assigned managed identity but the system-assigned managed identity is not enabled on this Azure virtual machine.")
+            az_error.set_recommendation("Enable the system-assigned managed identity on the Azure virtual machine: {}.".format(namespace.sql_virtual_machine_name))
+            raise az_error
+
         return vm.identity.principal_id
 
     # The user-assigned MSI case.
     if vm.identity is None or not hasattr(vm.identity, 'user_assigned_identities') or getattr(vm.identity, 'user_assigned_identities') is None:
-        raise InvalidArgumentValueError("Enable Azure AD authentication with user-assigned managed identity {}, but the managed identity is not attached to this Azure VM".format(namespace.msi_client_id))
+        az_error = InvalidArgumentValueError("Enable Azure AD authentication with user-assigned managed identity {}, but the managed identity is not attached to this Azure virtual machine.".format(namespace.msi_client_id))
+        az_error.set_recommendation("Attach the user-assigned managed identity {} to the Azure virtual machine {}.".format(namespace.msi_client_id, namespace.sql_virtual_machine_name))
+        raise az_error
 
     for umi in vm.identity.user_assigned_identities.values():
         if umi.client_id == namespace.msi_client_id:
             return umi.principal_id
 
-    raise InvalidArgumentValueError("Enable Azure AD authentication with user-assigned managed identity {}, but the managed identity is not attached to this Azure VM".format(namespace.msi_client_id))
+    az_error = InvalidArgumentValueError("Enable Azure AD authentication with user-assigned managed identity {}, but the managed identity is not attached to this Azure virtual machine.".format(namespace.msi_client_id))
+    az_error.set_recommendation("Attach the user-assigned managed identity {} to the Azure virtual machine {}.".format(namespace.msi_client_id, namespace.sql_virtual_machine_name))
+    raise az_error
 
 
 # Validate the MSI has appropriate permissions to query Microsoft Graph API.
@@ -362,7 +373,9 @@ def _validate_msi_with_enough_permission(cli_ctx, principal_id):
     missing_roles = [role_name for role_name in required_role_names if app_role_id_map[role_name] not in all_assigned_role_ids]
 
     if len(missing_roles) > 0:
-        raise InvalidArgumentValueError("The managed identity is lack of the following roles for Azure AD authentication: {}.".format(", ".join(missing_roles)))
+        az_error = InvalidArgumentValueError("The managed identity is lack of the following roles for Azure AD authentication: {}.".format(", ".join(missing_roles)))
+        az_error.set_recommendation("Grant the managed identity EITHER the Directory.Readers role OR the three App roles 'User.Read.All', 'Application.Read.All', 'GroupMember.Read.All'")
+        raise az_error
 
 
 MICROSOFT_GRAPH_API_ERROR = "Unable to validate the permission of MSI due to querying Microsoft Graph API encountered error: {}."

@@ -787,12 +787,12 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
 
             # Assert customer cannot enable Azure AD authentication with system-assigned MSI but the system-asigned MSI is not enabled on the VM
             with self.assertRaisesRegex(InvalidArgumentValueError, "Enable Azure AD authentication with system-assigned managed identity "\
-                                        "but the system-assigned managed identity is not enabled on this Azure VM"):
+                                        "but the system-assigned managed identity is not enabled on this Azure virtual machine."):
                 self.cmd(validate_system_msi)
 
             # Assert customer cannot enable Azure AD authentication with user-assigned MSI but the user-asigned MSI is not attached on the VM
             with self.assertRaisesRegex(InvalidArgumentValueError, "Enable Azure AD authentication with user-assigned managed identity {}, "\
-                                        "but the managed identity is not attached to this Azure VM".format(unattached_identity['clientId'])):
+                                        "but the managed identity is not attached to this Azure virtual machine.".format(unattached_identity['clientId'])):
                 self.cmd(validate_unattached_msi)
 
             # Enable the system-assigned managed identity on the VM
