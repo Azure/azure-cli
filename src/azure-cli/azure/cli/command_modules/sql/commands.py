@@ -848,7 +848,6 @@ def load_command_table(self, _):
 
         g.custom_show_command('show', 'managed_instance_encryption_protector_get')
         g.custom_command('set', 'managed_instance_encryption_protector_update')
-        g.custom_command('revalidate', 'managed_instance_encryption_protector_revalidate')
 
     managed_instance_aadadmin_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceAdministratorsOperations.{}',

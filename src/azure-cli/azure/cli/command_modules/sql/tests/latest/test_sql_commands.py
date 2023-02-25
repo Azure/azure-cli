@@ -923,17 +923,17 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
     def test_sql_per_db_cmk(self):
         server = "pstestsvr"
         resource_group = "pstest"
-        database_name_one = "cliautomationdb01"
-        database_name_two = "cliautomationdb02"
-        encryption_protector = "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"
-        encryption_protector2 = "https://pstestkv.vault.azure.net/keys/testkey1/6218d117492a42eda0b6a9334c9a989d"
+        database_name_one = "cliautomationdb04"
+        database_name_two = "cliautomationdb05"
+        encryption_protector = "https://pstestkv.vault.azure.net/keys/testkey4/6638b3667e384aefa31364f94d230361"
+        encryption_protector2 = "https://pstestkv.vault.azure.net/keys/testkey5/fd021f84a0d94d43b8ef33154bcab86f"
         umi = "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
 
         # test sql db is created with db level encryption protector and umi
 
         # az sql db create -g pstest -ai --server pstestsvr --name clidbwithcmk --encryption-protector "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"  
         # --user-assigned-identity-id "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi" --yes
-        self.cmd('sql db create -g {} --server {} --name {} -ai --encryption-protector {} --user-assigned-identity-id {} --yes'
+        self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --user-assigned-identity-id {} --yes'
                  .format(resource_group, server, database_name_one, encryption_protector, umi),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -946,7 +946,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name_one),
                      JMESPathCheck('encryptionProtector', encryption_protector)])
 
-        self.cmd('sql db update -g {} --server {} --name {} -ai --encryption-protector {}'
+        self.cmd('sql db update -g {} --server {} --name {} -i --encryption-protector {}'
                  .format(resource_group, server, database_name_one, encryption_protector2),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -1541,7 +1541,7 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
 
         # az sql db create -g pstest -ai --server pstestsvr --name clidbwithcmk --encryption-protector "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"  
         # --user-assigned-identity-id "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi" --yes
-        self.cmd('sql db create -g {} --server {} --name {} -ai --encryption-protector {} --user-assigned-identity-id {} --yes'
+        self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --user-assigned-identity-id {} --yes'
                  .format(resource_group_1, server1, database_name, encryption_protector, umi),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group_1),
@@ -1549,7 +1549,7 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
 
         self.cmd('sql db copy -g {} --server {} --name {} '
                  '--dest-name {} --dest-resource-group {} --dest-server {} '
-                 '-ai --encryption-protector {} --user-assigned-identity-id {}'
+                 '-i --encryption-protector {} --user-assigned-identity-id {}'
                  .format(resource_group_1, server1, database_name, database_copy_name,
                          resource_group_2, server2, encryption_protector, umi),
                  checks=[

@@ -5184,26 +5184,6 @@ def managed_instance_encryption_protector_get(
         encryption_protector_name=EncryptionProtectorName.CURRENT)
 
 
-def managed_instance_encryption_protector_revalidate(
-        client,
-        resource_group_name,
-        managed_instance_name):
-    '''
-    Revalidate a managed instance encryption protector.
-    '''
-
-    if managed_instance_name is None:
-        raise CLIError('Managed instance name cannot be null')
-
-    try:
-        return client.begin_revalidate(
-            resource_group_name=resource_group_name,
-            managed_instance_name=managed_instance_name,
-            encryption_protector_name=EncryptionProtectorName.CURRENT)
-    except Exception as ex:
-        raise ex
-
-
 #####
 #           sql managed instance ad-admin
 #####
