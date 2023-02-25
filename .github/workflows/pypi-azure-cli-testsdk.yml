@@ -22,18 +22,6 @@ jobs:
         cd src/azure-cli-testsdk
         python setup.py sdist bdist_wheel
 
-    - name: Publish package to https://test.pypi.org
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        user: __token__
-        password: ${{ secrets.TEST_PYPI_PASSWORD }}
-        repository_url: https://test.pypi.org/legacy/
-        packages_dir: src/azure-cli-testsdk/dist
-
-    - name: Validate Package Installation from Test PyPi
-      run: |
-        pip install --upgrade --extra-index-url https://test.pypi.org/simple azure-cli-testsdk
-
     - name: Publish package to https://pypi.org
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
@@ -43,4 +31,4 @@ jobs:
 
     - name: Validate Package Installation from PyPi
       run: |
-        pip install --upgrade --extra-index-url https://test.pypi.org/simple azure-cli-testsdk
+        pip install --upgrade azure-cli-testsdk
