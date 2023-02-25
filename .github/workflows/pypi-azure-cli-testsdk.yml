@@ -23,4 +23,20 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
+        password: ${{ secrets.TEST_PYPI_PASSWORD }}
+        repository_url: https://test.pypi.org/legacy/
+    - name: Install dependencies
+      run: |
+        python3.7 -m pip install --upgrade pip
+        python3.7 -m pip install virtualenv pip-tools
+        pip install --extra-index-url https://test.pypi.org/simple azure-cli-testsdk        
+    - name: Publish package
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: __token__
         password: ${{ secrets.PYPI_PASSWORD }}
+    - name: Install dependencies
+      run: |
+        python3.7 -m pip install --upgrade pip
+        python3.7 -m pip install virtualenv pip-tools
+        pip install azure-cli-testsdk
