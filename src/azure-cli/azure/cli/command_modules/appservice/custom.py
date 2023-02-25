@@ -62,6 +62,7 @@ from .utils import (_normalize_sku,
                     raise_missing_token_suggestion,
                     _get_location_from_resource_group,
                     _list_app,
+                    is_functionapp,
                     _rename_server_farm_props,
                     _get_location_from_webapp,
                     _normalize_location,
@@ -910,8 +911,8 @@ def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None
 
 
 def list_function_app(cmd, resource_group_name=None):
-    return list(filter(lambda x: x.kind is not None and "function" in x.kind.lower(),
-                       _list_app(cmd.cli_ctx, resource_group_name)))
+    return list(filter(lambda x: x.kind is not None and is_functionapp(x),
+                        _list_app(cmd.cli_ctx, resource_group_name)))
 
 
 def show_app(cmd, resource_group_name, name, slot=None):
