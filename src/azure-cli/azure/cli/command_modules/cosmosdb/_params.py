@@ -454,7 +454,7 @@ def load_arguments(self, _):
         c.argument('restorable_mongodb_database_rid', options_list=['--database-rid', '-d'], help="Rid of the database", required=True)
         c.argument('start_time', options_list=['--start-time', '-s'], help="Start time of restorable MongoDB collections event feed", required=False)
         c.argument('end_time', options_list=['--end-time', '-e'], help="End time of restorable MongoDB collections event feed", required=False)
-        
+
     # Restorable mongodb Resources
     with self.argument_context('cosmosdb mongodb restorable-resource') as c:
         c.argument('location', options_list=['--location', '-l'], help="Azure Location of the account", required=True)

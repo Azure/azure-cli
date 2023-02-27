@@ -153,6 +153,7 @@ def cf_cassandra_data_center(cli_ctx, _):
 def cf_service(cli_ctx, _):
     return cf_cosmosdb(cli_ctx).service
 
+
 # restorable gremlin databases/graphs
 def cf_restorable_gremlin_databases(cli_ctx, _):
     return cf_cosmosdb(cli_ctx).restorable_gremlin_databases

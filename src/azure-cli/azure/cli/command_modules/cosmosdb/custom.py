@@ -318,7 +318,7 @@ def _create_database_account(client,
 
         if databases_to_restore is not None:
             restore_parameters.databases_to_restore = databases_to_restore
-        
+
         if gremlin_databases_to_restore is not None:
             restore_parameters.gremlin_databases_to_restore = gremlin_databases_to_restore
 
@@ -1787,9 +1787,9 @@ def cli_cosmosdb_restore(cmd,
     # Validate if source account is empty only for live account restores. For deleted account restores the api will not work
     if not is_source_restorable_account_deleted:
         restorable_resources = None
+        api_type = target_restorable_account.api_type.lower()
         arm_location_normalized = target_restorable_account.location.lower().replace(" ", "")
-
-        if target_restorable_account.api_type.lower() == "sql":
+        if api_type == "sql":
             try:
                 from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_sql_resources
                 restorable_sql_resources_client = cf_restorable_sql_resources(cmd.cli_ctx, [])
@@ -1953,6 +1953,7 @@ def cli_mongo_db_retrieve_latest_backup_time(client,
                                                                           restoreLocation)
     return asyc_backupInfo.result()
 
+
 # latest restorable timestamp for gremlin graph and table
 def cli_gremlin_retrieve_latest_backup_time(client,
                                             resource_group_name,
@@ -2008,7 +2009,7 @@ def cli_table_retrieve_latest_backup_time(client,
                                                                           restoreLocation)
     return asyc_backupInfo.result()
 
-    
+
 ######################
 # data plane APIs
 ######################
