@@ -674,10 +674,7 @@ def load_command_table(self, _):
 
     with self.command_group('restore-point collection', restore_point_collection, min_api='2021-03-01',
                             client_factory=cf_restore_point_collection) as g:
-        g.command('list', 'list')
         g.custom_show_command('show', 'restore_point_collection_show')
         g.custom_command('create', 'restore_point_collection_create')
         g.custom_command('update', 'restore_point_collection_update')
-        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
-        g.command('list-all', 'list_all')
         g.wait_command('wait')

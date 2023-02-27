@@ -3904,20 +3904,6 @@ helps['restore-point wait'] = """
 --name "rpName" --deleted
 """
 
-helps['restore-point collection'] = """
-    type: group
-    short-summary: Manage restore point collection
-"""
-
-helps['restore-point collection list'] = """
-    type: command
-    short-summary: "Get the list of restore point collections in a resource group."
-    examples:
-      - name: Get the list of restore point collections in a resource group.
-        text: |-
-               az restore-point collection list --resource-group "myResourceGroup"
-"""
-
 helps['restore-point collection show'] = """
     type: command
     short-summary: "Get the restore point collection."
@@ -3945,23 +3931,6 @@ for more details. When updating a restore point collection, only tags may be mod
 helps['restore-point collection update'] = """
     type: command
     short-summary: "Update the restore point collection."
-"""
-
-helps['restore-point collection delete'] = """
-    type: command
-    short-summary: "Delete the restore point collection. This operation will also delete all the \
-contained restore points."
-"""
-
-helps['restore-point collection list-all'] = """
-    type: command
-    short-summary: "Get the list of restore point collections in the subscription. Use nextLink property in the \
-response to get the next page of restore point collections. Do this till nextLink is not null to fetch all the restore \
-point collections."
-    examples:
-      - name: Get the list of restore point collections in a subscription
-        text: |-
-               az restore-point collection list-all
 """
 
 helps['restore-point collection wait'] = """
