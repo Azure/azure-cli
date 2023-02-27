@@ -430,10 +430,12 @@ def show_exception_handler(ex):
 
 
 def verify_property(instance, condition):
+    from jmespath import Options
     from jmespath import compile as compile_jmespath
+    options = Options(dict_cls=OrderedDict, enable_legacy_literals=True)
     result = todict(instance)
-    jmes_query = compile_jmespath(condition)
-    value = jmes_query.search(result)
+    jmes_query = compile_jmespath(condition, options)
+    value = jmes_query.search(result, options)
     return value
 
 
