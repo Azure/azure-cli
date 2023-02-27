@@ -74,7 +74,7 @@ def load_arguments(self, _):
         c.argument('secrets_mount_path', validator=validate_volume_mount_path, help="The path within the container where the secrets volume should be mounted. Must not contain colon ':'.")
         c.argument('file', options_list=['--file', '-f'], help="The path to the input file.")
         c.argument('zone', help="The zone to place the container group.")
-        c.argument('priority', help='The priority of the Container Group')
+        c.argument('priority', help='The priority of the container group')
         c.argument('sku', help="The SKU of the container group")
 
     with self.argument_context('container create', arg_group='Confidential Container Group') as c:
