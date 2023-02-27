@@ -4539,6 +4539,7 @@ def managed_instance_create(
         external_admin_sid=None,
         external_admin_name=None,
         service_principal_type=None,
+        zone_redundant=None,
         **kwargs):
     '''
     Creates a managed instance.
@@ -4575,6 +4576,8 @@ def managed_instance_create(
     kwargs['key_id'] = key_id
 
     kwargs['primary_user_assigned_identity_id'] = primary_user_assigned_identity_id
+
+    kwargs['zone_redundant'] = zone_redundant
 
     ad_only = None
     if enable_ad_only_auth:
@@ -4657,7 +4660,8 @@ def managed_instance_update(
         user_assigned_identity_id=None,
         virtual_network_subnet_id=None,
         yes=None,
-        service_principal_type=None):
+        service_principal_type=None,
+        zone_redundant=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -4723,6 +4727,9 @@ def managed_instance_update(
 
     if virtual_network_subnet_id is not None:
         instance.subnet_id = virtual_network_subnet_id
+
+    if zone_redundant is not None:
+        instance.zone_redundant = zone_redundant
 
     return instance
 
