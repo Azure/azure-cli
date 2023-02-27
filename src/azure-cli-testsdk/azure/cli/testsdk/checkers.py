@@ -20,7 +20,9 @@ class JMESPathCheck(object):  # pylint: disable=too-few-public-methods
         actual_result = None
         try:
             actual_result = jmespath.search(self._query, json_value,
-                                            jmespath.Options(collections.OrderedDict))
+                                            jmespath.Options(
+                                                collections.OrderedDict,
+                                                enable_legacy_literals=True))
         except jmespath.exceptions.JMESPathTypeError:
             raise JMESPathCheckAssertionError(self._query, self._expected_result, actual_result,
                                               execution_result.output)
@@ -44,7 +46,9 @@ class JMESPathCheckExists(object):  # pylint: disable=too-few-public-methods
     def __call__(self, execution_result):
         json_value = execution_result.get_output_in_json()
         actual_result = jmespath.search(self._query, json_value,
-                                        jmespath.Options(collections.OrderedDict))
+                                        jmespath.Options(
+                                                collections.OrderedDict,
+                                                enable_legacy_literals=True))
         if not actual_result:
             raise JMESPathCheckAssertionError(self._query, 'some value', actual_result,
                                               execution_result.output)
@@ -57,7 +61,9 @@ class JMESPathCheckNotExists(object):  # pylint: disable=too-few-public-methods
     def __call__(self, execution_result):
         json_value = execution_result.get_output_in_json()
         actual_result = jmespath.search(self._query, json_value,
-                                        jmespath.Options(collections.OrderedDict))
+                                        jmespath.Options(
+                                                collections.OrderedDict,
+                                                enable_legacy_literals=True))
         if actual_result:
             raise JMESPathCheckAssertionError(self._query, 'some value', actual_result,
                                               execution_result.output)
@@ -71,7 +77,9 @@ class JMESPathCheckGreaterThan(object):  # pylint: disable=too-few-public-method
     def __call__(self, execution_result):
         json_value = execution_result.get_output_in_json()
         actual_result = jmespath.search(self._query, json_value,
-                                        jmespath.Options(collections.OrderedDict))
+                                        jmespath.Options(
+                                                collections.OrderedDict,
+                                                enable_legacy_literals=True))
         if not actual_result > self._expected_result:
             expected_result_format = "> {}".format(self._expected_result)
 
@@ -90,7 +98,9 @@ class JMESPathPatternCheck(object):  # pylint: disable=too-few-public-methods
     def __call__(self, execution_result):
         json_value = execution_result.get_output_in_json()
         actual_result = jmespath.search(self._query, json_value,
-                                        jmespath.Options(collections.OrderedDict))
+                                        jmespath.Options(
+                                                collections.OrderedDict,
+                                                enable_legacy_literals=True))
         if not re.match(self._expected_result, str(actual_result), re.IGNORECASE):
             raise JMESPathCheckAssertionError(self._query, self._expected_result, actual_result,
                                               execution_result.output)
