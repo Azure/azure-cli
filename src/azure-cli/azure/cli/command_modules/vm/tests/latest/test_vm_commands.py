@@ -6555,10 +6555,10 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             self.exists('colocationStatus')
         ])
 
-        self.cmd('ppg create -n {ppg2} -t ultra -g {rg}', checks=[
+        self.cmd('ppg create -n {ppg2} -t Standard -g {rg}', checks=[
             self.check('name', '{ppg2}'),
             self.check('location', '{loc}'),
-            self.check('proximityPlacementGroupType', 'Ultra')
+            self.check('proximityPlacementGroupType', 'Standard')
         ])
 
         self.cmd('ppg create -n {ppg3} -g {rg}', checks=[
@@ -6569,7 +6569,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
         self.cmd('ppg list -g {rg}', checks=[
             self.check('length(@)', 3)
         ])
-        self.cmd('ppg delete -n {ppg1} -g {rg}')
+        self.cmd('ppg delete -n {ppg1} -g {rg} --yes')
         self.cmd('ppg list -g {rg}', checks=[
             self.check('length(@)', 2),
         ])
