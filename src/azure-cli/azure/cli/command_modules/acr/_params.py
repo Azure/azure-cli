@@ -239,8 +239,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.argument('name', options_list=['--name', '-n'], help='The name of the credential set.')
         c.argument('login_server', options_list=['--login-server', '-l'], help="The login server address of the upstream registry such as 'docker.io'")
-        c.argument('username_id', options_list=['--username-id', '-u'], help='The Keyvault secret ID of the secret containing the username to the upstream registry.')
-        c.argument('password_id', options_list=['--password-id', '-p'], help='The Keyvault secret ID of the secret containing the password to the upstream registry.')
+        c.argument('username_id', options_list=['--username-id', '-u'], help='The Azure Key Vault secret ID of the secret containing the username to the upstream registry.')
+        c.argument('password_id', options_list=['--password-id', '-p'], help='The Azure Key Vault secret ID of the secret containing the password to the upstream registry.')
 
     with self.argument_context('acr repository untag') as c:
         c.argument('image', options_list=['--image', '-t'], help="The name of the image. May include a tag in the format 'name:tag'.")

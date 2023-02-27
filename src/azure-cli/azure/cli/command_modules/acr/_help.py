@@ -629,9 +629,9 @@ examples:
 
 helps['acr credential-set update'] = """
 type: command
-short-summary: Update the username or password KV secret ID on a credential set.
+short-summary: Update the username or password Azure Key Vault secret ID on a credential set.
 examples:
-  - name: Update the password KV secret ID.
+  - name: Update the password Azure Key Vault secret ID.
     text: az acr credential-set update -r MyRegistry -n MyRule -p https://MyKeyvault.vault.azure.net/secrets/newsecretname
 """
 
