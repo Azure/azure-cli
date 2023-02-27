@@ -1103,53 +1103,6 @@ def process_nw_flow_log_show_namespace(cmd, namespace):
         raise CLIError('usage error: --nsg NSG | --location NETWORK_WATCHER_LOCATION --name FLOW_LOW_NAME')
 
 
-def process_nw_packet_capture_create_namespace(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-
-    storage_usage = CLIError('usage error: --storage-account NAME_OR_ID [--storage-path '
-                             'PATH] [--file-path PATH] | --file-path PATH')
-    if not namespace.storage_account and not namespace.file_path:
-        raise storage_usage
-
-    if namespace.storage_path and not namespace.storage_account:
-        raise storage_usage
-
-    if namespace.target_type and namespace.target_type.lower() == "azurevmss":
-        get_network_watcher_from_vmss(cmd, namespace)
-        if not is_valid_resource_id(namespace.target):
-            namespace.target = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=namespace.resource_group_name,
-                namespace='Microsoft.Compute',
-                type='virtualMachineScaleSets',
-                name=namespace.target)
-    else:
-        get_network_watcher_from_vm(cmd, namespace)
-        if not is_valid_resource_id(namespace.vm):
-            namespace.vm = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=namespace.resource_group_name,
-                namespace='Microsoft.Compute',
-                type='virtualMachines',
-                name=namespace.vm)
-
-    if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
-        namespace.storage_account = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Storage',
-            type='storageAccounts',
-            name=namespace.storage_account)
-
-    if namespace.file_path:
-        file_path = namespace.file_path
-        if not file_path.endswith('.cap'):
-            raise CLIError("usage error: --file-path PATH must end with the '*.cap' extension")
-        if not file_path.startswith('/'):
-            file_path = file_path.replace('/', '\\')
-        namespace.file_path = file_path
-
-
 def process_nw_troubleshooting_start_namespace(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     storage_usage = CLIError('usage error: --storage-account NAME_OR_ID [--storage-path PATH]')
@@ -1276,20 +1229,6 @@ def validate_status_code_ranges(namespace):
             raise usage_error
 
     namespace.status_code_ranges = values
-
-
-def validate_capture_size_and_limit(namespace):
-    if namespace.capture_limit:
-        if namespace.capture_limit < 0:
-            raise CLIError('usage error: --capture-limit cannot be a negative value.')
-
-    if namespace.capture_size:
-        if namespace.capture_size < 0:
-            raise CLIError('usage error: --capture-size cannot be a negative value.')
-
-    if namespace.time_limit:
-        if namespace.time_limit < 0:
-            raise CLIError('usage error: --time-limit cannot be a negative value.')
 
 
 def validate_subnet_ranges(namespace):

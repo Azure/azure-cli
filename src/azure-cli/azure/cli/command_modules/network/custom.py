@@ -5722,29 +5722,6 @@ def list_nw_connection_monitor_v2_output(client,
     return connection_monitor.outputs
 
 
-def create_nw_packet_capture(cmd, client, resource_group_name, capture_name,
-                             watcher_rg, watcher_name, vm=None, location=None,
-                             storage_account=None, storage_path=None, file_path=None,
-                             capture_size=None, capture_limit=None, time_limit=None, filters=None,
-                             target_type=None, target=None, include=None, exclude=None):
-    PacketCapture, PacketCaptureStorageLocation = cmd.get_models('PacketCapture', 'PacketCaptureStorageLocation')
-    PacketCaptureMachineScope = cmd.get_models('PacketCaptureMachineScope')
-    # Set the appropriate fields if target is VM
-    pcap_scope = None
-    if not target_type or target_type.lower() != "azurevmss":
-        target = vm
-    else:
-        pcap_scope = PacketCaptureMachineScope(include=include, exclude=exclude)
-
-    storage_settings = PacketCaptureStorageLocation(storage_id=storage_account,
-                                                    storage_path=storage_path, file_path=file_path)
-    capture_params = PacketCapture(target=target, storage_location=storage_settings,
-                                   bytes_to_capture_per_packet=capture_size,
-                                   total_bytes_per_session=capture_limit, time_limit_in_seconds=time_limit,
-                                   filters=filters, target_type=target_type, scope=pcap_scope)
-    return client.begin_create(watcher_rg, watcher_name, capture_name, capture_params)
-
-
 def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_account=None,
                          resource_group_name=None, enabled=None, retention=0, log_format=None, log_version=None,
                          traffic_analytics_workspace=None, traffic_analytics_interval=None,
