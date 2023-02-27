@@ -524,7 +524,6 @@ def load_command_table(self, _):
     self.command_table["network watcher connection-monitor endpoint show"] = WatcherConnectionMonitorEndpointShow(loader=self)
     self.command_table["network watcher connection-monitor endpoint list"] = WatcherConnectionMonitorEndpointList(loader=self)
 
-
     with self.command_group('network watcher connection-monitor test-configuration',
                             network_watcher_cm_sdk,
                             min_api='2019-11-01',
@@ -542,7 +541,6 @@ def load_command_table(self, _):
     self.command_table["network watcher connection-monitor test-configuration show"] = WCMTCShow(loader=self)
     self.command_table["network watcher connection-monitor test-configuration list"] = WCMTCList(loader=self)
 
-
     with self.command_group('network watcher connection-monitor test-group',
                             network_watcher_cm_sdk,
                             min_api='2019-11-01',
@@ -550,15 +548,17 @@ def load_command_table(self, _):
                             is_preview=True,
                             validator=process_nw_cm_v2_test_group) as c:
         c.custom_command('add', 'add_nw_connection_monitor_v2_test_group')
-        # c.custom_command('remove', 'remove_nw_connection_monitor_v2_test_group')
-        # c.custom_show_command('show', 'show_nw_connection_monitor_v2_test_group')
-        # c.custom_command('list', 'list_nw_connection_monitor_v2_test_group')
-    from .operations.watcher import WatcherConnectionMonitorTestGroupShow as WCMTGShow, \
-        WatcherConnectionMonitorTestGroupList as WCMTGList, \
-        WatcherConnectionMonitorTestGroupRemove as WCMTGRemove
-    self.command_table["network watcher connection-monitor test-group show"] = WCMTGShow(loader=self)
-    self.command_table["network watcher connection-monitor test-group list"] = WCMTGList(loader=self)
-    self.command_table["network watcher connection-monitor test-group remove"] = WCMTGRemove(loader=self)
+    #     c.custom_command('remove', 'remove_nw_connection_monitor_v2_test_group')
+    #     c.custom_show_command('show', 'show_nw_connection_monitor_v2_test_group')
+    #     c.custom_command('list', 'list_nw_connection_monitor_v2_test_group')
+
+    with self.command_group('network watcher connection-monitor test-group',
+                            is_preview=True) as c:
+        from .operations.watcher import WatcherConnectionMonitorTestGroupShow as WCMTGShow, \
+            WatcherConnectionMonitorTestGroupList as WCMTGList
+        self.command_table["network watcher connection-monitor test-group show"] = WCMTGShow(loader=self)
+        self.command_table["network watcher connection-monitor test-group list"] = WCMTGList(loader=self)
+        c.custom_command('remove', 'remove_nw_connection_monitor_test_group')
 
     # with self.command_group('network watcher connection-monitor output',
     #                         network_watcher_cm_sdk,

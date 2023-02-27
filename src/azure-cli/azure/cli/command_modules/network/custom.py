@@ -6899,3 +6899,13 @@ def remove_nw_connection_monitor_output(cmd, connection_monitor_name, location):
     }
     from .operations.watcher import WatcherConnectionMonitorOutputRemove
     return WatcherConnectionMonitorOutputRemove(cli_ctx=cmd.cli_ctx)(command_args=update_args)
+
+
+def remove_nw_connection_monitor_test_group(cmd, connection_monitor_name, location, name):
+    update_args = {
+        'connection_monitor_name': connection_monitor_name,
+        'location': location,
+        'name': name
+    }
+    from .operations.watcher import WatcherConnectionMonitorTestGroupRemove
+    return WatcherConnectionMonitorTestGroupRemove(cli_ctx=cmd.cli_ctx)(command_args=update_args)
