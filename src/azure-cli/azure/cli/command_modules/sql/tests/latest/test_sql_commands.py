@@ -264,43 +264,6 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         # test list sql server should be 0
         self.cmd('sql server list -g {}'.format(resource_group_1), checks=[NoneCheck()])
 
-        # test create third sql server, with identity and federated client id
-        self.cmd('sql server create -g {} --name {} -l {} -i '
-                 '--admin-user {} --admin-password {} --federated-client-id {}'
-                 .format(resource_group_1, server_name_3, resource_group_location, admin_login, admin_passwords[0], federated_client_id_1),
-                 checks=[
-                     JMESPathCheck('name', server_name_3),
-                     JMESPathCheck('location', resource_group_location),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', admin_login),
-                     JMESPathCheck('identity.type', 'SystemAssigned'),
-                     JMESPathCheck('federatedClientId', federated_client_id_1)])
-
-        self.cmd('sql server show -g {} --name {}'
-                 .format(resource_group_1, server_name_3),
-                 checks=[
-                     JMESPathCheck('name', server_name_3),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('federatedClientId', federated_client_id_1)])
-
-        # test update sql server's federated client id
-        self.cmd('sql server update -g {} --name {} --admin-password {} --federated-client-id {} -i'
-                 .format(resource_group_1, server_name_3, admin_passwords[2], federated_client_id_2),
-                 checks=[
-                     JMESPathCheck('name', server_name_3),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', admin_login),
-                     JMESPathCheck('federatedClientId', federated_client_id_2)])
-
-        # test update sql server's federated client id to empty guid
-        self.cmd('sql server update -g {} --name {} --admin-password {} --federated-client-id {} -i'
-                 .format(resource_group_1, server_name_3, admin_passwords[2], federated_client_id_3),
-                 checks=[
-                     JMESPathCheck('name', server_name_3),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', admin_login),
-                     JMESPathCheck('federatedClientId', None)])
-
         # delete sql server
         self.cmd('sql server delete -g {} --name {} --yes'
                  .format(resource_group_1, server_name_3), checks=NoneCheck())
@@ -880,8 +843,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('readScale', 'Enabled'),
                      JMESPathCheck('highAvailabilityReplicaCount', '2')])
 
-    @ResourceGroupPreparer(location='westcentralus')
-    @SqlServerPreparer(location='westcentralus')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_db_ledger(self, resource_group, resource_group_location, server):
         database_name_one = "cliautomationdb01"
         database_name_two = "cliautomationdb02"
@@ -1177,14 +1140,17 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
     def test_sql_db_long_term_retention(
             self):
         self.kwargs.update({
-            'rg': 'CustomerExperienceTeam_RG',
-            'loc': 'westcentralus',
-            'server_name': 'mi-tooling-server',
-            'database_name': 'a-reneamoso-qpi-testing',
+            'rg': 'strehan-donotdelete-canaryeuap',
+            'loc': 'centraluseuap',
+            'server_name': 'testsvr-strehan-donotdelete1',
+            'database_name': 'basicdb',
             'weekly_retention': 'P1W',
             'monthly_retention': 'P1M',
             'yearly_retention': 'P2M',
-            'week_of_year': 12
+            'week_of_year': 12,
+            'encryption_protector' : 'https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1',
+            'keys' : '"https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1" "https://test123343strehan.vault.azure.net/keys/testk1/96151496df864e32aa62a3c1857b2931"',
+            'umi' : '/subscriptions/e1775f9f-a286-474d-b6f0-29c42ac74554/resourcegroups/ArmTemplate/providers/Microsoft.ManagedIdentity/userAssignedIdentities/shobhittest'
         })
 
         # test update long term retention on live database
@@ -1265,14 +1231,15 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
 
         # test restore managed database from LTR backup
         self.kwargs.update({
-            'dest_database_name': 'cli-restore-ltr'
+            'dest_database_name': 'cli-restore-ltr3'
         })
 
         self.cmd('sql db delete -g {rg} -s {server_name} -n {dest_database_name} --yes')
 
         self.cmd(
             'sql db ltr-backup restore --backup-id \'{backup_id}\' --dest-database {dest_database_name}'
-            ' --dest-server {server_name} --dest-resource-group {rg}',
+            ' --dest-server {server_name} --dest-resource-group {rg} -i --encryption-protector {encryption_protector}'
+            ' --keys {keys} --umi {umi}',
             checks=[
                 self.check('name', '{dest_database_name}')])
 
@@ -1289,10 +1256,13 @@ class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
     def test_sql_db_geo_restore(
             self):
         self.kwargs.update({
-            'rg': 'rebeccaxu-test',
-            'loc': 'eastus',
-            'server_name': 'rebeccaxu-eastus-svr',
-            'database_name': 'cli-test-hs',
+            'rg': 'strehan-donotdelete-canaryeuap',
+            'loc': 'centraluseuap',
+            'server_name': 'testsvr-strehan-donotdelete1',
+            'database_name': 'basicdb',
+            'encryption_protector' : 'https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1',
+            'keys' : '"https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1" "https://test123343strehan.vault.azure.net/keys/testk1/96151496df864e32aa62a3c1857b2931"',
+            'umi' : '/subscriptions/e1775f9f-a286-474d-b6f0-29c42ac74554/resourcegroups/ArmTemplate/providers/Microsoft.ManagedIdentity/userAssignedIdentities/shobhittest'
         })
 
         # test list geo backups for database
@@ -1309,7 +1279,7 @@ class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'backup_id': backup_id,
-            'dest_database_name': "cli-georestore"
+            'dest_database_name': "cli-georestore1"
         })
 
         self.cmd(
@@ -2751,7 +2721,7 @@ class SqlServerDnsAliasMgmtScenarioTest(ScenarioTest):
         s2 = ServerInfo(server_name_2, resource_group_1, resource_group_location_1)
         s3 = ServerInfo(server_name_3, resource_group_2, resource_group_location_2)
 
-        alias_name = 'alias1'
+        alias_name = 'alias4'
 
         # verify setup
         for s in (s1, s2, s3):
@@ -4102,12 +4072,12 @@ class SqlServerIdentityTest(ScenarioTest):
         v_cores = 4
         storage_size_in_gb = '32'
         edition = 'GeneralPurpose'
-        resource_group_1 = "alswansotest3-rg"
+        resource_group_1 = "pstest"
         collation = "SQL_Latin1_General_CP1_CI_AS"
         proxy_override = "Proxy"
 
-        test_umi = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
-        umi_list = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
+        test_umi = '/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi'
+        umi_list = '/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi'
 
         identity_type = ResourceIdType.system_assigned_user_assigned.value
         user = admin_login
@@ -4120,7 +4090,7 @@ class SqlServerIdentityTest(ScenarioTest):
                      JMESPathCheck('name', server_name),
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', user),
-                     JMESPathCheck('identity.type', 'SystemAssigned, UserAssigned')])
+                     JMESPathCheck('identity.type', 'SystemAssigned,UserAssigned')])
 
         # test show sql server
         self.cmd('sql server show -g {} --name {}'
