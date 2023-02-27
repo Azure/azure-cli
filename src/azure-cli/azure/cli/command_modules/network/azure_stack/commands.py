@@ -284,6 +284,11 @@ def load_command_table(self, _):
         min_api='2020-06-01'
     )
 
+    network_nic_custom = CliCommandType(
+        operations_tmpl=custom_operations_tmpl,
+        client_factory=cf_network_interfaces
+    )
+
     # endregion
 
     # region NetworkRoot
