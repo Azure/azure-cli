@@ -9,7 +9,6 @@
 # flake8: noqa
 
 from .__cmd_group import *
-from ._configure import *
 from ._configure_flow_log import *
 from ._create import *
 from ._delete import *
