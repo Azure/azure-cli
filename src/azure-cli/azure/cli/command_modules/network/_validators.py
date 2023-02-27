@@ -732,7 +732,6 @@ def load_cert_file(param_name):
     return load_cert_validator
 
 
-
 def get_network_watcher_from_vm(cmd, namespace):
     from msrestazure.tools import parse_resource_id
 
