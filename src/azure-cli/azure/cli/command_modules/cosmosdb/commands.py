@@ -427,19 +427,19 @@ def load_command_table(self, _):
     with self.command_group('cosmosdb mongodb restorable-resource', cosmosdb_mongodb_restorable_resources_sdk, client_factory=cf_restorable_mongodb_resources) as g:
         g.command('list', 'list')
 
-    with self.command_group('cosmosdb gremlin restorable-database', cosmosdb_restorable_gremlin_databases_sdk, client_factory=cf_restorable_gremlin_databases, is_preview=True) as g:
+    with self.command_group('cosmosdb gremlin restorable-database', cosmosdb_restorable_gremlin_databases_sdk, client_factory=cf_restorable_gremlin_databases) as g:
         g.command('list', 'list')
 
-    with self.command_group('cosmosdb gremlin restorable-graph', cosmosdb_restorable_gremlin_graphs_sdk, client_factory=cf_restorable_gremlin_graphs, is_preview=True) as g:
+    with self.command_group('cosmosdb gremlin restorable-graph', cosmosdb_restorable_gremlin_graphs_sdk, client_factory=cf_restorable_gremlin_graphs) as g:
         g.command('list', 'list')
 
-    with self.command_group('cosmosdb gremlin restorable-resource', cosmosdb_restorable_gremlin_resources_sdk, client_factory=cf_restorable_gremlin_resources, is_preview=True) as g:
+    with self.command_group('cosmosdb gremlin restorable-resource', cosmosdb_restorable_gremlin_resources_sdk, client_factory=cf_restorable_gremlin_resources) as g:
         g.command('list', 'list')
 
-    with self.command_group('cosmosdb table restorable-table', cosmosdb_restorable_tables_sdk, client_factory=cf_restorable_tables, is_preview=True) as g:
+    with self.command_group('cosmosdb table restorable-table', cosmosdb_restorable_tables_sdk, client_factory=cf_restorable_tables) as g:
         g.command('list', 'list')
 
-    with self.command_group('cosmosdb table restorable-resource', cosmosdb_restorable_table_resources_sdk, client_factory=cf_restorable_table_resources, is_preview=True) as g:
+    with self.command_group('cosmosdb table restorable-resource', cosmosdb_restorable_table_resources_sdk, client_factory=cf_restorable_table_resources) as g:
         g.command('list', 'list')
 
     # Get account locations
@@ -457,11 +457,11 @@ def load_command_table(self, _):
 
     # Retrieve backup info for gremlin
     with self.command_group('cosmosdb gremlin', cosmosdb_gremlin_sdk, client_factory=cf_gremlin_resources) as g:
-        g.custom_command('retrieve-latest-backup-time', 'cli_gremlin_retrieve_latest_backup_time', is_preview=True)
+        g.custom_command('retrieve-latest-backup-time', 'cli_gremlin_retrieve_latest_backup_time')
 
     # Retrieve backup info for table
     with self.command_group('cosmosdb table', cosmosdb_table_sdk, client_factory=cf_table_resources) as g:
-        g.custom_command('retrieve-latest-backup-time', 'cli_table_retrieve_latest_backup_time', is_preview=True)
+        g.custom_command('retrieve-latest-backup-time', 'cli_table_retrieve_latest_backup_time')
 
     # managed cassandra cluster
     with self.command_group('managed-cassandra cluster', cosmosdb_managed_cassandra_cluster_sdk, client_factory=cf_cassandra_cluster) as g:

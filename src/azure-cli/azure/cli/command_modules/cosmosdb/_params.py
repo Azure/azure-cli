@@ -85,8 +85,8 @@ def load_arguments(self, _):
         c.argument('restore_source', help="The restorable-database-account Id of the source account from which the account has to be restored. Required if --is-restore-request is set to true.", is_preview=True, arg_group='Restore')
         c.argument('restore_timestamp', action=UtcDatetimeAction, help="The timestamp to which the account has to be restored to. Required if --is-restore-request is set to true.", is_preview=True, arg_group='Restore')
         c.argument('databases_to_restore', nargs='+', action=CreateDatabaseRestoreResource, is_preview=True, arg_group='Restore')
-        c.argument('gremlin_databases_to_restore', nargs='+', action=CreateGremlinDatabaseRestoreResource, is_preview=True, arg_group='Restore')
-        c.argument('tables_to_restore', nargs='+', action=CreateTableRestoreResource, is_preview=True, arg_group='Restore')
+        c.argument('gremlin_databases_to_restore', nargs='+', action=CreateGremlinDatabaseRestoreResource, arg_group='Restore')
+        c.argument('tables_to_restore', nargs='+', action=CreateTableRestoreResource, arg_group='Restore')
 
     for scope in ['cosmosdb create', 'cosmosdb update']:
         with self.argument_context(scope) as c:
@@ -382,8 +382,8 @@ def load_arguments(self, _):
         c.argument('restore_timestamp', options_list=['--restore-timestamp', '-t'], action=UtcDatetimeAction, help="The timestamp to which the account has to be restored to.")
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help="The location of the source account from which restore is triggered. This will also be the write region of the restored account")
         c.argument('databases_to_restore', nargs='+', action=CreateDatabaseRestoreResource)
-        c.argument('gremlin_databases_to_restore', nargs='+', action=CreateGremlinDatabaseRestoreResource, is_preview=True)
-        c.argument('tables_to_restore', nargs='+', action=CreateTableRestoreResource, is_preview=True)
+        c.argument('gremlin_databases_to_restore', nargs='+', action=CreateGremlinDatabaseRestoreResource)
+        c.argument('tables_to_restore', nargs='+', action=CreateTableRestoreResource)
 
     # Mongo role definition
     with self.argument_context('cosmosdb mongodb role definition') as c:
