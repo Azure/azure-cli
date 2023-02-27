@@ -103,19 +103,23 @@ steps:
       PathtoPublish: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.json'
       ArtifactName: 'test_results'
       publishLocation: 'Container'
+  # https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/publish-build-artifacts-v1?view=azure-pipelines#inputs
+  # Wildcards are not supported.
   - task: PublishBuildArtifacts@1
     condition: and(succeededOrFailed(), eq(variables.pipelineTestParallelXml, 'true'))
     inputs:
       # /home/cloudtest/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_3.8_latest_1.parallel.xml
       PathtoPublish: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.parallel.xml'
-      ArtifactName: 'test_results'
+      # Use another artifact to publish the test results xml files, otherwise the bot will download too many files.
+      ArtifactName: 'test_results_xml'
       publishLocation: 'Container'
   - task: PublishBuildArtifacts@1
     condition: and(succeededOrFailed(), eq(variables.pipelineTestSerialXml, 'true'))
     inputs:
       # /home/cloudtest/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_3.8_latest_1.serial.xml
       PathtoPublish: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.serial.xml'
-      ArtifactName: 'test_results'
+      # # Use another artifact to publish the test results xml files, otherwise the bot will download too many files.
+      ArtifactName: 'test_results_xml'
       publishLocation: 'Container'
   - task: PublishTestResults@2
     condition: and(succeededOrFailed(), eq(variables.pipelineTestXml, 'true'))
