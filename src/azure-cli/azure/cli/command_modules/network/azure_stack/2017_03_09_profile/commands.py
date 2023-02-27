@@ -45,3 +45,15 @@ def load_command_table(self, _):
     self.command_table['network vpn-connection shared-key update'] = VpnConnSharedKeyUpdate(loader=self)
 
     # endregion
+
+    # region VirtualNetwork
+    from .operations.vnet import VNetCreate, VNetUpdate, VNetSubnetUpdate
+    from .._format import transform_vnet_table_output
+    vnet = import_aaz_by_profile("network.vnet")
+    operations_tmpl = self.get_module_name_by_profile("operations.vnet#{}")
+    self.command_table['network vnet create'] = VNetCreate(loader=self)
+    self.command_table['network vnet update'] = VNetUpdate(loader=self)
+    self.command_table['network vnet list'] = vnet.List(loader=self, table_transformer=transform_vnet_table_output)
+
+    self.command_table['network vnet subnet update'] = VNetSubnetUpdate(loader=self)
+    # endregion

@@ -152,7 +152,6 @@ class VNetSubnetCreate(_VNetSubNet.Create):
         )
         # filter arguments
         args_schema.endpoints._registered = False
-        # args_schema.address_prefix._registered = False
         return args_schema
 
     def pre_operations(self):
