@@ -212,24 +212,9 @@ def load_command_table(self, _):
         min_api='2018-07-01'
     )
 
-    network_subnet_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#SubnetsOperations.{}',
-        client_factory=cf_subnets
-    )
-
     network_vgw_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#VirtualNetworkGatewaysOperations.{}',
         client_factory=cf_virtual_network_gateways
-    )
-
-    network_vnet_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualNetworksOperations.{}',
-        client_factory=cf_virtual_networks
-    )
-
-    network_vnet_peering_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualNetworkPeeringsOperations.{}',
-        client_factory=cf_virtual_network_peerings
     )
 
     network_watcher_sdk = CliCommandType(
@@ -297,13 +282,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#CustomIPPrefixesOperations.{}',
         client_factory=cf_custom_ip_prefixes,
         min_api='2020-06-01'
-    )
-
-    network_custom = CliCommandType(operations_tmpl=custom_operations_tmpl)
-
-    network_nic_custom = CliCommandType(
-        operations_tmpl=custom_operations_tmpl,
-        client_factory=cf_network_interfaces
     )
 
     # endregion

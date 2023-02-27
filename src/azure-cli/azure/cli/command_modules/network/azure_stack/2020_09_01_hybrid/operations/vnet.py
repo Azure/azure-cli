@@ -101,6 +101,7 @@ class VNetUpdate(_VNet.Update):
         if not has_value(instance.properties.ddos_protection_plan.id):
             instance.properties.ddos_protection_plan = None
 
+
 def list_available_ips(cmd, resource_group_name, virtual_network_name):
     Show = import_aaz_by_profile("network.vnet").Show
     vnet = Show(cli_ctx=cmd.cli_ctx)(command_args={
@@ -194,6 +195,7 @@ class VNetSubnetCreate(_VNetSubNet.Create):
             args.service_endpoint_policy,
             element_transformer=lambda _, policy_id: {"id": policy_id}
         )
+
 
 class VNetSubnetUpdate(_VNetSubNet.Update):
     @classmethod
