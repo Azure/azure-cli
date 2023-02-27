@@ -403,7 +403,7 @@ class TestConnectivity(_TestConnectivity):
 class PacketCaptureCreate(_PacketCaptureCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZDictArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             registered=False,
