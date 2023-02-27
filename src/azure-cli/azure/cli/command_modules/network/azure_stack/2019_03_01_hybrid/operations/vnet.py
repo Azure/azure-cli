@@ -114,15 +114,6 @@ def list_available_ips(cmd, resource_group_name, virtual_network_name):
 _VNetSubNet = import_aaz_by_profile("network.vnet.subnet")
 
 
-def _handle_plural_or_singular(args, plural_name, singular_name):
-    values = getattr(args, plural_name)
-    if not has_value(values):
-        return
-
-    setattr(args, plural_name, values if len(values) > 1 else None)
-    setattr(args, singular_name, values[0] if len(values) == 1 else None)
-
-
 class VNetSubnetCreate(_VNetSubNet.Create):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
