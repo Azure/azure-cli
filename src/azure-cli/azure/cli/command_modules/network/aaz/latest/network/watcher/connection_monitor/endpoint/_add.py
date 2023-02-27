@@ -12,17 +12,26 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network watcher connection-monitor test-group create",
+    "network watcher connection-monitor endpoint add",
     is_preview=True,
 )
-class Create(AAZCommand):
-    """network watcher connection-monitor test-group create
+class Add(AAZCommand):
+    """Add an endpoint to a connection monitor.
+
+    :example: Add an external address as a destination endpoint
+        az network watcher connection-monitor endpoint add --connection-monitor MyConnectionMonitor --location westus --name MyExternalEndpoint --address "bing.com" --dest-test-groups DefaultTestGroup --type ExternalAddress
+
+    :example: Add an Azure VM as a source endpoint
+        az network watcher connection-monitor endpoint add --connection-monitor MyConnectionMonitor --location westus --name MyVMEndpoint --resource-id MyVMResourceID --source-test-groups DefaultTestGroup --type AzureVM
+
+    :example: Add a Subnet as a source endpoint with addresses excluded
+        az network watcher connection-monitor endpoint add --connection-monitor MyConnectionMonitor --location westus --name MySubnetEndpoint --resource-id MySubnetID --source-test-groups DefaultTestGroup --type AzureSubnet --address-exclude 10.0.0.25 10.0.0.30 --coverage-level BelowAverage
     """
 
     _aaz_info = {
         "version": "2022-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/connectionmonitors/{}", "2022-01-01", "properties.testGroups[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/connectionmonitors/{}", "2022-01-01", "properties.endpoints[]"],
         ]
     }
 
@@ -59,48 +68,78 @@ class Create(AAZCommand):
             help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
-
-        # define Arg Group "Parameters.properties.testGroups[]"
-
-        _args_schema = cls._args_schema
-        _args_schema.destinations = AAZListArg(
-            options=["--destinations"],
-            arg_group="Parameters.properties.testGroups[]",
-            help="List of destination endpoint names.",
+        _args_schema.address = AAZStrArg(
+            options=["--address"],
+            help="Address of the connection monitor endpoint (IP or domain name).",
+        )
+        _args_schema.coverage_level = AAZStrArg(
+            options=["--coverage-level"],
+            help="Test coverage for the endpoint. Allowed values: AboveAverage, Average, BelowAverage, Default, Full, Low",
+            enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage", "Default": "Default", "Full": "Full", "Low": "Low"},
+        )
+        _args_schema.filter_items = AAZListArg(
+            options=["--filter-items"],
+            help="List of property=value pairs to define filter items. Property currently include: type, address. Property value of type supports 'AgentAddress' only now.",
+        )
+        _args_schema.filter_type = AAZStrArg(
+            options=["--filter-type"],
+            help="The behavior of the endpoint filter. Currently only 'Include' is supported.  Allowed values: Include.",
+            enum={"Include": "Include"},
+        )
+        _args_schema.endpoint_name = AAZStrArg(
+            options=["-n", "--name", "--endpoint-name"],
+            help="The name of the connection monitor endpoint.",
             required=True,
         )
-        _args_schema.disable = AAZBoolArg(
-            options=["--disable"],
-            arg_group="Parameters.properties.testGroups[]",
-            help="Value indicating whether test group is disabled.",
+        _args_schema.resource_id = AAZStrArg(
+            options=["--resource-id"],
+            help="Resource ID of the connection monitor endpoint.",
         )
-        _args_schema.name = AAZStrArg(
-            options=["--name"],
-            arg_group="Parameters.properties.testGroups[]",
-            help="The name of the connection monitor test group.",
-            required=True,
+        _args_schema.scope_exclude = AAZListArg(
+            options=["--scope-exclude"],
+            help="List of items which needs to be excluded from the endpoint scope.",
         )
-        _args_schema.sources = AAZListArg(
-            options=["--sources"],
-            arg_group="Parameters.properties.testGroups[]",
-            help="List of source endpoint names.",
-            required=True,
+        _args_schema.scope_include = AAZListArg(
+            options=["--scope-include"],
+            help="List of items which needs to be included to the endpoint scope.",
         )
-        _args_schema.test_configurations = AAZListArg(
-            options=["--test-configurations"],
-            arg_group="Parameters.properties.testGroups[]",
-            help="List of test configuration names.",
-            required=True,
+        _args_schema.type = AAZStrArg(
+            options=["--type"],
+            help="The endpoint type.  Allowed values: AzureArcVM, AzureSubnet, AzureVM, AzureVMSS, AzureVNet, ExternalAddress, MMAWorkspaceMachine, MMAWorkspaceNetwork.",
+            enum={"AzureArcVM": "AzureArcVM", "AzureSubnet": "AzureSubnet", "AzureVM": "AzureVM", "AzureVMSS": "AzureVMSS", "AzureVNet": "AzureVNet", "ExternalAddress": "ExternalAddress", "MMAWorkspaceMachine": "MMAWorkspaceMachine", "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"},
         )
 
-        destinations = cls._args_schema.destinations
-        destinations.Element = AAZStrArg()
+        filter_items = cls._args_schema.filter_items
+        filter_items.Element = AAZObjectArg()
 
-        sources = cls._args_schema.sources
-        sources.Element = AAZStrArg()
+        _element = cls._args_schema.filter_items.Element
+        _element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the filter item.",
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+            help="The type of item included in the filter. Currently only 'AgentAddress' is supported.",
+            enum={"AgentAddress": "AgentAddress"},
+        )
 
-        test_configurations = cls._args_schema.test_configurations
-        test_configurations.Element = AAZStrArg()
+        scope_exclude = cls._args_schema.scope_exclude
+        scope_exclude.Element = AAZObjectArg()
+
+        _element = cls._args_schema.scope_exclude.Element
+        _element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
+        )
+
+        scope_include = cls._args_schema.scope_include
+        scope_include.Element = AAZObjectArg()
+
+        _element = cls._args_schema.scope_include.Element
+        _element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
+        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -136,10 +175,10 @@ class Create(AAZCommand):
 
         def _get(self):
             result = self.ctx.vars.instance
-            result = result.properties.testGroups
+            result = result.properties.endpoints
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.name,
+                lambda e: e[1].name == self.ctx.args.endpoint_name,
                 filters
             )
             idx = next(filters)[0]
@@ -147,10 +186,10 @@ class Create(AAZCommand):
 
         def _set(self, value):
             result = self.ctx.vars.instance
-            result = result.properties.testGroups
+            result = result.properties.endpoints
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.name,
+                lambda e: e[1].name == self.ctx.args.endpoint_name,
                 filters
             )
             idx = next(filters, [len(result)])[0]
@@ -240,7 +279,7 @@ class Create(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _CreateHelper._build_schema_connection_monitor_result_read(cls._schema_on_200)
+            _AddHelper._build_schema_connection_monitor_result_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -355,7 +394,7 @@ class Create(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _CreateHelper._build_schema_connection_monitor_result_read(cls._schema_on_200_201)
+            _AddHelper._build_schema_connection_monitor_result_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -369,29 +408,54 @@ class Create(AAZCommand):
                 self.ctx.args,
                 typ=AAZObjectType
             )
-            _builder.set_prop("destinations", AAZListType, ".destinations", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("disable", AAZBoolType, ".disable")
-            _builder.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("sources", AAZListType, ".sources", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("testConfigurations", AAZListType, ".test_configurations", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("address", AAZStrType, ".address")
+            _builder.set_prop("coverageLevel", AAZStrType, ".coverage_level")
+            _builder.set_prop("filter", AAZObjectType)
+            _builder.set_prop("name", AAZStrType, ".endpoint_name", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("resourceId", AAZStrType, ".resource_id")
+            _builder.set_prop("scope", AAZObjectType)
+            _builder.set_prop("type", AAZStrType, ".type")
 
-            destinations = _builder.get(".destinations")
-            if destinations is not None:
-                destinations.set_elements(AAZStrType, ".")
+            filter = _builder.get(".filter")
+            if filter is not None:
+                filter.set_prop("items", AAZListType, ".filter_items")
+                filter.set_prop("type", AAZStrType, ".filter_type")
 
-            sources = _builder.get(".sources")
-            if sources is not None:
-                sources.set_elements(AAZStrType, ".")
+            items = _builder.get(".filter.items")
+            if items is not None:
+                items.set_elements(AAZObjectType, ".")
 
-            test_configurations = _builder.get(".testConfigurations")
-            if test_configurations is not None:
-                test_configurations.set_elements(AAZStrType, ".")
+            _elements = _builder.get(".filter.items[]")
+            if _elements is not None:
+                _elements.set_prop("address", AAZStrType, ".address")
+                _elements.set_prop("type", AAZStrType, ".type")
+
+            scope = _builder.get(".scope")
+            if scope is not None:
+                scope.set_prop("exclude", AAZListType, ".scope_exclude")
+                scope.set_prop("include", AAZListType, ".scope_include")
+
+            exclude = _builder.get(".scope.exclude")
+            if exclude is not None:
+                exclude.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".scope.exclude[]")
+            if _elements is not None:
+                _elements.set_prop("address", AAZStrType, ".address")
+
+            include = _builder.get(".scope.include")
+            if include is not None:
+                include.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".scope.include[]")
+            if _elements is not None:
+                _elements.set_prop("address", AAZStrType, ".address")
 
             return _instance_value
 
 
-class _CreateHelper:
-    """Helper class for Create"""
+class _AddHelper:
+    """Helper class for Add"""
 
     _schema_connection_monitor_endpoint_scope_item_read = None
 
@@ -662,4 +726,4 @@ class _CreateHelper:
         _schema.type = cls._schema_connection_monitor_result_read.type
 
 
-__all__ = ["Create"]
+__all__ = ["Add"]

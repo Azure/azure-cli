@@ -8,9 +8,11 @@ from knack.util import CLIError
 from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id
 
 
-from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZResourceLocationArgFormat
 from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 from azure.cli.core.commands.arm import get_arm_resource_by_id
+
+from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZResourceLocationArgFormat, AAZListArg, AAZStrArg, \
+    AAZArgEnum
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
@@ -38,13 +40,14 @@ from ..aaz.latest.network.watcher.connection_monitor import Update as _WatcherCo
 from ..aaz.latest.network.watcher.connection_monitor.output import Add as _WatcherConnectionMonitorOutputAdd, \
     List as _WatcherConnectionMonitorOutputList
 from ..aaz.latest.network.watcher.connection_monitor.endpoint import Show as _WatcherConnectionMonitorEndpointShow, \
-    Remove as _WatcherConnectionMonitorEndpointRemove, List as _WatcherConnectionMonitorEndpointList
+    Remove as _WatcherConnectionMonitorEndpointRemove, List as _WatcherConnectionMonitorEndpointList, \
+    Add as _WatcherConnectionMonitorEndpointAdd
 
 from ..aaz.latest.network.watcher.connection_monitor.test_configuration import Show as _MonitorTestConfigurationShow, \
     List as _MonitorTestConfigurationList, Remove as _MonitorTestConfigurationRemove
 
 from ..aaz.latest.network.watcher.connection_monitor.test_group import Show as _WatcherConnectionMonitorTestGroupShow, \
-    List as _WatcherConnectionMonitorTestGroupList, Remove as _WatcherConnectionMonitorTestGroupRemove
+    List as _WatcherConnectionMonitorTestGroupList
 
 logger = get_logger(__name__)
 
@@ -1173,6 +1176,116 @@ class WatcherConnectionMonitorOutputRemove(_WatcherConnectionMonitorUpdate):
         args.outputs = []
 
 
+class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.watcher_name._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_rg._required = False
+        args_schema.filter_items._registered = False
+        args_schema.scope_exclude._registered = False
+        args_schema.scope_include._registered = False
+
+        args_schema.address_exclude = AAZListArg(
+            options=["--address-exclude"],
+            help="List of address of the endpoint item which needs to be included to the endpoint scope.", # ? include
+        )
+        args_schema.address_exclude.Element = AAZStrArg()
+
+        args_schema.address_include = AAZListArg(
+            options=["--address-exclude"],
+            help="List of address of the endpoint item which needs to be included to the endpoint scope.",
+        )
+        args_schema.address_include.Element = AAZStrArg()
+
+        args_schema.filter_item = AAZListArg(
+            options=["--filter-item"],
+            help="List of property=value pairs to define filter items. "
+                 "Property currently include: type, address. Property value of "
+                 "type supports 'AgentAddress' only now.",
+        )
+        args_schema.filter_item.Element = AAZStrArg()
+
+        args_schema.dest_test_groups = AAZListArg(
+            options=["--dest-test-groups"],
+            help="Space-separated list of names for test group to reference as destination.",
+            arg_group="V2 Test Group"
+        )
+        args_schema.dest_test_groups.Element = AAZStrArg()
+
+        args_schema.source_test_groups = AAZListArg(
+            options=["--source-test-groups"],
+            help="Space-separated list of names for test group to reference as source.",
+            arg_group="V2 Test Group"
+        )
+        args_schema.source_test_groups.Element = AAZStrArg()
+        args_schema.coverage_level.enum = AAZArgEnum({
+            "AboveAverage": "AboveAverage",
+            "Average": "Average",
+            "BelowAverage": "BelowAverage",
+            "Default": "Default",
+            "Full": "Full",
+            "Low": "Low"
+        })
+        args_schema.filter_type.enum = AAZArgEnum({"Include": "Include"})
+        args_schema.type.enum = AAZArgEnum({
+            "AzureArcVM": "AzureArcVM",
+            "AzureSubnet": "AzureSubnet",
+            "AzureVM": "AzureVM",
+            "AzureVMSS": "AzureVMSS",
+            "AzureVNet": "AzureVNet",
+            "ExternalAddress": "ExternalAddress",
+            "MMAWorkspaceMachine": "MMAWorkspaceMachine",
+            "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"
+        })
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_location(self)
+
+    def pre_instance_create(self):
+        args = self.ctx.args
+        name = args.endpoint_name
+        args.scope_exclude = []
+        args.scope_include = []
+        if has_value(args.address_include):
+            for ip in args.address_include:
+                args.scope_include.append({"address": ip})
+        if has_value(args.address_exclude):
+            for ip in args.address_exclude:
+                args.scope_exclude.append({"address": ip})
+
+        if has_value(args.filter_type) and has_value(args.filter_items):
+            filter_item = {}
+            for item in args.filter_items:
+                try:
+                    key, val = item.split('=', 1)
+                    if hasattr(filter_item, key):
+                        setattr(filter_item, key, val)
+                    else:
+                        raise ValidationError("usage error: '{}' is not a valid property of "
+                                              "connection monitor endpoint filter-item".format(key))
+                except ValueError:
+                    raise ValidationError('usage error:  PropertyName=PropertyValue [PropertyName=PropertyValue ...]')
+            args.filter_items.append(filter_item)
+        instance = self.ctx.vars.instance
+
+        src_test_groups = set()
+        dst_test_groups = set()
+        if has_value(args.source_test_groups):
+            src_test_groups = set(args.source_test_groups)
+        if has_value(args.dest_test_groups):
+            dst_test_groups = set(args.dest_test_groups)
+        for test_group in instance.properties.test_groups:
+            if test_group.name in src_test_groups:
+                test_group.sources.append(name)
+            if test_group.name in dst_test_groups:
+                test_group.destinations.append(name)
+
+
 class WatcherConnectionMonitorEndpointShow(_WatcherConnectionMonitorEndpointShow):
 
     @classmethod
@@ -1229,7 +1342,6 @@ class WatcherConnectionMonitorEndpointRemove(_WatcherConnectionMonitorEndpointRe
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False

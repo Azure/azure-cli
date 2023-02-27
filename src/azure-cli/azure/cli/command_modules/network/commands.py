@@ -508,21 +508,26 @@ def load_command_table(self, _):
     self.command_table["network watcher connection-monitor delete"] = WatcherConnectionMonitorDelete(loader=self)
     self.command_table["network watcher connection-monitor show"] = WatcherConnectionMonitorShow(loader=self)
 
-    with self.command_group('network watcher connection-monitor endpoint',
-                            network_watcher_cm_sdk,
-                            min_api='2019-11-01',
-                            client_factory=cf_connection_monitor,
-                            is_preview=True,
-                            validator=process_nw_cm_v2_endpoint_namespace) as g:
-        g.custom_command('add', 'add_nw_connection_monitor_v2_endpoint')
-        # g.custom_command('remove', 'remove_nw_connection_monitor_v2_endpoint')
-        # g.custom_show_command('show', 'show_nw_connection_monitor_v2_endpoint')
-        # g.custom_command('list', 'list_nw_connection_monitor_v2_endpoint')
-    from .operations.watcher import WatcherConnectionMonitorEndpointShow, \
+    # with self.command_group('network watcher connection-monitor endpoint',
+    #                         network_watcher_cm_sdk,
+    #                         min_api='2019-11-01',
+    #                         client_factory=cf_connection_monitor,
+    #                         is_preview=True,
+    #                         validator=process_nw_cm_v2_endpoint_namespace) as g:
+    #     g.custom_command('add', 'add_nw_connection_monitor_v2_endpoint')
+    #     g.custom_command('remove', 'remove_nw_connection_monitor_v2_endpoint')
+    #     g.custom_show_command('show', 'show_nw_connection_monitor_v2_endpoint')
+    #     g.custom_command('list', 'list_nw_connection_monitor_v2_endpoint')
+    from .operations.watcher import WatcherConnectionMonitorEndpointAdd, WatcherConnectionMonitorEndpointShow, \
         WatcherConnectionMonitorEndpointList, WatcherConnectionMonitorEndpointRemove
-    self.command_table["network watcher connection-monitor endpoint remove"] = WatcherConnectionMonitorEndpointRemove(loader=self)
-    self.command_table["network watcher connection-monitor endpoint show"] = WatcherConnectionMonitorEndpointShow(loader=self)
-    self.command_table["network watcher connection-monitor endpoint list"] = WatcherConnectionMonitorEndpointList(loader=self)
+    self.command_table["network watcher connection-monitor endpoint add"] = WatcherConnectionMonitorEndpointAdd(
+        loader=self)
+    self.command_table["network watcher connection-monitor endpoint remove"] = WatcherConnectionMonitorEndpointRemove(
+        loader=self)
+    self.command_table["network watcher connection-monitor endpoint show"] = WatcherConnectionMonitorEndpointShow(
+        loader=self)
+    self.command_table["network watcher connection-monitor endpoint list"] = WatcherConnectionMonitorEndpointList(
+        loader=self)
 
     with self.command_group('network watcher connection-monitor test-configuration',
                             network_watcher_cm_sdk,

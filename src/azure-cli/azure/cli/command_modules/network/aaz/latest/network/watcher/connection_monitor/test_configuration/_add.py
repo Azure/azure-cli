@@ -12,26 +12,23 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network watcher connection-monitor endpoint create",
+    "network watcher connection-monitor test-configuration add",
     is_preview=True,
 )
-class Create(AAZCommand):
-    """Add an endpoint to a connection monitor.
+class Add(AAZCommand):
+    """Add a test configuration to a connection monitor.
 
-    :example: Add an external address as a destination endpoint
-        az network watcher connection-monitor endpoint add --connection-monitor MyConnectionMonitor --location westus --name MyExternalEndpoint --address "bing.com" --dest-test-groups DefaultTestGroup --type ExternalAddress
+    :example: Add a test configuration with HTTP supported
+        az network watcher connection-monitor test-configuration add --connection-monitor MyConnectionMonitor --location westus --name MyHTTPTestConfiguration --test-groups DefaultTestGroup --protocol Http --http-request-header name=Host value=bing.com --http- request-header name=UserAgent value=Edge
 
-    :example: Add an Azure VM as a source endpoint
-        az network watcher connection-monitor endpoint add --connection-monitor MyConnectionMonitor --location westus --name MyVMEndpoint --resource-id MyVMResourceID --source-test-groups DefaultTestGroup --type AzureVM
-
-    :example: Add a Subnet as a source endpoint with addresses excluded
-        az network watcher connection-monitor endpoint add --connection-monitor MyConnectionMonitor --location westus --name MySubnetEndpoint --resource-id MySubnetID --source-test-groups DefaultTestGroup --type AzureSubnet --address-exclude 10.0.0.25 10.0.0.30 --coverage-level BelowAverage
+    :example: Add a test configuration with TCP supported
+        az network watcher connection-monitor test-configuration add --connection-monitor MyConnectionMonitor --location westus --name MyHTTPTestConfiguration --test-groups TCPTestGroup DefaultTestGroup --protocol Tcp --tcp-port 4096
     """
 
     _aaz_info = {
         "version": "2022-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/connectionmonitors/{}", "2022-01-01", "properties.endpoints[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/connectionmonitors/{}", "2022-01-01", "properties.testConfigurations[]"],
         ]
     }
 
@@ -63,82 +60,124 @@ class Create(AAZCommand):
             help="The name of the Network Watcher resource.",
             required=True,
         )
-        _args_schema.watcher_rg = AAZResourceGroupNameArg(
-            options=["-g", "--watcher-rg"],
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
+        _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.address = AAZStrArg(
-            options=["--address"],
-            help="Address of the connection monitor endpoint (IP or domain name).",
-        )
-        _args_schema.coverage_level = AAZStrArg(
-            options=["--coverage-level"],
-            help="Test coverage for the endpoint. Allowed values: AboveAverage, Average, BelowAverage, Default, Full, Low",
-            enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage", "Default": "Default", "Full": "Full", "Low": "Low"},
-        )
-        _args_schema.filter_items = AAZListArg(
-            options=["--filter-items"],
-            help="List of property=value pairs to define filter items. Property currently include: type, address. Property value of type supports 'AgentAddress' only now.",
-        )
-        _args_schema.filter_type = AAZStrArg(
-            options=["--filter-type"],
-            help="The behavior of the endpoint filter. Currently only 'Include' is supported.",
-            enum={"Include": "Include"},
-        )
-        _args_schema.name = AAZStrArg(
-            options=["--name"],
-            help="The name of the connection monitor endpoint.",
+        _args_schema.test_configuration_name = AAZStrArg(
+            options=["-n", "--name", "--test-configuration-name"],
+            help="The name of the connection monitor test configuration.",
             required=True,
         )
-        _args_schema.resource_id = AAZStrArg(
-            options=["--resource-id"],
-            help="Resource ID of the connection monitor endpoint.",
+        _args_schema.preferred_ip_version = AAZStrArg(
+            options=["--preferred-ip-version"],
+            help="The preferred IP version to use in test evaluation. The connection monitor may choose to use a different version depending on other parameters.  Allowed values: IPv4, IPv6.",
+            enum={"IPv4": "IPv4", "IPv6": "IPv6"},
         )
-        _args_schema.scope_exclude = AAZListArg(
-            options=["--scope-exclude"],
-            help="List of items which needs to be excluded from the endpoint scope.",
+        _args_schema.protocol = AAZStrArg(
+            options=["--protocol"],
+            help="The protocol to use in test evaluation.  Allowed values: Http, Icmp, Tcp.",
+            required=True,
+            enum={"Http": "Http", "Icmp": "Icmp", "Tcp": "Tcp"},
         )
-        _args_schema.scope_include = AAZListArg(
-            options=["--scope-include"],
-            help="List of items which needs to be included to the endpoint scope.",
+        _args_schema.threshold_failed_percent = AAZIntArg(
+            options=["--threshold-failed-percent"],
+            help="The maximum percentage of failed checks permitted for a test to evaluate as successful.",
         )
-        _args_schema.type = AAZStrArg(
-            options=["--type"],
-            help="The endpoint type.  Allowed values: AzureArcVM, AzureSubnet, AzureVM, AzureVMSS, AzureVNet, ExternalAddress, MMAWorkspaceMachine, MMAWorkspaceNetwork.",
-            enum={"AzureArcVM": "AzureArcVM", "AzureSubnet": "AzureSubnet", "AzureVM": "AzureVM", "AzureVMSS": "AzureVMSS", "AzureVNet": "AzureVNet", "ExternalAddress": "ExternalAddress", "MMAWorkspaceMachine": "MMAWorkspaceMachine", "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"},
+        _args_schema.threshold_round_trip_time = AAZFloatArg(
+            options=["--threshold-round-trip-time"],
+            help="The maximum round-trip time in milliseconds permitted for a test to evaluate as successful.",
         )
-
-        filter_items = cls._args_schema.filter_items
-        filter_items.Element = AAZObjectArg()
-
-        _element = cls._args_schema.filter_items.Element
-        _element.address = AAZStrArg(
-            options=["address"],
-            help="The address of the filter item.",
-        )
-        _element.type = AAZStrArg(
-            options=["type"],
-            help="The type of item included in the filter. Currently only 'AgentAddress' is supported.",
-            enum={"AgentAddress": "AgentAddress"},
+        _args_schema.frequency = AAZIntArg(
+            options=["--frequency"],
+            help="The frequency of test evaluation, in seconds.  Default: 60.",
         )
 
-        scope_exclude = cls._args_schema.scope_exclude
-        scope_exclude.Element = AAZObjectArg()
+        # define Arg Group "HttpConfiguration"
 
-        _element = cls._args_schema.scope_exclude.Element
-        _element.address = AAZStrArg(
-            options=["address"],
-            help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
+        _args_schema = cls._args_schema
+        _args_schema.http_method = AAZStrArg(
+            options=["--http-method"],
+            arg_group="HttpConfiguration",
+            help="The HTTP method to use.",
+            enum={"Get": "Get", "Post": "Post"},
+        )
+        _args_schema.http_path = AAZStrArg(
+            options=["--http-path"],
+            arg_group="HttpConfiguration",
+            help="The path component of the URI. For instance, \"/dir1/dir2\".",
+        )
+        _args_schema.http_port = AAZIntArg(
+            options=["--http-port"],
+            arg_group="HttpConfiguration",
+            help="The port to connect to.",
+            fmt=AAZIntArgFormat(
+                maximum=65535,
+                minimum=0,
+            ),
+        )
+        _args_schema.http_prefer_https = AAZBoolArg(
+            options=["--http-prefer-https"],
+            arg_group="HttpConfiguration",
+            help="Value indicating whether HTTPS is preferred over HTTP in cases where the choice is not explicit.",
+        )
+        _args_schema.http_request_header = AAZListArg(
+            options=["--http-request-header"],
+            arg_group="HttpConfiguration",
+            help="The HTTP headers to transmit with the request.",
+        )
+        _args_schema.http_valid_status_codes = AAZListArg(
+            options=["--http-valid-status-codes"],
+            arg_group="HttpConfiguration",
+            help="HTTP status codes to consider successful. For instance, \"2xx,301-304,418\".",
         )
 
-        scope_include = cls._args_schema.scope_include
-        scope_include.Element = AAZObjectArg()
+        http_request_header = cls._args_schema.http_request_header
+        http_request_header.Element = AAZObjectArg()
 
-        _element = cls._args_schema.scope_include.Element
-        _element.address = AAZStrArg(
-            options=["address"],
-            help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
+        _element = cls._args_schema.http_request_header.Element
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="The name in HTTP header.",
+        )
+        _element.value = AAZStrArg(
+            options=["value"],
+            help="The value in HTTP header.",
+        )
+
+        http_valid_status_codes = cls._args_schema.http_valid_status_codes
+        http_valid_status_codes.Element = AAZStrArg()
+
+        # define Arg Group "IcmpConfiguration"
+
+        _args_schema = cls._args_schema
+        _args_schema.icmp_disable_trace_route = AAZBoolArg(
+            options=["--icmp-disable-trace-route"],
+            arg_group="IcmpConfiguration",
+            help="Value indicating whether path evaluation with trace route should be disabled. false is default.  Allowed values: false, true.",
+        )
+
+        # define Arg Group "TcpConfiguration"
+
+        _args_schema = cls._args_schema
+        _args_schema.tcp_port_behavior = AAZStrArg(
+            options=["--tcp-port-behavior"],
+            arg_group="TcpConfiguration",
+            help="Destination port behavior.  Allowed values: ListenIfAvailable,  None.",
+            enum={"ListenIfAvailable": "ListenIfAvailable", "None": "None"},
+        )
+        _args_schema.tcp_disable_trace_route = AAZBoolArg(
+            options=["--tcp-disable-trace-route"],
+            arg_group="TcpConfiguration",
+            help="Value indicating whether path evaluation with trace route should be disabled. false is default.  Allowed values: false, true.",
+        )
+        _args_schema.tcp_port = AAZIntArg(
+            options=["--tcp-port"],
+            arg_group="TcpConfiguration",
+            help="The port to connect to.",
+            fmt=AAZIntArgFormat(
+                maximum=65535,
+                minimum=0,
+            ),
         )
         return cls._args_schema
 
@@ -175,10 +214,10 @@ class Create(AAZCommand):
 
         def _get(self):
             result = self.ctx.vars.instance
-            result = result.properties.endpoints
+            result = result.properties.testConfigurations
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.name,
+                lambda e: e[1].name == self.ctx.args.test_configuration_name,
                 filters
             )
             idx = next(filters)[0]
@@ -186,10 +225,10 @@ class Create(AAZCommand):
 
         def _set(self, value):
             result = self.ctx.vars.instance
-            result = result.properties.endpoints
+            result = result.properties.testConfigurations
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.name,
+                lambda e: e[1].name == self.ctx.args.test_configuration_name,
                 filters
             )
             idx = next(filters, [len(result)])[0]
@@ -234,7 +273,7 @@ class Create(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.watcher_rg,
+                    "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -279,7 +318,7 @@ class Create(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _CreateHelper._build_schema_connection_monitor_result_read(cls._schema_on_200)
+            _AddHelper._build_schema_connection_monitor_result_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -337,7 +376,7 @@ class Create(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.watcher_rg,
+                    "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -394,7 +433,7 @@ class Create(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _CreateHelper._build_schema_connection_monitor_result_read(cls._schema_on_200_201)
+            _AddHelper._build_schema_connection_monitor_result_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -408,54 +447,57 @@ class Create(AAZCommand):
                 self.ctx.args,
                 typ=AAZObjectType
             )
-            _builder.set_prop("address", AAZStrType, ".address")
-            _builder.set_prop("coverageLevel", AAZStrType, ".coverage_level")
-            _builder.set_prop("filter", AAZObjectType)
-            _builder.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("resourceId", AAZStrType, ".resource_id")
-            _builder.set_prop("scope", AAZObjectType)
-            _builder.set_prop("type", AAZStrType, ".type")
+            _builder.set_prop("httpConfiguration", AAZObjectType)
+            _builder.set_prop("icmpConfiguration", AAZObjectType)
+            _builder.set_prop("name", AAZStrType, ".test_configuration_name", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("preferredIPVersion", AAZStrType, ".preferred_ip_version")
+            _builder.set_prop("protocol", AAZStrType, ".protocol", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("successThreshold", AAZObjectType)
+            _builder.set_prop("tcpConfiguration", AAZObjectType)
+            _builder.set_prop("testFrequencySec", AAZIntType, ".frequency")
 
-            filter = _builder.get(".filter")
-            if filter is not None:
-                filter.set_prop("items", AAZListType, ".filter_items")
-                filter.set_prop("type", AAZStrType, ".filter_type")
+            http_configuration = _builder.get(".httpConfiguration")
+            if http_configuration is not None:
+                http_configuration.set_prop("method", AAZStrType, ".http_method")
+                http_configuration.set_prop("path", AAZStrType, ".http_path")
+                http_configuration.set_prop("port", AAZIntType, ".http_port")
+                http_configuration.set_prop("preferHTTPS", AAZBoolType, ".http_prefer_https")
+                http_configuration.set_prop("requestHeaders", AAZListType, ".http_request_header")
+                http_configuration.set_prop("validStatusCodeRanges", AAZListType, ".http_valid_status_codes")
 
-            items = _builder.get(".filter.items")
-            if items is not None:
-                items.set_elements(AAZObjectType, ".")
+            request_headers = _builder.get(".httpConfiguration.requestHeaders")
+            if request_headers is not None:
+                request_headers.set_elements(AAZObjectType, ".")
 
-            _elements = _builder.get(".filter.items[]")
+            _elements = _builder.get(".httpConfiguration.requestHeaders[]")
             if _elements is not None:
-                _elements.set_prop("address", AAZStrType, ".address")
-                _elements.set_prop("type", AAZStrType, ".type")
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("value", AAZStrType, ".value")
 
-            scope = _builder.get(".scope")
-            if scope is not None:
-                scope.set_prop("exclude", AAZListType, ".scope_exclude")
-                scope.set_prop("include", AAZListType, ".scope_include")
+            valid_status_code_ranges = _builder.get(".httpConfiguration.validStatusCodeRanges")
+            if valid_status_code_ranges is not None:
+                valid_status_code_ranges.set_elements(AAZStrType, ".")
 
-            exclude = _builder.get(".scope.exclude")
-            if exclude is not None:
-                exclude.set_elements(AAZObjectType, ".")
+            icmp_configuration = _builder.get(".icmpConfiguration")
+            if icmp_configuration is not None:
+                icmp_configuration.set_prop("disableTraceRoute", AAZBoolType, ".icmp_disable_trace_route")
 
-            _elements = _builder.get(".scope.exclude[]")
-            if _elements is not None:
-                _elements.set_prop("address", AAZStrType, ".address")
+            success_threshold = _builder.get(".successThreshold")
+            if success_threshold is not None:
+                success_threshold.set_prop("checksFailedPercent", AAZIntType, ".threshold_failed_percent")
+                success_threshold.set_prop("roundTripTimeMs", AAZFloatType, ".threshold_round_trip_time")
 
-            include = _builder.get(".scope.include")
-            if include is not None:
-                include.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".scope.include[]")
-            if _elements is not None:
-                _elements.set_prop("address", AAZStrType, ".address")
+            tcp_configuration = _builder.get(".tcpConfiguration")
+            if tcp_configuration is not None:
+                tcp_configuration.set_prop("destinationPortBehavior", AAZStrType, ".tcp_port_behavior")
+                tcp_configuration.set_prop("disableTraceRoute", AAZBoolType, ".tcp_disable_trace_route")
+                tcp_configuration.set_prop("port", AAZIntType, ".tcp_port")
 
             return _instance_value
 
 
-class _CreateHelper:
-    """Helper class for Create"""
+class _AddHelper:
+    """Helper class for Add"""
 
     _schema_connection_monitor_endpoint_scope_item_read = None
 
@@ -726,4 +768,4 @@ class _CreateHelper:
         _schema.type = cls._schema_connection_monitor_result_read.type
 
 
-__all__ = ["Create"]
+__all__ = ["Add"]

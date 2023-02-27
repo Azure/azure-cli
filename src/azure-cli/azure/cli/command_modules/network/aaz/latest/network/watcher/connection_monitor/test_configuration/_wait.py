@@ -52,9 +52,7 @@ class Wait(AAZWaitCommand):
             required=True,
             id_part="name",
         )
-        _args_schema.watcher_rg = AAZResourceGroupNameArg(
-            options=["-g", "--watcher-rg"],
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
+        _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
         return cls._args_schema
@@ -114,7 +112,7 @@ class Wait(AAZWaitCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.watcher_rg,
+                    "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
