@@ -16,10 +16,9 @@ from azure.cli.command_modules.network.azure_stack._client_factory import (
     cf_express_route_circuit_peerings, cf_express_route_circuits,
     cf_express_route_service_providers,
     cf_network_interfaces, cf_network_security_groups, cf_network_watcher, cf_packet_capture,
-    cf_virtual_networks, cf_virtual_network_peerings,
     cf_virtual_network_gateways,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_security_rules, cf_subnets, cf_usages,
+    cf_security_rules, cf_usages,
     cf_public_ip_addresses, cf_connection_monitor,
     cf_public_ip_prefixes, cf_dns_references, cf_private_endpoints,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
@@ -33,13 +32,13 @@ from azure.cli.command_modules.network.azure_stack._util import (
 from azure.cli.command_modules.network.azure_stack._format import (
     transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
-    transform_vnet_create_output, transform_public_ip_create_output,
+    transform_public_ip_create_output,
     transform_traffic_manager_create_output, transform_nic_create_output,
     transform_nsg_create_output, transform_vnet_gateway_create_output,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
     transform_network_usage_list, transform_network_usage_table, transform_nsg_rule_table_output,
-    transform_vnet_table_output, transform_effective_route_table, transform_effective_nsg,
+    transform_effective_route_table, transform_effective_nsg,
     transform_vnet_gateway_routes_table, transform_vnet_gateway_bgp_peer_table)
 from azure.cli.command_modules.network.azure_stack._validators import (
     get_network_watcher_from_location,
@@ -53,7 +52,7 @@ from azure.cli.command_modules.network.azure_stack._validators import (
     process_nw_packet_capture_create_namespace, process_nw_test_connectivity_namespace, process_nw_topology_namespace,
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
     process_public_ip_create_namespace,
-    process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
+    process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
     process_vpn_connection_create_namespace,
     process_nw_config_diagnostic_namespace,
     process_appgw_waf_policy_update)

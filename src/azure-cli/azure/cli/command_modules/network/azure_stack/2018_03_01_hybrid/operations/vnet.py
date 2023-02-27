@@ -72,18 +72,11 @@ class VNetCreate(_VNet.Create):
 class VNetUpdate(_VNet.Update):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArgFormat, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZListArgFormat
 
         class EmptyListArgFormat(AAZListArgFormat):
             def __call__(self, ctx, value):
                 if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
                     logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
                     value._data = None
                 return super().__call__(ctx, value)
@@ -117,7 +110,7 @@ _VNetSubNet = import_aaz_by_profile("network.vnet.subnet")
 class VNetSubnetCreate(_VNetSubNet.Create):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.delegations = AAZListArg(
             options=["--delegations"],
@@ -147,8 +140,7 @@ class VNetSubnetCreate(_VNetSubNet.Create):
 class VNetSubnetUpdate(_VNetSubNet.Update):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZListArgFormat, \
-            AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZListArgFormat, AAZResourceIdArgFormat
 
         class EmptyListArgFormat(AAZListArgFormat):
             def __call__(self, ctx, value):

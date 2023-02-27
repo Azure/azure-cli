@@ -6,8 +6,6 @@
 from knack.log import get_logger
 
 from azure.cli.core.aaz import has_value
-from azure.cli.core.aaz.utils import assign_aaz_list_arg
-from azure.cli.core.azclierror import ResourceNotFoundError
 from ._util import import_aaz_by_profile
 
 
@@ -72,18 +70,11 @@ class VNetCreate(_VNet.Create):
 class VNetUpdate(_VNet.Update):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArgFormat, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZListArgFormat
 
         class EmptyListArgFormat(AAZListArgFormat):
             def __call__(self, ctx, value):
                 if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
                     logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
                     value._data = None
                 return super().__call__(ctx, value)
@@ -100,15 +91,7 @@ _VNetSubNet = import_aaz_by_profile("network.vnet.subnet")
 class VNetSubnetUpdate(_VNetSubNet.Update):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZListArgFormat, \
-            AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
 
         class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
             def __call__(self, ctx, value):
