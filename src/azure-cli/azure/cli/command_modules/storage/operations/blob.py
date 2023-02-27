@@ -818,7 +818,8 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
     account_key = None
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
-            get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry))
+            start if start else datetime.utcnow(), expiry)
+
     else:
         account_key = client.credential.account_key
 
@@ -1008,8 +1009,11 @@ def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
     if blob_type is not None and blob_type != 'Detect':
         blob_service_client = src_client._get_container_client()._get_blob_service_client()
         if blob_service_client.credential is not None:
+            as_user = True
+            if hasattr(blob_service_client.credential, 'account_key'):
+                as_user = False
             source_url = generate_sas_blob_uri(cmd, blob_service_client, full_uri=True, blob_url=source_url,
-                                               blob_name=None, container_name=None,
+                                               blob_name=None, container_name=None, as_user=as_user,
                                                expiry=datetime.utcnow() + timedelta(hours=1), permission='r')
 
         params = {"source_if_modified_since": kwargs.get("source_if_modified_since"),
