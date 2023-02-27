@@ -413,8 +413,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
         except CLIError as e:
             if '429' in str(e):
                 raise CLIError("{}: {}".format(AAD_TOKEN_BASE_ERROR_MESSAGE, str(e)))
-            else:
-                logger.warning("%s: %s", AAD_TOKEN_BASE_ERROR_MESSAGE, str(e))
+            logger.warning("%s: %s", AAD_TOKEN_BASE_ERROR_MESSAGE, str(e))
 
     # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
     if registry:
