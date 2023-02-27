@@ -623,9 +623,6 @@ class NwFlowLogCreate(_NwFlowLogCreate):
         args_schema.subnet = AAZResourceIdArg(
             options=['--subnet'],
             help="Name or ID of Subnet.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{vnet}/subnets/{}"
-            )
         )
         args_schema.nic = AAZResourceIdArg(
             options=['--nic'],
@@ -652,6 +649,10 @@ class NwFlowLogCreate(_NwFlowLogCreate):
         get_network_watcher_from_location(self,
                                           watcher_name='network_watcher_name',
                                           rg_name='resource_group')
+        if has_value(args.subnet):
+            subnet = args.subnet.to_serialized_data()
+            if not is_valid_resource_id(subnet) and has_value(args.vnet):
+                args.subnet = args.vnet.to_serialized_data()+"/subnets/"+subnet
 
         if not has_value(args.enabled):
             args.enabled = True
@@ -739,9 +740,6 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
             options=['--subnet'],
             help="Name or ID of Subnet.",
             nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{vnet}/subnets/{}"
-            )
         )
         args_schema.nic = AAZResourceIdArg(
             options=['--nic'],
@@ -767,10 +765,14 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        get_network_watcher_from_resource(self,
+        get_network_watcher_from_location(self,
                                           watcher_name='network_watcher_name',
                                           rg_name='resource_group')
-        # args = self.ctx.args
+        if has_value(args.subnet):
+            subnet = args.subnet.to_serialized_data()
+            if not is_valid_resource_id(subnet) and has_value(args.vnet):
+                args.subnet = args.vnet.to_serialized_data()+"/subnets/"+subnet
+
         if sum(map(bool, [args.vnet, args.nic, args.nsg])) > 1:
             raise MutuallyExclusiveArgumentError("Please enter only one target resource ID.")
         if has_value(args.subnet):

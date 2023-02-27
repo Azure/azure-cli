@@ -459,7 +459,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
         self.assertEqual(res2['name'], self.kwargs['flow_log'])
         self.assertEqual(res2['retentionPolicy']['days'], 2)
         self.assertEqual(res2['retentionPolicy']['enabled'], True)
-        # self.assertIsNotNone(res2['tags'])
+        self.assertIsNotNone(res2['tags'])
 
         self.cmd('network watcher flow-log delete --location {location} --name {flow_log}')
 
@@ -496,7 +496,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
         self.assertEqual(res2['name'], self.kwargs['flow_log'])
         self.assertEqual(res2['retentionPolicy']['days'], 2)
         self.assertEqual(res2['retentionPolicy']['enabled'], True)
-        # self.assertIsNotNone(res2['tags'])
+        self.assertIsNotNone(res2['tags'])
         
     @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='eastus')
     @StorageAccountPreparer(name_prefix='testflowlog', location='eastus', kind='StorageV2')
@@ -566,4 +566,4 @@ class NWFlowLogScenarioTest(ScenarioTest):
         self.assertEqual(res2['retentionPolicy']['days'], 2)
         self.assertEqual(res2['retentionPolicy']['enabled'], True)
         self.assertTrue(res2['storageId'].endswith(self.kwargs['storage_account_2']))
-        # self.assertIsNotNone(res2['tags'])
+        self.assertIsNotNone(res2['tags'])
