@@ -944,7 +944,6 @@ def load_command_table(self, _):
     self.command_table['network traffic-manager endpoint show-geographic-hierarchy'] = ShowGeographicHierarchy(loader=self, table_transformer=transform_geographic_hierachy_table_output)
     # endregion
 
-
     # region VirtualNetworkGateways
     with self.command_group('network vnet-gateway', network_vgw_sdk, min_api='2016-09-01') as g:
         g.custom_command('create', 'create_vnet_gateway', supports_no_wait=True, transform=transform_vnet_gateway_create_output, validator=process_vnet_gateway_create_namespace)

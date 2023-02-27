@@ -12,32 +12,35 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network vnet list",
+    "network vnet update",
 )
-class List(AAZCommand):
-    """List virtual networks.
+class Update(AAZCommand):
+    """Update a virtual network.
 
-    :example: List all virtual networks in a subscription.
-        az network vnet list
+    :example: Update a virtual network with the IP address of a DNS server.
+        az network vnet update -g MyResourceGroup -n MyVNet --dns-servers 10.2.0.8
 
-    :example: List all virtual networks in a resource group.
-        az network vnet list -g MyResourceGroup
+    :example: Update a virtual network.
+        az network vnet update --address-prefixes 40.1.0.0/24 --name MyVNet --resource-group MyResourceGroup
 
-    :example: List virtual networks in a subscription which specify a certain address prefix.
-        az network vnet list --query "[?contains(addressSpace.addressPrefixes, '10.0.0.0/16')]"
+    :example: Update a virtual network to delete DNS server.
+        az network vnet update -g MyResourceGroup -n MyVNet --dns-servers null
     """
 
     _aaz_info = {
         "version": "2017-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/virtualnetworks", "2017-10-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks", "2017-10-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}", "2017-10-01"],
         ]
     }
 
+    AZ_SUPPORT_NO_WAIT = True
+
+    AZ_SUPPORT_GENERIC_UPDATE = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_paging(self._execute_operations, self._output)
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -50,17 +53,303 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.resource_group = AAZResourceGroupNameArg()
+        _args_schema.resource_group = AAZResourceGroupNameArg(
+            required=True,
+        )
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
+            help="The virtual network (VNet) name.",
+            required=True,
+            id_part="name",
+        )
+        _args_schema.address_prefixes = AAZListArg(
+            options=["--address-prefixes"],
+            help="Space-separated list of IP address prefixes for the VNet.",
+            nullable=True,
+        )
+        _args_schema.dns_servers = AAZListArg(
+            options=["--dns-servers"],
+            help="Space-separated list of DNS server IP addresses.",
+            nullable=True,
+        )
+        _args_schema.ddos_protection = AAZBoolArg(
+            options=["--ddos-protection"],
+            help="Control whether DDoS protection is enabled.",
+            nullable=True,
+        )
+        _args_schema.vm_protection = AAZBoolArg(
+            options=["--vm-protection"],
+            help="Enable VM protection for all subnets in the VNet.",
+            nullable=True,
+        )
+
+        address_prefixes = cls._args_schema.address_prefixes
+        address_prefixes.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        dns_servers = cls._args_schema.dns_servers
+        dns_servers.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        # define Arg Group "Parameters"
+
+        # define Arg Group "Properties"
         return cls._args_schema
+
+    _args_address_space_update = None
+
+    @classmethod
+    def _build_args_address_space_update(cls, _schema):
+        if cls._args_address_space_update is not None:
+            _schema.address_prefixes = cls._args_address_space_update.address_prefixes
+            return
+
+        cls._args_address_space_update = AAZObjectArg(
+            nullable=True,
+        )
+
+        address_space_update = cls._args_address_space_update
+        address_space_update.address_prefixes = AAZListArg(
+            options=["address-prefixes"],
+            help="A list of address blocks reserved for this virtual network in CIDR notation.",
+            nullable=True,
+        )
+
+        address_prefixes = cls._args_address_space_update.address_prefixes
+        address_prefixes.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        _schema.address_prefixes = cls._args_address_space_update.address_prefixes
+
+    _args_application_security_group_update = None
+
+    @classmethod
+    def _build_args_application_security_group_update(cls, _schema):
+        if cls._args_application_security_group_update is not None:
+            _schema.id = cls._args_application_security_group_update.id
+            _schema.location = cls._args_application_security_group_update.location
+            _schema.tags = cls._args_application_security_group_update.tags
+            return
+
+        cls._args_application_security_group_update = AAZObjectArg(
+            nullable=True,
+        )
+
+        application_security_group_update = cls._args_application_security_group_update
+        application_security_group_update.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource ID.",
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/applicationSecurityGroups/{}",
+            ),
+        )
+        application_security_group_update.location = AAZResourceLocationArg(
+            options=["l", "location"],
+            help="Resource location.",
+            nullable=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        application_security_group_update.tags = AAZDictArg(
+            options=["tags"],
+            help="Resource tags.",
+            nullable=True,
+        )
+
+        tags = cls._args_application_security_group_update.tags
+        tags.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        _schema.id = cls._args_application_security_group_update.id
+        _schema.location = cls._args_application_security_group_update.location
+        _schema.tags = cls._args_application_security_group_update.tags
+
+    _args_security_rule_update = None
+
+    @classmethod
+    def _build_args_security_rule_update(cls, _schema):
+        if cls._args_security_rule_update is not None:
+            _schema.access = cls._args_security_rule_update.access
+            _schema.description = cls._args_security_rule_update.description
+            _schema.destination_address_prefix = cls._args_security_rule_update.destination_address_prefix
+            _schema.destination_address_prefixes = cls._args_security_rule_update.destination_address_prefixes
+            _schema.destination_application_security_groups = cls._args_security_rule_update.destination_application_security_groups
+            _schema.destination_port_range = cls._args_security_rule_update.destination_port_range
+            _schema.destination_port_ranges = cls._args_security_rule_update.destination_port_ranges
+            _schema.direction = cls._args_security_rule_update.direction
+            _schema.etag = cls._args_security_rule_update.etag
+            _schema.name = cls._args_security_rule_update.name
+            _schema.priority = cls._args_security_rule_update.priority
+            _schema.protocol = cls._args_security_rule_update.protocol
+            _schema.provisioning_state = cls._args_security_rule_update.provisioning_state
+            _schema.source_address_prefix = cls._args_security_rule_update.source_address_prefix
+            _schema.source_address_prefixes = cls._args_security_rule_update.source_address_prefixes
+            _schema.source_application_security_groups = cls._args_security_rule_update.source_application_security_groups
+            _schema.source_port_range = cls._args_security_rule_update.source_port_range
+            _schema.source_port_ranges = cls._args_security_rule_update.source_port_ranges
+            return
+
+        cls._args_security_rule_update = AAZObjectArg(
+            nullable=True,
+        )
+
+        security_rule_update = cls._args_security_rule_update
+        security_rule_update.etag = AAZStrArg(
+            options=["etag"],
+            help="A unique read-only string that changes whenever the resource is updated.",
+            nullable=True,
+        )
+        security_rule_update.name = AAZStrArg(
+            options=["name"],
+            help="The name of the resource that is unique within a resource group. This name can be used to access the resource.",
+            nullable=True,
+        )
+        security_rule_update.access = AAZStrArg(
+            options=["access"],
+            help="The network traffic is allowed or denied. Possible values are: 'Allow' and 'Deny'.",
+            enum={"Allow": "Allow", "Deny": "Deny"},
+        )
+        security_rule_update.description = AAZStrArg(
+            options=["description"],
+            help="A description for this rule. Restricted to 140 chars.",
+            nullable=True,
+        )
+        security_rule_update.destination_address_prefix = AAZStrArg(
+            options=["destination-address-prefix"],
+            help="The destination address prefix. CIDR or destination IP range. Asterisks '*' can also be used to match all source IPs. Default tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used.",
+            nullable=True,
+        )
+        security_rule_update.destination_address_prefixes = AAZListArg(
+            options=["destination-address-prefixes"],
+            help="The destination address prefixes. CIDR or destination IP ranges.",
+            nullable=True,
+        )
+        security_rule_update.destination_application_security_groups = AAZListArg(
+            options=["destination-application-security-groups"],
+            help="The application security group specified as destination.",
+            nullable=True,
+        )
+        security_rule_update.destination_port_range = AAZStrArg(
+            options=["destination-port-range"],
+            help="The destination port or range. Integer or range between 0 and 65535. Asterisks '*' can also be used to match all ports.",
+            nullable=True,
+        )
+        security_rule_update.destination_port_ranges = AAZListArg(
+            options=["destination-port-ranges"],
+            help="The destination port ranges.",
+            nullable=True,
+        )
+        security_rule_update.direction = AAZStrArg(
+            options=["direction"],
+            help="The direction of the rule. The direction specifies if rule will be evaluated on incoming or outgoing traffic. Possible values are: 'Inbound' and 'Outbound'.",
+            enum={"Inbound": "Inbound", "Outbound": "Outbound"},
+        )
+        security_rule_update.priority = AAZIntArg(
+            options=["priority"],
+            help="The priority of the rule. The value can be between 100 and 4096. The priority number must be unique for each rule in the collection. The lower the priority number, the higher the priority of the rule.",
+            nullable=True,
+        )
+        security_rule_update.protocol = AAZStrArg(
+            options=["protocol"],
+            help="Network protocol this rule applies to. Possible values are 'Tcp', 'Udp', and '*'.",
+            enum={"*": "*", "Tcp": "Tcp", "Udp": "Udp"},
+        )
+        security_rule_update.provisioning_state = AAZStrArg(
+            options=["provisioning-state"],
+            help="The provisioning state of the public IP resource. Possible values are: 'Updating', 'Deleting', and 'Failed'.",
+            nullable=True,
+        )
+        security_rule_update.source_address_prefix = AAZStrArg(
+            options=["source-address-prefix"],
+            help="The CIDR or source IP range. Asterisks '*' can also be used to match all source IPs. Default tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used. If this is an ingress rule, specifies where network traffic originates from. ",
+            nullable=True,
+        )
+        security_rule_update.source_address_prefixes = AAZListArg(
+            options=["source-address-prefixes"],
+            help="The CIDR or source IP ranges.",
+            nullable=True,
+        )
+        security_rule_update.source_application_security_groups = AAZListArg(
+            options=["source-application-security-groups"],
+            help="The application security group specified as source.",
+            nullable=True,
+        )
+        security_rule_update.source_port_range = AAZStrArg(
+            options=["source-port-range"],
+            help="The source port or range. Integer or range between 0 and 65535. Asterisks '*' can also be used to match all ports.",
+            nullable=True,
+        )
+        security_rule_update.source_port_ranges = AAZListArg(
+            options=["source-port-ranges"],
+            help="The source port ranges.",
+            nullable=True,
+        )
+
+        destination_address_prefixes = cls._args_security_rule_update.destination_address_prefixes
+        destination_address_prefixes.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        destination_application_security_groups = cls._args_security_rule_update.destination_application_security_groups
+        destination_application_security_groups.Element = AAZObjectArg(
+            nullable=True,
+        )
+        cls._build_args_application_security_group_update(destination_application_security_groups.Element)
+
+        destination_port_ranges = cls._args_security_rule_update.destination_port_ranges
+        destination_port_ranges.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        source_address_prefixes = cls._args_security_rule_update.source_address_prefixes
+        source_address_prefixes.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        source_application_security_groups = cls._args_security_rule_update.source_application_security_groups
+        source_application_security_groups.Element = AAZObjectArg(
+            nullable=True,
+        )
+        cls._build_args_application_security_group_update(source_application_security_groups.Element)
+
+        source_port_ranges = cls._args_security_rule_update.source_port_ranges
+        source_port_ranges.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        _schema.access = cls._args_security_rule_update.access
+        _schema.description = cls._args_security_rule_update.description
+        _schema.destination_address_prefix = cls._args_security_rule_update.destination_address_prefix
+        _schema.destination_address_prefixes = cls._args_security_rule_update.destination_address_prefixes
+        _schema.destination_application_security_groups = cls._args_security_rule_update.destination_application_security_groups
+        _schema.destination_port_range = cls._args_security_rule_update.destination_port_range
+        _schema.destination_port_ranges = cls._args_security_rule_update.destination_port_ranges
+        _schema.direction = cls._args_security_rule_update.direction
+        _schema.etag = cls._args_security_rule_update.etag
+        _schema.name = cls._args_security_rule_update.name
+        _schema.priority = cls._args_security_rule_update.priority
+        _schema.protocol = cls._args_security_rule_update.protocol
+        _schema.provisioning_state = cls._args_security_rule_update.provisioning_state
+        _schema.source_address_prefix = cls._args_security_rule_update.source_address_prefix
+        _schema.source_address_prefixes = cls._args_security_rule_update.source_address_prefixes
+        _schema.source_application_security_groups = cls._args_security_rule_update.source_application_security_groups
+        _schema.source_port_range = cls._args_security_rule_update.source_port_range
+        _schema.source_port_ranges = cls._args_security_rule_update.source_port_ranges
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
-        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
-        if condition_0:
-            self.VirtualNetworksList(ctx=self.ctx)()
-        if condition_1:
-            self.VirtualNetworksListAll(ctx=self.ctx)()
+        self.VirtualNetworksGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.vars.instance)
+        self.InstanceUpdateByJson(ctx=self.ctx)()
+        self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.vars.instance)
+        yield self.VirtualNetworksCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -71,12 +360,19 @@ class List(AAZCommand):
     def post_operations(self):
         pass
 
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
-        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
-        return result, next_link
+    @register_callback
+    def pre_instance_update(self, instance):
+        pass
 
-    class VirtualNetworksList(AAZHttpOperation):
+    @register_callback
+    def post_instance_update(self, instance):
+        pass
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+    class VirtualNetworksGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -90,7 +386,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}",
                 **self.url_parameters
             )
 
@@ -113,6 +409,10 @@ class List(AAZCommand):
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
+                **self.serialize_url_param(
+                    "virtualNetworkName", self.ctx.args.name,
+                    required=True,
+                ),
             }
             return parameters
 
@@ -151,133 +451,47 @@ class List(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.next_link = AAZStrType(
-                serialized_name="nextLink",
-            )
-            _schema_on_200.value = AAZListType()
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.etag = AAZStrType()
-            _element.id = AAZStrType()
-            _element.location = AAZStrType()
-            _element.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.tags = AAZDictType()
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties
-            properties.address_space = AAZObjectType(
-                serialized_name="addressSpace",
-            )
-            _ListHelper._build_schema_address_space_read(properties.address_space)
-            properties.dhcp_options = AAZObjectType(
-                serialized_name="dhcpOptions",
-            )
-            properties.enable_ddos_protection = AAZBoolType(
-                serialized_name="enableDdosProtection",
-            )
-            properties.enable_vm_protection = AAZBoolType(
-                serialized_name="enableVmProtection",
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-            )
-            properties.resource_guid = AAZStrType(
-                serialized_name="resourceGuid",
-            )
-            properties.subnets = AAZListType()
-            properties.virtual_network_peerings = AAZListType(
-                serialized_name="virtualNetworkPeerings",
-            )
-
-            dhcp_options = cls._schema_on_200.value.Element.properties.dhcp_options
-            dhcp_options.dns_servers = AAZListType(
-                serialized_name="dnsServers",
-            )
-
-            dns_servers = cls._schema_on_200.value.Element.properties.dhcp_options.dns_servers
-            dns_servers.Element = AAZStrType()
-
-            subnets = cls._schema_on_200.value.Element.properties.subnets
-            subnets.Element = AAZObjectType()
-            _ListHelper._build_schema_subnet_read(subnets.Element)
-
-            virtual_network_peerings = cls._schema_on_200.value.Element.properties.virtual_network_peerings
-            virtual_network_peerings.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.virtual_network_peerings.Element
-            _element.etag = AAZStrType()
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.virtual_network_peerings.Element.properties
-            properties.allow_forwarded_traffic = AAZBoolType(
-                serialized_name="allowForwardedTraffic",
-            )
-            properties.allow_gateway_transit = AAZBoolType(
-                serialized_name="allowGatewayTransit",
-            )
-            properties.allow_virtual_network_access = AAZBoolType(
-                serialized_name="allowVirtualNetworkAccess",
-            )
-            properties.peering_state = AAZStrType(
-                serialized_name="peeringState",
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-            )
-            properties.remote_address_space = AAZObjectType(
-                serialized_name="remoteAddressSpace",
-            )
-            _ListHelper._build_schema_address_space_read(properties.remote_address_space)
-            properties.remote_virtual_network = AAZObjectType(
-                serialized_name="remoteVirtualNetwork",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.remote_virtual_network)
-            properties.use_remote_gateways = AAZBoolType(
-                serialized_name="useRemoteGateways",
-            )
-
-            tags = cls._schema_on_200.value.Element.tags
-            tags.Element = AAZStrType()
+            _UpdateHelper._build_schema_virtual_network_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
-    class VirtualNetworksListAll(AAZHttpOperation):
+    class VirtualNetworksCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+            if session.http_response.status_code in [200, 201]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/virtualNetworks",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "GET"
+            return "PUT"
 
         @property
         def error_format(self):
@@ -287,7 +501,15 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "virtualNetworkName", self.ctx.args.name,
                     required=True,
                 ),
             }
@@ -307,136 +529,165 @@ class List(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
 
-        def on_200(self, session):
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                value=self.ctx.vars.instance,
+            )
+
+            return self.serialize_content(_content_value)
+
+        def on_200_201(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200
+                schema_builder=self._build_schema_on_200_201
             )
 
-        _schema_on_200 = None
+        _schema_on_200_201 = None
 
         @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
+        def _build_schema_on_200_201(cls):
+            if cls._schema_on_200_201 is not None:
+                return cls._schema_on_200_201
 
-            cls._schema_on_200 = AAZObjectType()
+            cls._schema_on_200_201 = AAZObjectType()
+            _UpdateHelper._build_schema_virtual_network_read(cls._schema_on_200_201)
 
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.next_link = AAZStrType(
-                serialized_name="nextLink",
-            )
-            _schema_on_200.value = AAZListType()
+            return cls._schema_on_200_201
 
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
+    class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
-            _element = cls._schema_on_200.value.Element
-            _element.etag = AAZStrType()
-            _element.id = AAZStrType()
-            _element.location = AAZStrType()
-            _element.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.tags = AAZDictType()
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
+        def __call__(self, *args, **kwargs):
+            self._update_instance(self.ctx.vars.instance)
 
-            properties = cls._schema_on_200.value.Element.properties
-            properties.address_space = AAZObjectType(
-                serialized_name="addressSpace",
+        def _update_instance(self, instance):
+            _instance_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                value=instance,
+                typ=AAZObjectType
             )
-            _ListHelper._build_schema_address_space_read(properties.address_space)
-            properties.dhcp_options = AAZObjectType(
-                serialized_name="dhcpOptions",
-            )
-            properties.enable_ddos_protection = AAZBoolType(
-                serialized_name="enableDdosProtection",
-            )
-            properties.enable_vm_protection = AAZBoolType(
-                serialized_name="enableVmProtection",
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-            )
-            properties.resource_guid = AAZStrType(
-                serialized_name="resourceGuid",
-            )
-            properties.subnets = AAZListType()
-            properties.virtual_network_peerings = AAZListType(
-                serialized_name="virtualNetworkPeerings",
-            )
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
-            dhcp_options = cls._schema_on_200.value.Element.properties.dhcp_options
-            dhcp_options.dns_servers = AAZListType(
-                serialized_name="dnsServers",
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("addressSpace", AAZObjectType)
+                properties.set_prop("dhcpOptions", AAZObjectType)
+                properties.set_prop("enableDdosProtection", AAZBoolType, ".ddos_protection")
+                properties.set_prop("enableVmProtection", AAZBoolType, ".vm_protection")
+
+            address_space = _builder.get(".properties.addressSpace")
+            if address_space is not None:
+                address_space.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
+
+            address_prefixes = _builder.get(".properties.addressSpace.addressPrefixes")
+            if address_prefixes is not None:
+                address_prefixes.set_elements(AAZStrType, ".")
+
+            dhcp_options = _builder.get(".properties.dhcpOptions")
+            if dhcp_options is not None:
+                dhcp_options.set_prop("dnsServers", AAZListType, ".dns_servers")
+
+            dns_servers = _builder.get(".properties.dhcpOptions.dnsServers")
+            if dns_servers is not None:
+                dns_servers.set_elements(AAZStrType, ".")
+
+            return _instance_value
+
+    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
+
+        def __call__(self, *args, **kwargs):
+            self._update_instance_by_generic(
+                self.ctx.vars.instance,
+                self.ctx.generic_update_args
             )
 
-            dns_servers = cls._schema_on_200.value.Element.properties.dhcp_options.dns_servers
-            dns_servers.Element = AAZStrType()
 
-            subnets = cls._schema_on_200.value.Element.properties.subnets
-            subnets.Element = AAZObjectType()
-            _ListHelper._build_schema_subnet_read(subnets.Element)
+class _UpdateHelper:
+    """Helper class for Update"""
 
-            virtual_network_peerings = cls._schema_on_200.value.Element.properties.virtual_network_peerings
-            virtual_network_peerings.Element = AAZObjectType()
+    @classmethod
+    def _build_schema_address_space_update(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
 
-            _element = cls._schema_on_200.value.Element.properties.virtual_network_peerings.Element
-            _element.etag = AAZStrType()
-            _element.id = AAZStrType()
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+        address_prefixes = _builder.get(".addressPrefixes")
+        if address_prefixes is not None:
+            address_prefixes.set_elements(AAZStrType, ".")
 
-            properties = cls._schema_on_200.value.Element.properties.virtual_network_peerings.Element.properties
-            properties.allow_forwarded_traffic = AAZBoolType(
-                serialized_name="allowForwardedTraffic",
-            )
-            properties.allow_gateway_transit = AAZBoolType(
-                serialized_name="allowGatewayTransit",
-            )
-            properties.allow_virtual_network_access = AAZBoolType(
-                serialized_name="allowVirtualNetworkAccess",
-            )
-            properties.peering_state = AAZStrType(
-                serialized_name="peeringState",
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-            )
-            properties.remote_address_space = AAZObjectType(
-                serialized_name="remoteAddressSpace",
-            )
-            _ListHelper._build_schema_address_space_read(properties.remote_address_space)
-            properties.remote_virtual_network = AAZObjectType(
-                serialized_name="remoteVirtualNetwork",
-            )
-            _ListHelper._build_schema_sub_resource_read(properties.remote_virtual_network)
-            properties.use_remote_gateways = AAZBoolType(
-                serialized_name="useRemoteGateways",
-            )
+    @classmethod
+    def _build_schema_application_security_group_update(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("id", AAZStrType, ".id")
+        _builder.set_prop("location", AAZStrType, ".location")
+        _builder.set_prop("tags", AAZDictType, ".tags")
 
-            tags = cls._schema_on_200.value.Element.tags
-            tags.Element = AAZStrType()
+        tags = _builder.get(".tags")
+        if tags is not None:
+            tags.set_elements(AAZStrType, ".")
 
-            return cls._schema_on_200
+    @classmethod
+    def _build_schema_security_rule_update(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("etag", AAZStrType, ".etag")
+        _builder.set_prop("name", AAZStrType, ".name")
+        _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
+        properties = _builder.get(".properties")
+        if properties is not None:
+            properties.set_prop("access", AAZStrType, ".access", typ_kwargs={"flags": {"required": True}})
+            properties.set_prop("description", AAZStrType, ".description")
+            properties.set_prop("destinationAddressPrefix", AAZStrType, ".destination_address_prefix")
+            properties.set_prop("destinationAddressPrefixes", AAZListType, ".destination_address_prefixes")
+            properties.set_prop("destinationApplicationSecurityGroups", AAZListType, ".destination_application_security_groups")
+            properties.set_prop("destinationPortRange", AAZStrType, ".destination_port_range")
+            properties.set_prop("destinationPortRanges", AAZListType, ".destination_port_ranges")
+            properties.set_prop("direction", AAZStrType, ".direction", typ_kwargs={"flags": {"required": True}})
+            properties.set_prop("priority", AAZIntType, ".priority")
+            properties.set_prop("protocol", AAZStrType, ".protocol", typ_kwargs={"flags": {"required": True}})
+            properties.set_prop("provisioningState", AAZStrType, ".provisioning_state")
+            properties.set_prop("sourceAddressPrefix", AAZStrType, ".source_address_prefix")
+            properties.set_prop("sourceAddressPrefixes", AAZListType, ".source_address_prefixes")
+            properties.set_prop("sourceApplicationSecurityGroups", AAZListType, ".source_application_security_groups")
+            properties.set_prop("sourcePortRange", AAZStrType, ".source_port_range")
+            properties.set_prop("sourcePortRanges", AAZListType, ".source_port_ranges")
 
-class _ListHelper:
-    """Helper class for List"""
+        destination_address_prefixes = _builder.get(".properties.destinationAddressPrefixes")
+        if destination_address_prefixes is not None:
+            destination_address_prefixes.set_elements(AAZStrType, ".")
+
+        destination_application_security_groups = _builder.get(".properties.destinationApplicationSecurityGroups")
+        if destination_application_security_groups is not None:
+            cls._build_schema_application_security_group_update(destination_application_security_groups.set_elements(AAZObjectType, "."))
+
+        destination_port_ranges = _builder.get(".properties.destinationPortRanges")
+        if destination_port_ranges is not None:
+            destination_port_ranges.set_elements(AAZStrType, ".")
+
+        source_address_prefixes = _builder.get(".properties.sourceAddressPrefixes")
+        if source_address_prefixes is not None:
+            source_address_prefixes.set_elements(AAZStrType, ".")
+
+        source_application_security_groups = _builder.get(".properties.sourceApplicationSecurityGroups")
+        if source_application_security_groups is not None:
+            cls._build_schema_application_security_group_update(source_application_security_groups.set_elements(AAZObjectType, "."))
+
+        source_port_ranges = _builder.get(".properties.sourcePortRanges")
+        if source_port_ranges is not None:
+            source_port_ranges.set_elements(AAZStrType, ".")
 
     _schema_address_space_read = None
 
@@ -1230,5 +1481,123 @@ class _ListHelper:
         _schema.name = cls._schema_subnet_read.name
         _schema.properties = cls._schema_subnet_read.properties
 
+    _schema_virtual_network_read = None
 
-__all__ = ["List"]
+    @classmethod
+    def _build_schema_virtual_network_read(cls, _schema):
+        if cls._schema_virtual_network_read is not None:
+            _schema.etag = cls._schema_virtual_network_read.etag
+            _schema.id = cls._schema_virtual_network_read.id
+            _schema.location = cls._schema_virtual_network_read.location
+            _schema.name = cls._schema_virtual_network_read.name
+            _schema.properties = cls._schema_virtual_network_read.properties
+            _schema.tags = cls._schema_virtual_network_read.tags
+            _schema.type = cls._schema_virtual_network_read.type
+            return
+
+        cls._schema_virtual_network_read = _schema_virtual_network_read = AAZObjectType()
+
+        virtual_network_read = _schema_virtual_network_read
+        virtual_network_read.etag = AAZStrType()
+        virtual_network_read.id = AAZStrType()
+        virtual_network_read.location = AAZStrType()
+        virtual_network_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        virtual_network_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        virtual_network_read.tags = AAZDictType()
+        virtual_network_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
+
+        properties = _schema_virtual_network_read.properties
+        properties.address_space = AAZObjectType(
+            serialized_name="addressSpace",
+        )
+        cls._build_schema_address_space_read(properties.address_space)
+        properties.dhcp_options = AAZObjectType(
+            serialized_name="dhcpOptions",
+        )
+        properties.enable_ddos_protection = AAZBoolType(
+            serialized_name="enableDdosProtection",
+        )
+        properties.enable_vm_protection = AAZBoolType(
+            serialized_name="enableVmProtection",
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+        )
+        properties.resource_guid = AAZStrType(
+            serialized_name="resourceGuid",
+        )
+        properties.subnets = AAZListType()
+        properties.virtual_network_peerings = AAZListType(
+            serialized_name="virtualNetworkPeerings",
+        )
+
+        dhcp_options = _schema_virtual_network_read.properties.dhcp_options
+        dhcp_options.dns_servers = AAZListType(
+            serialized_name="dnsServers",
+        )
+
+        dns_servers = _schema_virtual_network_read.properties.dhcp_options.dns_servers
+        dns_servers.Element = AAZStrType()
+
+        subnets = _schema_virtual_network_read.properties.subnets
+        subnets.Element = AAZObjectType()
+        cls._build_schema_subnet_read(subnets.Element)
+
+        virtual_network_peerings = _schema_virtual_network_read.properties.virtual_network_peerings
+        virtual_network_peerings.Element = AAZObjectType()
+
+        _element = _schema_virtual_network_read.properties.virtual_network_peerings.Element
+        _element.etag = AAZStrType()
+        _element.id = AAZStrType()
+        _element.name = AAZStrType()
+        _element.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        properties = _schema_virtual_network_read.properties.virtual_network_peerings.Element.properties
+        properties.allow_forwarded_traffic = AAZBoolType(
+            serialized_name="allowForwardedTraffic",
+        )
+        properties.allow_gateway_transit = AAZBoolType(
+            serialized_name="allowGatewayTransit",
+        )
+        properties.allow_virtual_network_access = AAZBoolType(
+            serialized_name="allowVirtualNetworkAccess",
+        )
+        properties.peering_state = AAZStrType(
+            serialized_name="peeringState",
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+        )
+        properties.remote_address_space = AAZObjectType(
+            serialized_name="remoteAddressSpace",
+        )
+        cls._build_schema_address_space_read(properties.remote_address_space)
+        properties.remote_virtual_network = AAZObjectType(
+            serialized_name="remoteVirtualNetwork",
+        )
+        cls._build_schema_sub_resource_read(properties.remote_virtual_network)
+        properties.use_remote_gateways = AAZBoolType(
+            serialized_name="useRemoteGateways",
+        )
+
+        tags = _schema_virtual_network_read.tags
+        tags.Element = AAZStrType()
+
+        _schema.etag = cls._schema_virtual_network_read.etag
+        _schema.id = cls._schema_virtual_network_read.id
+        _schema.location = cls._schema_virtual_network_read.location
+        _schema.name = cls._schema_virtual_network_read.name
+        _schema.properties = cls._schema_virtual_network_read.properties
+        _schema.tags = cls._schema_virtual_network_read.tags
+        _schema.type = cls._schema_virtual_network_read.type
+
+
+__all__ = ["Update"]
