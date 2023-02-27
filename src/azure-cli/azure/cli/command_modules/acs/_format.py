@@ -28,7 +28,9 @@ def _aks_agentpool_table_format(result):
         mode: mode
     }""")
     # use ordered dicts so headers are predictable
-    return parsed.search(result, Options(dict_cls=OrderedDict))
+    # enable compatibility with legacy JSON literals
+    return parsed.search(result,
+        Options(dict_cls=OrderedDict, enable_legacy_literals=True))
 
 
 def aks_agentpool_list_table_format(results):
@@ -96,7 +98,9 @@ def aks_upgrades_table_format(result):
         upgrades: controlPlaneProfile.upgrades[].kubernetesVersion || [`None available`] | sort_versions(@) | set_preview_array(@) | join(`, `, @)
     }""")
     # use ordered dicts so headers are predictable
-    return parsed.search(result, Options(dict_cls=OrderedDict, custom_functions=_custom_functions(preview)))
+    # enable compatibility with legacy JSON literals
+    return parsed.search(result,
+        Options(dict_cls=OrderedDict, custom_functions=_custom_functions(preview), enable_legacy_literals=True))
 
 
 def aks_versions_table_format(result):
@@ -116,8 +120,9 @@ def aks_versions_table_format(result):
     }""")
 
     # use ordered dicts so headers are predictable
-    results = parsed.search(result, Options(
-        dict_cls=OrderedDict, custom_functions=_custom_functions(preview)))
+    # enable compatibility with legacy JSON literals
+    return parsed.search(result,
+        Options(dict_cls=OrderedDict, custom_functions=_custom_functions(preview), enable_legacy_literals=True))
     return sorted(results, key=lambda x: version_to_tuple(x.get('kubernetesVersion')), reverse=True)
 
 
@@ -142,7 +147,9 @@ def _aks_nodepool_snapshot_table_format(result):
         enableFIPS: enableFIPS
     }""")
     # use ordered dicts so headers are predictable
-    return parsed.search(result, Options(dict_cls=OrderedDict))
+    # enable compatibility with legacy JSON literals
+    return parsed.search(result,
+        Options(dict_cls=OrderedDict, enable_legacy_literals=True))
 
 
 def version_to_tuple(version):
