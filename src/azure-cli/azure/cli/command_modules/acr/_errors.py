@@ -119,7 +119,7 @@ CONNECTIVITY_REFRESH_TOKEN_ERROR = ErrorClass(
 
 CONNECTIVITY_TOOMANYREQUESTS_ERROR = ErrorClass(
     "CONNECTIVITY_TOOMANYREQUESTS_ERROR",
-    "Too many requests, access to registry '{}' was denied. Response code: 429. Please wait a moment before trying again."
+    "Too many requests, access to registry '{}' was denied. Please wait a moment before trying again."
 )
 
 
