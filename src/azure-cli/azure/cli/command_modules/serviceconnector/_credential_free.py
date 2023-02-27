@@ -35,6 +35,19 @@ AUTHTYPES = {
 # pylint: disable=line-too-long, consider-using-f-string
 # For db(mysqlFlex/psql/psqlFlex/sql) linker with auth type=systemAssignedIdentity, enable AAD auth and create db user on data plane
 # For other linker, ignore the steps
+def is_passwordless_command(cmd, auth_info):
+    # return if connection is not for db mi
+    if auth_info['auth_type'] not in {AUTHTYPES[AUTH_TYPE.SystemIdentity], AUTHTYPES[AUTH_TYPE.UserAccount]}:
+        return False
+    source_type = get_source_resource_name(cmd)
+    target_type = get_target_resource_name(cmd)
+    if source_type not in {RESOURCE.WebApp, RESOURCE.ContainerApp, RESOURCE.SpringCloud, RESOURCE.SpringCloudDeprecated, RESOURCE.Local}:
+        return False
+    if target_type not in {RESOURCE.Sql, RESOURCE.Postgres, RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible}:
+        return False
+    return True
+
+
 def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, client_type, connection_name):
     # return if connection is not for db mi
     if auth_info['auth_type'] not in {AUTHTYPES[AUTH_TYPE.SystemIdentity], AUTHTYPES[AUTH_TYPE.UserAccount]}:
@@ -131,7 +144,7 @@ class TargetHandler:
             'az account show').get("user").get("name")
         self.login_usertype = run_cli_cmd(
             'az account show').get("user").get("type")
-        if(self.login_usertype not in ['servicePrincipal', 'user']):
+        if self.login_usertype not in ['servicePrincipal', 'user']:
             raise CLIInternalError(
                 f'{self.login_usertype} is not supported. Please login as user or servicePrincipal')
         self.aad_username = "aad_" + connection_name

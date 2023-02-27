@@ -6082,16 +6082,22 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
         primary_location = ManagedInstancePreparer.location
         secondary_location = ManagedInstancePreparer.sec_location
 
+        secondary_type = "Standby"
+        self.kwargs.update({
+            'secondary_type': secondary_type
+        })
+
         # Create Failover Group
         self.cmd(
-            'sql instance-failover-group create -n {} -g {} --mi {} --partner-resource-group {} --partner-mi {} --failover-policy Automatic --grace-period 2'
+            'sql instance-failover-group create -n {} -g {} --mi {} --partner-resource-group {} --partner-mi {} --failover-policy Automatic --grace-period 2 --secondary-type {}'
                 .format(failover_group_name, resource_group_name, primary_name, secondary_group,
-                        secondary_name),
+                        secondary_name, secondary_type),
             checks=[
                 JMESPathCheck('name', failover_group_name),
                 JMESPathCheck('resourceGroup', resource_group_name),
                 JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
-                JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120)
+                JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
+                JMESPathCheck('secondaryType', secondary_type)
             ])
 
         # Get Instance Failover Group on a partner managed instance and check if role is secondary
@@ -6102,16 +6108,23 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
                      JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
                      JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
-                     JMESPathCheck('replicationRole', 'Secondary')
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('secondaryType', secondary_type)
                  ])
 
+        secondary_type = "Geo"
+        self.kwargs.update({
+            'secondary_type': secondary_type
+        })
+
         # Update Failover Group
-        self.cmd('sql instance-failover-group update -g {} -n {} -l {} --grace-period 3 '
-                 .format(resource_group_name, failover_group_name, primary_location),
+        self.cmd('sql instance-failover-group update -g {} -n {} -l {} --grace-period 3 --secondary-type {}'
+                 .format(resource_group_name, failover_group_name, primary_location, secondary_type),
                  checks=[
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
                      JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
-                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled')
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('secondaryType', secondary_type)
                  ])
 
         # Check if properties got propagated to secondary server
@@ -6122,7 +6135,8 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
                      JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
                      JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
-                     JMESPathCheck('replicationRole', 'Secondary')
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('secondaryType', secondary_type)
                  ])
 
         # Update Failover Group failover policy to Manual

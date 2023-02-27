@@ -302,6 +302,10 @@ allow_data_loss_param_type = CLIArgumentType(
     help='Complete the failover even if doing so may result in data loss. '
     'This will allow the failover to proceed even if a primary database is unavailable.')
 
+secondary_type_param_type = CLIArgumentType(
+    help='Intended usage of the secondary instance in the Failover Group. '
+    'Standby indicates that the secondary instance will be used as a passive replica for disaster recovery only.')
+
 aad_admin_login_param_type = CLIArgumentType(
     options_list=['--display-name', '-u'],
     required=True,
@@ -2463,7 +2467,8 @@ def load_arguments(self, _):
                 'deleted_time',
                 'target_managed_database_name',
                 'target_managed_instance_name',
-                'restore_point_in_time'
+                'restore_point_in_time',
+                'tags'
             ])
 
         c.argument('deleted_time',
@@ -2739,6 +2744,20 @@ def load_arguments(self, _):
 
         c.argument('allow_data_loss',
                    arg_type=allow_data_loss_param_type)
+
+        c.argument('secondary_type',
+                   arg_type=secondary_type_param_type)
+
+        c.argument('resource_group_name_failover',
+                   options_list=['--resource-group', '-g'],
+                   help='Name of resource group of the secondary instance in the Instance Failover Group. '
+                   'You can configure the default group using `az configure --defaults group=<name>`')
+
+        c.argument('location_name_failover',
+                   options_list=['--location', '-l'],
+                   help='Location of the secondary instance in the Instance Failover Group. '
+                   'Values from: `az account list-locations`. You can configure the default location using '
+                   '`az configure --defaults location=<location>`')
 
     ###################################################
     #             sql sensitivity classification      #

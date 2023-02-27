@@ -2471,6 +2471,58 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_upgrade_kubernetes_version_nodepool(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        node_pool_name = self.create_random_name('c', 6)
+        create_version, upgrade_version = self._get_versions(resource_group_location)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'node_pool_name': node_pool_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'create_version': create_version,
+            'upgrade_version': upgrade_version
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--vm-set-type VirtualMachineScaleSets --node-count=1 ' \
+                     '--ssh-key-value={ssh_key_value} --kubernetes-version {upgrade_version} ' \
+                     '-o json'
+
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        create_nodepool_cmd = 'aks nodepool add ' \
+                              '--resource-group={resource_group} ' \
+                              '--cluster-name={name} ' \
+                              '-n {node_pool_name} ' \
+                              '--node-count=1 ' \
+                              '--kubernetes-version {create_version} '
+        self.cmd(create_nodepool_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        upgrade_kubernetes_version_nodepool_cmd = 'aks nodepool upgrade ' \
+                                               '--resource-group={resource_group} ' \
+                                               '--cluster-name={name} --nodepool-name {node_pool_name} ' \
+                                               '--kubernetes-version {upgrade_version} --yes ' \
+                                               '--no-wait'
+        self.cmd(upgrade_kubernetes_version_nodepool_cmd)
+
+        get_nodepool_cmd = 'aks nodepool show ' \
+                           '--resource-group={resource_group} ' \
+                           '--cluster-name={name} ' \
+                           '-n {node_pool_name} '
+        self.cmd(get_nodepool_cmd, checks=[
+            self.check('provisioningState', 'Upgrading')
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_spot_node_pool(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -6783,7 +6835,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd = 'aks create --resource-group {resource_group} --name {aks_name2} --location {location} ' \
                      '--nodepool-name {nodepool_name} ' \
                      '--node-count 1 --snapshot-id {snapshot_resource_id} ' \
-                     '-k {k8s_version} ' \
                      '--ssh-key-value={ssh_key_value} -o json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -6792,7 +6843,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # add a new nodepool to this cluster using this snapshot
         add_nodepool_cmd = 'aks nodepool add --resource-group={resource_group} --cluster-name={aks_name2} --name={nodepool_name2} --node-count 1 ' \
-                           '-k {k8s_version} ' \
                            '--snapshot-id {snapshot_resource_id} -o json'
         self.cmd(add_nodepool_cmd,
             checks=[
@@ -6816,14 +6866,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(get_nodepool_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('creationData.sourceResourceId', snapshot_resource_id)
-        ])
-
-        # upgrade this cluster (snapshot is not allowed for cluster upgrading), snapshot info is reset
-        create_cmd = 'aks upgrade --resource-group {resource_group} --name {aks_name2} -k {upgrade_k8s_version} --yes -o json'
-        self.cmd(create_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('agentPoolProfiles[0].creationData', None),
-            self.check('agentPoolProfiles[1].creationData', None)
         ])
 
         # delete the 2nd AKS cluster

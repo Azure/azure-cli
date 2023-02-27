@@ -308,6 +308,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account failover') as c:
         c.argument('failover_type', options_list=['--failover-type', '--type'], is_preview=True, default=None,
                    help="The parameter is set to 'Planned' to indicate whether a Planned failover is requested")
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('storage account delete') as c:
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
@@ -1317,19 +1318,23 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('tags', tags_type)
         c.extra('destination_blob_type', arg_type=get_enum_type(['Detect', 'BlockBlob', 'PageBlob', 'AppendBlob']),
                 help='Defines the type of blob at the destination. '
-                     'Value of "Detect" determines the type basd on source blob type.')
+                     'Value of "Detect" determines the type based on source blob type.')
 
-    with self.argument_context('storage blob copy start-batch', arg_group='Copy Source') as c:
+    with self.argument_context('storage blob copy start-batch', arg_group='Copy Source',
+                               resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         from azure.cli.command_modules.storage._validators import get_source_file_or_blob_service_client_track2
-
         c.argument('source_client', ignore_type, validator=get_source_file_or_blob_service_client_track2)
-
         c.extra('source_account_name')
         c.extra('source_account_key')
         c.extra('source_uri')
         c.argument('source_sas')
         c.argument('source_container')
         c.argument('source_share')
+
+        c.extra('tier', tier_type)
+        c.extra('destination_blob_type', arg_type=get_enum_type(['Detect', 'BlockBlob', 'PageBlob', 'AppendBlob']),
+                help='Defines the type of blob at the destination. '
+                     'Value of "Detect" determines the type based on source blob type.')
 
     with self.argument_context('storage blob incremental-copy start') as c:
         from azure.cli.command_modules.storage._validators import process_blob_source_uri
