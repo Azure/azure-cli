@@ -707,16 +707,10 @@ def load_command_table(self, _):
         self.command_table['network vnet-gateway list-learned-routes'] = ListLearnedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
 
     with self.command_group('network vnet-gateway packet-capture'):
-        from .custom import VnetGatewayPackageCaptureStart, VnetGatewayPackageCaptureStop
         from .aaz.latest.network.vnet_gateway import Wait
-        self.command_table['network vnet-gateway packet-capture start'] = VnetGatewayPackageCaptureStart(loader=self)
-        self.command_table['network vnet-gateway packet-capture stop'] = VnetGatewayPackageCaptureStop(loader=self)
         self.command_table['network vnet-gateway packet-capture wait'] = Wait(loader=self)
 
     with self.command_group('network vnet-gateway vpn-client') as g:
-        from .custom import VpnProfilePackageUrlShow, VpnClientConnectionHealthShow
-        self.command_table['network vnet-gateway vpn-client show-url'] = VpnProfilePackageUrlShow(loader=self)
-        self.command_table['network vnet-gateway vpn-client show-health'] = VpnClientConnectionHealthShow(loader=self)
         g.custom_command('generate', 'generate_vpn_client')
 
     with self.command_group('network vnet-gateway vpn-client ipsec-policy'):

@@ -963,61 +963,6 @@ def load_command_table(self, _):
         g.custom_command('list-available-ips', 'subnet_list_available_ips', min_api='2016-09-01', is_preview=True)
     # endregion
 
-    # region VirtualNetworkGateways
-    with self.command_group('network vnet-gateway', network_vgw_sdk, min_api='2016-09-01') as g:
-        g.custom_command('create', 'create_vnet_gateway', supports_no_wait=True, transform=transform_vnet_gateway_create_output, validator=process_vnet_gateway_create_namespace)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vnet_gateway', supports_no_wait=True, validator=process_vnet_gateway_update_namespace)
-        g.wait_command('wait')
-        g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.command('reset', 'begin_reset')
-        g.command('list-bgp-peer-status', 'begin_get_bgp_peer_status', table_transformer=transform_vnet_gateway_bgp_peer_table)
-        g.command('list-advertised-routes', 'begin_get_advertised_routes', table_transformer=transform_vnet_gateway_routes_table)
-        g.command('list-learned-routes', 'begin_get_learned_routes', table_transformer=transform_vnet_gateway_routes_table)
-        g.command('show-supported-devices', 'supported_vpn_devices', is_preview=True, min_api='2017-09-01')
-        g.custom_command('disconnect-vpn-connections', 'disconnect_vnet_gateway_vpn_connections', client_factory=cf_virtual_network_gateways, supports_no_wait=True, is_preview=True, min_api='2019-11-01')
-
-    with self.command_group('network vnet-gateway packet-capture', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2019-07-01') as g:
-        g.custom_command('start', 'start_vnet_gateway_package_capture', supports_no_wait=True)
-        g.custom_command('stop', 'stop_vnet_gateway_package_capture', supports_no_wait=True)
-        g.wait_command('wait')
-
-    with self.command_group('network vnet-gateway vpn-client', network_vgw_sdk, client_factory=cf_virtual_network_gateways) as g:
-        g.custom_command('generate', 'generate_vpn_client')
-        g.command('show-url', 'begin_get_vpn_profile_package_url', min_api='2017-08-01')
-        g.command('show-health', 'begin_get_vpnclient_connection_health', is_preview=True, min_api='2019-04-01')
-
-    with self.command_group('network vnet-gateway vpn-client ipsec-policy', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2018-02-01') as g:
-        g.custom_command('set', 'set_vpn_client_ipsec_policy', supports_no_wait=True)
-        g.show_command('show', 'begin_get_vpnclient_ipsec_parameters')
-        g.wait_command('wait')
-
-    with self.command_group('network vnet-gateway revoked-cert', network_vgw_sdk) as g:
-        g.custom_command('create', 'create_vnet_gateway_revoked_cert')
-        g.custom_command('delete', 'delete_vnet_gateway_revoked_cert')
-
-    with self.command_group('network vnet-gateway root-cert', network_vgw_sdk) as g:
-        g.custom_command('create', 'create_vnet_gateway_root_cert')
-        g.custom_command('delete', 'delete_vnet_gateway_root_cert')
-
-    with self.command_group('network vnet-gateway ipsec-policy', network_vgw_sdk, min_api='2018-02-01') as g:
-        g.custom_command('add', 'add_vnet_gateway_ipsec_policy', supports_no_wait=True, doc_string_source='IpsecPolicy')
-        g.custom_command('list', 'list_vnet_gateway_ipsec_policies')
-        g.custom_command('clear', 'clear_vnet_gateway_ipsec_policies', supports_no_wait=True)
-
-    with self.command_group('network vnet-gateway aad', network_vgw_sdk, min_api='2019-04-01') as g:
-        g.custom_command('assign', 'assign_vnet_gateway_aad', supports_no_wait=True)
-        g.custom_show_command('show', 'show_vnet_gateway_aad')
-        g.custom_command('remove', 'remove_vnet_gateway_aad', supports_no_wait=True)
-
-    with self.command_group('network vnet-gateway nat-rule', network_vgw_sdk, min_api='2021-02-01', is_preview=True) as g:
-        g.custom_command('add', 'add_vnet_gateway_nat_rule', supports_no_wait=True)
-        g.custom_show_command('list', 'show_vnet_gateway_nat_rule')
-        g.custom_command('remove', 'remove_vnet_gateway_nat_rule', supports_no_wait=True)
-        g.wait_command('wait')
-    # endregion
-
     # region VirtualNetworkGatewayConnections
     with self.command_group('network vpn-connection') as g:
         g.custom_command('create', 'create_vpn_connection', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), table_transformer=deployment_validate_table_format, validator=process_vpn_connection_create_namespace, exception_handler=handle_template_based_exception)

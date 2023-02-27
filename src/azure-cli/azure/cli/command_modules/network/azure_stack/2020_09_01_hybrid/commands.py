@@ -62,3 +62,38 @@ def load_command_table(self, _):
         g.command('ipsec-policy clear', 'clear_vpn_conn_ipsec_policies', supports_no_wait=True)
 
     # endregion
+
+    # region VirtualNetworkGateways
+    from .._format import transform_vnet_gateway_bgp_peer_table, transform_vnet_gateway_routes_table
+    operations_tmpl = self.get_module_name_by_profile("operations.vnet_gateway#{}")
+    vnet_gateway = import_aaz_by_profile("network.vnet_gateway")
+
+    self.command_table['network vnet-gateway list-bgp-peer-status'] = vnet_gateway.ListBgpPeerStatus(
+        loader=self, table_transformer=transform_vnet_gateway_bgp_peer_table)
+    self.command_table['network vnet-gateway list-advertised-routes'] = vnet_gateway.ListAdvertisedRoutes(
+        loader=self, table_transformer=transform_vnet_gateway_routes_table)
+    self.command_table['network vnet-gateway list-learned-routes'] = vnet_gateway.ListLearnedRoutes(
+        loader=self, table_transformer=transform_vnet_gateway_routes_table)
+
+    self.command_table['network vnet-gateway vpn-client ipsec-policy wait'] = vnet_gateway.Wait(loader=self)
+
+    from .operations.vnet_gateway import VnetGatewayCreate, VnetGatewayUpdate
+    self.command_table['network vnet-gateway create'] = VnetGatewayCreate(loader=self)
+    self.command_table['network vnet-gateway update'] = VnetGatewayUpdate(loader=self)
+
+    with self.command_group('network vnet-gateway vpn-client', operations_tmpl=operations_tmpl) as g:
+        g.command('generate', 'generate_vpn_client')
+
+    from .operations.vnet_gateway import VnetGatewayRevokedCertCreate
+    self.command_table['network vnet-gateway revoked-cert create'] = VnetGatewayRevokedCertCreate(loader=self)
+
+    from .operations.vnet_gateway import VnetGatewayRootCertCreate
+    self.command_table['network vnet-gateway root-cert create'] = VnetGatewayRootCertCreate(loader=self)
+
+    from .operations.vnet_gateway import VnetGatewayIpsecPolicyAdd
+    self.command_table['network vnet-gateway ipsec-policy add'] = VnetGatewayIpsecPolicyAdd(loader=self)
+
+    with self.command_group('network vnet-gateway ipsec-policy', operations_tmpl=operations_tmpl) as g:
+        g.command('clear', 'clear_vnet_gateway_ipsec_policies', supports_no_wait=True)
+
+    # endregion

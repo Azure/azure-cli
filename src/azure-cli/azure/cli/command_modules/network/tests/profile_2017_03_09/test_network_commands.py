@@ -287,3 +287,97 @@ class NetworkLocalGatewayScenarioTest(ScenarioTest):
         self.cmd('network local-gateway delete --resource-group {rg} --name {lgw1}')
         self.cmd('network local-gateway list --resource-group {rg}',
                  checks=self.check('length(@)', 1))
+
+
+class NetworkVpnGatewayScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway')
+    def test_network_vpn_gateway(self, resource_group):
+
+        self.kwargs.update({
+            'vnet1': 'myvnet1',
+            'vnet2': 'myvnet2',
+            'vnet3': 'myvnet3',
+            'gw1': 'gateway1',
+            'gw2': 'gateway2',
+            'gw3': 'gateway3',
+            'ip1': 'pubip1',
+            'ip2': 'pubip2',
+            'ip3': 'pubip3'
+        })
+
+        self.cmd('network public-ip create -n {ip1} -g {rg}')
+        self.cmd('network public-ip create -n {ip2} -g {rg}')
+        self.cmd('network public-ip create -n {ip3} -g {rg}')
+        self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24')
+        self.cmd('network vnet create -g {rg} -n {vnet2} --subnet-name GatewaySubnet --address-prefix 10.1.0.0/16')
+        self.cmd('network vnet create -g {rg} -n {vnet3} --subnet-name GatewaySubnet --address-prefix 10.2.0.0/16')
+
+        self.kwargs.update({'sub': self.get_subscription_id()})
+        self.kwargs.update({
+            'vnet1_id': '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet1}'.format(**self.kwargs),
+            'vnet2_id': '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet2}'.format(**self.kwargs)
+        })
+
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2_id} --public-ip-address {ip2} --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw3} --vnet {vnet3} --public-ip-address {ip3} --no-wait --sku standard --asn 12345 --bgp-peering-address 10.2.250.250 --peer-weight 50')
+
+        self.cmd('network vnet-gateway wait -g {rg} -n {gw1} --created')
+        self.cmd('network vnet-gateway wait -g {rg} -n {gw2} --created')
+        self.cmd('network vnet-gateway wait -g {rg} -n {gw3} --created')
+
+        self.cmd('network vnet-gateway show -g {rg} -n {gw1}', checks=[
+            self.check('gatewayType', 'Vpn'),
+            self.check('sku.capacity', 2),
+            self.check('sku.name', 'Basic'),
+            self.check('vpnType', 'RouteBased'),
+            self.check('enableBgp', False)
+        ])
+        self.cmd('network vnet-gateway show -g {rg} -n {gw2}', checks=[
+            self.check('gatewayType', 'Vpn'),
+            self.check('sku.capacity', 2),
+            self.check('sku.name', 'Basic'),
+            self.check('vpnType', 'RouteBased'),
+            self.check('enableBgp', False)
+        ])
+        self.cmd('network vnet-gateway show -g {rg} -n {gw3}', checks=[
+            self.check('sku.name', 'Standard'),
+            self.check('enableBgp', True),
+            self.check('bgpSettings.asn', 12345),
+            self.check('bgpSettings.bgpPeeringAddress', '10.2.250.250'),
+            self.check('bgpSettings.peerWeight', 50)
+        ])
+
+        self.kwargs.update({
+            'conn12': 'conn1to2',
+            'conn21': 'conn2to1',
+            'gw1_id': '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworkGateways/{gw1}'.format(**self.kwargs)
+        })
+
+        self.cmd('network vpn-connection create -n {conn12} -g {rg} --shared-key 123 --vnet-gateway1 {gw1_id} --vnet-gateway2 {gw2} --tags foo=doo')
+        self.cmd('network vpn-connection update -n {conn12} -g {rg} --routing-weight 25 --tags foo=boo',
+                 checks=self.check('routingWeight', 25))
+        self.cmd('network vpn-connection create -n {conn21} -g {rg} --shared-key 123 --vnet-gateway2 {gw1_id} --vnet-gateway1 {gw2}')
+
+
+class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
+
+    @ResourceGroupPreparer('cli_test_vpn_client_package')
+    def test_vpn_client_package(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'public_ip': 'pip1',
+            'gateway_prefix': '100.1.1.0/24',
+            'gateway': 'vgw1',
+            'cert': 'cert1',
+            'cert_path': os.path.join(TEST_DIR, 'test-root-cert.cer')
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        self.cmd('network public-ip create -g {rg} -n {public_ip}')
+        self.cmd('network vnet-gateway create -g {rg} -n {gateway} --address-prefix {gateway_prefix} --vnet {vnet} --public-ip-address {public_ip}')
+        self.cmd('network vnet-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert} --public-cert-data "{cert_path}"')
+        output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway}').get_output_in_json()
+        self.assertTrue('.exe' in output, 'Expected EXE file in output.\nActual: {}'.format(str(output)))
