@@ -760,9 +760,8 @@ def load_command_table(self, _):
         g.custom_command('clear', 'clear_vpn_conn_ipsec_policies', supports_no_wait=True)
 
     with self.command_group('network vpn-connection packet-capture'):
-        from .custom import VpnConnPackageCaptureStart, VpnConnPackageCaptureStop
+        from .custom import VpnConnPackageCaptureStop
         from .aaz.latest.network.vpn_connection import Wait
-        self.command_table['network vpn-connection packet-capture start'] = VpnConnPackageCaptureStart(loader=self)
         self.command_table['network vpn-connection packet-capture stop'] = VpnConnPackageCaptureStop(loader=self)
         self.command_table['network vpn-connection packet-capture wait'] = Wait(loader=self)
     # endregion

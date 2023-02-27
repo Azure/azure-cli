@@ -104,8 +104,7 @@ from .aaz.latest.network.vnet_gateway.vpn_client import GenerateVpnProfile as _V
 from .aaz.latest.network.vpn_connection import Update as _VpnConnectionUpdate, \
     ShowDeviceConfigScript as _VpnConnectionDeviceConfigScriptShow
 from .aaz.latest.network.vpn_connection.ipsec_policy import Add as _VpnConnIpsecPolicyAdd
-from .aaz.latest.network.vpn_connection.packet_capture import Start as _VpnConnPackageCaptureStart, \
-    Stop as _VpnConnPackageCaptureStop
+from .aaz.latest.network.vpn_connection.packet_capture import Stop as _VpnConnPackageCaptureStop
 from .aaz.latest.network.vpn_connection.shared_key import Update as _VpnConnSharedKeyUpdate
 
 logger = get_logger(__name__)
@@ -7054,13 +7053,6 @@ def list_vpn_connections(cmd, resource_group_name, virtual_network_gateway_name=
     return List(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": resource_group_name})
 
 
-class VpnConnPackageCaptureStart(_VpnConnPackageCaptureStart):
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
 class VpnConnPackageCaptureStop(_VpnConnPackageCaptureStop):
 
     @classmethod
@@ -7068,10 +7060,6 @@ class VpnConnPackageCaptureStop(_VpnConnPackageCaptureStop):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.sas_url._required = True
         return args_schema
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
 
 
 class VpnConnectionDeviceConfigScriptShow(_VpnConnectionDeviceConfigScriptShow):
@@ -7084,10 +7072,6 @@ class VpnConnectionDeviceConfigScriptShow(_VpnConnectionDeviceConfigScriptShow):
         args_schema.vendor._required = True
 
         return args_schema
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
 # endregion
 
 
