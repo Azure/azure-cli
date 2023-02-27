@@ -760,6 +760,26 @@ def get_network_watcher_from_resource(cmd, namespace):
     get_network_watcher_from_location(remove=True)(cmd, namespace)
 
 
+def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
+                                      rg_name='watcher_rg'):
+    def _validator(cmd, namespace):
+        from msrestazure.tools import parse_resource_id
+
+        location = namespace.location
+        network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK).network_watchers
+        watcher = next((x for x in network_client.list_all() if x.location.lower() == location.lower()), None)
+        if not watcher:
+            raise CLIError("network watcher is not enabled for region '{}'.".format(location))
+        id_parts = parse_resource_id(watcher.id)
+        setattr(namespace, rg_name, id_parts['resource_group'])
+        setattr(namespace, watcher_name, id_parts['name'])
+
+        if remove:
+            del namespace.location
+
+    return _validator
+
+
 def process_nw_cm_v1_create_namespace(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
 
