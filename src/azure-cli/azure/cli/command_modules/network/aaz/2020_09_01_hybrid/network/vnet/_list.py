@@ -990,7 +990,6 @@ class _ListHelper:
     @classmethod
     def _build_schema_network_security_group_read(cls, _schema):
         if cls._schema_network_security_group_read is not None:
-            _schema.etag = cls._schema_network_security_group_read.etag
             _schema.id = cls._schema_network_security_group_read.id
             _schema.location = cls._schema_network_security_group_read.location
             _schema.name = cls._schema_network_security_group_read.name
@@ -1002,7 +1001,6 @@ class _ListHelper:
         cls._schema_network_security_group_read = _schema_network_security_group_read = AAZObjectType()
 
         network_security_group_read = _schema_network_security_group_read
-        network_security_group_read.etag = AAZStrType()
         network_security_group_read.id = AAZStrType()
         network_security_group_read.location = AAZStrType()
         network_security_group_read.name = AAZStrType(
@@ -1056,7 +1054,6 @@ class _ListHelper:
         tags = _schema_network_security_group_read.tags
         tags.Element = AAZStrType()
 
-        _schema.etag = cls._schema_network_security_group_read.etag
         _schema.id = cls._schema_network_security_group_read.id
         _schema.location = cls._schema_network_security_group_read.location
         _schema.name = cls._schema_network_security_group_read.name
@@ -1187,7 +1184,6 @@ class _ListHelper:
     @classmethod
     def _build_schema_security_rule_read(cls, _schema):
         if cls._schema_security_rule_read is not None:
-            _schema.etag = cls._schema_security_rule_read.etag
             _schema.id = cls._schema_security_rule_read.id
             _schema.name = cls._schema_security_rule_read.name
             _schema.properties = cls._schema_security_rule_read.properties
@@ -1196,7 +1192,6 @@ class _ListHelper:
         cls._schema_security_rule_read = _schema_security_rule_read = AAZObjectType()
 
         security_rule_read = _schema_security_rule_read
-        security_rule_read.etag = AAZStrType()
         security_rule_read.id = AAZStrType()
         security_rule_read.name = AAZStrType()
         security_rule_read.properties = AAZObjectType(
@@ -1269,7 +1264,6 @@ class _ListHelper:
         source_port_ranges = _schema_security_rule_read.properties.source_port_ranges
         source_port_ranges.Element = AAZStrType()
 
-        _schema.etag = cls._schema_security_rule_read.etag
         _schema.id = cls._schema_security_rule_read.id
         _schema.name = cls._schema_security_rule_read.name
         _schema.properties = cls._schema_security_rule_read.properties

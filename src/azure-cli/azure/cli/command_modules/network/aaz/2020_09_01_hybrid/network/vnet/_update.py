@@ -188,7 +188,6 @@ class Update(AAZCommand):
             _schema.destination_port_range = cls._args_security_rule_update.destination_port_range
             _schema.destination_port_ranges = cls._args_security_rule_update.destination_port_ranges
             _schema.direction = cls._args_security_rule_update.direction
-            _schema.etag = cls._args_security_rule_update.etag
             _schema.name = cls._args_security_rule_update.name
             _schema.priority = cls._args_security_rule_update.priority
             _schema.protocol = cls._args_security_rule_update.protocol
@@ -205,11 +204,6 @@ class Update(AAZCommand):
         )
 
         security_rule_update = cls._args_security_rule_update
-        security_rule_update.etag = AAZStrArg(
-            options=["etag"],
-            help="A unique read-only string that changes whenever the resource is updated.",
-            nullable=True,
-        )
         security_rule_update.name = AAZStrArg(
             options=["name"],
             help="The name of the resource that is unique within a resource group. This name can be used to access the resource.",
@@ -336,7 +330,6 @@ class Update(AAZCommand):
         _schema.destination_port_range = cls._args_security_rule_update.destination_port_range
         _schema.destination_port_ranges = cls._args_security_rule_update.destination_port_ranges
         _schema.direction = cls._args_security_rule_update.direction
-        _schema.etag = cls._args_security_rule_update.etag
         _schema.name = cls._args_security_rule_update.name
         _schema.priority = cls._args_security_rule_update.priority
         _schema.protocol = cls._args_security_rule_update.protocol
@@ -652,7 +645,6 @@ class _UpdateHelper:
     def _build_schema_security_rule_update(cls, _builder):
         if _builder is None:
             return
-        _builder.set_prop("etag", AAZStrType, ".etag")
         _builder.set_prop("name", AAZStrType, ".name")
         _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
@@ -1239,7 +1231,6 @@ class _UpdateHelper:
     @classmethod
     def _build_schema_network_security_group_read(cls, _schema):
         if cls._schema_network_security_group_read is not None:
-            _schema.etag = cls._schema_network_security_group_read.etag
             _schema.id = cls._schema_network_security_group_read.id
             _schema.location = cls._schema_network_security_group_read.location
             _schema.name = cls._schema_network_security_group_read.name
@@ -1251,7 +1242,6 @@ class _UpdateHelper:
         cls._schema_network_security_group_read = _schema_network_security_group_read = AAZObjectType()
 
         network_security_group_read = _schema_network_security_group_read
-        network_security_group_read.etag = AAZStrType()
         network_security_group_read.id = AAZStrType()
         network_security_group_read.location = AAZStrType()
         network_security_group_read.name = AAZStrType(
@@ -1305,7 +1295,6 @@ class _UpdateHelper:
         tags = _schema_network_security_group_read.tags
         tags.Element = AAZStrType()
 
-        _schema.etag = cls._schema_network_security_group_read.etag
         _schema.id = cls._schema_network_security_group_read.id
         _schema.location = cls._schema_network_security_group_read.location
         _schema.name = cls._schema_network_security_group_read.name
@@ -1436,7 +1425,6 @@ class _UpdateHelper:
     @classmethod
     def _build_schema_security_rule_read(cls, _schema):
         if cls._schema_security_rule_read is not None:
-            _schema.etag = cls._schema_security_rule_read.etag
             _schema.id = cls._schema_security_rule_read.id
             _schema.name = cls._schema_security_rule_read.name
             _schema.properties = cls._schema_security_rule_read.properties
@@ -1445,7 +1433,6 @@ class _UpdateHelper:
         cls._schema_security_rule_read = _schema_security_rule_read = AAZObjectType()
 
         security_rule_read = _schema_security_rule_read
-        security_rule_read.etag = AAZStrType()
         security_rule_read.id = AAZStrType()
         security_rule_read.name = AAZStrType()
         security_rule_read.properties = AAZObjectType(
@@ -1518,7 +1505,6 @@ class _UpdateHelper:
         source_port_ranges = _schema_security_rule_read.properties.source_port_ranges
         source_port_ranges.Element = AAZStrType()
 
-        _schema.etag = cls._schema_security_rule_read.etag
         _schema.id = cls._schema_security_rule_read.id
         _schema.name = cls._schema_security_rule_read.name
         _schema.properties = cls._schema_security_rule_read.properties

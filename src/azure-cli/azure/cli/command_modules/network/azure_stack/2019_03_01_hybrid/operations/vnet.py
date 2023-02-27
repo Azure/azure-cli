@@ -140,16 +140,6 @@ class VNetSubnetCreate(_VNetSubNet.Create):
                  "Values from: az network vnet list-endpoint-services.",
         )
         args_schema.service_endpoints.Element = AAZStrArg()
-        args_schema.service_endpoint_policy = AAZListArg(
-            options=["--service-endpoint-policy"],
-            help="Space-separated list of names or IDs of service endpoint policies to apply.",
-        )
-        args_schema.service_endpoint_policy.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/serviceEndpointPolicies/{}",
-            ),
-        )
         # filter arguments
         args_schema.endpoints._registered = False
         return args_schema
@@ -202,19 +192,6 @@ class VNetSubnetUpdate(_VNetSubNet.Update):
         )
         args_schema.service_endpoints.Element = AAZStrArg(
             nullable=True,
-        )
-        args_schema.service_endpoint_policy = AAZListArg(
-            options=["--service-endpoint-policy"],
-            help="Space-separated list of names or IDs of service endpoint policies to apply.",
-            nullable=True,
-            fmt=EmptyListArgFormat(),
-        )
-        args_schema.service_endpoint_policy.Element = AAZResourceIdArg(
-            nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/serviceEndpointPolicies/{}",
-            ),
         )
         # filter arguments
         args_schema.address_prefix._registered = False

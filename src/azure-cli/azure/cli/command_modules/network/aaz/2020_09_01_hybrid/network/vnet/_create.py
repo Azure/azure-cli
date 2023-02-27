@@ -118,10 +118,6 @@ class Create(AAZCommand):
         subnets.Element = AAZObjectArg()
 
         _element = cls._args_schema.subnets.Element
-        _element.etag = AAZStrArg(
-            options=["etag"],
-            help="A unique read-only string that changes whenever the resource is updated.",
-        )
         _element.name = AAZStrArg(
             options=["name"],
             help="The subnet name.",
@@ -142,21 +138,9 @@ class Create(AAZCommand):
             options=["nsg", "network-security-group"],
             help="The reference to the NetworkSecurityGroup resource.",
         )
-        _element.provisioning_state = AAZStrArg(
-            options=["provisioning-state"],
-            help="The provisioning state of the resource.",
-        )
-        _element.resource_navigation_links = AAZListArg(
-            options=["resource-navigation-links"],
-            help="Gets an array of references to the external resources using subnet.",
-        )
         _element.route_table = AAZObjectArg(
             options=["route-table"],
             help="The reference to the RouteTable resource.",
-        )
-        _element.service_association_links = AAZListArg(
-            options=["service-association-links"],
-            help="Gets an array of references to services injecting into this subnet.",
         )
         _element.service_endpoint_policy = AAZListArg(
             options=["service-endpoint-policy"],
@@ -199,10 +183,6 @@ class Create(AAZCommand):
         actions.Element = AAZStrArg()
 
         network_security_group = cls._args_schema.subnets.Element.network_security_group
-        network_security_group.etag = AAZStrArg(
-            options=["etag"],
-            help="A unique read-only string that changes whenever the resource is updated.",
-        )
         network_security_group.id = AAZResourceIdArg(
             options=["id"],
             help="Resource ID.",
@@ -246,10 +226,6 @@ class Create(AAZCommand):
         security_rules.Element = AAZObjectArg()
 
         _element = cls._args_schema.subnets.Element.network_security_group.security_rules.Element
-        _element.etag = AAZStrArg(
-            options=["etag"],
-            help="A unique read-only string that changes whenever the resource is updated.",
-        )
         _element.id = AAZResourceIdArg(
             options=["id"],
             help="Resource ID.",
@@ -349,27 +325,6 @@ class Create(AAZCommand):
         tags = cls._args_schema.subnets.Element.network_security_group.tags
         tags.Element = AAZStrArg()
 
-        resource_navigation_links = cls._args_schema.subnets.Element.resource_navigation_links
-        resource_navigation_links.Element = AAZObjectArg()
-
-        _element = cls._args_schema.subnets.Element.resource_navigation_links.Element
-        _element.id = AAZStrArg(
-            options=["id"],
-            help="Resource ID.",
-        )
-        _element.name = AAZStrArg(
-            options=["name"],
-            help="Name of the resource that is unique within a resource group. This name can be used to access the resource.",
-        )
-        _element.link = AAZStrArg(
-            options=["link"],
-            help="Link to the external resource",
-        )
-        _element.linked_resource_type = AAZStrArg(
-            options=["linked-resource-type"],
-            help="Resource type of the linked resource.",
-        )
-
         route_table = cls._args_schema.subnets.Element.route_table
         route_table.etag = AAZStrArg(
             options=["etag"],
@@ -445,27 +400,6 @@ class Create(AAZCommand):
 
         tags = cls._args_schema.subnets.Element.route_table.tags
         tags.Element = AAZStrArg()
-
-        service_association_links = cls._args_schema.subnets.Element.service_association_links
-        service_association_links.Element = AAZObjectArg()
-
-        _element = cls._args_schema.subnets.Element.service_association_links.Element
-        _element.id = AAZStrArg(
-            options=["id"],
-            help="Resource ID.",
-        )
-        _element.name = AAZStrArg(
-            options=["name"],
-            help="Name of the resource that is unique within a resource group. This name can be used to access the resource.",
-        )
-        _element.link = AAZStrArg(
-            options=["link"],
-            help="Link to the external resource.",
-        )
-        _element.linked_resource_type = AAZStrArg(
-            options=["linked-resource-type"],
-            help="Resource type of the linked resource.",
-        )
 
         service_endpoint_policy = cls._args_schema.subnets.Element.service_endpoint_policy
         service_endpoint_policy.Element = AAZObjectArg()
@@ -630,7 +564,6 @@ class Create(AAZCommand):
             _schema.destination_port_range = cls._args_security_rule_create.destination_port_range
             _schema.destination_port_ranges = cls._args_security_rule_create.destination_port_ranges
             _schema.direction = cls._args_security_rule_create.direction
-            _schema.etag = cls._args_security_rule_create.etag
             _schema.name = cls._args_security_rule_create.name
             _schema.priority = cls._args_security_rule_create.priority
             _schema.protocol = cls._args_security_rule_create.protocol
@@ -645,10 +578,6 @@ class Create(AAZCommand):
         cls._args_security_rule_create = AAZObjectArg()
 
         security_rule_create = cls._args_security_rule_create
-        security_rule_create.etag = AAZStrArg(
-            options=["etag"],
-            help="A unique read-only string that changes whenever the resource is updated.",
-        )
         security_rule_create.name = AAZStrArg(
             options=["name"],
             help="The name of the resource that is unique within a resource group. This name can be used to access the resource.",
@@ -749,7 +678,6 @@ class Create(AAZCommand):
         _schema.destination_port_range = cls._args_security_rule_create.destination_port_range
         _schema.destination_port_ranges = cls._args_security_rule_create.destination_port_ranges
         _schema.direction = cls._args_security_rule_create.direction
-        _schema.etag = cls._args_security_rule_create.etag
         _schema.name = cls._args_security_rule_create.name
         _schema.priority = cls._args_security_rule_create.priority
         _schema.protocol = cls._args_security_rule_create.protocol
@@ -905,7 +833,6 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".properties.subnets[]")
             if _elements is not None:
-                _elements.set_prop("etag", AAZStrType, ".etag")
                 _elements.set_prop("name", AAZStrType, ".name")
                 _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
@@ -915,10 +842,7 @@ class Create(AAZCommand):
                 properties.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
                 properties.set_prop("delegations", AAZListType, ".delegations")
                 properties.set_prop("networkSecurityGroup", AAZObjectType, ".network_security_group")
-                properties.set_prop("provisioningState", AAZStrType, ".provisioning_state")
-                properties.set_prop("resourceNavigationLinks", AAZListType, ".resource_navigation_links")
                 properties.set_prop("routeTable", AAZObjectType, ".route_table")
-                properties.set_prop("serviceAssociationLinks", AAZListType, ".service_association_links")
                 properties.set_prop("serviceEndpointPolicies", AAZListType, ".service_endpoint_policy")
                 properties.set_prop("serviceEndpoints", AAZListType, ".service_endpoints")
 
@@ -948,7 +872,6 @@ class Create(AAZCommand):
 
             network_security_group = _builder.get(".properties.subnets[].properties.networkSecurityGroup")
             if network_security_group is not None:
-                network_security_group.set_prop("etag", AAZStrType, ".etag")
                 network_security_group.set_prop("id", AAZStrType, ".id")
                 network_security_group.set_prop("location", AAZStrType, ".location")
                 network_security_group.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
@@ -971,7 +894,6 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".properties.subnets[].properties.networkSecurityGroup.properties.securityRules[]")
             if _elements is not None:
-                _elements.set_prop("etag", AAZStrType, ".etag")
                 _elements.set_prop("id", AAZStrType, ".id")
                 _elements.set_prop("name", AAZStrType, ".name")
                 _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
@@ -1023,21 +945,6 @@ class Create(AAZCommand):
             if tags is not None:
                 tags.set_elements(AAZStrType, ".")
 
-            resource_navigation_links = _builder.get(".properties.subnets[].properties.resourceNavigationLinks")
-            if resource_navigation_links is not None:
-                resource_navigation_links.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.subnets[].properties.resourceNavigationLinks[]")
-            if _elements is not None:
-                _elements.set_prop("id", AAZStrType, ".id")
-                _elements.set_prop("name", AAZStrType, ".name")
-                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-
-            properties = _builder.get(".properties.subnets[].properties.resourceNavigationLinks[].properties")
-            if properties is not None:
-                properties.set_prop("link", AAZStrType, ".link")
-                properties.set_prop("linkedResourceType", AAZStrType, ".linked_resource_type")
-
             route_table = _builder.get(".properties.subnets[].properties.routeTable")
             if route_table is not None:
                 route_table.set_prop("etag", AAZStrType, ".etag")
@@ -1073,21 +980,6 @@ class Create(AAZCommand):
             tags = _builder.get(".properties.subnets[].properties.routeTable.tags")
             if tags is not None:
                 tags.set_elements(AAZStrType, ".")
-
-            service_association_links = _builder.get(".properties.subnets[].properties.serviceAssociationLinks")
-            if service_association_links is not None:
-                service_association_links.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.subnets[].properties.serviceAssociationLinks[]")
-            if _elements is not None:
-                _elements.set_prop("id", AAZStrType, ".id")
-                _elements.set_prop("name", AAZStrType, ".name")
-                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-
-            properties = _builder.get(".properties.subnets[].properties.serviceAssociationLinks[].properties")
-            if properties is not None:
-                properties.set_prop("link", AAZStrType, ".link")
-                properties.set_prop("linkedResourceType", AAZStrType, ".linked_resource_type")
 
             service_endpoint_policies = _builder.get(".properties.subnets[].properties.serviceEndpointPolicies")
             if service_endpoint_policies is not None:
@@ -1299,7 +1191,6 @@ class _CreateHelper:
     def _build_schema_security_rule_create(cls, _builder):
         if _builder is None:
             return
-        _builder.set_prop("etag", AAZStrType, ".etag")
         _builder.set_prop("name", AAZStrType, ".name")
         _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
@@ -1886,7 +1777,6 @@ class _CreateHelper:
     @classmethod
     def _build_schema_network_security_group_read(cls, _schema):
         if cls._schema_network_security_group_read is not None:
-            _schema.etag = cls._schema_network_security_group_read.etag
             _schema.id = cls._schema_network_security_group_read.id
             _schema.location = cls._schema_network_security_group_read.location
             _schema.name = cls._schema_network_security_group_read.name
@@ -1898,7 +1788,6 @@ class _CreateHelper:
         cls._schema_network_security_group_read = _schema_network_security_group_read = AAZObjectType()
 
         network_security_group_read = _schema_network_security_group_read
-        network_security_group_read.etag = AAZStrType()
         network_security_group_read.id = AAZStrType()
         network_security_group_read.location = AAZStrType()
         network_security_group_read.name = AAZStrType(
@@ -1952,7 +1841,6 @@ class _CreateHelper:
         tags = _schema_network_security_group_read.tags
         tags.Element = AAZStrType()
 
-        _schema.etag = cls._schema_network_security_group_read.etag
         _schema.id = cls._schema_network_security_group_read.id
         _schema.location = cls._schema_network_security_group_read.location
         _schema.name = cls._schema_network_security_group_read.name
@@ -2083,7 +1971,6 @@ class _CreateHelper:
     @classmethod
     def _build_schema_security_rule_read(cls, _schema):
         if cls._schema_security_rule_read is not None:
-            _schema.etag = cls._schema_security_rule_read.etag
             _schema.id = cls._schema_security_rule_read.id
             _schema.name = cls._schema_security_rule_read.name
             _schema.properties = cls._schema_security_rule_read.properties
@@ -2092,7 +1979,6 @@ class _CreateHelper:
         cls._schema_security_rule_read = _schema_security_rule_read = AAZObjectType()
 
         security_rule_read = _schema_security_rule_read
-        security_rule_read.etag = AAZStrType()
         security_rule_read.id = AAZStrType()
         security_rule_read.name = AAZStrType()
         security_rule_read.properties = AAZObjectType(
@@ -2165,7 +2051,6 @@ class _CreateHelper:
         source_port_ranges = _schema_security_rule_read.properties.source_port_ranges
         source_port_ranges.Element = AAZStrType()
 
-        _schema.etag = cls._schema_security_rule_read.etag
         _schema.id = cls._schema_security_rule_read.id
         _schema.name = cls._schema_security_rule_read.name
         _schema.properties = cls._schema_security_rule_read.properties

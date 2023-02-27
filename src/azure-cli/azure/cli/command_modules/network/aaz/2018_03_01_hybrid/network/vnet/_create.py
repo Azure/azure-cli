@@ -114,10 +114,6 @@ class Create(AAZCommand):
         subnets.Element = AAZObjectArg()
 
         _element = cls._args_schema.subnets.Element
-        _element.etag = AAZStrArg(
-            options=["etag"],
-            help="A unique read-only string that changes whenever the resource is updated.",
-        )
         _element.name = AAZStrArg(
             options=["name"],
             help="The subnet name.",
@@ -129,14 +125,6 @@ class Create(AAZCommand):
         _element.network_security_group = AAZObjectArg(
             options=["nsg", "network-security-group"],
             help="The reference to the NetworkSecurityGroup resource.",
-        )
-        _element.provisioning_state = AAZStrArg(
-            options=["provisioning-state"],
-            help="The provisioning state of the resource.",
-        )
-        _element.resource_navigation_links = AAZListArg(
-            options=["resource-navigation-links"],
-            help="Gets an array of references to the external resources using subnet.",
         )
         _element.route_table = AAZObjectArg(
             options=["route-table"],
@@ -297,27 +285,6 @@ class Create(AAZCommand):
 
         tags = cls._args_schema.subnets.Element.network_security_group.tags
         tags.Element = AAZStrArg()
-
-        resource_navigation_links = cls._args_schema.subnets.Element.resource_navigation_links
-        resource_navigation_links.Element = AAZObjectArg()
-
-        _element = cls._args_schema.subnets.Element.resource_navigation_links.Element
-        _element.id = AAZStrArg(
-            options=["id"],
-            help="Resource ID.",
-        )
-        _element.name = AAZStrArg(
-            options=["name"],
-            help="Name of the resource that is unique within a resource group. This name can be used to access the resource.",
-        )
-        _element.link = AAZStrArg(
-            options=["link"],
-            help="Link to the external resource",
-        )
-        _element.linked_resource_type = AAZStrArg(
-            options=["linked-resource-type"],
-            help="Resource type of the linked resource.",
-        )
 
         route_table = cls._args_schema.subnets.Element.route_table
         route_table.etag = AAZStrArg(
@@ -759,7 +726,6 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".properties.subnets[]")
             if _elements is not None:
-                _elements.set_prop("etag", AAZStrType, ".etag")
                 _elements.set_prop("name", AAZStrType, ".name")
                 _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
@@ -767,8 +733,6 @@ class Create(AAZCommand):
             if properties is not None:
                 properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
                 properties.set_prop("networkSecurityGroup", AAZObjectType, ".network_security_group")
-                properties.set_prop("provisioningState", AAZStrType, ".provisioning_state")
-                properties.set_prop("resourceNavigationLinks", AAZListType, ".resource_navigation_links")
                 properties.set_prop("routeTable", AAZObjectType, ".route_table")
                 properties.set_prop("serviceEndpoints", AAZListType, ".service_endpoints")
 
@@ -848,21 +812,6 @@ class Create(AAZCommand):
             tags = _builder.get(".properties.subnets[].properties.networkSecurityGroup.tags")
             if tags is not None:
                 tags.set_elements(AAZStrType, ".")
-
-            resource_navigation_links = _builder.get(".properties.subnets[].properties.resourceNavigationLinks")
-            if resource_navigation_links is not None:
-                resource_navigation_links.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.subnets[].properties.resourceNavigationLinks[]")
-            if _elements is not None:
-                _elements.set_prop("id", AAZStrType, ".id")
-                _elements.set_prop("name", AAZStrType, ".name")
-                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-
-            properties = _builder.get(".properties.subnets[].properties.resourceNavigationLinks[].properties")
-            if properties is not None:
-                properties.set_prop("link", AAZStrType, ".link")
-                properties.set_prop("linkedResourceType", AAZStrType, ".linked_resource_type")
 
             route_table = _builder.get(".properties.subnets[].properties.routeTable")
             if route_table is not None:
