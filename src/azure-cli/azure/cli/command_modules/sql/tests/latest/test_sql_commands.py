@@ -1256,13 +1256,10 @@ class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
     def test_sql_db_geo_restore(
             self):
         self.kwargs.update({
-            'rg': 'strehan-donotdelete-canaryeuap',
-            'loc': 'centraluseuap',
-            'server_name': 'testsvr-strehan-donotdelete1',
-            'database_name': 'basicdb',
-            'encryption_protector' : 'https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1',
-            'keys' : '"https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1" "https://test123343strehan.vault.azure.net/keys/testk1/96151496df864e32aa62a3c1857b2931"',
-            'umi' : '/subscriptions/e1775f9f-a286-474d-b6f0-29c42ac74554/resourcegroups/ArmTemplate/providers/Microsoft.ManagedIdentity/userAssignedIdentities/shobhittest'
+            'rg': 'Canary1',
+            'loc': 'eastus2euap',
+            'server_name': 'viditreproserver',
+            'database_name': 'vidittestdb'
         })
 
         # test list geo backups for database

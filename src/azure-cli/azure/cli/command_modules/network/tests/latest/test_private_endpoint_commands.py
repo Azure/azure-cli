@@ -2462,7 +2462,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self, group_id=False)
 
-    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_sql_server")
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_sql_server", location="eastus")
     def test_private_endpoint_connection_sql_server(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,
