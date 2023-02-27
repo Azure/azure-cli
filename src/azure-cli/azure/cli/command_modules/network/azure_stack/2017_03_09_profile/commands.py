@@ -48,7 +48,6 @@ def load_command_table(self, _):
 
     # region VirtualNetworkGateways
     from .._format import transform_vnet_gateway_bgp_peer_table, transform_vnet_gateway_routes_table
-    operations_tmpl = self.get_module_name_by_profile("operations.vnet_gateway#{}")
 
     from .operations.vnet_gateway import VnetGatewayCreate, VnetGatewayUpdate
     self.command_table['network vnet-gateway create'] = VnetGatewayCreate(loader=self)

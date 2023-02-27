@@ -17,7 +17,6 @@ from azure.cli.command_modules.network.azure_stack._client_factory import (
     cf_express_route_service_providers,
     cf_network_interfaces, cf_network_security_groups, cf_network_watcher, cf_packet_capture,
     cf_virtual_networks, cf_virtual_network_peerings,
-    cf_virtual_network_gateways,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_security_rules, cf_subnets, cf_usages,
     cf_public_ip_addresses, cf_connection_monitor,
@@ -215,11 +214,6 @@ def load_command_table(self, _):
     network_subnet_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#SubnetsOperations.{}',
         client_factory=cf_subnets
-    )
-
-    network_vgw_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualNetworkGatewaysOperations.{}',
-        client_factory=cf_virtual_network_gateways
     )
 
     network_vnet_sdk = CliCommandType(

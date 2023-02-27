@@ -77,7 +77,6 @@ class VnetGatewayCreate(_VnetGateway.Create):
             args.bgp_peering_address = None
             args.peer_weight = None
 
-
         if has_value(args.address_prefixes) or has_value(args.client_protocol):
             import os
             if has_value(args.root_cert_data):
@@ -88,7 +87,6 @@ class VnetGatewayCreate(_VnetGateway.Create):
                 args.vpn_client_root_certificates = [{'name': args.root_cert_name, 'public_cert_data': path}]
             else:
                 args.vpn_client_root_certificates = []
-
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -183,6 +181,7 @@ class VnetGatewayUpdate(_VnetGateway.Update):
 
 
 _VpnClient = import_aaz_by_profile("network.vnet_gateway.vpn_client")
+
 
 def generate_vpn_client(cmd, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
                         authentication_method=None, radius_server_auth_certificate=None, client_root_certificates=None,
