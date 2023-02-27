@@ -92,23 +92,23 @@ class Add(AAZCommand):
             help="The frequency of test evaluation, in seconds.  Default: 60.",
         )
 
-        # define Arg Group "HttpConfiguration"
+        # define Arg Group "HTTP Protocol"
 
         _args_schema = cls._args_schema
         _args_schema.http_method = AAZStrArg(
             options=["--http-method"],
-            arg_group="HttpConfiguration",
-            help="The HTTP method to use.",
+            arg_group="HTTP Protocol",
+            help="The HTTP method to use. Allowed values: Get, Post.",
             enum={"Get": "Get", "Post": "Post"},
         )
         _args_schema.http_path = AAZStrArg(
             options=["--http-path"],
-            arg_group="HttpConfiguration",
+            arg_group="HTTP Protocol",
             help="The path component of the URI. For instance, \"/dir1/dir2\".",
         )
         _args_schema.http_port = AAZIntArg(
             options=["--http-port"],
-            arg_group="HttpConfiguration",
+            arg_group="HTTP Protocol",
             help="The port to connect to.",
             fmt=AAZIntArgFormat(
                 maximum=65535,
@@ -117,24 +117,24 @@ class Add(AAZCommand):
         )
         _args_schema.http_prefer_https = AAZBoolArg(
             options=["--http-prefer-https"],
-            arg_group="HttpConfiguration",
+            arg_group="HTTP Protocol",
             help="Value indicating whether HTTPS is preferred over HTTP in cases where the choice is not explicit.",
         )
-        _args_schema.http_request_header = AAZListArg(
-            options=["--http-request-header"],
-            arg_group="HttpConfiguration",
+        _args_schema.http_request_headers = AAZListArg(
+            options=["--http-request-headers"],
+            arg_group="HTTP Protocol",
             help="The HTTP headers to transmit with the request.",
         )
         _args_schema.http_valid_status_codes = AAZListArg(
             options=["--http-valid-status-codes"],
-            arg_group="HttpConfiguration",
+            arg_group="HTTP Protocol",
             help="HTTP status codes to consider successful. For instance, \"2xx,301-304,418\".",
         )
 
-        http_request_header = cls._args_schema.http_request_header
-        http_request_header.Element = AAZObjectArg()
+        http_request_headers = cls._args_schema.http_request_headers
+        http_request_headers.Element = AAZObjectArg()
 
-        _element = cls._args_schema.http_request_header.Element
+        _element = cls._args_schema.http_request_headers.Element
         _element.name = AAZStrArg(
             options=["name"],
             help="The name in HTTP header.",
@@ -147,32 +147,32 @@ class Add(AAZCommand):
         http_valid_status_codes = cls._args_schema.http_valid_status_codes
         http_valid_status_codes.Element = AAZStrArg()
 
-        # define Arg Group "IcmpConfiguration"
+        # define Arg Group "ICMP Protocol"
 
         _args_schema = cls._args_schema
         _args_schema.icmp_disable_trace_route = AAZBoolArg(
             options=["--icmp-disable-trace-route"],
-            arg_group="IcmpConfiguration",
+            arg_group="ICMP Protocol",
             help="Value indicating whether path evaluation with trace route should be disabled. false is default.  Allowed values: false, true.",
         )
 
-        # define Arg Group "TcpConfiguration"
+        # define Arg Group "TCP Protocol"
 
         _args_schema = cls._args_schema
         _args_schema.tcp_port_behavior = AAZStrArg(
             options=["--tcp-port-behavior"],
-            arg_group="TcpConfiguration",
+            arg_group="TCP Protocol",
             help="Destination port behavior.  Allowed values: ListenIfAvailable,  None.",
             enum={"ListenIfAvailable": "ListenIfAvailable", "None": "None"},
         )
         _args_schema.tcp_disable_trace_route = AAZBoolArg(
             options=["--tcp-disable-trace-route"],
-            arg_group="TcpConfiguration",
+            arg_group="TCP Protocol",
             help="Value indicating whether path evaluation with trace route should be disabled. false is default.  Allowed values: false, true.",
         )
         _args_schema.tcp_port = AAZIntArg(
             options=["--tcp-port"],
-            arg_group="TcpConfiguration",
+            arg_group="TCP Protocol",
             help="The port to connect to.",
             fmt=AAZIntArgFormat(
                 maximum=65535,
@@ -462,7 +462,7 @@ class Add(AAZCommand):
                 http_configuration.set_prop("path", AAZStrType, ".http_path")
                 http_configuration.set_prop("port", AAZIntType, ".http_port")
                 http_configuration.set_prop("preferHTTPS", AAZBoolType, ".http_prefer_https")
-                http_configuration.set_prop("requestHeaders", AAZListType, ".http_request_header")
+                http_configuration.set_prop("requestHeaders", AAZListType, ".http_request_headers")
                 http_configuration.set_prop("validStatusCodeRanges", AAZListType, ".http_valid_status_codes")
 
             request_headers = _builder.get(".httpConfiguration.requestHeaders")

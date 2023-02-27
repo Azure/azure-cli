@@ -529,19 +529,21 @@ def load_command_table(self, _):
     self.command_table["network watcher connection-monitor endpoint list"] = WatcherConnectionMonitorEndpointList(
         loader=self)
 
-    with self.command_group('network watcher connection-monitor test-configuration',
-                            network_watcher_cm_sdk,
-                            min_api='2019-11-01',
-                            client_factory=cf_connection_monitor,
-                            is_preview=True,
-                            validator=process_nw_cm_v2_test_configuration_namespace) as c:
-        c.custom_command('add', 'add_nw_connection_monitor_v2_test_configuration')
-        # c.custom_command('remove', 'remove_nw_connection_monitor_v2_test_configuration')
-        # c.custom_show_command('show', 'show_nw_connection_monitor_v2_test_configuration')
-        # c.custom_command('list', 'list_nw_connection_monitor_v2_test_configuration')
-    from .operations.watcher import WatcherConnectionMonitorTestConfigurationShow as WCMTCShow, \
+    # with self.command_group('network watcher connection-monitor test-configuration',
+    #                         network_watcher_cm_sdk,
+    #                         min_api='2019-11-01',
+    #                         client_factory=cf_connection_monitor,
+    #                         is_preview=True,
+    #                         validator=process_nw_cm_v2_test_configuration_namespace) as c:
+    #     c.custom_command('add', 'add_nw_connection_monitor_v2_test_configuration')
+    #     c.custom_command('remove', 'remove_nw_connection_monitor_v2_test_configuration')
+    #     c.custom_show_command('show', 'show_nw_connection_monitor_v2_test_configuration')
+    #     c.custom_command('list', 'list_nw_connection_monitor_v2_test_configuration')
+    from .operations.watcher import WatcherConnectionMonitorTestConfigurationAdd as WCMTAdd, \
+        WatcherConnectionMonitorTestConfigurationShow as WCMTCShow, \
         WatcherConnectionMonitorTestConfigurationList as WCMTCList, \
         WatcherConnectionMonitorTestConfigurationRemove as WCMTRemove
+    self.command_table["network watcher connection-monitor test-configuration add"] = WCMTAdd(loader=self)
     self.command_table["network watcher connection-monitor test-configuration remove"] = WCMTRemove(loader=self)
     self.command_table["network watcher connection-monitor test-configuration show"] = WCMTCShow(loader=self)
     self.command_table["network watcher connection-monitor test-configuration list"] = WCMTCList(loader=self)

@@ -43,8 +43,9 @@ from ..aaz.latest.network.watcher.connection_monitor.endpoint import Show as _Wa
     Remove as _WatcherConnectionMonitorEndpointRemove, List as _WatcherConnectionMonitorEndpointList, \
     Add as _WatcherConnectionMonitorEndpointAdd
 
-from ..aaz.latest.network.watcher.connection_monitor.test_configuration import Show as _MonitorTestConfigurationShow, \
-    List as _MonitorTestConfigurationList, Remove as _MonitorTestConfigurationRemove
+from ..aaz.latest.network.watcher.connection_monitor.test_configuration import Add as _MonitorTestConfigurationAdd, \
+    Show as _MonitorTestConfigurationShow, List as _MonitorTestConfigurationList, \
+    Remove as _MonitorTestConfigurationRemove
 
 from ..aaz.latest.network.watcher.connection_monitor.test_group import Show as _WatcherConnectionMonitorTestGroupShow, \
     List as _WatcherConnectionMonitorTestGroupList
@@ -1222,25 +1223,6 @@ class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
             arg_group="V2 Test Group"
         )
         args_schema.source_test_groups.Element = AAZStrArg()
-        args_schema.coverage_level.enum = AAZArgEnum({
-            "AboveAverage": "AboveAverage",
-            "Average": "Average",
-            "BelowAverage": "BelowAverage",
-            "Default": "Default",
-            "Full": "Full",
-            "Low": "Low"
-        })
-        args_schema.filter_type.enum = AAZArgEnum({"Include": "Include"})
-        args_schema.type.enum = AAZArgEnum({
-            "AzureArcVM": "AzureArcVM",
-            "AzureSubnet": "AzureSubnet",
-            "AzureVM": "AzureVM",
-            "AzureVMSS": "AzureVMSS",
-            "AzureVNet": "AzureVNet",
-            "ExternalAddress": "ExternalAddress",
-            "MMAWorkspaceMachine": "MMAWorkspaceMachine",
-            "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"
-        })
         return args_schema
 
     def pre_operations(self):
@@ -1248,7 +1230,7 @@ class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
 
     def pre_instance_create(self):
         args = self.ctx.args
-        name = args.endpoint_name
+        name = args.endpoint_name.to_serialized_data()
         args.scope_exclude = []
         args.scope_include = []
         if has_value(args.address_include):
@@ -1385,6 +1367,55 @@ class WatcherConnectionMonitorEndpointRemove(_WatcherConnectionMonitorEndpointRe
                 test_group.sources.remove(name)
             if name in test_group.destinations:
                 test_group.destinations.remove(name)
+
+
+class WatcherConnectionMonitorTestConfigurationAdd(_MonitorTestConfigurationAdd):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.watcher_name._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_rg._required = False
+
+        args_schema.http_request_header = AAZListArg(
+            options=["--address-exclude"],
+            help="List of address of the endpoint item which needs to be included to the endpoint scope.", # ? include
+        )
+        args_schema.http_request_header.Element = AAZStrArg()
+
+        args_schema.test_groups = AAZListArg(
+            options=["--test-groups"],
+            help="Space-separated list of names of test group which only need to be affected if specified.",
+        )
+        args_schema.test_groups.Element = AAZStrArg()
+
+    def pre_operations(self):
+        get_network_watcher_from_location(self)
+
+    def pre_instance_create(self):
+        args = self.ctx.args
+        name = args.test_configuration_name.to_serialized_data()
+
+        if has_value(args.http_request_header):
+            request_header = {}
+            for item in args.http_request_header:
+                try:
+                    key, val = item.split('=', 1)
+                    if hasattr(request_header, key):
+                        setattr(request_header, key, val)
+                    else:
+                        raise ValidationError("usage error: '{}' is not a value property of HTTPHeader".format(key))
+                except ValueError:
+                    raise ValidationError('usage error: name=HTTPHeader value=HTTPHeaderValue')
+        args.http_request_headers.append(request_header)
+
+        instance = self.ctx.vars.instance
+        if has_value(args.test_groups):
+            for test_group in instance.properties.test_groups:
+                if test_group.name in args.test_groups:
+                    test_group.test_configurations.append(name)
 
 
 class WatcherConnectionMonitorTestConfigurationShow(_MonitorTestConfigurationShow):
