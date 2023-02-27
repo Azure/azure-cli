@@ -83,12 +83,19 @@ steps:
       echo $pipelineTestJson
       echo "##vso[task.setvariable variable=pipelineTestJson]$pipelineTestJson"
 
-      pipelineTestXml='false'
-      if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.parallel.xml' ]] || [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.serial.xml' ]]; then
-        pipelineTestXml='true'
+      pipelineTestParallelXml='false'
+      if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.parallel.xml' ]]; then
+        pipelineTestParallelXml='true'
       fi
-      echo $pipelineTestXml
-      echo "##vso[task.setvariable variable=pipelineTestXml]$pipelineTestXml"
+      echo $pipelineTestParallelXml
+      echo "##vso[task.setvariable variable=pipelineTestParallelXml]$pipelineTestParallelXml"
+
+      pipelineTestSerialXml='false'
+      if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.serial.xml' ]]; then
+        pipelineTestSerialXml='true'
+      fi
+      echo $pipelineTestSerialXml
+      echo "##vso[task.setvariable variable=pipelineTestSerialXml]$pipelineTestSerialXml"
   - task: PublishBuildArtifacts@1
     condition: and(succeededOrFailed(), eq(variables.pipelineTestJson, 'true'))
     inputs:
@@ -97,10 +104,17 @@ steps:
       ArtifactName: 'test_results'
       publishLocation: 'Container'
   - task: PublishBuildArtifacts@1
-    condition: and(succeededOrFailed(), eq(variables.pipelineTestXml, 'true'))
+    condition: and(succeededOrFailed(), eq(variables.pipelineTestParallelXml, 'true'))
     inputs:
-      # /home/cloudtest/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_3.8_latest_1.*.xml
-      PathtoPublish: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
+      # /home/cloudtest/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_3.8_latest_1.parallel.xml
+      PathtoPublish: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.parallel.xml'
+      ArtifactName: 'test_results'
+      publishLocation: 'Container'
+  - task: PublishBuildArtifacts@1
+    condition: and(succeededOrFailed(), eq(variables.pipelineTestSerialXml, 'true'))
+    inputs:
+      # /home/cloudtest/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_3.8_latest_1.serial.xml
+      PathtoPublish: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.serial.xml'
       ArtifactName: 'test_results'
       publishLocation: 'Container'
   - task: PublishTestResults@2
