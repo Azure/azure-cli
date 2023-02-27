@@ -5719,4 +5719,3 @@ class PPGShow(_PPGShow):
         args_schema.include_colocation_status.enum = AAZArgEnum({"True": "True", "False": "False"})
 
         return args_schema
-

@@ -6569,7 +6569,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
         self.cmd('ppg list -g {rg}', checks=[
             self.check('length(@)', 3)
         ])
-        self.cmd('ppg delete -n {ppg1} -g {rg} --yes')
+        self.cmd('ppg delete -n {ppg1} -g {rg}')
         self.cmd('ppg list -g {rg}', checks=[
             self.check('length(@)', 2),
         ])
