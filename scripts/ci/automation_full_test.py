@@ -5,13 +5,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azdev.utilities import get_path_table
+import json
 import logging
 import os
 import subprocess
 import sys
 import time
 import xml.etree.ElementTree as ET
-from azdev.utilities import get_path_table
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -30,6 +31,9 @@ fix_failure_tests = sys.argv[5].lower() == 'true' if len(sys.argv) >= 6 else Fal
 target = sys.argv[6].lower() if len(sys.argv) >= 7 else 'cli'
 working_directory = os.getenv('BUILD_SOURCESDIRECTORY') if target == 'cli' else f"{os.getenv('BUILD_SOURCESDIRECTORY')}/azure-cli-extensions"
 azdev_test_result_dir = os.path.expanduser("~/.azdev/env_config/mnt/vss/_work/1/s/env")
+python_version = os.environ.get('PYTHON_VERSION')
+job_name = os.environ.get('JOB_NAME')
+unique_job_name = ' '.join([job_name, python_version, profile, str(instance_idx)])
 cli_jobs = {
             'acr': 45,
             'acs': 62,
@@ -354,6 +358,111 @@ def process_test(cmd, azdev_test_result_fp, live_rerun=False, modules=[]):
     return False
 
 
+def build_pipeline_result():
+    if profile == '2018-03-01-hybrid':
+        selected_modules = ['keyvault', 'network', 'resource', 'storage', 'vm']
+    elif profile == '2019-03-01-hybrid':
+        selected_modules = ['databoxedge', 'iot', 'resource', 'storage', 'vm']
+    elif profile == '2020-09-01-hybrid':
+        selected_modules = ['acr', 'acs', 'databoxedge', 'iot', 'keyvault', 'storage', 'vm']
+    else:
+        selected_modules = get_path_table()['mod']
+        excluded_modules = ['extension', 'interactive']
+        for m in excluded_modules:
+            selected_modules.pop(m)
+        selected_modules = list(selected_modules.keys())
+    # add azure-cli-core, azure-cli-telemetry to selected_modules
+    selected_modules += ['core', 'telemetry']
+    pipeline_result = {
+        # "Automation Full Test Python310 Profile Latest instance1"
+        unique_job_name:
+            {
+                "Name": job_name,
+                "Details": [
+                    {
+                        "Profile": profile,
+                        "Details": [
+                            {
+                                "PythonVersion": python_version,
+                                "Details": []
+                            }
+                        ]
+                    }
+                ]
+            }
+    }
+
+    for k in selected_modules:
+        pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'].append({
+            "Module": k,
+            "Status": "Running",
+            "Content": ""
+        })
+    return pipeline_result
+
+
+def get_pipeline_result(test_result_fp, pipeline_result):
+    tree = ET.parse(test_result_fp)
+    root = tree.getroot()
+    for testsuite in root:
+        for testcase in testsuite:
+            # ['azure', 'cli', 'command_modules', 'network', 'tests', 'latest', 'test_network_commands', 'NetworkNicScenarioTest']
+            # ['src', 'azure-cli', 'azure', 'cli', 'command_modules', 'network', 'tests', 'hybrid_2018_03_01', 'test_dns_commands', 'DnsZoneImportTest']
+            # ['src', 'azure-cli-core', 'azure', 'cli', 'core', 'tests', 'test_aaz_arg', 'TestAAZArg']
+            # ['src', 'azure-cli-telemetry', 'azure', 'cli', 'telemetry', 'tests', 'test_records_collection', 'TestRecordsCollection']
+            class_name = testcase.attrib['classname'].split('.')
+            if class_name[2] == 'command_modules':
+                module = class_name[3]
+            elif class_name[4] == 'command_modules':
+                module = class_name[5]
+            elif class_name[1] == 'azure-cli-core':
+                module = class_name[4]
+            elif class_name[1] == 'azure-cli-telemetry':
+                module = class_name[4]
+            else:
+                logger.error(f'unexpected class name: {class_name}')
+                module = 'unknown'
+            failures = testcase.findall('failure')
+            if failures:
+                # logger.info(f"failed testcase attributes: {testcase.attrib}")
+                state = "Failed"
+                test_case = testcase.attrib['name']
+                line = testcase.attrib['file'] + ':' + testcase.attrib['line']
+                # only get first failure
+                for failure in failures:
+                    message = failure.attrib['message'].replace('\n', '<br>')
+                    break
+                for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details']:
+                    if i['Module'] == module:
+                        i['Status'] = 'Failed'
+                        i['Content'] = build_markdown_content(state, test_case, message, line, i['Content'])
+                        break
+            else:
+                for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details']:
+                    if i['Module'] == module:
+                        i['Status'] = 'Succeeded' if i['Status'] != 'Failed' else 'Failed'
+                        break
+
+    print(json.dumps(pipeline_result, indent=4))
+    return pipeline_result
+
+
+def build_markdown_content(state, test_case, message, line, content):
+    if content == "":
+        content = f'|Type|Test Case|Error Message|Line|\n|---|---|---|---|\n'
+    content += f'|{state}|{test_case}|{message}|{line}|\n'
+    return content
+
+
+def save_pipeline_result(pipeline_result):
+    # save pipeline result to file
+    # /mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_3.8_latest_1.json
+    filename = os.path.join(azdev_test_result_dir, f'pipeline_result_{python_version}_{profile}_{instance_idx}.json')
+    with open(filename, 'w') as f:
+        json.dump(pipeline_result, f, indent=4)
+    logger.info(f"save pipeline result to file: {filename}")
+
+
 class AutomaticScheduling(object):
 
     def __init__(self):
@@ -445,16 +554,20 @@ class AutomaticScheduling(object):
                 serial_tests.append(k)
             else:
                 parallel_tests.append(k)
+        pipeline_result = build_pipeline_result()
         if serial_tests:
             azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{instance_idx}.serial.xml")
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + serial_tests + \
-                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '"--durations=10"']
+                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1 --durations=10 --tb=no']
             serial_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
+            pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result)
         if parallel_tests:
             azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{instance_idx}.parallel.xml")
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + parallel_tests + \
-                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '"--durations=10"']
+                  ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1 --durations=10 --tb=no']
             parallel_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
+            pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result)
+        save_pipeline_result(pipeline_result)
         return serial_error_flag or parallel_error_flag
 
     def run_extension_instance_modules(self, instance_modules):

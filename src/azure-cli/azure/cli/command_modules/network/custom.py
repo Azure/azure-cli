@@ -5722,40 +5722,6 @@ def list_nw_connection_monitor_v2_output(client,
     return connection_monitor.outputs
 
 
-def show_topology_watcher(cmd, client, resource_group_name, network_watcher_name, target_resource_group_name=None,
-                          target_vnet=None, target_subnet=None):  # pylint: disable=unused-argument
-    TopologyParameters = cmd.get_models('TopologyParameters')
-    return client.get_topology(
-        resource_group_name=resource_group_name,
-        network_watcher_name=network_watcher_name,
-        parameters=TopologyParameters(
-            target_resource_group_name=target_resource_group_name,
-            target_virtual_network=target_vnet,
-            target_subnet=target_subnet
-        ))
-
-
-def check_nw_connectivity(cmd, client, watcher_rg, watcher_name, source_resource, source_port=None,
-                          dest_resource=None, dest_port=None, dest_address=None,
-                          resource_group_name=None, protocol=None, method=None, headers=None, valid_status_codes=None):
-    ConnectivitySource, ConnectivityDestination, ConnectivityParameters, ProtocolConfiguration, HTTPConfiguration = \
-        cmd.get_models(
-            'ConnectivitySource', 'ConnectivityDestination', 'ConnectivityParameters', 'ProtocolConfiguration',
-            'HTTPConfiguration')
-    params = ConnectivityParameters(
-        source=ConnectivitySource(resource_id=source_resource, port=source_port),
-        destination=ConnectivityDestination(resource_id=dest_resource, address=dest_address, port=dest_port),
-        protocol=protocol
-    )
-    if any([method, headers, valid_status_codes]):
-        params.protocol_configuration = ProtocolConfiguration(http_configuration=HTTPConfiguration(
-            method=method,
-            headers=headers,
-            valid_status_codes=valid_status_codes
-        ))
-    return client.begin_check_connectivity(watcher_rg, watcher_name, params)
-
-
 def create_nw_packet_capture(cmd, client, resource_group_name, capture_name,
                              watcher_rg, watcher_name, vm=None, location=None,
                              storage_account=None, storage_path=None, file_path=None,
@@ -6025,25 +5991,6 @@ def show_nw_troubleshooting_result(cmd, client, watcher_name, watcher_rg, resour
                                    resource_group_name=None):
     query_troubleshooting_parameters = cmd.get_models('QueryTroubleshootingParameters')(target_resource_id=resource)
     return client.begin_get_troubleshooting_result(watcher_rg, watcher_name, query_troubleshooting_parameters)
-
-
-def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, resource,
-                                         direction=None, protocol=None, source=None, destination=None,
-                                         destination_port=None, queries=None,
-                                         resource_group_name=None, resource_type=None, parent=None):
-    NetworkConfigurationDiagnosticParameters, NetworkConfigurationDiagnosticProfile = \
-        cmd.get_models('NetworkConfigurationDiagnosticParameters', 'NetworkConfigurationDiagnosticProfile')
-
-    if not queries:
-        queries = [NetworkConfigurationDiagnosticProfile(
-            direction=direction,
-            protocol=protocol,
-            source=source,
-            destination=destination,
-            destination_port=destination_port
-        )]
-    params = NetworkConfigurationDiagnosticParameters(target_resource_id=resource, profiles=queries)
-    return client.begin_get_network_configuration_diagnostic(watcher_rg, watcher_name, params)
 # endregion
 
 
