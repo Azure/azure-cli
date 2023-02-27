@@ -1143,13 +1143,13 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             'rg': 'strehan-donotdelete-canaryeuap',
             'loc': 'centraluseuap',
             'server_name': 'testsvr-strehan-donotdelete1',
-            'database_name': 'basicdb',
+            'database_name': 'basicdb2',
             'weekly_retention': 'P1W',
             'monthly_retention': 'P1M',
             'yearly_retention': 'P2M',
             'week_of_year': 12,
             'encryption_protector' : 'https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1',
-            'keys' : '"https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1" "https://test123343strehan.vault.azure.net/keys/testk1/96151496df864e32aa62a3c1857b2931"',
+            'keys' : '"https://test123343strehan.vault.azure.net/keys/k2/66f51a6e70f04067af8eaf77805e88b1" "https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1" "https://test123343strehan.vault.azure.net/keys/testk1/96151496df864e32aa62a3c1857b2931"',
             'umi' : '/subscriptions/e1775f9f-a286-474d-b6f0-29c42ac74554/resourcegroups/ArmTemplate/providers/Microsoft.ManagedIdentity/userAssignedIdentities/shobhittest'
         })
 
@@ -1256,10 +1256,10 @@ class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
     def test_sql_db_geo_restore(
             self):
         self.kwargs.update({
-            'rg': 'Canary1',
+            'rg': 'sejagada-AlwaysEncrypted',
             'loc': 'eastus2euap',
-            'server_name': 'viditreproserver',
-            'database_name': 'vidittestdb'
+            'server_name': 'sejagada-ae-sqlserver-canary-donotdelete',
+            'database_name': 'sejagada-ae-sqldb-canary-donotdelete'
         })
 
         # test list geo backups for database
@@ -6819,6 +6819,6 @@ class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
         self.kwargs.update({
             'recoverable_db': recoverable_db['id']
         })
-        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db -r {recoverable_db}',
+        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db1 -r {recoverable_db}',
                 checks=[
-                    JMESPathCheck('name', "recovered_db")])
+                    JMESPathCheck('name', "recovered_db1")])
