@@ -411,8 +411,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
                                                             permission,
                                                             use_acr_audience=use_acr_audience)
         except CLIError as e:
-            if '429' in str(e):
-                raise CLIError("{}: {}".format(AAD_TOKEN_BASE_ERROR_MESSAGE, str(e)))
+            raise_tomanyrequests_error(str(e))
             logger.warning("%s: %s", AAD_TOKEN_BASE_ERROR_MESSAGE, str(e))
 
     # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
@@ -443,6 +442,11 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
             'Please specify both username and password in non-interactive mode.')
 
     return login_server, None, None
+
+
+def raise_tomanyrequests_error(error):
+    if '429' in error:
+        raise CLIError("{}: {}".format(AAD_TOKEN_BASE_ERROR_MESSAGE, error))
 
 
 def get_login_credentials(cmd,
