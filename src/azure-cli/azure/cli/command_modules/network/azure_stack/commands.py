@@ -34,12 +34,11 @@ from azure.cli.command_modules.network.azure_stack._format import (
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
     transform_vnet_create_output, transform_public_ip_create_output,
     transform_traffic_manager_create_output, transform_nic_create_output,
-    transform_nsg_create_output, transform_vnet_gateway_create_output,
+    transform_nsg_create_output,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
     transform_network_usage_list, transform_network_usage_table, transform_nsg_rule_table_output,
-    transform_vnet_table_output, transform_effective_route_table, transform_effective_nsg,
-    transform_vnet_gateway_routes_table, transform_vnet_gateway_bgp_peer_table)
+    transform_vnet_table_output, transform_effective_route_table, transform_effective_nsg)
 from azure.cli.command_modules.network.azure_stack._validators import (
     get_network_watcher_from_location,
     process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace, process_ag_settings_create_namespace, process_ag_http_settings_create_namespace,
@@ -52,7 +51,7 @@ from azure.cli.command_modules.network.azure_stack._validators import (
     process_nw_packet_capture_create_namespace, process_nw_test_connectivity_namespace, process_nw_topology_namespace,
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
     process_public_ip_create_namespace,
-    process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
+    process_vnet_create_namespace,
     process_vpn_connection_create_namespace,
     process_nw_config_diagnostic_namespace,
     process_appgw_waf_policy_update)
