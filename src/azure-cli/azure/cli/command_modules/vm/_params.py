@@ -1079,8 +1079,8 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('identity_role', options_list=['--role'],
                        help='Role name or id the system assigned identity will have. '
-                            'Please note that the default value "Contributor" will be removed in the future, '
-                            'so please specify "--role" and "--scope" at the same time '
+                            'Please note that the default value "Contributor" will be removed in the breaking change '
+                            'release of the fall, so please specify "--role" and "--scope" at the same time '
                             'when assigning a role to the managed identity')
 
     with self.argument_context('vm auto-shutdown') as c:

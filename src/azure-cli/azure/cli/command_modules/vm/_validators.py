@@ -1271,9 +1271,9 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
                 "usage error: please specify --scope when assigning a role to the managed identity")
         if not role_is_explicitly_specified and namespace.identity_scope:
             logger.warning(
-                "Please note that the default value of '--role' will be removed in the future. "
-                "So specify '--role' and '--scope' at the same time when assigning a role to the managed identity "
-                "to avoid breaking your automation script when the default value of '--role' is removed."
+                "Please note that the default value of '--role' will be removed in the breaking change release of the "
+                "fall. So specify '--role' and '--scope' at the same time when assigning a role to the managed "
+                "identity to avoid breaking your automation script when the default value of '--role' is removed."
             )
 
     # Assign managed identity
