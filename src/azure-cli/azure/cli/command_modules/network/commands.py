@@ -31,7 +31,7 @@ from azure.cli.command_modules.network._validators import (
     process_lb_create_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
-    process_nw_flow_log_set_namespace, process_nw_flow_log_show_namespace,
+    process_nw_flow_log_show_namespace,
     process_nw_packet_capture_create_namespace,
     process_public_ip_create_namespace,
     process_vpn_connection_create_namespace,
@@ -595,19 +595,15 @@ def load_command_table(self, _):
         g.command('stop', 'begin_stop')
         g.command('list', 'list')
 
-    with self.command_group('network watcher flow-log') as g:
-        g.custom_command('configure',
-                         'set_nsg_flow_logging',
-                         validator=process_nw_flow_log_set_namespace,
-                         deprecate_info=self.deprecate(redirect='network watcher flow-log create', hide=False))
-        g.custom_show_command('show', 'show_nw_flow_logging', validator=process_nw_flow_log_show_namespace)
+    # with self.command_group('network watcher flow-log') as g:
 
-    with self.command_group('network watcher flow-log'):
+    with self.command_group('network watcher flow-log') as g:
         from .operations.watcher import NwFlowLogCreate, NwFlowLogUpdate, NwFlowLogList, NwFlowLogDelete
         self.command_table["network watcher flow-log create"] = NwFlowLogCreate(loader=self)
         self.command_table["network watcher flow-log update"] = NwFlowLogUpdate(loader=self)
         self.command_table["network watcher flow-log list"] = NwFlowLogList(loader=self)
         self.command_table["network watcher flow-log delete"] = NwFlowLogDelete(loader=self)
+        g.custom_show_command('show', 'show_nw_flow_logging', validator=process_nw_flow_log_show_namespace)
 
     with self.command_group('network watcher troubleshooting'):
         from .operations.watcher import NwTroubleshootingStart, NwTroubleshootingShow

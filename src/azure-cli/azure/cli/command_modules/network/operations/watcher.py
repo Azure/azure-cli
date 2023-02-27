@@ -649,10 +649,9 @@ class NwFlowLogCreate(_NwFlowLogCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        update_network_watcher_from_location(self.ctx,
-                                             self.cli_ctx,
-                                             watcher_name='network_watcher_name',
-                                             rg_name='resource_group')
+        get_network_watcher_from_location(self,
+                                          watcher_name='network_watcher_name',
+                                          rg_name='resource_group')
 
         if not has_value(args.enabled):
             args.enabled = True
@@ -672,7 +671,7 @@ class NwFlowLogCreate(_NwFlowLogCreate):
 
         if has_value(args.retention):
             if args.retention > 0:
-                args.retention_policy = {"days": args.retention, "enabled": (args.retention > 0)}
+                args.retention_policy = {"days": args.retention, "enabled": True}
 
         if has_value(args.traffic_analytics_workspace):
 
@@ -768,10 +767,9 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        update_network_watcher_from_location(self.ctx,
-                                             self.cli_ctx,
-                                             watcher_name='network_watcher_name',
-                                             rg_name='resource_group')
+        get_network_watcher_from_resource(self,
+                                          watcher_name='network_watcher_name',
+                                          rg_name='resource_group')
         # args = self.ctx.args
         if sum(map(bool, [args.vnet, args.nic, args.nsg])) > 1:
             raise MutuallyExclusiveArgumentError("Please enter only one target resource ID.")
@@ -785,7 +783,7 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
             args.target_resource_id = args.nsg
 
         if args.retention > 0:
-            args.retention_policy = {"days": args.retention, "enabled": (args.retention > 0)}
+            args.retention_policy = {"days": args.retention, "enabled": True}
 
         if has_value(args.traffic_analytics_workspace):
             workspace = get_arm_resource_by_id(self.cli_ctx, args.traffic_analytics_workspace.to_serialized_data())
@@ -824,10 +822,9 @@ class NwFlowLogList(_NwFlowLogList):
         return args_schema
 
     def pre_operations(self):
-        update_network_watcher_from_location(self.ctx,
-                                             self.cli_ctx,
-                                             watcher_name='network_watcher_name',
-                                             rg_name='resource_group')
+        get_network_watcher_from_location(self,
+                                          watcher_name='network_watcher_name',
+                                          rg_name='resource_group')
 
 
 class NwFlowLogDelete(_NwFlowLogDelete):
@@ -851,10 +848,9 @@ class NwFlowLogDelete(_NwFlowLogDelete):
         return args_schema
 
     def pre_operations(self):
-        update_network_watcher_from_location(self.ctx,
-                                             self.cli_ctx,
-                                             watcher_name='network_watcher_name',
-                                             rg_name='resource_group')
+        get_network_watcher_from_location(self,
+                                          watcher_name='network_watcher_name',
+                                          rg_name='resource_group')
 
 
 class NwTroubleshootingStart(_NwTroubleshootingStart):
