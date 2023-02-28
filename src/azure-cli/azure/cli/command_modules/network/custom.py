@@ -3632,6 +3632,9 @@ class PrivateEndpointCreate(_PrivateEndpointCreate):
         if has_value(args.subnet):
             args.subnet_id = args.subnet
 
+        if has_value(args.edge_zone):
+            args.edge_zone_type = 'EdgeZone'
+
 
 class PrivateEndpointUpdate(_PrivateEndpointUpdate):
     @classmethod
@@ -3808,6 +3811,9 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
             args.lb_frontend_ip_configs,
             element_transformer=lambda _, lb_frontend_ip_config: {"id": lb_frontend_ip_config}
         )
+
+        if has_value(args.edge_zone):
+            args.edge_zone_type = 'EdgeZone'
 
 
 class PrivateLinkServiceUpdate(_PrivateLinkServiceUpdate):
