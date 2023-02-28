@@ -47,6 +47,7 @@ from ._formatters import format_what_if_operation_result
 from ._bicep import (
     run_bicep_command,
     is_bicep_file,
+    is_bicepparam_file_provided,
     ensure_bicep_installation,
     remove_bicep_installation,
     get_bicep_latest_release_tag,
@@ -939,6 +940,8 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
     on_error_deployment = None
     template_content = None
 
+    
+
     if query_string and not template_uri:
         raise IncorrectUsageError('please provide --template-uri if --query-string is specified')
 
@@ -957,11 +960,29 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
         template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['mainTemplate']
     else:
-        template_content = (
-            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
-            if is_bicep_file(template_file)
-            else read_file_content(template_file)
-        )
+
+        if is_bicepparam_file_provided(parameters):
+            if len(parameters) > 1: 
+                raise IncorrectUsageError("Can not use --parameters more than once when using a .bicepparam file")
+            bicepparam_file = parameters[0][0]
+            
+            if not is_bicep_file(template_file):
+                raise IncorrectUsageError("Only .bicep template are allowed with .bicepparam parameters")
+
+            build_bicepparam_output = run_bicep_command(cmd.cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"])
+            
+            build_bicepparam_output_json = json.loads(build_bicepparam_output)
+            template_content = build_bicepparam_output_json["templateJson"]
+
+            bicepparam_json_content = build_bicepparam_output_json["parametersJson"]
+
+        else:
+            template_content = (
+                run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
+                if is_bicep_file(template_file)
+                else read_file_content(template_file)
+            )
+
         template_obj = _remove_comments_from_json(template_content, file_path=template_file)
 
         if is_bicep_file(template_file):
@@ -975,9 +996,13 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
 
     template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
-    parameters = _process_parameters(template_param_defs, parameters) or {}
-    parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
-    parameters = json.loads(json.dumps(parameters))
+
+    if is_bicepparam_file_provided(parameters):
+        parameters = json.loads(bicepparam_json_content).get('parameters', {})
+    else:
+        parameters = _process_parameters(template_param_defs, parameters) or {}
+        parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
+        parameters = json.loads(json.dumps(parameters))
 
     properties = DeploymentProperties(template=template_content, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
