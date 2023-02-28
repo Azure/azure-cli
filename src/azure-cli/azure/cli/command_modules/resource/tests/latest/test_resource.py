@@ -11,6 +11,7 @@ import time
 from unittest import mock
 import unittest
 from pathlib import Path
+import logging
 
 from azure.cli.core.parser import IncorrectUsageError, InvalidArgumentValueError
 from azure.cli.testsdk.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
@@ -3979,6 +3980,27 @@ class BicepScenarioTest(ScenarioTest):
             self.greater_than('length(@)', 0)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_bicepparam')
+    def test_bicepparam_deployment_with_json_template(self):
+        self.kwargs.update({
+            'tf': "./main.json",
+            'params' : "./param.bicepparam"
+        })
+
+        with self.assertRaisesRegex(CLIError, "Only .bicep template are allowed with .bicepparam parameters"):
+            self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}')
+            
+
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_bicepparam')
+    def test_bicepparam_deployment_with_multiple_parameter_sources(self):
+        self.kwargs.update({
+            'tf': "./main.bicepparam",
+            'params1' : "./param1.bicepparam",
+            'params2' : "./param2.json",
+        })
+
+        with self.assertRaisesRegex(CLIError, "Can not use --parameters more than once when using a .bicepparam file"):
+            self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params1} --parameters {params2}')
 
 # Because don't want to record bicep cli binary
 class BicepBuildTest(LiveScenarioTest):
