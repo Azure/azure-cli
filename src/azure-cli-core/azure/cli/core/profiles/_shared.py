@@ -188,7 +188,9 @@ AZURE_API_PROFILES = {
             'tasks': '2019-06-01-preview',
             'task_runs': '2019-06-01-preview',
             'runs': '2019-06-01-preview',
-            'network_rule': '2021-08-01-preview'
+            'network_rule': '2021-08-01-preview',
+            'cache_rules': '2023-01-01-preview',
+            'credential_sets': '2023-01-01-preview'
         }),
         # The order does make things different.
         # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
