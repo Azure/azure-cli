@@ -381,3 +381,64 @@ class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
         self.cmd('network vnet-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert} --public-cert-data "{cert_path}"')
         output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway}').get_output_in_json()
         self.assertTrue('.exe' in output, 'Expected EXE file in output.\nActual: {}'.format(str(output)))
+
+
+class NetworkVNetScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_vnet_test')
+    def test_network_vnet(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'rt': 'Microsoft.Network/virtualNetworks'
+        })
+
+        self.cmd('network vnet create --resource-group {rg} --name {vnet} --subnet-name default', checks=[
+            self.check('newVNet.provisioningState', 'Succeeded'),
+            self.check('newVNet.addressSpace.addressPrefixes[0]', '10.0.0.0/16')
+        ])
+
+        self.cmd('network vnet list', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?type == '{rt}']) == length(@)", True)
+        ])
+        self.cmd('network vnet list --resource-group {rg}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?type == '{rt}']) == length(@)", True),
+        ])
+        self.cmd('network vnet show --resource-group {rg} --name {vnet}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{vnet}'),
+            self.check('type', '{rt}')
+        ])
+        self.kwargs['prefixes'] = '20.0.0.0/16 10.0.0.0/16'
+        self.cmd('network vnet update --resource-group {rg} --name {vnet} --address-prefixes {prefixes} --dns-servers 1.2.3.4', checks=[
+            self.check('length(addressSpace.addressPrefixes)', 2),
+            self.check('dhcpOptions.dnsServers[0]', '1.2.3.4')
+        ])
+        self.cmd('network vnet update -g {rg} -n {vnet} --dns-servers ""', checks=[
+            self.check('length(addressSpace.addressPrefixes)', 2),
+            self.check('dhcpOptions.dnsServers', [])
+        ])
+
+        # test generic update
+        self.cmd('network vnet update --resource-group {rg} --name {vnet} --set addressSpace.addressPrefixes[0]="20.0.0.0/24"',
+                 checks=self.check('addressSpace.addressPrefixes[0]', '20.0.0.0/24'))
+
+        self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix 20.0.0.0/24')
+        self.cmd('network vnet subnet list --resource-group {rg} --vnet-name {vnet}',
+                 checks=self.check('type(@)', 'array'))
+        self.cmd('network vnet subnet show --resource-group {rg} --vnet-name {vnet} --name {subnet}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{subnet}'),
+        ])
+
+        self.cmd('network vnet subnet delete --resource-group {rg} --vnet-name {vnet} --name {subnet}')
+        self.cmd('network vnet subnet list --resource-group {rg} --vnet-name {vnet}',
+                 checks=self.check("length([?name == '{subnet}'])", 0))
+
+        self.cmd('network vnet list --resource-group {rg}',
+                 checks=self.check("length([?name == '{vnet}'])", 1))
+        self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
+        self.cmd('network vnet list --resource-group {rg}', checks=self.is_empty())

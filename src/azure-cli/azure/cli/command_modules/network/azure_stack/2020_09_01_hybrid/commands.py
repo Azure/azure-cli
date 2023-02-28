@@ -96,4 +96,24 @@ def load_command_table(self, _):
     with self.command_group('network vnet-gateway ipsec-policy', operations_tmpl=operations_tmpl) as g:
         g.command('clear', 'clear_vnet_gateway_ipsec_policies', supports_no_wait=True)
 
+    # region VirtualNetwork
+    from .operations.vnet import VNetCreate, VNetUpdate, VNetSubnetCreate, VNetSubnetUpdate, VNetPeeringCreate
+    from .._format import transform_vnet_table_output
+    vnet = import_aaz_by_profile("network.vnet")
+    operations_tmpl = self.get_module_name_by_profile("operations.vnet#{}")
+    self.command_table['network vnet create'] = VNetCreate(loader=self)
+    self.command_table['network vnet update'] = VNetUpdate(loader=self)
+    self.command_table['network vnet list'] = vnet.List(loader=self, table_transformer=transform_vnet_table_output)
+    with self.command_group('network vnet', operations_tmpl=operations_tmpl) as g:
+        g.custom_command("list-available-ips", "list_available_ips", is_preview=True)
+
+    self.command_table['network vnet peering create'] = VNetPeeringCreate(loader=self)
+    with self.command_group('network vnet peering', operations_tmpl=operations_tmpl) as g:
+        g.custom_command("sync", "sync_vnet_peering")
+
+    self.command_table['network vnet subnet create'] = VNetSubnetCreate(loader=self)
+    self.command_table['network vnet subnet update'] = VNetSubnetUpdate(loader=self)
+    with self.command_group('network vnet subnet', operations_tmpl=operations_tmpl) as g:
+        g.custom_command("list-available-ips", "subnet_list_available_ips", is_preview=True)
+
     # endregion
