@@ -15,4 +15,5 @@ from ._delete import *
 from ._list import *
 from ._list_endpoint_services import *
 from ._show import *
+from ._update import *
 from ._wait import *
