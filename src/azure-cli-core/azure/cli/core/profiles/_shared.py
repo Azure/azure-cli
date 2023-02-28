@@ -96,7 +96,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_CONSUMPTION = ('azure.mgmt.consumption', None)
     MGMT_CONTAINERINSTANCE = ('azure.mgmt.containerinstance', None)
     MGMT_COSMOSDB = ('azure.mgmt.cosmosdb', None)
-    MGMT_DEPLOYMENTMANAGER = ('azure.mgmt.deploymentmanager', None)
     MGMT_DATALAKE_ANALYTICS = ('azure.mgmt.datalake.analytics', None)
     MGMT_DATALAKE_STORE = ('azure.mgmt.datalake.store', None)
     MGMT_DATAMIGRATION = ('azure.mgmt.datamigration', None)
@@ -179,9 +178,9 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
         ResourceType.MGMT_KEYVAULT: '2022-07-01',
-        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2020-04-01-preview', {
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
             'classic_administrators': '2015-06-01',
-            'role_definitions': '2018-01-01-preview',
+            'role_definitions': '2022-04-01',
             'provider_operations_metadata': '2018-01-01-preview'
         }),
         ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2022-02-01-preview', {
@@ -204,7 +203,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_FILESHARE: '2021-06-08',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
-        ResourceType.MGMT_SERVICEBUS: '2022-01-01-preview',
+        ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
             'action_groups': '2022-06-01',
@@ -247,7 +246,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2022-09-04',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-11-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2023-01-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
         }),
@@ -297,7 +296,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
-        ResourceType.MGMT_SERVICEBUS: '2022-01-01-preview',
+        ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-05-01',
@@ -344,7 +343,7 @@ AZURE_API_PROFILES = {
         # API versions
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
-        ResourceType.MGMT_SERVICEBUS: '2022-01-01-preview',
+        ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-03-22',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01'
     },
