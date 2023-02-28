@@ -6822,3 +6822,73 @@ class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
         self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db3 -r {recoverable_db}',
                 checks=[
                     JMESPathCheck('name', "recovered_db3")])
+
+
+class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    def test_sql_mi_zone_redundancy(self):
+
+        subscription_id = ManagedInstancePreparer.subscription_id
+        group = ManagedInstancePreparer.group
+        vnet_name = 'vnet-skrivokapic-multiaz-paasv2'
+        subnet_name = ManagedInstancePreparer.subnet_name
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
+        self.kwargs.update({
+            'rg': group,
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
+                                                             managed_instance_name_max_length),
+            'loc': 'southafricanorth',
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123SecretPassword',
+            'subnet': subnet,
+            'license_type': 'BasePrice',
+            'v_cores': 4,
+            'storage_size_in_gb': '128',
+            'edition': 'BusinessCritical',
+            'family': 'Gen5',
+            'collation': ManagedInstancePreparer.collation,
+            'proxy_override': "Proxy",
+            'zone_redundant': 'True'
+        })
+
+        # Create a zone - redundant managed instance
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                                    '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
+                                    '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
+                                    '--proxy-override {proxy_override} --zone-redundant {zone_redundant}',
+                                    checks=[
+                                        self.check('name', '{managed_instance_name}'),
+                                        self.check('resourceGroup', '{rg}'),
+                                        self.check('administratorLogin', '{username}'),
+                                        self.check('vCores', '{v_cores}'),
+                                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                                        self.check('licenseType', '{license_type}'),
+                                        self.check('sku.tier', '{edition}'),
+                                        self.check('sku.family', '{family}'),
+                                        self.check('sku.capacity', '{v_cores}'),
+                                        self.check('identity', None),
+                                        self.check('collation', '{collation}'),
+                                        self.check('proxyOverride', '{proxy_override}'),
+                                        self.check('zoneRedundant', '{zone_redundant}')])
+
+        # Get the managed instance and check zone redundancy
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['zoneRedundant'], True)
+
+        # Disable zone redundancy
+        self.kwargs.update({
+            'zone_redundant': 'False'
+        })
+
+        self.cmd('sql mi update -g {rg} -n {managed_instance_name} --zone-redundant {zone_redundant}',
+                 checks= [self.check('zoneRedundant', '{zone_redundant}')])
+
+        # Get the managed instance and check zone redundancy
+
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['zoneRedundant'], False)
+
+        # Delete the managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
