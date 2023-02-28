@@ -652,7 +652,7 @@ class NwFlowLogCreate(_NwFlowLogCreate):
         if has_value(args.subnet):
             subnet = args.subnet.to_serialized_data()
             if not is_valid_resource_id(subnet) and has_value(args.vnet):
-                args.subnet = args.vnet.to_serialized_data()+"/subnets/"+subnet
+                args.subnet = args.vnet.to_serialized_data() + "/subnets/" + subnet
 
         if not has_value(args.enabled):
             args.enabled = True
@@ -771,7 +771,7 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
         if has_value(args.subnet):
             subnet = args.subnet.to_serialized_data()
             if not is_valid_resource_id(subnet) and has_value(args.vnet):
-                args.subnet = args.vnet.to_serialized_data()+"/subnets/"+subnet
+                args.subnet = args.vnet.to_serialized_data() + "/subnets/" + subnet
 
         if sum(map(bool, [args.vnet, args.nic, args.nsg])) > 1:
             raise MutuallyExclusiveArgumentError("Please enter only one target resource ID.")
