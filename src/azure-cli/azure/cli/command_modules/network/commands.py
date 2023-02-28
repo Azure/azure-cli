@@ -32,8 +32,7 @@ from azure.cli.command_modules.network._validators import (
     process_lb_create_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
-    process_nw_flow_log_set_namespace, process_nw_flow_log_create_namespace, process_nw_flow_log_show_namespace,
-    process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
+    process_nw_flow_log_show_namespace,
     process_public_ip_create_namespace,
     process_vpn_connection_create_namespace,
     process_appgw_waf_policy_update, process_cross_region_lb_create_namespace)
@@ -68,11 +67,6 @@ def load_command_table(self, _):
     network_watcher_cm_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#ConnectionMonitorsOperations.{}',
         client_factory=cf_connection_monitor
-    )
-
-    network_watcher_flow_log_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#FlowLogsOperations.{}',
-        client_factory=cf_flow_logs,
     )
 
     network_watcher_flow_log_update_sdk = CliCommandType(
@@ -602,35 +596,18 @@ def load_command_table(self, _):
         self.command_table["network watcher packet-capture show-status"] = PacketCaptureShowStatus(loader=self)
         self.command_table["network watcher packet-capture stop"] = PacketCaptureStop(loader=self)
 
-    with self.command_group('network watcher flow-log', client_factory=cf_network_watcher, min_api='2016-09-01') as g:
-        g.custom_command('configure',
-                         'set_nsg_flow_logging',
-                         validator=process_nw_flow_log_set_namespace,
-                         deprecate_info=self.deprecate(redirect='network watcher flow-log create', hide=False))
+    with self.command_group('network watcher flow-log') as g:
+        from .operations.watcher import NwFlowLogCreate, NwFlowLogUpdate, NwFlowLogList, NwFlowLogDelete
+        self.command_table["network watcher flow-log create"] = NwFlowLogCreate(loader=self)
+        self.command_table["network watcher flow-log update"] = NwFlowLogUpdate(loader=self)
+        self.command_table["network watcher flow-log list"] = NwFlowLogList(loader=self)
+        self.command_table["network watcher flow-log delete"] = NwFlowLogDelete(loader=self)
         g.custom_show_command('show', 'show_nw_flow_logging', validator=process_nw_flow_log_show_namespace)
 
-    with self.command_group('network watcher flow-log',
-                            network_watcher_flow_log_sdk,
-                            client_factory=cf_flow_logs,
-                            min_api='2019-11-01',
-                            validator=get_network_watcher_from_location(remove=False)) as g:
-        g.custom_command('list', 'list_nw_flow_log', validator=get_network_watcher_from_location(remove=False))
-        g.custom_command('delete', 'delete_nw_flow_log', validator=get_network_watcher_from_location(remove=False))
-        g.custom_command('create',
-                         'create_nw_flow_log',
-                         client_factory=cf_flow_logs,
-                         validator=process_nw_flow_log_create_namespace)
-        g.generic_update_command('update',
-                                 getter_name='update_nw_flow_log_getter',
-                                 getter_type=network_watcher_flow_log_update_sdk,
-                                 setter_name='update_nw_flow_log_setter',
-                                 setter_type=network_watcher_flow_log_update_sdk,
-                                 custom_func_name='update_nw_flow_log',
-                                 validator=process_nw_flow_log_create_namespace)
-
-    with self.command_group('network watcher troubleshooting', client_factory=cf_network_watcher, min_api='2016-09-01') as g:
-        g.custom_command('start', 'start_nw_troubleshooting', supports_no_wait=True, validator=process_nw_troubleshooting_start_namespace)
-        g.custom_show_command('show', 'show_nw_troubleshooting_result', validator=process_nw_troubleshooting_show_namespace)
+    with self.command_group('network watcher troubleshooting') as g:
+        from .operations.watcher import NwTroubleshootingStart, NwTroubleshootingShow
+        self.command_table["network watcher troubleshooting start"] = NwTroubleshootingStart(loader=self)
+        self.command_table["network watcher troubleshooting show"] = NwTroubleshootingShow(loader=self)
     # endregion
 
     # region PublicIPAddresses
