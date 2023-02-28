@@ -28,7 +28,7 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_SERVICEBUS)
 
     sb_namespace_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.servicebus.Operation.Namespace_custom_file#{}',
+        operations_tmpl='azure.cli.command_modules.servicebus.Operation.NamespaceCustomFile#{}',
     )
 
     sb_queue_util = CliCommandType(
