@@ -1137,6 +1137,7 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
 
 
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
+    @live_only()
     def test_sql_db_long_term_retention(
             self):
         self.kwargs.update({
@@ -4842,6 +4843,7 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
 
 class SqlServerTrustGroupsScenarioTest(ScenarioTest):
 
+    @live_only()
     @AllowLargeResponse()
     @ManagedInstancePreparer(parameter_name="mi1")
     @ManagedInstancePreparer(parameter_name="mi2")
@@ -6226,6 +6228,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         return self.cmd('storage account keys list -g {} -n {} --query [0].value'
                         .format(resource_group, storage_account)).get_output_in_json()
 
+    @live_only()
     @ResourceGroupPreparer(location='eastus2')
     @SqlServerPreparer(location='eastus2')
     @StorageAccountPreparer(location='eastus2')
@@ -6734,6 +6737,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceRestoreCrossSubscriptionScenarioTest(ScenarioTest):
+    @live_only()
     @ManagedInstancePreparer()
     def test_sql_managed_deleted_cross_subscription_restore(self, mi, rg):
         from datetime import datetime, timezone, timedelta
@@ -6825,6 +6829,7 @@ class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
 
 
 class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
+    @live_only()
     @AllowLargeResponse()
     def test_sql_mi_zone_redundancy(self):
 
