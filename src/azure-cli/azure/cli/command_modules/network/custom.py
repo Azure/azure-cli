@@ -4635,9 +4635,6 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
     def pre_instance_update(self, instance):
         args = self.ctx.args
         instance = self.ctx.vars.instance
-        if args.make_primary.to_serialized_data():
-            for config in instance.properties.ip_configurations:
-                config.properties.primary = False
         args.asgs_obj = assign_aaz_list_arg(
             args.asgs_obj,
             args.application_security_groups,
@@ -4658,6 +4655,12 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             args.lb_inbound_nat_rules,
             element_transformer=lambda _, rule_id: {"id": rule_id}
         )
+        # all ip configurations must belong to the same asgs
+        is_primary = args.make_primary.to_serialized_data()
+        for config in instance.properties.ip_configurations:
+            if is_primary:
+                config.properties.primary = False
+            config.properties.application_security_groups = args.asgs_obj
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.subnet.id):
