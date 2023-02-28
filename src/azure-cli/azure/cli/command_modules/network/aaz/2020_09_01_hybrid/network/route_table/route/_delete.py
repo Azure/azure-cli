@@ -12,26 +12,28 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network route-table route show",
+    "network route-table route delete",
+    confirmation="Are you sure you want to perform this operation?",
 )
-class Show(AAZCommand):
-    """Get the details of a route in a route table.
+class Delete(AAZCommand):
+    """Delete a route from a route table.
 
-    :example: Get the details of a route in a route table.
-        az network route-table route show -g MyResourceGroup --route-table-name MyRouteTable -n MyRoute -o table
+    :example: Delete a route from a route table.
+        az network route-table route delete -g MyResourceGroup --route-table-name MyRouteTable -n MyRoute
     """
 
     _aaz_info = {
-        "version": "2015-06-15",
+        "version": "2018-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/routetables/{}/routes/{}", "2015-06-15"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/routetables/{}/routes/{}", "2018-11-01"],
         ]
     }
 
+    AZ_SUPPORT_NO_WAIT = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return self._output()
+        return self.build_lro_poller(self._execute_operations, None)
 
     _args_schema = None
 
@@ -63,7 +65,7 @@ class Show(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.RoutesGet(ctx=self.ctx)()
+        yield self.RoutesDelete(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -74,18 +76,39 @@ class Show(AAZCommand):
     def post_operations(self):
         pass
 
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-    class RoutesGet(AAZHttpOperation):
+    class RoutesDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
             if session.http_response.status_code in [200]:
-                return self.on_200(session)
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+            if session.http_response.status_code in [204]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_204,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
 
             return self.on_error(session.http_response)
 
@@ -98,7 +121,7 @@ class Show(AAZCommand):
 
         @property
         def method(self):
-            return "GET"
+            return "DELETE"
 
         @property
         def error_format(self):
@@ -130,66 +153,21 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2015-06-15",
+                    "api-version", "2018-11-01",
                     required=True,
                 ),
             }
             return parameters
 
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
         def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
-            )
+            pass
 
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.etag = AAZStrType()
-            _schema_on_200.id = AAZStrType()
-            _schema_on_200.name = AAZStrType()
-            _schema_on_200.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-
-            properties = cls._schema_on_200.properties
-            properties.address_prefix = AAZStrType(
-                serialized_name="addressPrefix",
-            )
-            properties.next_hop_ip_address = AAZStrType(
-                serialized_name="nextHopIpAddress",
-            )
-            properties.next_hop_type = AAZStrType(
-                serialized_name="nextHopType",
-                flags={"required": True},
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-            )
-
-            return cls._schema_on_200
+        def on_204(self, session):
+            pass
 
 
-class _ShowHelper:
-    """Helper class for Show"""
+class _DeleteHelper:
+    """Helper class for Delete"""
 
 
-__all__ = ["Show"]
+__all__ = ["Delete"]

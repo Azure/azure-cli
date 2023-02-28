@@ -12,19 +12,15 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network route-table route show",
+    "network route-table route wait",
 )
-class Show(AAZCommand):
-    """Get the details of a route in a route table.
-
-    :example: Get the details of a route in a route table.
-        az network route-table route show -g MyResourceGroup --route-table-name MyRouteTable -n MyRoute -o table
+class Wait(AAZWaitCommand):
+    """Place the CLI in a waiting state until a condition is met.
     """
 
     _aaz_info = {
-        "version": "2015-06-15",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/routetables/{}/routes/{}", "2015-06-15"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/routetables/{}/routes/{}", "2018-11-01"],
         ]
     }
 
@@ -75,7 +71,7 @@ class Show(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
         return result
 
     class RoutesGet(AAZHttpOperation):
@@ -130,7 +126,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2015-06-15",
+                    "api-version", "2018-11-01",
                     required=True,
                 ),
             }
@@ -188,8 +184,8 @@ class Show(AAZCommand):
             return cls._schema_on_200
 
 
-class _ShowHelper:
-    """Helper class for Show"""
+class _WaitHelper:
+    """Helper class for Wait"""
 
 
-__all__ = ["Show"]
+__all__ = ["Wait"]

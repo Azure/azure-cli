@@ -12,26 +12,25 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network route-table route show",
+    "network route-table route list",
 )
-class Show(AAZCommand):
-    """Get the details of a route in a route table.
+class List(AAZCommand):
+    """List routes in a route table.
 
-    :example: Get the details of a route in a route table.
-        az network route-table route show -g MyResourceGroup --route-table-name MyRouteTable -n MyRoute -o table
+    :example: List routes in a route table.
+        az network route-table route list -g MyResourceGroup --route-table-name MyRouteTable
     """
 
     _aaz_info = {
-        "version": "2015-06-15",
+        "version": "2018-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/routetables/{}/routes/{}", "2015-06-15"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/routetables/{}/routes", "2018-11-01"],
         ]
     }
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return self._output()
+        return self.build_paging(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -47,23 +46,16 @@ class Show(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            help="Route name.",
-            required=True,
-            id_part="child_name_1",
-        )
         _args_schema.route_table_name = AAZStrArg(
             options=["--route-table-name"],
             help="Route table name.",
             required=True,
-            id_part="name",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.RoutesGet(ctx=self.ctx)()
+        self.RoutesList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -75,10 +67,11 @@ class Show(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
+        return result, next_link
 
-    class RoutesGet(AAZHttpOperation):
+    class RoutesList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -92,7 +85,7 @@ class Show(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/routeTables/{routeTableName}/routes/{routeName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/routeTables/{routeTableName}/routes",
                 **self.url_parameters
             )
 
@@ -112,10 +105,6 @@ class Show(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "routeName", self.ctx.args.name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
                     "routeTableName", self.ctx.args.route_table_name,
                     required=True,
                 ),
@@ -130,7 +119,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2015-06-15",
+                    "api-version", "2018-11-01",
                     required=True,
                 ),
             }
@@ -163,14 +152,23 @@ class Show(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.etag = AAZStrType()
-            _schema_on_200.id = AAZStrType()
-            _schema_on_200.name = AAZStrType()
-            _schema_on_200.properties = AAZObjectType(
+            _schema_on_200.next_link = AAZStrType(
+                serialized_name="nextLink",
+            )
+            _schema_on_200.value = AAZListType()
+
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
+            _element.etag = AAZStrType()
+            _element.id = AAZStrType()
+            _element.name = AAZStrType()
+            _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
 
-            properties = cls._schema_on_200.properties
+            properties = cls._schema_on_200.value.Element.properties
             properties.address_prefix = AAZStrType(
                 serialized_name="addressPrefix",
             )
@@ -188,8 +186,8 @@ class Show(AAZCommand):
             return cls._schema_on_200
 
 
-class _ShowHelper:
-    """Helper class for Show"""
+class _ListHelper:
+    """Helper class for List"""
 
 
-__all__ = ["Show"]
+__all__ = ["List"]
