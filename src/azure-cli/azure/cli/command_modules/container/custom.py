@@ -35,7 +35,8 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequest, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupSubnetId,
-                                                 ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity)
+                                                 ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity,
+                                                 ContainerGroupPriority, ContainerGroupSku, ConfidentialComputeProperties)
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics_workspace,
@@ -111,7 +112,10 @@ def create_container(cmd,
                      identity_role='Contributor',
                      no_wait=False,
                      acr_identity=None,
-                     zone=None):
+                     zone=None,
+                     priority=None,
+                     sku=None,
+                     cce_policy=None):
     """Create a container group. """
     if file:
         return _create_update_from_file(cmd.cli_ctx, resource_group_name, name, location, file, no_wait)
@@ -206,6 +210,18 @@ def create_container(cmd,
     if zone:
         zones = [zone]
 
+    # Set up Priority of the Container Group.
+    if priority == "Spot":
+        priority = ContainerGroupPriority.Spot
+    elif priority == "Regular":
+        priority = ContainerGroupPriority.Regular
+
+    # Set up Container Group Sku.
+    confidential_compute_properties = None
+    if sku == "Confidential":
+        sku = ContainerGroupSku.Confidential
+        confidential_compute_properties = ConfidentialComputeProperties(cce_policy=cce_policy)
+
     container = Container(name=name,
                           image=image,
                           resources=container_resource_requirements,
@@ -226,7 +242,10 @@ def create_container(cmd,
                             subnet_ids=cgroup_subnet,
                             diagnostics=diagnostics,
                             tags=tags,
-                            zones=zones)
+                            zones=zones,
+                            priority=priority,
+                            sku=sku,
+                            confidential_compute_properties=confidential_compute_properties)
 
     container_group_client = cf_container_groups(cmd.cli_ctx)
 

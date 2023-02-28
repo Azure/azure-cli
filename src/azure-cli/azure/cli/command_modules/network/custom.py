@@ -14,11 +14,11 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_
 
 from azure.cli.core.aaz import has_value
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
-from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
+from azure.cli.core.commands import upsert_to_collection, get_property
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
 from azure.cli.core.util import CLIError, sdk_no_wait
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError, \
     UnrecognizedArgumentError, ResourceNotFoundError, ArgumentUsageError, MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, supported_api_version
 
@@ -39,6 +39,9 @@ from .aaz.latest.network.application_gateway.http_listener import Create as _HTT
 from .aaz.latest.network.application_gateway.http_settings import Create as _HTTPSettingsCreate, \
     Update as _HTTPSettingsUpdate
 from .aaz.latest.network.application_gateway.identity import Assign as _IdentityAssign
+from .aaz.latest.network.application_gateway.private_link import Add as _AGPrivateLinkAdd, \
+    Remove as _AGPrivateLinkRemove
+from .aaz.latest.network.application_gateway.private_link.ip_config import Add as _AGPrivateLinkIPConfigAdd
 from .aaz.latest.network.application_gateway.listener import Create as _ListenerCreate, Update as _ListenerUpdate
 from .aaz.latest.network.application_gateway.redirect_config import Create as _RedirectConfigCreate, \
     Update as _RedirectConfigUpdate
@@ -68,6 +71,10 @@ from .aaz.latest.network.express_route.peering import Create as _ExpressRoutePee
 from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCreate
 from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRoutePortIdentityAssign
 from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
+from .aaz.latest.network.nic import Create as _NICCreate, Update as _NICUpdate
+from .aaz.latest.network.nic.ip_config import Create as _NICIPConfigCreate, Update as _NICIPConfigUpdate
+from .aaz.latest.network.nic.ip_config.inbound_nat_rule import Add as _NICIPConfigNATAdd, \
+    Remove as _NICIPConfigNATRemove
 from .aaz.latest.network.nsg import Create as _NSGCreate
 from .aaz.latest.network.nsg.rule import Create as _NSGRuleCreate, Update as _NSGRuleUpdate
 from .aaz.latest.network.public_ip import Create as _PublicIPCreate, Update as _PublicIPUpdate
@@ -86,6 +93,19 @@ from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
 from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update as _VNetSubnetUpdate
 from .aaz.latest.network.vnet_gateway import Create as _VnetGatewayCreate, Update as _VnetGatewayUpdate, \
     DisconnectVpnConnections as _VnetGatewayVpnConnectionsDisconnect
+from .aaz.latest.network.vnet_gateway.aad import Assign as _VnetGatewayAadAssign
+from .aaz.latest.network.vnet_gateway.ipsec_policy import Add as _VnetGatewayIpsecPolicyAdd
+from .aaz.latest.network.vnet_gateway.nat_rule import Add as _VnetGatewayNatRuleAdd, List as _VnetGatewayNatRuleShow, \
+    Remove as _VnetGatewayNatRuleRemove
+from .aaz.latest.network.vnet_gateway.revoked_cert import Create as _VnetGatewayRevokedCertCreate
+from .aaz.latest.network.vnet_gateway.root_cert import Create as _VnetGatewayRootCertCreate
+from .aaz.latest.network.vnet_gateway.vpn_client import GenerateVpnProfile as _VpnProfileGenerate, \
+    Generate as _VpnClientPackageGenerate
+from .aaz.latest.network.vpn_connection import Update as _VpnConnectionUpdate, \
+    ShowDeviceConfigScript as _VpnConnectionDeviceConfigScriptShow
+from .aaz.latest.network.vpn_connection.ipsec_policy import Add as _VpnConnIpsecPolicyAdd
+from .aaz.latest.network.vpn_connection.packet_capture import Stop as _VpnConnPackageCaptureStop
+from .aaz.latest.network.vpn_connection.shared_key import Update as _VpnConnSharedKeyUpdate
 
 logger = get_logger(__name__)
 
@@ -697,172 +717,155 @@ def remove_ag_identity(cmd, resource_group_name, application_gateway_name, no_wa
     })
 
 
-def add_ag_private_link(cmd,
-                        resource_group_name,
-                        application_gateway_name,
-                        frontend_ip,
-                        private_link_name,
-                        private_link_subnet_name_or_id,
-                        private_link_subnet_prefix=None,
-                        private_link_primary=None,
-                        private_link_ip_address=None,
-                        no_wait=False):
-    (SubResource, IPAllocationMethod, Subnet,
-     ApplicationGatewayPrivateLinkConfiguration,
-     ApplicationGatewayPrivateLinkIpConfiguration) = cmd.get_models(
-         'SubResource', 'IPAllocationMethod', 'Subnet',
-         'ApplicationGatewayPrivateLinkConfiguration', 'ApplicationGatewayPrivateLinkIpConfiguration')
-
-    ncf = network_client_factory(cmd.cli_ctx)
-
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    private_link_config_id = resource_id(
-        subscription=get_subscription_id(cmd.cli_ctx),
-        resource_group=resource_group_name,
-        namespace='Microsoft.Network',
-        type='applicationGateways',
-        name=appgw.name,
-        child_type_1='privateLinkConfigurations',
-        child_name_1=private_link_name
-    )
-
-    if not any(fic for fic in appgw.frontend_ip_configurations if fic.name == frontend_ip):
-        raise CLIError("Frontend IP doesn't exist")
-
-    for fic in appgw.frontend_ip_configurations:
-        if fic.private_link_configuration and fic.private_link_configuration.id == private_link_config_id:
-            raise CLIError('Frontend IP already reference an existing Private Link')
-        if fic.name == frontend_ip:
-            break
-    else:
-        raise CLIError("Frontend IP doesn't exist")
-
-    if appgw.private_link_configurations is not None:
-        for pl in appgw.private_link_configurations:
-            if pl.name == private_link_name:
-                raise CLIError('Private Link name duplicates')
-
-    # get the virtual network of this application gateway
-    vnet_name = parse_resource_id(appgw.gateway_ip_configurations[0].subnet.id)['name']
-    vnet = ncf.virtual_networks.get(resource_group_name, vnet_name)
-
-    # prepare the subnet for new private link
-    for subnet in vnet.subnets:
-        if subnet.name == private_link_subnet_name_or_id:
-            raise CLIError('Subnet name duplicates. In order to use existing subnet, please enter subnet ID.')
-        if subnet.address_prefix == private_link_subnet_prefix:
-            raise CLIError('Subnet prefix duplicates')
-        if subnet.address_prefixes and private_link_subnet_prefix in subnet.address_prefixes:
-            raise CLIError('Subnet prefix duplicates')
-
-    if is_valid_resource_id(private_link_subnet_name_or_id):
-        private_link_subnet_id = private_link_subnet_name_or_id
-    else:
-        private_link_subnet = Subnet(name=private_link_subnet_name_or_id,
-                                     address_prefix=private_link_subnet_prefix,
-                                     private_link_service_network_policies='Disabled')
-        private_link_subnet_id = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=resource_group_name,
-            namespace='Microsoft.Network',
-            type='virtualNetworks',
-            name=vnet_name,
-            child_type_1='subnets',
-            child_name_1=private_link_subnet_name_or_id
+class AGPrivateLinkAdd(_AGPrivateLinkAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZBoolArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.frontend_ip = AAZStrArg(
+            options=["--frontend-ip"],
+            help="Frontend IP that the private link will associate to.",
+            required=True,
         )
-        vnet.subnets.append(private_link_subnet)
-        ncf.virtual_networks.begin_create_or_update(resource_group_name, vnet_name, vnet)
+        args_schema.subnet = AAZStrArg(
+            options=["--subnet"],
+            help="Name or ID of a subnet within the same vnet of an application gateway.",
+            arg_group="Properties",
+            required=True,
+        )
+        args_schema.subnet_prefix = AAZStrArg(
+            options=["--subnet-prefix"],
+            help="CIDR prefix to use when creating a new subnet.",
+            arg_group="Properties",
+        )
+        args_schema.ip_address = AAZStrArg(
+            options=["--ip-address"],
+            help="Static private IP address of a subnet for private link. If omitting, a dynamic one will be created.",
+            arg_group="Properties",
+        )
+        args_schema.primary = AAZBoolArg(
+            options=["--primary"],
+            help="Whether the IP configuration is primary or not.",
+            arg_group="Properties",
+        )
+        args_schema.ip_configurations._registered = False
+        return args_schema
 
-    private_link_ip_allocation_method = IPAllocationMethod.static.value if private_link_ip_address \
-        else IPAllocationMethod.dynamic.value
-    private_link_ip_config = ApplicationGatewayPrivateLinkIpConfiguration(
-        name='PrivateLinkDefaultIPConfiguration',
-        private_ip_address=private_link_ip_address,
-        private_ip_allocation_method=private_link_ip_allocation_method,
-        subnet=SubResource(id=private_link_subnet_id),
-        primary=private_link_primary
-    )
-    private_link_config = ApplicationGatewayPrivateLinkConfiguration(
-        name=private_link_name,
-        ip_configurations=[private_link_ip_config]
-    )
+    def pre_instance_create(self):
+        args = self.ctx.args
+        instance = self.ctx.vars.instance
+        if not any(fic for fic in instance.properties.frontend_ip_configurations if fic.name == args.frontend_ip):
+            err_msg = "Frontend IP doesn't exist."
+            raise ValidationError(err_msg)
 
-    # associate the private link with the frontend IP configuration
-    for fic in appgw.frontend_ip_configurations:
-        if fic.name == frontend_ip:
-            fic.private_link_configuration = SubResource(id=private_link_config_id)
+        private_link_id = resource_id(
+            subscription=self.ctx.subscription_id,
+            resource_group=args.resource_group,
+            namespace="Microsoft.Network",
+            type="applicationGateways",
+            name=args.gateway_name,
+            child_type_1="privateLinkConfigurations",
+            child_name_1=args.name
+        )
+        for fic in instance.properties.frontend_ip_configurations:
+            if has_value(fic.properties.private_link_configuration) \
+                    and fic.properties.private_link_configuration.id == private_link_id:
+                err_msg = "Frontend IP already reference an existing private link."
+                raise ValidationError(err_msg)
+        # associate private link with frontend IP configuration
+        for fic in instance.properties.frontend_ip_configurations:
+            if fic.name == args.frontend_ip:
+                fic.properties.private_link_configuration = {"id": private_link_id}
 
-    if appgw.private_link_configurations is None:
-        appgw.private_link_configurations = []
-    appgw.private_link_configurations.append(private_link_config)
+        if has_value(instance.properties.private_link_configurations):
+            for plc in instance.properties.private_link_configurations:
+                if plc.name == args.name:
+                    err_msg = "Private link name duplicates."
+                    raise ValidationError(err_msg)
+        # prepare subnet for new private link
+        rid = instance.properties.gateway_ip_configurations[0].properties.subnet.id.to_serialized_data()
+        metadata = parse_resource_id(rid)
+        if not is_valid_resource_id(args.subnet.to_serialized_data()):
+            args.subnet = resource_id(
+                subscription=metadata["subscription"],
+                resource_group=metadata["resource_group"],
+                namespace="Microsoft.Network",
+                type="virtualNetworks",
+                name=metadata["name"],
+                child_type_1="subnets",
+                child_name_1=args.subnet
+            )
 
-    return sdk_no_wait(no_wait,
-                       ncf.application_gateways.begin_create_or_update,
-                       resource_group_name,
-                       application_gateway_name, appgw)
+        from .aaz.latest.network.vnet import Show
+        vnet = Show(cli_ctx=self.cli_ctx)(command_args={
+            "name": metadata["name"],
+            "resource_group": metadata["resource_group"]
+        })
+        for subnet in vnet["subnets"]:
+            if subnet["id"] == args.subnet:
+                break
+        else:
+            subnet_name = parse_resource_id(args.subnet.to_serialized_data())["child_name_1"]
+
+            from azure.cli.core.commands import LongRunningOperation
+            poller = VNetSubnetCreate(cli_ctx=self.cli_ctx)(command_args={
+                "name": subnet_name,
+                "vnet_name": metadata["name"],
+                "resource_group": metadata["resource_group"],
+                "address_prefix": args.subnet_prefix,
+                "private_link_service_network_policies": "Disabled"
+            })
+            LongRunningOperation(self.cli_ctx)(poller)
+
+        args.ip_configurations = [{
+            "name": "PrivateLinkDefaultIPConfiguration",
+            "private_ip_address": args.ip_address,
+            "private_ip_allocation_method": "Static" if has_value(args.ip_address) else "Dynamic",
+            "subnet": {"id": args.subnet},
+            "primary": args.primary
+        }]
 
 
-def show_ag_private_link(cmd,
-                         resource_group_name,
-                         application_gateway_name,
-                         private_link_name):
-    ncf = network_client_factory(cmd.cli_ctx)
+class AGPrivateLinkRemove(_AGPrivateLinkRemove):
+    def pre_instance_delete(self):
+        args = self.ctx.args
+        instance = self.ctx.vars.instance
+        for plc in instance.properties.private_link_configurations:
+            if plc.name == args.name:
+                to_be_removed = plc
+                break
+        else:
+            err_msg = "Private link doesn't exist."
+            raise ValidationError(err_msg)
 
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    target_private_link = None
-    for pl in appgw.private_link_configurations:
-        if pl.name == private_link_name:
-            target_private_link = pl
-            break
-    else:
-        raise CLIError("Priavte Link doesn't exist")
-
-    return target_private_link
-
-
-def list_ag_private_link(cmd,
-                         resource_group_name,
-                         application_gateway_name):
-    ncf = network_client_factory(cmd.cli_ctx)
-
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    return appgw.private_link_configurations
+        for fic in instance.properties.frontend_ip_configurations:
+            if has_value(fic.properties.private_link_configuration) \
+                    and fic.properties.private_link_configuration.id == to_be_removed.id:
+                fic.properties.private_link_configuration = None
 
 
-def remove_ag_private_link(cmd,
-                           resource_group_name,
-                           application_gateway_name,
-                           private_link_name,
-                           no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
+class AGPrivateLinkIPConfigAdd(_AGPrivateLinkIPConfigAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.private_ip_allocation_method._registered = False
+        args_schema.subnet._registered = False
+        return args_schema
 
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+    def pre_instance_create(self):
+        args = self.ctx.args
+        instance = self.ctx.vars.instance
+        for plc in instance.properties.private_link_configurations:
+            if plc.name == args.private_link:
+                target_private_link = plc
+                break
+        else:
+            err_msg = "Private link doesn't exist."
+            raise ValidationError(err_msg)
 
-    removed_private_link = None
-
-    for pl in appgw.private_link_configurations:
-        if pl.name == private_link_name:
-            removed_private_link = pl
-            break
-    else:
-        raise CLIError("Priavte Link doesn't exist")
-
-    for fic in appgw.frontend_ip_configurations:
-        if fic.private_link_configuration and fic.private_link_configuration.id == removed_private_link.id:
-            fic.private_link_configuration = None
-
-    # the left vnet have to delete manually
-    # rs = parse_resource_id(removed_private_link.ip_configurations[0].subnet.id)
-    # vnet_resource_group, vnet_name, subnet = rs['resource_group'], rs['name'], rs['child_name_1']
-    # ncf.subnets.delete(vnet_resource_group, vnet_name, subnet)
-
-    appgw.private_link_configurations.remove(removed_private_link)
-    return sdk_no_wait(no_wait,
-                       ncf.application_gateways.begin_create_or_update,
-                       resource_group_name,
-                       application_gateway_name,
-                       appgw)
+        args.private_ip_allocation_method = "Static" if has_value(args.ip_address) else "Dynamic"
+        subnet_id = target_private_link.properties.ip_configurations[0].properties.subnet.id
+        args.subnet.id = subnet_id
 
 
 # region application-gateway trusted-client-certificates
@@ -1048,132 +1051,6 @@ class SSLProfileRemove(_SSLProfileRemove):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 # endregion
-
-
-def add_ag_private_link_ip(cmd,
-                           resource_group_name,
-                           application_gateway_name,
-                           private_link_name,
-                           private_link_ip_name,
-                           private_link_primary=False,
-                           private_link_ip_address=None,
-                           no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    target_private_link = None
-    for pl in appgw.private_link_configurations:
-        if pl.name == private_link_name:
-            target_private_link = pl
-            break
-    else:
-        raise CLIError("Priavte Link doesn't exist")
-
-    (SubResource, IPAllocationMethod,
-     ApplicationGatewayPrivateLinkIpConfiguration) = \
-        cmd.get_models('SubResource', 'IPAllocationMethod',
-                       'ApplicationGatewayPrivateLinkIpConfiguration')
-
-    private_link_subnet_id = target_private_link.ip_configurations[0].subnet.id
-
-    private_link_ip_allocation_method = IPAllocationMethod.static.value if private_link_ip_address \
-        else IPAllocationMethod.dynamic.value
-    private_link_ip_config = ApplicationGatewayPrivateLinkIpConfiguration(
-        name=private_link_ip_name,
-        private_ip_address=private_link_ip_address,
-        private_ip_allocation_method=private_link_ip_allocation_method,
-        subnet=SubResource(id=private_link_subnet_id),
-        primary=private_link_primary
-    )
-
-    target_private_link.ip_configurations.append(private_link_ip_config)
-
-    return sdk_no_wait(no_wait,
-                       ncf.application_gateways.begin_create_or_update,
-                       resource_group_name,
-                       application_gateway_name,
-                       appgw)
-
-
-def show_ag_private_link_ip(cmd,
-                            resource_group_name,
-                            application_gateway_name,
-                            private_link_name,
-                            private_link_ip_name):
-    ncf = network_client_factory(cmd.cli_ctx)
-
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    target_private_link = None
-    for pl in appgw.private_link_configurations:
-        if pl.name == private_link_name:
-            target_private_link = pl
-            break
-    else:
-        raise CLIError("Priavte Link doesn't exist")
-
-    target_private_link_ip_config = None
-    for pic in target_private_link.ip_configurations:
-        if pic.name == private_link_ip_name:
-            target_private_link_ip_config = pic
-            break
-    else:
-        raise CLIError("IP Configuration doesn't exist")
-
-    return target_private_link_ip_config
-
-
-def list_ag_private_link_ip(cmd,
-                            resource_group_name,
-                            application_gateway_name,
-                            private_link_name):
-    ncf = network_client_factory(cmd.cli_ctx)
-
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    target_private_link = None
-    for pl in appgw.private_link_configurations:
-        if pl.name == private_link_name:
-            target_private_link = pl
-            break
-    else:
-        raise CLIError("Priavte Link doesn't exist")
-
-    return target_private_link.ip_configurations
-
-
-def remove_ag_private_link_ip(cmd,
-                              resource_group_name,
-                              application_gateway_name,
-                              private_link_name,
-                              private_link_ip_name,
-                              no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx)
-
-    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-
-    target_private_link = None
-    for pl in appgw.private_link_configurations:
-        if pl.name == private_link_name:
-            target_private_link = pl
-            break
-    else:
-        raise CLIError("Priavte Link doesn't exist")
-
-    updated_ip_configurations = target_private_link.ip_configurations
-    for pic in target_private_link.ip_configurations:
-        if pic.name == private_link_ip_name:
-            updated_ip_configurations.remove(pic)
-            break
-    else:
-        raise CLIError("IP Configuration doesn't exist")
-
-    return sdk_no_wait(no_wait,
-                       ncf.application_gateways.begin_create_or_update,
-                       resource_group_name,
-                       application_gateway_name,
-                       appgw)
 
 
 class HTTPSettingsCreate(_HTTPSettingsCreate):
@@ -1555,12 +1432,19 @@ class RuleCreate(_RuleCreate):
     def pre_instance_create(self):
         args = self.ctx.args
         instance = self.ctx.vars.instance
-        if not has_value(args.address_pool):
+        if not has_value(args.address_pool) and not has_value(args.redirect_config):
             address_pools = instance.properties.backend_address_pools
             if len(address_pools) == 1:
                 args.address_pool = instance.properties.backend_address_pools[0].id
             elif len(address_pools) > 1:
                 err_msg = "Multiple backend address pools found. Specify --address-pool explicitly."
+                raise ArgumentUsageError(err_msg)
+        if not has_value(args.http_settings) and not has_value(args.redirect_config):
+            settings = instance.properties.backend_http_settings_collection
+            if len(settings) == 1:
+                args.http_settings = instance.properties.backend_http_settings_collection[0].id
+            elif len(settings) > 1:
+                err_msg = "Multiple backend settings found. Specify --http-settings explicitly."
                 raise ArgumentUsageError(err_msg)
         if not has_value(args.http_listener):
             listeners = instance.properties.http_listeners
@@ -1568,13 +1452,6 @@ class RuleCreate(_RuleCreate):
                 args.http_listener = instance.properties.http_listeners[0].id
             elif len(listeners) > 1:
                 err_msg = "Multiple HTTP listeners found. Specify --http-listener explicitly."
-                raise ArgumentUsageError(err_msg)
-        if not has_value(args.http_settings):
-            settings = instance.properties.backend_http_settings_collection
-            if len(settings) == 1:
-                args.http_settings = instance.properties.backend_http_settings_collection[0].id
-            elif len(settings) > 1:
-                err_msg = "Multiple backend settings found. Specify --http-settings explicitly."
                 raise ArgumentUsageError(err_msg)
 
     def _output(self, *args, **kwargs):
@@ -4213,192 +4090,6 @@ def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
     return subnet
 
 
-# pylint: disable=too-many-branches
-def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
-                                   vnet=None, backend_addresses=None, backend_addresses_config_file=None,
-                                   admin_state=None, drain_period=None):
-    if backend_addresses and backend_addresses_config_file:
-        raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')
-    if backend_addresses_config_file:
-        if not isinstance(backend_addresses_config_file, list):
-            raise CLIError('Config file must be a list. Please see example as a reference.')
-        for addr in backend_addresses_config_file:
-            if not isinstance(addr, dict):
-                raise CLIError('Each address in config file must be a dictionary. Please see example as a reference.')
-    ncf = network_client_factory(cmd.cli_ctx)
-    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
-    (BackendAddressPool,
-     LoadBalancerBackendAddress,
-     Subnet,
-     VirtualNetwork) = cmd.get_models('BackendAddressPool',
-                                      'LoadBalancerBackendAddress',
-                                      'Subnet',
-                                      'VirtualNetwork')
-    # Before 2020-03-01, service doesn't support the other rest method.
-    # We have to use old one to keep backward compatibility.
-    # Same for basic sku. service refuses that basic sku lb call the other rest method.
-    if cmd.supported_api_version(max_api='2020-03-01') or lb.sku.name.lower() == 'basic':
-        new_pool = BackendAddressPool(name=backend_address_pool_name)
-        upsert_to_collection(lb, 'backend_address_pools', new_pool, 'name')
-        poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
-        return get_property(poller.result().backend_address_pools, backend_address_pool_name)
-
-    addresses_pool = []
-    if backend_addresses:
-        addresses_pool.extend(backend_addresses)
-    if backend_addresses_config_file:
-        addresses_pool.extend(backend_addresses_config_file)
-    for addr in addresses_pool:
-        if 'virtual_network' not in addr and vnet:
-            addr['virtual_network'] = vnet
-
-    if cmd.supported_api_version(min_api='2020-11-01'):  # pylint: disable=too-many-nested-blocks
-        try:
-            if addresses_pool:
-                new_addresses = []
-                for addr in addresses_pool:
-                    # vnet      | subnet        |  status
-                    # name/id   | name/id/null  |    ok
-                    # null      | id            |    ok
-                    if 'virtual_network' in addr:
-                        if admin_state is not None:
-                            address = LoadBalancerBackendAddress(name=addr['name'],
-                                                                 virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
-                                                                 subnet=Subnet(id=_process_subnet_name_and_id(addr['subnet'], addr['virtual_network'], cmd, resource_group_name)) if 'subnet' in addr else None,
-                                                                 ip_address=addr['ip_address'],
-                                                                 admin_state=admin_state)
-                        else:
-                            address = LoadBalancerBackendAddress(name=addr['name'],
-                                                                 virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
-                                                                 subnet=Subnet(id=_process_subnet_name_and_id(addr['subnet'], addr['virtual_network'], cmd, resource_group_name)) if 'subnet' in addr else None,
-                                                                 ip_address=addr['ip_address'])
-                    elif 'subnet' in addr and is_valid_resource_id(addr['subnet']):
-                        if admin_state is not None:
-                            address = LoadBalancerBackendAddress(name=addr['name'],
-                                                                 subnet=Subnet(id=addr['subnet']),
-                                                                 ip_address=addr['ip_address'],
-                                                                 admin_state=admin_state)
-                        else:
-                            address = LoadBalancerBackendAddress(name=addr['name'],
-                                                                 subnet=Subnet(id=addr['subnet']),
-                                                                 ip_address=addr['ip_address'])
-                    else:
-                        raise KeyError
-
-                    new_addresses.append(address)
-            else:
-                new_addresses = None
-        except KeyError:
-            raise UnrecognizedArgumentError('Each backend address must have name, ip-address, (vnet name and subnet '
-                                            'name | subnet id) information.')
-    else:
-        try:
-            new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
-                                                        virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
-                                                        ip_address=addr['ip_address']) for addr in addresses_pool] if addresses_pool else None
-        except KeyError:
-            raise UnrecognizedArgumentError('Each backend address must have name, vnet and ip-address information.')
-
-    if drain_period is not None:
-        new_pool = BackendAddressPool(name=backend_address_pool_name,
-                                      load_balancer_backend_addresses=new_addresses,
-                                      drain_period_in_seconds=drain_period)
-    else:
-        new_pool = BackendAddressPool(name=backend_address_pool_name,
-                                      load_balancer_backend_addresses=new_addresses)
-
-    # when sku is 'gateway', 'tunnelInterfaces' can't be None. Otherwise, service will respond error
-    if cmd.supported_api_version(min_api='2021-02-01') and lb.sku.name.lower() == 'gateway':
-        GatewayLoadBalancerTunnelInterface = cmd.get_models('GatewayLoadBalancerTunnelInterface')
-        new_pool.tunnel_interfaces = [
-            GatewayLoadBalancerTunnelInterface(type='Internal', protocol='VXLAN', identifier=900)]
-    return ncf.load_balancer_backend_address_pools.begin_create_or_update(resource_group_name,
-                                                                          load_balancer_name,
-                                                                          backend_address_pool_name,
-                                                                          new_pool)
-
-
-def set_lb_backend_address_pool(cmd, instance, resource_group_name, vnet=None, backend_addresses=None,
-                                backend_addresses_config_file=None, admin_state=None, drain_period=None):
-
-    if backend_addresses and backend_addresses_config_file:
-        raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')
-    if backend_addresses_config_file:
-        if not isinstance(backend_addresses_config_file, list):
-            raise CLIError('Config file must be a list. Please see example as a reference.')
-        for addr in backend_addresses_config_file:
-            if not isinstance(addr, dict):
-                raise CLIError('Each address in config file must be a dictionary. Please see example as a reference.')
-
-    (LoadBalancerBackendAddress,
-     Subnet,
-     VirtualNetwork) = cmd.get_models('LoadBalancerBackendAddress',
-                                      'Subnet',
-                                      'VirtualNetwork')
-
-    addresses_pool = []
-    if backend_addresses:
-        addresses_pool.extend(backend_addresses)
-    if backend_addresses_config_file:
-        addresses_pool.extend(backend_addresses_config_file)
-    for addr in addresses_pool:
-        if 'virtual_network' not in addr and vnet:
-            addr['virtual_network'] = vnet
-
-    if cmd.supported_api_version(min_api='2020-11-01'):  # pylint: disable=too-many-nested-blocks
-        try:
-            if addresses_pool:
-                new_addresses = []
-                for addr in addresses_pool:
-                    # vnet      | subnet        |  status
-                    # name/id   | name/id/null  |    ok
-                    # null      | id            |    ok
-                    if 'virtual_network' in addr:
-                        if admin_state is not None:
-                            address = LoadBalancerBackendAddress(name=addr['name'], virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
-                                                                 subnet=Subnet(id=_process_subnet_name_and_id(addr['subnet'], addr['virtual_network'], cmd, resource_group_name)) if 'subnet' in addr else None,
-                                                                 ip_address=addr['ip_address'],
-                                                                 admin_state=admin_state)
-                        else:
-                            address = LoadBalancerBackendAddress(name=addr['name'],
-                                                                 virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
-                                                                 subnet=Subnet(id=_process_subnet_name_and_id(addr['subnet'], addr['virtual_network'], cmd, resource_group_name)) if 'subnet' in addr else None,
-                                                                 ip_address=addr['ip_address'])
-                    elif 'subnet' in addr and is_valid_resource_id(addr['subnet']):
-                        if admin_state is not None:
-                            address = LoadBalancerBackendAddress(name=addr['name'],
-                                                                 subnet=Subnet(id=addr['subnet']),
-                                                                 ip_address=addr['ip_address'],
-                                                                 admin_state=admin_state)
-                        else:
-                            address = LoadBalancerBackendAddress(name=addr['name'],
-                                                                 subnet=Subnet(id=addr['subnet']),
-                                                                 ip_address=addr['ip_address'])
-                    else:
-                        raise KeyError
-
-                    new_addresses.append(address)
-            else:
-                new_addresses = None
-        except KeyError:
-            raise UnrecognizedArgumentError('Each backend address must have name, ip-address, (vnet name and subnet '
-                                            'name | subnet id) information.')
-    else:
-        try:
-            new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
-                                                        virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
-                                                        ip_address=addr['ip_address']) for addr in addresses_pool] if addresses_pool else None
-        except KeyError:
-            raise UnrecognizedArgumentError('Each backend address must have name, vnet and ip-address information.')
-
-    if drain_period is not None:
-        instance.drain_period_in_seconds = drain_period
-    if new_addresses:
-        instance.load_balancer_backend_addresses = new_addresses
-
-    return instance
-
-
 def delete_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name):
     from azure.cli.core.commands import LongRunningOperation
     ncf = network_client_factory(cmd.cli_ctx)
@@ -4495,532 +4186,193 @@ def create_cross_region_load_balancer(cmd, load_balancer_name, resource_group_na
 # endregion
 
 
-def add_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
-                                        address_name, ip_address, vnet=None, subnet=None, admin_state=None):
-    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
-    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
-    (LoadBalancerBackendAddress,
-     Subnet,
-     VirtualNetwork) = cmd.get_models('LoadBalancerBackendAddress',
-                                      'Subnet',
-                                      'VirtualNetwork')
-    if cmd.supported_api_version(min_api='2020-11-01'):
-        if vnet:
-            if admin_state is not None:
-                new_address = LoadBalancerBackendAddress(name=address_name,
-                                                         subnet=Subnet(id=_process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name)) if subnet else None,
-                                                         virtual_network=VirtualNetwork(id=vnet),
-                                                         ip_address=ip_address if ip_address else None,
-                                                         admin_state=admin_state)
-            else:
-                new_address = LoadBalancerBackendAddress(name=address_name,
-                                                         subnet=Subnet(id=_process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name)) if subnet else None,
-                                                         virtual_network=VirtualNetwork(id=vnet),
-                                                         ip_address=ip_address if ip_address else None)
-        elif is_valid_resource_id(subnet):
-            if admin_state is not None:
-                new_address = LoadBalancerBackendAddress(name=address_name,
-                                                         subnet=Subnet(id=subnet),
-                                                         ip_address=ip_address if ip_address else None,
-                                                         admin_state=admin_state)
-            else:
-                new_address = LoadBalancerBackendAddress(name=address_name,
-                                                         subnet=Subnet(id=subnet),
-                                                         ip_address=ip_address if ip_address else None)
-        else:
-            raise UnrecognizedArgumentError('Each backend address must have name, ip-address, (vnet name and subnet name | subnet id) information.')
-
-    else:
-        new_address = LoadBalancerBackendAddress(name=address_name,
-                                                 virtual_network=VirtualNetwork(id=vnet) if vnet else None,
-                                                 ip_address=ip_address if ip_address else None)
-    if address_pool.load_balancer_backend_addresses is None:
-        address_pool.load_balancer_backend_addresses = []
-    address_pool.load_balancer_backend_addresses.append(new_address)
-    return client.begin_create_or_update(resource_group_name, load_balancer_name,
-                                         backend_address_pool_name, address_pool)
-
-
-def remove_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name,
-                                           backend_address_pool_name, address_name):
-    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
-    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
-    if address_pool.load_balancer_backend_addresses is None:
-        address_pool.load_balancer_backend_addresses = []
-    lb_addresses = [addr for addr in address_pool.load_balancer_backend_addresses if addr.name != address_name]
-    address_pool.load_balancer_backend_addresses = lb_addresses
-    return client.begin_create_or_update(resource_group_name, load_balancer_name,
-                                         backend_address_pool_name, address_pool)
-
-
-def list_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name,
-                                         backend_address_pool_name):
-    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
-    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
-    return address_pool.load_balancer_backend_addresses
-
-
-def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol, port,
-                    path=None, interval=None, threshold=None, probe_threshold=None):
-    if probe_threshold is not None:
-        logger.warning(
-            "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
-            "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
-            "by not specifying the value of the property."
-        )
-
-    from .aaz.latest.network.lb import Show
-    lb = Show(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": load_balancer_name,
-        "resource_group": resource_group_name,
-    })
-
-    probes = []
-    for item in lb["probes"]:
-        probe = dict()
-        probe["name"] = item.pop("name", None)
-        if probe["name"] == item_name:
-            logger.warning("Item '%s' already exists. Replacing with new values.", item_name)
-            continue
-
-        probe["interval_in_seconds"] = item.pop("intervalInSeconds", None)
-        probe["number_of_probes"] = item.pop("numberOfProbes", None)
-        probe["port"] = item.pop("port", None)
-        probe["probe_threshold"] = item.pop("probeThreshold", None)
-        probe["protocol"] = item.pop("protocol", None)
-        probe["request_path"] = item.pop("requestPath", None)
-        probes.append(probe)
-
-    probes.append({
-        "name": item_name,
-        "interval_in_seconds": interval,
-        "number_of_probes": threshold,
-        "port": port,
-        "probe_threshold": probe_threshold,
-        "protocol": protocol,
-        "request_path": path,
-    })
-
-    from .aaz.latest.network.lb import Update
-    result = Update(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": load_balancer_name,
-        "resource_group": resource_group_name,
-        "probes": probes,
-    }).result()["probes"]
-
-    return [r for r in result if r["name"] == item_name][0]
-
-
-def update_lb_probe(cmd, resource_group_name, load_balancer_name, item_name,
-                    protocol=None, port=None, path=None, interval=None, threshold=None, probe_threshold=None):
-    from .aaz.latest.network.lb import Show
-    lb = Show(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": load_balancer_name,
-        "resource_group": resource_group_name,
-    })
-
-    probes = []
-    for item in lb["probes"]:
-        probe = dict()
-        probe["name"] = item.pop("name", None)
-        probe["interval_in_seconds"] = item.pop("intervalInSeconds", None)
-        probe["number_of_probes"] = item.pop("numberOfProbes", None)
-        probe["port"] = item.pop("port", None)
-        probe["probe_threshold"] = item.pop("probeThreshold", None)
-        probe["protocol"] = item.pop("protocol", None)
-        probe["request_path"] = item.pop("requestPath", None)
-        probes.append(probe)
-
-    for probe in probes:
-        if probe["name"] == item_name:
-            if interval is not None:
-                probe["interval_in_seconds"] = interval
-            if threshold is not None:
-                probe["number_of_probes"] = threshold
-            if port is not None:
-                probe["port"] = port
-            if probe_threshold is not None:
-                logger.warning(
-                    "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
-                    "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
-                    "by not specifying the value of the property."
-                )
-                probe["probe_threshold"] = probe_threshold
-            if protocol is not None:
-                probe["protocol"] = protocol
-            if path is not None:
-                if path == "":
-                    probe["request_path"] = None
-                else:
-                    probe["request_path"] = path
-
-    from .aaz.latest.network.lb import Update
-    result = Update(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": load_balancer_name,
-        "resource_group": resource_group_name,
-        "probes": probes,
-    }).result()["probes"]
-
-    return [r for r in result if r["name"] == item_name][0]
-
-
-def create_cross_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, protocol, port,
-                          path=None, interval=None, threshold=None):
-    Probe = cmd.get_models('Probe')
-    ncf = network_client_factory(cmd.cli_ctx)
-    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
-    new_probe = Probe(
-        protocol=protocol, port=port, interval_in_seconds=interval, number_of_probes=threshold,
-        request_path=path, name=item_name)
-    upsert_to_collection(lb, 'probes', new_probe, 'name')
-    poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
-    return get_property(poller.result().probes, item_name)
-
-
-def set_cross_lb_probe(cmd, instance, parent, item_name, protocol=None, port=None,
-                       path=None, interval=None, threshold=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('protocol', protocol)
-        c.set_param('port', port)
-        c.set_param('request_path', path)
-        c.set_param('interval_in_seconds', interval)
-        c.set_param('number_of_probes', threshold)
-    return parent
-
-
-def create_lb_rule(
-        cmd, resource_group_name, load_balancer_name, item_name,
-        protocol, frontend_port, backend_port, frontend_ip_name=None,
-        backend_address_pool_name=None, probe_name=None, load_distribution='default',
-        floating_ip=None, idle_timeout=None, enable_tcp_reset=None, disable_outbound_snat=None, backend_pools_name=None):
-    LoadBalancingRule = cmd.get_models('LoadBalancingRule')
-    ncf = network_client_factory(cmd.cli_ctx)
-    lb = cached_get(cmd, ncf.load_balancers.get, resource_group_name, load_balancer_name)
-    lb = lb_get_operation(lb)
-    if not frontend_ip_name:
-        frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
-    # avoid break when backend_address_pool_name is None and backend_pools_name is not None
-    if not backend_address_pool_name and backend_pools_name:
-        backend_address_pool_name = backend_pools_name[0]
-    if not backend_address_pool_name:
-        backend_address_pool_name = _get_default_name(lb, 'backend_address_pools', '--backend-pool-name')
-    new_rule = LoadBalancingRule(
-        name=item_name,
-        protocol=protocol,
-        frontend_port=frontend_port,
-        backend_port=backend_port,
-        frontend_ip_configuration=get_property(lb.frontend_ip_configurations,
-                                               frontend_ip_name),
-        backend_address_pool=get_property(lb.backend_address_pools,
-                                          backend_address_pool_name),
-        probe=get_property(lb.probes, probe_name) if probe_name else None,
-        load_distribution=load_distribution,
-        enable_floating_ip=floating_ip,
-        idle_timeout_in_minutes=idle_timeout,
-        enable_tcp_reset=enable_tcp_reset,
-        disable_outbound_snat=disable_outbound_snat)
-
-    if backend_pools_name:
-        new_rule.backend_address_pools = [get_property(lb.backend_address_pools, name) for name in backend_pools_name]
-        # Otherwiase service will response error : (LoadBalancingRuleBackendAdressPoolAndBackendAddressPoolsCannotBeSetAtTheSameTimeWithDifferentValue) BackendAddressPool and BackendAddressPools[] in LoadBalancingRule rule2 cannot be set at the same time with different value.
-        new_rule.backend_address_pool = None
-
-    upsert_to_collection(lb, 'load_balancing_rules', new_rule, 'name')
-    poller = cached_put(cmd, ncf.load_balancers.begin_create_or_update, lb, resource_group_name, load_balancer_name)
-    return get_property(poller.result().load_balancing_rules, item_name)
-
-
-def set_lb_rule(
-        cmd, instance, parent, item_name, protocol=None, frontend_port=None,
-        frontend_ip_name=None, backend_port=None, backend_address_pool_name=None, probe_name=None,
-        load_distribution='default', floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
-        disable_outbound_snat=None, backend_pools_name=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('protocol', protocol)
-        c.set_param('frontend_port', frontend_port)
-        c.set_param('backend_port', backend_port)
-        c.set_param('idle_timeout_in_minutes', idle_timeout)
-        c.set_param('load_distribution', load_distribution)
-        c.set_param('disable_outbound_snat', disable_outbound_snat)
-        c.set_param('enable_tcp_reset', enable_tcp_reset)
-        c.set_param('enable_floating_ip', floating_ip)
-
-    if frontend_ip_name is not None:
-        instance.frontend_ip_configuration = \
-            get_property(parent.frontend_ip_configurations, frontend_ip_name)
-
-    if backend_address_pool_name is not None:
-        instance.backend_address_pool = \
-            get_property(parent.backend_address_pools, backend_address_pool_name)
-        # To keep compatible when bump version from '2020-11-01' to '2021-02-01'
-        # https://github.com/Azure/azure-rest-api-specs/issues/14430
-        if cmd.supported_api_version(min_api='2021-02-01') and not backend_pools_name:
-            instance.backend_address_pools = [instance.backend_address_pool]
-    if backend_pools_name is not None:
-        instance.backend_address_pools = [get_property(parent.backend_address_pools, i) for i in backend_pools_name]
-        # Otherwiase service will response error : (LoadBalancingRuleBackendAdressPoolAndBackendAddressPoolsCannotBeSetAtTheSameTimeWithDifferentValue) BackendAddressPool and BackendAddressPools[] in LoadBalancingRule rule2 cannot be set at the same time with different value.
-        instance.backend_address_pool = None
-
-    if probe_name == '':
-        instance.probe = None
-    elif probe_name is not None:
-        instance.probe = get_property(parent.probes, probe_name)
-
-    return parent
-
-
-def add_lb_backend_address_pool_tunnel_interface(cmd, resource_group_name, load_balancer_name,
-                                                 backend_address_pool_name, protocol, identifier, traffic_type, port=None):
-    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
-    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
-    GatewayLoadBalancerTunnelInterface = cmd.get_models('GatewayLoadBalancerTunnelInterface')
-    tunnel_interface = GatewayLoadBalancerTunnelInterface(port=port, identifier=identifier, protocol=protocol, type=traffic_type)
-    if not address_pool.tunnel_interfaces:
-        address_pool.tunnel_interfaces = []
-    address_pool.tunnel_interfaces.append(tunnel_interface)
-    return client.begin_create_or_update(resource_group_name, load_balancer_name,
-                                         backend_address_pool_name, address_pool)
-
-
-def update_lb_backend_address_pool_tunnel_interface(cmd, resource_group_name, load_balancer_name,
-                                                    backend_address_pool_name, index, protocol=None, identifier=None, traffic_type=None, port=None):
-    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
-    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
-    if index >= len(address_pool.tunnel_interfaces):
-        raise UnrecognizedArgumentError(f'{index} is out of scope, please input proper index')
-
-    item = address_pool.tunnel_interfaces[index]
-    if protocol:
-        item.protocol = protocol
-    if identifier:
-        item.identifier = identifier
-    if port:
-        item.port = port
-    if traffic_type:
-        item.type = traffic_type
-    return client.begin_create_or_update(resource_group_name, load_balancer_name,
-                                         backend_address_pool_name, address_pool)
-
-
-def remove_lb_backend_address_pool_tunnel_interface(cmd, resource_group_name, load_balancer_name,
-                                                    backend_address_pool_name, index):
-    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
-    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
-    if index >= len(address_pool.tunnel_interfaces):
-        raise UnrecognizedArgumentError(f'{index} is out of scope, please input proper index')
-    address_pool.tunnel_interfaces.pop(index)
-    return client.begin_create_or_update(resource_group_name, load_balancer_name,
-                                         backend_address_pool_name, address_pool)
-
-
-def list_lb_backend_address_pool_tunnel_interface(cmd, resource_group_name, load_balancer_name,
-                                                  backend_address_pool_name):
-    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
-    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
-    return address_pool.tunnel_interfaces
-# endregion
-
-
 # region NetworkInterfaces (NIC)
-def create_nic(cmd, resource_group_name, network_interface_name, subnet, location=None, tags=None,
-               internal_dns_name_label=None, dns_servers=None, enable_ip_forwarding=False,
-               load_balancer_backend_address_pool_ids=None,
-               load_balancer_inbound_nat_rule_ids=None,
-               load_balancer_name=None, network_security_group=None,
-               private_ip_address=None, private_ip_address_version=None,
-               public_ip_address=None, virtual_network_name=None, enable_accelerated_networking=None,
-               application_security_groups=None, no_wait=False,
-               app_gateway_backend_address_pools=None, edge_zone=None):
-    client = network_client_factory(cmd.cli_ctx).network_interfaces
-    (NetworkInterface, NetworkInterfaceDnsSettings, NetworkInterfaceIPConfiguration, NetworkSecurityGroup,
-     PublicIPAddress, Subnet, SubResource) = cmd.get_models(
-         'NetworkInterface', 'NetworkInterfaceDnsSettings', 'NetworkInterfaceIPConfiguration',
-         'NetworkSecurityGroup', 'PublicIPAddress', 'Subnet', 'SubResource')
+class NICCreate(_NICCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vnet_name = AAZStrArg(
+            options=["--vnet-name"],
+            arg_group="IP Configuration",
+            help="Name of the virtual network.",
+        )
+        args_schema.subnet = AAZResourceIdArg(
+            options=["--subnet"],
+            arg_group="IP Configuration",
+            help="Name or ID of an existing subnet. If name specified, please also specify `--vnet-name`; "
+                 "If you want to use an existing subnet in other resource group, "
+                 "please provide the ID instead of the name of the subnet.",
+            required=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/virtualNetworks/{vnet_name}/subnets/{}",
+            ),
+        )
+        args_schema.application_security_groups = AAZListArg(
+            options=["--application-security-groups", "--asgs"],
+            arg_group="IP Configuration",
+            help="Space-separated list of application security groups.",
+        )
+        args_schema.application_security_groups.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationSecurityGroups/{}",
+            ),
+        )
+        args_schema.private_ip_address = AAZStrArg(
+            options=["--private-ip-address"],
+            arg_group="IP Configuration",
+            help="Static private IP address to use.",
+        )
+        args_schema.private_ip_address_version = AAZStrArg(
+            options=["--private-ip-address-version"],
+            arg_group="IP Configuration",
+            help="Version of private IP address to use.",
+            enum=["IPv4", "IPv6"],
+            default="IPv4",
+        )
+        args_schema.public_ip_address = AAZResourceIdArg(
+            options=["--public-ip-address"],
+            arg_group="IP Configuration",
+            help="Name or ID of an existing public IP address.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
+                         "publicIPAddresses/{}"
+            ),
+        )
+        args_schema.gateway_name = AAZStrArg(
+            options=["--gateway-name"],
+            arg_group="Application Gateway",
+            help="Name of the application gateway."
+        )
+        args_schema.app_gateway_address_pools = AAZListArg(
+            options=["--app-gateway-address-pools", "--ag-address-pools"],
+            arg_group="Application Gateway",
+            help="Space-separated list of names or IDs of application gateway backend address pools to "
+                 "associate with the NIC. If names are used, `--gateway-name` must be specified.",
+        )
+        args_schema.app_gateway_address_pools.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/backendAddressPools/{}",
+            ),
+        )
+        args_schema.lb_name = AAZStrArg(
+            options=["--lb-name"],
+            arg_group="Load Balancer",
+            help="Name of the load balancer",
+        )
+        args_schema.lb_address_pools = AAZListArg(
+            options=["--lb-address-pools"],
+            arg_group="Load Balancer",
+            help="Space-separated list of names or IDs of load balancer address pools to associate with the NIC. "
+                 "If names are used, `--lb-name` must be specified.",
+        )
+        args_schema.lb_address_pools.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/loadBalancers/{lb_name}/backendAddressPools/{}",
+            ),
+        )
+        args_schema.lb_inbound_nat_rules = AAZListArg(
+            options=["--lb-inbound-nat-rules"],
+            arg_group="Load Balancer",
+            help="Space-separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. "
+                 "If names are used, `--lb-name` must be specified.",
+        )
+        args_schema.lb_inbound_nat_rules.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/loadBalancers/{lb_name}/inboundNatRules/{}",
+            ),
+        )
+        args_schema.edge_zone = AAZStrArg(
+            options=["--edge-zone"],
+            help="Name of edge zone."
+        )
+        args_schema.network_security_group = AAZResourceIdArg(
+            options=["--network-security-group"],
+            help="Name or ID of an existing network security group",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/networkSecurityGroups/{}",
+            ),
+        )
+        args_schema.extended_location._registered = False
+        args_schema.ip_configurations._registered = False
+        args_schema.nsg._registered = False
+        return args_schema
 
-    dns_settings = NetworkInterfaceDnsSettings(internal_dns_name_label=internal_dns_name_label,
-                                               dns_servers=dns_servers or [])
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.network_security_group):
+            args.nsg.id = args.network_security_group
+        if has_value(args.edge_zone):
+            args.extended_location.name = args.edge_zone
+            args.extended_location.type = "EdgeZone"
+        ip_configuration = {
+            "name": "ipconfig1",
+            "private_ip_address": args.private_ip_address,
+            "private_ip_address_version": args.private_ip_address_version,  # when address doesn't exist, version should be ipv4 (default)
+            "private_ip_allocation_method": "Static" if has_value(args.private_ip_address) else "Dynamic",
+            "subnet": {"id": args.subnet} if has_value(args.subnet) else None,
+            "public_ip_address": {"id": args.public_ip_address} if has_value(args.public_ip_address) else None,
+            "application_security_groups": [{"id": x} for x in args.application_security_groups] if has_value(args.application_security_groups) else None,
+            "application_gateway_backend_address_pools": [{"id": x} for x in args.app_gateway_address_pools] if has_value(args.app_gateway_address_pools) else None,
+            "load_balancer_backend_address_pools": [{"id": x} for x in args.lb_address_pools] if has_value(args.lb_address_pools) else None,
+            "load_balancer_inbound_nat_rules": [{"id": x} for x in args.lb_inbound_nat_rules] if has_value(args.lb_inbound_nat_rules) else None,
+        }
+        args.ip_configurations = [ip_configuration]
 
-    nic = NetworkInterface(location=location, tags=tags, enable_ip_forwarding=enable_ip_forwarding,
-                           dns_settings=dns_settings)
-
-    if cmd.supported_api_version(min_api='2016-09-01'):
-        nic.enable_accelerated_networking = enable_accelerated_networking
-
-    if network_security_group:
-        nic.network_security_group = NetworkSecurityGroup(id=network_security_group)
-    ip_config_args = {
-        'name': 'ipconfig1',
-        'load_balancer_backend_address_pools': load_balancer_backend_address_pool_ids,
-        'load_balancer_inbound_nat_rules': load_balancer_inbound_nat_rule_ids,
-        'private_ip_allocation_method': 'Static' if private_ip_address else 'Dynamic',
-        'private_ip_address': private_ip_address,
-        'subnet': Subnet(id=subnet),
-        'application_gateway_backend_address_pools':
-            [SubResource(id=x) for x in app_gateway_backend_address_pools]
-            if app_gateway_backend_address_pools else None
-    }
-    if cmd.supported_api_version(min_api='2016-09-01'):
-        ip_config_args['private_ip_address_version'] = private_ip_address_version
-    if cmd.supported_api_version(min_api='2017-09-01'):
-        ip_config_args['application_security_groups'] = application_security_groups
-    ip_config = NetworkInterfaceIPConfiguration(**ip_config_args)
-
-    if public_ip_address:
-        ip_config.public_ip_address = PublicIPAddress(id=public_ip_address)
-    nic.ip_configurations = [ip_config]
-
-    if edge_zone:
-        nic.extended_location = _edge_zone_model(cmd, edge_zone)
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, network_interface_name, nic)
+    def _output(self, *args, **kwargs):
+        result = super()._output(*args, **kwargs)
+        return {"NewNIC": result}
 
 
-def update_nic(cmd, instance, network_security_group=None, enable_ip_forwarding=None,
-               internal_dns_name_label=None, dns_servers=None, enable_accelerated_networking=None):
-    if enable_ip_forwarding is not None:
-        instance.enable_ip_forwarding = enable_ip_forwarding
+class NICUpdate(_NICUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
 
-    if network_security_group == '':
-        instance.network_security_group = None
-    elif network_security_group is not None:
-        NetworkSecurityGroup = cmd.get_models('NetworkSecurityGroup')
-        instance.network_security_group = NetworkSecurityGroup(id=network_security_group)
+        class EmptyListArgFormat(AAZListArgFormat):
+            def __call__(self, ctx, value):
+                if value.to_serialized_data() == [""]:
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
 
-    if internal_dns_name_label == '':
-        instance.dns_settings.internal_dns_name_label = None
-    elif internal_dns_name_label is not None:
-        instance.dns_settings.internal_dns_name_label = internal_dns_name_label
-    if dns_servers == ['']:
-        instance.dns_settings.dns_servers = None
-    elif dns_servers:
-        instance.dns_settings.dns_servers = dns_servers
+        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
+            def __call__(self, ctx, value):
+                if value._data == "":
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
 
-    if enable_accelerated_networking is not None:
-        instance.enable_accelerated_networking = enable_accelerated_networking
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.network_security_group = AAZResourceIdArg(
+            options=["--network-security-group"],
+            help="Name or ID of an existing network security group",
+            fmt=EmptyResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/networkSecurityGroups/{}",
+            ),
+            nullable=True,
+        )
+        args_schema.dns_servers._fmt = EmptyListArgFormat()
+        args_schema.nsg._registered = False
+        return args_schema
 
-    return instance
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.network_security_group):
+            args.nsg.id = args.network_security_group
+        if has_value(args.internal_dns_name) and args.internal_dns_name == "":
+            args.internal_dns_name = None
 
-
-def create_nic_ip_config(cmd, resource_group_name, network_interface_name, ip_config_name, subnet=None,
-                         virtual_network_name=None, public_ip_address=None, load_balancer_name=None,
-                         load_balancer_backend_address_pool_ids=None,
-                         load_balancer_inbound_nat_rule_ids=None,
-                         private_ip_address=None,
-                         private_ip_address_version=None,
-                         make_primary=False,
-                         application_security_groups=None,
-                         app_gateway_backend_address_pools=None):
-    NetworkInterfaceIPConfiguration, PublicIPAddress, Subnet, SubResource = cmd.get_models(
-        'NetworkInterfaceIPConfiguration', 'PublicIPAddress', 'Subnet', 'SubResource')
-    ncf = network_client_factory(cmd.cli_ctx)
-    nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
-
-    if cmd.supported_api_version(min_api='2016-09-01'):
-        IPVersion = cmd.get_models('IPVersion')
-        private_ip_address_version = private_ip_address_version or IPVersion.I_PV4.value
-        if private_ip_address_version == IPVersion.I_PV4.value and not subnet:
-            primary_config = next(x for x in nic.ip_configurations if x.primary)
-            subnet = primary_config.subnet.id
-        if make_primary:
-            for config in nic.ip_configurations:
-                config.primary = False
-
-    new_config_args = {
-        'name': ip_config_name,
-        'subnet': Subnet(id=subnet) if subnet else None,
-        'public_ip_address': PublicIPAddress(id=public_ip_address) if public_ip_address else None,
-        'load_balancer_backend_address_pools': load_balancer_backend_address_pool_ids,
-        'load_balancer_inbound_nat_rules': load_balancer_inbound_nat_rule_ids,
-        'private_ip_address': private_ip_address,
-        'private_ip_allocation_method': 'Static' if private_ip_address else 'Dynamic'
-    }
-    if cmd.supported_api_version(min_api='2016-09-01'):
-        new_config_args['private_ip_address_version'] = private_ip_address_version
-        new_config_args['primary'] = make_primary
-    if cmd.supported_api_version(min_api='2017-09-01'):
-        new_config_args['application_security_groups'] = application_security_groups
-    if cmd.supported_api_version(min_api='2018-08-01'):
-        new_config_args['application_gateway_backend_address_pools'] = \
-            [SubResource(id=x) for x in app_gateway_backend_address_pools] \
-            if app_gateway_backend_address_pools else None
-
-    new_config = NetworkInterfaceIPConfiguration(**new_config_args)
-
-    upsert_to_collection(nic, 'ip_configurations', new_config, 'name')
-    poller = ncf.network_interfaces.begin_create_or_update(
-        resource_group_name, network_interface_name, nic)
-    return get_property(poller.result().ip_configurations, ip_config_name)
-
-
-def update_nic_ip_config_setter(cmd, resource_group_name, network_interface_name, parameters, gateway_lb):
-    aux_subscriptions = []
-    if is_valid_resource_id(gateway_lb):
-        aux_subscriptions.append(parse_resource_id(gateway_lb)['subscription'])
-    client = network_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions).network_interfaces
-    return client.begin_create_or_update(resource_group_name, network_interface_name, parameters)
-
-
-def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
-                      virtual_network_name=None, public_ip_address=None, load_balancer_name=None,
-                      load_balancer_backend_address_pool_ids=None,
-                      load_balancer_inbound_nat_rule_ids=None,
-                      private_ip_address=None,
-                      private_ip_address_version=None, make_primary=False,
-                      application_security_groups=None,
-                      app_gateway_backend_address_pools=None, gateway_lb=None):
-    PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
-
-    if make_primary:
-        for config in parent.ip_configurations:
-            config.primary = False
-        instance.primary = True
-
-    if private_ip_address == '':
-        # switch private IP address allocation to Dynamic if empty string is used
-        instance.private_ip_address = None
-        instance.private_ip_allocation_method = 'dynamic'
-        if cmd.supported_api_version(min_api='2016-09-01'):
-            instance.private_ip_address_version = 'ipv4'
-    elif private_ip_address is not None:
-        # if specific address provided, allocation is static
-        instance.private_ip_address = private_ip_address
-        instance.private_ip_allocation_method = 'static'
-        if private_ip_address_version is not None:
-            instance.private_ip_address_version = private_ip_address_version
-
-    if subnet == '':
-        instance.subnet = None
-    elif subnet is not None:
-        instance.subnet = Subnet(id=subnet)
-
-    if public_ip_address == '':
-        instance.public_ip_address = None
-    elif public_ip_address is not None:
-        instance.public_ip_address = PublicIPAddress(id=public_ip_address)
-
-    if load_balancer_backend_address_pool_ids == '':
-        instance.load_balancer_backend_address_pools = None
-    elif load_balancer_backend_address_pool_ids is not None:
-        instance.load_balancer_backend_address_pools = load_balancer_backend_address_pool_ids
-
-    if load_balancer_inbound_nat_rule_ids == '':
-        instance.load_balancer_inbound_nat_rules = None
-    elif load_balancer_inbound_nat_rule_ids is not None:
-        instance.load_balancer_inbound_nat_rules = load_balancer_inbound_nat_rule_ids
-
-    for config in parent.ip_configurations:
-        if application_security_groups == ['']:
-            config.application_security_groups = None
-        elif application_security_groups:
-            config.application_security_groups = application_security_groups
-
-    if app_gateway_backend_address_pools == ['']:
-        instance.application_gateway_backend_address_pools = None
-    elif app_gateway_backend_address_pools:
-        instance.application_gateway_backend_address_pools = \
-            [SubResource(id=x) for x in app_gateway_backend_address_pools]
-    if gateway_lb is not None:
-        instance.gateway_load_balancer = None if gateway_lb == '' else SubResource(id=gateway_lb)
-    return parent
+    def post_instance_update(self, instance):
+        if not has_value(instance.properties.network_security_group.id):
+            instance.properties.network_security_group = None
 
 
 def _get_nic_ip_config(nic, name):
@@ -5034,67 +4386,398 @@ def _get_nic_ip_config(nic, name):
     return ip_config
 
 
-def add_nic_ip_config_address_pool(
-        cmd, resource_group_name, network_interface_name, ip_config_name, backend_address_pool,
-        load_balancer_name=None, application_gateway_name=None):
-    BackendAddressPool = cmd.get_models('BackendAddressPool')
-    client = network_client_factory(cmd.cli_ctx).network_interfaces
-    nic = client.get(resource_group_name, network_interface_name)
-    ip_config = _get_nic_ip_config(nic, ip_config_name)
+class NICIPConfigCreate(_NICIPConfigCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vnet_name = AAZStrArg(
+            options=["--vnet-name"],
+            arg_group="IP Configuration",
+            help="Name of the virtual network.",
+        )
+        args_schema.subnet._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/virtualNetworks/{vnet_name}/subnets/{}",
+        )
+        args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
+                     "publicIPAddresses/{}"
+        )
+        args_schema.application_security_groups = AAZListArg(
+            options=["--application-security-groups", "--asgs"],
+            arg_group="IP Configuration",
+            help="Space-separated list of application security groups.",
+        )
+        args_schema.application_security_groups.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationSecurityGroups/{}",
+            ),
+        )
+        args_schema.gateway_name = AAZStrArg(
+            options=["--gateway-name"],
+            arg_group="Application Gateway",
+            help="Name of the application gateway."
+        )
+        args_schema.app_gateway_address_pools = AAZListArg(
+            options=["--app-gateway-address-pools", "--ag-address-pools"],
+            arg_group="Application Gateway",
+            help="Space-separated list of names or IDs of application gateway backend address pools to "
+                 "associate with the NIC. If names are used, `--gateway-name` must be specified.",
+        )
+        args_schema.app_gateway_address_pools.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/backendAddressPools/{}",
+            ),
+        )
+        args_schema.lb_name = AAZStrArg(
+            options=["--lb-name"],
+            arg_group="Load Balancer",
+            help="Name of the load balancer",
+        )
+        args_schema.lb_address_pools = AAZListArg(
+            options=["--lb-address-pools"],
+            arg_group="Load Balancer",
+            help="Space-separated list of names or IDs of load balancer address pools to associate with the NIC. "
+                 "If names are used, `--lb-name` must be specified.",
+        )
+        args_schema.lb_address_pools.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/loadBalancers/{lb_name}/backendAddressPools/{}",
+            ),
+        )
+        args_schema.lb_inbound_nat_rules = AAZListArg(
+            options=["--lb-inbound-nat-rules"],
+            arg_group="Load Balancer",
+            help="Space-separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. "
+                 "If names are used, `--lb-name` must be specified.",
+        )
+        args_schema.lb_inbound_nat_rules.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/loadBalancers/{lb_name}/inboundNatRules/{}",
+            ),
+        )
+        args_schema.application_gateway_backend_address_pools._registered = False
+        args_schema.load_balancer_backend_address_pools._registered = False
+        args_schema.load_balancer_inbound_nat_rules._registered = False
+        args_schema.private_ip_allocation_method._registered = False
+        args_schema.asgs_obj._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.private_ip_allocation_method = "Static" if has_value(args.private_ip_address) else "Dynamic"
+
+        args.asgs_obj = assign_aaz_list_arg(
+            args.asgs_obj,
+            args.application_security_groups,
+            element_transformer=lambda _, asg_id: {"id": asg_id}
+        )
+        args.application_gateway_backend_address_pools = assign_aaz_list_arg(
+            args.application_gateway_backend_address_pools,
+            args.app_gateway_address_pools,
+            element_transformer=lambda _, pool_id: {"id": pool_id}
+        )
+        args.load_balancer_backend_address_pools = assign_aaz_list_arg(
+            args.load_balancer_backend_address_pools,
+            args.lb_address_pools,
+            element_transformer=lambda _, pool_id: {"id": pool_id}
+        )
+        args.load_balancer_inbound_nat_rules = assign_aaz_list_arg(
+            args.load_balancer_inbound_nat_rules,
+            args.lb_inbound_nat_rules,
+            element_transformer=lambda _, rule_id: {"id": rule_id}
+        )
+
+    def pre_instance_create(self):
+        args = self.ctx.args
+        instance = self.ctx.vars.instance
+        if args.private_ip_address_version.to_serialized_data().lower() == "ipv4" and not has_value(args.subnet):
+            primary = next(x for x in instance.properties.ip_configurations if x.properties.primary)
+            args.subnet = primary.properties.subnet.id
+        if args.make_primary.to_serialized_data():
+            for config in instance.properties.ip_configurations:
+                config.properties.primary = False
+
+
+class NICIPConfigUpdate(_NICIPConfigUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
+
+        class EmptyListArgFormat(AAZListArgFormat):
+            def __call__(self, ctx, value):
+                if value.to_serialized_data() == [""]:
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
+        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
+            def __call__(self, ctx, value):
+                if value._data == "":
+                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
+                    value._data = None
+                return super().__call__(ctx, value)
+
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vnet_name = AAZStrArg(
+            options=["--vnet-name"],
+            arg_group="IP Configuration",
+            help="Name of the virtual network.",
+            nullable=True,
+        )
+        args_schema.subnet._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/virtualNetworks/{vnet_name}/subnets/{}",
+        )
+        args_schema.public_ip_address._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
+                     "publicIPAddresses/{}"
+        )
+        args_schema.gateway_lb._fmt = EmptyResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
+                     "loadBalancers/{}/frontendIPConfigurations/{}",
+        )
+        args_schema.application_security_groups = AAZListArg(
+            options=["--application-security-groups", "--asgs"],
+            arg_group="IP Configuration",
+            help="Space-separated list of application security groups.",
+            fmt=EmptyListArgFormat(),
+            nullable=True,
+        )
+        args_schema.application_security_groups.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationSecurityGroups/{}",
+            ),
+            nullable=True,
+        )
+        args_schema.gateway_name = AAZStrArg(
+            options=["--gateway-name"],
+            arg_group="Application Gateway",
+            help="Name of the application gateway.",
+            nullable=True,
+        )
+        args_schema.app_gateway_address_pools = AAZListArg(
+            options=["--app-gateway-address-pools", "--ag-address-pools"],
+            arg_group="Application Gateway",
+            help="Space-separated list of names or IDs of application gateway backend address pools to "
+                 "associate with the NIC. If names are used, `--gateway-name` must be specified.",
+            fmt=EmptyListArgFormat(),
+            nullable=True,
+        )
+        args_schema.app_gateway_address_pools.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/applicationGateways/{gateway_name}/backendAddressPools/{}",
+            ),
+            nullable=True,
+        )
+        args_schema.lb_name = AAZStrArg(
+            options=["--lb-name"],
+            arg_group="Load Balancer",
+            help="Name of the load balancer",
+            nullable=True,
+        )
+        args_schema.lb_address_pools = AAZListArg(
+            options=["--lb-address-pools"],
+            arg_group="Load Balancer",
+            help="Space-separated list of names or IDs of load balancer address pools to associate with the NIC. "
+                 "If names are used, `--lb-name` must be specified.",
+            fmt=EmptyListArgFormat(),
+            nullable=True,
+        )
+        args_schema.lb_address_pools.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/loadBalancers/{lb_name}/backendAddressPools/{}",
+            ),
+            nullable=True,
+        )
+        args_schema.lb_inbound_nat_rules = AAZListArg(
+            options=["--lb-inbound-nat-rules"],
+            arg_group="Load Balancer",
+            help="Space-separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. "
+                 "If names are used, `--lb-name` must be specified.",
+            fmt=EmptyListArgFormat(),
+            nullable=True,
+        )
+        args_schema.lb_inbound_nat_rules.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/loadBalancers/{lb_name}/inboundNatRules/{}",
+            ),
+            nullable=True,
+        )
+        args_schema.application_gateway_backend_address_pools._registered = False
+        args_schema.load_balancer_backend_address_pools._registered = False
+        args_schema.load_balancer_inbound_nat_rules._registered = False
+        args_schema.private_ip_allocation_method._registered = False
+        args_schema.asgs_obj._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.private_ip_address):
+            if args.private_ip_address is None or args.private_ip_address == "":
+                # switch private IP address allocation to dynamic if empty string is used
+                args.private_ip_address = None
+                args.private_ip_allocation_method = "Dynamic"
+                args.private_ip_address_version = "IPv4"
+            else:
+                # if specific address provided, allocation is static
+                args.private_ip_allocation_method = "Static"
+
+    def pre_instance_update(self, instance):
+        args = self.ctx.args
+        instance = self.ctx.vars.instance
+        args.asgs_obj = assign_aaz_list_arg(
+            args.asgs_obj,
+            args.application_security_groups,
+            element_transformer=lambda _, asg_id: {"id": asg_id}
+        )
+        args.application_gateway_backend_address_pools = assign_aaz_list_arg(
+            args.application_gateway_backend_address_pools,
+            args.app_gateway_address_pools,
+            element_transformer=lambda _, pool_id: {"id": pool_id}
+        )
+        args.load_balancer_backend_address_pools = assign_aaz_list_arg(
+            args.load_balancer_backend_address_pools,
+            args.lb_address_pools,
+            element_transformer=lambda _, pool_id: {"id": pool_id}
+        )
+        args.load_balancer_inbound_nat_rules = assign_aaz_list_arg(
+            args.load_balancer_inbound_nat_rules,
+            args.lb_inbound_nat_rules,
+            element_transformer=lambda _, rule_id: {"id": rule_id}
+        )
+        # all ip configurations must belong to the same asgs
+        is_primary = args.make_primary.to_serialized_data()
+        for config in instance.properties.ip_configurations:
+            if is_primary:
+                config.properties.primary = False
+            config.properties.application_security_groups = args.asgs_obj
+
+    def post_instance_update(self, instance):
+        if not has_value(instance.properties.subnet.id):
+            instance.properties.subnet = None
+        if not has_value(instance.properties.public_ip_address.id):
+            instance.properties.public_ip_address = None
+        if not has_value(instance.properties.gateway_load_balancer.id):
+            instance.properties.gateway_load_balancer = None
+
+
+def add_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_name, ip_config_name,
+                                   backend_address_pool, load_balancer_name=None, application_gateway_name=None):
+    from .aaz.latest.network.nic.ip_config.lb_pool import Add as _LBPoolAdd
+    from .aaz.latest.network.nic.ip_config.ag_pool import Add as _AGPoolAdd
+
+    class LBPoolAdd(_LBPoolAdd):
+        def _output(self, *args, **kwargs):
+            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+            return result["ipConfigurations"][0]
+
+    class AGPoolAdd(_AGPoolAdd):
+        def _output(self, *args, **kwargs):
+            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+            return result["ipConfigurations"][0]
+
+    arguments = {
+        "ip_config_name": ip_config_name,
+        "nic_name": network_interface_name,
+        "resource_group": resource_group_name,
+        "pool_id": backend_address_pool
+    }
     if load_balancer_name:
-        upsert_to_collection(ip_config, 'load_balancer_backend_address_pools',
-                             BackendAddressPool(id=backend_address_pool),
-                             'id')
-    elif application_gateway_name:
-        upsert_to_collection(ip_config, 'application_gateway_backend_address_pools',
-                             BackendAddressPool(id=backend_address_pool),
-                             'id')
-    poller = client.begin_create_or_update(resource_group_name, network_interface_name, nic)
-    return get_property(poller.result().ip_configurations, ip_config_name)
+        return LBPoolAdd(cli_ctx=cmd.cli_ctx)(command_args=arguments)
+    if application_gateway_name:
+        return AGPoolAdd(cli_ctx=cmd.cli_ctx)(command_args=arguments)
 
 
-def remove_nic_ip_config_address_pool(
-        cmd, resource_group_name, network_interface_name, ip_config_name, backend_address_pool,
-        load_balancer_name=None, application_gateway_name=None):
-    client = network_client_factory(cmd.cli_ctx).network_interfaces
-    nic = client.get(resource_group_name, network_interface_name)
-    ip_config = _get_nic_ip_config(nic, ip_config_name)
+def remove_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_name, ip_config_name,
+                                      backend_address_pool, load_balancer_name=None, application_gateway_name=None):
+    from .aaz.latest.network.nic.ip_config.lb_pool import Remove as _LBPoolRemove
+    from .aaz.latest.network.nic.ip_config.ag_pool import Remove as _AGPoolRemove
+
+    class LBPoolRemove(_LBPoolRemove):
+        def _handler(self, command_args):
+            lro_poller = super()._handler(command_args)
+            lro_poller._result_callback = self._output
+            return lro_poller
+
+        def _output(self, *args, **kwargs):
+            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+            return result["ipConfigurations"][0]
+
+    class AGPoolRemove(_AGPoolRemove):
+        def _handler(self, command_args):
+            lro_poller = super()._handler(command_args)
+            lro_poller._result_callback = self._output
+            return lro_poller
+
+        def _output(self, *args, **kwargs):
+            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+            return result["ipConfigurations"][0]
+
+    arguments = {
+        "ip_config_name": ip_config_name,
+        "nic_name": network_interface_name,
+        "resource_group": resource_group_name,
+        "pool_id": backend_address_pool
+    }
     if load_balancer_name:
-        keep_items = [x for x in ip_config.load_balancer_backend_address_pools or [] if x.id != backend_address_pool]
-        ip_config.load_balancer_backend_address_pools = keep_items
-    elif application_gateway_name:
-        keep_items = [x for x in ip_config.application_gateway_backend_address_pools or [] if
-                      x.id != backend_address_pool]
-        ip_config.application_gateway_backend_address_pools = keep_items
-    poller = client.begin_create_or_update(resource_group_name, network_interface_name, nic)
-    return get_property(poller.result().ip_configurations, ip_config_name)
+        return LBPoolRemove(cli_ctx=cmd.cli_ctx)(command_args=arguments)
+    if application_gateway_name:
+        return AGPoolRemove(cli_ctx=cmd.cli_ctx)(command_args=arguments)
 
 
-def add_nic_ip_config_inbound_nat_rule(
-        cmd, resource_group_name, network_interface_name, ip_config_name, inbound_nat_rule,
-        load_balancer_name=None):
-    InboundNatRule = cmd.get_models('InboundNatRule')
-    client = network_client_factory(cmd.cli_ctx).network_interfaces
-    nic = client.get(resource_group_name, network_interface_name)
-    ip_config = _get_nic_ip_config(nic, ip_config_name)
-    upsert_to_collection(ip_config, 'load_balancer_inbound_nat_rules',
-                         InboundNatRule(id=inbound_nat_rule),
-                         'id')
-    poller = client.begin_create_or_update(resource_group_name, network_interface_name, nic)
-    return get_property(poller.result().ip_configurations, ip_config_name)
+class NICIPConfigNATAdd(_NICIPConfigNATAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.lb_name = AAZStrArg(
+            options=["--lb-name"],
+            help="Name of the load balancer",
+        )
+        args_schema.inbound_nat_rule._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/loadBalancers/{lb_name}/inboundNatRules/{}",
+        )
+        return args_schema
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result["ipConfigurations"][0]
 
 
-def remove_nic_ip_config_inbound_nat_rule(
-        cmd, resource_group_name, network_interface_name, ip_config_name, inbound_nat_rule,
-        load_balancer_name=None):
-    client = network_client_factory(cmd.cli_ctx).network_interfaces
-    nic = client.get(resource_group_name, network_interface_name)
-    ip_config = _get_nic_ip_config(nic, ip_config_name)
-    keep_items = \
-        [x for x in ip_config.load_balancer_inbound_nat_rules or [] if x.id != inbound_nat_rule]
-    ip_config.load_balancer_inbound_nat_rules = keep_items
-    poller = client.begin_create_or_update(resource_group_name, network_interface_name, nic)
-    return get_property(poller.result().ip_configurations, ip_config_name)
+class NICIPConfigNATRemove(_NICIPConfigNATRemove):
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.lb_name = AAZStrArg(
+            options=["--lb-name"],
+            help="Name of the load balancer",
+        )
+        args_schema.inbound_nat_rule._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/loadBalancers/{lb_name}/inboundNatRules/{}",
+        )
+        return args_schema
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result["ipConfigurations"][0]
 # endregion
 
 
@@ -5278,46 +4961,58 @@ def list_nsg_rules(cmd, resource_group_name, network_security_group_name, includ
 
 
 # region NetworkWatchers
-def _create_network_watchers(cmd, client, resource_group_name, locations, tags):
+def _create_network_watchers(cmd, resource_group_name, locations, tags):
     if resource_group_name is None:
         raise CLIError("usage error: '--resource-group' required when enabling new regions")
 
-    NetworkWatcher = cmd.get_models('NetworkWatcher')
+    from .aaz.latest.network.watcher import Create
     for location in locations:
-        client.create_or_update(
-            resource_group_name, '{}-watcher'.format(location),
-            NetworkWatcher(location=location, tags=tags))
+        Create(cli_ctx=cmd.cli_ctx)(command_args={
+            'name': '{}-watcher'.format(location),
+            'resource_group': resource_group_name,
+            'location': location,
+            'tags': tags
+        })
 
 
-def _update_network_watchers(cmd, client, watchers, tags):
-    NetworkWatcher = cmd.get_models('NetworkWatcher')
+def _update_network_watchers(cmd, watchers, tags):
+    from .aaz.latest.network.watcher import Update
     for watcher in watchers:
-        id_parts = parse_resource_id(watcher.id)
+        id_parts = parse_resource_id(watcher['id'])
         watcher_rg = id_parts['resource_group']
         watcher_name = id_parts['name']
-        watcher_tags = watcher.tags if tags is None else tags
-        client.create_or_update(
-            watcher_rg, watcher_name,
-            NetworkWatcher(location=watcher.location, tags=watcher_tags))
+        watcher_tags = watcher.get('tag', None) if tags is None else tags
+        Update(cli_ctx=cmd.cli_ctx)(command_args={
+            'name': watcher_name,
+            'resource_group': watcher_rg,
+            'location': watcher['location'],
+            'tags': watcher_tags
+        })
 
 
-def _delete_network_watchers(cmd, client, watchers):
+def _delete_network_watchers(cmd, watchers):
+    from .aaz.latest.network.watcher import Delete
     for watcher in watchers:
         from azure.cli.core.commands import LongRunningOperation
-        id_parts = parse_resource_id(watcher.id)
+        id_parts = parse_resource_id(watcher['id'])
         watcher_rg = id_parts['resource_group']
         watcher_name = id_parts['name']
         logger.warning(
             "Disabling Network Watcher for region '%s' by deleting resource '%s'",
-            watcher.location, watcher.id)
-        LongRunningOperation(cmd.cli_ctx)(client.begin_delete(watcher_rg, watcher_name))
+            watcher['location'], watcher['id'])
+        poller = Delete(cli_ctx=cmd.cli_ctx)(command_args={
+            'name': watcher_name,
+            'resource_group': watcher_rg
+        })
+        LongRunningOperation(cmd.cli_ctx)(poller)
 
 
-def configure_network_watcher(cmd, client, locations, resource_group_name=None, enabled=None, tags=None):
-    watcher_list = list(client.list_all())
+def configure_network_watcher(cmd, locations, resource_group_name=None, enabled=None, tags=None):
+    from .aaz.latest.network.watcher import List
+    watcher_list = List(cli_ctx=cmd.cli_ctx)(command_args={})
     locations_list = [location.lower() for location in locations]
-    existing_watchers = [w for w in watcher_list if w.location in locations_list]
-    nonenabled_regions = list(set(locations) - set(watcher.location for watcher in existing_watchers))
+    existing_watchers = [w for w in watcher_list if w["location"] in locations_list]
+    nonenabled_regions = list(set(locations) - set(watcher["location"] for watcher in existing_watchers))
 
     if enabled is None:
         if resource_group_name is not None:
@@ -5327,18 +5022,18 @@ def configure_network_watcher(cmd, client, locations, resource_group_name=None, 
         for location in nonenabled_regions:
             logger.warning(
                 "Region '%s' is not enabled for Network Watcher and will be ignored.", location)
-        _update_network_watchers(cmd, client, existing_watchers, tags)
+        _update_network_watchers(cmd, existing_watchers, tags)
 
     elif enabled:
-        _create_network_watchers(cmd, client, resource_group_name, nonenabled_regions, tags)
-        _update_network_watchers(cmd, client, existing_watchers, tags)
+        _create_network_watchers(cmd, resource_group_name, nonenabled_regions, tags)
+        _update_network_watchers(cmd, existing_watchers, tags)
 
     else:
         if tags is not None:
             raise CLIError("usage error: '--tags' cannot be used when disabling regions")
-        _delete_network_watchers(cmd, client, existing_watchers)
+        _delete_network_watchers(cmd, existing_watchers)
 
-    return client.list_all()
+    return List(cli_ctx=cmd.cli_ctx)(command_args={})
 
 
 def create_nw_connection_monitor(cmd,
@@ -6026,128 +5721,6 @@ def list_nw_connection_monitor_v2_output(client,
     return connection_monitor.outputs
 
 
-def show_topology_watcher(cmd, client, resource_group_name, network_watcher_name, target_resource_group_name=None,
-                          target_vnet=None, target_subnet=None):  # pylint: disable=unused-argument
-    TopologyParameters = cmd.get_models('TopologyParameters')
-    return client.get_topology(
-        resource_group_name=resource_group_name,
-        network_watcher_name=network_watcher_name,
-        parameters=TopologyParameters(
-            target_resource_group_name=target_resource_group_name,
-            target_virtual_network=target_vnet,
-            target_subnet=target_subnet
-        ))
-
-
-def check_nw_connectivity(cmd, client, watcher_rg, watcher_name, source_resource, source_port=None,
-                          dest_resource=None, dest_port=None, dest_address=None,
-                          resource_group_name=None, protocol=None, method=None, headers=None, valid_status_codes=None):
-    ConnectivitySource, ConnectivityDestination, ConnectivityParameters, ProtocolConfiguration, HTTPConfiguration = \
-        cmd.get_models(
-            'ConnectivitySource', 'ConnectivityDestination', 'ConnectivityParameters', 'ProtocolConfiguration',
-            'HTTPConfiguration')
-    params = ConnectivityParameters(
-        source=ConnectivitySource(resource_id=source_resource, port=source_port),
-        destination=ConnectivityDestination(resource_id=dest_resource, address=dest_address, port=dest_port),
-        protocol=protocol
-    )
-    if any([method, headers, valid_status_codes]):
-        params.protocol_configuration = ProtocolConfiguration(http_configuration=HTTPConfiguration(
-            method=method,
-            headers=headers,
-            valid_status_codes=valid_status_codes
-        ))
-    return client.begin_check_connectivity(watcher_rg, watcher_name, params)
-
-
-def check_nw_ip_flow(cmd, client, vm, watcher_rg, watcher_name, direction, protocol, local, remote,
-                     resource_group_name=None, nic=None, location=None):
-    VerificationIPFlowParameters = cmd.get_models('VerificationIPFlowParameters')
-
-    try:
-        local_ip_address, local_port = local.split(':')
-        remote_ip_address, remote_port = remote.split(':')
-    except:
-        raise CLIError("usage error: the format of the '--local' and '--remote' should be like x.x.x.x:port")
-
-    if not is_valid_resource_id(vm):
-        if not resource_group_name:
-            raise CLIError("usage error: --vm NAME --resource-group NAME | --vm ID")
-
-        vm = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-            namespace='Microsoft.Compute', type='virtualMachines', name=vm)
-
-    if nic and not is_valid_resource_id(nic):
-        if not resource_group_name:
-            raise CLIError("usage error: --nic NAME --resource-group NAME | --nic ID")
-
-        nic = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-            namespace='Microsoft.Network', type='networkInterfaces', name=nic)
-
-    return client.begin_verify_ip_flow(
-        watcher_rg, watcher_name,
-        VerificationIPFlowParameters(
-            target_resource_id=vm, direction=direction, protocol=protocol, local_port=local_port,
-            remote_port=remote_port, local_ip_address=local_ip_address,
-            remote_ip_address=remote_ip_address, target_nic_resource_id=nic))
-
-
-def show_nw_next_hop(cmd, client, resource_group_name, vm, watcher_rg, watcher_name,
-                     source_ip, dest_ip, nic=None, location=None):
-    NextHopParameters = cmd.get_models('NextHopParameters')
-
-    if not is_valid_resource_id(vm):
-        vm = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-            namespace='Microsoft.Compute', type='virtualMachines', name=vm)
-
-    if nic and not is_valid_resource_id(nic):
-        nic = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-            namespace='Microsoft.Network', type='networkInterfaces', name=nic)
-
-    return client.begin_get_next_hop(
-        watcher_rg, watcher_name, NextHopParameters(target_resource_id=vm,
-                                                    source_ip_address=source_ip,
-                                                    destination_ip_address=dest_ip,
-                                                    target_nic_resource_id=nic))
-
-
-def show_nw_security_view(cmd, client, resource_group_name, vm, watcher_rg, watcher_name, location=None):
-    if not is_valid_resource_id(vm):
-        vm = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-            namespace='Microsoft.Compute', type='virtualMachines', name=vm)
-
-    security_group_view_parameters = cmd.get_models('SecurityGroupViewParameters')(target_resource_id=vm)
-    return client.begin_get_vm_security_rules(watcher_rg, watcher_name, security_group_view_parameters)
-
-
-def create_nw_packet_capture(cmd, client, resource_group_name, capture_name,
-                             watcher_rg, watcher_name, vm=None, location=None,
-                             storage_account=None, storage_path=None, file_path=None,
-                             capture_size=None, capture_limit=None, time_limit=None, filters=None,
-                             target_type=None, target=None, include=None, exclude=None):
-    PacketCapture, PacketCaptureStorageLocation = cmd.get_models('PacketCapture', 'PacketCaptureStorageLocation')
-    PacketCaptureMachineScope = cmd.get_models('PacketCaptureMachineScope')
-    # Set the appropriate fields if target is VM
-    pcap_scope = None
-    if not target_type or target_type.lower() != "azurevmss":
-        target = vm
-    else:
-        pcap_scope = PacketCaptureMachineScope(include=include, exclude=exclude)
-
-    storage_settings = PacketCaptureStorageLocation(storage_id=storage_account,
-                                                    storage_path=storage_path, file_path=file_path)
-    capture_params = PacketCapture(target=target, storage_location=storage_settings,
-                                   bytes_to_capture_per_packet=capture_size,
-                                   total_bytes_per_session=capture_limit, time_limit_in_seconds=time_limit,
-                                   filters=filters, target_type=target_type, scope=pcap_scope)
-    return client.begin_create(watcher_rg, watcher_name, capture_name, capture_params)
-
-
 def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_account=None,
                          resource_group_name=None, enabled=None, retention=0, log_format=None, log_version=None,
                          traffic_analytics_workspace=None, traffic_analytics_interval=None,
@@ -6394,25 +5967,6 @@ def show_nw_troubleshooting_result(cmd, client, watcher_name, watcher_rg, resour
                                    resource_group_name=None):
     query_troubleshooting_parameters = cmd.get_models('QueryTroubleshootingParameters')(target_resource_id=resource)
     return client.begin_get_troubleshooting_result(watcher_rg, watcher_name, query_troubleshooting_parameters)
-
-
-def run_network_configuration_diagnostic(cmd, client, watcher_rg, watcher_name, resource,
-                                         direction=None, protocol=None, source=None, destination=None,
-                                         destination_port=None, queries=None,
-                                         resource_group_name=None, resource_type=None, parent=None):
-    NetworkConfigurationDiagnosticParameters, NetworkConfigurationDiagnosticProfile = \
-        cmd.get_models('NetworkConfigurationDiagnosticParameters', 'NetworkConfigurationDiagnosticProfile')
-
-    if not queries:
-        queries = [NetworkConfigurationDiagnosticProfile(
-            direction=direction,
-            protocol=protocol,
-            source=source,
-            destination=destination,
-            destination_port=destination_port
-        )]
-    params = NetworkConfigurationDiagnosticParameters(target_resource_id=resource, profiles=queries)
-    return client.begin_get_network_configuration_diagnostic(watcher_rg, watcher_name, params)
 # endregion
 
 
@@ -6811,6 +6365,10 @@ class VNetUpdate(_VNetUpdate):
         )
         return args_schema
 
+    def post_instance_update(self, instance):
+        if not has_value(instance.properties.ddos_protection_plan.id):
+            instance.properties.ddos_protection_plan = None
+
 
 class VNetSubnetCreate(_VNetSubnetCreate):
     @classmethod
@@ -6900,8 +6458,10 @@ class VNetSubnetCreate(_VNetSubnetCreate):
             element_transformer=lambda _, policy_id: {"id": policy_id}
         )
         # use string instead of bool
-        args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
-        args.private_link_service_network_policies = args.disable_private_link_service_network_policies
+        if has_value(args.disable_private_endpoint_network_policies):
+            args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
+        if has_value(args.disable_private_link_service_network_policies):
+            args.private_link_service_network_policies = args.disable_private_link_service_network_policies
 
 
 class VNetSubnetUpdate(_VNetSubnetUpdate):
@@ -7030,8 +6590,10 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             element_transformer=lambda _, policy_id: {"id": policy_id}
         )
         # use string instead of bool
-        args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
-        args.private_link_service_network_policies = args.disable_private_link_service_network_policies
+        if has_value(args.disable_private_endpoint_network_policies):
+            args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
+        if has_value(args.disable_private_link_service_network_policies):
+            args.private_link_service_network_policies = args.disable_private_link_service_network_policies
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.network_security_group.id):
@@ -7115,58 +6677,38 @@ def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_ne
 
 
 # region VirtualNetworkGateways
-def create_vnet_gateway_root_cert(cmd, resource_group_name, gateway_name, public_cert_data, cert_name):
-    VpnClientRootCertificate = cmd.get_models('VpnClientRootCertificate')
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
-    if not gateway.vpn_client_configuration:
-        raise CLIError("Must add address prefixes to gateway '{}' prior to adding a root cert."
-                       .format(gateway_name))
-    config = gateway.vpn_client_configuration
+class VnetGatewayRootCertCreate(_VnetGatewayRootCertCreate):
 
-    if config.vpn_client_root_certificates is None:
-        config.vpn_client_root_certificates = []
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.public_cert_data = AAZFileArg(options=['--public-cert-data'],
+                                                  help="Base64 contents of the root certificate file or file path.",
+                                                  required=True,
+                                                  fmt=AAZFileArgBase64EncodeFormat())
+        args_schema.root_cert_data._required = False
+        args_schema.root_cert_data._registered = False
+        return args_schema
 
-    cert = VpnClientRootCertificate(name=cert_name, public_cert_data=public_cert_data)
-    upsert_to_collection(config, 'vpn_client_root_certificates', cert, 'name')
-    return ncf.begin_create_or_update(resource_group_name, gateway_name, gateway)
-
-
-def delete_vnet_gateway_root_cert(cmd, resource_group_name, gateway_name, cert_name):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
-    config = gateway.vpn_client_configuration
-
-    try:
-        cert = next(c for c in config.vpn_client_root_certificates if c.name == cert_name)
-    except (AttributeError, StopIteration):
-        raise CLIError('Certificate "{}" not found in gateway "{}"'.format(cert_name, gateway_name))
-    config.vpn_client_root_certificates.remove(cert)
-
-    return ncf.begin_create_or_update(resource_group_name, gateway_name, gateway)
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.public_cert_data):
+            import os
+            path = os.path.expanduser(args.public_cert_data.to_serialized_data())
+        else:
+            path = None
+        args.root_cert_data = path
 
 
-def create_vnet_gateway_revoked_cert(cmd, resource_group_name, gateway_name, thumbprint, cert_name):
-    VpnClientRevokedCertificate = cmd.get_models('VpnClientRevokedCertificate')
-    config, gateway, ncf = _prep_cert_create(cmd, gateway_name, resource_group_name)
+class VnetGatewayRevokedCertCreate(_VnetGatewayRevokedCertCreate):
 
-    cert = VpnClientRevokedCertificate(name=cert_name, thumbprint=thumbprint)
-    upsert_to_collection(config, 'vpn_client_revoked_certificates', cert, 'name')
-    return ncf.begin_create_or_update(resource_group_name, gateway_name, gateway)
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.thumbprint._required = True
 
-
-def delete_vnet_gateway_revoked_cert(cmd, resource_group_name, gateway_name, cert_name):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
-    config = gateway.vpn_client_configuration
-
-    try:
-        cert = next(c for c in config.vpn_client_revoked_certificates if c.name == cert_name)
-    except (AttributeError, StopIteration):
-        raise CLIError('Certificate "{}" not found in gateway "{}"'.format(cert_name, gateway_name))
-    config.vpn_client_revoked_certificates.remove(cert)
-
-    return ncf.begin_create_or_update(resource_group_name, gateway_name, gateway)
+        return args_schema
 
 
 def _prep_cert_create(cmd, gateway_name, resource_group_name):
@@ -7205,6 +6747,7 @@ class VnetGatewayCreate(_VnetGatewayCreate):
         args_schema.vnet = AAZResourceIdArg(
             options=['--vnet'],
             help="Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'.",
+            required=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
             )
@@ -7299,6 +6842,7 @@ class VnetGatewayCreate(_VnetGatewayCreate):
             nat_rules = self.ctx.vars.instance.properties.natRules.to_serialized_data()
             for nat_rule in nat_rules:
                 if 'type' in nat_rule['properties']:
+                    # `properties.type` conflict with the `type` property when flatten `properties`
                     nat_rule['properties']['type'] = AAZUndefined
             self.ctx.vars.instance.properties.nat_rules = nat_rules
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -7326,7 +6870,6 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
             ),
-            nullable=True
         )
         args_schema.root_cert_data = AAZFileArg(options=['--root-cert-data'], arg_group="Root Cert Authentication",
                                                 help="Base64 contents of the root certificate file or file path.",
@@ -7340,6 +6883,7 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
         args_schema.active._registered = False
         args_schema.vpn_client_root_certificates._registered = False
         args_schema.sku_tier._registered = False
+        args_schema.vpn_client_ipsec_policies._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -7392,53 +6936,19 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
             args.active = active
 
 
-def start_vnet_gateway_package_capture(cmd, client, resource_group_name, virtual_network_gateway_name,
-                                       filter_data=None, no_wait=False):
-    VpnPacketCaptureStartParameters = cmd.get_models('VpnPacketCaptureStartParameters')
-    parameters = VpnPacketCaptureStartParameters(filter_data=filter_data)
-    return sdk_no_wait(no_wait, client.begin_start_packet_capture, resource_group_name,
-                       virtual_network_gateway_name, parameters=parameters)
-
-
-def stop_vnet_gateway_package_capture(cmd, client, resource_group_name, virtual_network_gateway_name,
-                                      sas_url, no_wait=False):
-    VpnPacketCaptureStopParameters = cmd.get_models('VpnPacketCaptureStopParameters')
-    parameters = VpnPacketCaptureStopParameters(sas_url=sas_url)
-    return sdk_no_wait(no_wait, client.begin_stop_packet_capture, resource_group_name,
-                       virtual_network_gateway_name, parameters=parameters)
-
-
-def generate_vpn_client(cmd, client, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
+def generate_vpn_client(cmd, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
                         authentication_method=None, radius_server_auth_certificate=None, client_root_certificates=None,
                         use_legacy=False):
-    params = cmd.get_models('VpnClientParameters')(
-        processor_architecture=processor_architecture
-    )
-
-    if cmd.supported_api_version(min_api='2017-06-01') and not use_legacy:
-        params.authentication_method = authentication_method
-        params.radius_server_auth_certificate = radius_server_auth_certificate
-        params.client_root_certificates = client_root_certificates
-        return client.begin_generate_vpn_profile(resource_group_name, virtual_network_gateway_name, params)
+    generate_args = {"name": virtual_network_gateway_name,
+                     "resource_group": resource_group_name,
+                     "processor_architecture": processor_architecture}
+    if not use_legacy:
+        generate_args['authentication_method'] = authentication_method
+        generate_args['radius_server_auth_certificate'] = radius_server_auth_certificate
+        generate_args['client_root_certificates'] = client_root_certificates
+        return _VpnProfileGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
     # legacy implementation
-    return client.begin_generatevpnclientpackage(resource_group_name, virtual_network_gateway_name, params)
-
-
-def set_vpn_client_ipsec_policy(cmd, client, resource_group_name, virtual_network_gateway_name,
-                                sa_life_time_seconds, sa_data_size_kilobytes,
-                                ipsec_encryption, ipsec_integrity,
-                                ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
-    VpnClientIPsecParameters = cmd.get_models('VpnClientIPsecParameters')
-    vpnclient_ipsec_params = VpnClientIPsecParameters(sa_life_time_seconds=sa_life_time_seconds,
-                                                      sa_data_size_kilobytes=sa_data_size_kilobytes,
-                                                      ipsec_encryption=ipsec_encryption,
-                                                      ipsec_integrity=ipsec_integrity,
-                                                      ike_encryption=ike_encryption,
-                                                      ike_integrity=ike_integrity,
-                                                      dh_group=dh_group,
-                                                      pfs_group=pfs_group)
-    return sdk_no_wait(no_wait, client.begin_set_vpnclient_ipsec_parameters, resource_group_name,
-                       virtual_network_gateway_name, vpnclient_ipsec_params)
+    return _VpnClientPackageGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
 
 
 class VnetGatewayVpnConnectionsDisconnect(_VnetGatewayVpnConnectionsDisconnect):
@@ -7467,7 +6977,6 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import build_vpn_connection_resource
 
-    client = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     tags = tags or {}
 
@@ -7507,238 +7016,218 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
-def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, tags=None,
-                          enable_bgp=None, use_policy_based_traffic_selectors=None,
-                          express_route_gateway_bypass=None):
+class VpnConnectionUpdate(_VpnConnectionUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.ipsec_policies._registered = False
 
-    with cmd.update_context(instance) as c:
-        c.set_param('routing_weight', routing_weight)
-        c.set_param('shared_key', shared_key)
-        c.set_param('tags', tags)
-        c.set_param('enable_bgp', enable_bgp)
-        c.set_param('express_route_gateway_bypass', express_route_gateway_bypass)
-        c.set_param('use_policy_based_traffic_selectors', use_policy_based_traffic_selectors)
-
-    # TODO: Remove these when issue #1615 is fixed
-    gateway1_id = parse_resource_id(instance.virtual_network_gateway1.id)
-    ncf = network_client_factory(cmd.cli_ctx, subscription_id=gateway1_id['subscription'])
-    instance.virtual_network_gateway1 = ncf.virtual_network_gateways.get(
-        gateway1_id['resource_group'], gateway1_id['name'])
-
-    if instance.virtual_network_gateway2:
-        gateway2_id = parse_resource_id(instance.virtual_network_gateway2.id)
-        ncf = network_client_factory(cmd.cli_ctx, subscription_id=gateway2_id['subscription'])
-        instance.virtual_network_gateway2 = ncf.virtual_network_gateways.get(
-            gateway2_id['resource_group'], gateway2_id['name'])
-
-    if instance.local_network_gateway2:
-        gateway2_id = parse_resource_id(instance.local_network_gateway2.id)
-        ncf = network_client_factory(cmd.cli_ctx, subscription_id=gateway2_id['subscription'])
-        instance.local_network_gateway2 = ncf.local_network_gateways.get(
-            gateway2_id['resource_group'], gateway2_id['name'])
-
-    return instance
+        return args_schema
 
 
 def list_vpn_connections(cmd, resource_group_name, virtual_network_gateway_name=None):
+    from .aaz.latest.network.vpn_connection import List, ListConnection
     if virtual_network_gateway_name:
-        client = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-        return client.list_connections(resource_group_name, virtual_network_gateway_name)
-    client = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
-    return client.list(resource_group_name)
+        return ListConnection(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": resource_group_name,
+                                                                 "vnet_gateway": virtual_network_gateway_name})
+    return List(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": resource_group_name})
 
 
-def start_vpn_conn_package_capture(cmd, client, resource_group_name, virtual_network_gateway_connection_name,
-                                   filter_data=None, no_wait=False):
-    VpnPacketCaptureStartParameters = cmd.get_models('VpnPacketCaptureStartParameters')
-    parameters = VpnPacketCaptureStartParameters(filter_data=filter_data)
-    return sdk_no_wait(no_wait, client.begin_start_packet_capture, resource_group_name,
-                       virtual_network_gateway_connection_name, parameters=parameters)
+class VpnConnPackageCaptureStop(_VpnConnPackageCaptureStop):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.sas_url._required = True
+        return args_schema
 
 
-def stop_vpn_conn_package_capture(cmd, client, resource_group_name, virtual_network_gateway_connection_name,
-                                  sas_url, no_wait=False):
-    VpnPacketCaptureStopParameters = cmd.get_models('VpnPacketCaptureStopParameters')
-    parameters = VpnPacketCaptureStopParameters(sas_url=sas_url)
-    return sdk_no_wait(no_wait, client.begin_stop_packet_capture, resource_group_name,
-                       virtual_network_gateway_connection_name, parameters=parameters)
+class VpnConnectionDeviceConfigScriptShow(_VpnConnectionDeviceConfigScriptShow):
 
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.device_family._required = True
+        args_schema.firmware_version._required = True
+        args_schema.vendor._required = True
 
-def show_vpn_connection_device_config_script(cmd, client, resource_group_name, virtual_network_gateway_connection_name,
-                                             vendor, device_family, firmware_version):
-    VpnDeviceScriptParameters = cmd.get_models('VpnDeviceScriptParameters')
-    parameters = VpnDeviceScriptParameters(
-        vendor=vendor,
-        device_family=device_family,
-        firmware_version=firmware_version
-    )
-    return client.vpn_device_configuration_script(resource_group_name, virtual_network_gateway_connection_name,
-                                                  parameters=parameters)
+        return args_schema
 # endregion
 
 
 # region IPSec Policy Commands
-def add_vnet_gateway_ipsec_policy(cmd, resource_group_name, gateway_name,
-                                  sa_life_time_seconds, sa_data_size_kilobytes,
-                                  ipsec_encryption, ipsec_integrity,
-                                  ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
-    IpsecPolicy = cmd.get_models('IpsecPolicy')
-    new_policy = IpsecPolicy(sa_life_time_seconds=sa_life_time_seconds,
-                             sa_data_size_kilobytes=sa_data_size_kilobytes,
-                             ipsec_encryption=ipsec_encryption,
-                             ipsec_integrity=ipsec_integrity,
-                             ike_encryption=ike_encryption,
-                             ike_integrity=ike_integrity,
-                             dh_group=dh_group,
-                             pfs_group=pfs_group)
+class VnetGatewayIpsecPolicyAdd(_VnetGatewayIpsecPolicyAdd):
 
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
-    try:
-        if gateway.vpn_client_configuration.vpn_client_ipsec_policies:
-            gateway.vpn_client_configuration.vpn_client_ipsec_policies.append(new_policy)
-        else:
-            gateway.vpn_client_configuration.vpn_client_ipsec_policies = [new_policy]
-    except AttributeError:
-        raise CLIError('VPN client configuration must first be set through `az network vnet-gateway create/update`.')
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vpn_client_ipsec_policy_index._registered = False
+
+        return args_schema
 
 
 def clear_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
-    try:
-        gateway.vpn_client_configuration.vpn_client_ipsec_policies = None
-    except AttributeError:
-        raise CLIError('VPN client configuration must first be set through `az network vnet-gateway create/update`.')
-    if no_wait:
-        return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
 
-    from azure.cli.core.commands import LongRunningOperation
-    poller = sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
-    return LongRunningOperation(cmd.cli_ctx)(poller).vpn_client_configuration.vpn_client_ipsec_policies
+    class VnetGatewayIpsecPoliciesClear(_VnetGatewayUpdate):
 
+        def _output(self, *args, **kwargs):
+            result = self.deserialize_output(
+                self.ctx.vars.instance.properties.vpn_client_configuration.vpn_client_ipsec_policies,
+                client_flatten=True
+            )
+            return result
 
-def list_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    try:
-        return ncf.get(resource_group_name, gateway_name).vpn_client_configuration.vpn_client_ipsec_policies
-    except AttributeError:
-        raise CLIError('VPN client configuration must first be set through `az network vnet-gateway create/update`.')
+        def pre_instance_update(self, instance):
+            instance.properties.vpn_client_configuration.vpn_client_ipsec_policies = None
 
+    ipsec_policies_args = {
+        "resource_group": resource_group_name,
+        "name": gateway_name,
+        "no_wait": no_wait
+    }
 
-def add_vpn_conn_ipsec_policy(cmd, client, resource_group_name, connection_name,
-                              sa_life_time_seconds, sa_data_size_kilobytes,
-                              ipsec_encryption, ipsec_integrity,
-                              ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
-    IpsecPolicy = cmd.get_models('IpsecPolicy')
-    new_policy = IpsecPolicy(sa_life_time_seconds=sa_life_time_seconds,
-                             sa_data_size_kilobytes=sa_data_size_kilobytes,
-                             ipsec_encryption=ipsec_encryption,
-                             ipsec_integrity=ipsec_integrity,
-                             ike_encryption=ike_encryption,
-                             ike_integrity=ike_integrity,
-                             dh_group=dh_group,
-                             pfs_group=pfs_group)
-
-    conn = client.get(resource_group_name, connection_name)
-    if conn.ipsec_policies:
-        conn.ipsec_policies.append(new_policy)
-    else:
-        conn.ipsec_policies = [new_policy]
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
+    return VnetGatewayIpsecPoliciesClear(cli_ctx=cmd.cli_ctx)(command_args=ipsec_policies_args)
 
 
-def clear_vpn_conn_ipsec_policies(cmd, client, resource_group_name, connection_name, no_wait=False):
-    conn = client.get(resource_group_name, connection_name)
-    conn.ipsec_policies = None
-    conn.use_policy_based_traffic_selectors = False
-    if no_wait:
-        return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
-
-    from azure.cli.core.commands import LongRunningOperation
-    poller = sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
-    return LongRunningOperation(cmd.cli_ctx)(poller).ipsec_policies
+class VpnConnIpsecPolicyAdd(_VpnConnIpsecPolicyAdd):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.ipsec_policy_index._registered = False
+        return args_schema
 
 
-def list_vpn_conn_ipsec_policies(cmd, client, resource_group_name, connection_name):
-    return client.get(resource_group_name, connection_name).ipsec_policies
+def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_wait=False):
+    class VpnConnIpsecPoliciesClear(_VpnConnectionUpdate):
+
+        def _output(self, *args, **kwargs):
+            result = self.deserialize_output(self.ctx.vars.instance.properties.ipsec_policies, client_flatten=True)
+            return result
+
+        def pre_operations(self):
+            args = self.ctx.args
+            args.ipsec_policies = None
+            args.use_policy_based_traffic_selectors = False
+
+    ipsec_policies_args = {
+        "resource_group": resource_group_name,
+        "name": connection_name,
+        "no_wait": no_wait,
+    }
+    return VpnConnIpsecPoliciesClear(cli_ctx=cmd.cli_ctx)(command_args=ipsec_policies_args)
 
 
-def assign_vnet_gateway_aad(cmd, resource_group_name, gateway_name,
-                            aad_tenant, aad_audience, aad_issuer, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
+class VnetGatewayAadAssign(_VnetGatewayAadAssign):
 
-    if gateway.vpn_client_configuration is None:
-        raise CLIError('VPN client configuration must be set first through `az network vnet-gateway create/update`.')
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.audience._required = True
+        args_schema.issuer._required = True
+        args_schema.tenant._required = True
 
-    gateway.vpn_client_configuration.aad_tenant = aad_tenant
-    gateway.vpn_client_configuration.aad_audience = aad_audience
-    gateway.vpn_client_configuration.aad_issuer = aad_issuer
-
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
-
-
-def show_vnet_gateway_aad(cmd, resource_group_name, gateway_name):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
-
-    if gateway.vpn_client_configuration is None:
-        raise CLIError('VPN client configuration must be set first through `az network vnet-gateway create/update`.')
-
-    return gateway.vpn_client_configuration
+        return args_schema
 
 
 def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
+    class VnetGatewayAadRemove(_VnetGatewayUpdate):
+        def pre_operations(self):
+            args = self.ctx.args
+            args.no_wait = no_wait
 
-    if gateway.vpn_client_configuration is None:
-        raise CLIError('VPN client configuration must be set first through `az network vnet-gateway create/update`.')
-
-    gateway.vpn_client_configuration.aad_tenant = None
-    gateway.vpn_client_configuration.aad_audience = None
-    gateway.vpn_client_configuration.aad_issuer = None
-    if cmd.supported_api_version(min_api='2020-11-01'):
-        gateway.vpn_client_configuration.vpn_authentication_types = None
-
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
-
-
-def add_vnet_gateway_nat_rule(cmd, resource_group_name, gateway_name, name, internal_mappings, external_mappings,
-                              rule_type=None, mode=None, ip_config_id=None, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
-
-    VirtualNetworkGatewayNatRule, VpnNatRuleMapping = cmd.get_models('VirtualNetworkGatewayNatRule',
-                                                                     'VpnNatRuleMapping')
-    gateway.nat_rules.append(
-        VirtualNetworkGatewayNatRule(type_properties_type=rule_type, mode=mode, name=name,
-                                     internal_mappings=[VpnNatRuleMapping(address_space=i_map) for i_map in internal_mappings] if internal_mappings else None,
-                                     external_mappings=[VpnNatRuleMapping(address_space=e_map) for e_map in external_mappings] if external_mappings else None,
-                                     ip_configuration_id=ip_config_id))
-
-    return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
+    aad_args = {"resource_group": resource_group_name,
+                "name": gateway_name,
+                "aad_audience": None,
+                "aad_issuer": None,
+                "aad_tenant": None,
+                "vpn_auth_type": None}
+    from azure.cli.core.commands import LongRunningOperation
+    poller = VnetGatewayAadRemove(cli_ctx=cmd.cli_ctx)(command_args=aad_args)
+    return LongRunningOperation(cmd.cli_ctx)(poller)['vpnClientConfiguration']
 
 
-def show_vnet_gateway_nat_rule(cmd, resource_group_name, gateway_name):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
+class VnetGatewayNatRuleAdd(_VnetGatewayNatRuleAdd):
 
-    return gateway.nat_rules
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.external_mappings = AAZListArg(
+            options=["--external-mappings"],
+            help="The private IP address external mapping for NAT.",
+            required=True
+        )
+        args_schema.external_mappings.Element = AAZStrArg()
+        args_schema.internal_mappings = AAZListArg(
+            options=["--internal-mappings"],
+            help="The private IP address internal mapping for NAT.",
+            required=True
+        )
+        args_schema.internal_mappings.Element = AAZStrArg()
+
+        args_schema.external_mappings_ip._registered = False
+        args_schema.internal_mappings_ip._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.external_mappings):
+            args.external_mappings_ip = assign_aaz_list_arg(
+                args.external_mappings_ip,
+                args.external_mappings,
+                element_transformer=lambda _, external_mapping: {"address_space": external_mapping}
+            )
+
+        if has_value(args.internal_mappings):
+            args.internal_mappings_ip = assign_aaz_list_arg(
+                args.internal_mappings_ip,
+                args.internal_mappings,
+                element_transformer=lambda _, internal_mapping: {"address_space": internal_mapping}
+            )
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined
+        if has_value(self.ctx.vars.instance.properties.nat_rules):
+            nat_rules = self.ctx.vars.instance.properties.natRules.to_serialized_data()
+            for nat_rule in nat_rules:
+                if 'type' in nat_rule['properties']:
+                    nat_rule['properties']['type'] = AAZUndefined
+            self.ctx.vars.instance.properties.nat_rules = nat_rules
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
-def remove_vnet_gateway_nat_rule(cmd, resource_group_name, gateway_name, name, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
+class VnetGatewayNatRuleShow(_VnetGatewayNatRuleShow):
 
-    for rule in gateway.nat_rules:
-        if name == rule.name:
-            gateway.nat_rules.remove(rule)
-            return sdk_no_wait(no_wait, ncf.begin_create_or_update, resource_group_name, gateway_name, gateway)
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined
+        if has_value(self.ctx.vars.instance.properties.nat_rules):
+            nat_rules = self.ctx.vars.instance.properties.natRules.to_serialized_data()
+            for nat_rule in nat_rules:
+                if 'type' in nat_rule['properties']:
+                    nat_rule['properties']['type'] = AAZUndefined
+            self.ctx.vars.instance.properties.nat_rules = nat_rules
+        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
+        return result
 
-    raise UnrecognizedArgumentError(f'Do not find nat_rules named {name}!!!')
+
+class VnetGatewayNatRuleRemove(_VnetGatewayNatRuleRemove):
+
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined
+        if has_value(self.ctx.vars.instance.properties.nat_rules):
+            nat_rules = self.ctx.vars.instance.properties.natRules.to_serialized_data()
+            for nat_rule in nat_rules:
+                if 'type' in nat_rule['properties']:
+                    nat_rule['properties']['type'] = AAZUndefined
+            self.ctx.vars.instance.properties.nat_rules = nat_rules
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 # endregion
 
 
@@ -8119,18 +7608,13 @@ def delete_virtual_router_peering(cmd, resource_group_name, virtual_router_name,
 
 
 # region network gateway connection
-def reset_shared_key(cmd, client, virtual_network_gateway_connection_name, key_length, resource_group_name=None):
-    ConnectionResetSharedKey = cmd.get_models('ConnectionResetSharedKey')
-    shared_key = ConnectionResetSharedKey(key_length=key_length)
-    return client.begin_reset_shared_key(resource_group_name=resource_group_name,
-                                         virtual_network_gateway_connection_name=virtual_network_gateway_connection_name,
-                                         parameters=shared_key)
+class VpnConnSharedKeyUpdate(_VpnConnSharedKeyUpdate):
 
-
-def update_shared_key(cmd, instance, value):
-    with cmd.update_context(instance) as c:
-        c.set_param('value', value)
-    return instance
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.value._required = True
+        return args_schema
 # endregion
 
 

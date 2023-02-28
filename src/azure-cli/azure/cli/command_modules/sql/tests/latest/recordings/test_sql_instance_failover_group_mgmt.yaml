@@ -12,8 +12,9 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
+        --secondary-type
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/mi-primary-wcus?api-version=2021-05-01-preview
   response:
@@ -28,7 +29,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:38:56 GMT
+      - Fri, 10 Feb 2023 11:14:33 GMT
       expires:
       - '-1'
       pragma:
@@ -59,8 +60,9 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
+        --secondary-type
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/managedInstances/mi-mdcs-cx-secondary?api-version=2021-05-01-preview
   response:
@@ -74,7 +76,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:38:57 GMT
+      - Fri, 10 Feb 2023 11:14:34 GMT
       expires:
       - '-1'
       pragma:
@@ -93,10 +95,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"readWriteEndpoint": {"failoverPolicy": "Automatic", "failoverWithDataLossGracePeriodMinutes":
-      120}, "readOnlyEndpoint": {"failoverPolicy": "Disabled"}, "partnerRegions":
-      [{"location": "centralus"}], "managedInstancePairs": [{"primaryManagedInstanceId":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/mi-primary-wcus",
+    body: '{"properties": {"secondaryType": "Standby", "readWriteEndpoint": {"failoverPolicy":
+      "Automatic", "failoverWithDataLossGracePeriodMinutes": 120}, "readOnlyEndpoint":
+      {"failoverPolicy": "Disabled"}, "partnerRegions": [{"location": "centralus"}],
+      "managedInstancePairs": [{"primaryManagedInstanceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/mi-primary-wcus",
       "partnerManagedInstanceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/managedInstances/mi-mdcs-cx-secondary"}]}}'
     headers:
       Accept:
@@ -108,33 +110,34 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '608'
+      - '636'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
+        --secondary-type
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
   response:
     body:
-      string: '{"operation":"CreateManagedFailoverGroup","startTime":"2023-01-27T13:38:59.447Z"}'
+      string: '{"operation":"CreateManagedFailoverGroup","startTime":"2023-02-10T11:14:36.21Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d878f064-a217-4aff-9f7e-a5b426e73519?api-version=2022-05-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/a4643838-e61f-41b6-a56c-878fc76fcdc2?api-version=2022-05-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '81'
+      - '80'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:39:00 GMT
+      - Fri, 10 Feb 2023 11:14:37 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupOperationResults/d878f064-a217-4aff-9f7e-a5b426e73519?api-version=2022-05-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupOperationResults/a4643838-e61f-41b6-a56c-878fc76fcdc2?api-version=2022-05-01-preview
       pragma:
       - no-cache
       server:
@@ -161,611 +164,14 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
+        --secondary-type
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d878f064-a217-4aff-9f7e-a5b426e73519?api-version=2022-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/a4643838-e61f-41b6-a56c-878fc76fcdc2?api-version=2022-05-01-preview
   response:
     body:
-      string: '{"name":"d878f064-a217-4aff-9f7e-a5b426e73519","status":"InProgress","startTime":"2023-01-27T13:38:59.447Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:39:10 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d878f064-a217-4aff-9f7e-a5b426e73519?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"d878f064-a217-4aff-9f7e-a5b426e73519","status":"InProgress","startTime":"2023-01-27T13:38:59.447Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:39:20 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d878f064-a217-4aff-9f7e-a5b426e73519?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"d878f064-a217-4aff-9f7e-a5b426e73519","status":"InProgress","startTime":"2023-01-27T13:38:59.447Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:39:31 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d878f064-a217-4aff-9f7e-a5b426e73519?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"d878f064-a217-4aff-9f7e-a5b426e73519","status":"InProgress","startTime":"2023-01-27T13:38:59.447Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:39:41 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d878f064-a217-4aff-9f7e-a5b426e73519?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"d878f064-a217-4aff-9f7e-a5b426e73519","status":"InProgress","startTime":"2023-01-27T13:38:59.447Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:39:52 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d878f064-a217-4aff-9f7e-a5b426e73519?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"d878f064-a217-4aff-9f7e-a5b426e73519","status":"InProgress","startTime":"2023-01-27T13:38:59.447Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:40:02 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d878f064-a217-4aff-9f7e-a5b426e73519?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"d878f064-a217-4aff-9f7e-a5b426e73519","status":"InProgress","startTime":"2023-01-27T13:38:59.447Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:40:14 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d878f064-a217-4aff-9f7e-a5b426e73519?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"d878f064-a217-4aff-9f7e-a5b426e73519","status":"InProgress","startTime":"2023-01-27T13:38:59.447Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:40:29 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d878f064-a217-4aff-9f7e-a5b426e73519?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"d878f064-a217-4aff-9f7e-a5b426e73519","status":"InProgress","startTime":"2023-01-27T13:38:59.447Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:40:47 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d878f064-a217-4aff-9f7e-a5b426e73519?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"d878f064-a217-4aff-9f7e-a5b426e73519","status":"InProgress","startTime":"2023-01-27T13:38:59.447Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:41:08 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d878f064-a217-4aff-9f7e-a5b426e73519?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"d878f064-a217-4aff-9f7e-a5b426e73519","status":"InProgress","startTime":"2023-01-27T13:38:59.447Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:41:34 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d878f064-a217-4aff-9f7e-a5b426e73519?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"d878f064-a217-4aff-9f7e-a5b426e73519","status":"InProgress","startTime":"2023-01-27T13:38:59.447Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:42:05 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d878f064-a217-4aff-9f7e-a5b426e73519?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"d878f064-a217-4aff-9f7e-a5b426e73519","status":"InProgress","startTime":"2023-01-27T13:38:59.447Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:42:42 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d878f064-a217-4aff-9f7e-a5b426e73519?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"d878f064-a217-4aff-9f7e-a5b426e73519","status":"Succeeded","startTime":"2023-01-27T13:38:59.447Z"}'
+      string: '{"name":"a4643838-e61f-41b6-a56c-878fc76fcdc2","status":"InProgress","startTime":"2023-02-10T11:14:36.21Z"}'
     headers:
       cache-control:
       - no-cache
@@ -774,7 +180,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:43:26 GMT
+      - Fri, 10 Feb 2023 11:14:47 GMT
       expires:
       - '-1'
       pragma:
@@ -805,23 +211,541 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
+        --secondary-type
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/a4643838-e61f-41b6-a56c-878fc76fcdc2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"a4643838-e61f-41b6-a56c-878fc76fcdc2","status":"InProgress","startTime":"2023-02-10T11:14:36.21Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Feb 2023 11:14:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-failover-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
+        --secondary-type
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/a4643838-e61f-41b6-a56c-878fc76fcdc2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"a4643838-e61f-41b6-a56c-878fc76fcdc2","status":"InProgress","startTime":"2023-02-10T11:14:36.21Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Feb 2023 11:15:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-failover-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
+        --secondary-type
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/a4643838-e61f-41b6-a56c-878fc76fcdc2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"a4643838-e61f-41b6-a56c-878fc76fcdc2","status":"InProgress","startTime":"2023-02-10T11:14:36.21Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Feb 2023 11:15:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-failover-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
+        --secondary-type
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/a4643838-e61f-41b6-a56c-878fc76fcdc2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"a4643838-e61f-41b6-a56c-878fc76fcdc2","status":"InProgress","startTime":"2023-02-10T11:14:36.21Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Feb 2023 11:15:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-failover-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
+        --secondary-type
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/a4643838-e61f-41b6-a56c-878fc76fcdc2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"a4643838-e61f-41b6-a56c-878fc76fcdc2","status":"InProgress","startTime":"2023-02-10T11:14:36.21Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Feb 2023 11:15:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-failover-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
+        --secondary-type
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/a4643838-e61f-41b6-a56c-878fc76fcdc2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"a4643838-e61f-41b6-a56c-878fc76fcdc2","status":"InProgress","startTime":"2023-02-10T11:14:36.21Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Feb 2023 11:15:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-failover-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
+        --secondary-type
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/a4643838-e61f-41b6-a56c-878fc76fcdc2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"a4643838-e61f-41b6-a56c-878fc76fcdc2","status":"InProgress","startTime":"2023-02-10T11:14:36.21Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Feb 2023 11:16:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-failover-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
+        --secondary-type
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/a4643838-e61f-41b6-a56c-878fc76fcdc2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"a4643838-e61f-41b6-a56c-878fc76fcdc2","status":"InProgress","startTime":"2023-02-10T11:14:36.21Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Feb 2023 11:16:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-failover-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
+        --secondary-type
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/a4643838-e61f-41b6-a56c-878fc76fcdc2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"a4643838-e61f-41b6-a56c-878fc76fcdc2","status":"InProgress","startTime":"2023-02-10T11:14:36.21Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Feb 2023 11:16:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-failover-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
+        --secondary-type
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/a4643838-e61f-41b6-a56c-878fc76fcdc2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"a4643838-e61f-41b6-a56c-878fc76fcdc2","status":"InProgress","startTime":"2023-02-10T11:14:36.21Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Feb 2023 11:17:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-failover-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
+        --secondary-type
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/a4643838-e61f-41b6-a56c-878fc76fcdc2?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"a4643838-e61f-41b6-a56c-878fc76fcdc2","status":"Succeeded","startTime":"2023-02-10T11:14:36.21Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Feb 2023 11:17:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-failover-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --mi --partner-resource-group --partner-mi --failover-policy --grace-period
+        --secondary-type
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
   response:
     body:
-      string: '{"properties":{"secondaryType":"Geo","readWriteEndpoint":{"failoverPolicy":"Automatic","failoverWithDataLossGracePeriodMinutes":120},"readOnlyEndpoint":{"failoverPolicy":"Disabled"},"replicationRole":"Primary","replicationState":"CATCH_UP","partnerRegions":[{"location":"centralus","replicationRole":"Secondary"}],"managedInstancePairs":[{"primaryManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/mi-primary-wcus","partnerManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/managedInstances/mi-mdcs-cx-secondary"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/West
+      string: '{"properties":{"secondaryType":"Standby","readWriteEndpoint":{"failoverPolicy":"Automatic","failoverWithDataLossGracePeriodMinutes":120},"readOnlyEndpoint":{"failoverPolicy":"Disabled"},"replicationRole":"Primary","replicationState":"CATCH_UP","partnerRegions":[{"location":"centralus","replicationRole":"Secondary"}],"managedInstancePairs":[{"primaryManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/mi-primary-wcus","partnerManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/managedInstances/mi-mdcs-cx-secondary"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/West
         Central US/instanceFailoverGroups/fgtest2022a","name":"fgtest2022a","type":"Microsoft.Sql/locations/instanceFailoverGroups"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '964'
+      - '968'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:43:27 GMT
+      - Fri, 10 Feb 2023 11:17:38 GMT
       expires:
       - '-1'
       pragma:
@@ -853,22 +777,22 @@ interactions:
       ParameterSetName:
       - -g -l -n
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
   response:
     body:
-      string: '{"properties":{"secondaryType":"Geo","readWriteEndpoint":{"failoverPolicy":"Automatic","failoverWithDataLossGracePeriodMinutes":120},"readOnlyEndpoint":{"failoverPolicy":"Disabled"},"replicationRole":"Secondary","replicationState":"CATCH_UP","partnerRegions":[{"location":"westcentralus","replicationRole":"Primary"}],"managedInstancePairs":[{"primaryManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/mi-primary-wcus","partnerManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/managedInstances/mi-mdcs-cx-secondary"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/locations/Central
+      string: '{"properties":{"secondaryType":"Standby","readWriteEndpoint":{"failoverPolicy":"Automatic","failoverWithDataLossGracePeriodMinutes":120},"readOnlyEndpoint":{"failoverPolicy":"Disabled"},"replicationRole":"Secondary","replicationState":"CATCH_UP","partnerRegions":[{"location":"westcentralus","replicationRole":"Primary"}],"managedInstancePairs":[{"primaryManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/mi-primary-wcus","partnerManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/managedInstances/mi-mdcs-cx-secondary"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/locations/Central
         US/instanceFailoverGroups/fgtest2022a","name":"fgtest2022a","type":"Microsoft.Sql/locations/instanceFailoverGroups"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '960'
+      - '964'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:43:27 GMT
+      - Fri, 10 Feb 2023 11:17:39 GMT
       expires:
       - '-1'
       pragma:
@@ -898,24 +822,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -l --grace-period
+      - -g -n -l --grace-period --secondary-type
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
   response:
     body:
-      string: '{"properties":{"secondaryType":"Geo","readWriteEndpoint":{"failoverPolicy":"Automatic","failoverWithDataLossGracePeriodMinutes":120},"readOnlyEndpoint":{"failoverPolicy":"Disabled"},"replicationRole":"Primary","replicationState":"CATCH_UP","partnerRegions":[{"location":"centralus","replicationRole":"Secondary"}],"managedInstancePairs":[{"primaryManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/mi-primary-wcus","partnerManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/managedInstances/mi-mdcs-cx-secondary"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/West
+      string: '{"properties":{"secondaryType":"Standby","readWriteEndpoint":{"failoverPolicy":"Automatic","failoverWithDataLossGracePeriodMinutes":120},"readOnlyEndpoint":{"failoverPolicy":"Disabled"},"replicationRole":"Primary","replicationState":"CATCH_UP","partnerRegions":[{"location":"centralus","replicationRole":"Secondary"}],"managedInstancePairs":[{"primaryManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/mi-primary-wcus","partnerManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/managedInstances/mi-mdcs-cx-secondary"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/West
         Central US/instanceFailoverGroups/fgtest2022a","name":"fgtest2022a","type":"Microsoft.Sql/locations/instanceFailoverGroups"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '964'
+      - '968'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:43:27 GMT
+      - Fri, 10 Feb 2023 11:17:40 GMT
       expires:
       - '-1'
       pragma:
@@ -953,29 +877,29 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g -n -l --grace-period
+      - -g -n -l --grace-period --secondary-type
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
   response:
     body:
-      string: '{"operation":"UpdateManagedFailoverGroup","startTime":"2023-01-27T13:43:29.957Z"}'
+      string: '{"operation":"UpdateManagedFailoverGroup","startTime":"2023-02-10T11:17:42.25Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/e9efe2a6-4b0a-4c69-838d-e0086c8036d4?api-version=2022-05-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/f1d06aeb-4468-4e94-8304-a4357d941327?api-version=2022-05-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '81'
+      - '80'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:43:30 GMT
+      - Fri, 10 Feb 2023 11:17:42 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupOperationResults/e9efe2a6-4b0a-4c69-838d-e0086c8036d4?api-version=2022-05-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupOperationResults/f1d06aeb-4468-4e94-8304-a4357d941327?api-version=2022-05-01-preview
       pragma:
       - no-cache
       server:
@@ -1001,23 +925,23 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -l --grace-period
+      - -g -n -l --grace-period --secondary-type
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/e9efe2a6-4b0a-4c69-838d-e0086c8036d4?api-version=2022-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/f1d06aeb-4468-4e94-8304-a4357d941327?api-version=2022-05-01-preview
   response:
     body:
-      string: '{"name":"e9efe2a6-4b0a-4c69-838d-e0086c8036d4","status":"Succeeded","startTime":"2023-01-27T13:43:29.957Z"}'
+      string: '{"name":"f1d06aeb-4468-4e94-8304-a4357d941327","status":"Succeeded","startTime":"2023-02-10T11:17:42.25Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '107'
+      - '106'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:43:41 GMT
+      - Fri, 10 Feb 2023 11:17:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1047,9 +971,9 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -l --grace-period
+      - -g -n -l --grace-period --secondary-type
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
   response:
@@ -1064,7 +988,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:43:41 GMT
+      - Fri, 10 Feb 2023 11:17:53 GMT
       expires:
       - '-1'
       pragma:
@@ -1096,7 +1020,7 @@ interactions:
       ParameterSetName:
       - -g -l -n
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
   response:
@@ -1111,7 +1035,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:43:41 GMT
+      - Fri, 10 Feb 2023 11:17:53 GMT
       expires:
       - '-1'
       pragma:
@@ -1143,7 +1067,7 @@ interactions:
       ParameterSetName:
       - -g -n -l --failover-policy
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
   response:
@@ -1158,7 +1082,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:43:41 GMT
+      - Fri, 10 Feb 2023 11:17:54 GMT
       expires:
       - '-1'
       pragma:
@@ -1198,15 +1122,15 @@ interactions:
       ParameterSetName:
       - -g -n -l --failover-policy
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
   response:
     body:
-      string: '{"operation":"UpdateManagedFailoverGroup","startTime":"2023-01-27T13:43:43.083Z"}'
+      string: '{"operation":"UpdateManagedFailoverGroup","startTime":"2023-02-10T11:17:56.797Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/709c90f1-7f55-4a5b-b4f0-ee5a652844e9?api-version=2022-05-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/c0d20b0b-e18c-4326-a1c0-9ee572af2de3?api-version=2022-05-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1214,11 +1138,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:43:43 GMT
+      - Fri, 10 Feb 2023 11:17:57 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupOperationResults/709c90f1-7f55-4a5b-b4f0-ee5a652844e9?api-version=2022-05-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupOperationResults/c0d20b0b-e18c-4326-a1c0-9ee572af2de3?api-version=2022-05-01-preview
       pragma:
       - no-cache
       server:
@@ -1228,7 +1152,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 202
       message: Accepted
@@ -1246,12 +1170,12 @@ interactions:
       ParameterSetName:
       - -g -n -l --failover-policy
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/709c90f1-7f55-4a5b-b4f0-ee5a652844e9?api-version=2022-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/c0d20b0b-e18c-4326-a1c0-9ee572af2de3?api-version=2022-05-01-preview
   response:
     body:
-      string: '{"name":"709c90f1-7f55-4a5b-b4f0-ee5a652844e9","status":"Succeeded","startTime":"2023-01-27T13:43:43.083Z"}'
+      string: '{"name":"c0d20b0b-e18c-4326-a1c0-9ee572af2de3","status":"Succeeded","startTime":"2023-02-10T11:17:56.797Z"}'
     headers:
       cache-control:
       - no-cache
@@ -1260,7 +1184,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:43:53 GMT
+      - Fri, 10 Feb 2023 11:18:07 GMT
       expires:
       - '-1'
       pragma:
@@ -1292,7 +1216,7 @@ interactions:
       ParameterSetName:
       - -g -n -l --failover-policy
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
   response:
@@ -1307,7 +1231,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:43:53 GMT
+      - Fri, 10 Feb 2023 11:18:07 GMT
       expires:
       - '-1'
       pragma:
@@ -1339,7 +1263,7 @@ interactions:
       ParameterSetName:
       - -g -n -l
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
   response:
@@ -1354,7 +1278,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:43:54 GMT
+      - Fri, 10 Feb 2023 11:18:08 GMT
       expires:
       - '-1'
       pragma:
@@ -1388,391 +1312,15 @@ interactions:
       ParameterSetName:
       - -g -n -l
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroups/fgtest2022a/failover?api-version=2022-05-01-preview
   response:
     body:
-      string: '{"operation":"FailoverManagedFailoverGroup","startTime":"2023-01-27T13:43:55.117Z"}'
+      string: '{"operation":"FailoverManagedFailoverGroup","startTime":"2023-02-10T11:18:09.38Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroupAzureAsyncOperation/f8a4a853-fadf-4fc6-9e92-449ed41b0561?api-version=2022-05-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '83'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:43:54 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroupOperationResults/f8a4a853-fadf-4fc6-9e92-449ed41b0561?api-version=2022-05-01-preview
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group set-primary
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroupAzureAsyncOperation/f8a4a853-fadf-4fc6-9e92-449ed41b0561?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"f8a4a853-fadf-4fc6-9e92-449ed41b0561","status":"InProgress","startTime":"2023-01-27T13:43:55.117Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:44:04 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group set-primary
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroupAzureAsyncOperation/f8a4a853-fadf-4fc6-9e92-449ed41b0561?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"f8a4a853-fadf-4fc6-9e92-449ed41b0561","status":"InProgress","startTime":"2023-01-27T13:43:55.117Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:44:14 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group set-primary
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroupAzureAsyncOperation/f8a4a853-fadf-4fc6-9e92-449ed41b0561?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"f8a4a853-fadf-4fc6-9e92-449ed41b0561","status":"Succeeded","startTime":"2023-01-27T13:43:55.117Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:44:24 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group set-primary
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroupOperationResults/f8a4a853-fadf-4fc6-9e92-449ed41b0561?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"properties":{"secondaryType":"Geo","readWriteEndpoint":{"failoverPolicy":"Manual"},"readOnlyEndpoint":{"failoverPolicy":"Disabled"},"replicationRole":"Primary","replicationState":"CATCH_UP","partnerRegions":[{"location":"westcentralus","replicationRole":"Secondary"}],"managedInstancePairs":[{"primaryManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/managedInstances/mi-mdcs-cx-secondary","partnerManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/mi-primary-wcus"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/locations/Central
-        US/instanceFailoverGroups/fgtest2022a","name":"fgtest2022a","type":"Microsoft.Sql/locations/instanceFailoverGroups"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '912'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:44:24 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -l -n
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"properties":{"secondaryType":"Geo","readWriteEndpoint":{"failoverPolicy":"Manual"},"readOnlyEndpoint":{"failoverPolicy":"Disabled"},"replicationRole":"Primary","replicationState":"CATCH_UP","partnerRegions":[{"location":"westcentralus","replicationRole":"Secondary"}],"managedInstancePairs":[{"primaryManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/managedInstances/mi-mdcs-cx-secondary","partnerManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/mi-primary-wcus"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/locations/Central
-        US/instanceFailoverGroups/fgtest2022a","name":"fgtest2022a","type":"Microsoft.Sql/locations/instanceFailoverGroups"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '912'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:44:56 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -l -n
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"properties":{"secondaryType":"Geo","readWriteEndpoint":{"failoverPolicy":"Manual"},"readOnlyEndpoint":{"failoverPolicy":"Disabled"},"replicationRole":"Secondary","replicationState":"CATCH_UP","partnerRegions":[{"location":"centralus","replicationRole":"Primary"}],"managedInstancePairs":[{"primaryManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/managedInstances/mi-mdcs-cx-secondary","partnerManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/mi-primary-wcus"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/West
-        Central US/instanceFailoverGroups/fgtest2022a","name":"fgtest2022a","type":"Microsoft.Sql/locations/instanceFailoverGroups"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '916'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:44:56 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group set-primary
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --allow-data-loss -g -n -l
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"properties":{"secondaryType":"Geo","readWriteEndpoint":{"failoverPolicy":"Manual"},"readOnlyEndpoint":{"failoverPolicy":"Disabled"},"replicationRole":"Secondary","replicationState":"CATCH_UP","partnerRegions":[{"location":"centralus","replicationRole":"Primary"}],"managedInstancePairs":[{"primaryManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/managedInstances/mi-mdcs-cx-secondary","partnerManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/mi-primary-wcus"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/West
-        Central US/instanceFailoverGroups/fgtest2022a","name":"fgtest2022a","type":"Microsoft.Sql/locations/instanceFailoverGroups"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '916'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:44:57 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group set-primary
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --allow-data-loss -g -n -l
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroups/fgtest2022a/forceFailoverAllowDataLoss?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"operation":"FailoverManagedFailoverGroup","startTime":"2023-01-27T13:44:57.71Z"}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/3922814e-04a1-4821-ab20-ce6e7155db7f?api-version=2022-05-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroupAzureAsyncOperation/912cb757-66dc-4f2d-87b6-bc87c6fc8683?api-version=2022-05-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1780,11 +1328,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:44:57 GMT
+      - Fri, 10 Feb 2023 11:18:08 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupOperationResults/3922814e-04a1-4821-ab20-ce6e7155db7f?api-version=2022-05-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroupOperationResults/912cb757-66dc-4f2d-87b6-bc87c6fc8683?api-version=2022-05-01-preview
       pragma:
       - no-cache
       server:
@@ -1810,14 +1358,14 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --allow-data-loss -g -n -l
+      - -g -n -l
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/3922814e-04a1-4821-ab20-ce6e7155db7f?api-version=2022-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroupAzureAsyncOperation/912cb757-66dc-4f2d-87b6-bc87c6fc8683?api-version=2022-05-01-preview
   response:
     body:
-      string: '{"name":"3922814e-04a1-4821-ab20-ce6e7155db7f","status":"InProgress","startTime":"2023-01-27T13:44:57.71Z"}'
+      string: '{"name":"912cb757-66dc-4f2d-87b6-bc87c6fc8683","status":"InProgress","startTime":"2023-02-10T11:18:09.38Z"}'
     headers:
       cache-control:
       - no-cache
@@ -1826,7 +1374,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:45:07 GMT
+      - Fri, 10 Feb 2023 11:18:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1856,14 +1404,14 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --allow-data-loss -g -n -l
+      - -g -n -l
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/3922814e-04a1-4821-ab20-ce6e7155db7f?api-version=2022-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroupAzureAsyncOperation/912cb757-66dc-4f2d-87b6-bc87c6fc8683?api-version=2022-05-01-preview
   response:
     body:
-      string: '{"name":"3922814e-04a1-4821-ab20-ce6e7155db7f","status":"Succeeded","startTime":"2023-01-27T13:44:57.71Z"}'
+      string: '{"name":"912cb757-66dc-4f2d-87b6-bc87c6fc8683","status":"Succeeded","startTime":"2023-02-10T11:18:09.38Z"}'
     headers:
       cache-control:
       - no-cache
@@ -1872,7 +1420,291 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:45:17 GMT
+      - Fri, 10 Feb 2023 11:18:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-failover-group set-primary
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroupOperationResults/912cb757-66dc-4f2d-87b6-bc87c6fc8683?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"properties":{"secondaryType":"Geo","readWriteEndpoint":{"failoverPolicy":"Manual"},"readOnlyEndpoint":{"failoverPolicy":"Disabled"},"replicationRole":"Primary","replicationState":"CATCH_UP","partnerRegions":[{"location":"westcentralus","replicationRole":"Secondary"}],"managedInstancePairs":[{"primaryManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/managedInstances/mi-mdcs-cx-secondary","partnerManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/mi-primary-wcus"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/locations/Central
+        US/instanceFailoverGroups/fgtest2022a","name":"fgtest2022a","type":"Microsoft.Sql/locations/instanceFailoverGroups"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '912'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Feb 2023 11:18:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-failover-group show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -l -n
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"properties":{"secondaryType":"Geo","readWriteEndpoint":{"failoverPolicy":"Manual"},"readOnlyEndpoint":{"failoverPolicy":"Disabled"},"replicationRole":"Primary","replicationState":"CATCH_UP","partnerRegions":[{"location":"westcentralus","replicationRole":"Secondary"}],"managedInstancePairs":[{"primaryManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/managedInstances/mi-mdcs-cx-secondary","partnerManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/mi-primary-wcus"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/locations/Central
+        US/instanceFailoverGroups/fgtest2022a","name":"fgtest2022a","type":"Microsoft.Sql/locations/instanceFailoverGroups"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '912'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Feb 2023 11:19:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-failover-group show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -l -n
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"properties":{"secondaryType":"Geo","readWriteEndpoint":{"failoverPolicy":"Manual"},"readOnlyEndpoint":{"failoverPolicy":"Disabled"},"replicationRole":"Secondary","replicationState":"CATCH_UP","partnerRegions":[{"location":"centralus","replicationRole":"Primary"}],"managedInstancePairs":[{"primaryManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/managedInstances/mi-mdcs-cx-secondary","partnerManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/mi-primary-wcus"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/West
+        Central US/instanceFailoverGroups/fgtest2022a","name":"fgtest2022a","type":"Microsoft.Sql/locations/instanceFailoverGroups"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '916'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Feb 2023 11:19:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-failover-group set-primary
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --allow-data-loss -g -n -l
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"properties":{"secondaryType":"Geo","readWriteEndpoint":{"failoverPolicy":"Manual"},"readOnlyEndpoint":{"failoverPolicy":"Disabled"},"replicationRole":"Secondary","replicationState":"CATCH_UP","partnerRegions":[{"location":"centralus","replicationRole":"Primary"}],"managedInstancePairs":[{"primaryManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/managedInstances/mi-mdcs-cx-secondary","partnerManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/mi-primary-wcus"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/West
+        Central US/instanceFailoverGroups/fgtest2022a","name":"fgtest2022a","type":"Microsoft.Sql/locations/instanceFailoverGroups"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '916'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Feb 2023 11:19:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-failover-group set-primary
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --allow-data-loss -g -n -l
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroups/fgtest2022a/forceFailoverAllowDataLoss?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"operation":"FailoverManagedFailoverGroup","startTime":"2023-02-10T11:19:02.56Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/8e644a95-a722-40f0-a2fe-1d8b2253a5b3?api-version=2022-05-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '82'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Feb 2023 11:19:02 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupOperationResults/8e644a95-a722-40f0-a2fe-1d8b2253a5b3?api-version=2022-05-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql instance-failover-group set-primary
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --allow-data-loss -g -n -l
+      User-Agent:
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/8e644a95-a722-40f0-a2fe-1d8b2253a5b3?api-version=2022-05-01-preview
+  response:
+    body:
+      string: '{"name":"8e644a95-a722-40f0-a2fe-1d8b2253a5b3","status":"Succeeded","startTime":"2023-02-10T11:19:02.56Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Feb 2023 11:19:12 GMT
       expires:
       - '-1'
       pragma:
@@ -1904,9 +1736,9 @@ interactions:
       ParameterSetName:
       - --allow-data-loss -g -n -l
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupOperationResults/3922814e-04a1-4821-ab20-ce6e7155db7f?api-version=2022-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupOperationResults/8e644a95-a722-40f0-a2fe-1d8b2253a5b3?api-version=2022-05-01-preview
   response:
     body:
       string: '{"properties":{"secondaryType":"Geo","readWriteEndpoint":{"failoverPolicy":"Manual"},"readOnlyEndpoint":{"failoverPolicy":"Disabled"},"replicationRole":"Primary","replicationState":"CATCH_UP","partnerRegions":[{"location":"centralus","replicationRole":"Secondary"}],"managedInstancePairs":[{"primaryManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/mi-primary-wcus","partnerManagedInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/managedInstances/mi-mdcs-cx-secondary"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/West
@@ -1919,7 +1751,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:45:17 GMT
+      - Fri, 10 Feb 2023 11:19:12 GMT
       expires:
       - '-1'
       pragma:
@@ -1951,7 +1783,7 @@ interactions:
       ParameterSetName:
       - -g -l -n
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
   response:
@@ -1966,7 +1798,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:45:49 GMT
+      - Fri, 10 Feb 2023 11:19:43 GMT
       expires:
       - '-1'
       pragma:
@@ -1998,7 +1830,7 @@ interactions:
       ParameterSetName:
       - -g -l -n
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
   response:
@@ -2013,7 +1845,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:45:49 GMT
+      - Fri, 10 Feb 2023 11:19:43 GMT
       expires:
       - '-1'
       pragma:
@@ -2045,7 +1877,7 @@ interactions:
       ParameterSetName:
       - -g -n -l
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
   response:
@@ -2060,7 +1892,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:45:49 GMT
+      - Fri, 10 Feb 2023 11:19:45 GMT
       expires:
       - '-1'
       pragma:
@@ -2092,7 +1924,7 @@ interactions:
       ParameterSetName:
       - -g -l -n
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mdcs-cx-secondary-vnet/providers/Microsoft.Sql/locations/centralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
   response:
@@ -2107,7 +1939,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:45:50 GMT
+      - Fri, 10 Feb 2023 11:19:45 GMT
       expires:
       - '-1'
       pragma:
@@ -2139,7 +1971,7 @@ interactions:
       ParameterSetName:
       - -g -l -n
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
   response:
@@ -2154,7 +1986,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:45:51 GMT
+      - Fri, 10 Feb 2023 11:19:46 GMT
       expires:
       - '-1'
       pragma:
@@ -2188,27 +2020,27 @@ interactions:
       ParameterSetName:
       - -g -l -n
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroups/fgtest2022a?api-version=2022-05-01-preview
   response:
     body:
-      string: '{"operation":"DropManagedFailoverGroup","startTime":"2023-01-27T13:45:52.51Z"}'
+      string: '{"operation":"DropManagedFailoverGroup","startTime":"2023-02-10T11:19:48.463Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d17f420f-9b90-4888-b4d5-52c779a75d9c?api-version=2022-05-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d7be2d1e-ffcf-4043-960b-a6f82a56396b?api-version=2022-05-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '78'
+      - '79'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:45:52 GMT
+      - Fri, 10 Feb 2023 11:19:49 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupOperationResults/d17f420f-9b90-4888-b4d5-52c779a75d9c?api-version=2022-05-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupOperationResults/d7be2d1e-ffcf-4043-960b-a6f82a56396b?api-version=2022-05-01-preview
       pragma:
       - no-cache
       server:
@@ -2236,12 +2068,12 @@ interactions:
       ParameterSetName:
       - -g -l -n
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.45.0 azsdk-python-mgmt-sql/4.0.0b7 Python/3.9.5 (Windows-10-10.0.17763-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d17f420f-9b90-4888-b4d5-52c779a75d9c?api-version=2022-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d7be2d1e-ffcf-4043-960b-a6f82a56396b?api-version=2022-05-01-preview
   response:
     body:
-      string: '{"name":"d17f420f-9b90-4888-b4d5-52c779a75d9c","status":"InProgress","startTime":"2023-01-27T13:45:52.51Z"}'
+      string: '{"name":"d7be2d1e-ffcf-4043-960b-a6f82a56396b","status":"Succeeded","startTime":"2023-02-10T11:19:48.463Z"}'
     headers:
       cache-control:
       - no-cache
@@ -2250,53 +2082,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:46:03 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql instance-failover-group delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -l -n
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/instanceFailoverGroupAzureAsyncOperation/d17f420f-9b90-4888-b4d5-52c779a75d9c?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"d17f420f-9b90-4888-b4d5-52c779a75d9c","status":"Succeeded","startTime":"2023-01-27T13:45:52.51Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '106'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:46:13 GMT
+      - Fri, 10 Feb 2023 11:19:59 GMT
       expires:
       - '-1'
       pragma:

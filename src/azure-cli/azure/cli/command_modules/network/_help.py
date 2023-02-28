@@ -3192,7 +3192,7 @@ examples:
 helps['network cross-region-lb'] = """
 type: group
 short-summary: Manage and configure cross-region load balancers.
-long-summary: To learn more about Azure Load Balancer visit https://docs.microsoft.com/azure/load-balancer/load-balancer-get-started-internet-arm-cli
+long-summary: To learn more about Azure Load Balancer visit https://learn.microsoft.com/en-us/azure/load-balancer/tutorial-cross-region-cli.
 """
 
 helps['network cross-region-lb create'] = """
@@ -3368,57 +3368,6 @@ examples:
     text: az network cross-region-lb frontend-ip update -g MyResourceGroup --lb-name MyLb -n MyFrontendIp --public-ip-address MyNewPublicIp
 """
 
-helps['network cross-region-lb probe'] = """
-type: group
-short-summary: Evaluate probe information and define routing rules.
-"""
-
-helps['network cross-region-lb probe create'] = """
-type: command
-short-summary: Create a probe.
-examples:
-  - name: Create a probe on a load balancer over HTTP and port 80.
-    text: |
-        az network cross-region-lb probe create -g MyResourceGroup --lb-name MyLb -n MyProbe \\
-            --protocol http --port 80 --path /
-  - name: Create a probe on a load balancer over TCP on port 443.
-    text: |
-        az network cross-region-lb probe create -g MyResourceGroup --lb-name MyLb -n MyProbe \\
-            --protocol tcp --port 443
-"""
-
-helps['network cross-region-lb probe delete'] = """
-type: command
-short-summary: Delete a probe.
-examples:
-  - name: Delete a probe.
-    text: az network cross-region-lb probe delete -g MyResourceGroup --lb-name MyLb -n MyProbe
-"""
-
-helps['network cross-region-lb probe list'] = """
-type: command
-short-summary: List probes.
-examples:
-  - name: List probes.
-    text: az network cross-region-lb probe list -g MyResourceGroup --lb-name MyLb -o table
-"""
-
-helps['network cross-region-lb probe show'] = """
-type: command
-short-summary: Get the details of a probe.
-examples:
-  - name: Get the details of a probe.
-    text: az network cross-region-lb probe show -g MyResourceGroup --lb-name MyLb -n MyProbe
-"""
-
-helps['network cross-region-lb probe update'] = """
-type: command
-short-summary: Update a probe.
-examples:
-  - name: Update a probe with a different port and interval.
-    text: az network cross-region-lb probe update -g MyResourceGroup --lb-name MyLb -n MyProbe --port 81 --interval 10
-"""
-
 helps['network cross-region-lb rule'] = """
 type: group
 short-summary: Manage cross-region load balancing rules.
@@ -3507,100 +3456,16 @@ short-summary: Manage address pools of a load balancer.
 helps['network lb address-pool create'] = """
 type: command
 short-summary: Create an address pool.
-parameters:
-  - name: --backend-address
-    short-summary: Backend addresses information for backend address pool. If it's used, --vnet is required or subnet is required.
-    long-summary: |
-        Usage1: --backend-address name=addr1 ip-address=10.0.0.1 --vnet MyVnet
-        Usage2: --backend-address name=addr1 ip-address=10.0.0.1 subnet=/subscriptions/000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1
-        Usage3: --backend-address name=addr1 ip-address=10.0.0.1 subnet=subnet1 --vnet MyVnet
-
-        name: Required. The name of the backend address.
-        ip-address: Required. Ip Address within the Virtual Network.
-        subnet: Name or Id of the subnet.
-
-        Multiple backend addresses can be specified by using more than one `--backend-address` argument.
-  - name: --backend-addresses-config-file
-    short-summary: A config file used to set backend addresses. This argument is for experienced users. You may encounter parse errors if the json file is invalid.
-    long-summary: |
-        Usage: --backend-addresses-config-file @"{config_file.json}"
-
-        A example config file is
-        [
-          {
-            "name": "address1",
-            "virtualNetwork": "clitestvnet",
-            "ipAddress": "10.0.0.4"
-          },
-          {
-            "name": "address2",
-            "virtualNetwork": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/virtualNetworks/clitestvnet",
-            "ipAddress": "10.0.0.5"
-          },
-          {
-            "name": "address3",
-            "subnet": "subnet3",
-            "ipAddress": "10.0.0.6"
-          },
-          {
-            "name": "address4",
-            "subnet": "/subscriptions/000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet4",
-            "ipAddress": "10.0.0.7"
-          }
-        ]
 examples:
   - name: Create an address pool.
     text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool
   - name: Create an address pool with several backend addresses using key-value arguments.
     text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --vnet {VnetResourceId} --backend-address name=addr1 ip-address=10.0.0.1 --backend-address name=addr2 ip-address=10.0.0.3
-  - name: Create an address pool with several backend addresses using config file
-    text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses-config-file @config_file.json
 """
 
 helps['network lb address-pool update'] = """
 type: command
 short-summary: Update an address pool.
-parameters:
-  - name: --backend-address
-    short-summary: Backend addresses information for backend address pool. If it's used, --vnet is required or subnet is required.
-    long-summary: |
-        Usage1: --backend-address name=addr1 ip-address=10.0.0.1 --vnet MyVnet
-        Usage2: --backend-address name=addr1 ip-address=10.0.0.1 subnet=/subscriptions/000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1
-        Usage3: --backend-address name=addr1 ip-address=10.0.0.1 subnet=subnet1 --vnet MyVnet
-
-        name: Required. The name of the backend address.
-        ip-address: Required. Ip Address within the Virtual Network.
-        subnet: Name or Id of the subnet.
-
-        Multiple backend addresses can be specified by using more than one `--backend-address` argument.
-  - name: --backend-addresses-config-file
-    short-summary: A config file used to set backend addresses. This argument is for experienced users. You may encounter parse errors if the json file is invalid.
-    long-summary: |
-        Usage: --backend-addresses-config-file @"{config_file.json}"
-
-        A example config file is
-        [
-          {
-            "name": "address1",
-            "virtualNetwork": "clitestvnet",
-            "ipAddress": "10.0.0.4"
-          },
-          {
-            "name": "address2",
-            "virtualNetwork": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/virtualNetworks/clitestvnet",
-            "ipAddress": "10.0.0.5"
-          },
-          {
-            "name": "address3",
-            "subnet": "subnet3",
-            "ipAddress": "10.0.0.6"
-          },
-          {
-            "name": "address4",
-            "subnet": "/subscriptions/000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet4",
-            "ipAddress": "10.0.0.7"
-          }
-        ]
 examples:
   - name: Update an address pool with several backend addresses using key-value arguments.
     text: az network lb address-pool update -g MyResourceGroup --lb-name MyLb -n MyAddressPool --vnet {VnetResourceId} --backend-address name=addr1 ip-address=10.0.0.1 --backend-address name=addr2 ip-address=10.0.0.3
@@ -5753,59 +5618,6 @@ examples:
         az network watcher connection-monitor create --endpoint-dest-address bing.com --endpoint-dest-name bing --endpoint-source-name "vm01" --endpoint-source-resource-id MyVM01ResourceID --location westus2 --name MyConnectionMonitorName --protocol Tcp --tcp-port 2048 --test-config-name TCPTestConfig
     crafted: true
 """
-
-helps['network watcher connection-monitor delete'] = """
-type: command
-short-summary: Delete a connection monitor for the given region.
-examples:
-  - name: Delete a connection monitor for the given region.
-    text: az network watcher connection-monitor delete -l westus -n MyConnectionMonitorName
-"""
-
-helps['network watcher connection-monitor list'] = """
-type: command
-short-summary: List connection monitors for the given region.
-examples:
-  - name: List a connection monitor for the given region.
-    text: az network watcher connection-monitor list -l westus
-  - name: List connection monitors for the given region. (autogenerated)
-    text: |
-        az network watcher connection-monitor list --location westus --subscription MySubscription
-    crafted: true
-"""
-
-helps['network watcher connection-monitor query'] = """
-type: command
-short-summary: Query a snapshot of the most recent connection state of a connection monitor.
-examples:
-  - name: List a connection monitor for the given region.
-    text: az network watcher connection-monitor query -l westus -n MyConnectionMonitorName
-"""
-
-helps['network watcher connection-monitor show'] = """
-type: command
-short-summary: Shows a connection monitor by name.
-examples:
-  - name: Show a connection monitor for the given name.
-    text: az network watcher connection-monitor show -l westus -n MyConnectionMonitorName
-"""
-
-helps['network watcher connection-monitor start'] = """
-type: command
-short-summary: Start the specified connection monitor.
-examples:
-  - name: Start the specified connection monitor.
-    text: az network watcher connection-monitor start -l westus -n MyConnectionMonitorName
-"""
-
-helps['network watcher connection-monitor stop'] = """
-type: command
-short-summary: Stop the specified connection monitor.
-examples:
-  - name: Stop the specified connection monitor.
-    text: az network watcher connection-monitor stop -l westus -n MyConnectionMonitorName
-"""
-
 
 helps['network watcher connection-monitor endpoint'] = """
 type: group

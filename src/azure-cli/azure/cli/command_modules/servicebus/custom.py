@@ -924,7 +924,6 @@ def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system
 def cli_add_encryption(cmd, client, resource_group_name, namespace_name, encryption_config):
     namespace = client.get(resource_group_name, namespace_name)
     Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_SERVICEBUS)
-
     if namespace.encryption:
         if namespace.encryption.key_vault_properties:
             namespace.encryption.key_vault_properties.extend(encryption_config)

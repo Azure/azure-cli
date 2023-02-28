@@ -16,10 +16,6 @@ def resource_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
 
-def cf_application_gateways(cli_ctx, _):
-    return network_client_factory(cli_ctx).application_gateways
-
-
 def cf_connection_monitor(cli_ctx, _):
     return network_client_factory(cli_ctx).connection_monitors
 
@@ -44,24 +40,12 @@ def cf_local_network_gateways(cli_ctx, _):
     return network_client_factory(cli_ctx).local_network_gateways
 
 
-def cf_network_interfaces(cli_ctx, _):
-    return network_client_factory(cli_ctx).network_interfaces
-
-
 def cf_network_watcher(cli_ctx, _):
     return network_client_factory(cli_ctx).network_watchers
 
 
-def cf_packet_capture(cli_ctx, _):
-    return network_client_factory(cli_ctx).packet_captures
-
-
 def cf_private_access(cli_ctx, _):
     return network_client_factory(cli_ctx).available_private_access_services
-
-
-def cf_virtual_network_gateway_connections(cli_ctx, _):
-    return network_client_factory(cli_ctx).virtual_network_gateway_connections
 
 
 def cf_virtual_network_gateways(cli_ctx, _):
