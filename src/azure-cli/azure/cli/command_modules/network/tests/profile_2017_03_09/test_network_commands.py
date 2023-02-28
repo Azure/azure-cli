@@ -442,3 +442,46 @@ class NetworkVNetScenarioTest(ScenarioTest):
                  checks=self.check("length([?name == '{vnet}'])", 1))
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
         self.cmd('network vnet list --resource-group {rg}', checks=self.is_empty())
+
+
+class NetworkRouteTableOperationScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_route_table')
+    def test_network_route_table_operation(self, resource_group):
+
+        self.kwargs.update({
+            'table': 'cli-test-route-table',
+            'route': 'my-route',
+            'rt': 'Microsoft.Network/routeTables'
+        })
+
+        self.cmd('network route-table create -n {table} -g {rg} --tags foo=doo',
+                 checks=self.check('tags.foo', 'doo'))
+        self.cmd('network route-table update -n {table} -g {rg} --tags foo=boo', checks=[
+            self.check('tags.foo', 'boo')
+        ])
+        self.cmd('network route-table route create --address-prefix 10.0.5.0/24 -n {route} -g {rg} --next-hop-type None --route-table-name {table}')
+
+        self.cmd('network route-table list',
+                 checks=self.check('type(@)', 'array'))
+        self.cmd('network route-table list --resource-group {rg}', checks=[
+            self.check('type(@)', 'array'),
+            self.check('length(@)', 1),
+            self.check('[0].name', '{table}'),
+            self.check('[0].type', '{rt}')
+        ])
+        self.cmd('network route-table show --resource-group {rg} --name {table}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{table}'),
+            self.check('type', '{rt}')
+        ])
+        self.cmd('network route-table route list --resource-group {rg} --route-table-name {table}',
+                 checks=self.check('type(@)', 'array'))
+        self.cmd('network route-table route show --resource-group {rg} --route-table-name {table} --name {route}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{route}'),
+        ])
+        self.cmd('network route-table route delete --resource-group {rg} --route-table-name {table} --name {route} -y')
+        self.cmd('network route-table route list --resource-group {rg} --route-table-name {table}', checks=self.is_empty())
+        self.cmd('network route-table delete --resource-group {rg} --name {table} -y')
+        self.cmd('network route-table list --resource-group {rg}', checks=self.is_empty())

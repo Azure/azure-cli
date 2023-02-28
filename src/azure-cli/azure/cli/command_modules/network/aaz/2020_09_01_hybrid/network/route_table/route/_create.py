@@ -12,26 +12,27 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network route-table route show",
+    "network route-table route create",
 )
-class Show(AAZCommand):
-    """Get the details of a route in a route table.
+class Create(AAZCommand):
+    """Create a route in a route table.
 
-    :example: Get the details of a route in a route table.
-        az network route-table route show -g MyResourceGroup --route-table-name MyRouteTable -n MyRoute -o table
+    :example: Create a route that forces all inbound traffic to a Network Virtual Appliance.
+        az network route-table route create -g MyResourceGroup --route-table-name MyRouteTable -n MyRoute --next-hop-type VirtualAppliance --address-prefix 10.0.0.0/16 --next-hop-ip-address 10.0.100.4
     """
 
     _aaz_info = {
-        "version": "2015-06-15",
+        "version": "2018-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/routetables/{}/routes/{}", "2015-06-15"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/routetables/{}/routes/{}", "2018-11-01"],
         ]
     }
 
+    AZ_SUPPORT_NO_WAIT = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return self._output()
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -51,19 +52,39 @@ class Show(AAZCommand):
             options=["-n", "--name"],
             help="Route name.",
             required=True,
-            id_part="child_name_1",
         )
         _args_schema.route_table_name = AAZStrArg(
             options=["--route-table-name"],
             help="Route table name.",
             required=True,
-            id_part="name",
         )
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.address_prefix = AAZStrArg(
+            options=["--address-prefix"],
+            arg_group="Properties",
+            help="The destination CIDR to which the route applies.",
+        )
+        _args_schema.next_hop_ip_address = AAZStrArg(
+            options=["--next-hop-ip-address"],
+            arg_group="Properties",
+            help="The IP address packets should be forwarded to when using the VirtualAppliance hop type.",
+        )
+        _args_schema.next_hop_type = AAZStrArg(
+            options=["--next-hop-type"],
+            arg_group="Properties",
+            help="The type of Azure hop the packet should be sent to.",
+            enum={"Internet": "Internet", "None": "None", "VirtualAppliance": "VirtualAppliance", "VirtualNetworkGateway": "VirtualNetworkGateway", "VnetLocal": "VnetLocal"},
+        )
+
+        # define Arg Group "RouteParameters"
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.RoutesGet(ctx=self.ctx)()
+        yield self.RoutesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -78,14 +99,30 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class RoutesGet(AAZHttpOperation):
+    class RoutesCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+            if session.http_response.status_code in [200, 201]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
 
             return self.on_error(session.http_response)
 
@@ -98,7 +135,7 @@ class Show(AAZCommand):
 
         @property
         def method(self):
-            return "GET"
+            return "PUT"
 
         @property
         def error_format(self):
@@ -130,7 +167,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2015-06-15",
+                    "api-version", "2018-11-01",
                     required=True,
                 ),
             }
@@ -140,37 +177,58 @@ class Show(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
 
-        def on_200(self, session):
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("name", AAZStrType, ".name")
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
+                properties.set_prop("nextHopIpAddress", AAZStrType, ".next_hop_ip_address")
+                properties.set_prop("nextHopType", AAZStrType, ".next_hop_type", typ_kwargs={"flags": {"required": True}})
+
+            return self.serialize_content(_content_value)
+
+        def on_200_201(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200
+                schema_builder=self._build_schema_on_200_201
             )
 
-        _schema_on_200 = None
+        _schema_on_200_201 = None
 
         @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
+        def _build_schema_on_200_201(cls):
+            if cls._schema_on_200_201 is not None:
+                return cls._schema_on_200_201
 
-            cls._schema_on_200 = AAZObjectType()
+            cls._schema_on_200_201 = AAZObjectType()
 
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.etag = AAZStrType()
-            _schema_on_200.id = AAZStrType()
-            _schema_on_200.name = AAZStrType()
-            _schema_on_200.properties = AAZObjectType(
+            _schema_on_200_201 = cls._schema_on_200_201
+            _schema_on_200_201.etag = AAZStrType()
+            _schema_on_200_201.id = AAZStrType()
+            _schema_on_200_201.name = AAZStrType()
+            _schema_on_200_201.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
 
-            properties = cls._schema_on_200.properties
+            properties = cls._schema_on_200_201.properties
             properties.address_prefix = AAZStrType(
                 serialized_name="addressPrefix",
             )
@@ -185,11 +243,11 @@ class Show(AAZCommand):
                 serialized_name="provisioningState",
             )
 
-            return cls._schema_on_200
+            return cls._schema_on_200_201
 
 
-class _ShowHelper:
-    """Helper class for Show"""
+class _CreateHelper:
+    """Helper class for Create"""
 
 
-__all__ = ["Show"]
+__all__ = ["Create"]
