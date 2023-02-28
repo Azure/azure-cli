@@ -251,9 +251,9 @@ class AcrCommandsTests(ScenarioTest):
                  checks=[self.check('name', '{cr_name}'),
                          self.check('provisioningState', 'Succeeded')])
 
-        self.cmd('acr cache delete -n {cr_name} -r {registry_name}')
+        self.cmd('acr cache delete -n {cr_name} -r {registry_name} -y')
 
-        self.cmd('acr credential-set delete -n {cs_name} -r {registry_name}')
+        self.cmd('acr credential-set delete -n {cs_name} -r {registry_name} -y')
 
         self.cmd('acr delete -n {registry_name} -g {rg} -y')
 

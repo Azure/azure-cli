@@ -240,7 +240,7 @@ def load_command_table(self, _):
         g.show_command('show', 'acr_cache_show')
         g.command('create', 'acr_cache_create')
         g.command('list', 'acr_cache_list')
-        g.command('delete', 'acr_cache_delete')
+        g.command('delete', 'acr_cache_delete', confirmation=True)
         g.generic_update_command('update',
                                  getter_name='acr_cache_update_get',
                                  setter_name='acr_cache_update_set',
@@ -252,7 +252,7 @@ def load_command_table(self, _):
         g.show_command('show', 'acr_cred_set_show')
         g.command('create', 'acr_cred_set_create')
         g.command('list', 'acr_cred_set_list')
-        g.command('delete', 'acr_cred_set_delete')
+        g.command('delete', 'acr_cred_set_delete', confirmation=True)
         g.generic_update_command('update',
                                  getter_name='acr_cred_set_update_get',
                                  setter_name='acr_cred_set_update_set',

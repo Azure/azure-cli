@@ -233,7 +233,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('cred_set', options_list=['--cred-set', '-c'], help='The name of the credential set.')
         c.argument('source_repo', options_list=['--source-repo', '-s'], help="The full source repository path such as 'docker.io/library/ubuntu'.")
         c.argument('target_repo', options_list=['--target-repo', '-t'], help="The target repository namespace such as 'ubuntu'.")
-        c.argument('remove_cred_set', get_three_state_flag(), help='Optional boolean indicating whether to remove the credential set from the cache rule. False by default.')
+        c.argument('remove_cred_set', action="store_true", help='Optional boolean indicating whether to remove the credential set from the cache rule. False by default.')
 
     with self.argument_context('acr credential-set') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
