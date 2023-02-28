@@ -6819,6 +6819,6 @@ class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
         self.kwargs.update({
             'recoverable_db': recoverable_db['id']
         })
-        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db1 -r {recoverable_db}',
+        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db3 -r {recoverable_db}',
                 checks=[
-                    JMESPathCheck('name', "recovered_db1")])
+                    JMESPathCheck('name', "recovered_db3")])
