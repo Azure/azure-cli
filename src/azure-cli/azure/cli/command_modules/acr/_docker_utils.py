@@ -33,6 +33,7 @@ from ._constants import ACR_AUDIENCE_RESOURCE_NAME
 from ._utils import get_registry_by_name, ResourceNotFound
 from .policy import acr_config_authentication_as_arm_show
 from ._format import add_timestamp
+from ._errors import CONNECTIVITY_TOOMANYREQUESTS_ERROR
 
 
 logger = get_logger(__name__)
@@ -164,7 +165,6 @@ def _get_aad_token_after_challenge(cli_ctx,
                              verify=(not should_disable_connection_verify()))
 
     if response.status_code == 429:
-        from ._errors import CONNECTIVITY_TOOMANYREQUESTS_ERROR
         if is_diagnostics_context:
             return CONNECTIVITY_TOOMANYREQUESTS_ERROR.format_error_message(login_server)
         raise CLIError(CONNECTIVITY_TOOMANYREQUESTS_ERROR.format_error_message(login_server)
@@ -445,7 +445,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
 
 
 def raise_toomanyrequests_error(error):
-    if 'Too many requests' in error:
+    if CONNECTIVITY_TOOMANYREQUESTS_ERROR.error_title in error:
         raise CLIError("{}: {}".format(AAD_TOKEN_BASE_ERROR_MESSAGE, error))
 
 
