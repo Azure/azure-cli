@@ -819,7 +819,6 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
             get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry))
-
     else:
         account_key = client.credential.account_key
 
